@@ -26,4 +26,5 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 ## Backlog
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
+- **Adapt Lab graphics trial (this branch):** `adapt-lab/Adapt-Lab-graphics-trial.html` (and its `-offline` copy) has the real-fish graphics plus these fixes: Run graphs stay at a readable 50-generation window with a big whole-run graph (1, 10 or 100 generations per point); Create now holds Design → Run → Food web, with Conservation and Story as separate tabs; Conservation uses its own species and never changes the student's design; the food web wobbles with good and bad years, and species (including the student's) can die out. To ship it, copy it over `Adapt-Lab.html` on `main` and rebuild the offline file.
 - **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.

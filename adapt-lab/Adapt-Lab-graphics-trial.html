@@ -539,6 +539,30 @@ html.modal-open,html.modal-open body{overflow:hidden}
 .endcard .gnav .btn{color:var(--ink)}
 .endcard .gnav .btn.primary{color:#fff}
 #rPopLeg i{display:inline-block;width:18px;border-top:3px solid var(--accent);vertical-align:middle;margin-right:5px}
+/* Create sub-tabs: Design → Run → Food web live inside Create */
+.subtabs{display:none;align-items:center;gap:8px 12px;flex-wrap:wrap;margin-bottom:12px}
+.app[data-tab="design"] .subtabs,.app[data-tab="run"] .subtabs,.app[data-tab="web"] .subtabs{display:flex}
+.subseg{display:inline-flex;align-items:center;gap:4px;background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:4px;flex-wrap:wrap}
+.subseg button{border:0;background:transparent;border-radius:10px;padding:7px 14px;font-weight:700;font-size:14.5px;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.subseg button i{font:600 11.5px var(--f-num);font-style:normal;width:20px;height:20px;border-radius:50%;display:inline-grid;place-items:center;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+.subseg button[aria-selected="true"]{background:var(--accent);color:#fff}
+.subseg button[aria-selected="true"] i{background:#fff;color:var(--accent);border-color:#fff}
+.subseg .arr{color:var(--muted);font-size:13px}
+.subtabs small{color:var(--muted);font-size:13px;flex:1 1 260px}
+@media (max-width:600px){.tabs{display:grid;grid-template-columns:1fr 1fr;width:100%}.tabs button{border-bottom:1px solid var(--line)}.tabs button:nth-child(2n){border-right:0}}
+@media (max-width:560px){.subseg button{padding:6px 9px;font-size:13.5px}.subseg .arr{display:none}}
+/* Run: open the whole run in a big, scrollable graph */
+.bigbtn{display:flex;justify-content:flex-end;margin-top:6px}
+.gwin{width:min(1400px,100%)}
+.gwin .mhead{flex-wrap:wrap}
+.gwin .mbody>.panel{background:var(--panel);border:1px solid var(--line);padding:12px;margin-bottom:12px}
+.bigrow{display:grid;grid-template-columns:40px minmax(0,1fr);align-items:start}
+.bigrow canvas{display:block;height:230px}
+.bigax{width:40px}
+.bigscroll{overflow-x:auto;overscroll-behavior-x:contain;padding-bottom:4px}
+.bigscroll canvas{width:100%}
+.gmctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gmctl .seg button:disabled{opacity:.4;cursor:not-allowed}
 </style>
 
 <div class="app" id="app" data-mode="guided">
@@ -550,11 +574,9 @@ html.modal-open,html.modal-open body{overflow:hidden}
     </div>
     <div class="tabs" role="tablist" aria-label="Lab">
       <button role="tab" id="tChal" aria-selected="true">1 · Challenge</button>
-      <button role="tab" id="tDesign" aria-selected="false">2 · Create</button>
-      <button role="tab" id="tRun" aria-selected="false">3 · Run</button>
-      <button role="tab" id="tWeb" aria-selected="false">4 · Food web</button>
-      <button role="tab" id="tCons" aria-selected="false">5 · Conservation</button>
-      <button role="tab" id="tStory" aria-selected="false">6 · Story</button>
+      <button role="tab" id="tCreate" aria-selected="false">2 · Create</button>
+      <button role="tab" id="tCons" aria-selected="false">3 · Conservation</button>
+      <button role="tab" id="tStory" aria-selected="false">4 · Story</button>
     </div>
   </header>
 
@@ -573,6 +595,14 @@ html.modal-open,html.modal-open body{overflow:hidden}
     </aside>
 
     <main style="min-width:0">
+      <nav class="subtabs" id="subTabs" aria-label="Create">
+        <div class="subseg" role="tablist" aria-label="Create">
+          <button role="tab" id="tDesign" aria-selected="false"><i>1</i>Design it</button><span class="arr" aria-hidden="true">→</span>
+          <button role="tab" id="tRun" aria-selected="false"><i>2</i>Run it</button><span class="arr" aria-hidden="true">→</span>
+          <button role="tab" id="tWeb" aria-selected="false"><i>3</i>Food web</button>
+        </div>
+        <small>Design your organism, watch natural selection change it over many generations, then add it to a food web.</small>
+      </nav>
       <section class="view" id="vChal">
         <details class="panel fdone" id="fDone" hidden></details>
         <div class="panel chalhead" id="chalHead"><div><h2>Foundation challenge</h2><p>Complete all five missions to unlock <b>Create</b>, where you invent your own organisms, and the <b>Conservation</b> course. Each mission earns <b>20 XP</b>. XP is the energy you spend to build a species: big bodies and costly adaptations cost more.</p></div><div class="chalprog" id="chalProg"></div></div>
@@ -670,7 +700,7 @@ html.modal-open,html.modal-open body{overflow:hidden}
           <div class="ctl"><span class="lbl">Speed</span><div class="seg" id="rSpeed" role="group" aria-label="Speed"><button data-v="1" aria-pressed="true">Normal</button><button data-v="4" aria-pressed="false">Fast</button><button data-v="ff" aria-pressed="false" title="Graph only, no animation">Fast-forward ⏩</button></div></div>
           <button class="btn" id="rSkip">Skip to the end</button>
           <button class="btn" id="rRestart">Start again</button>
-          <div class="ctl" style="margin-left:auto"><span class="lbl">Testing</span><span class="who" id="rWho"></span><button class="btn" id="rEdit">Change design</button></div>
+          <div class="ctl" id="rWhoBox" style="margin-left:auto"><span class="lbl">Testing</span><span class="who" id="rWho"></span><button class="btn" id="rEdit">Change design</button></div><div class="ctl" id="consPick" style="margin-left:auto" hidden><span class="lbl">Species to protect</span><div class="seg" id="consSeg" role="group" aria-label="Species to protect"></div></div>
         </div>
         <details class="panel envbox" id="envBox">
           <summary><b id="envTitle">Events</b> <small id="envSum"></small></summary>
@@ -720,7 +750,8 @@ html.modal-open,html.modal-open body{overflow:hidden}
             </div>
             <details class="panel fold" open><summary class="fsum ph">Population <em id="rPopEm">x-axis: years (1 year = 1 generation)</em></summary>
               <canvas class="chartcv" id="rPop" style="aspect-ratio:2.6/1" aria-label="Population graph"></canvas>
-              <div class="legend" id="rPopLeg" hidden><span><i></i>Population</span><span><i style="border-top:3px dashed #8a6a3a"></i>Food left</span><span><i style="border-top-color:#c4473a"></i>Predators (100% = normal)</span></div></details>
+              <div class="legend" id="rPopLeg" hidden><span><i></i>Population (faint line: each season)</span><span><i style="border-top:3px dashed #8a6a3a"></i>Food left</span><span><i style="border-top-color:#c4473a"></i>Predators (100% = normal)</span></div>
+              <div class="bigbtn"><button class="btn small" id="rBig">⤢ See the whole run in a big graph</button></div></details>
             <details class="panel fold" open id="fcPanel" hidden><summary class="fsum ph">Food chain <em id="fcPos"></em></summary><div class="fclist" id="fcList"></div><p class="note" id="fcNote"></p></details>
             <details class="panel fold" open><summary class="fsum ph">Cause of death <em id="rCauseEm">each year</em></summary>
               <canvas class="chartcv" id="rCause" aria-label="Cause of death chart"></canvas>
@@ -747,12 +778,23 @@ html.modal-open,html.modal-open body{overflow:hidden}
       <li>Gills only work in water. Air tubes (like an insect's) only supply enough oxygen to small bodies. Breathing through skin needs moist skin and damp air or fresh water.</li>
       <li>Some conditions are deadly. If an organism is active in conditions it cannot survive, its chance of surviving a year is 0%.</li>
       <li>In Run, no individual changes during its life. Each generation, the individuals that match the environment best are more likely to survive and have young, so the population changes over time.</li>
-      <li>In the Food web, each population is shown as an index where 100 is its normal level. Eating raises the eater and lowers the food; every population is also limited by space and disease. Producers need nothing but sunlight; consumers die out without food.</li>
+      <li>In the Food web, each population is shown as an index where 100 is its normal level. Eating raises the eater and lowers the food; every population is also limited by space, territory and disease. Producers need nothing but sunlight; consumers die out without food.</li>
+      <li>Every year in the Food web is a little different: good and bad weather and luck make each population wobble up and down. A population that falls below 3 (3% of normal) is too small to recover and dies out. An organism you add can out-compete or over-eat the species already there, or die out itself if it is poorly adapted.</li>
       <li>The energy pyramid uses the 10% rule: about a tenth of the energy at one level passes to the next.</li>
     </ul></details></footer>
 </div>
 <div class="vpop" id="vpop" hidden role="tooltip"></div>
 <div class="mmodal" id="mModal" hidden><div class="mwin" role="dialog" aria-modal="true" aria-labelledby="mTitle"><div class="mhead"><b id="mTitle">Mission</b><button class="mclose" id="mClose" aria-label="Close mission">✕ Close</button></div><div class="mbody" id="mBodyHost"></div></div></div>
+<div class="mmodal" id="gModal" hidden><div class="mwin gwin" role="dialog" aria-modal="true" aria-labelledby="gmTitle">
+  <div class="mhead"><b id="gmTitle">The whole run</b>
+    <div class="gmctl"><span class="lbl">Each point shows</span><div class="seg" id="gmBin" role="group" aria-label="Each point shows"><button data-v="1" aria-pressed="true">1 generation</button><button data-v="10" aria-pressed="false">10 generations</button><button data-v="100" aria-pressed="false">100 generations</button></div></div>
+    <button class="mclose" id="gmClose" aria-label="Close the big graph">✕ Close</button></div>
+  <div class="mbody">
+    <p class="note" id="gmNote" style="margin:0 0 10px"></p>
+    <div class="panel"><div class="ph">Population <em id="gmPopEm"></em></div><div class="bigrow"><canvas class="bigax" id="gmPopAx" aria-hidden="true"></canvas><div class="bigscroll" id="gmPopSc"><canvas id="gmPop" aria-label="Population over the whole run"></canvas></div></div><div class="legend" id="gmPopLeg"></div></div>
+    <div class="panel"><div class="ph">Cause of death <em id="gmCauseEm"></em></div><div class="bigrow"><canvas class="bigax" id="gmCauseAx" aria-hidden="true"></canvas><div class="bigscroll" id="gmCauseSc"><canvas id="gmCause" aria-label="Causes of death over the whole run"></canvas></div></div><div class="clegend" id="gmCauseLeg"></div></div>
+    <div class="panel"><div class="ph">Traits that changed most <em>population average</em></div><div class="bigrow"><canvas class="bigax" id="gmTraitsAx" aria-hidden="true"></canvas><div class="bigscroll" id="gmTraitsSc"><canvas id="gmTraits" aria-label="Trait averages over the whole run"></canvas></div></div><div class="legend" id="gmTraitLeg"></div></div>
+  </div></div></div>
 <div class="toast" id="toast" hidden role="status"></div>
 
 <script>
@@ -2274,7 +2316,7 @@ function renderXP(){const c=buildCost(ORG,SC),X=xp(),over=c>X;const m=$('xpMeter
   m.innerHTML=`Energy to build this ${ORG.kind}: <b class="c">${c} XP</b> of your <b>${X} XP</b><span class="xpbar"><i style="width:${100*c/top}%"></i></span><small>${over?`${c-X} XP too costly. Remove a costly adaptation${X<100?', or complete more challenge missions to earn XP':''}.`:'Big bodies and costly adaptations (thick coats, fat, wings, armour, poison, parental care) cost more XP to build.'}</small>`;
   $('goRun').disabled=over}
 function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>{t.hidden=true},2800)}
-function updateLocks(){['tDesign','tRun','tWeb','tCons','tStory'].forEach(id=>$(id).classList.toggle('locked',!isUnlocked()))}
+function updateLocks(){['tCreate','tDesign','tRun','tWeb','tCons','tStory'].forEach(id=>$(id).classList.toggle('locked',!isUnlocked()))}
 $('tUnlock').addEventListener('click',()=>{if($('tCode').value.trim().toUpperCase()===TEACHER_CODE){PROG.unlocked=true;saveProg();updateLocks();renderHub();$('tMsg').textContent='Everything is unlocked on this device.'}else $('tMsg').textContent='That code is not right.'});
 $('tReset').addEventListener('click',()=>{PROG={done:[false,false,false,false,false],unlocked:false,name:PROG.name||'',cls:PROG.cls||'',fw:[false,false,false],sp:{},spDone:false};$('extraBody').hidden=true;saveProg();updateLocks();endMission();setTab('chal');renderHub();$('tMsg').textContent='Progress reset on this device.'});
 
@@ -2893,45 +2935,90 @@ function updateRunHUD(){
 }
 function niceStep(x){const c=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,5000];return c.find(v=>x/v<=6)||10000}
 function xMaxNow(){if(!RUN.open)return YEARS;return Math.max(50,RUN.stopAt)}
-function chartAxes(ctx,w,h,L,Tp,pw,ph,top,step,xMax,xStep){const mut=css('--muted'),line=css('--line');ctx.font=`500 11px ${css('--f-num')}`;
-  for(let v=0;v<=top;v+=step){const y=Tp+ph*(1-v/top);ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(L+pw,y);ctx.stroke();ctx.fillStyle=mut;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v,L-5,y)}
-  for(let x=0;x<=xMax;x+=xStep){ctx.fillStyle=mut;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(x,L+pw*x/xMax,Tp+ph+5)}
-  const cy=changeYear();if(cy!=null){const x=L+pw*cy/xMax;ctx.strokeStyle=css('--sig');ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x,Tp);ctx.lineTo(x,Tp+ph);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=css('--sig');ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(RUN.human?'people arrive':'change starts',x+3,Tp)}
-  if(RUN.open){const ev=RUN.evlog.filter(e=>e.id);ctx.font=`700 10.5px ${css('--f-body')}`;let lastX=-99,row=0;ev.forEach(e=>{const x=L+pw*(e.g-1)/xMax;ctx.strokeStyle=css('--sig');ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x,Tp);ctx.lineTo(x,Tp+ph);ctx.stroke();ctx.setLineDash([]);
+function chartAxes(ctx,w,h,L,Tp,pw,ph,top,step,xMax,xStep,x0=0,noY=false){const mut=css('--muted'),line=css('--line');ctx.font=`500 11px ${css('--f-num')}`;const XS=x=>L+pw*(x-x0)/(xMax-x0);
+  for(let v=0;v<=top;v+=step){const y=Tp+ph*(1-v/top);ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(L+pw,y);ctx.stroke();if(!noY){ctx.fillStyle=mut;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v,L-5,y)}}
+  for(let x=Math.ceil(x0/xStep-1e-9)*xStep;x<=xMax+1e-9;x+=xStep){ctx.fillStyle=mut;const xx=XS(x);ctx.textAlign=xx>L+pw-14?'right':xx<L+14?'left':'center';ctx.textBaseline='top';ctx.fillText(x,xx,Tp+ph+5)}
+  const cy=changeYear();if(cy!=null&&cy>=x0&&cy<=xMax){const x=XS(cy);ctx.strokeStyle=css('--sig');ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(x,Tp);ctx.lineTo(x,Tp+ph);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=css('--sig');ctx.textAlign='left';ctx.textBaseline='top';ctx.fillText(RUN.human?'people arrive':'change starts',x+3,Tp)}
+  if(RUN.open){const ev=RUN.evlog.filter(e=>e.id&&e.g-1>=x0&&e.g-1<=xMax);ctx.font=`700 10.5px ${css('--f-body')}`;let lastX=-99,row=0;ev.forEach(e=>{const x=XS(e.g-1);ctx.strokeStyle=css('--sig');ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(x,Tp);ctx.lineTo(x,Tp+ph);ctx.stroke();ctx.setLineDash([]);
     row=x-lastX<70?(row+1)%3:0;lastX=x;const lab=evInfo(e.id,RUN.org.kind).name;ctx.fillStyle=css('--sig');ctx.textAlign='left';ctx.textBaseline='top';if(pw>260)ctx.fillText(lab.length>16?lab.slice(0,15)+'…':lab,x+3,Tp+row*12)})}}
+/* --- Run graphs: the small graphs always show a readable window (the last 50 generations);
+       the big graph shows the whole run, 1, 10 or 100 generations per point --- */
+const RUN_WIN=50;
+function runRange(){if(!RUN.open)return[0,YEARS];const g1=Math.max(RUN_WIN,Math.ceil(RUN.t/4));return[g1-RUN_WIN,g1]}
+function runSoFar(){return RUN.open?Math.max(1,Math.ceil(RUN.t/4)):YEARS}
+function niceStepPx(span,px){const want=span*70/Math.max(1,px);const c=[1,2,5,10,20,25,50,100,200,250,500,1000,2000,5000,10000];return c.find(v=>v>=want)||20000}
+function binPts(arr,per,b,g0,g1,raw){const out=[];if(!arr||!arr.length)return out;const end=arr.length/per;
+  if(raw){const i0=Math.max(0,Math.floor(g0*per)),i1=Math.min(arr.length-1,Math.ceil(g1*per));for(let i=i0;i<=i1;i++)if(arr[i]!=null)out.push([i/per,arr[i]]);return out}
+  for(let g=Math.floor(g0/b)*b;g<Math.min(g1,end);g+=b){let s=0,n=0;const a=Math.floor(g*per),z=Math.min(arr.length,Math.floor((g+b)*per));for(let i=a;i<z;i++)if(arr[i]!=null){s+=arr[i];n++}if(n)out.push([(g+Math.min(g+b,end))/2,s/n])}
+  return out}
+function drawPopChart(cv,g0,g1,b,big){const S=setupCv(cv);if(!S)return null;const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const acc=css('--accent');const two=RUN.open&&RUN.org.kind==='animal';
+  const L=big?2:30,Tp=10,pw=w-L-(big?4:two?34:10),ph=h-Tp-22;
+  const hs=binPts(RUN.hist,4,b,g0,g1);const top=Math.max(40,Math.ceil(Math.max(RUN.Kbase,...hs.map(q=>q[1]))/20)*20);const ys=niceStep(top);
+  chartAxes(ctx,w,h,L,Tp,pw,ph,top,ys,g1,big?niceStepPx(g1-g0,pw):niceStep(g1-g0),g0,big);
+  const X=g=>L+pw*(g-g0)/(g1-g0),Y=v=>Tp+ph*(1-v/top),YF=v=>Tp+ph*(1-v/100);
+  const line=(pts,yf)=>{ctx.beginPath();pts.forEach((q,i)=>i?ctx.lineTo(X(q[0]),yf(q[1])):ctx.moveTo(X(q[0]),yf(q[1])))};
+  ctx.save();ctx.beginPath();ctx.rect(L,0,pw+1,h);ctx.clip();
+  if(two){ctx.strokeStyle='#8a6a3a';ctx.lineWidth=2;ctx.setLineDash([5,4]);line(binPts(RUN.fHist,4,b,g0,g1),YF);ctx.stroke();ctx.setLineDash([]);
+    const pp=binPts(RUN.pHist,1,b,g0,g1);if(pp.length>1){ctx.strokeStyle='#c4473a';ctx.lineWidth=2;line(pp,v=>YF(Math.min(100,v*50)));ctx.stroke()}}
+  if(b===1){const raw=binPts(RUN.hist,4,1,g0,g1,true);ctx.strokeStyle=acc;ctx.globalAlpha=.3;ctx.lineWidth=1.2;line(raw,Y);ctx.stroke();ctx.globalAlpha=1}
+  if(hs.length){ctx.fillStyle=acc;ctx.globalAlpha=.12;ctx.beginPath();ctx.moveTo(X(hs[0][0]),Y(0));hs.forEach(q=>ctx.lineTo(X(q[0]),Y(q[1])));ctx.lineTo(X(hs[hs.length-1][0]),Y(0));ctx.fill();ctx.globalAlpha=1;
+    ctx.strokeStyle=acc;ctx.lineWidth=2.5;ctx.lineJoin='round';line(hs,Y);ctx.stroke();const lp=hs[hs.length-1];ctx.fillStyle=acc;ell(ctx,X(lp[0]),Y(lp[1]),4,4);ctx.fill()}
+  ctx.restore();
+  if(two&&!big){ctx.fillStyle=css('--muted');ctx.font=`500 11px ${css('--f-num')}`;ctx.textAlign='left';ctx.textBaseline='middle';[0,50,100].forEach(v=>ctx.fillText(v+'%',L+pw+4,YF(v)))}
+  return{top,step:ys,Tp,ph}}
+function drawCauseChart(cv,g0,g1,b,big){const S=setupCv(cv);if(!S)return null;const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const C=RUN.org.kind==='animal'?CAUSES_A:CAUSES_P;
+  const L=big?2:30,Tp=10,pw=w-L-(big?4:8),ph=h-Tp-22;const nb=Math.max(1,Math.ceil((g1-g0)/b));
+  const bins=Array.from({length:nb},(_,i)=>causeTotals(g0+i*b,Math.min(g1,g0+(i+1)*b)));const totals=bins.map(d=>Object.values(d).reduce((a,c)=>a+c,0));
+  const mx=Math.max(8,...totals);const step=niceStep(mx);const top=Math.ceil(mx/step)*step;
+  chartAxes(ctx,w,h,L,Tp,pw,ph,top,step,g0+nb*b,big?niceStepPx(nb*b,pw):niceStep(g1-g0),g0,big);
+  const bw=pw/nb;for(let i=0;i<nb;i++){let y=Tp+ph;Object.keys(C).forEach(k=>{const n=bins[i][k]||0;if(!n)return;const hh=ph*n/top;ctx.fillStyle=C[k][1];ctx.fillRect(L+i*bw+bw*.12,y-hh,Math.max(1,bw*.76),hh);y-=hh})}
+  return{top,step,Tp,ph}}
+function traitKeys(){let ks=topChanged(3);if(RUN.evs.some(e=>e.id==='disease'))ks=['res',...ks.filter(k=>k!=='res')].slice(0,3);return ks}
+function drawTraitChart(cv,g0,g1,b,big){const S=setupCv(cv);if(!S)return null;const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const L=big?2:30,Tp=10,pw=w-L-(big?4:10),ph=h-Tp-22;
+  chartAxes(ctx,w,h,L,Tp,pw,ph,100,25,g1,big?niceStepPx(g1-g0,pw):niceStep(g1-g0),g0,big);
+  const TH=RUN.traitHist;const ks=traitKeys();const cols=[css('--accent'),css('--sig'),css('--b')];const X=g=>L+pw*(g-g0)/(g1-g0);
+  ctx.save();ctx.beginPath();ctx.rect(L,0,pw+1,h);ctx.clip();
+  ks.forEach((k,j)=>{const pts=binPts(TH.map(m=>m[k]),1,b,g0,g1);ctx.strokeStyle=cols[j];ctx.lineWidth=2.5;ctx.beginPath();pts.forEach((q,i)=>{const y=Tp+ph*(1-q[1]/100);i?ctx.lineTo(X(q[0]),y):ctx.moveTo(X(q[0]),y)});ctx.stroke()});
+  ctx.restore();return{top:100,step:25,Tp,ph,ks,cols}}
+function traitLegend(T){return T.ks.length?T.ks.map((k,j)=>`<span><i style="border-top-color:${T.cols[j]}"></i>${k==='res'?'Disease resistance':TLAB[k]}</span>`).join(''):'<span>No big changes yet</span>'}
 function drawRunCharts(){
   if(!RUN)return;const C=RUN.org.kind==='animal'?CAUSES_A:CAUSES_P;const used=Object.keys(C).filter(k=>RUN.deaths.some(d=>d[k])||['pred','cold','food','graze','water','old'].includes(k));
-  const xMax=xMaxNow(),xStep=niceStep(xMax);
-  let S=setupCv($('rCause'));
-  if(S){const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const L=30,Tp=10,pw=w-L-8,ph=h-Tp-22;
-    const nb=Math.min(50,xMax),bs=xMax/nb;const bins=Array.from({length:nb},(_,i)=>{const o={};RUN.deaths.slice(Math.floor(i*bs),Math.floor((i+1)*bs)).forEach(d=>Object.entries(d).forEach(([k,n])=>o[k]=(o[k]||0)+n));return o});
-    const totals=bins.map(d=>Object.values(d).reduce((a,b)=>a+b,0));const mx=Math.max(8,...totals);const step=niceStep(mx);const top=Math.ceil(mx/step)*step;
-    chartAxes(ctx,w,h,L,Tp,pw,ph,top,step,xMax,xStep);
-    const bw=pw/nb;for(let i=0;i<nb;i++){let y=Tp+ph;Object.keys(C).forEach(k=>{const n=bins[i][k]||0;if(!n)return;const hh=ph*n/top;ctx.fillStyle=C[k][1];ctx.fillRect(L+i*bw+bw*.12,y-hh,bw*.76,hh);y-=hh})}}
+  const[g0,g1]=runRange();
+  drawCauseChart($('rCause'),g0,g1,1,false);
   const tot=causeTotals(0);
   $('rLegend').innerHTML=used.map(k=>`<div><i style="background:${C[k][1]}"></i>${C[k][0]}<b>${tot[k]||0}</b></div>`).join('');
-  $('rCauseEm').textContent=RUN.open&&xMax>50?`each bar = ${xMax/50} generations`:RUN.open?'each generation':'each year';
-  S=setupCv($('rPop'));
-  if(S){const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const acc=css('--accent');const L=30,Tp=10,pw=w-L-(RUN.open&&RUN.org.kind==='animal'?34:10),ph=h-Tp-22;
-    const top=Math.max(40,Math.ceil(Math.max(...RUN.hist,RUN.Kbase)/20)*20);chartAxes(ctx,w,h,L,Tp,pw,ph,top,niceStep(top),xMax,xStep);
-    const X=i=>L+pw*i/(xMax*4),Y=v=>Tp+ph*(1-v/top);const hs=RUN.hist;const stride=Math.max(1,Math.floor(hs.length/700));
-    const path=(arr,f,st)=>{ctx.beginPath();let first=true;for(let i=0;i<arr.length;i+=st){const v=arr[i];if(v==null)continue;const xx=f(i);first?ctx.moveTo(xx[0],xx[1]):ctx.lineTo(xx[0],xx[1]);first=false}};
-    if(RUN.open&&RUN.org.kind==='animal'){const fc='#8a6a3a';const YF=v=>Tp+ph*(1-v/100);
-      ctx.strokeStyle=fc;ctx.lineWidth=2;ctx.setLineDash([5,4]);path(RUN.fHist,i=>[X(i),YF(RUN.fHist[i])],stride);ctx.stroke();ctx.setLineDash([]);
-      if(RUN.pHist.length>1){ctx.strokeStyle='#c4473a';ctx.lineWidth=2;path(RUN.pHist,i=>[L+pw*i/xMax,YF(Math.min(100,RUN.pHist[i]*50))],Math.max(1,Math.floor(RUN.pHist.length/700)));ctx.stroke()}
-      ctx.fillStyle=css('--muted');ctx.font=`500 11px ${css('--f-num')}`;ctx.textAlign='left';ctx.textBaseline='middle';[0,50,100].forEach(v=>ctx.fillText(v+'%',L+pw+4,YF(v)))}
-    ctx.fillStyle=acc;ctx.globalAlpha=.12;ctx.beginPath();ctx.moveTo(X(0),Y(0));for(let i=0;i<hs.length;i+=stride)ctx.lineTo(X(i),Y(hs[i]));ctx.lineTo(X(hs.length-1),Y(0));ctx.fill();ctx.globalAlpha=1;
-    ctx.strokeStyle=acc;ctx.lineWidth=2.5;ctx.lineJoin='round';path(hs,i=>[X(i),Y(hs[i])],stride);ctx.lineTo(X(hs.length-1),Y(hs[hs.length-1]));ctx.stroke();
-    const li=hs.length-1;ctx.fillStyle=acc;ell(ctx,X(li),Y(hs[li]),4,4);ctx.fill()}
+  $('rCauseEm').textContent=RUN.open?(g0>0?`each bar = 1 generation · generations ${g0+1} to ${g1}`:'each bar = 1 generation'):'each year';
+  drawPopChart($('rPop'),g0,g1,1,false);
   $('rPopLeg').hidden=!(RUN.open&&RUN.org.kind==='animal');
-  $('rPopEm').textContent=RUN.open?(RUN.org.kind==='animal'?'x-axis: generations · right axis: food left and predator numbers':'x-axis: generations'):'x-axis: years (1 year = 1 generation)';
-  S=setupCv($('rTraits'));
-  if(S){const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const L=30,Tp=10,pw=w-L-10,ph=h-Tp-22;chartAxes(ctx,w,h,L,Tp,pw,ph,100,25,xMax,xStep);
-    const TH=RUN.traitHist;let ks=topChanged(3);const hadDis=RUN.evs.some(e=>e.id==='disease');if(hadDis)ks=['res',...ks.filter(k=>k!=='res')].slice(0,3);const cols=[css('--accent'),css('--sig'),css('--b')];
-    const st=Math.max(1,Math.floor(TH.length/700));
-    ks.forEach((k,j)=>{ctx.strokeStyle=cols[j];ctx.lineWidth=2.5;ctx.beginPath();let s0=false;for(let i=0;i<TH.length;i+=st){const m=TH[i];if(m[k]==null)continue;const x=L+pw*i/xMax,y=Tp+ph*(1-m[k]/100);s0?ctx.lineTo(x,y):ctx.moveTo(x,y);s0=true}ctx.stroke()});
-    $('rTraitLeg').innerHTML=ks.length?ks.map((k,j)=>`<span><i style="border-top-color:${cols[j]}"></i>${k==='res'?'Disease resistance':TLAB[k]}</span>`).join(''):'<span>No big changes yet</span>'}
+  $('rPopEm').textContent=RUN.open?(RUN.org.kind==='animal'?`last ${RUN_WIN} generations · right axis: food left and predator numbers`:`last ${RUN_WIN} generations`):'x-axis: years (1 year = 1 generation)';
+  const T=drawTraitChart($('rTraits'),g0,g1,1,false);if(T)$('rTraitLeg').innerHTML=traitLegend(T);
+  if(!$('gModal').hidden)bigSoon();
 }
+let BIGB=1,bigT=0,bigTimer=null,bigOpened=false,bigSync=false;
+const BIG_SC=['gmPopSc','gmCauseSc','gmTraitsSc'];
+function bigSoon(){const now=performance.now();if(now-bigT>300)drawBig();else if(!bigTimer)bigTimer=setTimeout(()=>{bigTimer=null;drawBig()},300)}
+function yAxisCv(cv,r){const S=setupCv(cv);if(!S||!r)return;const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);ctx.fillStyle=css('--muted');ctx.font=`500 11px ${css('--f-num')}`;ctx.textAlign='right';ctx.textBaseline='middle';for(let v=0;v<=r.top;v+=r.step)ctx.fillText(v,w-5,r.Tp+r.ph*(1-v/r.top))}
+function drawBig(){if(!RUN||$('gModal').hidden)return;bigT=performance.now();const G=runSoFar();const U=RUN.open?'generation':'year';
+  if(BIGB>1&&G/BIGB<3)BIGB=G/10>=3?10:1;
+  $('gmBin').querySelectorAll('button').forEach(x=>{const v=+x.dataset.v;const ok=v===1||G/v>=3;x.disabled=!ok;x.title=ok?'':'Keep the run going for more generations to use this view.';x.setAttribute('aria-pressed',String(v===BIGB))});
+  const b=BIGB,g1=Math.ceil(G/b)*b,n=g1/b;const sc=$('gmPopSc');const atEnd=sc.scrollLeft+sc.clientWidth>=sc.scrollWidth-24;
+  const W=Math.max(sc.clientWidth,Math.min(12000,n*(b===1?14:22)));['gmPop','gmCause','gmTraits'].forEach(id=>$(id).style.width=W+'px');
+  const P=drawPopChart($('gmPop'),0,g1,b,true),Q=drawCauseChart($('gmCause'),0,g1,b,true),T=drawTraitChart($('gmTraits'),0,g1,b,true);
+  yAxisCv($('gmPopAx'),P);yAxisCv($('gmCauseAx'),Q);yAxisCv($('gmTraitsAx'),T);
+  const two=RUN.open&&RUN.org.kind==='animal';
+  $('gmPopLeg').innerHTML='<span><i></i>Population (left axis)'+(b===1?', with the season-by-season ups and downs shown faintly':'')+'</span>'+(two?'<span><i style="border-top:3px dashed #8a6a3a"></i>Food left (top of graph = plenty)</span><span><i style="border-top-color:#c4473a"></i>Predators (middle of graph = normal)</span>':'');
+  $('gmCauseLeg').innerHTML=$('rLegend').innerHTML;if(T)$('gmTraitLeg').innerHTML=traitLegend(T);
+  const per=b===1?`1 ${U}`:`${b} ${U}s`;
+  $('gmPopEm').textContent=b===1?`every ${U}`:`average over each ${b} ${U}s`;$('gmCauseEm').textContent=b===1?`deaths in each ${U}`:`total deaths in each ${b} ${U}s`;
+  $('gmNote').textContent=`Here is the whole run so far: ${G} ${U}${G===1?'':'s'}. Each point shows ${per}. Zoom out to 10 or 100 generations to spot the long-term trends, or zoom in to 1 generation to see exactly what happened. Scroll sideways to move along the graphs.`+(G<30?' The 10-generation view opens once the run passes 30 generations.':G<300?' The 100-generation view opens once the run passes 300 generations.':'');
+  if(atEnd||!bigOpened){BIG_SC.forEach(id=>$(id).scrollLeft=1e9)}bigOpened=true}
+function openBig(){if(!RUN)return;$('gModal').hidden=false;bigOpened=false;document.body.style.overflow='hidden';requestAnimationFrame(drawBig);$('gmClose').focus()}
+function closeBig(){$('gModal').hidden=true;document.body.style.overflow='';$('rBig').focus()}
+$('rBig').addEventListener('click',openBig);$('gmClose').addEventListener('click',closeBig);
+$('gModal').addEventListener('click',e=>{if(e.target===$('gModal'))closeBig()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('gModal').hidden)closeBig()});
+$('gmBin').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;BIGB=+b.dataset.v;bigOpened=false;drawBig()});
+BIG_SC.forEach(id=>$(id).addEventListener('scroll',e=>{if(bigSync)return;bigSync=true;const x=e.target.scrollLeft;BIG_SC.forEach(o=>{if(o!==id)$(o).scrollLeft=x});bigSync=false},{passive:true}));
 function topChanged(n){if(!RUN||RUN.traitHist.length<2)return relevantKeys(RUN.org.kind,RUN.org.t,BIOMES[RUN.bk]).slice(0,n);
   const a=RUN.traitHist[0],b=[...RUN.traitHist].reverse().find(m=>Object.values(m).some(v=>v!=null&&typeof v==='number'))||a;
   return relevantKeys(RUN.org.kind,RUN.org.t,BIOMES[RUN.bk]).filter(k=>b[k]!=null).sort((x,y)=>Math.abs(b[y]-a[y])-Math.abs(b[x]-a[x])).slice(0,n)}
@@ -3000,27 +3087,45 @@ $('actionGrid').addEventListener('click',e=>{const b=e.target.closest('.check');
 
 /* ================= tabs & modes ================= */
 let tab='chal';
+const CREATE_TABS=['design','run','web'];let LAST_CREATE='design';
 function setTab(t){
   if(t!=='chal'&&!isUnlocked()){toast('Finish the Foundation challenge to unlock this.');return}
   if(t!=='chal'&&MISSION&&!(t==='story'&&MISSION.story)){if(MISSION.story)storyRestoreBiome();endMission()}
-  if(t==='chal'&&MISSION&&MISSION.type==='build'&&tab==='chal'){}
-  tab=t;$('app').dataset.tab=t;
+  const prev=tab;if(prev==='cons'&&t!=='cons')consLeave();
+  tab=t;$('app').dataset.tab=t;if(CREATE_TABS.includes(t))LAST_CREATE=t;
   const map={chal:'tChal',design:'tDesign',run:'tRun',web:'tWeb',cons:'tCons',story:'tStory'};Object.entries(map).forEach(([k,id])=>$(id).setAttribute('aria-selected',String(k===t)));
+  $('tCreate').setAttribute('aria-selected',String(CREATE_TABS.includes(t)));
+  if(t==='cons'&&prev!=='cons')consEnter();
   const buildMission=MISSION&&MISSION.type==='build';
   $('vChal').hidden=!(t==='chal'&&!buildMission);$('vStory').hidden=!(t==='story'&&!buildMission);if(t==='story'&&!buildMission)renderStory();$('vDesign').hidden=!(t==='design'||((t==='chal'||t==='story')&&buildMission));$('vRun').hidden=!(t==='run'||t==='cons');$('vWeb').hidden=t!=='web';if(t!=='web'&&WEB.playing)fwSetPlay(false);if(t==='web')fwEnter();
   if(t==='chal'&&!MISSION)renderHub();
   if(t!=='run'&&t!=='cons'&&RUN)setRunPlay(false);
+  if(t!=='run'&&t!=='cons'&&!$('gModal').hidden)closeBig();
+  $('rWhoBox').hidden=t==='cons';$('consPick').hidden=t!=='cons';if(t==='cons')renderConsPick();
   if(t==='run'||t==='cons'){renderEnv();if(!RUN||RUN.key!==runKey())newRun();kick()}
   renderStep();requestAnimationFrame(redraw)}
 $('tChal').addEventListener('click',()=>{if(MISSION&&MISSION.type==='build'){if(MISSION.story)storyRestoreBiome();endMission()}setTab('chal')});
 $('tStory').addEventListener('click',()=>{if(MISSION&&MISSION.story){storyCancel();return}setTab('story')});
+$('tCreate').addEventListener('click',()=>{if(CREATE_TABS.includes(tab))return;setTab(LAST_CREATE)});
 $('tDesign').addEventListener('click',()=>setTab('design'));$('tRun').addEventListener('click',()=>{if(tab==='design'&&isUnlocked()&&overBudget()){toast('Not enough XP to build this design. Remove a costly adaptation first.');return}setTab('run')});$('tCons').addEventListener('click',()=>setTab('cons'));$('tWeb').addEventListener('click',()=>setTab('web'));
+/* --- Conservation works on its own species, so the organism you built in Create is never changed --- */
+const CONS={sp:'zebra',over:null,saved:null,started:false};
+const CONS_SPECIES=[['zebra','Zebra'],['arctic-hare','Arctic hare'],['arctic-fox','Arctic fox'],['mine','My own organism']];
+function consStash(){if(!CONS.saved)CONS.saved={org:JSON.parse(JSON.stringify(ORG)),biome}}
+function consLoad(){if(CONS.sp==='mine'&&CONS.saved){ORG=JSON.parse(JSON.stringify(CONS.saved.org));biome=CONS.saved.biome;$('orgName').value=ORG.name||'';fullRefresh()}else loadPreset(CONS.sp);
+  if(CONS.over){Object.assign(ORG.t,CONS.over);fullRefresh()}}
+function consEnter(){consStash();if(!CONS.started&&$('app').dataset.mode==='guided'){CONS.started=true;COURSES.cons[STEPI.cons].setup()}else{CONS.started=true;consLoad()}}
+function consLeave(){if(!CONS.saved)return;ORG=CONS.saved.org;biome=CONS.saved.biome;CONS.saved=null;$('orgName').value=ORG.name||'';fullRefresh()}
+function renderConsPick(){const mine=CONS.saved?orgName(CONS.saved.org):'';
+  $('consSeg').innerHTML=CONS_SPECIES.map(([k,n])=>`<button data-sp="${k}" aria-pressed="${k===CONS.sp}" ${k==='mine'&&!mine?'disabled':''}>${k==='mine'&&mine?`My ${mine}`:n}</button>`).join('')}
+$('consSeg').addEventListener('click',e=>{const b=e.target.closest('[data-sp]');if(!b||b.disabled||b.dataset.sp===CONS.sp)return;CONS.sp=b.dataset.sp;CONS.over=null;consLoad();renderConsPick();renderEnv();newRun()});
 function setMode(m){$('app').dataset.mode=m;$('mGuided').setAttribute('aria-pressed',String(m==='guided'));$('mExplore').setAttribute('aria-pressed',String(m==='explore'));requestAnimationFrame(redraw)}
 $('mGuided').addEventListener('click',()=>setMode('guided'));$('mExplore').addEventListener('click',()=>setMode('explore'));
 
 /* ================= guided courses ================= */
 function fresh(kind,bk,over,name){ORG={kind,name:name||'',t:{...KIND_DEF[kind],...(over||{})},preset:null};$('orgName').value=ORG.name;biome=bk;fullRefresh()}
-function consSetup(preset,threats,actions,over){loadPreset(preset);if(over)Object.assign(ORG.t,over);CFG.threats=new Set(threats);CFG.actions=new Set(actions||[]);setTab('cons');$('envBox').open=true;renderEnv();newRun()}
+function consSetup(preset,threats,actions,over){CFG.threats=new Set(threats);CFG.actions=new Set(actions||[]);CONS.sp=preset;CONS.over=over||null;CONS.started=true;
+  if(tab!=='cons')setTab('cons');else{consLoad();renderConsPick()}$('envBox').open=true;renderEnv();newRun()}
 const COURSES={
  web:[
   {title:'Producers and consumers',task:['The bottom row of the tundra food web holds the <b>producers</b>.','Tap each producer and each consumer, and read what it eats.','Find the consumers that eat only plants, and the ones that eat only animals.'],look:['The food web','Species details'],
@@ -3057,8 +3162,8 @@ const COURSES={
    write:'How can hunting change the body of a species over many generations? Can you think of a real example?',setup:()=>consSetup('zebra',['hunting'])},
   {title:'A warming Arctic',task:['The Arctic hare faces <b>climate change</b> from year 10.','Run to the end. Watch the temperature, the snow and the fur colour.','Then add <b>Cut emissions</b> and run again.'],look:['Population','How the population changed'],
    write:'Describe two ways climate change threatens Arctic animals. Why does cutting emissions help only slowly?',setup:()=>consSetup('arctic-hare',['climate'])},
-  {title:'Slow breeders are most at risk',task:['Arctic foxes face <b>habitat loss and hunting</b>. Run with <b>few young, lots of care</b>.','Change <b>Parental care</b> in Create to <b>many young, no care</b>, come back and run again.','Compare the two populations.'],look:['Population'],
-   write:'Why are animals that have few young, like elephants and whales, more likely to go extinct when people change their habitat?',setup:()=>consSetup('arctic-fox',['habitat','hunting'])},
+  {title:'Slow breeders are most at risk',task:['Arctic foxes face <b>habitat loss and hunting</b>. Run to the end with <b>few young, lots of care</b>, and note how many foxes are left.','Now press <button class="btn small" data-care="none">Many young, no care</button> and run again. You can switch back with <button class="btn small" data-care="lots">Few young, lots of care</button>.','Compare the two populations.'],look:['Population'],
+   write:'Why are animals that have few young, like elephants and whales, more likely to go extinct when people change their habitat?',setup:()=>consSetup('arctic-fox',['habitat','hunting'],[],{care:'lots'})},
   {title:'Plan a rescue',task:['The Arctic fox faces <b>climate change, habitat loss and invasive species</b>.','You have <b>10 points</b>. Choose conservation actions.','Goal: at least <b>15 foxes</b> alive after 40 years. Try different plans.'],look:['Conservation actions','Population'],
    write:'Justify your plan. Which action made the biggest difference, and which threat was hardest to fix? Why?',setup:()=>consSetup('arctic-fox',['climate','habitat','invasive'])}
  ]
@@ -3076,6 +3181,9 @@ function renderStep(){
 }
 $('gDots').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const c=course();STEPI[c]=[...$('gDots').children].indexOf(b);renderStep();COURSES[c][STEPI[c]].setup();renderStep()});
 $('gSetup').addEventListener('click',()=>{const c=course();COURSES[c][STEPI[c]].setup();renderStep()});
+$('gTask').addEventListener('click',e=>{const b=e.target.closest('[data-care]');if(!b)return;const care=b.dataset.care;
+  if(tab!=='cons'||CONS.sp!=='arctic-fox')COURSES.cons[STEPI.cons].setup();CONS.over={care};ORG.t.care=care;newRun();
+  toast(care==='none'?'The Arctic foxes now have many young and give no care. Press play to compare.':'The Arctic foxes now have a few young and lots of care. Press play to compare.')});
 $('gPrev').addEventListener('click',()=>{const c=course();if(STEPI[c]>0){STEPI[c]--;COURSES[c][STEPI[c]].setup();renderStep()}});
 $('gNext').addEventListener('click',()=>{const c=course();if(STEPI[c]<COURSES[c].length-1){STEPI[c]++;COURSES[c][STEPI[c]].setup();renderStep()}else if(c==='create'){toast('Create course done. Try the Food web course next.')}else if(c==='web'){toast('Food web course done. Try the Conservation course next.')}else toast('Conservation course complete.')});
 
@@ -3142,29 +3250,43 @@ function fwTraits(s){if(s.plankton)return null;if(s.plant){const base=PRESETS[s.
   const base=s.pre?PRESETS[s.pre].t:DEF_A;return{...DEF_A,...base,...(s.t||{})}}
 function fwKind(s){return s.plankton?'plankton':s.plant?'plant':s.me?ORG.kind:'animal'}
 /* --- model: generalised Lotka-Volterra, populations as an index (1 = normal) --- */
-const FWG=1.5,FWP=.5;
+const FWG=1.5,FWP=.5,FWC=.14;
 function fwBuild(list,extra){
   const sp=list.map(s=>({...s,eats:[...(s.eats||[])]}));const n0=sp.length;
   if(extra)sp.push({...extra});
   const n=sp.length,idx={};sp.forEach((s,i)=>idx[s.id]=i);
-  sp.forEach(s=>{s.foods=s.eats.map(id=>idx[id]).filter(j=>j!=null);s.preds=[];s.bonus=[];s.extraPred=[]});
+  sp.forEach(s=>{s.foods=s.eats.map(id=>idx[id]).filter(j=>j!=null);s.preds=[];s.bonus=[];s.extraPred=[];s.comp=[]});
   sp.forEach((s,i)=>{if(i<n0)s.foods.forEach(j=>sp[j].preds.push(i))});
   if(extra){const me=n-1;sp[me].foods.forEach(j=>sp[j].extraPred.push(me));
-    (extra.eatenBy||[]).forEach(id=>{const p=idx[id];if(p!=null){sp[me].preds.push(p);sp[p].bonus.push(me)}})}
-  sp.forEach(s=>{s.self=s.lv===1?1:.4;s.b=s.self+(s.preds.length?FWP:0)-(s.lv===1?0:FWG)});
+    (extra.eatenBy||[]).forEach(id=>{const p=idx[id];if(p!=null){sp[me].preds.push(p);sp[p].bonus.push(me)}});
+    /* competition: species that eat the same foods as your organism fight it for food and space */
+    sp.forEach((s,j)=>{if(j===me||!s.foods.length)return;const sh=s.foods.filter(f=>sp[me].foods.includes(f)).length;if(!sh)return;const a=FWC*sh/s.foods.length;s.comp.push([me,a]);sp[me].comp.push([j,a])});
+    const nc=sp[me].comp.length;sp[me].comp.forEach(c=>c[1]/=Math.max(1,nc))}
+  /* self-limitation: plants by space and light, top predators by territory, other consumers by disease and crowding */
+  sp.forEach(s=>{s.self=s.lv===1?1:s.preds.length?.35:1;s.b=s.self+(s.preds.length?FWP:0)-(s.lv===1?0:FWG)});
   if(extra)sp[n-1].b+=extra.fit||0;
   return{sp,idx,n0}}
 function fwGrowth(W,N,i){const s=W.sp[i];let g=s.b-s.self*N[i];
   if(s.foods.length){const k=s.foods.length,kav=s.foods.filter(j=>N[j]>0).length;const c=FWG/(.5*k+.5*Math.max(1,kav));s.foods.forEach(j=>g+=c*N[j])}
   s.bonus.forEach(j=>g+=.5*FWG/Math.max(1,s.foods.length)*N[j]);
   if(s.preds.length){const m=s.preds.length;s.preds.forEach(p=>g-=FWP/m*N[p])}
-  s.extraPred.forEach(p=>g-=FWP/Math.max(1,s.preds.length)*.6*N[p]);
+  s.extraPred.forEach(p=>g-=FWP/Math.max(1,s.preds.length)*N[p]);
+  s.comp.forEach(([j,a])=>g-=a*N[j]);
   return g}
-function fwStep(W,N,rem,dt){const M=N.slice();for(let i=0;i<N.length;i++){if(N[i]<=0||rem[i]){M[i]=0;continue}M[i]=Math.min(4,N[i]*Math.exp(fwGrowth(W,N,i)*dt));if(M[i]<1e-3)M[i]=0}return M}
+/* live web only (nz): good and bad years. Each species has its own run of luck, and weather swings hit all the producers together.
+   A population that falls below 3% of normal is too small to recover, so it dies out here. */
+const FW_LUCK=.1,FW_WEATHER=.3,FW_MIN=.03;
+function fwStep(W,N,rem,dt,nz){const M=N.slice();const R=Math.random;
+  if(nz)nz.w+=-nz.w/3*dt+FW_WEATHER*Math.sqrt(2*dt/3)*gauss(R);
+  for(let i=0;i<N.length;i++){if(N[i]<=0||rem[i]){M[i]=0;continue}let g=fwGrowth(W,N,i);
+    if(nz){const s=W.sp[i];let e=nz.E[s.id]||0;e+=-e/2*dt+FW_LUCK*Math.sqrt(dt)*gauss(R);nz.E[s.id]=e;g+=s.lv===1?.5*e+nz.w:e}
+    M[i]=Math.min(4,N[i]*Math.exp(g*dt));
+    if(M[i]<(nz?FW_MIN:1e-3)){M[i]=0;if(nz)nz.died.push(i)}}
+  return M}
 /* --- state --- */
-const WEB={bk:'tundra',W:null,N:[],rem:[],year:0,hist:[],marks:[],base:null,baseLbl:'',sel:null,me:false,playing:false,last:0};
+const WEB={bk:'tundra',W:null,N:[],rem:[],year:0,hist:[],marks:[],base:null,baseLbl:'',sel:null,me:false,playing:false,last:0,nz:{E:{},w:0,died:[]},ext:[]};
 function fwMe(bk){
-  const o=ORG;const sc=scoresFor(o,bk);const ys=lethalOf(sc,bk,o)?0:yearSurvival(sc,bk,o);const fit=clamp(1.6*(ys-.55),-1.2,.6);
+  const o=ORG;const sc=scoresFor(o,bk);const ys=lethalOf(sc,bk,o)?0:yearSurvival(sc,bk,o);const fit=ys<=0?-2.5:clamp(1.6*(ys-.55),-1.2,.6);
   const list=FWS[bk];const ids=l=>list.filter(s=>s.lv===l).map(s=>s.id);
   let lv,eats,by;
   if(o.kind==='plant'){lv=1;eats=[];by=ids(2)}
@@ -3173,13 +3295,15 @@ function fwMe(bk){
   else{lv=3;eats=[...ids(1),...ids(2)];by=ids(4)}
   return{id:'me',me:true,name:orgName(o),lv,eats,eatenBy:by,fit,ys,t:JSON.parse(JSON.stringify(o.t)),kindMe:o.kind}}
 function fwReset(bk){if(bk)WEB.bk=bk;const extra=WEB.me?fwMe(WEB.bk):null;WEB.W=fwBuild(FWS[WEB.bk],extra);
-  WEB.N=WEB.W.sp.map(s=>s.me?.3:1);WEB.rem=WEB.W.sp.map(()=>false);WEB.year=0;WEB.hist=[];WEB.marks=[];WEB.base=null;WEB.baseLbl='';
+  WEB.N=WEB.W.sp.map(s=>s.me?.3:1);WEB.rem=WEB.W.sp.map(()=>false);WEB.year=0;WEB.hist=[];WEB.marks=[];WEB.base=null;WEB.baseLbl='';WEB.nz={E:{},w:0,died:[]};WEB.ext=[];
   if(WEB.sel&&WEB.W.idx[WEB.sel]==null)WEB.sel=null;fwRecord();fwSetPlay(false);fwRender()}
 function fwRecord(){const v={};WEB.W.sp.forEach((s,i)=>v[s.id]=WEB.N[i]);WEB.hist.push({y:WEB.year,v})}
-function fwAdvance(years){const steps=Math.round(years/.05);for(let k=0;k<steps;k++){WEB.N=fwStep(WEB.W,WEB.N,WEB.rem,.05);WEB.year=+(WEB.year+.05).toFixed(2);if(Math.abs(WEB.year*4-Math.round(WEB.year*4))<1e-6)fwRecord()}}
+function fwDied(){const nz=WEB.nz;nz.died.splice(0).forEach(i=>{const s=WEB.W.sp[i];const y=Math.floor(WEB.year);WEB.ext.push({id:s.id,name:s.name,me:!!s.me,y});
+  toast(s.me?`${s.name} could not survive in this food web and died out in year ${y}.`:`The ${s.name.toLowerCase()} population fell too low to recover and died out in year ${y}.`)})}
+function fwAdvance(years){const steps=Math.round(years/.05);for(let k=0;k<steps;k++){WEB.N=fwStep(WEB.W,WEB.N,WEB.rem,.05,WEB.nz);if(WEB.nz.died.length)fwDied();WEB.year=+(WEB.year+.05).toFixed(2);if(Math.abs(WEB.year*4-Math.round(WEB.year*4))<1e-6)fwRecord()}}
 function fwMark(lbl){WEB.base=WEB.N.slice();WEB.baseIds=WEB.W.sp.map(s=>s.id);WEB.baseLbl=lbl;WEB.marks.push({y:WEB.year,lbl})}
 function fwToggleRemove(id){const i=WEB.W.idx[id];if(i==null)return;const nm=WEB.W.sp[i].name;
-  if(WEB.rem[i]||WEB.N[i]===0){fwMark(`${nm} brought back`);WEB.rem[i]=false;WEB.N[i]=.3}else{fwMark(`${nm} removed`);WEB.rem[i]=true;WEB.N[i]=0}
+  if(WEB.rem[i]||WEB.N[i]===0){fwMark(`${nm} brought back`);WEB.rem[i]=false;WEB.N[i]=.3;WEB.ext=WEB.ext.filter(x=>x.id!==id)}else{fwMark(`${nm} removed`);WEB.rem[i]=true;WEB.N[i]=0}
   if(!WEB.playing)fwSetPlay(true);fwRender()}
 function fwToggleMe(){
   if(!WEB.me){WEB.me=true;const old={};WEB.W.sp.forEach((s,i)=>old[s.id]=[WEB.N[i],WEB.rem[i]]);fwMark(`${orgName(ORG)} added`);
@@ -3250,7 +3374,7 @@ function fwChain(i){const sp=WEB.W.sp;const down=[];let c=i;let guard=0;while(sp
   while(guard++<6){const ps=predOf(c).filter(j=>WEB.N[j]>0);if(!ps.length)break;c=ps.sort((a,b)=>sp[b].lv-sp[a].lv)[0];up.push(c)}
   return[...down,i,...up].map(j=>sp[j].name)}
 function fwInfo(){const box=$('wInfo');const sp=WEB.W.sp;
-  if(WEB.sel==null||WEB.W.idx[WEB.sel]==null){box.innerHTML=`<div class="winfo"><h3>Tap a species</h3><p>Every arrow is one feeding link. Producers make food from sunlight; consumers get their energy by eating other living things.</p><p>Try removing a top predator, or a producer, then watch the knock-on effects spread through the web.</p></div>`;return}
+  if(WEB.sel==null||WEB.W.idx[WEB.sel]==null){box.innerHTML=`<div class="winfo"><h3>Tap a species</h3><p>Every arrow is one feeding link. Producers make food from sunlight; consumers get their energy by eating other living things.</p><p>Numbers rise and fall from year to year with good and bad weather, and predators rise and fall a little after their prey. Try removing a top predator, or a producer, then watch the knock-on effects spread through the web.</p></div>`;return}
   const i=WEB.W.idx[WEB.sel],s=sp[i];const eats=s.foods.map(j=>sp[j].name);const by=sp.map((x,j)=>j).filter(j=>sp[j].foods.includes(i)||(s.me&&s.preds.includes(j))).map(j=>sp[j].name);
   const gone=WEB.N[i]===0;
   box.innerHTML=`<div class="winfo"><h3>${s.name}<span class="lvtag" style="border-color:${LVCOL[s.lv]};color:${LVCOL[s.lv]}">${LVNAME[s.lv]}</span>${s.me?'<span class="lvtag">your organism</span>':''}</h3>
@@ -3272,13 +3396,14 @@ function fwChart(){const S=setupCv($('wChart'));if(!S)return;const{ctx,w,h}=S;ct
   sp.forEach((s,i)=>{ctx.strokeStyle=fwColor(i);ctx.lineWidth=s.me||WEB.sel===s.id?3:1.8;ctx.beginPath();let st=false;
     H.forEach(r=>{if(r.y<x0||r.v[s.id]==null)return;const xx=X(r.y),yy=Y(r.v[s.id]);if(!st){ctx.moveTo(xx,yy);st=true}else ctx.lineTo(xx,yy)});ctx.stroke()});
   $('wLegend').innerHTML=sp.map((s,i)=>`<div><i style="background:${fwColor(i)}"></i>${s.name}<b>${WEB.N[i]===0?'gone':Math.round(WEB.N[i]*100)}</b></div>`).join('')}
-function fwEffects(){const ul=$('wEffects');if(!WEB.base){ul.innerHTML='<li>No changes yet. Remove a species (or add your organism) to see what happens to the others.</li>';return}
+function fwEffects(){const ul=$('wEffects');const exl=WEB.ext.map(x=>`<li>Year ${x.y}: <b>${x.name}</b> died out${x.me?'. It could not get enough food, or too many were eaten, to keep its numbers up.':'. Its numbers fell too low to recover.'}</li>`).join('');
+  if(!WEB.base){ul.innerHTML=exl+(exl?'':'<li>No changes yet. Populations rise and fall from year to year on their own. Remove a species (or add your organism) to see what happens to the others.</li>');return}
   const sp=WEB.W.sp;const rows=[];sp.forEach((s,i)=>{const bi=WEB.baseIds.indexOf(s.id);if(bi<0)return;const b=WEB.base[bi],n=WEB.N[i];
     if(b===0&&n===0)return;if(b>0&&n===0)rows.push([999,`<b>${s.name}</b> died out`]);
     else if(b===0)rows.push([500,`<b>${s.name}</b> is back: ${Math.round(n*100)}`]);
     else{const pc=Math.round(100*(n-b)/b);if(Math.abs(pc)>=8)rows.push([Math.abs(pc),`<b>${s.name}</b> ${pc>0?'▲ up':'▼ down'} ${Math.abs(pc)}%`])}});
   rows.sort((a,b)=>b[0]-a[0]);
-  ul.innerHTML=`<li><b>${WEB.baseLbl}</b> in year ${Math.floor(WEB.marks[WEB.marks.length-1].y)}.${WEB.year-WEB.marks[WEB.marks.length-1].y<8?' Keep watching: changes take years to spread.':''}</li>`+(rows.length?rows.map(r=>`<li>${r[1]}</li>`).join(''):'<li>No big changes yet.</li>')}
+  ul.innerHTML=exl+`<li><b>${WEB.baseLbl}</b> in year ${Math.floor(WEB.marks[WEB.marks.length-1].y)}.${WEB.year-WEB.marks[WEB.marks.length-1].y<8?' Keep watching: changes take years to spread.':''}</li>`+(rows.length?rows.map(r=>`<li>${r[1]}</li>`).join(''):'<li>No big changes yet.</li>')}
 function fwPyramid(){const S=setupCv($('wPyr'));if(!S)return;const{ctx,w,h}=S;ctx.clearRect(0,0,w,h);const sp=WEB.W.sp;
   const lvs=[1,2,3,4].filter(l=>sp.some(s=>s.lv===l));const rowH=(h-10)/lvs.length;
   lvs.forEach((l,k)=>{const ids=sp.map((s,i)=>i).filter(i=>sp[i].lv===l);const m=ids.reduce((a,i)=>a+WEB.N[i],0)/ids.length;const E=Math.pow(10,5-l)*m;
@@ -3912,7 +4037,7 @@ $('traitPanel').addEventListener('toggle',e=>{const d=e.target;if(!d.dataset||!d
 document.addEventListener('toggle',e=>{const d=e.target;if(d.open&&d.querySelector&&d.querySelector('canvas'))requestAnimationFrame(redraw)},true);
 
 /* ================= boot ================= */
-function redraw(){if(!$('mModal').hidden)document.querySelectorAll('#mBodyHost canvas[data-bk]').forEach(cv=>biomeThumb(cv,cv.dataset.bk));if(!$('vChal').hidden)document.querySelectorAll('#vChal canvas[data-bk]').forEach(cv=>biomeThumb(cv,cv.dataset.bk));if(!$('vDesign').hidden)drawCloseup();if(!$('vWeb').hidden&&WEB.W)fwRender();if(!$('vRun').hidden&&RUN){renderRun();drawRunCharts();drawChange()}}
+function redraw(){if(!$('gModal').hidden)drawBig();if(!$('mModal').hidden)document.querySelectorAll('#mBodyHost canvas[data-bk]').forEach(cv=>biomeThumb(cv,cv.dataset.bk));if(!$('vChal').hidden)document.querySelectorAll('#vChal canvas[data-bk]').forEach(cv=>biomeThumb(cv,cv.dataset.bk));if(!$('vDesign').hidden)drawCloseup();if(!$('vWeb').hidden&&WEB.W)fwRender();if(!$('vRun').hidden&&RUN){renderRun();drawRunCharts();drawChange()}}
 buildBiomes('biomes');buildBiomes('rBiomes');
 fullRefresh();renderHub();renderEnv();setTab('chal');
 let rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(redraw,120)});
@@ -3921,6 +4046,6 @@ new MutationObserver(redraw).observe(document.documentElement,{attributes:true,a
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(redraw);
 window.__adapt={org:()=>ORG,loadPreset,setTab,newRun,fullRefresh,setOrg:(kind,t)=>{ORG={kind,name:'',t:{...KIND_DEF[kind],...t},preset:null};fullRefresh()},
   advance:n=>{advance(n,true);updateRunHUD();drawRunCharts();renderRun();drawChange()},setBiome:b=>{biome=b;afterBiome()},yearSurvival:()=>yearSurvival(SC,biome,ORG),scores:()=>SC,lethal:()=>lethalOf(SC,biome,ORG),
-  presets:()=>Object.keys(PRESETS),unlock:()=>{PROG.unlocked=true;updateLocks()},startMission,cfg:()=>CFG,run:()=>RUN,meanT:()=>meanT(),missions:()=>MISSIONS,prog:()=>PROG,ysOf:(t,bk)=>{const o={kind:'animal',t:{...DEF_A,...t}};const sc=scoresFor(o,bk);return lethalOf(sc,bk,o)?0:yearSurvival(sc,bk,o)},evoCost:(t,p)=>evoCost({...DEF_A,...t},{...DEF_A,...p}),SP_ANC:()=>SP_ANC,web:()=>WEB,fwReset,fwToggleRemove,fwToggleMe,startFW,openSP,startSP,spSave,buildKey,spLeaves,certCanvas,cardCanvas,keyCanvas,renderHub,queue:id=>RUN.queue.push(id),cont:()=>{RUN.paused=false;RUN.blockStart=RUN.stopAt;RUN.stopAt+=50;$('rSum').hidden=true},foodChain:()=>foodChain(ORG.t,biome),cfgSet:o=>Object.assign(CFG,o),storyStart,storyNext,storyKeep,storyAdapt,storyDone,storyEnd,story:()=>STORY,optimise,ysIn,storyEnv};
+  presets:()=>Object.keys(PRESETS),unlock:()=>{PROG.unlocked=true;updateLocks()},startMission,cfg:()=>CFG,run:()=>RUN,meanT:()=>meanT(),missions:()=>MISSIONS,prog:()=>PROG,ysOf:(t,bk)=>{const o={kind:'animal',t:{...DEF_A,...t}};const sc=scoresFor(o,bk);return lethalOf(sc,bk,o)?0:yearSurvival(sc,bk,o)},evoCost:(t,p)=>evoCost({...DEF_A,...t},{...DEF_A,...p}),SP_ANC:()=>SP_ANC,web:()=>WEB,fwAdvance:y=>{fwAdvance(y);fwRender()},cons:()=>CONS,biome:()=>biome,fwReset,fwToggleRemove,fwToggleMe,startFW,openSP,startSP,spSave,buildKey,spLeaves,certCanvas,cardCanvas,keyCanvas,renderHub,queue:id=>RUN.queue.push(id),cont:()=>{RUN.paused=false;RUN.blockStart=RUN.stopAt;RUN.stopAt+=50;$('rSum').hidden=true},foodChain:()=>foodChain(ORG.t,biome),cfgSet:o=>Object.assign(CFG,o),storyStart,storyNext,storyKeep,storyAdapt,storyDone,storyEnd,story:()=>STORY,optimise,ysIn,storyEnv};
 })();
 </script>
