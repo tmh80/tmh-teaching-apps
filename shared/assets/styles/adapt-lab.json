@@ -1,0 +1,13 @@
+{
+ "sim": "Adapt Lab",
+ "look": "warm, rounded and friendly (Pikmin-inspired qualities; no copied characters)",
+ "outline": 0.011,
+ "highlight": 0.28,
+ "split": 0.58,
+ "notes": "Matches Adapt Lab's canvas creatures: soft countershading (dark back, pale belly), warm key light from the upper left, big round eyes with a white catch-light, rounded joins. Animals face right.",
+ "colours": {"back": "#6f7d92", "back2": "#93a1b4", "belly": "#f6f3ee", "belly2": "#e8e2da", "line": "#3e4757", "stripe": "#1e4f63"},
+ "species_colours": {
+  "mackerel": "#2f7f8f,#4fb3a9,#eef3f0,#d9e6ea,#24485a,#1e4f63",
+  "shark": "#6f7d92,#93a1b4,#f6f3ee,#e8e2da,#3e4757,#1e4f63"
+ }
+}

@@ -12,3 +12,7 @@ Components every sim reuses, so each new sim is mostly science content:
 - My Worksheet export (PDF)
 
 Force HQ has the most complete versions of these, so it is the starting point. Nothing has been extracted yet.
+
+## Graphics library
+
+`assets/` holds reusable, free-to-use graphics, with sources and licences in `assets/CREDITS.md`. See `assets/README.md`.

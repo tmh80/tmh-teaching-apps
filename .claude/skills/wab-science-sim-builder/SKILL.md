@@ -76,11 +76,21 @@ Reuse these components across sims instead of rebuilding them. If `shared/` in t
 
 ### Images and art
 
-Code-drawn SVG/canvas is the default. When richer art is needed:
-- **Sprite sheet:** ask Tom for one generated image containing every part in one style on a flat background. Slice with PIL, remove the background, trim, and embed.
-- **Trace to vector:** convert supplied art to SVG (potrace or vtracer) when parts must stay reshapeable.
-- **Open-licence assets:** PhyloPic (organism silhouettes), Kenney, OpenMoji. Check licences and record credits in the brief. Try npm/GitHub first, since other sites are usually blocked from the sandbox; otherwise ask Tom to attach files.
-- Ask for 2–3 reference screenshots before any art pass.
+Code-drawn SVG/canvas stays the default for anything that follows a science convention or that students
+drag, build or reshape (circuit symbols, force arrows, graphs, particle models, trait-driven creatures).
+For real-world things and scenery (organisms, cells, body systems, lab apparatus, everyday objects, planets,
+landscapes), **follow `.claude/skills/find-graphics/SKILL.md`**. It covers:
+- checking `shared/assets/` first, then searching free sources (Iconify emoji sets, PhyloPic, Bioicons/Servier,
+  NASA, Kenney, Wikimedia);
+- licence rules (free or credit only; never share-alike, non-commercial or no-derivatives) and logging every
+  file in `shared/assets/CREDITS.md`;
+- a per-sim style card so all art matches (ask Tom for the look of any sim other than Adapt Lab);
+- clean-up (trim, background removal, recolour, trace to vector), friendly makeovers of silhouettes, and
+  parts kits for code-drawn creatures;
+- embedding inside the offline file with a size budget;
+- the sprite-sheet fallback (Tom makes one image in another AI tool; the skill slices it).
+
+Show Tom a contact sheet or before/after picture rather than describing art.
 
 ## 6. Testing (before every delivery)
 
@@ -102,6 +112,6 @@ Then give a short summary: what changed, anything not done, one suggested next s
 ## 8. Brief and backlog
 
 Keep two short docs per sim in `<app>/docs/`:
-- `Brief.md`: what the sim is, file structure, debug hook functions, what must not break, art style, credits.
+- `Brief.md`: what the sim is, file structure, debug hook functions, what must not break, art style (link its style card in `shared/assets/styles/`), and which `shared/assets/` graphics it embeds (credits live in `shared/assets/CREDITS.md`).
 - `Backlog.md`: ideas and requests banked for later, with any open questions for Tom.
 Update both at the end of every working session.
