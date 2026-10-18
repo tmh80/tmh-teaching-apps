@@ -8,11 +8,11 @@ Interactive science sims and labs for WAB MS Science (Grade 6–8). Each app is 
 |---|---|---|---|---|
 | `force-hq/` | Force HQ | G7/8 Forces | `Force-HQ-offline.html` | Ready |
 | `sparks-through-time/` | Sparks Through Time | G6 Electricity | `Sparks-Through-Time.html` | Ready |
-| `adapt-lab/` | Adapt Lab | G7/8 Adaptations & evolution | `Adapt-Lab.html` | Needs internet: loads Google Fonts and the PDF library online (see backlog) |
+| `adapt-lab/` | Adapt Lab | G7/8 Adaptations & evolution | `Adapt-Lab-offline.html` | Ready |
 | `paper-plane-lab/` | Paper Plane Lab | G6 Scientific method | `Paper-Plane-Lab-offline.html` | Ready |
 | `tilt-lab/` | Tilt Lab | G7/8 Earth in Space (seasons) | `Tilt-Lab-offline.html` | Ready |
 
-`Force-HQ.html` is the source used for the online Claude preview; the `-offline` copy is the same app wrapped as a full web page.
+`Force-HQ.html` and `Adapt-Lab.html` are the sources used for the online Claude previews; each `-offline` copy is the same app wrapped as a full web page, with its fonts (and, for Adapt Lab, the jsPDF library used for PDF exports) embedded so it makes no internet requests.
 
 ## Other folders
 
@@ -25,5 +25,5 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 
 ## Backlog
 
-- **Adapt Lab offline:** embed its fonts and the jsPDF library so it works without internet, in line with the other apps.
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
+- **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.
