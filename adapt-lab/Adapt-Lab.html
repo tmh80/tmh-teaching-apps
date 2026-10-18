@@ -337,6 +337,7 @@ details.sec .secbody{display:flex;flex-direction:column;gap:10px;margin-top:10px
 .ecorow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:12px}
 .ecorow label{font:700 12px var(--f-body);text-transform:uppercase;letter-spacing:.09em;color:var(--muted)}
 .ecorow input{flex:1 1 200px;max-width:340px;border:1px solid var(--line);border-radius:9px;padding:7px 10px;background:var(--chip);font-family:var(--f-display);font-weight:700;font-size:17px}
+.ecorow input.cls{flex:0 1 120px;max-width:150px}
 .ecorow small{color:var(--muted);font-size:13px;flex:1 1 220px}
 .sethead{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;margin-top:16px}
 .sethead h2{margin:0;font-family:var(--f-display);font-size:21px}
@@ -575,7 +576,7 @@ html.modal-open,html.modal-open body{overflow:hidden}
       <section class="view" id="vChal">
         <details class="panel fdone" id="fDone" hidden></details>
         <div class="panel chalhead" id="chalHead"><div><h2>Foundation challenge</h2><p>Complete all five missions to unlock <b>Create</b>, where you invent your own organisms, and the <b>Conservation</b> course. Each mission earns <b>20 XP</b>. XP is the energy you spend to build a species: big bodies and costly adaptations cost more.</p></div><div class="chalprog" id="chalProg"></div></div>
-        <div class="panel ecorow"><label for="ecoName">Ecologist</label><input id="ecoName" maxlength="40" placeholder="Type your name" autocomplete="off"><small>Your name goes on your certificates, species cards and keys.</small><button class="btn small" id="certF" hidden>Certificate (PDF)</button></div>
+        <div class="panel ecorow"><label for="ecoName">Ecologist</label><input id="ecoName" maxlength="40" placeholder="Type your name" autocomplete="off"><label for="ecoClass">Class</label><input id="ecoClass" class="cls" maxlength="12" placeholder="Your class" autocomplete="off"><small>Your name and class go on your certificates, species cards and keys.</small><button class="btn small" id="certF" hidden>Certificate (PDF)</button></div>
         <div class="missions" id="missionList"></div>
         <div class="panel" id="missionBody" hidden></div>
         <div class="panel sethead" id="fwHead"></div>
@@ -2220,7 +2221,7 @@ function renderXP(){const c=buildCost(ORG,SC),X=xp(),over=c>X;const m=$('xpMeter
 function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>{t.hidden=true},2800)}
 function updateLocks(){['tDesign','tRun','tWeb','tCons','tStory'].forEach(id=>$(id).classList.toggle('locked',!isUnlocked()))}
 $('tUnlock').addEventListener('click',()=>{if($('tCode').value.trim().toUpperCase()===TEACHER_CODE){PROG.unlocked=true;saveProg();updateLocks();renderHub();$('tMsg').textContent='Everything is unlocked on this device.'}else $('tMsg').textContent='That code is not right.'});
-$('tReset').addEventListener('click',()=>{PROG={done:[false,false,false,false,false],unlocked:false,name:PROG.name||'',fw:[false,false,false],sp:{},spDone:false};$('extraBody').hidden=true;saveProg();updateLocks();endMission();setTab('chal');renderHub();$('tMsg').textContent='Progress reset on this device.'});
+$('tReset').addEventListener('click',()=>{PROG={done:[false,false,false,false,false],unlocked:false,name:PROG.name||'',cls:PROG.cls||'',fw:[false,false,false],sp:{},spDone:false};$('extraBody').hidden=true;saveProg();updateLocks();endMission();setTab('chal');renderHub();$('tMsg').textContent='Progress reset on this device.'});
 
 /* ================= FOUNDATION CHALLENGE ================= */
 let MISSION=null,USER=null;
@@ -3245,7 +3246,10 @@ function fwEnter(){if(!WEB.W){WEB.bk=getB(biome)?getB(biome).id:'tundra';fwReset
 /* ================= ECOLOGIST NAME, PDF EXPORTS, CERTIFICATES ================= */
 $('ecoName').value=PROG.name||'';
 $('ecoName').addEventListener('input',e=>{PROG.name=e.target.value.trim();saveProg()});
-function needName(){if((PROG.name||'').trim())return false;toast('Type your name in the Ecologist box first.');setTab('chal');setTimeout(()=>{$('ecoName').focus();$('ecoName').scrollIntoView({block:'center'})},50);return true}
+$('ecoClass').value=PROG.cls||'';
+$('ecoClass').addEventListener('input',e=>{PROG.cls=e.target.value.trim();saveProg()});
+function needName(){const noName=!(PROG.name||'').trim(),noCls=!(PROG.cls||'').trim();if(!noName&&!noCls)return false;toast(noName?'Type your name in the Ecologist box first.':'Type your class in the Class box first, so your teacher knows whose work this is.');const box=noName?'ecoName':'ecoClass';setTab('chal');setTimeout(()=>{$(box).focus();$(box).scrollIntoView({block:'center'})},50);return true}
+const clsTag=()=>(PROG.cls||'').trim()?' · Class '+PROG.cls.trim():'';
 let JSPDF=null;
 function loadJsPDF(){if(JSPDF)return Promise.resolve(JSPDF);if(window.jspdf&&window.jspdf.jsPDF)return Promise.resolve(JSPDF=window.jspdf.jsPDF);
   return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
@@ -3295,7 +3299,7 @@ function certCanvas(which){const C=CERTS[which];const c=pageCanvas(true);const x
   x.fillStyle='#16241e';x.font=`800 64px ${FD()}`;x.fillText(C.title,W/2,730);
   x.fillStyle='#38463f';x.font=`400 30px ${FB()}`;wrapText(x,C.what,W/2,800,1100,42,'center');
   drawEmblem(x,W/2,H-250,110,C.emb);
-  x.fillStyle='#55665e';x.font=`400 28px ${FB()}`;x.textAlign='left';x.fillText('Date: '+todayStr(),180,H-180);x.fillText('XP earned so far: '+xp(),180,H-136);
+  x.fillStyle='#55665e';x.font=`400 28px ${FB()}`;x.textAlign='left';if((PROG.cls||'').trim())x.fillText('Class: '+PROG.cls.trim(),180,H-224);x.fillText('Date: '+todayStr(),180,H-180);x.fillText('XP earned so far: '+xp(),180,H-136);
   x.textAlign='right';x.beginPath();x.strokeStyle='#55665e';x.lineWidth=2;x.moveTo(W-560,H-170);x.lineTo(W-180,H-170);x.stroke();x.fillText('Teacher',W-180,H-136);
   return c}
 async function exportCert(which){if(needName())return;if(document.fonts&&document.fonts.ready)await document.fonts.ready;
@@ -3311,7 +3315,7 @@ function specPic(ctx,x,y,w,h,o,bk){const B=BIOMES[bk];ctx.save();ctx.beginPath()
 /* --- species card --- */
 function cardCanvas(){const c=pageCanvas(false);const x=c.getContext('2d');const W=c.width,H=c.height;const o=ORG,bk=biome,B=BIOMES[bk];const sc=SC;
   x.fillStyle='#fbfdfb';x.fillRect(0,0,W,H);x.fillStyle='#2b6d57';x.fillRect(0,0,W,150);
-  x.fillStyle='#ffffff';x.font=`700 30px ${FB()}`;x.textAlign='left';x.fillText('ADAPT LAB · SPECIES CARD',80,70);x.font=`400 28px ${FB()}`;x.fillText('Discovered by Ecologist '+(PROG.name||''),80,115);
+  x.fillStyle='#ffffff';x.font=`700 30px ${FB()}`;x.textAlign='left';x.fillText('ADAPT LAB · SPECIES CARD',80,70);x.font=`400 28px ${FB()}`;x.fillText('Discovered by Ecologist '+(PROG.name||'')+clsTag(),80,115);
   x.fillStyle='#16241e';x.font=`800 76px ${FD()}`;x.fillText(orgName(o),80,250);
   x.fillStyle='#55665e';x.font=`400 30px ${FB()}`;const grp=o.kind==='animal'?(()=>{const g=classify(o.t);return g.sc>=.65?'Most like a '+g.g.n:'A mix of animal groups'})():'Plant · producer';x.fillText(`${grp} · home: ${B.name}`,80,300);
   const sx=80,sy=330,sw=W-160,sh=520;x.save();rrect(x,sx,sy,sw,sh,24);x.clip();const src=$('scene');if(src&&src.width&&!$('vDesign').hidden){x.drawImage(src,sx,sy,sw,sh)}else specPic(x,sx,sy,sw,sh,o,bk);x.restore();
@@ -3630,7 +3634,7 @@ function keyGame(L){const leaves=spLeaves();const target=leaves[Math.floor(Math.
       if(l.leaf){if(l.leaf.key===target.key)g.querySelector('.mcq').outerHTML=`<div class="feedback ok"><b>It is the ${target.name}.</b> Your key works. <button class="btn small" id="kAgain">Try another</button></div>`;else g.querySelector('.mcq').outerHTML=`<div class="feedback no">The key says ${l.leaf.name}, but this is not it. Look at the picture again. <button class="btn small" id="kAgain">Try again</button></div>`;$('kAgain').onclick=()=>keyGame(L)}
       else{at=l.next;draw()}}};draw()}
 function keyCanvas(){const c=pageCanvas(false);const x=c.getContext('2d');const W=c.width,H=c.height;x.fillStyle='#fbfdfb';x.fillRect(0,0,W,H);
-  x.fillStyle='#2b6d57';x.fillRect(0,0,W,150);x.fillStyle='#fff';x.font=`700 30px ${FB()}`;x.textAlign='left';x.fillText('ADAPT LAB · DICHOTOMOUS KEY',80,70);x.font=`400 28px ${FB()}`;x.fillText('Made by Ecologist '+(PROG.name||''),80,115);
+  x.fillStyle='#2b6d57';x.fillRect(0,0,W,150);x.fillStyle='#fff';x.font=`700 30px ${FB()}`;x.textAlign='left';x.fillText('ADAPT LAB · DICHOTOMOUS KEY',80,70);x.font=`400 28px ${FB()}`;x.fillText('Made by Ecologist '+(PROG.name||'')+clsTag(),80,115);
   x.fillStyle='#16241e';x.font=`800 60px ${FD()}`;x.fillText('From one species to four',80,240);
   x.fillStyle='#55665e';x.font=`400 26px ${FB()}`;wrapText(x,'Each split in the family tree happened when the environment divided a population. Natural selection then changed each group in a different way.',80,290,W-160,36);
   x.save();x.translate(80,360);rrect(x,0,0,W-160,(W-160)*9/16,16);x.clip();drawSpTree(x,W-160,(W-160)*9/16);x.restore();
@@ -3824,7 +3828,7 @@ function storyEndWire(){const S=STORY;
     $('stLeg').innerHTML=lines.map(l=>`<span><i style="border-top-color:${l.col}"></i>${l.nm}</span>`).join('')}
   const nm=$('stNm');nm.onchange=()=>{const v=nm.value.trim();if(v){S.name=v;renderStoryKey()}};renderStoryKey();
   $('stAgain').onclick=()=>{STORY=null;renderStory()};
-  $('stCopy').onclick=()=>{const txt=`Adapt Lab story: ${S.title} · ${PROG.name||'Ecologist'} · ${S.final}/${storyMax()} · ${S.alive?'survived all 6 cards':'extinct at card '+S.rounds.length}`;try{navigator.clipboard.writeText(txt).then(()=>toast('Result copied.'),()=>toast(txt))}catch(e){toast(txt)}};
+  $('stCopy').onclick=()=>{const txt=`Adapt Lab story: ${S.title} · ${PROG.name||'Ecologist'}${clsTag()} · ${S.final}/${storyMax()} · ${S.alive?'survived all 6 cards':'extinct at card '+S.rounds.length}`;try{navigator.clipboard.writeText(txt).then(()=>toast('Result copied.'),()=>toast(txt))}catch(e){toast(txt)}};
   $('stCert').onclick=()=>{CERTS.st={title:'Story: '+S.title,what:`Guided the ${S.name} through six changes over hundreds of thousands of years, scoring ${S.final} out of ${storyMax()}${S.alive?' and surviving every change':''}.`,emb:'sp'};exportCert('st')}}
 function chartAxes2(ctx,L,T,pw,ph,n){const mut=css('--muted'),line=css('--line');ctx.font=`500 11px ${css('--f-num')}`;for(let v=0;v<=100;v+=25){const y=T+ph*(1-v/100);ctx.strokeStyle=line;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(L,y);ctx.lineTo(L+pw,y);ctx.stroke();ctx.fillStyle=mut;ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(v+'%',L-5,y)}
   for(let i=0;i<n;i++){ctx.fillStyle=mut;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText('Card '+(i+1),L+pw*(i+.5)/n,T+ph+6)}}
@@ -3838,7 +3842,7 @@ function renderStoryKey(){const S=STORY;const host=$('stKey');if(!host)return;co
   host.querySelectorAll('canvas[data-sk]').forEach(cv=>{const o=L.find(x=>x.key===cv.dataset.sk);const S2=setupCv(cv);if(S2)specPic(S2.ctx,0,0,S2.w,S2.h,{kind:'animal',...o},S.base)});
   $('stKeyPdf').onclick=async()=>{if(needName())return;if(document.fonts&&document.fonts.ready)await document.fonts.ready;await savePdfFromCanvases([storyKeyCanvas(L,KL)],`Story-key-${fileSafe(PROG.name)}.pdf`,false)}}
 function storyKeyCanvas(L,KL){const S=STORY;const c=pageCanvas(false);const x=c.getContext('2d');const W=c.width,H=c.height;x.fillStyle='#fbfdfb';x.fillRect(0,0,W,H);
-  x.fillStyle='#2b6d57';x.fillRect(0,0,W,150);x.fillStyle='#fff';x.font=`700 30px ${FB()}`;x.textAlign='left';x.textBaseline='alphabetic';x.fillText('ADAPT LAB · STORY MODE · DICHOTOMOUS KEY',80,70);x.font=`400 28px ${FB()}`;x.fillText('Made by Ecologist '+(PROG.name||''),80,115);
+  x.fillStyle='#2b6d57';x.fillRect(0,0,W,150);x.fillStyle='#fff';x.font=`700 30px ${FB()}`;x.textAlign='left';x.textBaseline='alphabetic';x.fillText('ADAPT LAB · STORY MODE · DICHOTOMOUS KEY',80,70);x.font=`400 28px ${FB()}`;x.fillText('Made by Ecologist '+(PROG.name||'')+clsTag(),80,115);
   x.fillStyle='#16241e';x.font=`800 56px ${FD()}`;x.fillText(S.title,80,240);x.fillStyle='#55665e';x.font=`400 26px ${FB()}`;
   wrapText(x,`All of these lineages came from the same ${S.name.toLowerCase()} and faced the same six changes: ${S.deck.map(k=>SCARDS[k].title.toLowerCase()).join(', ')}. Different choices led them to evolve in different directions.`,80,290,W-160,36);
   let y=440;const cw=(W-160-30*(L.length-1))/L.length;L.forEach((o,i)=>{const cx=80+i*(cw+30);x.save();rrect(x,cx,y,cw,cw*.75,12);x.clip();specPic(x,cx,y,cw,cw*.75,{kind:'animal',...o},S.base);x.restore();
