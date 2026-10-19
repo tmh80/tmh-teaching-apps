@@ -264,6 +264,10 @@ span.sumchip{cursor:default}
 .misslist{max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:10px;margin:10px 0}
 .missrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--warn-soft)}
 .missrow:last-child{border-bottom:0}
+.donewhen{margin:8px 0 0;font-weight:600}
+
+.gotable{margin-top:10px;width:100%;justify-content:center;animation:swpulse 1.2s ease-in-out infinite;box-shadow:0 0 0 4px var(--accent-soft)}
+.swmirror{font-size:18px;background:#14202e;color:#e4f7e9;border-radius:8px;padding:6px 12px;font-family:var(--font-num)}
 
 </style></head><body>
 <div class="app" id="app">
@@ -628,13 +632,13 @@ function labLand(){
     const ok=S.expN>=3,b=$('#obsnext'),m=$('#obsmsg');if(b)b.disabled=!ok;if(m)m.textContent=ok?'':`Throw at least 3 planes first (${S.expN} so far).`;return}
   LAB.state='landed';{const r=mulberry32(S.seed+LAB.pend.n*7);LAB.tapeWin=Math.floor((f.landX*100-20-r()*55)/10)*10}
   LAB.noted=false;LAB.comment=throwerComment(hidFor(LAB.pend,LAB.res),LAB.pend.lv);
-  LAB.cell='';labPanels();if(!swRunning()&&(!timingNeeded()||LAB.sw.stop!=null))goTable();
+  LAB.cell='';labPanels();
 }
 function labAgain(){
   if(isExplore()||!LAB.pend||LAB.pend.explore)return;
   if(LAB.state!=='landed'&&LAB.state!=='flying'&&LAB.state!=='wait')return;
   S.flights.push({n:LAB.pend.n,lv:LAB.pend.lv,gone:true,why:'thrown again by student',hid:hidFor(LAB.pend,LAB.res)});
-  LAB.state='idle';LAB.res=null;LAB.pend=null;save();labPanels();
+  LAB.state='idle';LAB.res=null;LAB.pend=null;save();labPanels();goFlight();
 }
 function hidFor(p,res){
   const sw=LAB.sw;
@@ -657,7 +661,7 @@ function labRecord(){
   S.a['tr.'+String(p.lv)+'.'+(trial-1)]=String(v);
   LAB.state='idle';LAB.res=null;LAB.pend=null;LAB.cell='';LAB.comment=null;
   if(fvals(S.labLevel).length>=3){const n=nextLabLevel();if(n!=null)S.labLevel=n}
-  save();labPanels();updateChrome();
+  save();labPanels();updateChrome();goFlight();
 }
 function labUndo(){
   const L=live();if(!L.length||LAB.state!=='idle')return;
@@ -672,7 +676,7 @@ function unfairFlights(){const L=live();if(L.length<2)return[];const o=[];['angl
 function swToggle(){if(LAB.state==='idle')return;const now=performance.now();if(LAB.sw.start==null)LAB.sw.start=now;else if(LAB.sw.stop==null){LAB.sw.stop=now;
     if(!isExplore()&&S.dv==='time'&&!LAB.comment&&LAB.tLand&&LAB.tRel){const lag=(LAB.state==='landed'?now-LAB.tLand:-1),st=LAB.sw.start-LAB.tRel;
       if(LAB.state!=='landed')LAB.comment={t:'I stopped the stopwatch before the plane landed!',k:'timer'};else if(lag>280||st>280)LAB.comment={t:'I think I was a bit slow pressing the stopwatch.',k:'timer'}}}
-  labPanels(true);if(LAB.state==='landed'&&LAB.sw.stop!=null&&!isExplore())setTimeout(goTable,250)}
+  labPanels(true)}
 function swReset(){LAB.sw={start:null,stop:null};labPanels(true)}
 function swText(){const sw=LAB.sw;if(sw.start==null)return'0.00';return Math.max(0,((sw.stop!=null?sw.stop:performance.now())-sw.start)/1000).toFixed(2)}
 
@@ -824,7 +828,8 @@ function simPanelHTML(){
     <button class="btn primary big" data-act="lab:launch" ${(ex?(st==='wait'||st==='flying'):(st!=='idle'||lv==null||full))?'disabled':''}>▶ Launch plane</button>
     ${!dvT?`<button class="btn" data-act="lab:skip" ${st==='wait'||st==='flying'?'':'disabled'}>Skip the animation</button>`:''}
     ${!ex?`<button class="btn" data-act="lab:again" ${st==='landed'||st==='flying'||st==='wait'?'':'disabled'}>${S.launch==='launcher'?'Launch':'Throw'} again (do not record this one)</button>`:''}
-    ${full&&st==='idle'?'<span class="note">This one has 3 trials. Pick another in your table.</span>':''}</div></div>`;
+    ${full&&st==='idle'?'<span class="note">This one has 3 trials. Pick another in your table.</span>':''}</div>
+   ${!ex&&st==='landed'&&!(timingNeeded()&&LAB.sw.stop==null)&&!swRunning()?`<button class="btn primary big gotable" data-act="lab:table">📋 ${S.dv==='dist'?'Read the tape and fill in my table':'Write my time in my table'} ↓</button>`:''}</div>`;
 }
 function stopwatchHTML(need){
   const can=LAB.state==='wait'||LAB.state==='flying'||LAB.state==='landed',hot=need&&!isExplore()&&can&&LAB.sw.stop==null;
@@ -883,6 +888,7 @@ function labPanels(){
   const s=S.labLevel!=null?labSettings(S.labLevel):null,P=S.labLevel!=null?labPlane(S.labLevel):null;
   let table=`<div class="panel" id="tablepanel" style="border-width:2px"><h4>Table 1: my results</h4>
     ${st==='landed'&&S.dv==='dist'?tapeInner():''}
+    ${st==='landed'?`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">${S.dv==='time'?`<span class="swmirror">⏱ Your stopwatch reads <b>${swTimed()==null?'—':swText()} s</b></span>`:'<span></span>'}<button class="btn sm" data-act="lab:flight">⬆ Back to the flight view</button></div>`:''}
     ${st==='landed'?`<div class="fb mid" style="margin-top:0">${isDev()?`Type your ${dvT?'stopwatch time':'tape reading'} into the yellow box in your table.`:`Type your measurement into your table.`}</div>`:''}
     <div class="t1grid"><div style="min-width:0">${table1HTML('lab')}<div id="cellfb">${st==='landed'?cellFb():''}</div>
     ${st==='landed'?`<div style="margin-top:8px"><span class="lbl">My notes about this flight (optional)</span><input type="text" id="labnote" value="${esc(LAB.note)}" placeholder="${helped()?'Click “Add to my notes” when the thrower says something, or write your own.':'Write anything you noticed.'}"></div>
@@ -890,7 +896,7 @@ function labPanels(){
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn good big" id="recbtn" data-act="lab:record" ${recordBlocked()?'disabled':''}>✓ Yes, record it</button><button class="btn big" data-act="lab:again">↺ No, ${S.launch==='launcher'?'launch':'throw'} it again</button></div>
         <p class="note" style="margin:6px 0 0" id="decidehint">${decideHint()}</p></div>`:''}
     ${live().length&&st==='idle'?`<div style="margin-top:8px"><button class="btn sm" data-act="lab:undo">Remove my last flight</button></div>`:''}</div>${calcHTML()}</div></div>`;
-  let right=stopwatchHTML(dvT)+(st==='landed'&&S.dv==='time'?tapePanelHTML():'');
+  let right=stopwatchHTML(dvT);
   if(s)right+=`<div class="panel"><h4>Your plane</h4><div style="display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center">${planeSVG(s,P,S.planes[String(S.labLevel)].fold)}
     <dl class="ctl-list">${Object.keys(SETTING_LABEL).filter(k=>!(k==='clips'&&s.clippos==='No clip')).map(k=>{const isIV=IVS[S.iv].setting===k;return`<dt class="${isIV?'iv':''}">${SETTING_LABEL[k]}</dt><dd class="${isIV?'iv':''}">${esc(settingText(k,s[k]))}${isIV?' (testing)':''}</dd>`}).join('')}
     <dt>Mass</dt><dd>⚖ ${fmt(P.mass*1000,1)} g</dd><dt>Where</dt><dd>${S.env==='outside'?'Outside':'Inside'}</dd><dt>Launch</dt><dd>${S.launch==='launcher'?'Launcher':'By hand'}</dd></dl></div></div>`;
@@ -997,6 +1003,7 @@ function bandPower(n){return S.launch==='launcher'?Math.max(0.9,1-0.0065*(n-1)):
 
 const timingNeeded=()=>!isExplore()&&S.dv==='time';
 const swRunning=()=>LAB.sw.start!=null&&LAB.sw.stop==null;
+function goFlight(){const l=$('#labL');if(l)l.scrollIntoView({behavior:'smooth',block:'start'})}
 function goTable(){if(swRunning())return;const tp=$('#tablepanel');if(tp)tp.scrollIntoView({behavior:'smooth',block:'start'});const ci=$('#cellin');if(ci)setTimeout(()=>ci.focus({preventScroll:true}),400)}
 function decideHint(){return(S.dv==='time'&&swTimed()==null?'Use the stopwatch first. ':'')+(cellVal()==null?'Type your measurement into the yellow box first. ':'')+'Throw it again if something went wrong, for example you missed the stopwatch.'}
 
@@ -1527,7 +1534,7 @@ BUILD.plan=function(){
       {ok:!named.some(n=>IVX[S.iv].main.test(n)),msg:'Your independent variable is not in the list.',fix:`The ${c.ivLower} is what you change, so it cannot be a control variable.`},
       {ok:named.filter(n=>known.some(k=>n.includes(k))).length>=3,msg:'All three are things from your design or set-up.',fix:'Use things you chose in your plane design or set-up, such as the type of paper or where you fly.'},
       {ok:[0,1,2].every(i=>words(A('ctl.h'+i))>=3),msg:'You said how to control each one.',fix:'For each one, say how you will keep it the same, for example "I will use the same … for every flight".'}]});
-  B.q('ctl','Control variables',cb,[0,1,2].some(i=>words(A('ctl.n'+i))>0));
+  B.q('ctl','Control variables',cb+doneWhen('all three rows have a control variable <b>and</b> how you will control it'),[0,1,2].every(i=>words(A('ctl.n'+i))>0&&words(A('ctl.h'+i))>0));
   /* materials */
   let mt,mdn;
   if(helped()){
@@ -1537,9 +1544,9 @@ BUILD.plan=function(){
       <div><span class="lbl">My materials</span>${mine.length?`<div class="opts">${mine.map(id=>{const m=matShelf().find(x=>x.id===id);if(!m)return'';return`<div class="opt" style="cursor:default;align-items:center"><span class="t" style="flex:1">${esc(m.t)}${isDev()?': '+esc(m.amt):''}</span>${isPro()?`<input type="text" class="inl" data-bind="mat.n.${m.id}" value="${esc(A('mat.n.'+m.id))}" placeholder="how many?" style="min-width:9ch;width:11ch">`:''}<button class="btn sm" data-act="mat:rm" data-k="${m.id}" aria-label="Remove">✕</button></div>`}).join('')}</div>`:'<p class="note">Click things on the shelf to add them here.</p>'}</div></div>`+
      chkBtn('mat',()=>{const need=matShelf().filter(m=>m.need===true).map(m=>m.id),opt=matShelf().filter(m=>m.need==='opt').map(m=>m.id),extra=mine.filter(id=>!need.includes(id)&&!opt.includes(id)),miss=need.filter(id=>!mine.includes(id));
        return[{ok:!miss.length,msg:'You have everything you need.',fix:`You are missing ${miss.length} thing${miss.length===1?'':'s'}. Think about what you need to build, launch and measure.`},{ok:!extra.length,msg:'You left out things you do not need.',fix:'Take out the things you do not need for this test.'}].concat(isPro()?[{ok:mine.every(id=>words(A('mat.n.'+id))>=1),msg:'You wrote how many of each.',fix:'Write how many you need of each thing.'}]:[])});
-    mdn=mine.length>=1&&(!isPro()||mine.every(id=>words(A('mat.n.'+id))>=1));
-  }else{mt=nudge(['mastering'],'Check your notebook: a materials list says what you need and <b>how many</b> (amounts).')+`<p class="note" style="margin:0 0 4px">Write each item and how many you need, one on each line.</p>`+ta('mat','',4);mdn=words(A('mat'))>=1}
-  B.q('mat','Materials',mt,mdn);
+    mdn=mine.length>=4&&(!isPro()||mine.every(id=>words(A('mat.n.'+id))>=1));
+  }else{mt=nudge(['mastering'],'Check your notebook: a materials list says what you need and <b>how many</b> (amounts).')+`<p class="note" style="margin:0 0 4px">Write each item and how many you need, one on each line.</p>`+ta('mat','',4);mdn=matLinesDone()}
+  B.q('mat','Materials',mt+doneWhen(isDev()?'you have at least 4 things on your list':'you have at least 4 things, each with an amount (how many)'),mdn);
   /* method */
   let me,mde;
   if(helped()){
@@ -1552,16 +1559,20 @@ BUILD.plan=function(){
         ...(isDev()?[]:[{ok:m.every(k=>frameDone('mb.'+k,MB[k]())),msg:'You filled in every gap.',fix:'Fill in every gap in your steps.'}]),
         {ok:isDev()||!m.includes('m6')||/\b3\b|three/i.test(A('mb.m6.a')),msg:'You repeat each test the right number of times.',fix:'How many trials does each value get? Check step "Repeat steps 3 to 5".'},
         {ok:isDev()||!m.includes('m8')||/average|mean/i.test(A('mb.m8.a')),msg:'You work out the right thing at the end.',fix:'What do you work out from three trials? Check the last step.'}]});
-    mde=mbList().length>=1;
+    mde=mbList().length>=4&&(isDev()||mbList().every(k=>frameDone('mb.'+k,MB[k]())));
   }else{
     me=nudge(['mastering'],'Check your notebook for what makes a method easy to repeat.')+`<div class="rows">`+[0,1,2,3,4,5,6].map(i=>`<div class="rowi"><span class="no">${i+1}.</span><input type="text" data-bind="met.${i}" value="${esc(A('met.'+i))}"></div>`).join('')+`</div>`;
-    mde=methodList().length>=1;
+    mde=methodList().length>=4;
   }
-  B.q('met','Method',me,mde);
+  B.q('met','Method',me+doneWhen(isPro()?'you have at least 4 steps and every gap is filled in':'you have at least 4 steps'),mde);
   const ready=S.levels.length>=2&&S.env&&S.launch;
   B.raw(`<div class="nav"><button class="btn" data-go="hypothesis">← Hypothesis</button><span class="msg">${ready?'':'You need at least 2 experimental groups, a place to fly and a launch method before you fly.'}</span><button class="btn primary" data-go="lab">Next: Test flights →</button></div></div>`);
   return B;
 };
+
+/* typed materials list (Mastering, Einstein): done when there are at least 4 lines and every line gives an amount */
+function matLinesDone(){const L=A('mat').split('\n').map(t=>t.trim()).filter(Boolean);return L.length>=4&&L.every(t=>/\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|a pair|pair|a|an)\b/i.test(t))}
+const doneWhen=t=>`<p class="note donewhen">✓ This part turns green when ${t}.</p>`;
 
 /* ===== steps: results, compare, conclusion, finish ===== */
 const avgTol=()=>S.dv==='dist'?0.6:0.015;
@@ -2273,7 +2284,7 @@ function missingAll(){const out=[];
     if(step==='lab'){if(!trialsDone())out.push({step,t:'Your flights',d:flightsMissing().join(' · ')});return}
     let b;try{b=BUILD[step]()}catch(e){return}
     if(!Object.keys(b.f).length){if(['results','conclusion','evaluate'].includes(step))out.push({step,t:'Not started yet',d:'You need to record your flights first.'});return}
-    Object.entries(b.f).forEach(([id,ok])=>{if(ok)return;const det=id==='t1'?t1Missing():id==='graph'?graphMissing():[];out.push({step,t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''})})});
+    Object.entries(b.f).forEach(([id,ok])=>{if(ok)return;const det=id==='t1'?t1Missing():id==='graph'?graphMissing():planMissing(id);out.push({step,t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''})})});
   return out}
 /* things a later step depends on, said exactly */
 function prereqNotes(){const o=[];
@@ -2330,7 +2341,7 @@ function essentialsFor(step){
 function missingFor(step){
   if(step==='lab')return trialsDone()?[]:[{t:'Your flights',d:flightsMissing().join(' · ')}];
   let b;try{b=BUILD[step]()}catch(e){return[]}
-  const o=Object.entries(b.f).filter(([,ok])=>!ok).map(([id])=>{const det=id==='t1'?t1Missing():id==='graph'?graphMissing():[];return{t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''}});
+  const o=Object.entries(b.f).filter(([,ok])=>!ok).map(([id])=>{const det=id==='t1'?t1Missing():id==='graph'?graphMissing():planMissing(id);return{t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''}});
   if(step==='observe'&&(S.expN||0)<3)o.unshift({t:'Throw at least 3 planes',d:`You have thrown ${S.expN||0}.`});
   return o}
 function navGuard(step){
@@ -2348,6 +2359,14 @@ function navGuard(step){
 /* if a step's intro pop-up is showing, show this message straight after it */
 let PENDING_MSG=null;
 function showAfterIntro(html){if(MODAL_LOCK)PENDING_MSG=html;else openModal(html)}
+
+/* what is still needed in the plan's written parts (completeness only, never correctness) */
+function planMissing(id){
+  if(id==='ctl'){const o=[];[0,1,2].forEach(i=>{if(!words(A('ctl.n'+i)))o.push(`control variable ${i+1}`);if(!words(A('ctl.h'+i)))o.push(`how you will control number ${i+1}`)});return o}
+  if(id==='mat'){if(helped()){const m=matList(),o=[];if(m.length<4)o.push(`${4-m.length} more thing${4-m.length>1?'s':''} on your list`);if(isPro()){const na=m.filter(x=>!words(A('mat.n.'+x))).length;if(na)o.push(`the amount for ${na} thing${na>1?'s':''}`)}return o}
+    const L=A('mat').split('\n').map(t=>t.trim()).filter(Boolean),o=[];if(L.length<4)o.push(`${4-L.length} more thing${4-L.length>1?'s':''} (one on each line)`);const na=L.filter(t=>!/\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|a pair|pair|a|an)\b/i.test(t)).length;if(na)o.push(`an amount for ${na} thing${na>1?'s':''}`);return o}
+  if(id==='met'){const n=isDev()||isPro()?mbList().length:methodList().length,o=[];if(n<4)o.push(`${4-n} more step${4-n>1?'s':''}`);if(isPro()){const g=mbList().filter(k=>!frameDone('mb.'+k,MB[k]())).length;if(g)o.push(`the gaps in ${g} step${g>1?'s':''}`)}return o}
+  return[]}
 
 /* ===== FOR TEACHERS ===== */
 function teacherHTML(){
@@ -2602,6 +2621,8 @@ function act(a,el,ev){
    case'lab:level':labPickLevel(el.dataset.v);break;
    case'calc':calcKey(k);break;
    case'lab:addnote':labAddNote();break;
+   case'lab:table':goTable();break;
+   case'lab:flight':goFlight();break;
    case'lab:peek':openModal(peekHTML());break;
    case'exp-env':S.exp.env=k;save();labPanels();break;
    case'exp-launch':S.exp.launch=k;save();labPanels();break;

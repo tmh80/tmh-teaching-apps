@@ -13,7 +13,7 @@ function missingAll(){const out=[];
     if(step==='lab'){if(!trialsDone())out.push({step,t:'Your flights',d:flightsMissing().join(' · ')});return}
     let b;try{b=BUILD[step]()}catch(e){return}
     if(!Object.keys(b.f).length){if(['results','conclusion','evaluate'].includes(step))out.push({step,t:'Not started yet',d:'You need to record your flights first.'});return}
-    Object.entries(b.f).forEach(([id,ok])=>{if(ok)return;const det=id==='t1'?t1Missing():id==='graph'?graphMissing():[];out.push({step,t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''})})});
+    Object.entries(b.f).forEach(([id,ok])=>{if(ok)return;const det=id==='t1'?t1Missing():id==='graph'?graphMissing():planMissing(id);out.push({step,t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''})})});
   return out}
 /* things a later step depends on, said exactly */
 function prereqNotes(){const o=[];
@@ -70,7 +70,7 @@ function essentialsFor(step){
 function missingFor(step){
   if(step==='lab')return trialsDone()?[]:[{t:'Your flights',d:flightsMissing().join(' · ')}];
   let b;try{b=BUILD[step]()}catch(e){return[]}
-  const o=Object.entries(b.f).filter(([,ok])=>!ok).map(([id])=>{const det=id==='t1'?t1Missing():id==='graph'?graphMissing():[];return{t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''}});
+  const o=Object.entries(b.f).filter(([,ok])=>!ok).map(([id])=>{const det=id==='t1'?t1Missing():id==='graph'?graphMissing():planMissing(id);return{t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''}});
   if(step==='observe'&&(S.expN||0)<3)o.unshift({t:'Throw at least 3 planes',d:`You have thrown ${S.expN||0}.`});
   return o}
 function navGuard(step){
@@ -88,3 +88,11 @@ function navGuard(step){
 /* if a step's intro pop-up is showing, show this message straight after it */
 let PENDING_MSG=null;
 function showAfterIntro(html){if(MODAL_LOCK)PENDING_MSG=html;else openModal(html)}
+
+/* what is still needed in the plan's written parts (completeness only, never correctness) */
+function planMissing(id){
+  if(id==='ctl'){const o=[];[0,1,2].forEach(i=>{if(!words(A('ctl.n'+i)))o.push(`control variable ${i+1}`);if(!words(A('ctl.h'+i)))o.push(`how you will control number ${i+1}`)});return o}
+  if(id==='mat'){if(helped()){const m=matList(),o=[];if(m.length<4)o.push(`${4-m.length} more thing${4-m.length>1?'s':''} on your list`);if(isPro()){const na=m.filter(x=>!words(A('mat.n.'+x))).length;if(na)o.push(`the amount for ${na} thing${na>1?'s':''}`)}return o}
+    const L=A('mat').split('\n').map(t=>t.trim()).filter(Boolean),o=[];if(L.length<4)o.push(`${4-L.length} more thing${4-L.length>1?'s':''} (one on each line)`);const na=L.filter(t=>!/\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|a pair|pair|a|an)\b/i.test(t)).length;if(na)o.push(`an amount for ${na} thing${na>1?'s':''}`);return o}
+  if(id==='met'){const n=isDev()||isPro()?mbList().length:methodList().length,o=[];if(n<4)o.push(`${4-n} more step${4-n>1?'s':''}`);if(isPro()){const g=mbList().filter(k=>!frameDone('mb.'+k,MB[k]())).length;if(g)o.push(`the gaps in ${g} step${g>1?'s':''}`)}return o}
+  return[]}

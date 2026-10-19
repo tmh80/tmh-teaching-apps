@@ -256,7 +256,7 @@ BUILD.plan=function(){
       {ok:!named.some(n=>IVX[S.iv].main.test(n)),msg:'Your independent variable is not in the list.',fix:`The ${c.ivLower} is what you change, so it cannot be a control variable.`},
       {ok:named.filter(n=>known.some(k=>n.includes(k))).length>=3,msg:'All three are things from your design or set-up.',fix:'Use things you chose in your plane design or set-up, such as the type of paper or where you fly.'},
       {ok:[0,1,2].every(i=>words(A('ctl.h'+i))>=3),msg:'You said how to control each one.',fix:'For each one, say how you will keep it the same, for example "I will use the same … for every flight".'}]});
-  B.q('ctl','Control variables',cb,[0,1,2].some(i=>words(A('ctl.n'+i))>0));
+  B.q('ctl','Control variables',cb+doneWhen('all three rows have a control variable <b>and</b> how you will control it'),[0,1,2].every(i=>words(A('ctl.n'+i))>0&&words(A('ctl.h'+i))>0));
   /* materials */
   let mt,mdn;
   if(helped()){
@@ -266,9 +266,9 @@ BUILD.plan=function(){
       <div><span class="lbl">My materials</span>${mine.length?`<div class="opts">${mine.map(id=>{const m=matShelf().find(x=>x.id===id);if(!m)return'';return`<div class="opt" style="cursor:default;align-items:center"><span class="t" style="flex:1">${esc(m.t)}${isDev()?': '+esc(m.amt):''}</span>${isPro()?`<input type="text" class="inl" data-bind="mat.n.${m.id}" value="${esc(A('mat.n.'+m.id))}" placeholder="how many?" style="min-width:9ch;width:11ch">`:''}<button class="btn sm" data-act="mat:rm" data-k="${m.id}" aria-label="Remove">✕</button></div>`}).join('')}</div>`:'<p class="note">Click things on the shelf to add them here.</p>'}</div></div>`+
      chkBtn('mat',()=>{const need=matShelf().filter(m=>m.need===true).map(m=>m.id),opt=matShelf().filter(m=>m.need==='opt').map(m=>m.id),extra=mine.filter(id=>!need.includes(id)&&!opt.includes(id)),miss=need.filter(id=>!mine.includes(id));
        return[{ok:!miss.length,msg:'You have everything you need.',fix:`You are missing ${miss.length} thing${miss.length===1?'':'s'}. Think about what you need to build, launch and measure.`},{ok:!extra.length,msg:'You left out things you do not need.',fix:'Take out the things you do not need for this test.'}].concat(isPro()?[{ok:mine.every(id=>words(A('mat.n.'+id))>=1),msg:'You wrote how many of each.',fix:'Write how many you need of each thing.'}]:[])});
-    mdn=mine.length>=1&&(!isPro()||mine.every(id=>words(A('mat.n.'+id))>=1));
-  }else{mt=nudge(['mastering'],'Check your notebook: a materials list says what you need and <b>how many</b> (amounts).')+`<p class="note" style="margin:0 0 4px">Write each item and how many you need, one on each line.</p>`+ta('mat','',4);mdn=words(A('mat'))>=1}
-  B.q('mat','Materials',mt,mdn);
+    mdn=mine.length>=4&&(!isPro()||mine.every(id=>words(A('mat.n.'+id))>=1));
+  }else{mt=nudge(['mastering'],'Check your notebook: a materials list says what you need and <b>how many</b> (amounts).')+`<p class="note" style="margin:0 0 4px">Write each item and how many you need, one on each line.</p>`+ta('mat','',4);mdn=matLinesDone()}
+  B.q('mat','Materials',mt+doneWhen(isDev()?'you have at least 4 things on your list':'you have at least 4 things, each with an amount (how many)'),mdn);
   /* method */
   let me,mde;
   if(helped()){
@@ -281,13 +281,17 @@ BUILD.plan=function(){
         ...(isDev()?[]:[{ok:m.every(k=>frameDone('mb.'+k,MB[k]())),msg:'You filled in every gap.',fix:'Fill in every gap in your steps.'}]),
         {ok:isDev()||!m.includes('m6')||/\b3\b|three/i.test(A('mb.m6.a')),msg:'You repeat each test the right number of times.',fix:'How many trials does each value get? Check step "Repeat steps 3 to 5".'},
         {ok:isDev()||!m.includes('m8')||/average|mean/i.test(A('mb.m8.a')),msg:'You work out the right thing at the end.',fix:'What do you work out from three trials? Check the last step.'}]});
-    mde=mbList().length>=1;
+    mde=mbList().length>=4&&(isDev()||mbList().every(k=>frameDone('mb.'+k,MB[k]())));
   }else{
     me=nudge(['mastering'],'Check your notebook for what makes a method easy to repeat.')+`<div class="rows">`+[0,1,2,3,4,5,6].map(i=>`<div class="rowi"><span class="no">${i+1}.</span><input type="text" data-bind="met.${i}" value="${esc(A('met.'+i))}"></div>`).join('')+`</div>`;
-    mde=methodList().length>=1;
+    mde=methodList().length>=4;
   }
-  B.q('met','Method',me,mde);
+  B.q('met','Method',me+doneWhen(isPro()?'you have at least 4 steps and every gap is filled in':'you have at least 4 steps'),mde);
   const ready=S.levels.length>=2&&S.env&&S.launch;
   B.raw(`<div class="nav"><button class="btn" data-go="hypothesis">← Hypothesis</button><span class="msg">${ready?'':'You need at least 2 experimental groups, a place to fly and a launch method before you fly.'}</span><button class="btn primary" data-go="lab">Next: Test flights →</button></div></div>`);
   return B;
 };
+
+/* typed materials list (Mastering, Einstein): done when there are at least 4 lines and every line gives an amount */
+function matLinesDone(){const L=A('mat').split('\n').map(t=>t.trim()).filter(Boolean);return L.length>=4&&L.every(t=>/\d|\b(one|two|three|four|five|six|seven|eight|nine|ten|a pair|pair|a|an)\b/i.test(t))}
+const doneWhen=t=>`<p class="note donewhen">✓ This part turns green when ${t}.</p>`;

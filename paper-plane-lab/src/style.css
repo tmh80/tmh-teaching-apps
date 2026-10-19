@@ -261,3 +261,7 @@ span.sumchip{cursor:default}
 .misslist{max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:10px;margin:10px 0}
 .missrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--warn-soft)}
 .missrow:last-child{border-bottom:0}
+.donewhen{margin:8px 0 0;font-weight:600}
+
+.gotable{margin-top:10px;width:100%;justify-content:center;animation:swpulse 1.2s ease-in-out infinite;box-shadow:0 0 0 4px var(--accent-soft)}
+.swmirror{font-size:18px;background:#14202e;color:#e4f7e9;border-radius:8px;padding:6px 12px;font-family:var(--font-num)}

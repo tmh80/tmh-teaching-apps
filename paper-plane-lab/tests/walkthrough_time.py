@@ -71,7 +71,7 @@ with sync_playwright() as p:
         if LEVEL=='proficient':
             for e in pg.query_selector_all('[data-bind^="mat.n."]'): e.fill('3')
         pg.click('[data-act="chk"][data-id="mat"]')
-    else: fill('mat','3 sheets of thin card\n1 tape measure\n1 calculator')
+    else: fill('mat','3 sheets of thin card\n1 tape measure\n1 calculator\n4 paper clips')
     if help_:
         for k in ['m1','m2','m3','m4','m5','m6','m7','m8']:
             pg.click(f'[data-act="mb:add"][data-k="{k}"]')

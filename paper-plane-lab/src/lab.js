@@ -38,13 +38,13 @@ function labLand(){
     const ok=S.expN>=3,b=$('#obsnext'),m=$('#obsmsg');if(b)b.disabled=!ok;if(m)m.textContent=ok?'':`Throw at least 3 planes first (${S.expN} so far).`;return}
   LAB.state='landed';{const r=mulberry32(S.seed+LAB.pend.n*7);LAB.tapeWin=Math.floor((f.landX*100-20-r()*55)/10)*10}
   LAB.noted=false;LAB.comment=throwerComment(hidFor(LAB.pend,LAB.res),LAB.pend.lv);
-  LAB.cell='';labPanels();if(!swRunning()&&(!timingNeeded()||LAB.sw.stop!=null))goTable();
+  LAB.cell='';labPanels();
 }
 function labAgain(){
   if(isExplore()||!LAB.pend||LAB.pend.explore)return;
   if(LAB.state!=='landed'&&LAB.state!=='flying'&&LAB.state!=='wait')return;
   S.flights.push({n:LAB.pend.n,lv:LAB.pend.lv,gone:true,why:'thrown again by student',hid:hidFor(LAB.pend,LAB.res)});
-  LAB.state='idle';LAB.res=null;LAB.pend=null;save();labPanels();
+  LAB.state='idle';LAB.res=null;LAB.pend=null;save();labPanels();goFlight();
 }
 function hidFor(p,res){
   const sw=LAB.sw;
@@ -67,7 +67,7 @@ function labRecord(){
   S.a['tr.'+String(p.lv)+'.'+(trial-1)]=String(v);
   LAB.state='idle';LAB.res=null;LAB.pend=null;LAB.cell='';LAB.comment=null;
   if(fvals(S.labLevel).length>=3){const n=nextLabLevel();if(n!=null)S.labLevel=n}
-  save();labPanels();updateChrome();
+  save();labPanels();updateChrome();goFlight();
 }
 function labUndo(){
   const L=live();if(!L.length||LAB.state!=='idle')return;
@@ -82,7 +82,7 @@ function unfairFlights(){const L=live();if(L.length<2)return[];const o=[];['angl
 function swToggle(){if(LAB.state==='idle')return;const now=performance.now();if(LAB.sw.start==null)LAB.sw.start=now;else if(LAB.sw.stop==null){LAB.sw.stop=now;
     if(!isExplore()&&S.dv==='time'&&!LAB.comment&&LAB.tLand&&LAB.tRel){const lag=(LAB.state==='landed'?now-LAB.tLand:-1),st=LAB.sw.start-LAB.tRel;
       if(LAB.state!=='landed')LAB.comment={t:'I stopped the stopwatch before the plane landed!',k:'timer'};else if(lag>280||st>280)LAB.comment={t:'I think I was a bit slow pressing the stopwatch.',k:'timer'}}}
-  labPanels(true);if(LAB.state==='landed'&&LAB.sw.stop!=null&&!isExplore())setTimeout(goTable,250)}
+  labPanels(true)}
 function swReset(){LAB.sw={start:null,stop:null};labPanels(true)}
 function swText(){const sw=LAB.sw;if(sw.start==null)return'0.00';return Math.max(0,((sw.stop!=null?sw.stop:performance.now())-sw.start)/1000).toFixed(2)}
 
@@ -234,7 +234,8 @@ function simPanelHTML(){
     <button class="btn primary big" data-act="lab:launch" ${(ex?(st==='wait'||st==='flying'):(st!=='idle'||lv==null||full))?'disabled':''}>▶ Launch plane</button>
     ${!dvT?`<button class="btn" data-act="lab:skip" ${st==='wait'||st==='flying'?'':'disabled'}>Skip the animation</button>`:''}
     ${!ex?`<button class="btn" data-act="lab:again" ${st==='landed'||st==='flying'||st==='wait'?'':'disabled'}>${S.launch==='launcher'?'Launch':'Throw'} again (do not record this one)</button>`:''}
-    ${full&&st==='idle'?'<span class="note">This one has 3 trials. Pick another in your table.</span>':''}</div></div>`;
+    ${full&&st==='idle'?'<span class="note">This one has 3 trials. Pick another in your table.</span>':''}</div>
+   ${!ex&&st==='landed'&&!(timingNeeded()&&LAB.sw.stop==null)&&!swRunning()?`<button class="btn primary big gotable" data-act="lab:table">📋 ${S.dv==='dist'?'Read the tape and fill in my table':'Write my time in my table'} ↓</button>`:''}</div>`;
 }
 function stopwatchHTML(need){
   const can=LAB.state==='wait'||LAB.state==='flying'||LAB.state==='landed',hot=need&&!isExplore()&&can&&LAB.sw.stop==null;
@@ -293,6 +294,7 @@ function labPanels(){
   const s=S.labLevel!=null?labSettings(S.labLevel):null,P=S.labLevel!=null?labPlane(S.labLevel):null;
   let table=`<div class="panel" id="tablepanel" style="border-width:2px"><h4>Table 1: my results</h4>
     ${st==='landed'&&S.dv==='dist'?tapeInner():''}
+    ${st==='landed'?`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">${S.dv==='time'?`<span class="swmirror">⏱ Your stopwatch reads <b>${swTimed()==null?'—':swText()} s</b></span>`:'<span></span>'}<button class="btn sm" data-act="lab:flight">⬆ Back to the flight view</button></div>`:''}
     ${st==='landed'?`<div class="fb mid" style="margin-top:0">${isDev()?`Type your ${dvT?'stopwatch time':'tape reading'} into the yellow box in your table.`:`Type your measurement into your table.`}</div>`:''}
     <div class="t1grid"><div style="min-width:0">${table1HTML('lab')}<div id="cellfb">${st==='landed'?cellFb():''}</div>
     ${st==='landed'?`<div style="margin-top:8px"><span class="lbl">My notes about this flight (optional)</span><input type="text" id="labnote" value="${esc(LAB.note)}" placeholder="${helped()?'Click “Add to my notes” when the thrower says something, or write your own.':'Write anything you noticed.'}"></div>
@@ -300,7 +302,7 @@ function labPanels(){
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn good big" id="recbtn" data-act="lab:record" ${recordBlocked()?'disabled':''}>✓ Yes, record it</button><button class="btn big" data-act="lab:again">↺ No, ${S.launch==='launcher'?'launch':'throw'} it again</button></div>
         <p class="note" style="margin:6px 0 0" id="decidehint">${decideHint()}</p></div>`:''}
     ${live().length&&st==='idle'?`<div style="margin-top:8px"><button class="btn sm" data-act="lab:undo">Remove my last flight</button></div>`:''}</div>${calcHTML()}</div></div>`;
-  let right=stopwatchHTML(dvT)+(st==='landed'&&S.dv==='time'?tapePanelHTML():'');
+  let right=stopwatchHTML(dvT);
   if(s)right+=`<div class="panel"><h4>Your plane</h4><div style="display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center">${planeSVG(s,P,S.planes[String(S.labLevel)].fold)}
     <dl class="ctl-list">${Object.keys(SETTING_LABEL).filter(k=>!(k==='clips'&&s.clippos==='No clip')).map(k=>{const isIV=IVS[S.iv].setting===k;return`<dt class="${isIV?'iv':''}">${SETTING_LABEL[k]}</dt><dd class="${isIV?'iv':''}">${esc(settingText(k,s[k]))}${isIV?' (testing)':''}</dd>`}).join('')}
     <dt>Mass</dt><dd>⚖ ${fmt(P.mass*1000,1)} g</dd><dt>Where</dt><dd>${S.env==='outside'?'Outside':'Inside'}</dd><dt>Launch</dt><dd>${S.launch==='launcher'?'Launcher':'By hand'}</dd></dl></div></div>`;
@@ -407,5 +409,6 @@ function bandPower(n){return S.launch==='launcher'?Math.max(0.9,1-0.0065*(n-1)):
 
 const timingNeeded=()=>!isExplore()&&S.dv==='time';
 const swRunning=()=>LAB.sw.start!=null&&LAB.sw.stop==null;
+function goFlight(){const l=$('#labL');if(l)l.scrollIntoView({behavior:'smooth',block:'start'})}
 function goTable(){if(swRunning())return;const tp=$('#tablepanel');if(tp)tp.scrollIntoView({behavior:'smooth',block:'start'});const ci=$('#cellin');if(ci)setTimeout(()=>ci.focus({preventScroll:true}),400)}
 function decideHint(){return(S.dv==='time'&&swTimed()==null?'Use the stopwatch first. ':'')+(cellVal()==null?'Type your measurement into the yellow box first. ':'')+'Throw it again if something went wrong, for example you missed the stopwatch.'}

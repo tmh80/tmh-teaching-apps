@@ -116,6 +116,8 @@ function act(a,el,ev){
    case'lab:level':labPickLevel(el.dataset.v);break;
    case'calc':calcKey(k);break;
    case'lab:addnote':labAddNote();break;
+   case'lab:table':goTable();break;
+   case'lab:flight':goFlight();break;
    case'lab:peek':openModal(peekHTML());break;
    case'exp-env':S.exp.env=k;save();labPanels();break;
    case'exp-launch':S.exp.launch=k;save();labPanels();break;
