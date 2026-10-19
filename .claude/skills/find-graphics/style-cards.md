@@ -31,5 +31,7 @@ follows, so the 20th picture matches the first. `makeover.py --style` reads it d
   never copied characters.
 - Matches the canvas creatures already in the sim: soft countershading, warm key light from the upper left,
   rim light along the back, big round eyes with a white catch-light.
+- Anatomy stays accurate under the friendly style: predators' eyes forward near the snout, prey animals' eyes
+  further back on the side; mammals always get a nose and mouth (see SKILL.md, section 6).
 - Inside the sim, creatures are code-drawn from traits; real proportions come from PhyloPic via profile.py.
   The friendly SVGs in `shared/assets/animals/` are for places that show a fixed picture (cards, worksheets).
