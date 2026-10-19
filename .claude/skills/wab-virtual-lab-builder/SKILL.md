@@ -105,6 +105,6 @@ Try this
 
 ## 7. Build, test, deliver
 
-- Start from `paper-plane-lab/` in Tom's repo (`tmh80/tmh-teaching-apps`): copy `src/`, `build.js` and `tests/`, then replace the lab-specific parts (simulation model, variables, built-in errors, comments, materials shelf, method bank, reasons, intro text, teacher notes). Each lab gets its own folder with `src/`, `build.js`, `tests/`, `docs/<Name>_Brief.md`, and the Toddle file `<Name>-offline.html` at the folder root.
+- Start from `paper-plane-lab/` in Tom's repo (`tmh80/tmh-teaching-apps`): copy `src/`, `build.js` and `tests/`, then replace the lab-specific parts (simulation model, variables, built-in errors, comments, materials shelf, method bank, reasons, intro text, teacher notes). Each lab gets its own folder with `src/`, `build.js`, `tests/`, `docs/<Name>_Brief.md`, and the Toddle file `<Name>-offline.html` at the folder root. The repo keeps its own copy of this skill in `.claude/skills/`; keep both copies in step.
 - Test before every delivery with Playwright on `dist/test.html`: a full playthrough at every level, both measurement types, the launcher/alternative set-ups, a half-finished run (states, warnings, redirects, pre-save list), real-click measuring flows, the done rules, and both PDFs rendered to images with page counts checked.
 - Deliver: commit and push to the repo (explain in plain language), send the offline file, republish the claude.ai preview, save the offline file to the project, and give Tom the updated AI marking prompt when the PDFs change.
