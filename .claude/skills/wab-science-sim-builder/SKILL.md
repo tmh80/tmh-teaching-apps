@@ -92,7 +92,9 @@ These rules apply to every sim and lab. They came from running Paper Plane Lab w
 1. **The work:** only the student's own answers, tables, graphs and sketches, laid out simply. No auto-checks, flags, colour-coding or hidden data, so a teacher or an AI marker can read it easily.
 2. **The feedback sheet:** what the auto-checks found (what went well / what to work on per strand, with a level never above the challenge cap), a "What to check" list, accuracy comparisons (for example measurements vs real values), and any behind-the-scenes data.
 
-Both carry the student's name, class, date and challenge level. The checklist requires both to be saved, and the finish screen shows which ones have been saved.
+Both carry the student's name, class, date and challenge level. Show the level once, in the header of every page (for example "★ DEVELOPING · Highest grade: Developing"); don't repeat it as a big banner. The checklist requires both to be saved, and the finish screen shows which ones have been saved.
+
+**Keep both PDFs short.** The work PDF should be about 3 A4 pages and the feedback sheet 2, for a typical student. Use compact print, a graph at about two-thirds width, tight spacing, and run sections on rather than starting new pages (an easy way: draw each page on a canvas larger than A4 so everything prints smaller). Never cut a student's writing to save space.
 
 ## 5. Build setup
 
@@ -120,7 +122,7 @@ Code-drawn SVG/canvas is the default. When richer art is needed:
 - Check the offline file makes no network requests.
 - Run a half-finished playthrough: confirm the "To do" states, the "On this page" bar, the exact prerequisite messages, the "Continue anyway" warnings, the redirect to the first missing essential, the pre-export list and the "Go there" highlighting. Confirm a one-word or wrong answer counts as done and never blocks.
 - Test every manual-measuring flow with real mouse clicks and key presses (not only the debug hook), including optional tools such as a stopwatch in a distance test. Check the page doesn't scroll away from, or take focus from, a control that is still in use.
-- Render both PDFs to images and check them: the work PDF has no flags or checks; the feedback sheet has them all.
+- Render both PDFs to images and check them: the work PDF has no flags or checks; the feedback sheet has them all. Check the page counts at every challenge level (about 3 pages for the work, 2 for the feedback sheet).
 - **Independent-use check:** play through as a confused Grade 7 student with no teacher. Note any moment where the next step is unclear, a hint is missing, or text reads as clipped or too hard. Fix before shipping. For major releases, run this check with a separate agent that hasn't seen the build.
 
 ## 7. Delivery
