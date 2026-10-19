@@ -107,7 +107,8 @@ function pdfWrap(c,text,maxW){
   return out;
 }
 class Doc{
-  constructor(land){this.W=land?1754:1240;this.H=land?1240:1754;this.M=80;this.pages=[];this.newPage()}
+  /* scale > 1 = a bigger canvas on the same A4 page, so everything prints smaller */
+  constructor(land,scale=1){this.W=Math.round((land?1754:1240)*scale);this.H=Math.round((land?1240:1754)*scale);this.M=80;this.pages=[];this.newPage()}
   newPage(){const cv=document.createElement('canvas');cv.width=this.W;cv.height=this.H;const c=cv.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,this.W,this.H);c.textBaseline='alphabetic';this.pages.push(cv);this.c=c;this.y=120}
   ensure(h){if(this.y+h>this.H-80)this.newPage()}
   font(sz,w){this.c.font=`${w||'normal'} ${sz}px ${PDF_FONT}`}
@@ -153,12 +154,12 @@ class Doc{
 const S_LVCOL=()=>LV[S.level].col;
 function decorate(d,title){
   const n=d.pages.length,l=LV[S.level];
-  d.pages.forEach((cv,i)=>{const c=cv.getContext('2d');
+  d.pages.forEach((cv,i)=>{const c=cv.getContext('2d'),k=cv.width/1240;c.save();c.scale(k,k);cv={width:1240,height:cv.height/k};
     c.fillStyle='#14202e';c.fillRect(0,0,cv.width,70);c.font=`bold 24px ${PDF_FONT}`;c.fillStyle='#fff';c.textAlign='left';c.fillText(title,d.M,44);
     c.font=`19px ${PDF_FONT}`;c.fillStyle='#cfd9e6';c.fillText(`${S.name} · ${S.cls}`,d.M+c.measureText(title).width*24/19+30,44);
     const tag=`${'★'.repeat(l.stars)} ${l.n.toUpperCase()} · ${capText(S.level)}`;c.font=`bold 19px ${PDF_FONT}`;const tw=c.measureText(tag).width+30;
     c.fillStyle=l.col;c.fillRect(cv.width-d.M-tw,16,tw,38);c.fillStyle='#fff';c.textAlign='center';c.fillText(tag,cv.width-d.M-tw/2,42);
-    c.textAlign='center';c.fillStyle='#566475';c.font=`17px ${PDF_FONT}`;c.fillText(`Page ${i+1} of ${n}`,cv.width/2,cv.height-34);c.textAlign='left'});
+    c.textAlign='center';c.fillStyle='#566475';c.font=`17px ${PDF_FONT}`;c.fillText(`Page ${i+1} of ${n}`,cv.width/2,cv.height-34);c.textAlign='left';c.restore()});
 }
 function b64bytes(u){const b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
 function pdfFromCanvases(cvs,title){
@@ -180,15 +181,13 @@ function pdfFromCanvases(cvs,title){
 /* ---- the report ---- */
 /* the lab report: only the student's own work, laid out simply (easy for a teacher or an AI marker to read) */
 function buildReport(){
-  const d=new Doc(),c=cx(),l=LV[S.level];
+  const d=new Doc(false,1.2),c=cx(),l=LV[S.level];
   /* cover + marking page */
-  d.text('Paper Plane Investigation: Lab Report'+(S.attempt>1?` (investigation ${S.attempt})`:''),{sz:40,w:'bold',gap:4});
-  d.text(`${S.name}   ·   Class ${S.cls}   ·   ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,{sz:22,col:'#566475',gap:14});
-  d.ensure(120);d.c.fillStyle=l.col;d.c.fillRect(d.M,d.y,d.W-2*d.M,100);d.c.fillStyle='#fff';d.font(36,'bold');d.c.fillText(`Challenge level: ${l.n}  ${'★'.repeat(l.stars)}`,d.M+24,d.y+46);d.font(24);d.c.fillText(capText(S.level),d.M+24,d.y+82);d.y+=118;
+  d.text('Paper Plane Investigation: Lab Report'+(S.attempt>1?` (investigation ${S.attempt})`:''),{sz:34,w:'bold',gap:2});
+  d.text(`${S.name}   ·   Class ${S.cls}   ·   ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,{sz:22,col:'#566475',gap:2});
   d.text(`Changed: ${c.ivName}${c.isNum?' ('+c.iv.unit+')':''}  ·  Measured: ${c.dv.name} (${c.dv.unit})  ·  ${ENV[S.env]||'—'}, ${String(LAUNCH[S.launch]||'—').toLowerCase()}  ·  Tested: ${S.levels.map(v=>lvlLabel(S.iv,v)).join(', ')}`,{sz:19,col:'#566475',gap:10});
-  d.text('A separate feedback sheet shows what the lab checked and what to look at again.',{sz:17,col:'#566475'});
   /* report */
-  d.y+=10;d.h2('Observations');d.box('',obsText());
+  d.h2('Observations');d.box('',obsText());
   d.h2('Research question and variables');
   d.box('Research question',rqText());d.box(isMas()?'The science idea behind my question':'More detail',rqExtra());
   d.table(['Independent variable (the variable I am changing)','Dependent variable (the variable I am measuring)'],[[ivTextA()||'(not answered)',dvTextA()||'(not answered)']],[.5,.5]);
@@ -207,8 +206,8 @@ function buildReport(){
     st.map(s=>[rowLabel(s.lk),...[0,1,2].map(i=>A('tr.'+String(s.lk)+'.'+i)||'—'),A('avg.'+String(s.lk))||'—']),[.28,.16,.16,.16,.24]);
   d.text('Table 2: Qualitative observations',{sz:21,w:'bold'});
   d.table([`IV: ${A('t1.ivh')||''}`,'What I saw'],S.levels.map(lk=>[rowLabel(lk),A('obs.'+String(lk))||'—']),[.28,.72]);
-  d.ensure(GH*(d.W-2*d.M)/GW+80);d.h3('Graph');const g=gInit();
-  if(g.type&&gValid(g)){const gc=document.createElement('canvas');gc.width=GW;gc.height=GH;drawGraph(gc.getContext('2d'),g,{fb:false});d.image(gc,d.W-2*d.M)}else d.text('(No graph yet.)',{col:'#9aa7b6'});
+  d.ensure(GH*(d.W-2*d.M)*.62/GW+80);d.h3('Graph');const g=gInit();
+  if(g.type&&gValid(g)){const gc=document.createElement('canvas');gc.width=GW;gc.height=GH;drawGraph(gc.getContext('2d'),g,{fb:false});d.image(gc,(d.W-2*d.M)*.62)}else d.text('(No graph yet.)',{col:'#9aa7b6'});
   d.h2('Analysis');
   ['q1','q2'].forEach((n,i)=>{d.box(`${i+1}. ${QTXT[n]}`,qText(n))});
   d.h2('Evaluation');
@@ -232,16 +231,15 @@ function buildReport(){
   d.text(PEER.map(([k,t])=>(S.peer['ck.'+k]?'✓ ':'☐ ')+t).join('\n'),{sz:19});
   d.box('One thing done well',S.peer.well);d.box('One thing to improve',S.peer.better);
   }
-  decorate(d,'Paper Plane Lab: lab report');
+  decorate(d,'Lab report');
   return d.pages;
 }
 /* the feedback sheet: what the lab checked, what to check, and what really happened */
 function buildFeedback(){
-  const d=new Doc(),c=cx(),l=LV[S.level],R=rubric();
+  const d=new Doc(false,1.32),c=cx(),l=LV[S.level],R=rubric();
   /* cover + marking page */
-  d.text('Paper Plane Investigation: Feedback Sheet'+(S.attempt>1?` (investigation ${S.attempt})`:''),{sz:40,w:'bold',gap:4});
-  d.text(`${S.name}   ·   Class ${S.cls}   ·   ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,{sz:22,col:'#566475',gap:14});
-  d.ensure(120);d.c.fillStyle=l.col;d.c.fillRect(d.M,d.y,d.W-2*d.M,100);d.c.fillStyle='#fff';d.font(36,'bold');d.c.fillText(`Challenge level: ${l.n}  ${'★'.repeat(l.stars)}`,d.M+24,d.y+46);d.font(24);d.c.fillText(capText(S.level),d.M+24,d.y+82);d.y+=118;
+  d.text('Paper Plane Investigation: Feedback Sheet'+(S.attempt>1?` (investigation ${S.attempt})`:''),{sz:34,w:'bold',gap:2});
+  d.text(`${S.name}   ·   Class ${S.cls}   ·   ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,{sz:22,col:'#566475',gap:2});
   d.text(`Changed: ${c.ivName}${c.isNum?' ('+c.iv.unit+')':''}  ·  Measured: ${c.dv.name} (${c.dv.unit})  ·  ${ENV[S.env]||'—'}, ${String(LAUNCH[S.launch]||'—').toLowerCase()}  ·  Tested: ${S.levels.map(v=>lvlLabel(S.iv,v)).join(', ')}`,{sz:19,col:'#566475',gap:10});
   d.ensure(150);d.text('For my teacher',{sz:17,w:'bold',col:'#566475',gap:4});
   const bw=(d.W-2*d.M-30)/3,cap=CAP_BAND[S.level];[['Criterion B',1],['Criterion C',1],['Teacher comment',0]].forEach((x,i)=>{const X=d.M+i*(bw+15);d.c.strokeStyle='#14202e';d.c.lineWidth=2;d.c.strokeRect(X,d.y,bw,104);d.font(19,'bold');d.c.fillStyle='#14202e';d.c.fillText(x[0]+(x[1]?' (circle one)':''),X+12,d.y+26);
@@ -278,11 +276,11 @@ function buildFeedback(){
     st.map(s=>{const tb=[0,1,2].map(i=>String(A('tr.'+String(s.lk)+'.'+i)).trim()!==''&&!trOK(s.lk,i)),av=String(A('avg.'+String(s.lk))).trim(),ab=av!==''&&!avgOK(s.lk);
       return{cells:[rowLabel(s.lk),...[0,1,2].map(i=>(A('tr.'+String(s.lk)+'.'+i)||'—')+(tb[i]?'   !':'')),(av||'—')+(ab?'   !':'')],fill:[null,...tb.map(b=>b?PINK:null),ab?PINK:null]}}),[.28,.16,.16,.16,.24]);}
   /* appendix for the marker */
-  d.newPage();d.h2('Behind the scenes: what really happened');
+  d.h2('Behind the scenes: what really happened');
   d.text('The lab secretly recorded what really happened in each flight. “Typed” is what you wrote in your table. “Real” is the true value. Compare them to see how accurate your measurements were.',{sz:17,col:'#566475'});
   d.table(['#','Tested','Typed (cm)','Real (cm)','Typed (s)','Stopwatch (s)','Real (s)','Angle set','Speed set','Air (m/s)','Note'],S.flights.filter(f=>f.hid).map(f=>[f.n,lvlLabel(S.iv,f.lv),f.read!=null?f.read:'—',f.hid.trueDist,f.timed!=null?Number(f.timed).toFixed(2):'—',f.hid.sw!=null?f.hid.sw.toFixed(2):'—',f.hid.trueTime.toFixed(2),f.hid.aSet+'°',f.hid.vSet,(f.hid.wind>0?'+':'')+f.hid.wind.toFixed(2),[f.gone?'not used':'',f.hid.dive?'nosedive':''].filter(Boolean).join(', ')]),[.05,.12,.09,.09,.09,.1,.08,.08,.08,.09,.13],{sz:14});
   d.text('Method errors that were built into this lab: '+flawsHere().map(k=>FLAWS[k].name).join('; ')+'.',{sz:17});
-  decorate(d,'Paper Plane Lab: feedback sheet');
+  decorate(d,'Feedback sheet');
   return d.pages;
 }
 function exportReport(){
