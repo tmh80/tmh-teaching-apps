@@ -1,0 +1,13 @@
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><h1>Paper Plane <span>Lab</span></h1><p>Test one thing. Collect data. Write it up.</p></div>
+    <div id="lvbadge"></div>
+    <div class="tools" id="tools"></div>
+  </header>
+  <nav class="stepbar" id="stepbar" aria-label="Lab report steps"></nav>
+  <main id="main"></main>
+</div>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="box" id="modalbox"></div></div>
+<input type="file" id="loadfile" accept=".json,application/json" hidden>
+<button class="sheetbtn" id="sheetbtn" data-act="sheet" aria-controls="sheet" aria-expanded="false" hidden>📄 My report</button>
+<aside class="sheet" id="sheet" aria-label="My report so far"><div class="sheethead"><b>My report so far</b><button class="btn sm" data-act="sheet" aria-label="Close my report">✕</button></div><div id="sheetbody"></div></aside>

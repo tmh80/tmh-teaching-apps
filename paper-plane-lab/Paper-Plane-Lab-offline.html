@@ -243,6 +243,27 @@ body.sheet-open .sheetbtn{right:var(--shw)}
 .decide{margin-top:10px;border:2px dashed var(--line);border-radius:12px;padding:10px 14px;background:var(--chip)}
 .decide.ready{border:3px solid var(--good);background:var(--good-soft)}
 @media (prefers-reduced-motion:reduce){.swhot{animation:none}}
+/* ===== done / to-do states ===== */
+section.q[data-qid]{border-left:6px solid var(--warn);padding-left:14px;border-radius:6px;background:linear-gradient(90deg,var(--warn-soft),transparent 55%)}
+section.q[data-qid].isdone{border-left-color:var(--good);background:linear-gradient(90deg,var(--good-soft),transparent 55%)}
+.q .status{border-radius:999px;padding:2px 12px;font-size:14px;font-weight:800;white-space:nowrap}
+.status.ok{background:var(--good);color:#fff;border:1px solid var(--good)}
+.status.no{background:var(--warn-soft);color:var(--warn);border:2px solid var(--warn)}
+.stepbar button.done{border:2px solid var(--good);background:var(--good-soft)}
+.stepbar button.part{border:2px solid var(--warn);background:var(--warn-soft)}
+.stepbar button[aria-current="step"].done,.stepbar button[aria-current="step"].part{background:var(--ink)}
+.pagesum{border:2px solid var(--warn);background:var(--warn-soft);border-radius:12px;padding:10px 14px;margin:10px 0 4px}
+.pagesum.alldone{border-color:var(--good);background:var(--good-soft)}
+.sumchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.sumchip{border-radius:999px;padding:4px 12px;font-size:14.5px;font-weight:700;border:2px solid var(--warn);background:var(--panel);color:var(--warn);cursor:pointer}
+.sumchip.ok{border-color:var(--good);background:var(--good);color:#fff}
+span.sumchip{cursor:default}
+.prereq{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.flash{animation:flashsec 1.4s ease}
+@keyframes flashsec{0%,60%{box-shadow:0 0 0 5px var(--accent)}100%{box-shadow:none}}
+.misslist{max-height:55vh;overflow:auto;border:1px solid var(--line);border-radius:10px;margin:10px 0}
+.missrow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--warn-soft)}
+.missrow:last-child{border-bottom:0}
 
 </style></head><body>
 <div class="app" id="app">
@@ -470,7 +491,7 @@ const fvals=lk=>live().filter(f=>f.lv===lk);
 const fval=f=>S.dv==='dist'?f.read:f.timed;
 function levelStats(){return S.levels.map(lk=>{const vs=fvals(lk).map(fval).filter(v=>v!=null);const m=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;return{lk,vs,m,n:fvals(lk).length}})}
 const dvDp=()=>S.dv==='dist'?1:2;
-function trialsDone(){if(!S.iv)return false;return levelStats().every(s=>s.n>=3)&&S.levels.length>=minLevels()}
+function trialsDone(){if(!S.iv||!S.levels.length)return false;return levelStats().every(s=>s.n>=3)}
 const flightsExpected=()=>S.levels.length*3;
 
 /* what the data shows (used for Developing checks and for the marker's summary) */
@@ -607,7 +628,7 @@ function labLand(){
     const ok=S.expN>=3,b=$('#obsnext'),m=$('#obsmsg');if(b)b.disabled=!ok;if(m)m.textContent=ok?'':`Throw at least 3 planes first (${S.expN} so far).`;return}
   LAB.state='landed';{const r=mulberry32(S.seed+LAB.pend.n*7);LAB.tapeWin=Math.floor((f.landX*100-20-r()*55)/10)*10}
   LAB.noted=false;LAB.comment=throwerComment(hidFor(LAB.pend,LAB.res),LAB.pend.lv);
-  LAB.cell='';labPanels();if(!timingNeeded()||LAB.sw.stop!=null)goTable();
+  LAB.cell='';labPanels();if(!swRunning()&&(!timingNeeded()||LAB.sw.stop!=null))goTable();
 }
 function labAgain(){
   if(isExplore()||!LAB.pend||LAB.pend.explore)return;
@@ -651,7 +672,7 @@ function unfairFlights(){const L=live();if(L.length<2)return[];const o=[];['angl
 function swToggle(){if(LAB.state==='idle')return;const now=performance.now();if(LAB.sw.start==null)LAB.sw.start=now;else if(LAB.sw.stop==null){LAB.sw.stop=now;
     if(!isExplore()&&S.dv==='time'&&!LAB.comment&&LAB.tLand&&LAB.tRel){const lag=(LAB.state==='landed'?now-LAB.tLand:-1),st=LAB.sw.start-LAB.tRel;
       if(LAB.state!=='landed')LAB.comment={t:'I stopped the stopwatch before the plane landed!',k:'timer'};else if(lag>280||st>280)LAB.comment={t:'I think I was a bit slow pressing the stopwatch.',k:'timer'}}}
-  labPanels(true);if(LAB.state==='landed'&&LAB.sw.stop!=null&&timingNeeded())setTimeout(goTable,250)}
+  labPanels(true);if(LAB.state==='landed'&&LAB.sw.stop!=null&&!isExplore())setTimeout(goTable,250)}
 function swReset(){LAB.sw={start:null,stop:null};labPanels(true)}
 function swText(){const sw=LAB.sw;if(sw.start==null)return'0.00';return Math.max(0,((sw.stop!=null?sw.stop:performance.now())-sw.start)/1000).toFixed(2)}
 
@@ -739,7 +760,7 @@ function drawSim(){
     if(LAB.state==='idle')t=isExplore()?(LAB.res?'Change something and throw again!':'Set your throw and press Launch'):S.labLevel==null?'':'Press Launch';
     else if(LAB.state==='wait'){if(timingNeeded()){const rem=LAB.delay-(now-LAB.tWaitStart);t=rem>2180?'3…':rem>1180?'2…':rem>180?'1…':'Go! Press Start'}else t='Get ready…'}
     else if(LAB.state==='flying')t=timingNeeded()?(LAB.sw.start==null?'Press Start!':'Press Stop when it lands!'):'';
-    else if(LAB.state==='landed')t=isExplore()?'':S.dv==='time'?(LAB.sw.stop==null?'Landed. Stop the stopwatch!':'Landed.'):'Landed. Now read the tape.';
+    else if(LAB.state==='landed')t=isExplore()?'':swRunning()?'Landed. Stop the stopwatch!':S.dv==='time'?(LAB.sw.stop==null?'Landed. Stop the stopwatch!':'Landed.'):'Landed. Now read the tape.';
     m.textContent=t;m.style.display=t?'':'none'}
 }
 function drawTape(){
@@ -874,8 +895,8 @@ function labPanels(){
     <dl class="ctl-list">${Object.keys(SETTING_LABEL).filter(k=>!(k==='clips'&&s.clippos==='No clip')).map(k=>{const isIV=IVS[S.iv].setting===k;return`<dt class="${isIV?'iv':''}">${SETTING_LABEL[k]}</dt><dd class="${isIV?'iv':''}">${esc(settingText(k,s[k]))}${isIV?' (testing)':''}</dd>`}).join('')}
     <dt>Mass</dt><dd>⚖ ${fmt(P.mass*1000,1)} g</dd><dt>Where</dt><dd>${S.env==='outside'?'Outside':'Inside'}</dd><dt>Launch</dt><dd>${S.launch==='launcher'?'Launcher':'By hand'}</dd></dl></div></div>`;
   L.innerHTML=left;R.innerHTML=right;const T=$('#labT');if(T)T.innerHTML=table;
-  const nb=$('#labnext'),msg=$('#labmsg');if(nb){nb.disabled=!live().length;msg.textContent=trialsDone()?'All flights are done. Go to your results.':`${flightsExpected()-live().length} flights to go.`}
-  if(st==='landed'){drawTape();const ci=$('#cellin');if(ci){ci.oninput=()=>{LAB.cell=ci.value;$('#cellfb').innerHTML=cellFb();const rb=$('#recbtn');if(rb)rb.disabled=recordBlocked();const dc=$('#decide');if(dc)dc.classList.toggle('ready',!recordBlocked());const dh=$('#decidehint');if(dh)dh.textContent=decideHint()};if(document.activeElement===document.body&&(!timingNeeded()||LAB.sw.stop!=null))ci.focus({preventScroll:true})}
+  labSumRefresh();const nb=$('#labnext'),msg=$('#labmsg');if(nb){msg.textContent=trialsDone()?'All flights are done. Go to your results.':`${flightsExpected()-live().length} flights to go.`}
+  if(st==='landed'){drawTape();const ci=$('#cellin');if(ci){ci.oninput=()=>{LAB.cell=ci.value;$('#cellfb').innerHTML=cellFb();const rb=$('#recbtn');if(rb)rb.disabled=recordBlocked();const dc=$('#decide');if(dc)dc.classList.toggle('ready',!recordBlocked());const dh=$('#decidehint');if(dh)dh.textContent=decideHint()};if(document.activeElement===document.body&&!swRunning()&&(!timingNeeded()||LAB.sw.stop!=null))ci.focus({preventScroll:true})}
     const ln=$('#labnote');if(ln)ln.oninput=()=>{LAB.note=ln.value}}
   drawSim();
 }
@@ -892,12 +913,11 @@ function exploreRightHTML(){
 }
 function labHTML(){
   const c=S.iv?cx():null;
-  if(!S.iv||!S.dv)return`<div class="card"><h2>5. Test flights</h2><p class="lead">Choose what you will change and measure on the Question page first.</p><button class="btn" data-go="question">← Question</button></div>`;
-  if(S.levels.length<minLevels()||!S.env||!S.launch)return`<div class="card"><h2>5. Test flights</h2><p class="lead">On the Plan page, choose your experimental groups (at least ${minLevels()}) and set up your test first.</p><button class="btn" data-go="plan">← Plan</button></div>`;
+  {const pr=labPrereqs();if(pr.length)return`<div class="card"><h2>5. Test flights</h2><p class="lead">Before you can fly, you need to finish a few things:</p>${prereqHTML(pr)}</div>`}
   ensureLabLevel();
   return`<div class="card"><h2>5. Test flights</h2>
    <p class="lead">Set your throw, then test each ${c.isNum?'value':'type'} three times. ${S.dv==='time'?'Time each flight with the stopwatch':'Read the tape where the nose of the plane lands'}, and type each measurement into your results table. ${helped()?'When the thrower says something about a flight, click <b>📝 Add to my notes</b>: your notes will help you in your evaluation.':'When the thrower notices something, click it to look behind the scenes, then write your own note: your notes will help you in your evaluation.'}</p>
-   <div class="labgrid"><div class="labcol" id="labL"></div><div class="labcol" id="labR"></div></div>
+   <div id="labsum"></div><div class="labgrid"><div class="labcol" id="labL"></div><div class="labcol" id="labR"></div></div>
    <div id="labT" style="margin-top:12px"></div>
    <div class="nav"><button class="btn" data-go="plan">← Plan</button><span class="msg" id="labmsg"></span><button class="btn primary" id="labnext" data-go="results">Go to results →</button></div></div>`;
 }
@@ -976,7 +996,8 @@ function peekHTML(){
 function bandPower(n){return S.launch==='launcher'?Math.max(0.9,1-0.0065*(n-1)):1}
 
 const timingNeeded=()=>!isExplore()&&S.dv==='time';
-function goTable(){const tp=$('#tablepanel');if(tp)tp.scrollIntoView({behavior:'smooth',block:'start'});const ci=$('#cellin');if(ci)setTimeout(()=>ci.focus({preventScroll:true}),400)}
+const swRunning=()=>LAB.sw.start!=null&&LAB.sw.stop==null;
+function goTable(){if(swRunning())return;const tp=$('#tablepanel');if(tp)tp.scrollIntoView({behavior:'smooth',block:'start'});const ci=$('#cellin');if(ci)setTimeout(()=>ci.focus({preventScroll:true}),400)}
 function decideHint(){return(S.dv==='time'&&swTimed()==null?'Use the stopwatch first. ':'')+(cellVal()==null?'Type your measurement into the yellow box first. ':'')+'Throw it again if something went wrong, for example you missed the stopwatch.'}
 
 /* ===== GRAPH MAKER: drag points / categories, choose axes ===== */
@@ -1257,7 +1278,8 @@ const nudge=(lv,h)=>lv.includes(S.level)?`<div class="nudge">📓 ${h}</div>`:''
 const ta=(id,ph,rows=3)=>`<textarea data-bind="${id}" rows="${rows}" placeholder="${esc(ph||'')}">${esc(A(id))}</textarea>`;
 const inp=(id,cls,ph)=>`<input type="text" class="inl ${cls||''}" data-bind="${id}" value="${esc(A(id))}" placeholder="${esc(ph||'')}">`;
 const sel=(id,opts,ph='choose…')=>`<select class="inl" data-bind="${id}"><option value="">${ph}</option>${opts.map(o=>`<option ${A(id)===o?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
-function newB(){const f={};return{h:'',f,q(id,title,body,done){f[id]=!!done;this.h+=`<section class="q" data-qid="${id}"><h3><span>${title}</span><span class="status ${done?'ok':'no'}">${done?'✓ done':''}</span></h3>${body}</section>`},raw(h){this.h+=h}}}
+function newB(){const f={},t={};return{h:'',f,t,q(id,title,body,done){f[id]=!!done;t[id]=title;this.h+=`<section class="q ${done?'isdone':''}" data-qid="${id}"><h3><span>${title}</span>${statusPill(done)}</h3>${body}</section>`},raw(h){this.h+=h}}}
+const statusPill=done=>`<span class="status ${done?'ok':'no'}">${done?'✓ Done':'To do'}</span>`;
 function fbList(list){return list.map(x=>`<div class="fb ${x.ok?'ok':'mid'}">${x.ok?'✓':'•'} ${esc(x.ok?x.msg:(x.fix||'Not yet: '+x.msg.charAt(0).toLowerCase()+x.msg.slice(1)))}</div>`).join('')}
 /* "Check my answer": Developing and Proficient only. Developing gets a specific "what to fix" line. */
 function chkBtn(id,list){if(!helped())return'';const on=A('chk.'+id);const L=on?list().map(x=>isDev()?x:{ok:x.ok,msg:x.msg}):[];return`<div style="margin:6px 0"><button class="btn sm" data-act="chk" data-id="${id}">Check my answer</button></div>${on?fbList(L):''}`}
@@ -1345,10 +1367,10 @@ BUILD.observe=function(){
    <div class="labgrid"><div class="labcol" id="labL"></div><div class="labcol" id="labR"></div></div>`);
   let body,done;
   if(isDev()){body=tip(['developing'],'Change ONE thing at a time, then throw. Look at how far it goes and how it flies. Then fill in the gaps.')+frame('obs1',OBSF.obs1())+frame('obs2',OBSF.obs2())+frame('obs3',OBSF.obs3());done=frameDone('obs1',OBSF.obs1())&&frameDone('obs2',OBSF.obs2())&&frameDone('obs3',OBSF.obs3())}
-  else{body=tip(['proficient'],'Sentence starters: <i>I noticed that… · When I changed the…, the plane… · I wonder if…</i>')+nudge(['mastering'],'Check your notebook: what makes a good scientific observation?')+`<p style="margin:4px 0"><b>Write at least two observations and one thing you wonder about.</b></p>`+ta('obs','',4);done=words(A('obs'))>=15}
+  else{body=tip(['proficient'],'Sentence starters: <i>I noticed that… · When I changed the…, the plane… · I wonder if…</i>')+nudge(['mastering'],'Check your notebook: what makes a good scientific observation?')+`<p style="margin:4px 0"><b>Write at least two observations and one thing you wonder about.</b></p>`+ta('obs','',4);done=words(A('obs'))>=1}
   B.q('obs','My observations',body,done&&(S.expN||0)>=3);
   const ready=(S.expN||0)>=3;
-  B.raw(`<div class="nav"><span class="msg" id="obsmsg">${ready?'':'Throw at least 3 planes first.'}</span><button class="btn primary" id="obsnext" data-go="question" ${ready?'':'disabled'}>I'm ready: write my question →</button></div></div>`);
+  B.raw(`<div class="nav"><span class="msg" id="obsmsg">${ready?'':'Try to throw at least 3 planes first.'}</span><button class="btn primary" id="obsnext" data-go="question">I'm ready: write my question →</button></div></div>`);
   return B;
 };
 const ENV={inside:'Inside the sports hall',outside:'Outside on the field'},LAUNCH={hand:'By hand',launcher:'With a rubber band launcher'};
@@ -1412,7 +1434,7 @@ BUILD.question=function(){
     }else{
       body=nudge(['mastering'],'Look in your notebook for how to write a research question, and add the science idea behind it.')+
         `<span class="lbl">Research question</span>${ta('rq','',2)}<span class="lbl" style="display:block;margin-top:6px">${isMas()?'The science idea behind my question':'More detail (optional)'}</span>${ta('rq.x','',2)}`;
-      done=words(A('rq'))>=5;
+      done=words(A('rq'))>=1;
     }
     B.q('rq','Research question',body,done);
     const b2=tip(['developing'],'Write the name of each variable. Then write its <b>units</b> in the units box, for example <i>°C</i> for temperature. Some variables do not have units: if so, write <i>none</i>.')+tip(['proficient'],'Write each variable and its units. If a variable has no units, write <i>none</i>.')+
@@ -1422,9 +1444,9 @@ BUILD.question=function(){
         {ok:unitOK('iv'),msg:'The units for your independent variable are right.',fix:c.isNum?`What is the ${c.ivLower} measured in? Look at the values you can choose.`:`The ${c.ivLower} is a type, not a number, so it has no units. Write none.`},
         {ok:hasDV(A('dv.t')),msg:'Your dependent variable matches what you chose.',fix:`Your dependent variable is the one you measure: the ${c.dv.lower}.`},
         {ok:unitOK('dv'),msg:'The units for your dependent variable are right.',fix:S.dv==='dist'?'Distance is measured with a tape measure. Which units are on the tape?':'Time is measured with a stopwatch. Which units does it show?'}]);
-    B.q('ivdv','Independent and dependent variable',b2,words(A('iv.t'))>=1&&words(A('dv.t'))>=1&&words(A('iv.u'))>=1&&words(A('dv.u'))>=1);
+    B.q('ivdv','Independent and dependent variable',b2,words(A('iv.t'))>=1&&words(A('dv.t'))>=1);
   }
-  B.raw(`<div class="nav"><button class="btn" data-go="observe">← Observe</button><span class="msg"></span><button class="btn primary" data-go="hypothesis" ${S.iv&&S.dv?'':'disabled'}>Next: Hypothesis →</button></div></div>`);
+  B.raw(`<div class="nav"><button class="btn" data-go="observe">← Observe</button><span class="msg"></span><button class="btn primary" data-go="hypothesis">Next: Hypothesis →</button></div></div>`);
   return B;
 };
 
@@ -1445,7 +1467,7 @@ BUILD.hypothesis=function(){
      chkBtn('hyp',()=>[{ok:hasIV(A('hyp.a')),msg:'The IF part names your independent variable.'},{ok:hasDV(A('hyp.b')),msg:'The THEN part names your dependent variable.'},{ok:words(A('hyp.c'))>=5,msg:'The BECAUSE part gives a reason (at least 5 words).'}]);
     done=frameDone('hyp',FR.hypP());
   }else{
-    body=nudge(['mastering'],'Check your notebook for the hypothesis format and what a probable reason looks like.')+ta('hyp','',4);done=words(A('hyp'))>=8;
+    body=nudge(['mastering'],'Check your notebook for the hypothesis format and what a probable reason looks like.')+ta('hyp','',4);done=words(A('hyp'))>=1;
   }
   B.q('hyp','My hypothesis',body,done);
   B.raw(`<div class="nav"><button class="btn" data-go="question">← Question</button><span class="msg"></span><button class="btn primary" data-go="plan">Next: Plan →</button></div></div>`);
@@ -1505,7 +1527,7 @@ BUILD.plan=function(){
       {ok:!named.some(n=>IVX[S.iv].main.test(n)),msg:'Your independent variable is not in the list.',fix:`The ${c.ivLower} is what you change, so it cannot be a control variable.`},
       {ok:named.filter(n=>known.some(k=>n.includes(k))).length>=3,msg:'All three are things from your design or set-up.',fix:'Use things you chose in your plane design or set-up, such as the type of paper or where you fly.'},
       {ok:[0,1,2].every(i=>words(A('ctl.h'+i))>=3),msg:'You said how to control each one.',fix:'For each one, say how you will keep it the same, for example "I will use the same … for every flight".'}]});
-  B.q('ctl','Control variables',cb,[0,1,2].every(i=>words(A('ctl.n'+i))>0&&words(A('ctl.h'+i))>0));
+  B.q('ctl','Control variables',cb,[0,1,2].some(i=>words(A('ctl.n'+i))>0));
   /* materials */
   let mt,mdn;
   if(helped()){
@@ -1515,8 +1537,8 @@ BUILD.plan=function(){
       <div><span class="lbl">My materials</span>${mine.length?`<div class="opts">${mine.map(id=>{const m=matShelf().find(x=>x.id===id);if(!m)return'';return`<div class="opt" style="cursor:default;align-items:center"><span class="t" style="flex:1">${esc(m.t)}${isDev()?': '+esc(m.amt):''}</span>${isPro()?`<input type="text" class="inl" data-bind="mat.n.${m.id}" value="${esc(A('mat.n.'+m.id))}" placeholder="how many?" style="min-width:9ch;width:11ch">`:''}<button class="btn sm" data-act="mat:rm" data-k="${m.id}" aria-label="Remove">✕</button></div>`}).join('')}</div>`:'<p class="note">Click things on the shelf to add them here.</p>'}</div></div>`+
      chkBtn('mat',()=>{const need=matShelf().filter(m=>m.need===true).map(m=>m.id),opt=matShelf().filter(m=>m.need==='opt').map(m=>m.id),extra=mine.filter(id=>!need.includes(id)&&!opt.includes(id)),miss=need.filter(id=>!mine.includes(id));
        return[{ok:!miss.length,msg:'You have everything you need.',fix:`You are missing ${miss.length} thing${miss.length===1?'':'s'}. Think about what you need to build, launch and measure.`},{ok:!extra.length,msg:'You left out things you do not need.',fix:'Take out the things you do not need for this test.'}].concat(isPro()?[{ok:mine.every(id=>words(A('mat.n.'+id))>=1),msg:'You wrote how many of each.',fix:'Write how many you need of each thing.'}]:[])});
-    mdn=mine.length>=3&&(!isPro()||mine.every(id=>words(A('mat.n.'+id))>=1));
-  }else{mt=nudge(['mastering'],'Check your notebook: a materials list says what you need and <b>how many</b> (amounts).')+`<p class="note" style="margin:0 0 4px">Write each item and how many you need, one on each line.</p>`+ta('mat','',4);mdn=words(A('mat'))>=3}
+    mdn=mine.length>=1&&(!isPro()||mine.every(id=>words(A('mat.n.'+id))>=1));
+  }else{mt=nudge(['mastering'],'Check your notebook: a materials list says what you need and <b>how many</b> (amounts).')+`<p class="note" style="margin:0 0 4px">Write each item and how many you need, one on each line.</p>`+ta('mat','',4);mdn=words(A('mat'))>=1}
   B.q('mat','Materials',mt,mdn);
   /* method */
   let me,mde;
@@ -1530,14 +1552,14 @@ BUILD.plan=function(){
         ...(isDev()?[]:[{ok:m.every(k=>frameDone('mb.'+k,MB[k]())),msg:'You filled in every gap.',fix:'Fill in every gap in your steps.'}]),
         {ok:isDev()||!m.includes('m6')||/\b3\b|three/i.test(A('mb.m6.a')),msg:'You repeat each test the right number of times.',fix:'How many trials does each value get? Check step "Repeat steps 3 to 5".'},
         {ok:isDev()||!m.includes('m8')||/average|mean/i.test(A('mb.m8.a')),msg:'You work out the right thing at the end.',fix:'What do you work out from three trials? Check the last step.'}]});
-    mde=mbList().length>=6&&(isDev()||mbList().every(k=>frameDone('mb.'+k,MB[k]())));
+    mde=mbList().length>=1;
   }else{
     me=nudge(['mastering'],'Check your notebook for what makes a method easy to repeat.')+`<div class="rows">`+[0,1,2,3,4,5,6].map(i=>`<div class="rowi"><span class="no">${i+1}.</span><input type="text" data-bind="met.${i}" value="${esc(A('met.'+i))}"></div>`).join('')+`</div>`;
-    mde=methodList().length>=4;
+    mde=methodList().length>=1;
   }
   B.q('met','Method',me,mde);
-  const ready=S.levels.length>=minLevels()&&S.env&&S.launch;
-  B.raw(`<div class="nav"><button class="btn" data-go="hypothesis">← Hypothesis</button><span class="msg">${ready?'':'Choose your experimental groups and set up your test before you fly.'}</span><button class="btn primary" data-go="lab" ${ready?'':'disabled'}>Next: Test flights →</button></div></div>`);
+  const ready=S.levels.length>=2&&S.env&&S.launch;
+  B.raw(`<div class="nav"><button class="btn" data-go="hypothesis">← Hypothesis</button><span class="msg">${ready?'':'You need at least 2 experimental groups, a place to fly and a launch method before you fly.'}</span><button class="btn primary" data-go="lab">Next: Test flights →</button></div></div>`);
   return B;
 };
 
@@ -1559,7 +1581,7 @@ function obsReminder(lk){
 }
 BUILD.results=function(){
   const B=newB();B.raw(`<div class="card"><h2>6. Results</h2><p class="lead">Describe what you saw, then make your graph.</p>`);
-  if(!S.iv||!live().length){B.raw(`<div class="fb mid">Test some flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
+  if(!S.iv||!live().length){B.raw(`<div class="fb no">You haven’t recorded any flights yet. Go to <b>Test flights</b> and record your flights first.</div>`+`<div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
   const c=cx(),st=levelStats();
   /* table 1 (made on the flight screen) */
   let h=`<p class="note" style="margin-bottom:6px">You made this table on the Test flights page. <button class="btn sm" data-go="lab">Edit it there</button></p>`+table1HTML('static');
@@ -1569,8 +1591,8 @@ BUILD.results=function(){
   let h2=tip(['developing','proficient'],'Describe what each plane did in words. <b>Do not use numbers.</b> For example: <i>It flew straight, then dipped down at the end.</i>')+
     `<p class="note">Table 2: Qualitative observations (don’t use numbers!)</p><table class="tb"><thead><tr><th class="l" style="width:24%">IV: ${esc(A('t1.ivh'))}</th><th class="l">What I saw</th></tr></thead><tbody>`+
     S.levels.map(lk=>`<tr><td class="l"><b>${esc(rowLabel(lk))}</b></td><td class="l"><input type="text" style="text-align:left" data-bind="obs.${esc(String(lk))}" value="${esc(A('obs.'+String(lk)))}">${obsReminder(lk)}</td></tr>`).join('')+`</tbody></table>`;
-  B.q('t2','Table 2: what you saw',h2,S.levels.every(lk=>words(A('obs.'+String(lk)))>=2));
-  B.raw(`<section class="q" data-qid="graph"><h3><span>Your graph</span><span class="status ${graphEval().done?'ok':'no'}">${graphEval().done?'✓ done':''}</span></h3><div id="graphhost">${graphHTML()}</div></section>`);B.f.graph=graphEval().done;
+  B.q('t2','Table 2: what you saw',h2,S.levels.every(lk=>words(A('obs.'+String(lk)))>=1));
+  B.t.graph='Your graph';B.raw(`<section class="q ${graphEval().done?'isdone':''}" data-qid="graph"><h3><span>Your graph</span>${statusPill(graphEval().done)}</h3><div id="graphhost">${graphHTML()}</div></section>`);B.f.graph=graphEval().done;
   B.raw(`<div class="nav"><button class="btn" data-go="lab">← Test flights</button><span class="msg"></span><button class="btn primary" data-go="conclusion">Next: Analysis →</button></div></div>`);
   return B;
 };
@@ -1629,7 +1651,7 @@ BUILD.compare=function(){
   const B=newB();B.raw(`<div class="card"><h2>★ Extension: peer review with a partner</h2><p class="lead">Scientists do not trust one set of results on its own. They check that another scientist doing the <b>same experiment</b> gets <b>similar results</b>. If they do, the experiment is <b>reliable</b>.</p>
    <div class="panel" style="margin-bottom:10px"><h4>What you will do</h4><ol style="margin:4px 0;padding-left:20px"><li>Get your partner’s averages (they ran exactly the same test as you).</li><li>The lab puts your averages side by side and works out the <b>% difference</b> for each one.</li><li>Decide whether your experiment is reliable, and explain why your results might be different.</li><li>Swap computers and check each other’s report.</li></ol>
    <p class="note" style="margin-top:6px"><b>Example:</b> you got 600 cm and your partner got 620 cm. The difference is 20 cm, which is about 3%. That is close, so that result is reliable. If you got 600 cm and they got 800 cm (29%), the result is not reliable, and you would look for what was different.</p></div>`);
-  if(!live().length){B.raw(`<div class="fb mid">Test some flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
+  if(!live().length){B.raw(`<div class="fb no">You haven’t recorded any flights yet. Go to <b>Test flights</b> and record your flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
   const P=S.partner,mode=P.mode;
   let h=`<div class="grid2"><div><span class="lbl">My results code (give this to your partner)</span><textarea readonly rows="3" style="font-family:var(--font-num);font-size:12px" id="mycode">${esc(myCode())}</textarea><button class="btn sm" data-act="pcopy">Copy my code</button> <span class="note" id="copymsg"></span></div>
     <div><span class="lbl">My partner’s name</span><input type="text" data-bind="p.name" value="${esc(P.name)}" ${mode==='virtual'?'disabled':''}></div></div>
@@ -1658,7 +1680,7 @@ BUILD.compare=function(){
     else{w=tip(['proficient'],'Sentence starters: <i>My results were similar to / different from… · The biggest difference was at… · This might be because… · I think our experiment is reliable / not very reliable because…</i>')+
       nudge(['mastering'],'Check your notebook for what “reliable” means.')+`<p style="margin:4px 0"><b>How reliable is your experiment? Compare your results with your partner’s. Use data.</b></p>`+ta('rel','',5)+
       chkBtn('rel',()=>[{ok:usesData(A('rel'))>=2,msg:'You used numbers from the table.'},{ok:/reliab/i.test(A('rel')),msg:'You said how reliable the experiment is.'},{ok:/because|might|could|due to/i.test(A('rel')),msg:'You gave a reason for the differences.'}])}
-    B.q('rel','Is the experiment reliable?',w,isDev()?frameDone('rel',RELF()):words(A('rel'))>=15);
+    B.q('rel','Is the experiment reliable?',w,isDev()?frameDone('rel',RELF()):words(A('rel'))>=1);
   }
   /* peer check */
   const pe=S.peer;
@@ -1666,7 +1688,7 @@ BUILD.compare=function(){
     <span class="lbl">Checked by</span><input type="text" data-bind="peer.name" value="${esc(pe.name||'')}" style="max-width:320px">
     <div class="checklist" style="margin-top:8px">${PEER.map(([k,t])=>`<label><input type="checkbox" data-peerck="${k}" ${pe['ck.'+k]?'checked':''}><span>${t}</span></label>`).join('')}</div>
     <div class="grid2" style="margin-top:8px"><div><span class="lbl">One thing done well</span>${`<textarea data-bind="peer.well" rows="2">${esc(pe.well||'')}</textarea>`}</div><div><span class="lbl">One thing to improve</span><textarea data-bind="peer.better" rows="2">${esc(pe.better||'')}</textarea></div></div>`;
-  B.q('peer','Peer check (your partner fills this in)',ph,words(pe.name)>=1&&words(pe.well)>=2&&words(pe.better)>=2);
+  B.q('peer','Peer check (your partner fills this in)',ph,words(pe.name)>=1&&words(pe.well)>=1&&words(pe.better)>=1);
   B.raw(`<div class="fb mid" style="margin-top:12px">When you have finished, go back to <b>Finish</b> and save your report PDF again. The peer review will be added to it.</div><div class="nav"><button class="btn" data-go="extend">← Extensions</button><span class="msg"></span><button class="btn primary" data-go="finish">Go to Finish →</button></div></div>`);
   return B;
 };
@@ -1684,7 +1706,7 @@ const QSTEM={q1:()=>IVS[S.iv].type==='num'?'My graph shows a positive / negative
 function q3Picks(){const p=A('q3.pick',[]);return Array.isArray(p)?p:[]}
 function q3Chosen(){const cards=sortCards();return q3Picks().map(id=>cards.find(c=>c.id===id)).filter(Boolean)}
 function q3HelpedText(){return q3Chosen().map((cd,i)=>`Method error ${i+1}: ${cd.t} This affected my results because ${A('q3.w'+cd.id).trim()||'___'}.`).join('\n')}
-function q3HelpedDone(){const ch=q3Chosen();return ch.length>=2&&ch.every(cd=>words(A('q3.w'+cd.id))>=3)}
+function q3HelpedDone(){const ch=q3Chosen();return ch.length>=1&&ch.every(cd=>words(A('q3.w'+cd.id))>=1)}
 function qText(n){if(n==='q3'&&helped())return q3HelpedText();return isDev()?frameText(n,QF[n]()):A(n)}
 function flawsIn(t){return Object.keys(FLAWS).filter(k=>FLAWS[k].kw.test(t||''))}
 function revealHTML(){
@@ -1724,14 +1746,14 @@ function addQ(B,n,i){
      chkBtn(n,()=>{const t=A(n);if(n==='q1')return c.isNum?[{ok:/positive|negative|no trend/i.test(t),msg:'You named the trend.'},{ok:usesData(t)>=2,msg:'You used at least two numbers from your results.'}]:[{ok:/difference|more than|less than|further|longer|higher|lower/i.test(t),msg:'You compared the groups.'},{ok:usesData(t)>=2,msg:'You used at least two numbers from your results.'}];
        if(n==='q2')return[{ok:/support/i.test(t),msg:'You said if your hypothesis was supported.'},{ok:usesData(t)>=1,msg:'You used data.'}];
        return[{ok:words(t)>=15,msg:'You described how to improve the method.'},{ok:/fair|reliab/i.test(t),msg:'You explained how it makes the test fairer or more reliable.'}]});
-    done=words(A(n))>=8;
+    done=words(A(n))>=1;
   }
   B.q(n,`Question ${i+1}`,body,done);
 }
 BUILD.conclusion=function(){
   const B=newB();B.raw(`<div class="card"><h2>7. Analysis</h2><p class="lead">Analyse your data: describe what it shows, using numbers, and decide if your hypothesis was supported.</p>
    <div class="tip">📄 Look at <b>My report</b> on the right to see your data: Table 1 (with your averages) and your graph. Click the <b>My report</b> tab to close or open it.</div>`);
-  if(!live().length){B.raw(`<div class="fb mid">Test some flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
+  if(!live().length){B.raw(`<div class="fb no">You haven’t recorded any flights yet. Go to <b>Test flights</b> and record your flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
   ['q1','q2'].forEach((n,i)=>addQ(B,n,i));
   B.raw(`<div class="nav"><button class="btn" data-go="results">← Results</button><span class="msg"></span><button class="btn primary" data-go="evaluate">Next: Evaluation →</button></div></div>`);
   return B;
@@ -1753,17 +1775,18 @@ function finishItems(){
    ['v','I evaluated my test: fairness, errors and improvements.','evaluate',()=>allDone('evaluate')],
    ['s1','I checked my spelling and my units.',null,()=>true],
    ['s2','Everything in this report is my own work.',null,()=>true],
-   ['s3','I saved my report as a PDF and handed it in on Toddle.',null,()=>S.exported]
+   ['s3','I saved my lab report and my feedback sheet, and handed both in on Toddle.',null,()=>S.exported&&S.exportedFb]
   ];
 }
 const certReady=()=>finishItems().every(([k,,,ok])=>S.ck[k]&&ok());
 BUILD.finish=function(){
   const B=newB(),items=finishItems();
   B.raw(`<div class="card"><h2>9. Finish</h2><p class="lead">Save your report as a PDF and hand it in on Toddle. Then tick off the checklist to earn your certificate.</p>
-   <div class="panel" style="margin-bottom:12px"><h4>1. Save your report</h4><p class="note" style="margin-bottom:8px">Your PDF shows your challenge level (<b>${esc(LV[S.level].n)}</b>, ${esc(capText(S.level).toLowerCase())}). You can save it again after making changes.</p>
-   <button class="btn primary big" data-act="pdf">⬇ Save my report (PDF)</button> <span class="note" id="pdfmsg"></span></div>
+   <div class="panel" style="margin-bottom:12px"><h4>1. Save two PDFs and hand both in on Toddle</h4><p class="note" style="margin-bottom:8px">Your <b>lab report</b> is your own work. Your <b>feedback sheet</b> shows what the lab checked and what to look at again. Both show your challenge level (<b>${esc(LV[S.level].n)}</b>). You can save them again after making changes.</p>
+   <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary big" data-act="pdf">⬇ 1. Save my lab report</button><button class="btn primary big" data-act="pdffb">⬇ 2. Save my feedback sheet</button></div>
+   <p style="margin:8px 0 0">${S.exported?'<span class="status ok">✓ Lab report saved</span>':'<span class="status no">Lab report not saved yet</span>'} ${S.exportedFb?'<span class="status ok">✓ Feedback sheet saved</span>':'<span class="status no">Feedback sheet not saved yet</span>'}</p><span class="note" id="pdfmsg"></span></div>
    <div class="panel"><h4>2. Checklist</h4><p class="note">You can tick an item once the lab can see that part is finished.</p><div class="checklist">`+
-   items.map(([k,t,step,ok])=>{const can=ok();return`<label class="${can?'':'off'}"><input type="checkbox" data-ck="${k}" ${S.ck[k]&&can?'checked':''} ${can?'':'disabled'}><span>${t}</span>${!can&&step?`<button class="btn sm auto" data-act="gofix" data-k="${step}">Go and finish it</button>`:!can?'<span class="auto note">Save your PDF first</span>':''}</label>`}).join('')+`</div></div>`);
+   items.map(([k,t,step,ok])=>{const can=ok();return`<label class="${can?'':'off'}"><input type="checkbox" data-ck="${k}" ${S.ck[k]&&can?'checked':''} ${can?'':'disabled'}><span>${t}</span>${!can&&step?`<button class="btn sm auto" data-act="gofix" data-k="${step}">Go and finish it</button>`:!can?'<span class="auto note">Save both PDFs first</span>':''}</label>`}).join('')+`</div></div>`);
   const ready=certReady();
   B.raw(`<div class="panel" style="margin-top:12px"><h4>3. Your certificate</h4>${ready?certHTML()+`<div style="margin-top:10px"><button class="btn good big" data-act="cert">⬇ Save my certificate (PDF)</button></div>`:`<p class="note">Tick every item on the checklist to unlock your certificate.</p>`}</div>
    <div class="panel" style="margin-top:12px;border-color:var(--accent)"><h4>Finished early?</h4><p class="note" style="margin-bottom:8px">Try an extension: peer review your experiment with a partner, or run a new investigation at a higher challenge level.</p><button class="btn primary" data-go="extend">★ See the extensions</button></div>
@@ -1898,15 +1921,15 @@ function sortHTML(){
   return h;
 }
 function sortDone(){return sortCards().every(cd=>A('sort.'+cd.id))}
-function sortSummary(){const cards=sortCards(),g={};cards.forEach(cd=>{const v=A('sort.'+cd.id);if(v)(g[v]=g[v]||[]).push(cd.t+(catOK(cd,v)?'':'  !'))});return g}
+function sortSummary(plain){const cards=sortCards(),g={};cards.forEach(cd=>{const v=A('sort.'+cd.id);if(v)(g[v]=g[v]||[]).push(cd.t+(plain||catOK(cd,v)?'':'  !'))});return g}
 
 BUILD.evaluate=function(){
   const B=newB();B.raw(`<div class="card"><h2>8. Evaluation</h2><p class="lead">How fair was your test? Find the method errors, then decide how to make your test fairer and your results more reliable.</p>`);
-  if(!live().length){B.raw(`<div class="fb mid">Test some flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
+  if(!live().length){B.raw(`<div class="fb no">You haven’t recorded any flights yet. Go to <b>Test flights</b> and record your flights first.</div><div class="nav"><button class="btn" data-go="lab">← Test flights</button></div></div>`);return B}
   /* 1. fairness line */
   let fb=`<p style="margin:4px 0"><b>Mark an ✕ on the line to show how fair your test was.</b></p>`+fairHTML();
   fb+=isDev()?frame('fairw',FAIRF()):`<p style="margin:8px 0 2px"><b>Explain where you put your ✕.</b></p>`+ta('fairw','',2);
-  B.q('fair','1. How fair was my test?',fb,A('fair','')!==''&&(isDev()?frameDone('fairw',FAIRF()):words(A('fairw'))>=5));
+  B.q('fair','1. How fair was my test?',fb,A('fair','')!==''&&(isDev()?frameDone('fairw',FAIRF()):words(A('fairw'))>=1));
   /* my flight notes */
   {const N=live().filter(f=>(f.note||'').trim());B.raw(`<div class="panel" style="margin:10px 0"><h4>📝 My flight notes</h4>${N.length?`<ul style="margin:4px 0;padding-left:20px">${N.map(f=>`<li><b>Flight ${f.n} (${esc(lvlLabel(S.iv,f.lv))}):</b> ${esc(f.note)}</li>`).join('')}</ul>`:'<p class="note" style="margin:0">You did not write any notes during your flights.</p>'}<p class="note" style="margin:4px 0 0">Use your notes to help you find the method errors.</p></div>`)}
   /* 2. behind the scenes */
@@ -1918,7 +1941,7 @@ BUILD.evaluate=function(){
     sb=nudge(['mastering'],'Think about: how you measured (the tape and the stopwatch) · whether every throw was exactly the same · the air around the planes · how the planes were made · how many trials you did.')+
       `<p style="margin:4px 0"><b>List the method errors in your test, and an improvement for each.</b> Leave out human errors (slips you could fix by being more careful).</p>
       <div class="grid2"><div><span class="lbl">Method errors</span>${ta('ev.m','',5)}</div><div><span class="lbl">Improvements</span>${ta('ev.i','',5)}</div></div>`;
-    sd=words(A('ev.m'))>=3&&words(A('ev.i'))>=3;
+    sd=words(A('ev.m'))>=1&&words(A('ev.i'))>=1;
   }
   B.q('sort',helped()?'2. Sort the errors and improvements':'2. Method errors and improvements',sb,sd);
   /* 4. written evaluation */
@@ -1951,7 +1974,7 @@ function rubric(){
   /* C i */
   {const st=levelStats(),tot=st.length*3,trok=st.reduce((a,s)=>a+[0,1,2].filter(i=>trOK(s.lk,i)).length,0),avok=st.filter(s=>avgOK(s.lk)).length,ttl=!!t1Title(),units=t(A('t1.dvh')).includes(dvUnitTxt()),ge=graphEval();
    const frac=tot?trok/tot:0;let b=trok===0?(live().length?0:-1):frac<0.7?1:(frac===1&&avok===st.length&&ttl&&units&&ge.done&&ge.type)?3:2;
-   R.push({k:'C i',d:'My tables and graph',ev:[[trialsDone(),'You did every flight.',`You did ${live().length} of ${flightsExpected()} flights.`],[frac===1,'All your measurements are accurate.',`${tot-trok} of your ${tot} measurements are not accurate. Look for the pink boxes in Table 1.`],[avok===st.length,'All your averages are correct.',`${st.length-avok} average${st.length-avok===1?' is':'s are'} not correct. Check your adding and dividing.`],[ttl&&units,'Your table has a title and units.','Give your table a title and put units in the headings.'],[ge.type&&ge.title&&ge.xl&&ge.yl,'Your graph is the right type, with a title and axis labels.','Check your graph type, title and axis labels.'],[ge.placed===ge.total&&ge.accurate===ge.total,'All your points or bars are in the right place.','Check where your points or bars are on the graph.']].concat(gInit().fit&&IVS[S.iv].type==='num'?[[ge.fitOK&&!(ge.bendy&&!gInit().fit.curve),`Your ${gInit().fit.curve?'curve':'line'} of best fit matches your points well.`,ge.bendy&&!gInit().fit.curve?'Your points make a bend. Try a curve of best fit.':`Move your ${gInit().fit.curve?'curve':'line'} of best fit so it goes through the middle of your points.`]]:[]),b})}
+   R.push({k:'C i',d:'My tables and graph',ev:[[trialsDone(),'You did every flight.',`You did ${live().length} of ${flightsExpected()} flights.`],[frac===1,'All your measurements are accurate.',`${tot-trok} of your ${tot} measurements are not accurate. Look for the pink boxes on your feedback sheet.`],[avok===st.length,'All your averages are correct.',`${st.length-avok} average${st.length-avok===1?' is':'s are'} not correct. Check your adding and dividing.`],[ttl&&units,'Your table has a title and units.','Give your table a title and put units in the headings.'],[ge.type&&ge.title&&ge.xl&&ge.yl,'Your graph is the right type, with a title and axis labels.','Check your graph type, title and axis labels.'],[ge.placed===ge.total&&ge.accurate===ge.total,'All your points or bars are in the right place.','Check where your points or bars are on the graph.']].concat(gInit().fit&&IVS[S.iv].type==='num'?[[ge.fitOK&&!(ge.bendy&&!gInit().fit.curve),`Your ${gInit().fit.curve?'curve':'line'} of best fit matches your points well.`,ge.bendy&&!gInit().fit.curve?'Your points make a bend. Try a curve of best fit.':`Move your ${gInit().fit.curve?'curve':'line'} of best fit so it goes through the middle of your points.`]]:[]),b})}
   /* C ii */
   {const q=qText('q1'),u=usesData(q),pat=/positive|negative|no trend|increas|decreas|greatest|smallest|highest|lowest|difference/i.test(q);
    let b=!q.trim()?-1:u>=2&&pat&&words(q)>=20?3:u>=1?2:words(q)>=6?1:0;R.push({k:'C ii',d:'What my data shows (Q1)',ev:[[pat,'You described a pattern in your data.','Describe the pattern: the trend, or which group was highest and lowest.'],[u>=2,`You used ${u} numbers from your results.`,'Use at least two numbers from your results.']],b,up:b===3?'that the pattern you describe matches your data':''})}
@@ -1998,8 +2021,8 @@ function reportFlags(){
   if(!words(A('t1.dvh')))add('t1','The DV heading is missing.');else if(!UREX[dvUnitTxt()].test(A('t1.dvh')))add('t1',`The DV heading has no unit (${dvUnitTxt()}).`);
   if(!A('t1.avgu').trim())add('t1','The unit for the averages is missing.');else if(!UREX[dvUnitTxt()].test(A('t1.avgu')))add('t1',`The unit for the averages should be ${dvUnitTxt()}.`);
   {let bad=0,badA=0,missA=0;st.forEach(s=>{[0,1,2].forEach(i=>{if(String(A('tr.'+String(s.lk)+'.'+i)).trim()&&!trOK(s.lk,i))bad++});const av=String(A('avg.'+String(s.lk))).trim();if(s.n>=3&&!av)missA++;else if(av&&!avgOK(s.lk))badA++});
-   if(bad)add('t1',`${bad} reading${bad>1?'s do':' does'} not match where the plane landed${S.dv==='time'?' or the stopwatch':''} (marked ! in the table).`);
-   if(badA)add('t1',`${badA} average${badA>1?'s are':' is'} not correct (marked ! in the table).`);if(missA)add('t1',`${missA} average${missA>1?'s are':' is'} missing.`)}
+   if(bad)add('t1',`${bad} reading${bad>1?'s do':' does'} not match where the plane landed${S.dv==='time'?' or the stopwatch':''} (see the pink boxes on this sheet).`);
+   if(badA)add('t1',`${badA} average${badA>1?'s are':' is'} not correct (see the pink boxes on this sheet).`);if(missA)add('t1',`${missA} average${missA>1?'s are':' is'} missing.`)}
   /* Table 2 */
   {const rows=S.levels.map(lk=>A('obs.'+String(lk)));if(rows.some(r=>words(r)<2))add('t2','Some qualitative observations are missing.');if(rows.some(r=>/\d/.test(r)))add('t2','Table 2 uses numbers. Qualitative observations should use words only.')}
   /* graph */
@@ -2014,7 +2037,7 @@ function reportFlags(){
   {const q=qText('q2');if(!q.trim())add('q2','Question 2 is not answered.');else{if(!/support/i.test(q))add('q2','Question 2 does not say if the hypothesis was supported.');if(usesData(q)<1)add('q2','Question 2 does not use data.')}}
   /* evaluation */
   if(A('fair','')==='')add('fair','The fairness line has no ✕.');else{if(words(fairText())<5)add('fair','No reason is given for the ✕.');if(Number(A('fair'))>=70&&unfairFlights().length)add('fair',`Rated ${fairWord()}, but the ${unfairFlights().join(' and ')} changed between flights.`)}
-  if(helped()){const cards=sortCards(),wrong=cards.filter(cd=>A('sort.'+cd.id)&&!catOK(cd,A('sort.'+cd.id))),miss=cards.filter(cd=>!A('sort.'+cd.id));if(wrong.length)add('sort',`${wrong.length} card${wrong.length>1?'s are':' is'} in the wrong group (marked !).`);if(miss.length)add('sort',`${miss.length} card${miss.length>1?'s were':' was'} not sorted.`)}
+  if(helped()){const cards=sortCards(),wrong=cards.filter(cd=>A('sort.'+cd.id)&&!catOK(cd,A('sort.'+cd.id))),miss=cards.filter(cd=>!A('sort.'+cd.id));if(wrong.length)add('sort',`${wrong.length} card${wrong.length>1?'s are':' is'} in the wrong group.`);if(miss.length)add('sort',`${miss.length} card${miss.length>1?'s were':' was'} not sorted.`)}
   else{if(words(A('ev.m'))<3)add('sort','No method errors are listed.');if(words(A('ev.i'))<3)add('sort','No improvements are listed.');if(/\b(careless|misread|pressed .*(late|early)|not paying attention|by mistake|wasted)\b/i.test(A('ev.m')))add('sort','The method errors list includes human errors (slips).')}
   {const q=qText('q3');if(!q.trim())add('q3','Question 3 is not answered.');else{
     if(helped()){const ch=q3Chosen();if(ch.length<2)add('q3','Fewer than two method errors were explained.');const hum=ch.filter(cd=>!catOK(cd,'method'));if(hum.length)add('q3','A human error was explained instead of a method error.');if(ch.some(cd=>words(A('q3.w'+cd.id))<4))add('q3','Not every error says how it changed the results.')}
@@ -2107,10 +2130,68 @@ function pdfFromCanvases(cvs,title){
 }
 
 /* ---- the report ---- */
+/* the lab report: only the student's own work, laid out simply (easy for a teacher or an AI marker to read) */
 function buildReport(){
-  const d=new Doc(),c=cx(),l=LV[S.level],R=rubric();
+  const d=new Doc(),c=cx(),l=LV[S.level];
   /* cover + marking page */
   d.text('Paper Plane Investigation: Lab Report'+(S.attempt>1?` (investigation ${S.attempt})`:''),{sz:40,w:'bold',gap:4});
+  d.text(`${S.name}   ·   Class ${S.cls}   ·   ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,{sz:22,col:'#566475',gap:14});
+  d.ensure(120);d.c.fillStyle=l.col;d.c.fillRect(d.M,d.y,d.W-2*d.M,100);d.c.fillStyle='#fff';d.font(36,'bold');d.c.fillText(`Challenge level: ${l.n}  ${'★'.repeat(l.stars)}`,d.M+24,d.y+46);d.font(24);d.c.fillText(capText(S.level),d.M+24,d.y+82);d.y+=118;
+  d.text(`Changed: ${c.ivName}${c.isNum?' ('+c.iv.unit+')':''}  ·  Measured: ${c.dv.name} (${c.dv.unit})  ·  ${ENV[S.env]||'—'}, ${String(LAUNCH[S.launch]||'—').toLowerCase()}  ·  Tested: ${S.levels.map(v=>lvlLabel(S.iv,v)).join(', ')}`,{sz:19,col:'#566475',gap:10});
+  d.text('A separate feedback sheet shows what the lab checked and what to look at again.',{sz:17,col:'#566475'});
+  /* report */
+  d.y+=10;d.h2('Observations');d.box('',obsText());
+  d.h2('Research question and variables');
+  d.box('Research question',rqText());d.box(isMas()?'The science idea behind my question':'More detail',rqExtra());
+  d.table(['Independent variable (the variable I am changing)','Dependent variable (the variable I am measuring)'],[[ivTextA()||'(not answered)',dvTextA()||'(not answered)']],[.5,.5]);
+  d.h2('Hypothesis');d.box('',hypText());
+  d.h2('Plan');
+  d.text(`Set-up: ${ENV[S.env]||'—'}; ${LAUNCH[S.launch]||'—'}.  Plane design: ${designKeys().map(k=>SETTING_LABEL[k]+' '+settingText(k,S.design[k])).join('; ')}.`,{sz:18,col:'#566475'});
+  const cl=controlsList();d.table(['Control variables','How will I control them?'],[0,1,2].map(i=>[`${i+1}. ${cl[i]?cl[i].name:''}`,cl[i]?cl[i].how:'']),[.4,.6]);
+  d.box('Materials',materialsText());
+  const ml=methodList();d.box('Method',ml.map((s,i)=>`${i+1}. ${s}`).join('\n'));
+  d.h2('Results');
+  
+  d.text(t1Title()||'Table 1: (no title)',{sz:21,w:'bold'});
+  const st=levelStats(),PINK='#fbd9d3';
+  d.text(`DV (trials 1–3): ${A('t1.dvh')||'(no heading)'}`,{sz:18,w:'bold',col:'#566475',gap:2});
+  d.table([`IV: ${A('t1.ivh')||'(no heading)'}`,'Trial 1','Trial 2','Trial 3',`Average (${A('t1.avgu')||'?'})`],
+    st.map(s=>[rowLabel(s.lk),...[0,1,2].map(i=>A('tr.'+String(s.lk)+'.'+i)||'—'),A('avg.'+String(s.lk))||'—']),[.28,.16,.16,.16,.24]);
+  d.text('Table 2: Qualitative observations',{sz:21,w:'bold'});
+  d.table([`IV: ${A('t1.ivh')||''}`,'What I saw'],S.levels.map(lk=>[rowLabel(lk),A('obs.'+String(lk))||'—']),[.28,.72]);
+  d.ensure(GH*(d.W-2*d.M)/GW+80);d.h3('Graph');const g=gInit();
+  if(g.type&&gValid(g)){const gc=document.createElement('canvas');gc.width=GW;gc.height=GH;drawGraph(gc.getContext('2d'),g,{fb:false});d.image(gc,d.W-2*d.M)}else d.text('(No graph yet.)',{col:'#9aa7b6'});
+  d.h2('Analysis');
+  ['q1','q2'].forEach((n,i)=>{d.box(`${i+1}. ${QTXT[n]}`,qText(n))});
+  d.h2('Evaluation');
+  d.text('How fair was my test?',{sz:20,w:'bold'});
+  {d.ensure(90);const x0=d.M+40,w=d.W-2*d.M-80,y=d.y+10;const g=d.c.createLinearGradient(x0,0,x0+w,0);g.addColorStop(0,'#d6402f');g.addColorStop(.5,'#f2a93b');g.addColorStop(1,'#2e7d4f');d.c.fillStyle=g;d.c.fillRect(x0,y,w,26);d.c.strokeStyle='#14202e';d.c.lineWidth=2;d.c.strokeRect(x0,y,w,26);
+   d.font(17,'bold');d.c.fillStyle='#14202e';d.c.textAlign='left';d.c.fillText('Very unfair',x0,y+52);d.c.textAlign='center';d.c.fillText('Quite fair',x0+w/2,y+52);d.c.textAlign='right';d.c.fillText('Very fair',x0+w,y+52);d.c.textAlign='left';
+   if(A('fair','')!==''){const X=x0+w*Number(A('fair'))/100;d.font(40,'bold');d.c.fillStyle='#fff';d.c.strokeStyle='#000';d.c.lineWidth=4;d.c.textAlign='center';d.c.strokeText('✕',X,y+27);d.c.fillText('✕',X,y+27);d.c.textAlign='left'}
+   d.y+=76}
+  d.box('Why I put my ✕ there',fairText());
+  
+  if(helped()){const g=sortSummary(true);d.table(['Human errors','Method errors','Improvements'].concat(isPro()?['Not relevant']:[]),[[ (g.human||[]).join('\n')||'—',(g.method||[]).join('\n')||'—',(g.improve||[]).join('\n')||'—'].concat(isPro()?[(g.irrelevant||[]).join('\n')||'—']:[])],isPro()?[.25,.25,.25,.25]:[.33,.34,.33],{sz:16});}
+  else d.table(['Method errors','Improvements'],[[A('ev.m')||'—',A('ev.i')||'—']],[.5,.5],{sz:17});
+  ['q3','q4'].forEach((n,i)=>{d.box(`${i+3}. ${QTXT[n]}`,qText(n))});
+  const rows=cmpRows().filter(r=>r.p!=null);
+  if(compareStarted()){d.h2('Extension: peer review with a partner');
+  if(rows.length){d.table(['What I changed','My average',`${S.partner.name||'Partner'}’s average`,'% difference'],cmpRows().map(r=>[lvlLabel(S.iv,r.lk),r.me==null?'—':fmt(r.me,dvDp()),r.p==null?'—':fmt(r.p,dvDp()),r.pct==null?'—':fmt(r.pct,0)+'%']),[.31,.23,.23,.23]);
+    const cc=document.createElement('canvas');cc.width=1000;cc.height=380;drawCompare(cc.getContext('2d'),1000,380);d.image(cc,d.W-2*d.M)}
+  else d.text('(No partner results entered.)',{col:'#9aa7b6'});
+  d.box('Is the experiment reliable?',relText());
+  d.h3('Peer check'+(S.peer.name?` by ${S.peer.name}`:''));
+  d.text(PEER.map(([k,t])=>(S.peer['ck.'+k]?'✓ ':'☐ ')+t).join('\n'),{sz:19});
+  d.box('One thing done well',S.peer.well);d.box('One thing to improve',S.peer.better);
+  }
+  decorate(d,'Paper Plane Lab: lab report');
+  return d.pages;
+}
+/* the feedback sheet: what the lab checked, what to check, and what really happened */
+function buildFeedback(){
+  const d=new Doc(),c=cx(),l=LV[S.level],R=rubric();
+  /* cover + marking page */
+  d.text('Paper Plane Investigation: Feedback Sheet'+(S.attempt>1?` (investigation ${S.attempt})`:''),{sz:40,w:'bold',gap:4});
   d.text(`${S.name}   ·   Class ${S.cls}   ·   ${new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}`,{sz:22,col:'#566475',gap:14});
   d.ensure(120);d.c.fillStyle=l.col;d.c.fillRect(d.M,d.y,d.W-2*d.M,100);d.c.fillStyle='#fff';d.font(36,'bold');d.c.fillText(`Challenge level: ${l.n}  ${'★'.repeat(l.stars)}`,d.M+24,d.y+46);d.font(24);d.c.fillText(capText(S.level),d.M+24,d.y+82);d.y+=118;
   d.text(`Changed: ${c.ivName}${c.isNum?' ('+c.iv.unit+')':''}  ·  Measured: ${c.dv.name} (${c.dv.unit})  ·  ${ENV[S.env]||'—'}, ${String(LAUNCH[S.launch]||'—').toLowerCase()}  ·  Tested: ${S.levels.map(v=>lvlLabel(S.iv,v)).join(', ')}`,{sz:19,col:'#566475',gap:10});
@@ -2139,61 +2220,21 @@ function buildReport(){
     col(d.M+22+cw+26,'What to work on','#b3301e',todo,ALLGOOD(),'!','#b3301e');
     d.y=y0+H+12});
   const FL=reportFlags();d.ensure(220);
-  d.h3(FL.length?`Things to fix or check (${FL.length})`:'Things to fix or check');
-  {const t=FL.length?'Look for the {r}**red !**{/} in your report to find each one.':'{g}**The lab did not find anything to fix. Well done!**{/}';d.y+=d.rich(t,d.M,d.y,d.W-2*d.M,18,true)+8}
+  d.h3(FL.length?`What to check (${FL.length})`:'What to check');
+  {const t=FL.length?'Check each of these in your lab report.':'{g}**The lab did not find anything to fix. Well done!**{/}';d.y+=d.rich(t,d.M,d.y,d.W-2*d.M,18,true)+8}
   FL.forEach(f=>{const t=`**${FLAG_SEC[f.sec]}:** ${f.msg}`,h=d.rich(t,0,0,d.W-2*d.M-40,17,false);d.ensure(h+6);const c=d.c;c.fillStyle='#b3301e';c.beginPath();c.arc(d.M+12,d.y+12,12,0,7);c.fill();c.fillStyle='#fff';d.font(16,'bold');c.textAlign='center';c.fillText('!',d.M+12,d.y+18);c.textAlign='left';d.rich(t,d.M+34,d.y,d.W-2*d.M-40,17,true);d.y+=h+6});
-  /* report */
-  d.newPage();d.h2('Observations');d.flags(FL,'obs');d.box('',obsText());
-  d.h2('Research question and variables');
-  d.flags(FL,'rq');d.box('Research question',rqText());d.box(isMas()?'The science idea behind my question':'More detail',rqExtra());
-  d.flags(FL,'vars');d.table(['Independent variable (the variable I am changing)','Dependent variable (the variable I am measuring)'],[[ivTextA()||'(not answered)',dvTextA()||'(not answered)']],[.5,.5]);
-  d.h2('Hypothesis');d.flags(FL,'hyp');d.box('',hypText());
-  d.h2('Plan');
-  d.text(`Set-up: ${ENV[S.env]||'—'}; ${LAUNCH[S.launch]||'—'}.  Plane design: ${designKeys().map(k=>SETTING_LABEL[k]+' '+settingText(k,S.design[k])).join('; ')}.`,{sz:18,col:'#566475'});
-  const cl=controlsList();d.flags(FL,'ctl');d.table(['Control variables','How will I control them?'],[0,1,2].map(i=>[`${i+1}. ${cl[i]?cl[i].name:''}`,cl[i]?cl[i].how:'']),[.4,.6]);
-  d.flags(FL,'mat');d.box('Materials',materialsText());
-  const ml=methodList();d.flags(FL,'met');d.box('Method',ml.map((s,i)=>`${i+1}. ${s}`).join('\n'));
-  d.h2('Results');
-  d.flags(FL,'t1');
-  d.text(t1Title()||'Table 1: (no title)',{sz:21,w:'bold'});
-  const st=levelStats(),PINK='#fbd9d3';
-  d.text(`DV (trials 1–3): ${A('t1.dvh')||'(no heading)'}`,{sz:18,w:'bold',col:'#566475',gap:2});
-  d.table([`IV: ${A('t1.ivh')||'(no heading)'}`,'Trial 1','Trial 2','Trial 3',`Average (${A('t1.avgu')||'?'})`],
+  /* Table 1 compared with the real values */
+  {const st=levelStats(),PINK='#fbd9d3';d.ensure(260);d.h3('My Table 1 compared with the real values');
+   d.text('Pink boxes are readings or averages that do not match where the plane really landed, or the correct average.',{sz:17,col:'#566475'});
+   d.table([`IV: ${A('t1.ivh')||'(no heading)'}`,'Trial 1','Trial 2','Trial 3',`Average (${A('t1.avgu')||'?'})`],
     st.map(s=>{const tb=[0,1,2].map(i=>String(A('tr.'+String(s.lk)+'.'+i)).trim()!==''&&!trOK(s.lk,i)),av=String(A('avg.'+String(s.lk))).trim(),ab=av!==''&&!avgOK(s.lk);
-      return{cells:[rowLabel(s.lk),...[0,1,2].map(i=>(A('tr.'+String(s.lk)+'.'+i)||'—')+(tb[i]?'   !':'')),(av||'—')+(ab?'   !':'')],fill:[null,...tb.map(b=>b?PINK:null),ab?PINK:null]}}),[.28,.16,.16,.16,.24]);
-  d.text('Table 2: Qualitative observations',{sz:21,w:'bold'});d.flags(FL,'t2');
-  d.table([`IV: ${A('t1.ivh')||''}`,'What I saw'],S.levels.map(lk=>[rowLabel(lk),A('obs.'+String(lk))||'—']),[.28,.72]);
-  d.h3('Graph');d.flags(FL,'graph');const g=gInit();
-  if(g.type&&gValid(g)){const gc=document.createElement('canvas');gc.width=GW;gc.height=GH;drawGraph(gc.getContext('2d'),g,{fb:false});d.image(gc,d.W-2*d.M)}else d.text('(No graph yet.)',{col:'#9aa7b6'});
-  d.h2('Analysis');
-  ['q1','q2'].forEach((n,i)=>{d.flags(FL,n);d.box(`${i+1}. ${QTXT[n]}`,qText(n))});
-  d.h2('Evaluation');
-  d.text('How fair was my test?',{sz:20,w:'bold'});d.flags(FL,'fair');
-  {d.ensure(90);const x0=d.M+40,w=d.W-2*d.M-80,y=d.y+10;const g=d.c.createLinearGradient(x0,0,x0+w,0);g.addColorStop(0,'#d6402f');g.addColorStop(.5,'#f2a93b');g.addColorStop(1,'#2e7d4f');d.c.fillStyle=g;d.c.fillRect(x0,y,w,26);d.c.strokeStyle='#14202e';d.c.lineWidth=2;d.c.strokeRect(x0,y,w,26);
-   d.font(17,'bold');d.c.fillStyle='#14202e';d.c.textAlign='left';d.c.fillText('Very unfair',x0,y+52);d.c.textAlign='center';d.c.fillText('Quite fair',x0+w/2,y+52);d.c.textAlign='right';d.c.fillText('Very fair',x0+w,y+52);d.c.textAlign='left';
-   if(A('fair','')!==''){const X=x0+w*Number(A('fair'))/100;d.font(40,'bold');d.c.fillStyle='#fff';d.c.strokeStyle='#000';d.c.lineWidth=4;d.c.textAlign='center';d.c.strokeText('✕',X,y+27);d.c.fillText('✕',X,y+27);d.c.textAlign='left'}
-   d.y+=76}
-  d.box('Why I put my ✕ there',fairText());
-  d.flags(FL,'sort');
-  if(helped()){const g=sortSummary();d.table(['Human errors','Method errors','Improvements'].concat(isPro()?['Not relevant']:[]),[[ (g.human||[]).join('\n')||'—',(g.method||[]).join('\n')||'—',(g.improve||[]).join('\n')||'—'].concat(isPro()?[(g.irrelevant||[]).join('\n')||'—']:[])],isPro()?[.25,.25,.25,.25]:[.33,.34,.33],{sz:16});if(Object.values(g).flat().some(t=>/  !$/.test(t)))d.text('! = sorted into the wrong group.',{sz:15,col:'#b3301e'})}
-  else d.table(['Method errors','Improvements'],[[A('ev.m')||'—',A('ev.i')||'—']],[.5,.5],{sz:17});
-  ['q3','q4'].forEach((n,i)=>{d.flags(FL,n);d.box(`${i+3}. ${QTXT[n]}`,qText(n))});
-  const rows=cmpRows().filter(r=>r.p!=null);
-  if(compareStarted()){d.h2('Extension: peer review with a partner');
-  if(rows.length){d.table(['What I changed','My average',`${S.partner.name||'Partner'}’s average`,'% difference'],cmpRows().map(r=>[lvlLabel(S.iv,r.lk),r.me==null?'—':fmt(r.me,dvDp()),r.p==null?'—':fmt(r.p,dvDp()),r.pct==null?'—':fmt(r.pct,0)+'%']),[.31,.23,.23,.23]);
-    const cc=document.createElement('canvas');cc.width=1000;cc.height=380;drawCompare(cc.getContext('2d'),1000,380);d.image(cc,d.W-2*d.M)}
-  else d.text('(No partner results entered.)',{col:'#9aa7b6'});
-  d.box('Is the experiment reliable?',relText());
-  d.h3('Peer check'+(S.peer.name?` by ${S.peer.name}`:''));
-  d.text(PEER.map(([k,t])=>(S.peer['ck.'+k]?'✓ ':'☐ ')+t).join('\n'),{sz:19});
-  d.box('One thing done well',S.peer.well);d.box('One thing to improve',S.peer.better);
-  }
+      return{cells:[rowLabel(s.lk),...[0,1,2].map(i=>(A('tr.'+String(s.lk)+'.'+i)||'—')+(tb[i]?'   !':'')),(av||'—')+(ab?'   !':'')],fill:[null,...tb.map(b=>b?PINK:null),ab?PINK:null]}}),[.28,.16,.16,.16,.24]);}
   /* appendix for the marker */
   d.newPage();d.h2('Behind the scenes: what really happened');
   d.text('The lab secretly recorded what really happened in each flight. “Typed” is what you wrote in your table. “Real” is the true value. Compare them to see how accurate your measurements were.',{sz:17,col:'#566475'});
   d.table(['#','Tested','Typed (cm)','Real (cm)','Typed (s)','Stopwatch (s)','Real (s)','Angle set','Speed set','Air (m/s)','Note'],S.flights.filter(f=>f.hid).map(f=>[f.n,lvlLabel(S.iv,f.lv),f.read!=null?f.read:'—',f.hid.trueDist,f.timed!=null?Number(f.timed).toFixed(2):'—',f.hid.sw!=null?f.hid.sw.toFixed(2):'—',f.hid.trueTime.toFixed(2),f.hid.aSet+'°',f.hid.vSet,(f.hid.wind>0?'+':'')+f.hid.wind.toFixed(2),[f.gone?'not used':'',f.hid.dive?'nosedive':''].filter(Boolean).join(', ')]),[.05,.12,.09,.09,.09,.1,.08,.08,.08,.09,.13],{sz:14});
   d.text('Method errors that were built into this lab: '+flawsHere().map(k=>FLAWS[k].name).join('; ')+'.',{sz:17});
-  decorate(d,'Paper Plane Lab');
+  decorate(d,'Paper Plane Lab: feedback sheet');
   return d.pages;
 }
 function exportReport(){
@@ -2219,6 +2260,97 @@ function buildCert(){
 }
 function exportCert(){download(`PaperPlaneLab_${safeName()}_certificate.pdf`,pdfFromCanvases([buildCert()],'Paper Plane Lab certificate - '+S.name))}
 
+/* ===== Making progress obvious: what is done, what is not, and exactly what is missing ===== */
+const STEP_NAME=k=>(STEPS.find(x=>x[0]===k)||[k,k])[1];
+const plural=(n,w)=>`${n} ${w}${n===1?'':'s'}`;
+function flightsMissing(){if(!S.iv)return['choose what to change on the Question page'];return levelStats().filter(s=>s.n<3).map(s=>`${lvlLabel(S.iv,s.lk)} needs ${plural(3-s.n,'more trial')}`)}
+function t1Missing(){const o=[],st=levelStats();if(!t1Title())o.push('a table title');if(!words(A('t1.ivh')))o.push('the IV heading');if(!words(A('t1.dvh')))o.push('the DV heading');
+  const mm=st.reduce((a,s)=>a+[0,1,2].filter(i=>!String(A('tr.'+String(s.lk)+'.'+i)).trim()).length,0);if(mm)o.push(plural(mm,'measurement'));
+  const ma=st.filter(s=>!String(A('avg.'+String(s.lk))).trim()).length;if(ma)o.push(plural(ma,'average'));return o}
+function graphMissing(){const g=gInit(),o=[];if(!g.type)return['choose a type of graph'];if(!String(g.title||'').trim())o.push('a title');if(!String(g.xl||'').trim())o.push('an x-axis label');if(!String(g.yl||'').trim())o.push('a y-axis label');if(!gValid(g))o.push('your axis numbers');
+  const e=graphEval();if(e.placed<e.total)o.push(`${plural(e.total-e.placed,g.type==='scatter'?'point':'bar')} to plot`);return o}
+/* everything not finished, step by step (used before saving the PDFs) */
+function missingAll(){const out=[];
+  ['observe','question','hypothesis','plan','lab','results','conclusion','evaluate'].forEach(step=>{
+    if(step==='lab'){if(!trialsDone())out.push({step,t:'Your flights',d:flightsMissing().join(' · ')});return}
+    let b;try{b=BUILD[step]()}catch(e){return}
+    if(!Object.keys(b.f).length){if(['results','conclusion','evaluate'].includes(step))out.push({step,t:'Not started yet',d:'You need to record your flights first.'});return}
+    Object.entries(b.f).forEach(([id,ok])=>{if(ok)return;const det=id==='t1'?t1Missing():id==='graph'?graphMissing():[];out.push({step,t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''})})});
+  return out}
+/* things a later step depends on, said exactly */
+function prereqNotes(){const o=[];
+  if(['results','conclusion','evaluate'].includes(S.step)&&S.iv&&live().length&&!trialsDone())o.push(['lab',`You still have flights to do: ${flightsMissing().join(' · ')}.`]);
+  if(['results','conclusion'].includes(S.step)&&S.iv&&live().length){const ma=levelStats().filter(s=>s.n>=3&&!String(A('avg.'+String(s.lk))).trim());if(ma.length)o.push(['lab',`Your graph and Question 1 use your averages, but ${plural(ma.length,'average')} ${ma.length===1?'is':'are'} missing in Table 1 (${ma.map(s=>lvlLabel(S.iv,s.lk)).join(', ')}).`])}
+  if(S.step==='conclusion'&&S.iv&&live().length&&!graphEval().done)o.push(['results',`Question 1 asks about your graph, and your graph is not finished. Still needed: ${graphMissing().join(', ')}.`]);
+  return o}
+function labPrereqs(){const o=[];
+  if(!S.iv)o.push(['question','You haven’t chosen what you will change (your independent variable).']);
+  if(!S.dv)o.push(['question','You haven’t chosen what you will measure (your dependent variable).']);
+  if(S.iv){if(S.levels.length<2)o.push(['plan',`You have chosen ${plural(S.levels.length,'experimental group')}. You need at least 2 to run your experiment.`]);
+    if(!S.env)o.push(['plan','You haven’t chosen where to fly (inside or outside).']);if(!S.launch)o.push(['plan','You haven’t chosen how to launch (by hand or with the launcher).'])}
+  return o}
+const prereqHTML=list=>list.map(([step,t])=>`<div class="fb no prereq"><span>${esc(t)}</span><button class="btn sm primary" data-act="gofix" data-k="${step}">Go to ${esc(STEP_NAME(step))}</button></div>`).join('');
+/* the "On this page" bar */
+function pageSumHTML(){
+  const secs=$$('#main section.q[data-qid]');let h=prereqHTML(prereqNotes());if(!secs.length)return h;
+  const it=secs.map(s=>({id:s.dataset.qid,t:s.querySelector('h3 span').textContent,ok:s.classList.contains('isdone')})),left=it.filter(x=>!x.ok);
+  return h+`<div class="pagesum ${left.length?'':'alldone'}"><b>${left.length?`On this page: ${it.length-left.length} of ${it.length} done. Click a part to go to it.`:'✓ Everything on this page is done!'}</b>
+    <div class="sumchips">${it.map(x=>`<button class="sumchip ${x.ok?'ok':'todo'}" data-act="jump" data-k="${x.id}">${x.ok?'✓':'○'} ${esc(x.t)}</button>`).join('')}</div></div>`;
+}
+function labSumHTML(){
+  if(!S.iv||!S.levels.length)return'';const L=live().length,N=flightsExpected(),st=levelStats(),av=st.filter(s=>String(A('avg.'+String(s.lk))).trim()).length,hd=words(A('t1.ivh'))>0&&words(A('t1.dvh'))>0,all=L>=N&&!!t1Title()&&hd&&av===st.length;
+  const chip=(ok,t)=>`<span class="sumchip ${ok?'ok':'todo'}">${ok?'✓':'○'} ${t}</span>`;
+  return`<div class="pagesum ${all?'alldone':''}"><b>${all?'✓ Everything on this page is done!':'On this page:'}</b><div class="sumchips">${chip(!!t1Title(),'Table title')}${chip(hd,'Table headings (IV and DV)')}${chip(L>=N,`Flights: ${L} of ${N}`)}${chip(av===st.length,`Averages: ${av} of ${st.length}`)}</div>${L<N&&L?`<p class="note" style="margin:4px 0 0">${esc(flightsMissing().join(' · '))}</p>`:''}</div>`;
+}
+function pageSumRefresh(){const h=$('#pagesum');if(h)h.innerHTML=pageSumHTML();const l=$('#labsum');if(l)l.innerHTML=labSumHTML()}
+function mountPageSum(){if(['finish','extend','compare','lab'].includes(S.step))return;const card=$('#main .card');if(!card||$('#pagesum'))return;const lead=card.querySelector(':scope > .lead')||card.querySelector(':scope > h2');if(lead)lead.insertAdjacentHTML('afterend','<div id="pagesum"></div>');pageSumRefresh()}
+function jumpTo(id){const sec=$(`[data-qid="${id}"]`);if(!sec)return;sec.scrollIntoView({behavior:'smooth',block:'center'});sec.classList.remove('flash');void sec.offsetWidth;sec.classList.add('flash')}
+/* check before saving a PDF */
+function trySave(kind){
+  const m=missingAll();if(!m.length){kind==='fb'?exportFeedback():exportReport();return}
+  openModal(`<h2>Before you save: ${plural(m.length,'part')} ${m.length===1?'is':'are'} not finished</h2>
+   <p>Your teacher will see anything that is missing. Click <b>Go there</b> to finish it, or save anyway.</p>
+   <div class="misslist">${m.map(x=>`<div class="missrow"><div><b>${esc(STEP_NAME(x.step))}:</b> ${esc(x.t)}${x.d?`<div class="note">${esc(x.d)}</div>`:''}</div><button class="btn sm primary" data-act="gofix" data-k="${x.step}">Go there</button></div>`).join('')}</div>
+   <div class="nav" style="border:0"><button class="btn" data-act="pdf-anyway" data-k="${kind}">Save anyway</button><button class="btn primary" data-act="closemodal">Go back and finish</button></div>`);
+}
+function exportFeedback(){
+  const m=$('#pdfmsg');if(m)m.textContent='Making your feedback sheet…';
+  setTimeout(()=>{try{const pages=buildFeedback(),blob=pdfFromCanvases(pages,'Paper Plane Lab feedback sheet - '+S.name);download(`PaperPlaneLab_${safeName()}_feedback_sheet.pdf`,blob);S.exportedFb=true;save();
+      if(m)m.textContent='Feedback sheet saved. Upload it to Toddle with your lab report.';setTimeout(()=>{if(S.step==='finish')rerender()},1500)}
+    catch(e){console.error(e);if(m)m.textContent='Sorry, the PDF could not be made: '+e.message}},50);
+}
+function labSumRefresh(){const l=$('#labsum');if(l)l.innerHTML=labSumHTML()}
+
+/* ---- moving between steps: only the experiment's essentials can stop a student; everything else is a warning ---- */
+const ORDER=()=>STEPS.map(x=>x[0]);
+const stepIdx=k=>ORDER().indexOf(k==='compare'?'extend':k);
+function essentialsFor(step){
+  const i=stepIdx(step),o=[];if(step==='extend')return o;
+  if(i>stepIdx('question')){if(!S.iv)o.push(['question','choose what you will change (your independent variable)']);if(!S.dv)o.push(['question','choose what you will measure (your dependent variable)'])}
+  if(i>=stepIdx('lab')&&S.iv){if(S.levels.length<2)o.push(['plan',`choose at least 2 experimental groups to test (you have ${S.levels.length})`]);if(!S.env)o.push(['plan','choose where to fly (inside or outside)']);if(!S.launch)o.push(['plan','choose how to launch (by hand or with the launcher)'])}
+  return o}
+function missingFor(step){
+  if(step==='lab')return trialsDone()?[]:[{t:'Your flights',d:flightsMissing().join(' · ')}];
+  let b;try{b=BUILD[step]()}catch(e){return[]}
+  const o=Object.entries(b.f).filter(([,ok])=>!ok).map(([id])=>{const det=id==='t1'?t1Missing():id==='graph'?graphMissing():[];return{t:String(b.t[id]||id).replace(/<[^>]+>/g,''),d:det.length?'Still needed: '+det.join(', '):''}});
+  if(step==='observe'&&(S.expN||0)<3)o.unshift({t:'Throw at least 3 planes',d:`You have thrown ${S.expN||0}.`});
+  return o}
+function navGuard(step){
+  if(!S.started||step===S.step)return true;
+  const ess=essentialsFor(step);
+  if(ess.length){const first=ess[0][0];go(first,true);HL=true;highlightMissing();
+    showAfterIntro(`<h2>You need this to run your experiment</h2><p>Before you can go to <b>${esc(STEP_NAME(step==='compare'?'extend':step))}</b>, you still need to:</p><ul>${ess.map(e=>`<li><b>${esc(e[1])}</b></li>`).join('')}</ul><p>We have brought you to the <b>${esc(STEP_NAME(first))}</b> page. The parts to finish are outlined in red.</p><div style="text-align:right"><button class="btn primary" data-act="closemodal">OK</button></div>`);
+    return false}
+  if(stepIdx(step)>stepIdx(S.step)&&!['finish','extend','compare','start'].includes(S.step)){
+    const left=missingFor(S.step);
+    if(left.length){openModal(`<h2>You haven’t finished this page</h2><p>These parts of <b>${esc(STEP_NAME(S.step))}</b> are not done yet:</p><div class="misslist">${left.map(x=>`<div class="missrow"><div><b>${esc(x.t)}</b>${x.d?`<div class="note">${esc(x.d)}</div>`:''}</div></div>`).join('')}</div><p class="note">You can come back to them later. Anything unfinished will show in your report.</p>
+      <div class="nav" style="border:0"><button class="btn" data-act="go-anyway" data-k="${step}">Continue anyway →</button><button class="btn primary" data-act="stay-finish">Go back and finish</button></div>`);return false}}
+  return true}
+
+/* if a step's intro pop-up is showing, show this message straight after it */
+let PENDING_MSG=null;
+function showAfterIntro(html){if(MODAL_LOCK)PENDING_MSG=html;else openModal(html)}
+
 /* ===== FOR TEACHERS ===== */
 function teacherHTML(){
   return`<h2>Paper Plane Lab: for teachers</h2>
@@ -2234,8 +2366,8 @@ function teacherHTML(){
   <ul>${Object.values(FLAWS).map(f=>`<li><b>${f.name}.</b> ${f.why}</li>`).join('')}</ul>
   <p class="note">Flying outside gives stronger, gustier wind than inside; the rubber band launcher makes throws much more consistent, but its band slowly loses stretch, so later launches are a little weaker (a method error of its own). During test flights the thrower (or launcher operator) comments on flights that something really affected: Developing and Proficient can add the comment to their notes; Mastering and Einstein see "Hmm, that one was different…", which opens the flight conditions with big effects in red (never the real distance or time). Students never see a distance: they read the tape, estimate the last digit and type it into their table. Launch angle and throw speed are set with sliders in the simulator; if a student changes them partway through, the PDF flags it as an unfair test. After all flights are done, a "Behind the scenes" panel shows the real values, and the PDF appendix lists them for the marker.</p>
   <h3>Marking</h3>
-  <p>Page 1 of each PDF lists every strand of Criteria B and C from the lab report template, what the automatic checks found and a suggested level, already capped by the challenge level. The checks look for structure and data use. They cannot judge whether the science is correct, so please confirm each level.</p>
-  <p>Students are <b>never told during the lab</b> whether a tape reading or an average is accurate, at any level. Instead, the PDF marks everything that does not look right with a red <b>!</b>: inaccurate readings and averages (highlighted in Table 1), missing units, a trend that does not match the data, missing control variables, human errors explained instead of method errors, and more. Page 1 lists every flag. A calculator on the Test flights page helps with averages.</p>
+  <p>Students hand in <b>two PDFs</b> on Toddle. The <b>lab report</b> holds only the student's own work, laid out simply so a teacher or an AI marker can read it. The <b>feedback sheet</b> lists every strand of Criteria B and C with what the automatic checks found and a suggested level (never above the challenge level), a "What to check" list, Table 1 compared with the real values, and the behind-the-scenes flight data. The checks look for structure and data use. They cannot judge whether the science is correct, so please confirm each level.</p>
+  <p>Students are <b>never told during the lab</b> whether a tape reading or an average is accurate, at any level. The feedback sheet shows it instead: inaccurate readings and averages are pink, and the "What to check" list covers missing units, a trend that does not match the data, missing control variables, human errors explained instead of method errors, and more. Every part of the lab shows a green <b>Done</b> or an amber <b>To do</b>, each page has an "On this page" bar, and before saving a PDF students see a list of anything unfinished with a "Go there" button. Any answer counts as done, even one word, and wrong answers are allowed: a short or wrong answer simply earns a lower level. Leaving a page with unfinished parts shows a warning with "Continue anyway". Only the things the experiment cannot run without (what to change, what to measure, at least 2 groups, where to fly, how to launch) stop a student, and the lab takes them straight to the first missing one. A calculator on the Test flights page helps with averages.</p>
   <h3>ACARA v9 (for planning only)</h3>
   <table><tr><th>Code</th><th>Where</th></tr>
   <tr><td>AC9S6I01</td><td>Research question and IF/THEN/BECAUSE hypothesis</td></tr>
@@ -2303,7 +2435,7 @@ function introHTML(step){
    <div style="text-align:right"><button class="btn primary ok" data-act="intro-ok" data-k="${step}">Got it – I understand!</button></div></div>`;
 }
 function showIntro(step){if(!INTRO[step])return;MODAL_LOCK=true;$('#modalbox').innerHTML=introHTML(step);$('#modal').classList.add('open');setTimeout(()=>{const b=$('#modalbox .ok');if(b)b.focus()},50)}
-function introOK(step){MODAL_LOCK=false;S.seen=S.seen||{};S.seen[step]=1;save();$('#modal').classList.remove('open')}
+function introOK(step){MODAL_LOCK=false;S.seen=S.seen||{};S.seen[step]=1;save();$('#modal').classList.remove('open');if(typeof PENDING_MSG!=='undefined'&&PENDING_MSG){const h=PENDING_MSG;PENDING_MSG=null;openModal(h)}}
 function maybeIntro(){
   if(!S.started)return;S.seen=S.seen||{};
   const h=$('#main .card h2');if(h&&INTRO[S.step]&&!h.querySelector('.aboutbtn'))h.insertAdjacentHTML('beforeend',`<button class="btn sm aboutbtn" data-act="intro" style="margin-left:auto">ℹ About this step</button>`);
@@ -2372,18 +2504,19 @@ function updateChrome(){
 }
 function softStatus(){
   if(!BUILD[S.step])return;let b;try{b=BUILD[S.step]()}catch(e){return}
-  Object.entries(b.f).forEach(([id,d])=>{const el=$(`[data-qid="${id}"] .status`);if(el){el.className='status '+(d?'ok':'no');el.textContent=d?'✓ done':'';if(d)el.closest('section').classList.remove('missing')}});
-  updateChrome();
+  Object.entries(b.f).forEach(([id,d])=>{const el=$(`[data-qid="${id}"] .status`);if(el){el.className='status '+(d?'ok':'no');el.textContent=d?'✓ Done':'To do';const sec=el.closest('section');sec.classList.toggle('isdone',d);if(d)sec.classList.remove('missing')}});
+  updateChrome();pageSumRefresh();
 }
 function render(){
   const main=$('#main');
   if(!S.started){main.innerHTML=startHTML();updateChrome();return}
   if(S.step==='start')S.step='observe';
-  if(S.step==='lab'){main.innerHTML=labHTML();updateChrome();labPanels();labStart();sheetRefresh();maybeIntro();highlightMissing();return}
-  if(S.step==='observe'){main.innerHTML=BUILD.observe().h;updateChrome();labPanels();labStart();sheetRefresh();maybeIntro();highlightMissing();return}
+  if(S.step==='lab'){main.innerHTML=labHTML();updateChrome();labPanels();labStart();pageSumRefresh();sheetRefresh();maybeIntro();highlightMissing();return}
+  if(S.step==='observe'){main.innerHTML=BUILD.observe().h;updateChrome();labPanels();labStart();mountPageSum();sheetRefresh();maybeIntro();highlightMissing();return}
   labStop();
   main.innerHTML=BUILD[S.step]().h;updateChrome();
   if(S.step==='results')graphBind();
+  mountPageSum();
   if(S.step==='compare')drawCmp();
   sheetRefresh();maybeIntro();highlightMissing();
 }
@@ -2393,13 +2526,13 @@ let HL=false;
 /* after "Go and finish it" on the Finish page: outline every part of that step that is not finished yet */
 function highlightMissing(){
   if(!HL)return;const miss=[];
-  if(S.step==='lab'){const t=$('#tablepanel');if(t&&!trialsDone())miss.push(t)}
+  if(S.step==='lab'){const t=$('#tablepanel');if(t&&(!trialsDone()||t1Missing().length))miss.push(t)}
   $$('#main section.q').forEach(sec=>{if(!sec.querySelector('.status.ok'))miss.push(sec)});
   miss.forEach(m=>{m.classList.add('missing');$$('input[type=text][data-bind],textarea[data-bind]',m).forEach(i=>{if(!i.value.trim())i.classList.add('emptyfield')})});
   const card=$('#main .card');if(card&&!$('#hlmsg')){card.insertAdjacentHTML('afterbegin',`<div class="fb no" id="hlmsg">${miss.length?'<b>Still to finish:</b> the parts outlined in red on this page.':'<b>Nearly there:</b> check this page, then go back to Finish.'} <button class="btn sm" data-go="finish">Back to Finish</button></div>`)}
   if(miss[0])setTimeout(()=>miss[0].scrollIntoView({behavior:'smooth',block:'center'}),120);
 }
-function go(step){HL=false;const prev=S.step;if(step!==S.step){LAB.state='idle';LAB.res=null;LAB.pend=null}S.step=step;save();
+function go(step,force){if(!force&&!navGuard(step))return;HL=false;const prev=S.step;if(step!==S.step){LAB.state='idle';LAB.res=null;LAB.pend=null}S.step=step;save();
   if(step==='conclusion'&&prev!=='conclusion')setSheet(true);else if(prev==='conclusion'&&step!=='conclusion')setSheet(false);
   render();window.scrollTo(0,0)}
 
@@ -2450,7 +2583,10 @@ function act(a,el,ev){
      g.fit=old?{x1:old.x1,y1:old.y1,x2:old.x2,y2:old.y2,curve:true,xm:(old.x1+old.x2)/2,ym:(old.y1+old.y2)/2}:{x1:m.xmin+(m.xmax-m.xmin)*.1,y1:my,x2:m.xmax-(m.xmax-m.xmin)*.1,y2:my,curve:true,xm:(m.xmin+m.xmax)/2,ym:my}}else gWarn('Choose your axis numbers first.');save();graphRefresh();break}
    case'g:type':gInit().type=k;save();graphRefresh();break;
    case'g:check':S.a['chk.graph']=1;save();graphRefresh();break;
-   case'pdf':exportReport();break;
+   case'pdf':trySave('report');break;
+   case'pdffb':trySave('fb');break;
+   case'pdf-anyway':MODAL_LOCK=false;closeModal();k==='fb'?exportFeedback():exportReport();break;
+   case'jump':jumpTo(k);break;
    case'cert':exportCert();break;
    case'savefile':saveFile();break;
    case'openfile':$('#loadfile').click();break;
@@ -2472,7 +2608,9 @@ function act(a,el,ev){
    case'exp-env':S.exp.env=k;save();labPanels();break;
    case'exp-launch':S.exp.launch=k;save();labPanels();break;
    case'sheet':toggleSheet();break;
-   case'gofix':go(k);HL=true;highlightMissing();break;
+   case'gofix':MODAL_LOCK=false;closeModal();go(k,true);HL=true;highlightMissing();break;
+   case'go-anyway':closeModal();go(k,true);break;
+   case'stay-finish':closeModal();HL=true;highlightMissing();break;
    case'intro':showIntro(S.step);break;
    case'fair':{const r=el.getBoundingClientRect(),x=ev&&ev.clientX!=null?ev.clientX:r.left+r.width/2;S.a.fair=Math.round(Math.max(0,Math.min(100,(x-r.left)/r.width*100)));save();rerender();break}
    case'sortpick':S.a['sort.'+id]=k;if(k!=='method')S.a['q3.pick']=q3Picks().filter(x=>x!==id);save();rerender();break;

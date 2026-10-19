@@ -5,7 +5,7 @@ description: Build or extend a self-contained interactive science sim (HTML) for
 
 # WAB Science Sim Builder
 
-For open-ended science simulations in the family of Force HQ (G7/8 forces), Sparks Through Time (G6 electricity) and Adapt Lab (G7/8 adaptations/evolution). Fixed-sequence labs with a graded write-up (like Paper Plane Lab) use their own skill.
+For open-ended science simulations in the family of Force HQ (G7/8 forces), Sparks Through Time (G6 electricity) and Adapt Lab (G7/8 adaptations/evolution). Fixed-sequence labs with a graded write-up (like Paper Plane Lab) follow the same completion, freedom and hand-in rules (section 4a).
 
 Tom is Head of MS Sciences at WAB (Beijing). Grade 6 is one class; Grade 7/8 is a mixed class on Cycle A / Cycle B.
 
@@ -60,10 +60,39 @@ Reuse these components across sims instead of rebuilding them. If `shared/` in t
 - **Glossary:** tappable key terms with short student-friendly definitions.
 - **Fun facts:** clickable facts tied to concepts already met.
 - **Onboarding tour:** first-run tour highlighting journal, calculator, glossary, question box and modes. Replayable.
-- **Progress and rewards:** badges/stamps/XP, with a visible map of what's done and what's next.
-- **My Worksheet export:** printable/PDF summary of answers, sketches, auto-marked checks and badges, with a fun celebratory design suitable for a parent portfolio. Exclude incomplete challenges.
+- **Progress and rewards:** badges/stamps/XP, with a visible map of what's done and what's next. Follow section 4a.
+- **My Worksheet export:** follows the hand-in rule in section 4a: a clean PDF of the student's own work (answers, sketches, badges, with a fun celebratory design suitable for a parent portfolio; exclude incomplete challenges) plus a separate feedback sheet with the auto-marked checks. Run the pre-export check first.
 - **Save:** progress stored in localStorage, every read/write wrapped in try/catch, and the sim must work fully if storage is unavailable.
 - **Layout:** controls docked beside or under the simulation so students rarely scroll. Test desktop, iPad and phone widths. Support touch and mouse.
+
+## 4a. Completion, freedom and hand-in (learned from classroom use)
+
+These rules apply to every sim and lab. They came from running Paper Plane Lab with a real class.
+
+**Let students do the work, including getting it wrong**
+- **Never force the right answer.** Students can submit wrong or weak work: extra or missing materials, a method in the wrong order, a wrong unit. Nothing makes them fix it before moving on, and nothing removes or hides wrong choices. Otherwise everyone is hand-held to the correct answer and the assessment means nothing. Optional "Check my answer" help is fine at lower challenge levels.
+- **Done means attempted.** Any answer counts as done, even one word. Never gate completion on word counts, a minimum number of steps or items, or correctness. A short or wrong answer simply earns a lower level.
+- **Block only what the experiment needs.** The only things that can stop a student are the choices the sim cannot run without (for a fair-test lab: the independent variable, the dependent variable, enough groups to compare, the set-up the sim needs). In middle school the experiment runs from the IV, DV and control settings, so the written method, materials and control-variable notes are assessed, never enforced.
+- **When an essential is missing,** move the student straight to the first missing one, outline it in red and explain in a pop-up exactly what is needed. If a step intro pop-up is showing, show the explanation straight after it.
+- **Everything else warns.** Leaving a page with unfinished parts shows "You haven't finished this page" with the list, plus "Continue anyway" and "Go back and finish". No Next button is ever disabled for non-essential work.
+
+**Make progress obvious**
+- **Every task shows its state, loudly.** Done = green "✓ Done" pill and a green left border. Not done = amber "To do" pill and an amber border. Navigation (step bar, map, stops) marks each part done (green), part-done (amber) or not started.
+- **"On this page" bar** at the top of each screen: "2 of 5 done", with a chip for every task. Clicking a chip scrolls to that task and flashes it.
+- **Prerequisites stated exactly.** When a later step depends on an earlier one, say exactly what is missing ("You have chosen 1 experimental group. You need at least 2.", "2 averages are missing in Table 1") with a "Go to …" button. Never a vague "do X first".
+- **Pre-export check.** Before saving any PDF, list every unfinished part, grouped by step, with "Go there" buttons, plus "Save anyway" and "Go back and finish". "Go there" (and "Go and finish it" on any checklist) outlines unfinished parts in red, highlights their empty boxes and scrolls to the first.
+
+**Measuring by hand**
+- **Students measure for themselves whenever possible:** read the scale, estimate the last digit, time with a stopwatch, work out averages. Never give them the value.
+- **Make manual measuring simple:** a zoomed view of the scale, a countdown before anything that is timed, the control they need highlighted while it is needed, an entry box right next to the reading, a clear "Keep it or redo it?" choice after each measurement, and a calculator for averages.
+- **Don't say if a measurement is right during the activity.** Show accuracy on the feedback sheet instead.
+- **Never move the page or the keyboard focus away from a control the student is still using.** For example, while a stopwatch is running (even an optional one), don't scroll to the results table and don't put the cursor in a text box (the space bar must still work). Move them on only after they've finished.
+
+**Hand-in: two PDFs on Toddle**
+1. **The work:** only the student's own answers, tables, graphs and sketches, laid out simply. No auto-checks, flags, colour-coding or hidden data, so a teacher or an AI marker can read it easily.
+2. **The feedback sheet:** what the auto-checks found (what went well / what to work on per strand, with a level never above the challenge cap), a "What to check" list, accuracy comparisons (for example measurements vs real values), and any behind-the-scenes data.
+
+Both carry the student's name, class, date and challenge level. The checklist requires both to be saved, and the finish screen shows which ones have been saved.
 
 ## 5. Build setup
 
@@ -89,6 +118,9 @@ Code-drawn SVG/canvas is the default. When richer art is needed:
 - Verify physics and maths with a script (expected values at g = 9.8 N/kg, formula results, edge cases like zero or huge inputs).
 - Screenshot each lab at desktop, iPad and phone widths; review them as a tiled contact sheet.
 - Check the offline file makes no network requests.
+- Run a half-finished playthrough: confirm the "To do" states, the "On this page" bar, the exact prerequisite messages, the "Continue anyway" warnings, the redirect to the first missing essential, the pre-export list and the "Go there" highlighting. Confirm a one-word or wrong answer counts as done and never blocks.
+- Test every manual-measuring flow with real mouse clicks and key presses (not only the debug hook), including optional tools such as a stopwatch in a distance test. Check the page doesn't scroll away from, or take focus from, a control that is still in use.
+- Render both PDFs to images and check them: the work PDF has no flags or checks; the feedback sheet has them all.
 - **Independent-use check:** play through as a confused Grade 7 student with no teacher. Note any moment where the next step is unclear, a hint is missing, or text reads as clipped or too hard. Fix before shipping. For major releases, run this check with a separate agent that hasn't seen the build.
 
 ## 7. Delivery
