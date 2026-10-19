@@ -46,7 +46,7 @@ Students choose a level at the start; it is then locked and printed in the heade
 | Einstein | No help at all (an extra challenge) | Mastering |
 
 - **Grade 6** uses bands only (Beginning, Developing, Proficient, Mastering). Never show numbers or "/8".
-- **Grade 7/8** uses MYP 1–8. Proposed caps: Developing 3–4, Proficient 5–6, Mastering 7–8, Einstein 8. Confirm with Tom before the first Grade 7/8 lab.
+- **Grade 7/8** uses MYP 1–8 (confirmed by Tom). Caps: Developing 3–4, Proficient 5–6, Mastering 7–8, Einstein 8 (extra challenge). Feedback-sheet badges and the teacher's circle-a-level boxes use these numbers, with numbers above the cap left off.
 - **Everything is typed at every level.** Only set-up choices are clicked (variables, groups, location, launch method, design, sliders, material shelf and method bank at lower levels).
 - Use MYP command terms for the year group (Year 1: state, outline, discuss, describe; "prediction" rather than "hypothesis").
 - When a part is complete, say "You're good. Try the next challenge level." (Einstein: "You've mastered it. Excellent work!").
