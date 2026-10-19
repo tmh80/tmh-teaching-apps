@@ -45,7 +45,10 @@ def main():
     ap.add_argument("--face", choices=["none", "mammal"], default="none",
                     help="mammal: nose on the snout tip and a mouth line (found automatically from the outline)")
     ap.add_argument("--nose", type=float, default=0.25, help="nose size as a fraction of snout depth")
-    ap.add_argument("--mouth", type=float, default=0.055, help="mouth length as a fraction of body length")
+    ap.add_argument("--mouth", type=float, default=0.045, help="mouth length as a fraction of body length")
+    ap.add_argument("--ear", type=float, default=0.0,
+                    help="ear size as a fraction of head depth (0 = none). Small round ears ~0.3 (bear, seal-like 0 = none), big ears ~0.6 (fox, hare)")
+    ap.add_argument("--eye-style", choices=["dot", "big"], help="dot = simple dark dot (Tom's default for mammals); big = white eye with pupil")
     a = ap.parse_args()
     st = json.load(open(a.style)); c = dict(st["colours"])
     if a.colours:
@@ -75,6 +78,7 @@ def main():
             gills += (f'<path d="M{x:.1f},{t+(b-t)*.3:.1f} q{-(x1-x0)*.008:.1f},{(b-t)*.15:.1f} 0,{(b-t)*.3:.1f}" stroke="{c["line"]}" '
                       f'stroke-width="{ow*.7:.1f}" fill="none" stroke-linecap="round" opacity=".6"/>')
     face = ""
+    eye_style = a.eye_style or st.get("eye_style_" + a.face, st.get("eye_style", "big"))
     if a.face == "mammal":
         L = x1 - x0
         def edges(fx):  # top/bottom of the outline at x, in picture units
@@ -83,8 +87,15 @@ def main():
         st_, sb_ = edges(x1 - L * 0.03); D = sb_ - st_            # snout depth just behind the tip
         nr = D * a.nose
         ncx = tipx - nr * 0.95; nt, nb = edges(ncx); ncy = nt + nr * 0.95   # nose sits on the top front of the snout
-        nose = (f'<ellipse cx="{ncx:.1f}" cy="{ncy:.1f}" rx="{nr:.1f}" ry="{nr*.78:.1f}" fill="#2b2230"/>'
-                f'<ellipse cx="{ncx-nr*.25:.1f}" cy="{ncy-nr*.35:.1f}" rx="{nr*.35:.1f}" ry="{nr*.2:.1f}" fill="#fff" opacity=".6"/>')
+        nose = f'<ellipse cx="{ncx:.1f}" cy="{ncy:.1f}" rx="{nr:.1f}" ry="{nr*.8:.1f}" fill="#1f1a1c"/>'
+        if a.ear > 0:  # ear: a short curved stroke tucked against the top of the head, behind the eye
+            Dh = edges(hx)[1] - edges(hx)[0]; re_ = Dh * a.ear
+            ecx = hx - Dh * 0.55
+            top_y = edges(ecx)[0] + ow * 1.9                 # just inside the outline
+            p0 = (ecx - re_ * 0.55, top_y + re_ * 0.85)       # lower, towards the back of the head
+            p1 = (ecx + re_ * 0.45, top_y + re_ * 0.2)        # higher, towards the eye
+            face += (f'<path d="M{p0[0]:.1f},{p0[1]:.1f} C{p0[0]-re_*.05:.1f},{top_y-re_*.05:.1f} {ecx+re_*.1:.1f},{top_y-re_*.2:.1f} {p1[0]:.1f},{p1[1]:.1f}" '
+                     f'stroke="{c["line"]}" stroke-width="{ow*1.5:.1f}" fill="none" stroke-linecap="round"/>')
         mx0, my0 = ncx - nr * 0.1, ncy + nr * 0.75
         # mouth follows the lower jaw, just inside the outline, from under the nose back towards the cheek
         inset = max(D * 0.05, ow * 1.35)  # the outline is ow*2 wide, so this sits just inside it
@@ -97,8 +108,13 @@ def main():
             mxp, myp = (pts[k][0] + pts[k + 1][0]) / 2, (pts[k][1] + pts[k + 1][1]) / 2
             d_ += f" Q{pts[k][0]:.1f},{pts[k][1]:.1f} {mxp:.1f},{myp:.1f}"
         d_ += f" L{pts[-1][0]:.1f},{pts[-1][1]:.1f}"
-        mouth = (f'<path d="{d_}" stroke="{c["line"]}" stroke-width="{ow*.75:.1f}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
-        face = mouth + nose
+        mouth = (f'<path d="{d_}" stroke="{c["line"]}" stroke-width="{ow*.9:.1f}" fill="none" stroke-linecap="round" stroke-linejoin="round"/>')
+        face += mouth + nose
+    if eye_style == "dot":
+        eye_svg = f'<ellipse cx="{hx:.1f}" cy="{ey:.1f}" rx="{er*.8:.1f}" ry="{er*1.0:.1f}" fill="#1f1a1c"/>'
+    else:
+        eye_svg = (f'<circle cx="{hx:.1f}" cy="{ey:.1f}" r="{er*1.25:.1f}" fill="#fff" stroke="{c["line"]}" stroke-width="{ow*.8:.1f}"/>'
+                   f'<circle cx="{hx+er*.25:.1f}" cy="{ey+er*.1:.1f}" r="{er*.7:.1f}" fill="#2b2230"/><circle cx="{hx+er*.45:.1f}" cy="{ey-er*.25:.1f}" r="{er*.25:.1f}" fill="#fff"/>')
     hl = st.get("highlight", 0.28)
     out = f'''<svg xmlns="http://www.w3.org/2000/svg" viewBox="{x0-pad:.1f} {y0-pad:.1f} {x1-x0+2*pad:.1f} {y1-y0+2*pad:.1f}">
 <defs><clipPath id="b">{sil}</clipPath>
@@ -107,8 +123,7 @@ def main():
 <g fill="{c['line']}" stroke="{c['line']}" stroke-width="{ow*2/inner:.2f}" stroke-linejoin="round" stroke-linecap="round">{sil}</g>
 <g clip-path="url(#b)"><rect x="{X0}" y="{Y0}" width="{W}" height="{H}" fill="url(#g)"/>{stripes}
 <ellipse cx="{x0+(x1-x0)*.55:.1f}" cy="{y0+(y1-y0)*.32:.1f}" rx="{(x1-x0)*.28:.1f}" ry="{(y1-y0)*.07:.1f}" fill="#fff" opacity="{hl}"/></g>
-{gills}{face}<circle cx="{hx:.1f}" cy="{ey:.1f}" r="{er*1.25:.1f}" fill="#fff" stroke="{c['line']}" stroke-width="{ow*.8:.1f}"/>
-<circle cx="{hx+er*.25:.1f}" cy="{ey+er*.1:.1f}" r="{er*.7:.1f}" fill="#2b2230"/><circle cx="{hx+er*.45:.1f}" cy="{ey-er*.25:.1f}" r="{er*.25:.1f}" fill="#fff"/>
+{gills}{face}{eye_svg}
 </svg>'''
     open(a.out, "w").write(out)
     if a.png:

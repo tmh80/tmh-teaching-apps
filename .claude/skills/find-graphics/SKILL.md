@@ -101,14 +101,17 @@ countershaded body, rounded outline, highlight, big eye, optional stripes and gi
 python3 -I scripts/makeover.py SIL.svg OUT.svg --style shared/assets/styles/adapt-lab.json --flip --eye 0.88,0.34,0.17 --gills 0.79 --png preview.png
 ```
 `--eye x,y,r`: x along the body (0 = left after flipping), y down the body depth at that point, r = eye size.
-Mammals get `--face mammal` (nose on the snout tip, mouth along the jaw line). Check the preview PNG; adjust
+Mammals get `--face mammal`: Tom's face style is a dark **dot** eye, a dark **dot** nose on the snout tip, a short
+mouth stroke under the nose along the jaw, and an **ear drawn as a short curved line** tucked inside the top of
+the head behind the eye. Size the ear to the animal with `--ear` (fraction of head depth): about 0.3 for small
+round ears (bear), 0.5–0.7 for big ears (fox, hare, fennec); 0 for animals with no visible ear (seal, whale). Check the preview PNG; adjust
 and rerun until it reads clearly at the size it will be shown.
 
 **Anatomy rules (Tom, Oct 2026):** faces must be scientifically right, as well as friendly.
 - Predators (carnivorous mammals, birds of prey, sharks) have eyes set forward, close to the snout
   (`--eye` x about 0.93–0.95 on a mammal side view, high on the head), for judging distance.
 - Prey animals (rabbits, deer, most fish) have eyes further back on the side of the head, for all-round vision.
-- Every mammal needs a nose and a mouth; fish need gills; check features such as the shark's gill slits and
+- Every mammal needs an eye, nose, mouth and (where visible) an ear, sized to the creature; fish need gills; check features such as the shark's gill slits and
   tall top tail lobe, or the mackerel's finlets and wavy back bands.
 
 Consistency checklist for every graphic in one sim: same facing direction, same outline weight, palette

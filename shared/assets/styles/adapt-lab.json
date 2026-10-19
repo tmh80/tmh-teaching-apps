@@ -4,10 +4,19 @@
  "outline": 0.011,
  "highlight": 0.28,
  "split": 0.58,
- "notes": "Matches Adapt Lab's canvas creatures: soft countershading (dark back, pale belly), warm key light from the upper left, big round eyes with a white catch-light, rounded joins. Animals face right.",
- "colours": {"back": "#6f7d92", "back2": "#93a1b4", "belly": "#f6f3ee", "belly2": "#e8e2da", "line": "#3e4757", "stripe": "#1e4f63"},
+ "notes": "Matches Adapt Lab's canvas creatures: soft countershading (dark back, pale belly), warm key light from the upper left, big round eyes with a white catch-light, rounded joins. Animals face right. Mammal faces (Tom, Oct 2026): eye and nose are simple dark dots, the mouth a short stroke under the nose, and the ear a curved line on top of the head sized to the animal.",
+ "colours": {
+  "back": "#6f7d92",
+  "back2": "#93a1b4",
+  "belly": "#f6f3ee",
+  "belly2": "#e8e2da",
+  "line": "#3e4757",
+  "stripe": "#1e4f63"
+ },
  "species_colours": {
   "mackerel": "#2f7f8f,#4fb3a9,#eef3f0,#d9e6ea,#24485a,#1e4f63",
   "shark": "#6f7d92,#93a1b4,#f6f3ee,#e8e2da,#3e4757,#1e4f63"
- }
+ },
+ "eye_style_mammal": "dot",
+ "eye_style": "big"
 }
