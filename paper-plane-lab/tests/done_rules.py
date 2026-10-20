@@ -12,7 +12,7 @@ with sync_playwright() as p:
           if(lv==='mastering'){s.a.mat='paper\\n1 tape\\n1 calc\\n2 clips';o.matNoAmount=f();s.a.mat='3 paper\\n1 tape\\n1 calc\\n2 clips';o.matFull=f();
             s.a['met.0']='a';s.a['met.1']='b';s.a['met.2']='c';o.met3=f();s.a['met.3']='d';o.met4=f()}
           else{s.a.matsel=['paper','tape','calc'];o.mat3=f();s.a.matsel=['paper','tape','calc','glue'];if(lv==='proficient'){o.matNoAmt=f();['paper','tape','calc','glue'].forEach(id=>s.a['mat.n.'+id]='1')}o.mat4=f();
-            s.a.mb=['m1','m2','m3'];o.met3=f();s.a.mb=['m1','m2','m3','m4'];o.met4=f();if(lv==='proficient'){Object.keys(s.a).filter(k=>k.startsWith('mb.')).forEach(k=>delete s.a[k]);o.met4gaps=f()}}
+            s.a.mb=['m1','m3','m4'];o.met3=f();s.a.mb=['m1','m3','m4','m5'];o.met4=f();if(lv==='proficient'){Object.keys(s.a).filter(k=>k.startsWith('mb.')).forEach(k=>delete s.a[k]);o.met4gaps=f()}}
           return o}''',lv)
         print(lv, r)
     b.close()

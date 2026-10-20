@@ -1335,25 +1335,24 @@ function matList(){return Array.isArray(A('matsel'))?A('matsel'):[]}
 function materialsText(){if(helped())return matList().map(id=>{const m=matShelf().find(x=>x.id===id);return m?m.t+': '+(isPro()?(A('mat.n.'+id)||'?'):m.amt):''}).filter(Boolean).join('\n');return A('mat')}
 const MB={
  m1:()=>['Set the ',{k:'a',ph:'independent variable'},` to the first ${IVS[S.iv].type==='num'?'value':'type'} I am testing.`],
- m2:()=>['Keep the ',{k:'a',ph:'control variable'},', the ',{k:'b',ph:'control variable'},' and the ',{k:'c',ph:'control variable'},' the same for every flight.'],
  m3:()=>['Launch the plane ',{k:'a',ph:'how'},' from behind the start line.'],
  m4:()=>S.dv==='dist'?['Measure the distance from the start line to the ',{k:'a',ph:'which part of the plane'},' using a ',{k:'b',ph:'measuring tool'},', and estimate the last digit.']:['Time the flight with a ',{k:'a',ph:'measuring tool'},' from when the plane is released until it ',{k:'b',ph:'what happens'},'.'],
  m5:()=>['Record the result in my ',{k:'a',ph:'where'},'.'],
- m6:()=>['Repeat steps 3 to 5 until I have ',{k:'a',w:'',ph:'how many'},' trials.'],
- m7:()=>['Change the ',{k:'a',ph:'independent variable'},` to the next ${IVS[S.iv].type==='num'?'value':'type'} and repeat steps 3 to 6.`],
- m8:()=>['Work out the ',{k:'a',ph:'what'},` of the trials for each ${IVS[S.iv].type==='num'?'value':'type'}.`],
+ m6:()=>['Repeat steps 2 to 4 until I have ',{k:'a',w:'',ph:'how many'},' trials.'],
+ m7:()=>['Change the ',{k:'a',ph:'independent variable'},` to the next ${IVS[S.iv].type==='num'?'value':'type'} and repeat steps 2 to 5.`],
  d1:()=>['Throw the plane as hard as I can and keep only the best flight.'],
  d2:()=>['Change two settings at the same time to save time.'],
  d3:()=>['Fold a new plane from a different type of paper for every trial.']
 };
-const MB_ORDER=['m1','m2','m3','m4','m5','m6','m7','m8'];
-function mbList(){return Array.isArray(A('mb'))?A('mb'):[]}
+/* Only hands-on steps someone could follow to run the test. No "keep everything the same" (that belongs in control variables) and no "work out the average" (that is data processing, not method). */
+const MB_ORDER=['m1','m3','m4','m5','m6','m7'];
+function mbList(){return Array.isArray(A('mb'))?A('mb').filter(k=>MB[k]):[]}
 function mbDev(k){const c=cx(),g=c.isNum?'value':'group';return{
- m1:`Set the ${c.ivLower} to the first ${g} I am testing.`,m2:'Keep everything else the same for every flight (my control variables).',
+ m1:`Set the ${c.ivLower} to the first ${g} I am testing.`,
  m3:`Launch the plane ${S.launch==='launcher'?'with the launcher':'by hand'} from behind the start line.`,
  m4:S.dv==='dist'?'Measure the distance from the start line to the nose of the plane with the tape measure, and estimate the last digit.':'Time the flight with the stopwatch, from when the plane is released until it lands.',
- m5:'Record the result in my results table.',m6:'Repeat steps 3 to 5 until I have 3 trials.',
- m7:`Change the ${c.ivLower} to the next ${g} and repeat steps 3 to 6.`,m8:`Work out the average of the trials for each ${g}.`,
+ m5:'Record the result in my results table.',m6:'Repeat steps 2 to 4 until I have 3 trials.',
+ m7:`Change the ${c.ivLower} to the next ${g} and repeat steps 2 to 5.`,
  d1:'Throw the plane as hard as I can and keep only the best flight.',d2:'Change two settings at the same time to save time.',d3:'Fold a new plane from a different type of paper for every trial.'}[k]}
 function methodBankHTML(){
   const mine=mbList(),bank=shuf(Object.keys(MB),'mb').filter(k=>!mine.includes(k));
@@ -1552,13 +1551,12 @@ BUILD.plan=function(){
   if(helped()){
     me=tip(['developing'],'Click the steps you need to add them to your method. Some steps would make the test <b>unfair</b>, so leave them out. Use the arrows to put your steps in order.')+tip(['proficient'],'Pick the steps you need, put them in order and fill in the gaps. Leave out any step that would make the test unfair.')+methodBankHTML()+
      chkBtn('met',()=>{const m=mbList(),pos=k=>m.indexOf(k),bad=m.filter(k=>k[0]==='d'),miss=MB_ORDER.filter(k=>!m.includes(k));
-       const ordered=['m3','m4','m5','m6','m7','m8'].every((k,i,a)=>i===0||pos(a[i-1])<pos(k))&&pos('m1')<pos('m3');
+       const ordered=['m3','m4','m5','m6','m7'].every((k,i,a)=>i===0||pos(a[i-1])<pos(k))&&pos('m1')<pos('m3');
        return[{ok:!bad.length,msg:'You left out the steps that make the test unfair.',fix:'Take out any step that changes more than one thing or only keeps the best flight.'},
         {ok:!miss.length,msg:'You have every step you need.',fix:`You are missing ${miss.length} step${miss.length===1?'':'s'}. Look in the bank again.`},
-        {ok:!miss.length&&ordered,msg:'Your steps are in a sensible order.',fix:'Check the order: set up, launch, measure, record, repeat, change, then work out averages.'},
+        {ok:!miss.length&&ordered,msg:'Your steps are in a sensible order.',fix:'Check the order: set up, launch, measure, record, repeat, then change to the next group.'},
         ...(isDev()?[]:[{ok:m.every(k=>frameDone('mb.'+k,MB[k]())),msg:'You filled in every gap.',fix:'Fill in every gap in your steps.'}]),
-        {ok:isDev()||!m.includes('m6')||/\b3\b|three/i.test(A('mb.m6.a')),msg:'You repeat each test the right number of times.',fix:'How many trials does each value get? Check step "Repeat steps 3 to 5".'},
-        {ok:isDev()||!m.includes('m8')||/average|mean/i.test(A('mb.m8.a')),msg:'You work out the right thing at the end.',fix:'What do you work out from three trials? Check the last step.'}]});
+        {ok:isDev()||!m.includes('m6')||/\b3\b|three/i.test(A('mb.m6.a')),msg:'You repeat each test the right number of times.',fix:'How many trials does each value get? Check step "Repeat steps 2 to 4".'}]});
     mde=mbList().length>=4&&(isDev()||mbList().every(k=>frameDone('mb.'+k,MB[k]())));
   }else{
     me=nudge(['mastering'],'Check your notebook for what makes a method easy to repeat.')+`<div class="rows">`+[0,1,2,3,4,5,6].map(i=>`<div class="rowi"><span class="no">${i+1}.</span><input type="text" data-bind="met.${i}" value="${esc(A('met.'+i))}"></div>`).join('')+`</div>`;

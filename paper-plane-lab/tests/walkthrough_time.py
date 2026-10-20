@@ -73,7 +73,7 @@ with sync_playwright() as p:
         pg.click('[data-act="chk"][data-id="mat"]')
     else: fill('mat','3 sheets of thin card\n1 tape measure\n1 calculator\n4 paper clips')
     if help_:
-        for k in ['m1','m2','m3','m4','m5','m6','m7','m8']:
+        for k in ['m1','m3','m4','m5','m6','m7']:
             pg.click(f'[data-act="mb:add"][data-k="{k}"]')
         ins=pg.query_selector_all('[data-bind^="mb."]')
         for el in ins: el.fill('wingspan')
