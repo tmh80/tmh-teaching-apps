@@ -21,3 +21,5 @@
 - Nothing blocks a student except what the experiment needs (IV, DV, at least 2 groups, where to fly, how to launch). Everything else warns with "Continue anyway". Wrong answers are allowed.
 - The page never scrolls away from, or steals keyboard focus from, a running stopwatch.
 - Offline: no network requests. Grade 6 uses bands only (no numbers).
+
+**Toddle set-up:** the For teachers notes open with "Set it up on Toddle": steps plus a copyable prompt for Toddle's AI task helper (Grade 6, MYP Year 1 Criteria B and C, bands, challenge caps, feedback format). Edit `LAB_INFO` / `MYP_CRIT` in `src/teacher.js`.

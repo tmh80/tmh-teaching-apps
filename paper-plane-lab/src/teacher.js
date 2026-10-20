@@ -1,7 +1,65 @@
+/* ===== TODDLE SET-UP (every virtual lab has this) =====
+   Change LAB_INFO for each lab. grade 6 -> MYP Year 1 criteria and bands only; grade 7/8 -> MYP Year 3 criteria and 1-8 levels. */
+const LAB_INFO={title:'Paper Plane Lab',grade:'6',file:'Paper-Plane-Lab-offline.html',lessons:2,
+  topic:'a fair test with virtual paper planes, choosing one thing to change about the plane or how it is thrown and measuring how far it flies or how long it stays in the air'};
+const MYP_CRIT={
+  1:{B:['Outline an appropriate problem or research question to be tested by a scientific investigation','Outline a testable prediction using scientific reasoning','Outline how to manipulate the variables, and outline how data will be collected','Design scientific investigations'],
+     C:['Present collected and transformed data','Interpret data and outline results using scientific reasoning','Discuss the validity of a prediction based on the outcome of the scientific investigation','Discuss the validity of the method','Describe improvements or extensions to the method']},
+  3:{B:['Describe a problem or question to be tested by a scientific investigation','Outline a testable hypothesis and explain it using scientific reasoning','Describe how to manipulate the variables, and describe how sufficient, relevant data will be collected','Design scientific investigations'],
+     C:['Present collected and transformed data','Interpret data and describe results using scientific reasoning','Discuss the validity of a hypothesis based on the outcome of the scientific investigation','Discuss the validity of the method','Describe improvements or extensions to the method']}};
+function toddlePrompt(){
+  const g6=LAB_INFO.grade==='6',yr=g6?1:3,C=MYP_CRIT[yr],rn=['i','ii','iii','iv','v'];
+  const caps=g6?['Developing: highest band Developing','Proficient: highest band Proficient','Mastering: highest band Mastering','Einstein (extra challenge): highest band Mastering']
+               :['Developing: levels 3–4 at most','Proficient: levels 5–6 at most','Mastering: levels 7–8 at most','Einstein (extra challenge): level 8 at most'];
+  return`Create a formative assessment for my Grade ${LAB_INFO.grade} MYP Sciences class.
+
+TASK
+Title: ${LAB_INFO.title}: virtual lab report
+What students do: ${LAB_INFO.title} is an offline virtual lab (the attached file ${LAB_INFO.file}). Students run ${LAB_INFO.topic}. The lab takes them step by step through Observe, Question, Hypothesis, Plan, Test, Results, Analysis and Evaluation. It takes about ${LAB_INFO.lessons} lessons and can be run by a cover teacher.
+What students hand in: two PDFs saved from the lab.
+1. Lab report: the student's own work only.
+2. Feedback sheet: the lab's automatic checks, a "What to check" list, their results compared with the real values, and behind-the-scenes data from their test.
+Student instructions should be short, at a Grade ${LAB_INFO.grade} reading level: open the file, type your name and class, choose a challenge level, work through every step, then save both PDFs and upload them here.
+
+ASSESSMENT CRITERIA (MYP Sciences, Year ${yr})
+Criterion B: Inquiring and designing
+${C.B.map((t,i)=>`  ${rn[i]}. ${t}`).join('\n')}
+Criterion C: Processing and evaluating
+${C.C.map((t,i)=>`  ${rn[i]}. ${t}`).join('\n')}
+${g6?'Report each criterion as a band only (Beginning, Developing, Proficient, Mastering). Do not show numbers out of 8.':'Report each criterion as an MYP level from 1 to 8.'}
+
+MARKING METHOD
+- Students choose a challenge level at the start. It is printed in the top-right header of every page of both PDFs. Their grade for each criterion cannot go above the cap for that level:
+${caps.map(t=>`  - ${t}`).join('\n')}
+- Mark the lab report against each strand using best-fit judgement, then apply the cap.
+- Use the feedback sheet to check the data: pink cells show measurements or averages that are not accurate, and "What to check" lists things to look at. The lab's checks look at structure and data use; confirm the science yourself.
+- An unfinished or wrong answer is allowed in the report; it simply earns a lower level.
+
+FEEDBACK FORMAT (to the student, in simple words)
+Good job!
+
+Keep it up
+- (2 to 4 simple positives about what the student did well)
+
+Try this
+- (2 to 4 actions, each starting with a verb and naming the part of the report)
+
+This is formative: no final grade goes to the gradebook unless I choose to.`}
+function toddleHTML(){
+  return`<h3>Set it up on Toddle</h3>
+  <ol><li>On Toddle, create a new <b>formative assessment</b> for the class and choose to make it with the <b>AI</b> task helper.</li>
+  <li>Copy the prompt below and paste it into the AI helper. Check what it builds and change anything you like.</li>
+  <li>Attach <b>${LAB_INFO.file}</b> to the task so students can download it.</li>
+  <li>Set the hand-in to <b>file upload</b>, so students can upload their two PDFs.</li>
+  <li>Assign it to the class.</li></ol>
+  <p class="note">Button names on Toddle may differ a little. The prompt uses MYP Year ${LAB_INFO.grade==='6'?'1':'3'} Criteria B and C and the challenge-level caps below.</p>
+  <textarea id="toddlePrompt" readonly rows="12" style="width:100%;font:13px/1.4 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap">${esc(toddlePrompt())}</textarea>
+  <div style="display:flex;gap:8px;align-items:center;margin-top:6px"><button class="btn primary sm" onclick="(function(b){const t=document.getElementById('toddlePrompt');t.focus();t.select();let ok=false;try{ok=document.execCommand('copy')}catch(e){}if(navigator.clipboard){navigator.clipboard.writeText(t.value).then(()=>{b.textContent='✓ Copied'},()=>{b.textContent=ok?'✓ Copied':'Selected: press Ctrl+C'})}else b.textContent=ok?'✓ Copied':'Selected: press Ctrl+C'})(this)">📋 Copy the prompt</button></div>`}
 /* ===== FOR TEACHERS ===== */
 function teacherHTML(){
   return`<h2>Paper Plane Lab: for teachers</h2>
-  <p><b>Purpose.</b> Students plan and run their own fair test with virtual paper planes and write a full lab report in the format of the department lab report template. It is a formative task: students hand in a PDF on Toddle. It is designed for two lessons and can be run by a cover teacher.</p>
+  <p><b>Purpose.</b> Students plan and run their own fair test with virtual paper planes and write a full lab report in the format of the department lab report template. It is a formative task: students hand in two PDFs on Toddle. It is designed for two lessons and can be run by a cover teacher.</p>
+  ${toddleHTML()}
   <h3>The two lessons</h3>
   <table><tr><th>Lesson 1</th><td>Each student opens the lab on their own computer, types their name and class, and chooses a challenge level. Students who may do the peer review extension together should choose the <b>same</b> variables, values, set-up and plane design. Then: Observe (free throws and observations) → Question → Hypothesis → Plan → Test flights (each student flies their own planes and fills in Table 1 as they go).</td></tr>
   <tr><th>Lesson 2</th><td>Results (observations table and graph) → Analysis (mini-lesson on describing trends or comparing groups, then Q1–Q2) → Evaluation (mini-lesson on fair tests, human vs method error and reliability; a fairness line; sorting errors and improvements; Q3 explains method errors only, Q4 fixes them) → Finish: save the PDF, upload to Toddle, complete the checklist, save the certificate.</td></tr><tr><th>Extensions</th><td>For students who finish early: (1) peer review with a partner who ran the same experiment (compare averages, judge reliability, peer-check each other's report; a virtual partner is available), added to the PDF as an extension section; (2) a new investigation with a different independent variable at a higher challenge level, with its own PDF and certificate. The first report stays downloadable.</td></tr></table>

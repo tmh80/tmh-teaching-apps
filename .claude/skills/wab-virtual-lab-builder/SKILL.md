@@ -101,7 +101,8 @@ Try this
 ## 6. Standing preferences
 
 - Offline single HTML file, no internet requests (claude.ai is blocked for students in China). Grade 6 reading level, warm and clear. Standards (ACARA, MYP) appear only in the teacher notes. No "I can" statements, no Quiz-Quiz-Trade, no "it isn't X, it's Y" phrasing.
-- Teacher notes ("For teachers" button): purpose, the two lessons, levels and caps, built-in errors, marking, standards for planning.
+- Teacher notes ("For teachers" button): purpose, **Set it up on Toddle**, the two lessons, levels and caps, built-in errors, marking, standards for planning.
+- **Set it up on Toddle (every virtual lab):** short steps (create a formative assessment with Toddle's AI task helper, paste the prompt, attach the offline HTML file, set the hand-in to file upload for the two PDFs, assign) and a ready-made prompt in a read-only box with a "📋 Copy the prompt" button. Build the prompt from one `LAB_INFO` setting (title, grade, file, lessons, topic) so it updates itself. The prompt covers: grade level; the task and what students hand in; the MYP criteria strands (Grade 6 = **Year 1** Criteria B and C, reported as bands only; Grade 7/8 = **Year 3** Criteria B and C, levels 1–8); the marking method (level in the top-right header, caps per challenge level, best-fit then cap, use the feedback sheet's pink cells and "What to check", wrong or unfinished work allowed); and the feedback format "Good job! / Keep it up / Try this".
 - Save progress automatically (localStorage in try/catch) plus "Save progress" / "Open" files for changing computers.
 
 ## 7. Build, test, deliver
