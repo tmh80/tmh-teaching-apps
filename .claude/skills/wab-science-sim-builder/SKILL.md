@@ -205,9 +205,9 @@ Code-drawn SVG/canvas is the default. When richer art is needed:
 - For custom SVG drag-and-drop (parts bins, map palettes), use `page.mouse.move/down/up` with intermediate steps rather than built-in drag helpers, and convert model coordinates to screen coordinates with the SVG's `getScreenCTM()`; scroll the target into view first.
 - Prediction options are shuffled: click the right one by its text, not by position.
 - Verify physics and maths with a script (expected values at g = 9.8 N/kg, formula results, edge cases), check every Review calculation's stated answer, check every question has a model answer, and check every build task is achievable (section 4e).
-- Answer each Review type at least once (right and wrong), including drawing on the pad with real mouse moves. Check that one go locks each question and shows the right answer, that synonyms are accepted, and that the points add up.
+- Answer each Review type at least once (right and wrong), including drawing on the pad with real mouse moves. Check that one go locks each question and shows the right answer, that synonyms are accepted, and that the points add up. Complete each build task and confirm every check turns green, and that a wrong build (e.g. series instead of parallel) leaves the right check grey.
 - Drag every pop-up by its header with real mouse moves and with touch (`has_touch`) at desktop and phone widths: it follows the pointer, its header stays on screen, its spot is kept, buttons in the header still work, and the sim behind it can still be clicked.
-- Check the name gate: Cancel, Escape and clicking outside return to the name box, and the teacher code gets in. Complete each build task and confirm every check turns green, and that a wrong build (e.g. series instead of parallel) leaves the right check grey.
+- Check the name gate: Cancel, Escape and clicking outside return to the name box, and the teacher code gets in.
 - For round-based games, test the recovery paths: go bankrupt, then redo, go back a round, undo, sell, and start again, and confirm money and buildings restore correctly.
 - Screenshot each lab at desktop, iPad and phone widths; review them as a tiled contact sheet. Check `scrollWidth` equals the viewport width at phone size on every page, including the teacher page and workshops.
 - Check the offline file makes no network requests.
