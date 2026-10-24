@@ -11,9 +11,19 @@ const SECTIONS = [
     blurb: 'Free-body diagrams: draw every force on an object as an arrow, then become an Arena Inspector.',
     steps: ['s8', 's9', 's10'], challenge: ['m1', 'm2', 'm4'], review: ['r4', 'r6', 'r8', 'r12', 'r11'], needs: 'c1f',
     goal: 'Draw free-body diagrams with every arrow starting at the centre of the object, the right direction and size for each force, and longer arrows for bigger forces; use a diagram to work out a set-up.',
-    vocab: ['free-body diagram', 'force arrow', 'weight', 'normal force', 'friction', 'tension', 'scale'] }
+    vocab: ['free-body diagram', 'force arrow', 'weight', 'normal force', 'friction', 'tension', 'scale'] },
+  { id: 'c2f', ch: 'c2', n: 2, title: 'Inertia', part: 'Foundation', stamp: 'Inertia Expert',
+    blurb: 'The same push on light and heavy crates, stopping with a brake, the velocity–time graph and Newton\'s first law.',
+    steps: ['i1', 'i2', 'i3', 'i4', 'i5', 'i6'], challenge: null, review: ['c2r1', 'c2r2', 'c2r3', 'c2r4', 'c2r5', 'c2r6'],
+    goal: 'Explain that objects with more mass have more inertia, so they are harder to start moving and harder to stop; read a speed from a velocity–time graph; state Newton\'s first law and use it to explain everyday examples.',
+    vocab: ['inertia', 'mass', 'velocity', 'velocity–time graph', 'brake', 'braking distance', 'Newton\'s first law', 'unbalanced force'] },
+  { id: 'c2x', ch: 'c2', n: 2, title: 'Inertia', part: 'Extension', stamp: 'Brake Master',
+    blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
+    steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
+    goal: 'Describe motion from the shape of a velocity–time graph; explain why more mass needs a bigger force to stop in the same distance; draw the free-body diagram of an object gliding at a steady speed.',
+    vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

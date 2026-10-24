@@ -12,9 +12,12 @@ const PXM = 39, CX = 450, GROUND = 300, ROPEY = 262, CW = 88, CRH = 64, LIM = 9,
 const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 250;
 const S = {
   left: [], right: [], mass: 50, floor: 'concrete', x: 0, v: 0, a: 0, t: 0, pullT: 0, shoveT: -1, lastShoveT: null,
-  running: false, hist: [], msg: '', flags: null, frozen: false
+  running: false, hist: [], msg: '', flags: null, frozen: false,
+  /* Chapter 2: a launcher and a brake. The crate starts at x0, Launch sets it moving at v0, and once it
+     passes the brake line (brakeX) a brake pushes against the motion with brakeF newtons until it stops. */
+  x0: 0, v0: 2, brakeX: null, brakeF: 40, brakeFrom: null, brakeT: null
 };
-const newFlags = () => ({ ran: false, shoved: false, moved: false, stuck: false, pulled: false });
+const newFlags = () => ({ ran: false, shoved: false, moved: false, stuck: false, pulled: false, launched: false, stopped: false });
 S.flags = newFlags();
 const tot = a => a.reduce((s, p) => s + PUL[p].n, 0);
 
@@ -27,8 +30,9 @@ function forces() {
   if (Math.abs(S.v) < 1e-6) fr = Math.abs(app) <= fs ? -app : -Math.sign(app) * fk;
   else fr = -Math.sign(S.v) * fk;
   if (Math.abs(fr) < 1e-9) fr = 0;
-  const net = app + fr;
-  return { L, R, shove, app, fr, net, W, N, m, a: net / m, fmax: fs, fk };
+  const brk = S.brakeFrom != null && Math.abs(S.v) > 1e-6 ? -Math.sign(S.v) * S.brakeF : 0;   // brakes only act while moving
+  const net = app + fr + brk;
+  return { L, R, shove, app, fr, brk, net, W, N, m, a: net / m, fmax: fs, fk };
 }
 /* forces for a still, set-up arena (no ramp) — used by guided checks and FBD comparisons */
 function staticForces() { const keep = S.running; S.running = false; const f = forces(); S.running = keep; return f; }
@@ -39,6 +43,8 @@ function stepSim(dt) {
   if (S.v !== 0 && v2 * S.v < 0) v2 = 0;
   if (Math.abs(v2) < 1e-5 && Math.abs(f.app) <= f.fmax) v2 = 0;
   S.x += (S.v + v2) / 2 * dt; S.v = v2; S.t += dt; S.pullT += dt;
+  if (S.brakeX != null && S.brakeFrom == null && S.v > 0 && S.x >= S.brakeX) { S.brakeFrom = S.brakeX; S.brakeT = S.t; }
+  if (S.brakeFrom != null && S.v === 0 && S.running) { S.running = false; S.flags.stopped = true; S.msg = `The crate stopped ${fmt(S.x - S.brakeFrom, 2)} m past the brake line.`; syncRun(); }
   if (S.shoveT >= 0) { S.shoveT += dt; if (S.shoveT >= SHOVE_T) { S.shoveT = -1; S.lastShoveT = S.t; } }
   S.hist.push([S.t, S.v]); if (S.hist.length > 4000) S.hist.shift();
   const fl = S.flags; fl.ran = true;
@@ -48,5 +54,7 @@ function stepSim(dt) {
   if (Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
-function resetSim() { S.x = 0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
+function resetSim() { S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
+function launch() { resetSim(); S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
+function clearCh2() { S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }

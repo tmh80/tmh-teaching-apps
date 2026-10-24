@@ -7,7 +7,7 @@ Interactive science sims and labs for WAB MS Science (Grade 6–8). Each app is 
 | Folder | App | Unit | Upload this file to Toddle | Status |
 |---|---|---|---|---|
 | `force-hq/` | Force HQ | G7/8 Forces | `Force-HQ-offline.html` | Ready |
-| `force-hq-rebuild/` | Force HQ (October 2026 rebuild) | G7/8 Forces | `Force-HQ-Rebuild-offline.html` | In progress: Chapter 1 (Foundation + Extension) ready; Toddle PDFs in `worksheets/`. Source in `src/`, rebuild with `python3 build.py`. Will replace `force-hq/` when finished |
+| `force-hq-rebuild/` | Force HQ (October 2026 rebuild) | G7/8 Forces | `Force-HQ-Rebuild-offline.html` | In progress: Chapters 1 and 2 (Foundation + Extension) ready; Toddle PDFs in `worksheets/`. Source in `src/`, rebuild with `python3 build.py`. Will replace `force-hq/` when finished |
 | `sparks-through-time/` | Sparks Through Time | G6 Electricity | `Sparks-Through-Time.html` | Ready |
 | `adapt-lab/` | Adapt Lab | G7/8 Adaptations & evolution | `Adapt-Lab-offline.html` | Ready |
 | `paper-plane-lab/` | Paper Plane Lab | G6 Scientific method | `Paper-Plane-Lab-offline.html` | Ready (source in `src/`, rebuild with `node build.js`) |

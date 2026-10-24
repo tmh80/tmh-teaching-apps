@@ -447,6 +447,140 @@ input.ansin.right,input.gapin.right{border-color:var(--good)!important;backgroun
 .matchrow .corr{grid-column:2;justify-self:start}
 .sortrow>span:first-child{flex:1;min-width:0}
 
+/* ===== Home (October 2026 polish): night-stadium hero, chapter route, stamp book ===== */
+:root{--herobg:#13212a;--herobg2:#1b3040}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--herobg:#132029;--herobg2:#1a2c38}}
+:root[data-theme="dark"]{--herobg:#132029;--herobg2:#1a2c38}
+body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
+#vHome{gap:18px}
+.hero2{position:relative;display:grid;grid-template-columns:minmax(320px,.85fr) minmax(0,1.3fr);background:radial-gradient(120% 140% at 85% 0%,var(--herobg2) 0%,var(--herobg) 60%);color:#eef4f6;border-radius:20px;overflow:hidden;box-shadow:0 22px 44px -22px rgba(8,22,32,.6);isolation:isolate}
+.hero2::before{content:'';position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:30px 30px;mask-image:linear-gradient(90deg,#000 0%,transparent 70%)}
+.herocopy{padding:36px 34px 30px;display:flex;flex-direction:column;gap:12px;justify-content:center}
+.kicker{font-family:var(--f-display);font-weight:700;letter-spacing:.16em;text-transform:uppercase;font-size:14px;color:var(--hazard);display:inline-flex;align-items:center;gap:10px}
+.kicker::before{content:'';width:26px;height:3px;border-radius:2px;background:var(--hazard)}
+.hero2 h1{font-size:clamp(40px,4.4vw,62px);color:#fff;line-height:.95;letter-spacing:.005em}
+.hero2 h1 span{color:var(--hazard);white-space:nowrap}
+.hero2 #hello{font-size:17.5px;line-height:1.55;color:#c3d1d8;max-width:44ch;margin:0}
+.resume{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px;margin-top:6px;backdrop-filter:blur(2px)}
+.rlbl{font-family:var(--f-display);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#93a9b4;font-weight:700}
+.rtitle{font-family:var(--f-display);font-size:25px;font-weight:800;color:#fff;line-height:1.08}
+.rmeta{font-size:14px;color:#b4c4cb;margin-bottom:2px}
+.go.big{background:var(--hazard);color:#1b1404;font-size:17px;padding:12px 22px;align-self:flex-start;margin-top:8px;border-radius:12px;box-shadow:0 5px 0 #9c6c0d;transition:transform .12s,box-shadow .12s}
+.go.big:hover{transform:translateY(-1px);box-shadow:0 6px 0 #9c6c0d}
+.go.big:active{transform:translateY(4px);box-shadow:0 1px 0 #9c6c0d}
+.whoLine{margin:0;color:#c3d1d8;font-size:14.5px}.whoLine:empty{display:none}
+.linkbtn{background:none;border:0;color:var(--hazard);text-decoration:underline;text-underline-offset:3px;padding:0;font-weight:700}
+.heroart{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:22px 22px 22px 0;min-width:0}
+.heroart canvas{width:100%;aspect-ratio:900/420;display:block;border-radius:14px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 16px 30px -14px rgba(0,0,0,.6)}
+.herostats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.herostats div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 12px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.herostats b{font-family:var(--f-display);font-size:28px;font-weight:800;color:#fff;line-height:1}
+.herostats small{font-size:16px;color:#93a9b4;font-weight:700}
+.herostats span{font-size:13.5px;color:#b4c4cb;font-weight:700}
+.hazard{grid-column:1/-1;height:9px;background:repeating-linear-gradient(135deg,var(--hazard) 0 14px,#0d171d 14px 28px);opacity:.95}
+.sectop{display:flex;justify-content:space-between;align-items:flex-end;gap:10px 40px;flex-wrap:wrap;margin-top:14px}
+.kicker2{font-family:var(--f-display);font-weight:700;letter-spacing:.13em;text-transform:uppercase;font-size:13px;color:var(--accent)}
+.sectop .sech{font-size:36px;margin-top:2px}
+.sectop .secp{margin:0;max-width:60ch;font-size:15px}
+.chfeat{display:grid;grid-template-columns:minmax(230px,.75fr) minmax(0,2fr);gap:20px;padding:20px;border-radius:18px;box-shadow:0 10px 26px -18px rgba(10,30,40,.45)}
+.chside{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:6px 12px;align-content:start}
+.chside > div{grid-column:1/-1;display:flex;flex-direction:column;gap:6px}
+.chside h3{font-size:32px}
+.chside p{margin:0;color:var(--muted);font-size:15px}
+.chnum{font-family:var(--f-display);font-weight:800;font-size:66px;line-height:.82;color:var(--accent);letter-spacing:-.02em}
+.chnum.sm{font-size:34px;color:var(--muted)}
+.chicon{width:46px;height:46px;color:var(--accent);flex:none}
+.sectiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.sectile{border:1.5px solid var(--line);border-radius:14px;padding:18px 16px 14px;display:flex;flex-direction:column;gap:9px;background:var(--bg);position:relative;overflow:hidden}
+.sectile::before{content:'';position:absolute;inset:0 0 auto 0;height:5px;background:var(--accent)}
+.sectile.ext::before{background:var(--res)}
+.sectile.done{border-color:var(--good)}.sectile.done::before{background:var(--good)}
+.sectile .sechd{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.partname{font-family:var(--f-display);font-size:25px;font-weight:800}
+.mins{font-size:12.5px;color:var(--muted);font-weight:700;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.sectile > p{font-size:14.5px;color:var(--muted);margin:0;flex:1}
+.sectile .parts{display:flex;gap:6px;flex-wrap:wrap}
+.pbar{height:8px;border-radius:999px;background:var(--chip);overflow:hidden;border:1px solid var(--line)}
+.pbar i{display:block;height:100%;background:var(--accent);border-radius:inherit;min-width:0}
+.sectile.ext .pbar i{background:var(--res)}.pbar.done i,.sectile.done .pbar i{background:var(--good)}
+.pbar.onDark{background:rgba(255,255,255,.12);border-color:transparent}.pbar.onDark i{background:var(--hazard)}
+.tilefoot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px}
+.sectile .open{align-self:auto}
+.minis{font-size:12.5px;color:var(--muted);font-weight:700}.minis.on{color:var(--good)}.minis.on::before{content:'✓ '}
+.route{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.routegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;position:relative}
+.routegrid::before{content:'';position:absolute;left:24px;right:24px;top:-4px;border-top:2.5px dashed var(--line)}
+.stop{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;position:relative}
+.stop::before{content:'';position:absolute;top:-9px;left:22px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2.5px solid var(--line)}
+.stophd{display:flex;justify-content:space-between;align-items:center}
+.stop .chicon{color:var(--muted);width:34px;height:34px}
+.stop .kicker2{color:var(--muted)}
+.stop h3{font-size:23px}
+.stop p{font-size:14px;color:var(--muted);margin:0;flex:1}
+.stop .pillst{align-self:flex-start;margin-top:4px}
+.homegrid{gap:14px}
+.homecard{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;padding:20px;border-radius:18px;align-items:start}
+.hcicon{width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.hcicon .chicon{width:40px;height:40px;color:inherit}
+.workc .hcicon{background:var(--hazard-soft);color:var(--fric)}
+.hcbody{display:flex;flex-direction:column;gap:6px;min-width:0}
+.hcbody p{margin:0}
+.homecard h3{font-size:27px}
+.workc .kicker2{color:var(--fric)}
+.stampbook{padding:20px;border-radius:18px;display:flex;flex-direction:column;gap:14px;margin-bottom:28px}
+.sbhd h3{font-size:25px;margin-top:2px}
+.sbgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:14px}
+.sbitem{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.sbitem span{font-size:13px;color:var(--muted);font-weight:700;line-height:1.25}
+.sbitem.soon{opacity:.55}
+.sbitem .stamp{transform:rotate(-6deg)}
+@media (max-width:1099px){
+  .hero2{grid-template-columns:minmax(0,1fr)}
+  .heroart{padding:0 22px 22px}
+  .chfeat{grid-template-columns:minmax(0,1fr)}
+  .routegrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:640px){
+  .herocopy{padding:24px 18px 16px}
+  .heroart{padding:0 12px 14px}
+  .herostats b{font-size:22px}.herostats div{padding:7px 9px;gap:4px}.herostats span{font-size:12px}
+  .sectop .sech{font-size:28px}
+  .sectiles,.routegrid{grid-template-columns:minmax(0,1fr)}
+  .chfeat{padding:16px}
+  .chnum{font-size:50px}
+  .homecard{grid-template-columns:minmax(0,1fr);padding:16px}
+  .hcicon{width:52px;height:52px}
+}
+/* welcome box */
+.modal.welcome{padding:0;overflow:hidden;gap:0;max-width:520px}
+.wband{background:radial-gradient(120% 160% at 90% 0%,var(--herobg2),var(--herobg));color:#fff;padding:20px 22px 16px;display:flex;flex-direction:column;gap:6px;position:relative}
+.wband::after{content:'';position:absolute;left:0;right:0;bottom:0;height:7px;background:repeating-linear-gradient(135deg,var(--hazard) 0 12px,#0d171d 12px 24px)}
+.wband .wlogo{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:.04em}
+.wband .wlogo svg{width:30px;height:30px}.wband .wlogo span{color:var(--hazard)}
+.wband h2{font-size:34px;color:#fff;margin-bottom:6px}
+.wbody{padding:18px 22px 20px;display:flex;flex-direction:column;gap:12px}
+.wbody p{margin:0;color:var(--muted)}
+.stamp.ghoststamp{color:var(--line);font-size:14px}
+/* Chapter 2: brake control and velocity–time graph */
+.nudge{display:flex;gap:6px;margin-top:4px}
+.vtrow{border-top:1px solid var(--line);padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px}
+.vtrow .lbl{display:flex;align-items:center;gap:6px}
+#cvVT{width:100%;aspect-ratio:900/240;display:block;border-radius:8px}
+.predict{border:2px dashed var(--accent);border-radius:12px;padding:10px 12px;background:var(--accent-soft);display:flex;flex-direction:column;gap:6px}
+.predict p{margin:0;font-weight:700}
+.predict.done{border-style:solid;background:var(--panel)}
+.popts{display:flex;flex-wrap:wrap;gap:6px}
+.popts .mini{font-size:14px;padding:6px 10px}
+.mtabs{display:flex;gap:6px;flex-wrap:wrap}
+.mtabs button{border:1.5px solid var(--line);background:var(--chip);border-radius:999px;padding:6px 14px;font-weight:700}
+.mtabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.mtabs button.done:not([aria-selected="true"]){border-color:var(--good);color:var(--good)}
+.mbrief h3{font-size:22px} .mbrief p{margin:4px 0 0}
+.blog{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:2px;font-size:15px}.blog:empty{display:none}
+.blog li.ok{color:var(--good);font-weight:700}
+.qfig{margin:8px 0 2px}
+#brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:nowrap;align-items:center}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -458,29 +592,39 @@ input.ansin.right,input.gapin.right{border-color:var(--good)!important;backgroun
   <div class="topright">
     <button type="button" class="ghost sm" data-journal>📓 Journal <span class="jc" id="jCount">0</span></button>
     <button type="button" class="ghost sm" id="saveWorkBtn">📄 Save my work</button>
+    <button type="button" class="ghost sm teachbtn" id="teacherBtn">For teachers</button>
   </div>
 </header>
 
 <main id="main">
   <!-- HOME -->
   <section id="vHome" class="view">
-    <div class="teachrow"><button type="button" class="ghost sm" id="teacherBtn">For teachers: set classwork or homework</button></div>
-    <div class="hero panel">
-      <canvas id="cvHome" role="img" aria-label="The Force HQ arena complex: the Main Arena, the Snow Arena, the Space Dome, the Drop Zone tower and the Workshop"></canvas>
-      <div class="herotext">
-        <h1>Welcome to Force HQ</h1>
-        <p id="hello">Every force is a push or a pull. Here in the Force Arenas you can test them yourself, with tug-of-war teams, husky sleds, space pods and more.</p>
+    <div class="hero2">
+      <div class="herocopy">
+        <span class="kicker">Force Arenas · Forces unit</span>
+        <h1>Welcome to <span>Force HQ</span></h1>
+        <p id="hello">Every force is a push or a pull. In the Force Arenas you test them for yourself, with tug-of-war teams, husky sleds, space pods and more.</p>
+        <div class="resume" id="resume"></div>
         <p class="whoLine" id="whoLine"></p>
       </div>
+      <div class="heroart">
+        <canvas id="cvHome" role="img" aria-label="The Force HQ arena complex: the Main Arena, the Snow Arena, the Space Dome, the Drop Zone tower and the Workshop"></canvas>
+        <div class="herostats" id="heroStats"></div>
+      </div>
+      <div class="hazard" aria-hidden="true"></div>
     </div>
-    <h2 class="sech">The Force Arenas: guided chapters</h2>
-    <p class="secp">Each chapter is split into sections of approx. 20 to 30 minutes. Start with the <b>Foundation</b>. The <b>Extension</b> goes further, for when your teacher sets it or you want an extra challenge. Every section makes its own worksheet to save and upload.</p>
-    <div class="chapters" id="chapterCards"></div>
+
+    <div class="sectop">
+      <div><span class="kicker2">Guided chapters</span><h2 class="sech">Your route through the Force Arenas</h2></div>
+      <p class="secp">Each chapter has sections of approx. 20 to 30 minutes. Start with the <b>Foundation</b>. The <b>Extension</b> goes further, when your teacher sets it or you want an extra challenge. Every section makes its own worksheet.</p>
+    </div>
+    <div id="chapterCards"></div>
+
     <div class="homegrid">
-      <div class="panel homecard" id="exploreCard"></div>
-      <div class="panel homecard" id="workshopCard"></div>
+      <div class="panel homecard explorec" id="exploreCard"></div>
+      <div class="panel homecard workc" id="workshopCard"></div>
     </div>
-    <div class="panel stamps" id="stampRow"></div>
+    <div class="panel stampbook" id="stampRow"></div>
   </section>
 
   <!-- CHAPTER -->
@@ -535,6 +679,11 @@ input.ansin.right,input.gapin.right{border-color:var(--good)!important;backgroun
           <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="num" id="massOut">50 kg</span></div>
           <input type="range" id="mass" min="10" max="150" step="1" value="50" aria-label="Crate mass in kilograms">
         </div>
+        <div data-panel="brake">
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="brake">Brake force</button></h3><span class="num" id="brakeOut">40 N</span><button type="button" class="info" data-info="brake" aria-label="How does the brake work?">ⓘ</button></div>
+          <input type="range" id="brakeF" min="5" max="200" step="1" value="40" aria-label="Brake force in newtons">
+          <div class="nudge"><button type="button" class="mini" data-bk="-1">−1 N</button><button type="button" class="mini" data-bk="1">+1 N</button></div>
+        </div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -542,7 +691,8 @@ input.ansin.right,input.gapin.right{border-color:var(--good)!important;backgroun
         <div class="scenebar">
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove">Reset</button>
+          <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch">Reset</button>
         </div>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">
@@ -559,6 +709,10 @@ input.ansin.right,input.gapin.right{border-color:var(--good)!important;backgroun
               <label><input type="checkbox" id="tgRes" checked> Resultant force arrow</label>
             </div>
           </div>
+        </div>
+        <div class="vtrow" data-panel="vt">
+          <div class="lbl"><button type="button" class="term tl" data-t="vtgraph">Velocity–time graph of the crate</button><button type="button" class="info" data-info="vt" aria-label="How do I read the velocity–time graph?">ⓘ</button></div>
+          <canvas id="cvVT" role="img" aria-label="Velocity–time graph of the crate: velocity in metres per second up the side, time in seconds along the bottom"></canvas>
         </div>
       </div>
     </div>
@@ -660,9 +814,12 @@ const PXM = 39, CX = 450, GROUND = 300, ROPEY = 262, CW = 88, CRH = 64, LIM = 9,
 const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 250;
 const S = {
   left: [], right: [], mass: 50, floor: 'concrete', x: 0, v: 0, a: 0, t: 0, pullT: 0, shoveT: -1, lastShoveT: null,
-  running: false, hist: [], msg: '', flags: null, frozen: false
+  running: false, hist: [], msg: '', flags: null, frozen: false,
+  /* Chapter 2: a launcher and a brake. The crate starts at x0, Launch sets it moving at v0, and once it
+     passes the brake line (brakeX) a brake pushes against the motion with brakeF newtons until it stops. */
+  x0: 0, v0: 2, brakeX: null, brakeF: 40, brakeFrom: null, brakeT: null
 };
-const newFlags = () => ({ ran: false, shoved: false, moved: false, stuck: false, pulled: false });
+const newFlags = () => ({ ran: false, shoved: false, moved: false, stuck: false, pulled: false, launched: false, stopped: false });
 S.flags = newFlags();
 const tot = a => a.reduce((s, p) => s + PUL[p].n, 0);
 
@@ -675,8 +832,9 @@ function forces() {
   if (Math.abs(S.v) < 1e-6) fr = Math.abs(app) <= fs ? -app : -Math.sign(app) * fk;
   else fr = -Math.sign(S.v) * fk;
   if (Math.abs(fr) < 1e-9) fr = 0;
-  const net = app + fr;
-  return { L, R, shove, app, fr, net, W, N, m, a: net / m, fmax: fs, fk };
+  const brk = S.brakeFrom != null && Math.abs(S.v) > 1e-6 ? -Math.sign(S.v) * S.brakeF : 0;   // brakes only act while moving
+  const net = app + fr + brk;
+  return { L, R, shove, app, fr, brk, net, W, N, m, a: net / m, fmax: fs, fk };
 }
 /* forces for a still, set-up arena (no ramp) — used by guided checks and FBD comparisons */
 function staticForces() { const keep = S.running; S.running = false; const f = forces(); S.running = keep; return f; }
@@ -687,6 +845,8 @@ function stepSim(dt) {
   if (S.v !== 0 && v2 * S.v < 0) v2 = 0;
   if (Math.abs(v2) < 1e-5 && Math.abs(f.app) <= f.fmax) v2 = 0;
   S.x += (S.v + v2) / 2 * dt; S.v = v2; S.t += dt; S.pullT += dt;
+  if (S.brakeX != null && S.brakeFrom == null && S.v > 0 && S.x >= S.brakeX) { S.brakeFrom = S.brakeX; S.brakeT = S.t; }
+  if (S.brakeFrom != null && S.v === 0 && S.running) { S.running = false; S.flags.stopped = true; S.msg = `The crate stopped ${fmt(S.x - S.brakeFrom, 2)} m past the brake line.`; syncRun(); }
   if (S.shoveT >= 0) { S.shoveT += dt; if (S.shoveT >= SHOVE_T) { S.shoveT = -1; S.lastShoveT = S.t; } }
   S.hist.push([S.t, S.v]); if (S.hist.length > 4000) S.hist.shift();
   const fl = S.flags; fl.ran = true;
@@ -696,8 +856,10 @@ function stepSim(dt) {
   if (Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
-function resetSim() { S.x = 0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
+function resetSim() { S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
+function launch() { resetSim(); S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
+function clearCh2() { S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 
 /* ===== Drawing: arena, pullers, animals, live free-body diagram ===== */
 let C = {};
@@ -926,7 +1088,9 @@ function drawTeam(c, side, s, col, edge, pulling, tt, ph, showMeter) {
 
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'fbd', 'floor', 'mass', 'shove', 'toggles', 'run'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run'];
+/* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
+const EXPLORE_HIDE = ['launch', 'brake', 'readD'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -945,7 +1109,19 @@ function drawScene(f, cvo) {
   const meter = LAB.show.has('meter');
   drawTeam(c, 'left', -1, C.left, cx - CW / 2, pulling, tt, ph, meter);
   drawTeam(c, 'right', 1, C.right, cx + CW / 2, pulling, tt, ph, meter);
+  if (S.brakeX != null) {   // Chapter 2: start mark and brake line on the floor
+    const bx = CX + S.brakeX * PXM; c.save(); c.setLineDash([7, 5]); c.strokeStyle = C.bad; c.lineWidth = 3; c.beginPath(); c.moveTo(bx, GROUND - 92); c.lineTo(bx, GROUND + 8); c.stroke(); c.restore();
+    pill(c, 'BRAKE LINE', bx, GROUND - 100, C.bad, 12);
+    if (S.target != null) { const tx = CX + (S.brakeX + S.target) * PXM, z = 0.15 * PXM; c.save(); c.globalAlpha = .28; c.fillStyle = C.good; c.fillRect(tx - z, GROUND - 4, 2 * z, 12); c.restore(); c.fillStyle = C.good; c.fillRect(tx - 1.5, GROUND - 60, 3, 68); c.beginPath(); c.moveTo(tx + 1.5, GROUND - 60); c.lineTo(tx + 26, GROUND - 52); c.lineTo(tx + 1.5, GROUND - 44); c.fill(); pill(c, `TARGET ${fmt(S.target, 1)} m`, tx, GROUND + 22, C.good, 11); }
+    const sx = CX + S.x0 * PXM; c.fillStyle = C.muted; c.fillRect(sx - 1.5, GROUND - 6, 3, 14); txt(c, 'START', sx, GROUND + 20, C.muted, `700 11px ${C.fn}`);
+  }
   drawCrate(c, cx, GROUND, S.mass);
+  if (Math.abs(f.brk || 0) > 0.5) {   // the brake pushes back against the motion
+    const ex = cx + Math.sign(f.brk) * -(CW / 2), L = 26 + Math.abs(f.brk) / 4;
+    arrow(c, ex + Math.sign(-f.brk) * (L + 6), GROUND - 18, ex + Math.sign(-f.brk) * 6, GROUND - 18, C.bad, 5);
+    if (!RMOTION) { c.save(); c.strokeStyle = C.hazard; c.lineWidth = 2; for (let k = 0; k < 4; k++) { const sx2 = cx - Math.sign(S.v) * (CW / 2 + 4 + k * 7), jy = (performance.now() / 40 + k * 3) % 6; c.beginPath(); c.moveTo(sx2, GROUND - 1); c.lineTo(sx2 - Math.sign(S.v) * 8, GROUND - 5 - jy); c.stroke(); } c.restore(); }
+    pill(c, `brake ${fmt(Math.abs(f.brk), 0)} N`, cx, GROUND - CRH - 16, C.bad);
+  }
   // shove arrow lingers for 3 s
   const since = S.lastShoveT == null ? 9 : S.t - S.lastShoveT;
   if (f.shove > 0.5 || since < 3) { c.save(); if (f.shove <= 0.5) c.globalAlpha = Math.max(.35, 1 - since / 3); const hx = cx - CW / 2, F = f.shove > 0.5 ? f.shove : SHOVE_F;
@@ -1061,12 +1237,17 @@ function renderControls() {
   $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => !LAB.floors || LAB.floors.includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
   const m = $('#mass'); m.value = S.mass; $('#massOut').textContent = S.mass + ' kg';
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
+  const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; $('#brakeOut').textContent = S.brakeF + ' N'; }
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
   $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
   $('#shoveBtn').addEventListener('click', () => { shove(); labChanged(); });
+  $('#launchBtn').addEventListener('click', () => { launch(); labChanged(); });
+  const setBrake = v => { S.brakeF = clamp(Math.round(v), 5, 200); if (!S.running) resetSim(); labChanged(); };
+  $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
+  $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
   $('#floors').addEventListener('click', e => { const b = e.target.closest('[data-floor]'); if (!b) return; S.floor = b.dataset.floor; resetSim(); labChanged(); });
   $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massOut').textContent = S.mass + ' kg'; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
   $('#tgVert').addEventListener('change', e => { LAB.showVert = e.target.checked; });
@@ -1092,7 +1273,8 @@ const RD = [
   ['readM', 'Mass', 'mass', '', f => fmt(f.m, 0) + ' kg'],
   ['readRes', 'Resultant force', 'resultant', 'res', f => Math.abs(f.net) < .5 ? '0 N (balanced)' : fmt(Math.abs(f.net), 1) + ' N ' + (f.net > 0 ? '→' : '←')],
   ['readA', 'Acceleration', 'acceleration', '', f => fmt(f.a, 2) + ' m/s²'],
-  ['readV', 'Velocity', 'velocity', '', () => fmt(S.v, 2) + ' m/s']
+  ['readV', 'Velocity', 'velocity', '', () => fmt(S.v, 2) + ' m/s'],
+  ['readD', 'Braking distance', 'brakingdist', '', () => S.brakeFrom == null ? '0.00 m' : fmt(S.x - S.brakeFrom, 2) + ' m']
 ];
 function buildReads() {
   $('#reads').innerHTML = RD.map(([k, l, t, cl]) => `<div class="rd ${cl}" data-panel="${k}"><div class="lbl"><button type="button" class="term tl" data-t="${t}">${l}</button><button type="button" class="info" data-info="${k}" aria-label="How do I read the ${l} readout?">ⓘ</button></div><div class="v" id="v-${k}"></div></div>`).join('');
@@ -1105,7 +1287,7 @@ function drawLiveFBD(f) {
   const cv = $('#cvFBD'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 340, 300), cx = 170, cy = 128, VMAX = 92;
   c.fillStyle = C.panel; c.fillRect(0, 0, 340, 300);
-  const hv = [f.L, f.R, Math.abs(f.fr), f.shove, LAB.showRes ? Math.abs(f.net) : 0];
+  const hv = [f.L, f.R, Math.abs(f.fr), Math.abs(f.brk || 0), f.shove, LAB.showRes ? Math.abs(f.net) : 0];
   const hmax = Math.max(...hv), step = niceStep(Math.max(1, hmax > 0.5 ? hmax : (LAB.showVert ? f.W * 4 / 3 : 10))), k = 30 / step;
   c.strokeStyle = C.grid; c.lineWidth = 1;
   for (let x = cx % 30; x <= 340; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 262); c.stroke(); }
@@ -1124,6 +1306,7 @@ function drawLiveFBD(f) {
   if (f.L > 0.5) { arrow(c, cx, cy - 7, cx - f.L * k, cy - 7, C.left, 4); lab(Math.round(f.L) + ' N', cx - Math.max(f.L * k, 40) / 2 - 14, cy - 21, C.left); }
   if (f.R > 0.5) { arrow(c, cx, cy - 7, cx + f.R * k, cy - 7, C.right, 4); lab(Math.round(f.R) + ' N', cx + Math.max(f.R * k, 40) / 2 + 14, cy - 21, C.right); }
   if (Math.abs(f.fr) > 0.5 && (LAB.show.has('readF') || LAB.mode === 'explore')) { arrow(c, cx, cy + 7, cx + f.fr * k, cy + 7, C.fric, 4); lab(fmt(Math.abs(f.fr), 1) + ' N', cx + Math.sign(f.fr) * (Math.max(Math.abs(f.fr) * k, 40) / 2 + 14), cy + 21, C.fric); }
+  if (Math.abs(f.brk || 0) > 0.5) { arrow(c, cx, cy + 22, cx + f.brk * k, cy + 22, C.bad, 4); lab('brake ' + fmt(Math.abs(f.brk), 0) + ' N', cx + Math.sign(f.brk) * (Math.max(Math.abs(f.brk) * k, 40) / 2 + 22), cy + 36, C.bad); }
   if (f.shove > 0.5) { arrow(c, cx, cy - 36, cx + f.shove * k, cy - 36, C.ink, 4); lab('push ' + Math.round(f.shove) + ' N', cx + Math.max(f.shove * k, 60) / 2 + 30, cy - 50, C.ink); }
   c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 262.5); c.lineTo(340, 262.5); c.stroke();
   if (LAB.showRes && (LAB.show.has('readRes') || LAB.mode === 'explore')) {
@@ -1132,8 +1315,34 @@ function drawLiveFBD(f) {
     else lab('Resultant = 0 N (balanced)', cx, 282, C.res);
   }
   $('#scaleNote').textContent = `Scale: 1 grid square = ${step} N` + (cut ? '. The weight and normal arrows are too long to fit, so they are shortened (see the break marks).' : '');
-  const lg = [['left', 'Left pull'], ['right', 'Right pull'], ['fric', 'Friction', 'readF'], ['ink', 'Push'], ['vert', 'Weight / normal', 'readW'], ['res', 'Resultant', 'readRes']].filter(x => !x[2] || LAB.show.has(x[2]) || LAB.mode === 'explore');
+  const lg = [['left', 'Left pull'], ['right', 'Right pull'], ['fric', 'Friction', 'readF'], ['ink', 'Push'], ['bad', 'Brake', 'brake'], ['vert', 'Weight / normal', 'readW'], ['res', 'Resultant', 'readRes']].filter(x => !x[2] || LAB.show.has(x[2]) || LAB.mode === 'explore');
   const lh = lg.map(([k2, n]) => `<span><i style="background:var(--${k2})"></i>${n}</span>`).join(''); const le = $('#legend'); if (le.dataset.h !== lh) { le.innerHTML = lh; le.dataset.h = lh; }
+}
+
+/* ---- velocity–time graph (Chapter 2 on): flat = steady speed, sloping down = slowing down ---- */
+function niceUp(v) { const steps = [0.5, 1, 2, 2.5, 4, 5, 8, 10, 15, 20, 25, 40, 50]; return steps.find(x => x >= v) || Math.ceil(v / 10) * 10; }
+function drawVT() {
+  const cv = $('#cvVT'); if (!cv || !cv.offsetParent) return;
+  const W = 900, H = 240, c = fit(cv, W, H), x0 = 64, x1 = W - 18, y0 = 14, y1 = H - 40;
+  c.fillStyle = C.panel; c.fillRect(0, 0, W, H);
+  const hs = S.hist, tEnd = hs.length ? hs[hs.length - 1][0] : 0;
+  let vmax = 0, vmin = 0; hs.forEach(([, v]) => { if (v > vmax) vmax = v; if (v < vmin) vmin = v; });
+  if (S.v0 > vmax && S.brakeX != null) vmax = S.v0;
+  const top = niceUp(Math.max(1, vmax * 1.1)), bot = vmin < -0.01 ? -niceUp(-vmin * 1.1) : 0, tMax = Math.max(6, Math.ceil(tEnd + 0.5));
+  const vs = top - bot <= 2 ? 0.25 : top - bot <= 5 ? 0.5 : top - bot <= 10 ? 1 : top - bot <= 25 ? 2.5 : 5, ts = tMax <= 10 ? 1 : tMax <= 24 ? 2 : 5;
+  const X = t => x0 + (t / tMax) * (x1 - x0), Y = v => y1 - ((v - bot) / (top - bot)) * (y1 - y0);
+  c.lineWidth = 1; c.strokeStyle = C.grid;
+  for (let v = bot; v <= top + 1e-9; v += vs) { c.beginPath(); c.moveTo(x0, Y(v)); c.lineTo(x1, Y(v)); c.stroke(); txt(c, String(+v.toFixed(2)), x0 - 8, Y(v), C.muted, `600 12px ${C.fn}`, 'right'); }
+  for (let t = 0; t <= tMax + 1e-9; t += ts) { c.beginPath(); c.moveTo(X(t), y0); c.lineTo(X(t), y1); c.stroke(); txt(c, String(t), X(t), y1 + 13, C.muted, `600 12px ${C.fn}`); }
+  c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0, y1); c.lineTo(x1, y1); c.stroke();
+  if (bot < 0) { c.beginPath(); c.moveTo(x0, Y(0)); c.lineTo(x1, Y(0)); c.stroke(); }
+  txt(c, 'Time (s)', (x0 + x1) / 2, H - 9, C.ink, `700 13px ${C.fb}`);
+  c.save(); c.translate(16, (y0 + y1) / 2); c.rotate(-Math.PI / 2); txt(c, 'Velocity (m/s)', 0, 0, C.ink, `700 13px ${C.fb}`); c.restore();
+  if (S.brakeT != null) { const bx = X(S.brakeT); c.save(); c.setLineDash([6, 4]); c.strokeStyle = C.bad; c.lineWidth = 2; c.beginPath(); c.moveTo(bx, y0); c.lineTo(bx, y1); c.stroke(); c.restore(); pill(c, 'brake on', bx, y0 + 12, C.bad, 12); }
+  if (!hs.length) { txt(c, 'The graph draws itself when the crate starts moving.', (x0 + x1) / 2, (y0 + y1) / 2, C.muted, `600 15px ${C.fb}`); return; }
+  c.strokeStyle = C.accent; c.lineWidth = 3.5; c.lineJoin = 'round'; c.beginPath(); c.moveTo(X(0), Y(hs[0][1]));
+  const stride = Math.max(1, Math.floor(hs.length / 900)); for (let i = 0; i < hs.length; i += stride) c.lineTo(X(hs[i][0]), Y(hs[i][1])); c.lineTo(X(tEnd), Y(S.v)); c.stroke();
+  c.fillStyle = C.accent; c.beginPath(); c.arc(X(tEnd), Y(S.v), 5, 0, 7); c.fill();
 }
 
 /* ---- main loop ---- */
@@ -1142,17 +1351,17 @@ function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (S.running) updateSim(dt);
   const f = forces();
-  if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); readouts(f); if (LAB.tick) LAB.tick(f); }
+  if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); drawVT(); readouts(f); if (LAB.tick) LAB.tick(f); }
   requestAnimationFrame(frame);
 }
 
 /* ===== Shell: views, home, name and class, teacher mode ===== */
 const CHAPTERS = [
-  { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true },
-  { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: false },
-  { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: false },
-  { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: false },
-  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady speeds and the new Drop Zone.', stamp: 'Balance Master', ready: false }
+  { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
+  { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
+  { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: false, arena: 'Snow Arena', icon: 'tri' },
+  { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: false, arena: 'Space Dome', icon: 'pair' },
+  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady speeds and the new Drop Zone.', stamp: 'Balance Master', ready: false, arena: 'Drop Zone', icon: 'chute' }
 ];
 const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
@@ -1162,7 +1371,7 @@ const unlocked = () => !!DB.unlocked;
 
 function show(v) {
   if (typeof qUnpop === 'function') qUnpop();
-  VIEW = v; VIEWS.forEach(x => $('#' + x).hidden = x !== v);
+  VIEW = v; VIEWS.forEach(x => $('#' + x).hidden = x !== v); document.body.dataset.view = v;
   $('#crumb').textContent = v === 'vChapter' && CH ? `Force Arenas · Chapter ${CH.n}` : v === 'vExplore' ? 'Force Arenas · Explore' : v === 'vTeacher' ? 'For teachers' : '';
   window.scrollTo(0, 0);
   if (v === 'vHome') renderHome();
@@ -1178,27 +1387,56 @@ function chStatus(id) {
   if (L.done || Cc || R.done) return { label: 'In progress', cls: 'part' };
   return { label: 'Not started', cls: 'todo' };
 }
-function secRow(sec) {
-  const id = sec.id, d = CHDATA[id], st = chStatus(id), L = learnProgress(id), R = reviewProgress(id), M = secMins(id);
-  return `<div class="secrow ${st.cls}"><div class="sechd"><b>${sec.part}</b><span class="scaleNote">approx. ${M.total} min · own worksheet</span></div><p>${sec.blurb}</p>
-    <div class="parts"><span class="pillst ${L.done === L.total ? 'done' : L.done ? 'part' : 'todo'}">Learn ${L.done}/${L.total}</span>${d.challenge ? `<span class="pillst ${challengeDone(id) ? 'done' : 'todo'}">Challenge${challengeDone(id) ? ' ✓' : ''}</span>` : ''}<span class="pillst ${R.done === R.total ? 'done' : R.done ? 'part' : 'todo'}">Check ${R.done}/${R.total}</span></div>
-    <button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start the ' + sec.part : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button></div>`;
+/* small line icons for the chapter cards (inline SVG, inherits currentColor) */
+const CHICON = {
+  rope: '<path d="M4 22h9M27 22h9" stroke-width="3"/><rect x="14" y="16" width="12" height="12" rx="2"/><path d="M14 16l12 12M26 16L14 28" stroke-width="1.6"/>',
+  move: '<rect x="18" y="14" width="14" height="14" rx="2"/><path d="M4 17h9M7 21h8M4 25h9" stroke-width="2.6"/>',
+  tri: '<path d="M20 6L35 32H5z"/><path d="M11 22h18" stroke-width="2"/><text x="20" y="19" text-anchor="middle" font-size="7.5" font-weight="800" stroke="none" fill="currentColor">F</text><text x="13.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">m</text><text x="26.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">a</text>',
+  pair: '<path d="M18 20H4M8 15l-5 5 5 5M22 20h14M32 15l5 5-5 5" stroke-width="3"/><path d="M20 10v20" stroke-width="2" stroke-dasharray="3 3"/>',
+  chute: '<path d="M7 18a13 11 0 0 1 26 0z"/><path d="M8 18l12 12 12-12M20 18v12" stroke-width="1.6"/><circle cx="20" cy="32" r="3"/>'
+};
+const chIcon = k => `<svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${CHICON[k] || ''}</svg>`;
+/* how far through a section is, from 0 to 1 */
+function secParts(id) {
+  const d = CHDATA[id], L = learnProgress(id), R = reviewProgress(id), C2 = d.challenge ? challengeState(id) : { tried: 0, total: 0 };
+  return { L, R, C2, done: L.done + R.done + C2.tried, total: L.total + R.total + C2.total };
 }
+const pctBar = (f, cls = '') => `<div class="pbar ${cls}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(f * 100)}"><i style="width:${Math.round(f * 100)}%"></i></div>`;
+function secRow(sec) {
+  const id = sec.id, d = CHDATA[id], st = chStatus(id), P = secParts(id), M = secMins(id), stamped = !!dbGet('stamps', {})[id];
+  return `<div class="sectile ${st.cls} ${sec.part === 'Extension' ? 'ext' : 'fnd'}">
+    <div class="sechd"><span class="partname">${sec.part}</span><span class="mins">approx. ${M.total} min</span></div>
+    <p>${sec.blurb}</p>
+    <div class="parts"><span class="pillst ${P.L.done === P.L.total ? 'done' : P.L.done ? 'part' : 'todo'}">Learn ${P.L.done}/${P.L.total}</span>${d.challenge ? `<span class="pillst ${challengeDone(id) ? 'done' : P.C2.tried ? 'part' : 'todo'}">Challenge ${P.C2.tried}/${P.C2.total}</span>` : ''}<span class="pillst ${P.R.done === P.R.total ? 'done' : P.R.done ? 'part' : 'todo'}">Check ${P.R.done}/${P.R.total}</span></div>
+    ${pctBar(P.total ? P.done / P.total : 0, st.cls)}
+    <div class="tilefoot"><button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start the ' + sec.part : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button>${stamped ? `<span class="minis on" title="Stamp earned">${sec.stamp}</span>` : `<span class="minis">Stamp: ${sec.stamp}</span>`}</div></div>`;
+}
+function nextSection() { const st = dbGet('stamps', {}); return SECTIONS.find(s => !st[s.id]) || null; }
 function renderHome() {
-  const u = user();
-  $('#whoLine').innerHTML = u.teacher ? `You're in <b>teacher mode</b>: every chapter is unlocked. <button type="button" data-act="student">Switch to student mode</button>` :
-    u.name ? `Hi ${esc(u.name)}! Welcome back.` : '';
-  $('#chapterCards').innerHTML = CHAPTERS.map(ch => {
-    const secs = SECTIONS.filter(s => s.ch === ch.id);
-    if (!ch.ready || !secs.length) return `<div class="chcard soon"><span class="n">Chapter ${ch.n}</span><h3>${ch.title}</h3><p>${ch.blurb}</p><div class="parts"><span class="pillst todo">Coming soon</span></div></div>`;
-    return `<div class="chcard wide"><span class="n">Chapter ${ch.n}</span><h3>${ch.title}</h3><div class="secrows">${secs.map(secRow).join('')}</div></div>`;
-  }).join('');
-  $('#exploreCard').innerHTML = exploreOpen()
-    ? `<span class="lbl">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><button type="button" class="go" data-act="explore" style="align-self:flex-start">Go to Explore →</button>`
-    : `<span class="lbl">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`;
-  $('#workshopCard').innerHTML = `<span class="lbl">Coming soon</span><h3>The Workshop</h3><p>Pulleys, levers, ramps, wedges and screws. Find out how machines make a job feel easier, and calculate the work done.</p>`;
-  const stamps = dbGet('stamps', {});
-  $('#stampRow').innerHTML = `<span class="lbl">My stamps</span>` + SECTIONS.map(s => `<div class="stamp ${stamps[s.id] ? 'on' : ''}" title="${s.stamp}">${stamps[s.id] ? s.stamp : `Ch ${s.n} ${s.part}`}</div>`).join('') + CHAPTERS.filter(c => !c.ready).map(c => `<div class="stamp">Chapter ${c.n}</div>`).join('');
+  const u = user(), stamps = dbGet('stamps', {}), J = dbGet('journal', { order: [] });
+  $('#whoLine').innerHTML = u.teacher ? `You're in <b>teacher mode</b>: every chapter is unlocked. <button type="button" class="linkbtn" data-act="student">Switch to student mode</button>` : '';
+  /* "Up next" card: the first section without a stamp */
+  const nx = nextSection();
+  if (nx) {
+    const P = secParts(nx.id), started = P.done > 0, ch = CHAPTERS.find(c => c.id === nx.ch);
+    $('#resume').innerHTML = `<div class="rlbl">${started ? 'Carry on where you left off' : u.name && !u.teacher ? `Ready, ${esc(u.name)}? Up next` : 'Up next'}</div>
+      <div class="rtitle">Chapter ${nx.n} · ${nx.part}: ${ch.title}</div>
+      <div class="rmeta">approx. ${secMins(nx.id).total} min · ${P.done} of ${P.total} parts done</div>${pctBar(P.total ? P.done / P.total : 0, 'onDark')}
+      <button type="button" class="go big" data-open="${nx.id}">${started ? 'Carry on' : 'Start'} ${nx.part === 'Foundation' ? `Chapter ${nx.n}` : `the ${nx.part}`} →</button>`;
+  } else $('#resume').innerHTML = `<div class="rlbl">All done so far</div><div class="rtitle">You've finished every chapter that's open. Brilliant work!</div><button type="button" class="go big" data-act="explore">Go to Explore →</button>`;
+  const nst = Object.keys(stamps).filter(k => secOf(k)).length;
+  $('#heroStats').innerHTML = [[`${nst}<small>/${SECTIONS.length}</small>`, 'stamps'], [`${SECTIONS.filter(s => chStatus(s.id).cls === 'done').length}<small>/${SECTIONS.length}</small>`, 'sections done'], [J.order.length, 'Journal cards']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
+  /* chapters: open ones in full, the rest as a route of upcoming stops */
+  const open = CHAPTERS.filter(c => c.ready && SECTIONS.some(s => s.ch === c.id)), soon = CHAPTERS.filter(c => !open.includes(c));
+  $('#chapterCards').innerHTML = open.map(ch => `<div class="panel chfeat"><div class="chside"><span class="chnum">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}<div><span class="kicker2">Chapter ${ch.n} · ${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p></div></div><div class="sectiles">${SECTIONS.filter(s => s.ch === ch.id).map(secRow).join('')}</div></div>`).join('')
+    + (soon.length ? `<div class="route"><div class="routehd"><span class="kicker2">Coming soon</span></div><div class="routegrid">${soon.map(ch => `<div class="stop"><div class="stophd"><span class="chnum sm">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}</div><span class="kicker2">${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p><span class="pillst todo">Coming soon</span></div>`).join('')}</div></div>` : '');
+  $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
+    ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
+    : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
+  $('#workshopCard').innerHTML = `<div class="hcicon"><svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="12" r="6"/><circle cx="14" cy="12" r="1.5"/><path d="M8 12v18M20 12v8"/><rect x="16" y="20" width="8" height="8" rx="1.5"/><path d="M4 32h32"/><path d="M27 32l9-10"/></svg></div><div class="hcbody"><span class="kicker2">Coming soon</span><h3>The Workshop</h3><p>Pulleys, levers, ramps, wedges and screws. Find out how machines make a job feel easier, and calculate the work done.</p></div>`;
+  $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
+    + SECTIONS.map(s => `<div class="sbitem"><div class="stamp ${stamps[s.id] ? 'on' : 'ghoststamp'}" title="${s.stamp}">${s.stamp}</div><span>${stamps[s.id] ? s.stamp : `Chapter ${s.n} ${s.part}`}</span></div>`).join('')
+    + CHAPTERS.filter(c => !c.ready).map(c => `<div class="sbitem soon"><div class="stamp ghoststamp">${c.stamp}</div><span>Chapter ${c.n}</span></div>`).join('') + '</div>';
   requestAnimationFrame(drawHome);
 }
 /* Explore opens once the Chapter 1 Foundation is finished (guided before Explore). Teachers, and anyone who chooses "Open it anyway", can go in sooner. */
@@ -1214,6 +1452,10 @@ const HOMEHIT = [];
 function drawHome() {
   const cv = $('#cvHome'); if (!cv || !cv.offsetParent) return; readColors(); const c = fit(cv, 900, 420); HOMEHIT.length = 0;
   const g = c.createLinearGradient(0, 0, 0, 300); g.addColorStop(0, '#cfe6f2'); g.addColorStop(1, '#eef6f2'); c.fillStyle = g; c.fillRect(0, 0, 900, 420);
+  // sun, clouds and distant hills
+  const sg = c.createRadialGradient(470, 70, 4, 470, 70, 90); sg.addColorStop(0, 'rgba(255,240,190,.95)'); sg.addColorStop(.25, 'rgba(255,236,170,.55)'); sg.addColorStop(1, 'rgba(255,236,170,0)'); c.fillStyle = sg; c.fillRect(380, 0, 180, 170);
+  c.fillStyle = 'rgba(255,255,255,.85)'; for (const [x, y, k] of [[90, 70, 1], [300, 48, .8], [690, 60, 1.1], [840, 110, .7]]) { c.beginPath(); c.ellipse(x, y, 34 * k, 11 * k, 0, 0, 7); c.ellipse(x - 16 * k, y + 3, 20 * k, 9 * k, 0, 0, 7); c.ellipse(x + 18 * k, y + 2, 22 * k, 10 * k, 0, 0, 7); c.fill(); }
+  c.fillStyle = '#b9cfd9'; c.beginPath(); c.moveTo(0, 230); c.lineTo(90, 175); c.lineTo(170, 215); c.lineTo(260, 160); c.lineTo(360, 220); c.lineTo(480, 185); c.lineTo(560, 215); c.lineTo(680, 150); c.lineTo(790, 205); c.lineTo(900, 170); c.lineTo(900, 260); c.lineTo(0, 260); c.fill();
   c.fillStyle = '#c4d9c8'; c.beginPath(); c.moveTo(0, 250); c.quadraticCurveTo(200, 200, 420, 240); c.quadraticCurveTo(650, 280, 900, 220); c.lineTo(900, 420); c.lineTo(0, 420); c.fill();
   c.fillStyle = '#d9e7d6'; c.fillRect(0, 300, 900, 120);
   c.fillStyle = '#efe9dc'; c.beginPath(); c.moveTo(0, 360); c.quadraticCurveTo(450, 330, 900, 372); c.lineTo(900, 395); c.quadraticCurveTo(450, 352, 0, 385); c.fill();
@@ -1240,6 +1482,9 @@ function drawHome() {
   c.save(); c.translate(725, 288); c.fillStyle = '#e3a51c'; for (let i = 0; i < 8; i++) { c.rotate(Math.PI / 4); c.fillRect(-3, -14, 6, 7); } c.beginPath(); c.arc(0, 0, 10, 0, 7); c.fill(); c.fillStyle = '#7a5426'; c.beginPath(); c.arc(0, 0, 4, 0, 7); c.fill(); c.restore();
   c.strokeStyle = '#47637a'; c.lineWidth = 4; c.beginPath(); c.moveTo(830, 370); c.lineTo(830, 250); c.lineTo(880, 250); c.stroke(); c.lineWidth = 1.5; c.beginPath(); c.moveTo(872, 250); c.lineTo(872, 290); c.stroke(); c.fillStyle = '#c99a5b'; c.fillRect(864, 290, 16, 14);
   label('WORKSHOP', 725, 388, false); HOMEHIT.push({ x0: 630, x1: 890, y0: 250, y1: 400, id: 'workshop' });
+  // paths to each building and a few trees
+  c.strokeStyle = '#efe9dc'; c.lineWidth = 9; c.lineCap = 'round'; for (const [x1, y1, x2, y2] of [[390, 380, 150, 292], [390, 380, 613, 300], [390, 380, 725, 372]]) { c.beginPath(); c.moveTo(x1, y1); c.quadraticCurveTo((x1 + x2) / 2, y1 + 10, x2, y2); c.stroke(); }
+  for (const [x, y, k] of [[262, 330, 1], [520, 342, .9], [30, 330, .8], [870, 330, 1], [600, 330, .7]]) { c.fillStyle = '#7a5a3a'; c.fillRect(x - 2 * k, y - 4, 4 * k, 12 * k); c.fillStyle = '#5b8c4a'; c.beginPath(); c.arc(x, y - 10 * k, 12 * k, 0, 7); c.fill(); c.fillStyle = '#7cad67'; c.beginPath(); c.arc(x - 3 * k, y - 13 * k, 7 * k, 0, 7); c.fill(); }
   // Main Arena (front centre, biggest)
   c.fillStyle = '#b7c7cf'; c.beginPath(); c.ellipse(390, 330, 230, 60, 0, 0, 7); c.fill();
   c.fillStyle = '#d7e6f1'; c.beginPath(); c.ellipse(390, 312, 230, 175, 0, Math.PI, 0); c.fill();
@@ -1279,11 +1524,11 @@ function onSubmit(root, btn, fn) {
 /* ---------- name and class (asked first) ---------- */
 function askWho(first) {
   const u = user();
-  openModal(`<div class="modal" id="whoForm" role="form"><h2>${first ? 'Welcome to Force HQ!' : 'Who is using Force HQ?'}</h2>
-    <p>Type your name and class so your worksheets show who did the work. Your progress is saved on this device.</p>
+  openModal(`<div class="modal welcome" id="whoForm" role="form"><div class="wband"><div class="wlogo"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" rx="9" fill="#0d171d"/><path d="M8 20h9M23 20h9" stroke="#e3a51c" stroke-width="4" stroke-linecap="round"/><path d="M12 15l-5 5 5 5M28 15l5 5-5 5" fill="none" stroke="#e3a51c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="16" y="15" width="8" height="10" rx="2" fill="#c99a5b"/></svg>FORCE<span>HQ</span></div><h2>${first ? 'Welcome to Force HQ!' : 'Who is using Force HQ?'}</h2></div>
+    <div class="wbody"><p>Type your name and class so your worksheets show who did the work. Your progress is saved on this device.</p>
     <label>Your name<input type="text" id="whoName" autocomplete="given-name" value="${esc(u.teacher ? '' : u.name || '')}" required></label>
     <label>Your class<input type="text" id="whoCls" placeholder="for example 7B" value="${esc(u.teacher ? '' : u.cls || '')}"></label>
-    <div class="row" style="justify-content:space-between"><button type="button" class="mini" id="imTeacher">I'm a teacher</button><button type="button" class="go" id="whoGo">Let's go →</button></div></div>`);
+    <div class="row" style="justify-content:space-between;margin-top:4px"><button type="button" class="mini" id="imTeacher">I'm a teacher</button><button type="button" class="go" id="whoGo">Let's go →</button></div></div></div>`);
   onSubmit('#whoForm', '#whoGo', () => { const n = $('#whoName').value.trim(); if (!n) { $('#whoName').focus(); return; } DB.user = { name: n, cls: $('#whoCls').value.trim() }; saveDB(); closeModal(); refreshWho(); renderHome(); if (first) maybeTour(); });
   $('#imTeacher').addEventListener('click', () => askCode(ok => { if (ok) { DB.user = { name: 'Teacher', cls: '', teacher: true }; saveDB(); closeModal(); refreshWho(); renderHome(); } }));
 }
@@ -1373,6 +1618,9 @@ const TERMS = {
   kg: ['Kilogram (kg)', 'The unit of mass.', ['kilograms']],
   scale: ['Scale', 'On a free-body diagram drawn to scale, the same length always stands for the same number of newtons, for example 1 square = 50 N.', ['to scale']],
   centre: ['Centre of the object', 'On a free-body diagram, every force arrow starts from the middle of the object.', []],
+  brake: ['Brake', 'Something that pushes back against a moving object to slow it down and stop it.', ['brakes', 'brake']],
+  brakingdist: ['Braking distance', 'How far an object travels from the moment the brake comes on until it stops.', ['braking distance']],
+  vtgraph: ['Velocity–time graph', 'A graph with velocity up the side and time along the bottom. A flat line means a steady speed; a line sloping down means slowing down.', ['velocity–time graph', 'velocity-time graph', 'velocity–time graphs']],
   newton1: ['Newton\'s first law', 'An object stays still, or keeps moving at a steady speed in a straight line, unless an unbalanced force acts on it.', []],
   newton2: ['Newton\'s second law', 'Force = mass × acceleration (F = ma). A bigger resultant force gives a bigger acceleration.', []],
   newton3: ['Newton\'s third law', 'When one object pushes or pulls another, the second pushes or pulls back just as hard, in the opposite direction.', []],
@@ -1464,6 +1712,9 @@ const INFO = {
   readRes: { title: 'How to read the Resultant force readout', cards: [{ hi: '[data-panel="readRes"]', html: `<p>The <b>Resultant force</b> is what's left when you add up all the forces on the crate. Forces pointing opposite ways cancel out.</p><div class="example">Right 200 N, left 130 N, no friction: 200 − 130 = <b>70 N →</b>. If it says <b>0 N (balanced)</b>, the forces cancel out completely.</div><p>You'll learn all about this in Chapter 3.</p>` }] },
   readA: { title: 'How to read the Acceleration readout', cards: [{ hi: '[data-panel="readA"]', html: `<p>The <b>Acceleration</b> readout shows how quickly the crate's speed is changing, in metres per second squared (m/s²). Zero means the speed isn't changing.</p><p>You'll use it in Chapter 3.</p>` }] },
   readV: { title: 'How to read the Velocity readout', cards: [{ hi: '[data-panel="readV"]', html: `<p>The <b>Velocity</b> readout shows how fast the crate is moving, in metres per second (m/s). A minus sign means it is moving to the left.</p>` }] },
+  readD: { title: 'How to read the Braking distance readout', cards: [{ hi: '[data-panel="readD"]', html: `<p>The <b>Braking distance</b> readout shows how far the crate has slid since it crossed the red brake line, in metres (m). When the crate stops, the number stops changing.</p><div class="example">The crate crosses the brake line and stops 1.92 m later, so the readout shows <b>1.92 m</b>.</div>` }] },
+  brake: { title: 'How the brake works', cards: [{ hi: '[data-panel="brake"]', html: `<p>When the crate crosses the red <b>brake line</b>, the brake pushes back against it with the force on the slider, in newtons. It keeps pushing until the crate stops, then lets go.</p><p>Drag the slider, or use <b>−1 N</b> and <b>+1 N</b> for small changes. A bigger brake force stops the crate in a shorter distance.</p>` }] },
+  vt: { title: 'How to read a velocity–time graph', cards: [{ hi: '[data-panel="vt"]', html: `<p>The graph shows the crate's <b>velocity</b> (speed) up the side, in m/s, and the <b>time</b> along the bottom, in seconds. The line draws itself as the crate moves.</p><div class="example">To read a speed, find the point on the line, then look straight across to the numbers on the left. A line halfway between 1 and 1.5 means about <b>1.25 m/s</b>.</div><p>A <b>flat</b> line means a steady speed. A line sloping <b>down</b> means slowing down. A line along <b>0</b> means the crate isn't moving.</p>` }] },
   fbd: { title: 'How to read a free-body diagram', cards: [
     { hi: '[data-panel="fbd"]', html: `<p>A ${T('fbd')} shows every force on <b>one object</b>. Here, the object is the crate.</p><p>Each force is an arrow. Every arrow starts from the <b>centre</b> of the crate.</p>` },
     { hi: '[data-panel="fbd"]', html: `<p>The <b>direction</b> of an arrow shows which way the force acts.</p><p>The <b>length</b> of an arrow shows how big the force is. A force twice as big gets an arrow twice as long.</p><div class="example">The scale under the diagram tells you how many newtons each grid square stands for.</div>` }] },
@@ -1680,6 +1931,9 @@ const SYNS = [
   ['centre', 'center', 'middle', 'centre point', 'middle point'],
   ['against', 'opposite', 'opposite to', 'the opposite way to', 'opposing', 'in the opposite direction to', 'opposite direction to'],
   ['newtons', 'newton', 'n'],
+  ['harder', 'more difficult', 'tougher'],
+  ['still', 'at rest', 'stationary', 'not moving'],
+  ['speed', 'velocity'],
   ['9.8', 'g', '9.8 n kg']
 ];
 const gapNorm = x => normWord(x).replace(/^(a|an|the) /, '');
@@ -1887,7 +2141,7 @@ function setStep(i) {
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
   const st = chd.steps[GI]; LASTSIG = '';
   // arena state
-  S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false;
+  clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false;
   LAB.sides = st.sides || ['left', 'right']; LAB.pullers = st.pullers || ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = st.floors || null; LAB.showVert = true; LAB.showRes = true; LAB.idle = st.idle || null;
   if (st.setup) st.setup(); resetSim();
   LAB.show = panelsFor(CH.id, GI);
@@ -1921,13 +2175,22 @@ function renderRail() {
   $('#rail').innerHTML = `<div class="row" style="justify-content:space-between"><span class="lbl">Step ${GI + 1} of ${chd.steps.length}</span><div class="dots">${chd.steps.map((s, i) => `<button type="button" aria-label="Step ${i + 1}: ${esc(s.title)}" class="${stepDone(CH.id, i) ? 'done' : ''} ${i === GI ? 'cur' : ''}" data-goto="${i}"></button>`).join('')}</div></div>
     <h2>${st.title}</h2>
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
+    ${st.predict ? predictBox(st) : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => `<li id="tk${i}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
+  $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
   $('#gPrev').addEventListener('click', () => setStep(GI - 1));
   $('#gNext').addEventListener('click', tryNext);
+}
+/* "Predict first": the student locks in a prediction before testing it in the arena */
+const predOf = () => dbGet(stepKey(CH.id, GI) + '.pred', null);
+function predictBox(st) {
+  const P = st.predict, v = predOf();
+  return v == null ? `<div class="predict"><span class="lbl">Predict first</span><p class="gl">${P.q}</p><div class="popts">${P.opts.map((o, i) => `<button type="button" class="mini" data-pred="${i}">${o}</button>`).join('')}</div></div>`
+    : `<div class="predict done"><span class="lbl">Your prediction</span><p class="gl"><b>${P.opts[v]}</b></p><p class="scaleNote">${P.then || 'Now test it in the arena and see if you were right!'}</p></div>`;
 }
 function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
@@ -2138,7 +2401,7 @@ CHDATA.c1 = {
       cards: [
         { html: `<p>Brilliant work! You now know what a force is, how to measure one, and the main types of force. Here's a sneak peek at what comes next.</p>` },
         { html: `<p><b>Chapter 1 Extension: Free-body diagrams.</b> Learn to draw every force on an object as an arrow, then become an Arena Inspector. It has its own worksheet.</p>` },
-        { html: `<p><b>Chapter 2: Inertia.</b> Why is a heavy crate so hard to start moving, and so hard to stop? You'll find out in the Main Arena and the Space Dome.</p><p><b>Chapter 3: F = ma.</b> Race huskies in the Snow Arena and use a formula to predict how fast things speed up.</p>` },
+        { html: `<p><b>Chapter 2: Inertia.</b> Why is a heavy crate so hard to start moving, and so hard to stop? You'll find out in the Main Arena, with a launcher, a brake and your first velocity–time graph.</p><p><b>Chapter 3: F = ma.</b> Race huskies in the Snow Arena and use a formula to predict how fast things speed up.</p>` },
         { html: `<p><b>Chapter 4: Action and reaction.</b> Push off a space pod and discover that forces always come in pairs.</p><p><b>Chapter 5: Balanced forces.</b> Drop things in the new Drop Zone, where you can take the air out of the tower!</p><p><b>The Workshop.</b> Pulleys, levers, ramps, wedges and screws: machines that make a job feel easier.</p>` }],
       setup() { S.left = ['adult', 'dog']; S.right = ['strong']; S.floor = 'ice'; }, adds: [],
       qs: [{ id: 'q1', type: 'mcq', p: 'Before you move on: which of these is NOT a force?', opts: ['Mass', 'Weight', 'Friction', 'Tension'], a: 0, ok: 'Correct! Mass is the amount of stuff in an object, measured in kg. The others are all forces, measured in N.', why: { 1: 'Weight is the pull of gravity, so it is a force measured in newtons.', 2: 'Friction is a force between surfaces.', 3: 'Tension is the pulling force in a rope.' } }] },
@@ -2167,6 +2430,161 @@ CHDATA.c1 = {
         { id: 'q1', type: 'desk', p: 'Draw the free-body diagram of the 55 kg crate while the strong adult pulls it across the smooth floor.', deskTitle: 'A 55 kg crate sliding to the right',
           scen: { id: 'c1s10', obj: 'crate', label: '55 kg', brief: '<p>A <b>55 kg crate</b> is sliding to the right across the smooth floor. A strong adult pulls it with <b>200 N</b>, and friction on the sliding crate is <b>53.9 N</b>.</p><p>Draw all four forces. Think about which arrow should be longer: the pull or friction?</p>', forces: [{ type: 'weight', dir: 'down', value: 539 }, { type: 'normal', dir: 'up', value: 539 }, { type: 'pull', dir: 'right', value: 200 }, { type: 'friction', dir: 'left', value: 53.9 }] } },
         { id: 'q2', type: 'mcq', p: 'On your diagram, the pull arrow (200 N) is longer than the friction arrow (53.9 N). What does that tell you about the crate?', opts: ['The forces don\'t cancel out, so the crate keeps moving to the right', 'The forces cancel out, so the crate stays still', 'Friction wins, so the crate moves to the left', 'Nothing, because arrow length doesn\'t matter'], a: 0, ok: 'Exactly. The pull is bigger than friction, so the sideways forces don\'t cancel and the crate is pulled along. You will find out much more about this in Chapter 3.', why: { 1: 'The forces only cancel when they are the same size. Are 200 N and 53.9 N the same?', 2: 'Friction is the smaller force here, so it can\'t win.', 3: 'Longer arrows mean bigger forces, so arrow length tells you a lot.' } }] }
+  ]
+};
+
+/* ===== Chapter 2: Inertia (Newton's first law) ===== */
+/* A small velocity–time graph as inline SVG, for Check questions and worksheets.
+   lines: [{ pts: [[t, v], …], col, label }], opts: { tMax, vMax, vStep } */
+function vtSVG(lines, o = {}) {
+  const W = 420, H = 210, x0 = 46, x1 = W - 14, y0 = 12, y1 = H - 34, tMax = o.tMax || 8, vMax = o.vMax || 3, vStep = o.vStep || 0.5;
+  const X = t => x0 + t / tMax * (x1 - x0), Y = v => y1 - v / vMax * (y1 - y0);
+  let g = '';
+  for (let v = 0; v <= vMax + 1e-9; v += vStep) g += `<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="#d5dee2" stroke-width="1"/><text x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="#566a74">${+v.toFixed(2)}</text>`;
+  for (let t = 0; t <= tMax; t += 1) g += `<line x1="${X(t)}" y1="${y0}" x2="${X(t)}" y2="${y1}" stroke="#d5dee2" stroke-width="1"/><text x="${X(t)}" y="${y1 + 14}" text-anchor="middle" font-size="11" fill="#566a74">${t}</text>`;
+  g += `<path d="M${x0} ${y0}V${y1}H${x1}" fill="none" stroke="#13212a" stroke-width="1.5"/>`;
+  g += `<text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" font-size="12" font-weight="700" fill="#13212a">Time (s)</text><text transform="translate(12 ${(y0 + y1) / 2}) rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#13212a">Velocity (m/s)</text>`;
+  lines.forEach(l => {
+    g += `<polyline points="${l.pts.map(([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${l.col || '#1f5f8b'}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if (l.label) { const [t, v] = l.pts[l.lab || 0]; g += `<text x="${X(t) + 6}" y="${Y(v) - 7}" font-size="12" font-weight="800" fill="${l.col || '#1f5f8b'}">${l.label}</text>`; }
+  });
+  return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" style="width:100%;max-width:440px;display:block;background:#fff;border-radius:8px">${g}</svg></div>`;
+}
+/* record what the student measured, per crate mass, so questions can check their own runs */
+function ch2Record() {
+  const F = S.flags; F.sp = F.sp || {}; F.sd = F.sd || {}; F.st = F.st || {};
+  if (S.shoveT >= 0 && F.pushMass == null) F.pushMass = S.mass;
+  if (S.shoveT < 0 && S.lastShoveT != null && S.running && F.pushMass === S.mass && Math.abs(S.x) < LIM - 0.05) F.sp[S.mass] = S.v;
+  if (S.shoveT < 0 && !S.running) F.pushMass = null;
+  if (F.stopped && S.brakeFrom != null && !S.running) { F.sd[S.mass] = S.x - S.brakeFrom; F.st[S.mass] = S.t - S.brakeT; F.sdF = F.sdF || {}; F.sdF[S.mass] = S.brakeF; }
+}
+const sp = m => S.flags.sp && S.flags.sp[m], sd = m => S.flags.sd && S.flags.sd[m];
+/* the launcher course used in Chapter 2: start at -7 m, brake line at -4 m */
+function course(m, v0, F) { S.floor = 'air'; S.mass = m; S.x0 = -7; S.brakeX = -4; S.v0 = v0; S.brakeF = F; }
+
+CHDATA.c2 = {
+  goal: 'Explain inertia: objects with more mass are harder to start moving and harder to stop. State Newton\'s first law and read a velocity–time graph.',
+  vocab: ['inertia', 'mass', 'velocity', 'velocity–time graph', 'brake', 'braking distance', 'Newton\'s first law', 'unbalanced force'],
+  steps: [
+    { id: 'i1', title: 'The same push, three crates', floors: ['air'],
+      cards: [
+        { html: `<p>Welcome to Chapter 2! In Chapter 1 you found out what forces are. Now you'll find out why some things are much harder to get moving than others.</p><p>The crate is sitting on the <b>air floor</b>, so there is no friction at all.</p>` },
+        { hi: '#shoveBtn', html: `<p>The <b>Give it a push</b> button always gives the crate exactly the same shove. You'll try that same shove on three crates with different masses.</p><p>The <b>Velocity</b> readout under the arena shows how fast the crate is moving, in metres per second (m/s).</p>` }],
+      predict: { q: 'The same push will hit a 24 kg, a 61 kg and a 147 kg crate. Which one do you think will move fastest?', opts: ['The 24 kg crate', 'The 61 kg crate', 'The 147 kg crate', 'They will all move at the same speed'] },
+      setup() { S.floor = 'air'; S.mass = 24; }, adds: ['shove', 'mass', 'readM', 'readV'], sides: [], pullers: [], idle: 'Give the crate a push',
+      tick() { ch2Record(); },
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Push the <b>24 kg</b> crate.', () => sp(24) != null], ['Use the Crate mass slider to set <b>61 kg</b>, then push it.', () => sp(61) != null], ['Set <b>147 kg</b>, then push it.', () => sp(147) != null]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What speed did the push give the <b>24 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(24), need: () => sp(24) != null, needMsg: 'Push the 24 kg crate first.', ok: 'Correct! The light crate shoots off quickly.' },
+        { id: 'q2', type: 'reading', p: 'What speed did the push give the <b>61 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(61), need: () => sp(61) != null, needMsg: 'Push the 61 kg crate first.', ok: 'Correct!' },
+        { id: 'q3', type: 'reading', p: 'What speed did the push give the <b>147 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(147), need: () => sp(147) != null, needMsg: 'Push the 147 kg crate first.', ok: 'Correct! The heavy crate only creeps along.' },
+        { id: 'q4', type: 'mcq', p: 'The 147 kg crate has about 6 times the mass of the 24 kg crate. What happened to its speed?', opts: ['It moved about 6 times more slowly', 'It moved about 6 times faster', 'It moved at the same speed', 'It didn\'t move at all'], a: 0, ok: 'Exactly. 3.13 m/s ÷ 0.51 m/s is about 6. The same push gives a heavier crate much less speed.', why: { 1: 'Look at your readings again. Which crate was fastest?', 2: 'Your three readings were different. Which was the smallest?', 3: 'On the air floor there is no friction, so even the heavy crate moved a little.' } }] },
+
+    { id: 'i2', title: 'Inertia', floors: ['air'],
+      cards: [
+        { html: `<p>The heavy crate was much harder to get moving. Scientists say it has more ${T('inertia')}.</p><div class="law"><b>Inertia</b> is how hard it is to change the way an object is moving. The more mass an object has, the more inertia it has.</div>` },
+        { html: `<p>Inertia works both ways. A heavy object is hard to <b>start</b> moving, and once it is moving, it is hard to <b>stop</b>. You'll test the stopping part soon.</p>` }],
+      setup() { S.floor = 'air'; S.mass = 150; }, adds: [], sides: [], pullers: [], idle: 'Give the crate a push',
+      tick() { ch2Record(); },
+      tasks: [['Set the crate to <b>150 kg</b>, the heaviest it can be, and give it a push. Watch how slowly it sets off.', () => S.flags.shoved && S.mass === 150]],
+      qs: [
+        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that says what inertia is.', opts: ['Inertia is how hard it is to change the way an object is moving.', 'Inertia is the force that keeps things moving.', 'Inertia is how fast an object is moving.', 'Inertia is the pull of gravity on an object.'], a: 0, ok: 'Yes! Inertia is how hard it is to change an object\'s motion: to start it, stop it, or change its speed.', why: { 1: 'Inertia isn\'t a force. It is a property that every object has, because it has mass.', 2: 'That describes speed. A still crate has inertia too.', 3: 'That describes weight.' } },
+        { id: 'q2', type: 'gap', p: 'An object with more ___ has more inertia, so it is ___ to get it moving.', ans: [['mass'], ['harder', 'more difficult']], ok: 'Perfect. More mass means more inertia.' }] },
+
+    { id: 'i3', title: 'The velocity–time graph', info: ['vt'], floors: ['air'],
+      cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's speed as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the speed from the graph instead.</p>` }],
+      setup() { S.floor = 'air'; S.mass = 61; }, adds: ['vt'], hide: ['readV'], sides: [], pullers: [], idle: 'Give the crate a push',
+      tick() { ch2Record(); },
+      tasks: [['Set the crate to <b>61 kg</b> and give it a push. Watch the graph as it moves.', () => sp(61) != null]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'Read the graph. What speed is the 61 kg crate moving at after the push?', unit: 'm/s', tol: 0.08, live: () => sp(61), need: () => sp(61) != null, needMsg: 'Push the 61 kg crate first.', ok: 'Well read! The line sits just above 1.2 m/s.', hints: ['Find the flat part of the line, then look across to the numbers up the side.', 'The line sits between two grid lines. Estimate where it is between them.'] },
+        { id: 'q2', type: 'mcq', p: 'After the push, the line on the graph is flat. What does a flat line tell you?', opts: ['The crate is moving at a steady speed', 'The crate has stopped', 'The crate is speeding up', 'The crate is slowing down'], a: 0, ok: 'That\'s right. A flat line means the speed isn\'t changing.', why: { 1: 'A stopped crate would have a line along 0 m/s. Where is the line?', 2: 'Speeding up would make the line slope upwards.', 3: 'Slowing down would make the line slope downwards.' } }] },
+
+    { id: 'i4', title: 'Stopping a crate', info: ['brake', 'readD'], floors: ['air'],
+      cards: [
+        { html: `<p>Now for the other half of inertia: <b>stopping</b>.</p><p>A launcher sends the crate along the air floor at 2.4 m/s. When it crosses the red <b>brake line</b>, a ${T('brake')} pushes back against it with <b>36 N</b> until it stops.</p>` },
+        { hi: '#launchBtn', html: `<p>Press <b>Launch the crate</b> to send it off. The <b>Braking distance</b> readout shows how far it slides after the brake line.</p>` }],
+      predict: { q: 'A 24 kg crate and a 61 kg crate both arrive at 2.4 m/s and get the same 36 N brake. Which one will slide further before it stops?', opts: ['The 24 kg crate', 'The 61 kg crate', 'They will slide the same distance'] },
+      setup() { course(24, 2.4, 36); }, adds: ['launch', 'readD'], hide: ['shove'], sides: [], pullers: [], idle: 'Press Launch the crate',
+      tick() { ch2Record(); },
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Launch the <b>24 kg</b> crate and let it stop.', () => sd(24) != null], ['Set <b>61 kg</b>, launch it and let it stop.', () => sd(61) != null]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'How far did the <b>24 kg</b> crate slide after the brake line?', unit: 'm', tol: 0.04, live: () => sd(24), need: () => sd(24) != null, needMsg: 'Launch the 24 kg crate first.', ok: 'Correct!' },
+        { id: 'q2', type: 'reading', p: 'How far did the <b>61 kg</b> crate slide after the brake line?', unit: 'm', tol: 0.04, live: () => sd(61), need: () => sd(61) != null, needMsg: 'Launch the 61 kg crate first.', ok: 'Correct! It slid much further.' },
+        { id: 'q3', type: 'mcq', p: 'Why did the 61 kg crate slide further, even though the brake was the same?', opts: ['It has more mass, so it has more inertia and is harder to stop', 'The brake works less well on big crates', 'It was moving faster', 'Heavy crates have less friction'], a: 0, ok: 'Exactly. More mass means more inertia, so the same brake takes longer to stop it.', why: { 1: 'The brake pushed with 36 N both times. Check the brake label in the arena.', 2: 'Both crates were launched at 2.4 m/s.', 3: 'The air floor has no friction for either crate.' } }] },
+
+    { id: 'i5', title: 'Newton\'s first law', floors: ['air'],
+      cards: [
+        { html: `<p>Isaac Newton put all of this into one rule, called ${T('newton1', 'Newton\'s first law')}:</p><div class="law">An object stays still, or keeps moving at a steady speed in a straight line, unless an ${T('unbalanced', 'unbalanced force')} acts on it.</div>` },
+        { html: `<p>You've seen both halves already. The still crate didn't move until the push. Once it was gliding on the air floor, it kept going at a steady speed until the brake (or the end of the arena) stopped it.</p><div class="example">Far out in space there is no air and no friction. A space pod that gets one push keeps gliding at the same speed for ever, until something pushes or pulls on it.</div>` }],
+      setup() { S.floor = 'air'; S.mass = 47; }, adds: [], hide: ['launch', 'readD'], sides: [], pullers: [], idle: 'Give the crate a push',
+      tick() { ch2Record(); },
+      tasks: [['Give the 47 kg crate a push and watch the graph stay flat as it glides.', () => sp(47) != null]],
+      qs: [
+        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s first law.', opts: ['An object stays still, or keeps moving at a steady speed in a straight line, unless an unbalanced force acts on it.', 'Every moving object slows down and stops by itself.', 'The bigger the force, the faster an object moves.', 'Heavy objects always move more slowly than light ones.'], a: 0, ok: 'Yes! That is Newton\'s first law. Moving things only slow down when a force, like a brake or friction, acts on them.', why: { 1: 'On the air floor, the crate kept going. Things only slow down when a force acts on them.', 2: 'That is about how forces change speed. You\'ll meet it in Chapter 3.', 3: 'A heavy object can move fast, it just takes a bigger force to get it there.' } },
+        { id: 'q2', type: 'mcq', p: 'A space pod is gliding through empty space at 3.6 m/s. Its engines are off and nothing touches it. What happens next?', opts: ['It keeps gliding at 3.6 m/s in a straight line', 'It slowly comes to a stop', 'It speeds up', 'It starts to fall'], a: 0, ok: 'Exactly. No force acts on it, so nothing changes its motion.', why: { 1: 'What force could slow it down? There is no air and nothing touching it.', 2: 'Speeding up needs a force, and the engines are off.', 3: 'Far out in space, there is nothing nearby to pull it.' } }] },
+
+    { id: 'i6', title: 'Inertia in real life',
+      cards: [{ html: `<p>Inertia is all around you. Think of the crate as a car. When the brake stops the car, anything loose inside it keeps going, because it has inertia too.</p><p>Launch the crate once more, then try three everyday puzzles in the Your turn box.</p>` }],
+      setup() { course(61, 2.4, 36); }, adds: [], hide: ['shove'], sides: [], pullers: [], idle: 'Press Launch the crate',
+      tick() { ch2Record(); },
+      tasks: [['Launch the crate and watch the brake stop it.', () => S.flags.stopped]],
+      qs: [
+        { id: 'q1', type: 'mcq', p: 'A car brakes hard. A passenger who isn\'t wearing a seatbelt lurches forwards. Why?', opts: ['Their body has inertia, so it keeps moving forwards when the car slows down', 'The brakes push the passenger forwards', 'The seat throws them forwards', 'Gravity pulls them forwards'], a: 0, ok: 'Yes. The car slows down, but the passenger keeps going until something stops them. A seatbelt is that something.', why: { 1: 'The brakes act on the wheels, not on the passenger.', 2: 'The seat doesn\'t push forwards. The passenger keeps moving on their own.', 3: 'Gravity pulls down, not forwards.' } },
+        { id: 'q2', type: 'mcq', p: 'A magician whips a tablecloth away very quickly, and the plates stay on the table. Why do the plates stay put?', opts: ['The plates have inertia, so they tend to stay still', 'The plates are glued down', 'The tablecloth pushes the plates down', 'Plates have no mass'], a: 0, ok: 'That\'s it. The plates are still, and their inertia keeps them still. The cloth moves so fast that friction has no time to drag them along.', why: { 1: 'No glue needed! Think about what still objects tend to do.', 2: 'The cloth slides away underneath. What keeps the plates still?', 3: 'Plates do have mass, so they have inertia.' } },
+        { id: 'q3', type: 'mcq', p: 'A bowling ball (7.3 kg) and a football (0.43 kg) roll towards you at the same speed. Which is harder to stop?', opts: ['The bowling ball', 'The football', 'They are just as hard to stop'], a: 0, ok: 'Correct. The bowling ball has far more mass, so it has far more inertia.', why: { 1: 'Which one has more mass?', 2: 'They have the same speed, but their masses are very different.' } }] },
+
+    /* ---------- Extension ---------- */
+    { id: 'x1', title: 'Reading velocity–time graphs', floors: ['air'],
+      cards: [
+        { html: `<p>Welcome to the Chapter 2 Extension! Velocity–time graphs tell the whole story of a journey. Each shape of line means something different.</p><div class="example">Flat line: steady speed. Line sloping up: speeding up. Line sloping down: slowing down. Line along 0: not moving.</div>` },
+        { html: `<p>This time the launch speed is a mystery, so you'll read it from the graph. The free-body diagram is back too, so you can see which forces act at each moment.</p>` }],
+      setup() { course(55, 1.8, 30); }, adds: ['launch', 'readD', 'vt', 'fbd', 'readW', 'readN'], hide: ['shove', 'readV'], sides: [], pullers: [], idle: 'Press Launch the crate', mysteryLaunch: true,
+      tick() { ch2Record(); },
+      tasks: [['Launch the crate. Watch the graph stay flat, then slope down after the brake line.', () => sd(55) != null]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'Read the graph. How fast was the crate moving before it reached the brake line?', unit: 'm/s', tol: 0.08, live: () => S.flags.sd && sd(55) != null ? 1.8 : null, need: () => sd(55) != null, needMsg: 'Launch the crate first.', ok: 'Well read! It was gliding at 1.8 m/s.', hints: ['Look at the flat part of the line, before the dashed "brake on" line.'] },
+        { id: 'q2', type: 'reading', p: 'How many seconds did the crate take to stop, from "brake on" until the line reaches 0?', unit: 's', tol: 0.25, live: () => S.flags.st && S.flags.st[55], need: () => sd(55) != null, needMsg: 'Launch the crate first.', ok: 'Great graph reading! It took about 3.3 seconds to stop.', hints: ['Find where the dashed "brake on" line is, then where the blue line reaches 0.', 'Take the first time away from the second.'] },
+        { id: 'q3', type: 'mcq', p: 'While the crate glides at a steady speed before the brake line, which arrows does its free-body diagram show?', opts: ['Only the weight and the normal force', 'Weight, normal force and a forward force keeping it moving', 'Only a forward force', 'No arrows at all'], a: 0, ok: 'Exactly right. Nothing needs to push it along: with no unbalanced force, it just keeps going. That is Newton\'s first law.', why: { 1: 'Look at the diagram while it glides. Is there a forward arrow? It doesn\'t need one to keep moving.', 2: 'Gravity and the floor still act on it.', 3: 'The crate still has weight, and the floor still holds it up.' } }] },
+
+    { id: 'x2', title: 'Car versus truck', info: [], floors: ['air'],
+      cards: [
+        { html: `<p>Think of a 40 kg crate as a car and a 120 kg crate as a truck, with 3 times the mass. Both arrive at 2.4 m/s.</p><p>First give them both the same 48 N brake. Then use the <b>Brake force</b> slider to find the brake the truck needs to stop in the <b>same distance</b> as the car.</p>` }],
+      setup() { course(40, 2.4, 48); }, adds: ['brake'], hide: ['shove', 'fbd', 'readW', 'readN'], sides: [], pullers: [], idle: 'Press Launch the crate',
+      tick() { ch2Record(); const F = S.flags; if (F.sd && F.sd[120] != null && F.sdF[120] >= 140 && Math.abs(F.sd[120] - 2.4) <= 0.06) F.truckOK = true; if (F.sd && F.sd[120] != null && F.sdF[120] === 48) F.truck48 = F.sd[120]; if (F.sd && F.sd[40] != null && F.sdF[40] === 48) F.car48 = F.sd[40]; },
+      tasks: [['Launch the <b>40 kg</b> car with a <b>48 N</b> brake.', () => S.flags.car48 != null], ['Launch the <b>120 kg</b> truck with the same <b>48 N</b> brake.', () => S.flags.truck48 != null], ['Change the brake force until the truck stops in the same distance as the car (within 5 cm).', () => !!S.flags.truckOK]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With the 48 N brake, how far did the <b>40 kg car</b> slide?', unit: 'm', tol: 0.04, live: () => S.flags.car48, need: () => S.flags.car48 != null, needMsg: 'Launch the 40 kg crate with a 48 N brake first.', ok: 'Correct!' },
+        { id: 'q2', type: 'reading', p: 'With the same 48 N brake, how far did the <b>120 kg truck</b> slide?', unit: 'm', tol: 0.06, live: () => S.flags.truck48, need: () => S.flags.truck48 != null, needMsg: 'Launch the 120 kg crate with a 48 N brake first.', ok: 'Correct! It slid 3 times as far.' },
+        { id: 'q3', type: 'num', p: 'What brake force made the 120 kg truck stop in the same distance as the car?', unit: 'N', ans: 144, tol: 2, ok: 'Spot on: 144 N, which is 3 × 48 N.', hints: ['Look at the Brake force number when the truck stopped in about 2.4 m.', 'The truck has 3 times the mass of the car. Try 3 × 48 N.'] },
+        { id: 'q4', type: 'mcq', p: 'The truck has 3 times the mass of the car. To stop in the same distance from the same speed, it needs…', opts: ['3 times the brake force', 'the same brake force', 'a third of the brake force', '9 times the brake force'], a: 0, ok: 'Yes. 3 times the mass means 3 times the inertia, so it needs 3 times the force. That is why trucks have much bigger brakes than cars.', why: { 1: 'With the same 48 N, the truck slid much further. It needs more.', 2: 'Less force would make it slide even further!', 3: 'Check the number on the slider when the truck stopped in the right distance.' } }] }
+  ],
+  review: [
+    { id: 'c2r1', type: 'tick', p: 'Tick every statement about inertia that is true.', opts: ['A heavier object has more inertia', 'Inertia makes a moving object keep moving', 'Inertia is a force that pushes things along', 'An object at rest stays at rest unless a force acts on it', 'Light objects have no inertia'], a: [0, 1, 3], work: 'More mass means more inertia; moving objects keep moving and still objects stay still unless a force acts. Inertia is not a force, and every object with mass has some.' },
+    { id: 'c2r2', type: 'num', p: 'On the air floor, a shove gives a 30 kg crate a speed of 2.5 m/s. The same shove hits a crate with 5 times the mass (150 kg). What speed does it get?', ans: 0.5, unit: 'm/s', tol: 0.02, work: '5 times the mass gives a speed 5 times smaller: 2.5 ÷ 5 = 0.5 m/s', hints: ['More mass means less speed from the same push.', '5 times the mass, so divide the speed by 5.'] },
+    { id: 'c2r3', type: 'mcq', p: 'This velocity–time graph shows a crate on the air floor. What is the crate doing between 2 s and 6 s?' + vtSVG([{ pts: [[0, 0], [1, 0], [1.6, 1.8], [6, 1.8], [8, 1.8]] }], { tMax: 8, vMax: 2.5, vStep: 0.5, alt: 'Velocity rises from 0 to 1.8 m/s between 1 and 1.6 seconds, then stays flat at 1.8 m/s' }), opts: ['Moving at a steady speed of 1.8 m/s', 'Speeding up', 'Slowing down', 'Standing still'], a: 0, work: 'The line is flat at 1.8 m/s, so the speed is not changing.', why: { 1: 'Speeding up would make the line slope upwards.', 2: 'Slowing down would make the line slope downwards.', 3: 'Standing still would put the line along 0.' } },
+    { id: 'c2r4', type: 'sort', p: 'Sort these into things that are hard to start or stop, and things that are easy to start or stop.', groups: ['Hard to start or stop', 'Easy to start or stop'], items: [['A loaded lorry', 0], ['A table-tennis ball', 1], ['A full shopping trolley', 0], ['An empty shopping trolley', 1], ['A cargo ship', 0], ['A paper cup', 1]] },
+    { id: 'c2r5', type: 'gap', p: 'Newton\'s first law: an object stays ___, or keeps moving at a steady ___ in a straight line, unless an unbalanced ___ acts on it.', ans: [['still', 'at rest', 'stationary'], ['speed', 'velocity'], ['force']] },
+    { id: 'c2r6', type: 'explain', p: 'A passenger is standing on a bus. The bus brakes suddenly and the passenger lurches forwards. Use the word inertia to explain why.', model: 'The passenger was moving forwards with the bus. When the bus brakes, the brakes slow the bus down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards, so they lurch forwards until they grab a pole or their feet stop them.', check: ['Says the passenger was moving forwards with the bus', 'Uses the word inertia', 'Says the passenger keeps moving forwards when the bus slows down', 'Says a force (a pole, a seatbelt, their feet) is needed to stop them'] },
+    /* Extension */
+    { id: 'c2r7', type: 'match', colA: 'Shape of the line', p: 'Match each shape of line on a velocity–time graph to what the object is doing.', rows: [['A flat line above 0', 'Moving at a steady speed'], ['A line sloping upwards', 'Speeding up'], ['A line sloping down to 0', 'Slowing down and stopping'], ['A flat line along 0', 'Standing still']] },
+    { id: 'c2r8', type: 'mcq', p: 'Two crates arrive at the same speed and get the same brake force. The graph shows them both. Which line belongs to the heavier crate?' + vtSVG([{ pts: [[0, 2.2], [1, 2.2], [2.5, 0], [8, 0]], col: '#c94a34', label: 'Line 1', lab: 1 }, { pts: [[0, 2.2], [1, 2.2], [6.2, 0], [8, 0]], col: '#11806f', label: 'Line 2', lab: 2 }], { tMax: 8, vMax: 2.5, vStep: 0.5, alt: 'Two lines start at 2.2 m/s. Line 1 drops to 0 at 2.5 seconds; line 2 drops to 0 at 6.2 seconds' }), opts: ['Line 2, because it takes longer to stop', 'Line 1, because it stops more quickly', 'You can\'t tell from the graph', 'Both lines are the same crate'], a: 0, work: 'With the same brake, the crate with more mass (more inertia) takes longer to stop, so its line slopes down more gently: line 2.', why: { 1: 'A heavy crate is harder to stop. Would it stop quickly or slowly?', 2: 'Look at how long each line takes to reach 0.', 3: 'The lines are different, so they are different crates.' } },
+    { id: 'c2r9', type: 'num', p: 'A 40 kg crate stops in 2.4 m with a 48 N brake. A 120 kg crate arrives at the same speed and has to stop in the same 2.4 m. What brake force does it need?', ans: 144, unit: 'N', tol: 1, work: '120 kg is 3 times 40 kg, so it needs 3 times the force: 3 × 48 = 144 N', hints: ['How many times heavier is the second crate?', '3 times the mass needs 3 times the force.'] },
+    { id: 'c2r12', type: 'fbd', p: 'Draw the free-body diagram of this crate.', scen: { id: 'c2r12', obj: 'crate', label: '52 kg', brief: '<p>A <b>52 kg crate</b> glides to the right across the air floor at a steady <b>1.7 m/s</b>. Nothing is pushing or pulling it, and the air floor has no friction.</p>', forces: [{ type: 'weight', dir: 'down', value: 509.6 }, { type: 'normal', dir: 'up', value: 509.6 }] } },
+    { id: 'c2r11', type: 'explain', p: 'Explain why a loaded lorry needs much stronger brakes than a small car, even when they travel at the same speed.', model: 'The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force it would take much longer and much further to stop. To stop in a safe distance, it needs a much bigger brake force, so it needs stronger brakes.', check: ['Says the lorry has more mass', 'Says more mass means more inertia', 'Says it would take longer or further to stop with the same force', 'Says it needs a bigger force to stop in the same distance'] }
+  ]
+};
+CHDATA.c2.review.forEach(q => { if (q.build) q.build(); });
+
+/* Challenge: the inertia obstacle course. Pick a brake force so each crate stops on the target mark.
+   Every launch counts: on target first time scores 4, second time 3, third time 2, then 1. */
+CHDATA.c2.challenge = {
+  title: 'Inertia obstacle course',
+  intro: 'Each crate is launched along the air floor. Choose a brake force so it stops on the target mark, within 15 cm of it. Heavier crates have more inertia, so think before you launch: your score is highest if you hit the target in as few launches as you can.',
+  missions: [
+    { id: 'b1', kind: 'brake', title: 'Crate 1: a light crate', mass: 33, v0: 2.4, target: 3.0 },
+    { id: 'b2', kind: 'brake', title: 'Crate 2: a medium crate', mass: 78, v0: 2.0, target: 2.5 },
+    { id: 'b3', kind: 'brake', title: 'Crate 3: a heavy crate', mass: 129, v0: 1.6, target: 1.8 }
   ]
 };
 
@@ -2201,7 +2619,8 @@ function renderChallenge(ch) {
   if (lp.done < lp.total) host.appendChild(h('div', { class: 'gate' }, `<b>Tip:</b> you have finished ${lp.done} of ${lp.total} Learn steps. The Challenge uses everything from Learn, so it's easier if you finish those first. You can still have a go now.`));
   host.appendChild(h('div', { class: 'panel mission gl' }, `<span class="lbl">Challenge</span><h3>${C1.title}</h3><p>${C1.intro}</p>`));
   const save = (m, patch) => { const st = dbGet('chal.' + ch, {}); st[m.id] = Object.assign(st[m.id] || {}, patch); dbSet('chal.' + ch, st); renderOnPage(); tabTicks(); if (challengeDone(ch)) { addEvidence('challenge', `Chapter ${CH.n} ${CH.part} Challenge: ${C1.title}, ${challengeState(ch).score} of ${challengeState(ch).max} objectives met.`); maybeStamp(ch); } };
-  C1.missions.forEach(m => {
+  const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
+  C1.missions.filter(m => m.kind !== 'brake').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -2217,7 +2636,7 @@ function renderChallenge(ch) {
       card.innerHTML = `<h3>${m.title}</h3><div class="gl">${m.brief}</div>${m.clue ? `<details class="clue"><summary>Need a clue for the mass?</summary><div class="gl">${m.clue}</div></details>` : ''}<div style="max-width:420px">${FBDB.svg(m.scen, FBDB.model(m.scen), { noDot: true })}</div><div class="labhost"></div><div class="row"><button type="button" class="go" id="bCheck">Check my build</button></div><div class="fb" id="bFb"></div><ul class="objs" data-o></ul>`;
       const objs = () => { const s = (dbGet('chal.' + ch, {})[m.id]) || {}, o = s.o || {}; $('[data-o]', card).innerHTML = [['Try the mission (you get one check)', s.tried], [`The weight matches (${fmt(m.target.mass * G, 1)} N)`, o.w], [`The left pull matches (${m.target.L} N)`, o.l], [`The right pull matches (${m.target.R} N)`, o.r]].map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join(''); };
       // a full sandbox arena for this mission
-      S.left = []; S.right = []; S.mass = 50; S.floor = m.floor || 'smooth'; resetSim(); S.flags = newFlags();
+      clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = m.floor || 'smooth'; resetSim(); S.flags = newFlags();
       LAB.mode = 'challenge'; LAB.showRes = false; LAB.show = new Set(['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'fbd', 'floor', 'mass', 'run', 'shove']); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.onChange = null; LAB.tick = null; LAB.idle = null;
       placeLab($('.labhost', card)); $('#lab').classList.add('nolc'); applyPanels();
       $('#bCheck', card).addEventListener('click', () => { const o = { w: S.mass === m.target.mass, l: tot(S.left) === m.target.L, r: tot(S.right) === m.target.R }; const n = Object.values(o).filter(Boolean).length;
@@ -2228,7 +2647,7 @@ function renderChallenge(ch) {
       objs();
     }
   });
-  host.appendChild(h('div', { class: 'row' }, `<button type="button" class="go" data-ctab-go="review">Go to the Review →</button>`));
+  host.appendChild(h('div', { class: 'row' }, `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`));
 }
 /* draw the arena for a given set-up onto another canvas (keeps the live arena unchanged) */
 function snapArena(cv, setup) {
@@ -2236,6 +2655,42 @@ function snapArena(cv, setup) {
   const keep = { left: S.left, right: S.right, mass: S.mass, floor: S.floor, x: S.x, v: S.v, running: S.running, t: S.t, lastShoveT: S.lastShoveT }, ks = LAB.show;
   Object.assign(S, { left: setup.left, right: setup.right, mass: setup.mass, floor: setup.floor, x: 0, v: 0, running: false, t: 0, lastShoveT: null }); LAB.show = new Set(['meter']);
   const hits = HITS; drawScene(forces(), cv); HITS = hits; Object.assign(S, keep); LAB.show = ks;
+}
+/* Chapter 2 Challenge: the inertia obstacle course (one shared arena, a tab per crate).
+   Every launch counts: on target at the 1st launch = 4 points, 2nd = 3, 3rd = 2, later = 1. "Move on" after 3 misses scores 1. */
+function renderBrakeCourse(ch, bm, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, bm.findIndex(m => !get(m.id).done)), active = false;
+  const card = h('section', { class: 'panel mission', id: 'mi-course' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a crate"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>If the crate slid <b>past</b> the target, it needs a <b>bigger</b> brake force. If it stopped <b>short</b> of the target, use a <b>smaller</b> one.</p><p>A heavier crate has more inertia, so it needs a bigger brake force than a light one. In Car versus truck, 3 times the mass needed 3 times the force to stop in the same distance.</p></div></details>
+    <div class="labhost"></div><div class="fb" id="bkFb" hidden></div><ol class="blog" id="bkLog"></ol><ul class="objs" data-o></ul><div class="row" id="bkMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = false; LAB.show = new Set(['launch', 'brake', 'readD', 'readM', 'vt']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.onChange = null; LAB.idle = 'Choose a brake force, then press Launch the crate';
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc'); applyPanels();
+  const paint = () => {
+    const m = bm[cur], s = get(m.id);
+    $('.mtabs', card).innerHTML = bm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-cr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>This <b>${m.mass} kg</b> crate is launched at <b>${fmt(m.v0, 1)} m/s</b>. Choose a brake force so it stops <b>${fmt(m.target, 1)} m</b> after the brake line, on the green target.</p>`;
+    $('#bkLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Launch ${i + 1}: brake ${r.F} N, ${r.d == null ? 'the crate reached the end of the arena' : `stopped ${fmt(r.d, 2)} m after the brake line`}${r.hit ? ' ✓ on target!' : r.d == null || r.d > m.target ? ' (too far)' : ' (too short)'}</li>`).join('');
+    const fb = $('#bkFb'); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.best === 4 ? 'ok' : 'hint') : 'no'); fb.textContent = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Launch the crate (every launch counts)', s.tried], ['Stop it on the target, within 15 cm', s.done && s.hit], ['Hit the target on your first launch', s.best === 4]].map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#bkMore').innerHTML = s.done ? (cur < bm.length - 1 ? `<button type="button" class="go" data-cr="${cur + 1}">Next crate →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="bkGive">Move on to the next crate (1 point)</button>` : '');
+    const gv = $('#bkGive'); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} launches. The brake force that works is about ${Math.round(m.mass * m.v0 * m.v0 / (2 * m.target))} N. You scored 1 of 4 points.` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = bm[cur], s = get(m.id); clearCh2(); S.left = []; S.right = []; course(m.mass, m.v0, s.F || 40); S.target = m.target; S.flags = newFlags(); resetSim(); active = false; labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-cr]'); if (b) load(+b.dataset.cr); });
+  LAB.tick = () => {
+    if (S.running && S.flags.launched) active = true;
+    if (!active || S.running) return;
+    active = false; const m = bm[cur], s = get(m.id); if (s.done) { paint(); return; }
+    const d = S.brakeFrom != null && S.flags.stopped ? S.x - S.brakeFrom : null, hit = d != null && Math.abs(d - m.target) <= 0.15, n = (s.n || 0) + 1, log = (s.log || []).concat([{ F: S.brakeF, d, hit }]);
+    const best = hit ? Math.max(1, 5 - n) : 0;
+    save(m, { tried: true, n, log, F: S.brakeF, hit, done: hit, best, msg: hit ? `On target after ${n} launch${n > 1 ? 'es' : ''}! You scored ${best} of 4 points.` : `Not quite: ${d == null ? 'it reached the end of the arena' : `it stopped ${fmt(d, 2)} m after the brake line`}. The target is ${fmt(m.target, 1)} m. Change the brake force and launch again.` });
+    paint();
+  };
+  load(cur);
 }
 
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
@@ -2291,9 +2746,19 @@ const SECTIONS = [
     blurb: 'Free-body diagrams: draw every force on an object as an arrow, then become an Arena Inspector.',
     steps: ['s8', 's9', 's10'], challenge: ['m1', 'm2', 'm4'], review: ['r4', 'r6', 'r8', 'r12', 'r11'], needs: 'c1f',
     goal: 'Draw free-body diagrams with every arrow starting at the centre of the object, the right direction and size for each force, and longer arrows for bigger forces; use a diagram to work out a set-up.',
-    vocab: ['free-body diagram', 'force arrow', 'weight', 'normal force', 'friction', 'tension', 'scale'] }
+    vocab: ['free-body diagram', 'force arrow', 'weight', 'normal force', 'friction', 'tension', 'scale'] },
+  { id: 'c2f', ch: 'c2', n: 2, title: 'Inertia', part: 'Foundation', stamp: 'Inertia Expert',
+    blurb: 'The same push on light and heavy crates, stopping with a brake, the velocity–time graph and Newton\'s first law.',
+    steps: ['i1', 'i2', 'i3', 'i4', 'i5', 'i6'], challenge: null, review: ['c2r1', 'c2r2', 'c2r3', 'c2r4', 'c2r5', 'c2r6'],
+    goal: 'Explain that objects with more mass have more inertia, so they are harder to start moving and harder to stop; read a speed from a velocity–time graph; state Newton\'s first law and use it to explain everyday examples.',
+    vocab: ['inertia', 'mass', 'velocity', 'velocity–time graph', 'brake', 'braking distance', 'Newton\'s first law', 'unbalanced force'] },
+  { id: 'c2x', ch: 'c2', n: 2, title: 'Inertia', part: 'Extension', stamp: 'Brake Master',
+    blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
+    steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
+    goal: 'Describe motion from the shape of a velocity–time graph; explain why more mass needs a bigger force to stop in the same distance; draw the free-body diagram of an object gliding at a steady speed.',
+    vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];
@@ -2338,6 +2803,7 @@ const WS_CSS = `
 .ws .box{border:1.5px dashed #9aa9b0;border-radius:6px;min-height:40px;padding:4px 8px}
 .ws .opt{margin:2px 0}
 .ws .look{background:#eef8f1;border:1px solid #9ccfae;border-radius:6px;padding:4px 8px;margin-top:4px;font-size:10pt}
+.ws .qfig{margin:4px 0 6px}.ws .qfig svg{width:95mm!important;max-width:95mm!important;border:1px solid #cbd7dc}
 .ws .fbdbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .ws .fbdbox svg{width:100%;height:auto}
 .ws .mk{float:right;font-size:9pt;color:#555;font-weight:400}
@@ -2364,12 +2830,13 @@ function wsQuestion(q, i, mode, s) {
   else if (q.type === 'tick') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v && v.includes(oi)) || (key && q.a.includes(oi)) ? W('☑') : '☐'} ${q.opts[oi]}</div>`).join('') + (key ? `<div class="look">${q.work || ''}</div>` : '');
   else if (q.type === 'num') body = `<div class="box">Working: ${stu ? '' : key ? W(q.work) : ''}<br><br></div><p>Answer: ${stu && v != null ? W(esc(v)) : key ? W(fmt(q.ans, 2)) : '____________'} ${q.unit}</p>`;
   else if (q.type === 'gap') { let k = 0; body = `<p>${q.p.replace(/___/g, () => { const j = k++; return stu && v ? W('<u>' + esc(v[j] || '') + '</u>') : key ? W('<u>' + esc(q.ans[j][0]) + '</u>') : '______________'; })}</p>`; }
-  else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>Force</th><th>Letter</th></tr>${q.rows.map((r, ri) => `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
+  else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>${q.colA || "Force"}</th><th>Letter</th></tr>${q.rows.map((r, ri) => `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
   else if (q.type === 'sort') body = `<table><tr><th>Item</th>${q.groups.map(g => `<th style="width:22%">${g}</th>`).join('')}</tr>${sortItems(q).map(ii => `<tr><td>${q.items[ii][0]}</td>${q.groups.map((_, gi) => `<td style="text-align:center">${(stu && v && v[ii] === gi) || (key && q.items[ii][1] === gi) ? W('✓') : ''}</td>`).join('')}</tr>`).join('')}</table><p class="note">Tick one box in each row.</p>`;
   else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
   else if (q.type === 'fbd') body = `<div class="fbdbox"><div>${q.scen.brief}${key ? `<div class="look"><b>Look for:</b><br>${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N, ${DIRWORD[f.dir]}`).join('<br>')}<br>All arrows start at the centre; bigger forces have longer arrows.</div>` : stu && s && s.v && s.v.lastRes ? `<p style="font-size:10pt">Checks passed in the sim: ${s.v.lastRes.chips.filter(c => c[2]).map(c => c[1]).join(', ') || 'none'}</p>` : ''}</div><div>${stu ? (v && v.arrows && v.arrows.length ? `<div class="stu">${FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true })}</div>` : '<div class="box" style="height:60mm">Not drawn in the sim.</div>') : key ? FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }) : `<div style="border:1.5px dashed #9aa9b0;border-radius:6px">${blankFbd(q.scen)}</div>`}</div></div>`;
   else if (q.type === 'explain') body = stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6);
-  return `<div class="q"><div class="qh">Question ${i + 1}. ${q.type === 'gap' ? 'Fill the gaps.' : q.p} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${body}</div>`;
+  const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
+  return `<div class="q"><div class="qh">Question ${i + 1}. ${q.type === 'gap' ? 'Fill the gaps.' : qp} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
 }
 function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
@@ -2532,7 +2999,7 @@ const TRYTHIS = [
 function openExplore() {
   show('vExplore'); placeLab($('#exploreHost'));
   S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
-  LAB.mode = 'explore'; LAB.show = new Set(PANELS); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
+  clearCh2(); LAB.mode = 'explore'; LAB.show = new Set(PANELS.filter(k => !EXPLORE_HIDE.includes(k))); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
   applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDone', []));
   const draw = () => { $('#rail').innerHTML = `<span class="lbl">Explore · Main Arena</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${TRYTHIS.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };

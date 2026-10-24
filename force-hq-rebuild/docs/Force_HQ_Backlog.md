@@ -2,16 +2,12 @@
 
 ## Next milestones (from the rebuild brief)
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.
-2. **Chapter 2, Inertia.**
-   - Starting and stopping crates of different masses.
-   - Many short examples: sled, car versus truck, a space pod, the tablecloth trick, a seatbelt, a bowling ball versus a football.
-   - The velocity–time graph is introduced here, with the graph tab under the arena.
-   - Port the Space Dome event.
+2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Still to check with Tom: the Space Dome moved to Chapter 4, where the push-off needs it; in Chapter 2 the air floor shows "keeps going" and the space pod is a real-life example.
 3. **Chapter 3, F = ma.**
    - Resultant force and the formula triangle.
    - A levelled maths bank.
    - Port the Snow Arena husky sled event.
-4. **Chapter 4, Action and reaction.** The astronaut and pod push log, rope pairs, and thrusters.
+4. **Chapter 4, Action and reaction.** Port the Space Dome event first. The astronaut and pod push log, rope pairs, and thrusters.
 5. **Chapter 5, Balanced forces and the Drop Zone.**
    - New arena with an air slider.
    - Objects to drop: feather, ball, crate, parachutist.
@@ -22,6 +18,8 @@
 7. **Explore.** "Draw what's happening now", which checks a student's FBD against the live forces.
 
 ## Banked ideas
+- Chapter 2: small drawings for the real-life inertia examples (seatbelt, tablecloth, bowling ball).
+- Chapter 2: a "Put in order" question type (order objects by inertia) for the worksheets.
 - Port the fun facts from the old build, gated by chapter.
 - Grow the glossary to 50–80 terms as the chapters are added.
 - Allow diagonal arrows in the FBD builder for later scenarios (pushes at an angle).

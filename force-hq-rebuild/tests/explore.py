@@ -7,7 +7,7 @@ with sync_playwright() as p:
   pg=b.new_page(viewport={'width':1280,'height':860}); pg.on('pageerror',lambda e:errs.append(str(e)))
   pg.goto(f); pg.wait_for_timeout(400); pg.fill('#whoName','Mia'); pg.click('#whoGo'); pg.evaluate("__fhq.dbSet('tourDone',true)")
   pg.evaluate("__fhq.ev(\"show('vHome')\")"); pg.wait_for_timeout(200)
-  card=pg.locator('#exploreCard'); print('locked:',card.locator('.lbl').inner_text()); assert 'opens after' in card.inner_text().lower()
+  card=pg.locator('#exploreCard'); print('locked:',card.locator('.kicker2').inner_text()); assert 'opens after' in card.inner_text().lower()
   pg.locator('#exploreCard').screenshot(path=OUT+'explore_locked.png')
   # stamp modal unlocks it and opens Explore
   pg.evaluate("__fhq.ev(\"awardStamp('c1f')\")"); pg.wait_for_timeout(200); assert 'Explore is now open' in pg.locator('#modal').inner_text()

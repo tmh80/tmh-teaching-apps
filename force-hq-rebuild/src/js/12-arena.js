@@ -1,6 +1,8 @@
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'fbd', 'floor', 'mass', 'shove', 'toggles', 'run'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run'];
+/* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
+const EXPLORE_HIDE = ['launch', 'brake', 'readD'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -19,7 +21,19 @@ function drawScene(f, cvo) {
   const meter = LAB.show.has('meter');
   drawTeam(c, 'left', -1, C.left, cx - CW / 2, pulling, tt, ph, meter);
   drawTeam(c, 'right', 1, C.right, cx + CW / 2, pulling, tt, ph, meter);
+  if (S.brakeX != null) {   // Chapter 2: start mark and brake line on the floor
+    const bx = CX + S.brakeX * PXM; c.save(); c.setLineDash([7, 5]); c.strokeStyle = C.bad; c.lineWidth = 3; c.beginPath(); c.moveTo(bx, GROUND - 92); c.lineTo(bx, GROUND + 8); c.stroke(); c.restore();
+    pill(c, 'BRAKE LINE', bx, GROUND - 100, C.bad, 12);
+    if (S.target != null) { const tx = CX + (S.brakeX + S.target) * PXM, z = 0.15 * PXM; c.save(); c.globalAlpha = .28; c.fillStyle = C.good; c.fillRect(tx - z, GROUND - 4, 2 * z, 12); c.restore(); c.fillStyle = C.good; c.fillRect(tx - 1.5, GROUND - 60, 3, 68); c.beginPath(); c.moveTo(tx + 1.5, GROUND - 60); c.lineTo(tx + 26, GROUND - 52); c.lineTo(tx + 1.5, GROUND - 44); c.fill(); pill(c, `TARGET ${fmt(S.target, 1)} m`, tx, GROUND + 22, C.good, 11); }
+    const sx = CX + S.x0 * PXM; c.fillStyle = C.muted; c.fillRect(sx - 1.5, GROUND - 6, 3, 14); txt(c, 'START', sx, GROUND + 20, C.muted, `700 11px ${C.fn}`);
+  }
   drawCrate(c, cx, GROUND, S.mass);
+  if (Math.abs(f.brk || 0) > 0.5) {   // the brake pushes back against the motion
+    const ex = cx + Math.sign(f.brk) * -(CW / 2), L = 26 + Math.abs(f.brk) / 4;
+    arrow(c, ex + Math.sign(-f.brk) * (L + 6), GROUND - 18, ex + Math.sign(-f.brk) * 6, GROUND - 18, C.bad, 5);
+    if (!RMOTION) { c.save(); c.strokeStyle = C.hazard; c.lineWidth = 2; for (let k = 0; k < 4; k++) { const sx2 = cx - Math.sign(S.v) * (CW / 2 + 4 + k * 7), jy = (performance.now() / 40 + k * 3) % 6; c.beginPath(); c.moveTo(sx2, GROUND - 1); c.lineTo(sx2 - Math.sign(S.v) * 8, GROUND - 5 - jy); c.stroke(); } c.restore(); }
+    pill(c, `brake ${fmt(Math.abs(f.brk), 0)} N`, cx, GROUND - CRH - 16, C.bad);
+  }
   // shove arrow lingers for 3 s
   const since = S.lastShoveT == null ? 9 : S.t - S.lastShoveT;
   if (f.shove > 0.5 || since < 3) { c.save(); if (f.shove <= 0.5) c.globalAlpha = Math.max(.35, 1 - since / 3); const hx = cx - CW / 2, F = f.shove > 0.5 ? f.shove : SHOVE_F;
@@ -135,12 +149,17 @@ function renderControls() {
   $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => !LAB.floors || LAB.floors.includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
   const m = $('#mass'); m.value = S.mass; $('#massOut').textContent = S.mass + ' kg';
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
+  const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; $('#brakeOut').textContent = S.brakeF + ' N'; }
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
   $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
   $('#shoveBtn').addEventListener('click', () => { shove(); labChanged(); });
+  $('#launchBtn').addEventListener('click', () => { launch(); labChanged(); });
+  const setBrake = v => { S.brakeF = clamp(Math.round(v), 5, 200); if (!S.running) resetSim(); labChanged(); };
+  $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
+  $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
   $('#floors').addEventListener('click', e => { const b = e.target.closest('[data-floor]'); if (!b) return; S.floor = b.dataset.floor; resetSim(); labChanged(); });
   $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massOut').textContent = S.mass + ' kg'; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
   $('#tgVert').addEventListener('change', e => { LAB.showVert = e.target.checked; });
@@ -166,7 +185,8 @@ const RD = [
   ['readM', 'Mass', 'mass', '', f => fmt(f.m, 0) + ' kg'],
   ['readRes', 'Resultant force', 'resultant', 'res', f => Math.abs(f.net) < .5 ? '0 N (balanced)' : fmt(Math.abs(f.net), 1) + ' N ' + (f.net > 0 ? '→' : '←')],
   ['readA', 'Acceleration', 'acceleration', '', f => fmt(f.a, 2) + ' m/s²'],
-  ['readV', 'Velocity', 'velocity', '', () => fmt(S.v, 2) + ' m/s']
+  ['readV', 'Velocity', 'velocity', '', () => fmt(S.v, 2) + ' m/s'],
+  ['readD', 'Braking distance', 'brakingdist', '', () => S.brakeFrom == null ? '0.00 m' : fmt(S.x - S.brakeFrom, 2) + ' m']
 ];
 function buildReads() {
   $('#reads').innerHTML = RD.map(([k, l, t, cl]) => `<div class="rd ${cl}" data-panel="${k}"><div class="lbl"><button type="button" class="term tl" data-t="${t}">${l}</button><button type="button" class="info" data-info="${k}" aria-label="How do I read the ${l} readout?">ⓘ</button></div><div class="v" id="v-${k}"></div></div>`).join('');
@@ -179,7 +199,7 @@ function drawLiveFBD(f) {
   const cv = $('#cvFBD'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 340, 300), cx = 170, cy = 128, VMAX = 92;
   c.fillStyle = C.panel; c.fillRect(0, 0, 340, 300);
-  const hv = [f.L, f.R, Math.abs(f.fr), f.shove, LAB.showRes ? Math.abs(f.net) : 0];
+  const hv = [f.L, f.R, Math.abs(f.fr), Math.abs(f.brk || 0), f.shove, LAB.showRes ? Math.abs(f.net) : 0];
   const hmax = Math.max(...hv), step = niceStep(Math.max(1, hmax > 0.5 ? hmax : (LAB.showVert ? f.W * 4 / 3 : 10))), k = 30 / step;
   c.strokeStyle = C.grid; c.lineWidth = 1;
   for (let x = cx % 30; x <= 340; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 262); c.stroke(); }
@@ -198,6 +218,7 @@ function drawLiveFBD(f) {
   if (f.L > 0.5) { arrow(c, cx, cy - 7, cx - f.L * k, cy - 7, C.left, 4); lab(Math.round(f.L) + ' N', cx - Math.max(f.L * k, 40) / 2 - 14, cy - 21, C.left); }
   if (f.R > 0.5) { arrow(c, cx, cy - 7, cx + f.R * k, cy - 7, C.right, 4); lab(Math.round(f.R) + ' N', cx + Math.max(f.R * k, 40) / 2 + 14, cy - 21, C.right); }
   if (Math.abs(f.fr) > 0.5 && (LAB.show.has('readF') || LAB.mode === 'explore')) { arrow(c, cx, cy + 7, cx + f.fr * k, cy + 7, C.fric, 4); lab(fmt(Math.abs(f.fr), 1) + ' N', cx + Math.sign(f.fr) * (Math.max(Math.abs(f.fr) * k, 40) / 2 + 14), cy + 21, C.fric); }
+  if (Math.abs(f.brk || 0) > 0.5) { arrow(c, cx, cy + 22, cx + f.brk * k, cy + 22, C.bad, 4); lab('brake ' + fmt(Math.abs(f.brk), 0) + ' N', cx + Math.sign(f.brk) * (Math.max(Math.abs(f.brk) * k, 40) / 2 + 22), cy + 36, C.bad); }
   if (f.shove > 0.5) { arrow(c, cx, cy - 36, cx + f.shove * k, cy - 36, C.ink, 4); lab('push ' + Math.round(f.shove) + ' N', cx + Math.max(f.shove * k, 60) / 2 + 30, cy - 50, C.ink); }
   c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 262.5); c.lineTo(340, 262.5); c.stroke();
   if (LAB.showRes && (LAB.show.has('readRes') || LAB.mode === 'explore')) {
@@ -206,8 +227,34 @@ function drawLiveFBD(f) {
     else lab('Resultant = 0 N (balanced)', cx, 282, C.res);
   }
   $('#scaleNote').textContent = `Scale: 1 grid square = ${step} N` + (cut ? '. The weight and normal arrows are too long to fit, so they are shortened (see the break marks).' : '');
-  const lg = [['left', 'Left pull'], ['right', 'Right pull'], ['fric', 'Friction', 'readF'], ['ink', 'Push'], ['vert', 'Weight / normal', 'readW'], ['res', 'Resultant', 'readRes']].filter(x => !x[2] || LAB.show.has(x[2]) || LAB.mode === 'explore');
+  const lg = [['left', 'Left pull'], ['right', 'Right pull'], ['fric', 'Friction', 'readF'], ['ink', 'Push'], ['bad', 'Brake', 'brake'], ['vert', 'Weight / normal', 'readW'], ['res', 'Resultant', 'readRes']].filter(x => !x[2] || LAB.show.has(x[2]) || LAB.mode === 'explore');
   const lh = lg.map(([k2, n]) => `<span><i style="background:var(--${k2})"></i>${n}</span>`).join(''); const le = $('#legend'); if (le.dataset.h !== lh) { le.innerHTML = lh; le.dataset.h = lh; }
+}
+
+/* ---- velocity–time graph (Chapter 2 on): flat = steady speed, sloping down = slowing down ---- */
+function niceUp(v) { const steps = [0.5, 1, 2, 2.5, 4, 5, 8, 10, 15, 20, 25, 40, 50]; return steps.find(x => x >= v) || Math.ceil(v / 10) * 10; }
+function drawVT() {
+  const cv = $('#cvVT'); if (!cv || !cv.offsetParent) return;
+  const W = 900, H = 240, c = fit(cv, W, H), x0 = 64, x1 = W - 18, y0 = 14, y1 = H - 40;
+  c.fillStyle = C.panel; c.fillRect(0, 0, W, H);
+  const hs = S.hist, tEnd = hs.length ? hs[hs.length - 1][0] : 0;
+  let vmax = 0, vmin = 0; hs.forEach(([, v]) => { if (v > vmax) vmax = v; if (v < vmin) vmin = v; });
+  if (S.v0 > vmax && S.brakeX != null) vmax = S.v0;
+  const top = niceUp(Math.max(1, vmax * 1.1)), bot = vmin < -0.01 ? -niceUp(-vmin * 1.1) : 0, tMax = Math.max(6, Math.ceil(tEnd + 0.5));
+  const vs = top - bot <= 2 ? 0.25 : top - bot <= 5 ? 0.5 : top - bot <= 10 ? 1 : top - bot <= 25 ? 2.5 : 5, ts = tMax <= 10 ? 1 : tMax <= 24 ? 2 : 5;
+  const X = t => x0 + (t / tMax) * (x1 - x0), Y = v => y1 - ((v - bot) / (top - bot)) * (y1 - y0);
+  c.lineWidth = 1; c.strokeStyle = C.grid;
+  for (let v = bot; v <= top + 1e-9; v += vs) { c.beginPath(); c.moveTo(x0, Y(v)); c.lineTo(x1, Y(v)); c.stroke(); txt(c, String(+v.toFixed(2)), x0 - 8, Y(v), C.muted, `600 12px ${C.fn}`, 'right'); }
+  for (let t = 0; t <= tMax + 1e-9; t += ts) { c.beginPath(); c.moveTo(X(t), y0); c.lineTo(X(t), y1); c.stroke(); txt(c, String(t), X(t), y1 + 13, C.muted, `600 12px ${C.fn}`); }
+  c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0, y1); c.lineTo(x1, y1); c.stroke();
+  if (bot < 0) { c.beginPath(); c.moveTo(x0, Y(0)); c.lineTo(x1, Y(0)); c.stroke(); }
+  txt(c, 'Time (s)', (x0 + x1) / 2, H - 9, C.ink, `700 13px ${C.fb}`);
+  c.save(); c.translate(16, (y0 + y1) / 2); c.rotate(-Math.PI / 2); txt(c, 'Velocity (m/s)', 0, 0, C.ink, `700 13px ${C.fb}`); c.restore();
+  if (S.brakeT != null) { const bx = X(S.brakeT); c.save(); c.setLineDash([6, 4]); c.strokeStyle = C.bad; c.lineWidth = 2; c.beginPath(); c.moveTo(bx, y0); c.lineTo(bx, y1); c.stroke(); c.restore(); pill(c, 'brake on', bx, y0 + 12, C.bad, 12); }
+  if (!hs.length) { txt(c, 'The graph draws itself when the crate starts moving.', (x0 + x1) / 2, (y0 + y1) / 2, C.muted, `600 15px ${C.fb}`); return; }
+  c.strokeStyle = C.accent; c.lineWidth = 3.5; c.lineJoin = 'round'; c.beginPath(); c.moveTo(X(0), Y(hs[0][1]));
+  const stride = Math.max(1, Math.floor(hs.length / 900)); for (let i = 0; i < hs.length; i += stride) c.lineTo(X(hs[i][0]), Y(hs[i][1])); c.lineTo(X(tEnd), Y(S.v)); c.stroke();
+  c.fillStyle = C.accent; c.beginPath(); c.arc(X(tEnd), Y(S.v), 5, 0, 7); c.fill();
 }
 
 /* ---- main loop ---- */
@@ -216,6 +263,6 @@ function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (S.running) updateSim(dt);
   const f = forces();
-  if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); readouts(f); if (LAB.tick) LAB.tick(f); }
+  if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); drawVT(); readouts(f); if (LAB.tick) LAB.tick(f); }
   requestAnimationFrame(frame);
 }

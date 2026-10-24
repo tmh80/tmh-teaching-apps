@@ -34,3 +34,40 @@ Q3 (6 marks): 1 mark for each correct arrow (right force, right direction, right
 Q4 (1 mark): 1 cm.
 Q5 (4 marks, 1 per point): • Names friction as the force that stops the crate • Says friction acts against (opposite to) the pull • Says the forces cancel or balance on concrete, so the crate stays still • Says the air floor has no (or almost no) friction Model answer: On rough concrete, friction acts against the pull. It is big enough to match the kid's 60 N pull, so the forces cancel and the crate stays still. The air floor has no friction, so nothing pushes back against the pull and the crate starts to move.
 Total: 15 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 2 Foundation: Inertia". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 18 marks.
+
+Mark scheme
+Q1 (2 marks): A heavier object has more inertia; Inertia makes a moving object keep moving; An object at rest stays at rest unless a force acts on it. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.
+Q2 (2 marks): 0.5 m/s (accept 0.48 to 0.52). 1 mark for the answer, 1 for correct working: 5 times the mass gives a speed 5 times smaller: 2.5 ÷ 5 = 0.5 m/s.
+Q3 (1 mark): Moving at a steady speed of 1.8 m/s.
+Q4 (6 marks, 1 per item): Hard to start or stop: A loaded lorry, A full shopping trolley, A cargo ship. Easy to start or stop: A table-tennis ball, An empty shopping trolley, A paper cup.
+Q5 (3 marks, 1 per gap): gap 1: still (also accept at rest, stationary, not moving); gap 2: speed (also accept velocity); gap 3: force (also accept any correct scientific word).
+Q6 (4 marks, 1 per point): • Says the passenger was moving forwards with the bus • Uses the word inertia • Says the passenger keeps moving forwards when the bus slows down • Says a force (a pole, a seatbelt, their feet) is needed to stop them Model answer: The passenger was moving forwards with the bus. When the bus brakes, the brakes slow the bus down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards, so they lurch forwards until they grab a pole or their feet stop them.
+Total: 18 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 2 Extension: Inertia". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 14 marks.
+
+Mark scheme
+Q1 (4 marks, 1 per row): A flat line above 0 → Moving at a steady speed; A line sloping upwards → Speeding up; A line sloping down to 0 → Slowing down and stopping; A flat line along 0 → Standing still.
+Q2 (1 mark): Line B, because it takes longer to stop.
+Q3 (2 marks): 144 N (accept 143 to 145). 1 mark for the answer, 1 for correct working: 120 kg is 3 times 40 kg, so it needs 3 times the force: 3 × 48 = 144 N.
+Q4 (3 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 509.6 N down; Normal force 509.6 N up. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
+Q5 (4 marks, 1 per point): • Says the lorry has more mass • Says more mass means more inertia • Says it would take longer or further to stop with the same force • Says it needs a bigger force to stop in the same distance Model answer: The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force it would take much longer and much further to stop. To stop in a safe distance, it needs a much bigger brake force, so it needs stronger brakes.
+Total: 14 marks.

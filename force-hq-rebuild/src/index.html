@@ -8,29 +8,39 @@
   <div class="topright">
     <button type="button" class="ghost sm" data-journal>📓 Journal <span class="jc" id="jCount">0</span></button>
     <button type="button" class="ghost sm" id="saveWorkBtn">📄 Save my work</button>
+    <button type="button" class="ghost sm teachbtn" id="teacherBtn">For teachers</button>
   </div>
 </header>
 
 <main id="main">
   <!-- HOME -->
   <section id="vHome" class="view">
-    <div class="teachrow"><button type="button" class="ghost sm" id="teacherBtn">For teachers: set classwork or homework</button></div>
-    <div class="hero panel">
-      <canvas id="cvHome" role="img" aria-label="The Force HQ arena complex: the Main Arena, the Snow Arena, the Space Dome, the Drop Zone tower and the Workshop"></canvas>
-      <div class="herotext">
-        <h1>Welcome to Force HQ</h1>
-        <p id="hello">Every force is a push or a pull. Here in the Force Arenas you can test them yourself, with tug-of-war teams, husky sleds, space pods and more.</p>
+    <div class="hero2">
+      <div class="herocopy">
+        <span class="kicker">Force Arenas · Forces unit</span>
+        <h1>Welcome to <span>Force HQ</span></h1>
+        <p id="hello">Every force is a push or a pull. In the Force Arenas you test them for yourself, with tug-of-war teams, husky sleds, space pods and more.</p>
+        <div class="resume" id="resume"></div>
         <p class="whoLine" id="whoLine"></p>
       </div>
+      <div class="heroart">
+        <canvas id="cvHome" role="img" aria-label="The Force HQ arena complex: the Main Arena, the Snow Arena, the Space Dome, the Drop Zone tower and the Workshop"></canvas>
+        <div class="herostats" id="heroStats"></div>
+      </div>
+      <div class="hazard" aria-hidden="true"></div>
     </div>
-    <h2 class="sech">The Force Arenas: guided chapters</h2>
-    <p class="secp">Each chapter is split into sections of approx. 20 to 30 minutes. Start with the <b>Foundation</b>. The <b>Extension</b> goes further, for when your teacher sets it or you want an extra challenge. Every section makes its own worksheet to save and upload.</p>
-    <div class="chapters" id="chapterCards"></div>
+
+    <div class="sectop">
+      <div><span class="kicker2">Guided chapters</span><h2 class="sech">Your route through the Force Arenas</h2></div>
+      <p class="secp">Each chapter has sections of approx. 20 to 30 minutes. Start with the <b>Foundation</b>. The <b>Extension</b> goes further, when your teacher sets it or you want an extra challenge. Every section makes its own worksheet.</p>
+    </div>
+    <div id="chapterCards"></div>
+
     <div class="homegrid">
-      <div class="panel homecard" id="exploreCard"></div>
-      <div class="panel homecard" id="workshopCard"></div>
+      <div class="panel homecard explorec" id="exploreCard"></div>
+      <div class="panel homecard workc" id="workshopCard"></div>
     </div>
-    <div class="panel stamps" id="stampRow"></div>
+    <div class="panel stampbook" id="stampRow"></div>
   </section>
 
   <!-- CHAPTER -->
@@ -85,6 +95,11 @@
           <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="num" id="massOut">50 kg</span></div>
           <input type="range" id="mass" min="10" max="150" step="1" value="50" aria-label="Crate mass in kilograms">
         </div>
+        <div data-panel="brake">
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="brake">Brake force</button></h3><span class="num" id="brakeOut">40 N</span><button type="button" class="info" data-info="brake" aria-label="How does the brake work?">ⓘ</button></div>
+          <input type="range" id="brakeF" min="5" max="200" step="1" value="40" aria-label="Brake force in newtons">
+          <div class="nudge"><button type="button" class="mini" data-bk="-1">−1 N</button><button type="button" class="mini" data-bk="1">+1 N</button></div>
+        </div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -92,7 +107,8 @@
         <div class="scenebar">
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove">Reset</button>
+          <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch">Reset</button>
         </div>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">
@@ -109,6 +125,10 @@
               <label><input type="checkbox" id="tgRes" checked> Resultant force arrow</label>
             </div>
           </div>
+        </div>
+        <div class="vtrow" data-panel="vt">
+          <div class="lbl"><button type="button" class="term tl" data-t="vtgraph">Velocity–time graph of the crate</button><button type="button" class="info" data-info="vt" aria-label="How do I read the velocity–time graph?">ⓘ</button></div>
+          <canvas id="cvVT" role="img" aria-label="Velocity–time graph of the crate: velocity in metres per second up the side, time in seconds along the bottom"></canvas>
         </div>
       </div>
     </div>

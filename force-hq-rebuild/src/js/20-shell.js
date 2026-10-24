@@ -1,10 +1,10 @@
 /* ===== Shell: views, home, name and class, teacher mode ===== */
 const CHAPTERS = [
-  { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true },
-  { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: false },
-  { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: false },
-  { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: false },
-  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady speeds and the new Drop Zone.', stamp: 'Balance Master', ready: false }
+  { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
+  { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
+  { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: false, arena: 'Snow Arena', icon: 'tri' },
+  { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: false, arena: 'Space Dome', icon: 'pair' },
+  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady speeds and the new Drop Zone.', stamp: 'Balance Master', ready: false, arena: 'Drop Zone', icon: 'chute' }
 ];
 const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
@@ -14,7 +14,7 @@ const unlocked = () => !!DB.unlocked;
 
 function show(v) {
   if (typeof qUnpop === 'function') qUnpop();
-  VIEW = v; VIEWS.forEach(x => $('#' + x).hidden = x !== v);
+  VIEW = v; VIEWS.forEach(x => $('#' + x).hidden = x !== v); document.body.dataset.view = v;
   $('#crumb').textContent = v === 'vChapter' && CH ? `Force Arenas · Chapter ${CH.n}` : v === 'vExplore' ? 'Force Arenas · Explore' : v === 'vTeacher' ? 'For teachers' : '';
   window.scrollTo(0, 0);
   if (v === 'vHome') renderHome();
@@ -30,27 +30,56 @@ function chStatus(id) {
   if (L.done || Cc || R.done) return { label: 'In progress', cls: 'part' };
   return { label: 'Not started', cls: 'todo' };
 }
-function secRow(sec) {
-  const id = sec.id, d = CHDATA[id], st = chStatus(id), L = learnProgress(id), R = reviewProgress(id), M = secMins(id);
-  return `<div class="secrow ${st.cls}"><div class="sechd"><b>${sec.part}</b><span class="scaleNote">approx. ${M.total} min · own worksheet</span></div><p>${sec.blurb}</p>
-    <div class="parts"><span class="pillst ${L.done === L.total ? 'done' : L.done ? 'part' : 'todo'}">Learn ${L.done}/${L.total}</span>${d.challenge ? `<span class="pillst ${challengeDone(id) ? 'done' : 'todo'}">Challenge${challengeDone(id) ? ' ✓' : ''}</span>` : ''}<span class="pillst ${R.done === R.total ? 'done' : R.done ? 'part' : 'todo'}">Check ${R.done}/${R.total}</span></div>
-    <button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start the ' + sec.part : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button></div>`;
+/* small line icons for the chapter cards (inline SVG, inherits currentColor) */
+const CHICON = {
+  rope: '<path d="M4 22h9M27 22h9" stroke-width="3"/><rect x="14" y="16" width="12" height="12" rx="2"/><path d="M14 16l12 12M26 16L14 28" stroke-width="1.6"/>',
+  move: '<rect x="18" y="14" width="14" height="14" rx="2"/><path d="M4 17h9M7 21h8M4 25h9" stroke-width="2.6"/>',
+  tri: '<path d="M20 6L35 32H5z"/><path d="M11 22h18" stroke-width="2"/><text x="20" y="19" text-anchor="middle" font-size="7.5" font-weight="800" stroke="none" fill="currentColor">F</text><text x="13.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">m</text><text x="26.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">a</text>',
+  pair: '<path d="M18 20H4M8 15l-5 5 5 5M22 20h14M32 15l5 5-5 5" stroke-width="3"/><path d="M20 10v20" stroke-width="2" stroke-dasharray="3 3"/>',
+  chute: '<path d="M7 18a13 11 0 0 1 26 0z"/><path d="M8 18l12 12 12-12M20 18v12" stroke-width="1.6"/><circle cx="20" cy="32" r="3"/>'
+};
+const chIcon = k => `<svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${CHICON[k] || ''}</svg>`;
+/* how far through a section is, from 0 to 1 */
+function secParts(id) {
+  const d = CHDATA[id], L = learnProgress(id), R = reviewProgress(id), C2 = d.challenge ? challengeState(id) : { tried: 0, total: 0 };
+  return { L, R, C2, done: L.done + R.done + C2.tried, total: L.total + R.total + C2.total };
 }
+const pctBar = (f, cls = '') => `<div class="pbar ${cls}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(f * 100)}"><i style="width:${Math.round(f * 100)}%"></i></div>`;
+function secRow(sec) {
+  const id = sec.id, d = CHDATA[id], st = chStatus(id), P = secParts(id), M = secMins(id), stamped = !!dbGet('stamps', {})[id];
+  return `<div class="sectile ${st.cls} ${sec.part === 'Extension' ? 'ext' : 'fnd'}">
+    <div class="sechd"><span class="partname">${sec.part}</span><span class="mins">approx. ${M.total} min</span></div>
+    <p>${sec.blurb}</p>
+    <div class="parts"><span class="pillst ${P.L.done === P.L.total ? 'done' : P.L.done ? 'part' : 'todo'}">Learn ${P.L.done}/${P.L.total}</span>${d.challenge ? `<span class="pillst ${challengeDone(id) ? 'done' : P.C2.tried ? 'part' : 'todo'}">Challenge ${P.C2.tried}/${P.C2.total}</span>` : ''}<span class="pillst ${P.R.done === P.R.total ? 'done' : P.R.done ? 'part' : 'todo'}">Check ${P.R.done}/${P.R.total}</span></div>
+    ${pctBar(P.total ? P.done / P.total : 0, st.cls)}
+    <div class="tilefoot"><button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start the ' + sec.part : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button>${stamped ? `<span class="minis on" title="Stamp earned">${sec.stamp}</span>` : `<span class="minis">Stamp: ${sec.stamp}</span>`}</div></div>`;
+}
+function nextSection() { const st = dbGet('stamps', {}); return SECTIONS.find(s => !st[s.id]) || null; }
 function renderHome() {
-  const u = user();
-  $('#whoLine').innerHTML = u.teacher ? `You're in <b>teacher mode</b>: every chapter is unlocked. <button type="button" data-act="student">Switch to student mode</button>` :
-    u.name ? `Hi ${esc(u.name)}! Welcome back.` : '';
-  $('#chapterCards').innerHTML = CHAPTERS.map(ch => {
-    const secs = SECTIONS.filter(s => s.ch === ch.id);
-    if (!ch.ready || !secs.length) return `<div class="chcard soon"><span class="n">Chapter ${ch.n}</span><h3>${ch.title}</h3><p>${ch.blurb}</p><div class="parts"><span class="pillst todo">Coming soon</span></div></div>`;
-    return `<div class="chcard wide"><span class="n">Chapter ${ch.n}</span><h3>${ch.title}</h3><div class="secrows">${secs.map(secRow).join('')}</div></div>`;
-  }).join('');
-  $('#exploreCard').innerHTML = exploreOpen()
-    ? `<span class="lbl">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><button type="button" class="go" data-act="explore" style="align-self:flex-start">Go to Explore →</button>`
-    : `<span class="lbl">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`;
-  $('#workshopCard').innerHTML = `<span class="lbl">Coming soon</span><h3>The Workshop</h3><p>Pulleys, levers, ramps, wedges and screws. Find out how machines make a job feel easier, and calculate the work done.</p>`;
-  const stamps = dbGet('stamps', {});
-  $('#stampRow').innerHTML = `<span class="lbl">My stamps</span>` + SECTIONS.map(s => `<div class="stamp ${stamps[s.id] ? 'on' : ''}" title="${s.stamp}">${stamps[s.id] ? s.stamp : `Ch ${s.n} ${s.part}`}</div>`).join('') + CHAPTERS.filter(c => !c.ready).map(c => `<div class="stamp">Chapter ${c.n}</div>`).join('');
+  const u = user(), stamps = dbGet('stamps', {}), J = dbGet('journal', { order: [] });
+  $('#whoLine').innerHTML = u.teacher ? `You're in <b>teacher mode</b>: every chapter is unlocked. <button type="button" class="linkbtn" data-act="student">Switch to student mode</button>` : '';
+  /* "Up next" card: the first section without a stamp */
+  const nx = nextSection();
+  if (nx) {
+    const P = secParts(nx.id), started = P.done > 0, ch = CHAPTERS.find(c => c.id === nx.ch);
+    $('#resume').innerHTML = `<div class="rlbl">${started ? 'Carry on where you left off' : u.name && !u.teacher ? `Ready, ${esc(u.name)}? Up next` : 'Up next'}</div>
+      <div class="rtitle">Chapter ${nx.n} · ${nx.part}: ${ch.title}</div>
+      <div class="rmeta">approx. ${secMins(nx.id).total} min · ${P.done} of ${P.total} parts done</div>${pctBar(P.total ? P.done / P.total : 0, 'onDark')}
+      <button type="button" class="go big" data-open="${nx.id}">${started ? 'Carry on' : 'Start'} ${nx.part === 'Foundation' ? `Chapter ${nx.n}` : `the ${nx.part}`} →</button>`;
+  } else $('#resume').innerHTML = `<div class="rlbl">All done so far</div><div class="rtitle">You've finished every chapter that's open. Brilliant work!</div><button type="button" class="go big" data-act="explore">Go to Explore →</button>`;
+  const nst = Object.keys(stamps).filter(k => secOf(k)).length;
+  $('#heroStats').innerHTML = [[`${nst}<small>/${SECTIONS.length}</small>`, 'stamps'], [`${SECTIONS.filter(s => chStatus(s.id).cls === 'done').length}<small>/${SECTIONS.length}</small>`, 'sections done'], [J.order.length, 'Journal cards']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
+  /* chapters: open ones in full, the rest as a route of upcoming stops */
+  const open = CHAPTERS.filter(c => c.ready && SECTIONS.some(s => s.ch === c.id)), soon = CHAPTERS.filter(c => !open.includes(c));
+  $('#chapterCards').innerHTML = open.map(ch => `<div class="panel chfeat"><div class="chside"><span class="chnum">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}<div><span class="kicker2">Chapter ${ch.n} · ${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p></div></div><div class="sectiles">${SECTIONS.filter(s => s.ch === ch.id).map(secRow).join('')}</div></div>`).join('')
+    + (soon.length ? `<div class="route"><div class="routehd"><span class="kicker2">Coming soon</span></div><div class="routegrid">${soon.map(ch => `<div class="stop"><div class="stophd"><span class="chnum sm">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}</div><span class="kicker2">${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p><span class="pillst todo">Coming soon</span></div>`).join('')}</div></div>` : '');
+  $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
+    ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
+    : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
+  $('#workshopCard').innerHTML = `<div class="hcicon"><svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="12" r="6"/><circle cx="14" cy="12" r="1.5"/><path d="M8 12v18M20 12v8"/><rect x="16" y="20" width="8" height="8" rx="1.5"/><path d="M4 32h32"/><path d="M27 32l9-10"/></svg></div><div class="hcbody"><span class="kicker2">Coming soon</span><h3>The Workshop</h3><p>Pulleys, levers, ramps, wedges and screws. Find out how machines make a job feel easier, and calculate the work done.</p></div>`;
+  $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
+    + SECTIONS.map(s => `<div class="sbitem"><div class="stamp ${stamps[s.id] ? 'on' : 'ghoststamp'}" title="${s.stamp}">${s.stamp}</div><span>${stamps[s.id] ? s.stamp : `Chapter ${s.n} ${s.part}`}</span></div>`).join('')
+    + CHAPTERS.filter(c => !c.ready).map(c => `<div class="sbitem soon"><div class="stamp ghoststamp">${c.stamp}</div><span>Chapter ${c.n}</span></div>`).join('') + '</div>';
   requestAnimationFrame(drawHome);
 }
 /* Explore opens once the Chapter 1 Foundation is finished (guided before Explore). Teachers, and anyone who chooses "Open it anyway", can go in sooner. */
@@ -66,6 +95,10 @@ const HOMEHIT = [];
 function drawHome() {
   const cv = $('#cvHome'); if (!cv || !cv.offsetParent) return; readColors(); const c = fit(cv, 900, 420); HOMEHIT.length = 0;
   const g = c.createLinearGradient(0, 0, 0, 300); g.addColorStop(0, '#cfe6f2'); g.addColorStop(1, '#eef6f2'); c.fillStyle = g; c.fillRect(0, 0, 900, 420);
+  // sun, clouds and distant hills
+  const sg = c.createRadialGradient(470, 70, 4, 470, 70, 90); sg.addColorStop(0, 'rgba(255,240,190,.95)'); sg.addColorStop(.25, 'rgba(255,236,170,.55)'); sg.addColorStop(1, 'rgba(255,236,170,0)'); c.fillStyle = sg; c.fillRect(380, 0, 180, 170);
+  c.fillStyle = 'rgba(255,255,255,.85)'; for (const [x, y, k] of [[90, 70, 1], [300, 48, .8], [690, 60, 1.1], [840, 110, .7]]) { c.beginPath(); c.ellipse(x, y, 34 * k, 11 * k, 0, 0, 7); c.ellipse(x - 16 * k, y + 3, 20 * k, 9 * k, 0, 0, 7); c.ellipse(x + 18 * k, y + 2, 22 * k, 10 * k, 0, 0, 7); c.fill(); }
+  c.fillStyle = '#b9cfd9'; c.beginPath(); c.moveTo(0, 230); c.lineTo(90, 175); c.lineTo(170, 215); c.lineTo(260, 160); c.lineTo(360, 220); c.lineTo(480, 185); c.lineTo(560, 215); c.lineTo(680, 150); c.lineTo(790, 205); c.lineTo(900, 170); c.lineTo(900, 260); c.lineTo(0, 260); c.fill();
   c.fillStyle = '#c4d9c8'; c.beginPath(); c.moveTo(0, 250); c.quadraticCurveTo(200, 200, 420, 240); c.quadraticCurveTo(650, 280, 900, 220); c.lineTo(900, 420); c.lineTo(0, 420); c.fill();
   c.fillStyle = '#d9e7d6'; c.fillRect(0, 300, 900, 120);
   c.fillStyle = '#efe9dc'; c.beginPath(); c.moveTo(0, 360); c.quadraticCurveTo(450, 330, 900, 372); c.lineTo(900, 395); c.quadraticCurveTo(450, 352, 0, 385); c.fill();
@@ -92,6 +125,9 @@ function drawHome() {
   c.save(); c.translate(725, 288); c.fillStyle = '#e3a51c'; for (let i = 0; i < 8; i++) { c.rotate(Math.PI / 4); c.fillRect(-3, -14, 6, 7); } c.beginPath(); c.arc(0, 0, 10, 0, 7); c.fill(); c.fillStyle = '#7a5426'; c.beginPath(); c.arc(0, 0, 4, 0, 7); c.fill(); c.restore();
   c.strokeStyle = '#47637a'; c.lineWidth = 4; c.beginPath(); c.moveTo(830, 370); c.lineTo(830, 250); c.lineTo(880, 250); c.stroke(); c.lineWidth = 1.5; c.beginPath(); c.moveTo(872, 250); c.lineTo(872, 290); c.stroke(); c.fillStyle = '#c99a5b'; c.fillRect(864, 290, 16, 14);
   label('WORKSHOP', 725, 388, false); HOMEHIT.push({ x0: 630, x1: 890, y0: 250, y1: 400, id: 'workshop' });
+  // paths to each building and a few trees
+  c.strokeStyle = '#efe9dc'; c.lineWidth = 9; c.lineCap = 'round'; for (const [x1, y1, x2, y2] of [[390, 380, 150, 292], [390, 380, 613, 300], [390, 380, 725, 372]]) { c.beginPath(); c.moveTo(x1, y1); c.quadraticCurveTo((x1 + x2) / 2, y1 + 10, x2, y2); c.stroke(); }
+  for (const [x, y, k] of [[262, 330, 1], [520, 342, .9], [30, 330, .8], [870, 330, 1], [600, 330, .7]]) { c.fillStyle = '#7a5a3a'; c.fillRect(x - 2 * k, y - 4, 4 * k, 12 * k); c.fillStyle = '#5b8c4a'; c.beginPath(); c.arc(x, y - 10 * k, 12 * k, 0, 7); c.fill(); c.fillStyle = '#7cad67'; c.beginPath(); c.arc(x - 3 * k, y - 13 * k, 7 * k, 0, 7); c.fill(); }
   // Main Arena (front centre, biggest)
   c.fillStyle = '#b7c7cf'; c.beginPath(); c.ellipse(390, 330, 230, 60, 0, 0, 7); c.fill();
   c.fillStyle = '#d7e6f1'; c.beginPath(); c.ellipse(390, 312, 230, 175, 0, Math.PI, 0); c.fill();
@@ -131,11 +167,11 @@ function onSubmit(root, btn, fn) {
 /* ---------- name and class (asked first) ---------- */
 function askWho(first) {
   const u = user();
-  openModal(`<div class="modal" id="whoForm" role="form"><h2>${first ? 'Welcome to Force HQ!' : 'Who is using Force HQ?'}</h2>
-    <p>Type your name and class so your worksheets show who did the work. Your progress is saved on this device.</p>
+  openModal(`<div class="modal welcome" id="whoForm" role="form"><div class="wband"><div class="wlogo"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" rx="9" fill="#0d171d"/><path d="M8 20h9M23 20h9" stroke="#e3a51c" stroke-width="4" stroke-linecap="round"/><path d="M12 15l-5 5 5 5M28 15l5 5-5 5" fill="none" stroke="#e3a51c" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="16" y="15" width="8" height="10" rx="2" fill="#c99a5b"/></svg>FORCE<span>HQ</span></div><h2>${first ? 'Welcome to Force HQ!' : 'Who is using Force HQ?'}</h2></div>
+    <div class="wbody"><p>Type your name and class so your worksheets show who did the work. Your progress is saved on this device.</p>
     <label>Your name<input type="text" id="whoName" autocomplete="given-name" value="${esc(u.teacher ? '' : u.name || '')}" required></label>
     <label>Your class<input type="text" id="whoCls" placeholder="for example 7B" value="${esc(u.teacher ? '' : u.cls || '')}"></label>
-    <div class="row" style="justify-content:space-between"><button type="button" class="mini" id="imTeacher">I'm a teacher</button><button type="button" class="go" id="whoGo">Let's go →</button></div></div>`);
+    <div class="row" style="justify-content:space-between;margin-top:4px"><button type="button" class="mini" id="imTeacher">I'm a teacher</button><button type="button" class="go" id="whoGo">Let's go →</button></div></div></div>`);
   onSubmit('#whoForm', '#whoGo', () => { const n = $('#whoName').value.trim(); if (!n) { $('#whoName').focus(); return; } DB.user = { name: n, cls: $('#whoCls').value.trim() }; saveDB(); closeModal(); refreshWho(); renderHome(); if (first) maybeTour(); });
   $('#imTeacher').addEventListener('click', () => askCode(ok => { if (ok) { DB.user = { name: 'Teacher', cls: '', teacher: true }; saveDB(); closeModal(); refreshWho(); renderHome(); } }));
 }

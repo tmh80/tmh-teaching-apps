@@ -11,6 +11,9 @@ const SYNS = [
   ['centre', 'center', 'middle', 'centre point', 'middle point'],
   ['against', 'opposite', 'opposite to', 'the opposite way to', 'opposing', 'in the opposite direction to', 'opposite direction to'],
   ['newtons', 'newton', 'n'],
+  ['harder', 'more difficult', 'tougher'],
+  ['still', 'at rest', 'stationary', 'not moving'],
+  ['speed', 'velocity'],
   ['9.8', 'g', '9.8 n kg']
 ];
 const gapNorm = x => normWord(x).replace(/^(a|an|the) /, '');
