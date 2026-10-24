@@ -1,0 +1,122 @@
+/* ===== Chapter 1: What is a force? ===== */
+const right = () => S.right.slice().sort().join(), left = () => S.left.slice().sort().join();
+CHDATA.c1 = {
+  goal: 'Describe forces as pushes and pulls measured in newtons, name the main contact and non-contact forces, and draw free-body diagrams with arrows from the centre of the object.',
+  vocab: ['force', 'push', 'pull', 'newton (N)', 'newtonmeter', 'friction', 'weight', 'mass', 'gravity', 'normal force', 'tension', 'air resistance', 'contact force', 'non-contact force', 'free-body diagram'],
+  steps: [
+    { id: 's0', title: 'How Force HQ works', tour: true,
+      cards: [
+        { html: `<p>Welcome to the Main Arena! This is where you will test forces for yourself.</p><p>Information arrives in small cards like this one. Read each card, then press Next. When you reach the last card, it is saved in your <b>Journal</b>, so you can read it again whenever you like.</p>` },
+        { html: `<p>Your jobs for each step are in the <b>Do this</b> list on the left. They tick themselves when you have done them.</p><p>Questions appear in the <b>Your turn</b> box just under that list. A step is finished when every job is ticked and every question is answered.</p>` },
+        { html: `<p>Words with a dotted line under them, like ${T('force')}, are in the glossary. Tap one (or hover over it) to see what it means.</p><p>When you close these cards, a quick tour will show you where everything is.</p>` }],
+      setup() { S.left = ['adult']; S.right = ['adult', 'kid']; S.floor = 'smooth'; },
+      adds: ['run'], idle: 'Press Pull! to start the tug-of-war',
+      tasks: [['Press Pull! and watch what happens.', () => S.flags.pulled], ['Open your Journal, then close it again.', () => JOURNAL_OPENED || dbGet('journalOpened')], ['Open the calculator, then close it.', () => CALC_USED || dbGet('calcOpened')]],
+      qs: [{ id: 'q1', type: 'mcq', p: 'You closed an information card too quickly. Where can you read it again?', opts: ['In my Journal', 'Nowhere, it has gone for good', 'In the calculator', 'On the arena scoreboard'], a: 0, ok: 'That\'s right! Every card you read is saved in your Journal.' }] },
+
+    { id: 's1', title: 'Pushes and pulls',
+      cards: [
+        { html: `<p>Let's start with a big idea. Every ${T('force')} is either a <b>push</b> or a <b>pull</b>.</p><p>Before you read any more, try both for yourself. Give the crate a push with the button under the arena. Then drag an adult onto the right-hand side of the arena and press Pull!</p>` },
+        { hi: '[data-panel="pal"]', html: `<p>To add a puller, drag them from the column beside the arena and drop them onto the floor. Drop them on the <b>right</b> of the crate to join the right team, or on the <b>left</b> to join the left team.</p><p>If you change your mind, drag them off the arena or just tap them, and they go back to the bench.</p>` }],
+      setup() { S.floor = 'smooth'; }, adds: ['shove', 'pal'], sides: ['right'], pullers: ['adult'], idle: 'Give the crate a push, then try a pull',
+      tasks: [['Give the crate a push with the button under the arena.', () => S.flags.shoved], ['Drag an adult onto the right side of the arena, then press Pull!', () => S.right.includes('adult') && S.flags.pulled]],
+      qs: [
+        { id: 'q1', type: 'sort', p: 'Is each of these a push or a pull?', groups: ['Push', 'Pull'], items: [['The arena crew shoves the crate', 0], ['The adult heaves on the rope', 1], ['You kick a football', 0], ['A dog drags its lead', 1], ['You open a drawer', 1], ['You press a doorbell', 0]] },
+        { id: 'q2', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that says what a force is.', opts: ['A force is a push or a pull.', 'A force is how heavy something is.', 'A force is how fast something is moving.', 'A force only acts on things that are moving.'], a: 0, ok: 'Yes! A force is a push or a pull. Keep that sentence in your head for the whole of Force HQ.', why: { 1: 'That describes weight or mass. Think about what you just did to the crate.', 2: 'That describes speed. What did you do to make the crate move?', 3: 'Forces act on still things too. The crate was still before you pushed it.' } }] },
+
+    { id: 's2', title: 'Measuring forces in newtons', info: ['meter'],
+      cards: [{ html: `<p>Scientists measure forces in ${T('newton', 'newtons')}. We write newtons as <b>N</b>. The unit is named after Isaac Newton, who worked out the rules of forces over 300 years ago.</p><p>One newton is roughly the weight of a small apple in your hand.</p>` }],
+      setup() { S.floor = 'smooth'; }, adds: ['meter'], sides: ['right'], pullers: ['kid', 'adult', 'dog'],
+      tasks: [['Drag one adult onto the right side of the arena.', () => S.right.includes('adult')], ['Now add one kid to the right team too.', () => right() === 'adult,kid']],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With one adult and one kid on the right, what does the right newtonmeter read?', unit: 'N', live: () => tot(S.right), need: () => right() === 'adult,kid', needMsg: 'Set up the team first: one adult and one kid on the right.', ok: 'Spot on! The adult pulls with 130 N and the kid with 60 N, so the rope reads 190 N.', hints: ['Look at the label on the right rope, next to the crate.', 'The adult pulls with 130 N and the kid with 60 N. Add them together.'] },
+        { id: 'q2', type: 'gap', p: 'Forces are measured in ___. We write this unit with the letter ___.', ans: [['newtons', 'newton'], ['N']], ok: 'Perfect. Forces are measured in newtons (N).' }] },
+
+    { id: 's3', title: 'Reading both teams', info: ['readL', 'readR'],
+      cards: [{ html: `<p>Now there are two readouts under the arena: <b>Left pull</b> and <b>Right pull</b>. They show the same numbers as the two newtonmeters, so you don't have to squint at the ropes.</p><p>Every puller has a different strength. Build two teams and see how the numbers add up.</p>` }],
+      setup() { S.floor = 'smooth'; }, adds: ['readL', 'readR'], pullers: ['kid', 'dog', 'adult', 'strong'],
+      tasks: [['Build a left team with at least two pullers.', () => S.left.length >= 2], ['Build a right team with at least two pullers.', () => S.right.length >= 2]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'Type the Left pull reading for your teams.', unit: 'N', live: () => tot(S.left), need: () => S.left.length >= 2, needMsg: 'Put at least two pullers on the left first.', ok: 'Correct!' },
+        { id: 'q2', type: 'reading', p: 'Type the Right pull reading for your teams.', unit: 'N', live: () => tot(S.right), need: () => S.right.length >= 2, needMsg: 'Put at least two pullers on the right first.', ok: 'Correct!' },
+        { id: 'q3', type: 'reading', p: 'How many newtons more is the stronger team pulling? (Type 0 if they are the same.)', unit: 'N', live: () => Math.abs(tot(S.left) - tot(S.right)), need: () => S.left.length >= 2 && S.right.length >= 2, needMsg: 'Build both teams first.', ok: 'Great subtraction! You will use this idea a lot in Chapter 3.', hints: ['Take the smaller pull away from the bigger pull.', 'Bigger reading − smaller reading = the difference.'] }] },
+
+    { id: 's4', title: 'Friction', info: ['floor', 'readF'],
+      cards: [
+        { html: `<p>Here is a puzzle. One kid pulls the crate on rough concrete. Press Pull! and watch closely. Then try the same pull on the air floor.</p>` },
+        { html: `<p>${T('friction', 'Friction')} is a force between two surfaces that rub, or try to slide past each other.</p><div class="law">Friction always acts <b>against</b> the way something moves, or the way it is being pulled.</div><p>Rough surfaces make lots of friction. Smooth surfaces make a little. The air floor makes none at all, because the crate floats on a cushion of air.</p>` }],
+      setup() { S.right = ['kid']; S.floor = 'concrete'; }, adds: ['floor', 'readF'], sides: ['right'], pullers: ['kid'],
+      tick() { const f = staticForces(); if (S.running && S.floor === 'concrete' && S.v === 0 && S.right.length && S.pullT > 0.6) S.flags.stuckConcrete = true; if (S.floor === 'air' && S.flags.moved && S.right.length) S.flags.movedAir = true; },
+      tasks: [['With one kid pulling on rough concrete, press Pull! Does the crate move?', () => S.flags.stuckConcrete], ['Change to the air floor and press Pull! again.', () => S.flags.movedAir]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'Switch back to rough concrete with the kid pulling. What does the Friction readout say?', unit: 'N', live: () => Math.abs(staticForces().fr), need: () => S.floor === 'concrete' && right() === 'kid', needMsg: 'Choose rough concrete and keep one kid on the right.', ok: 'Yes! Friction pushes back with exactly 60 N, so it cancels the kid\'s pull and the crate stays still.', hints: ['Look at the Friction readout under the arena.', 'Friction matches the pull when the crate is stuck. How hard is the kid pulling?'] },
+        { id: 'q2', type: 'mcq', p: 'The kid pulls the crate to the right. Which way does friction act on the crate?', opts: ['To the left', 'To the right', 'Straight up', 'It doesn\'t act on a still crate'], a: 0, ok: 'That\'s right. Friction acts against the pull, so it points to the left.', why: { 1: 'Friction works against the pull. Look at the arrow in the Friction readout.', 3: 'The crate is still, but friction is still there. It is what holds the crate in place!' } },
+        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains why the crate glides on the air floor.', opts: ['The air floor has no friction, so nothing pushes back against the pull.', 'The air floor makes the crate lighter.', 'The kid pulls harder on the air floor.', 'Air pushes the crate along.'], a: 0, ok: 'Exactly. With no friction, even a small pull gets the crate moving.', why: { 1: 'The crate\'s mass doesn\'t change. What is missing on the air floor?', 2: 'The rope still reads 60 N. Check the newtonmeter.', 3: 'The air floats the crate, but it doesn\'t push it sideways.' } }] },
+
+    { id: 's5', title: 'Weight and mass',
+      cards: [
+        { html: `<p>${T('gravity', 'Gravity')} pulls everything towards the centre of the Earth. The pull of gravity on an object is called its ${T('weight')}.</p><p>Weight is a force, so it is measured in newtons. ${T('mass', 'Mass')} is how much stuff is in the object, and it is measured in kilograms (kg).</p>` },
+        { html: `<p>On Earth, gravity pulls on every kilogram with 9.8 newtons. So to find an object's weight:</p><div class="law"><b>weight (N) = mass (kg) × 9.8</b></div><div class="example">A 50 kg crate: 50 × 9.8 = <b>490 N</b></div><p>Open the calculator if you need it. Its <b>g</b> key is 9.8.</p>` }],
+      setup() { S.mass = 50; S.floor = 'smooth'; }, adds: ['mass', 'readM'], sides: [], pullers: [],
+      tasks: [['Use the Crate mass slider to set the crate to 47 kg.', () => S.mass === 47]],
+      qs: [
+        { id: 'q1', type: 'num', p: 'Work out the weight of the 47 kg crate.', ans: 460.6, unit: 'N', ok: 'Brilliant! 47 × 9.8 = 460.6 N.', hints: ['Multiply the mass by 9.8.', 'Type 47 × 9.8 into the calculator.'] },
+        { id: 'q2', type: 'num', p: 'A crate has a mass of 120 kg. What is its weight?', ans: 1176, unit: 'N', ok: 'Correct! 120 × 9.8 = 1176 N.', hints: ['Weight = mass × 9.8.', 'Type 120 × 9.8 into the calculator.'] },
+        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true.', opts: ['Mass is measured in kilograms, and weight is a force measured in newtons.', 'Mass and weight are the same thing.', 'Weight is measured in kilograms.', 'Mass is the pull of gravity.'], a: 0, ok: 'Yes. Mass is the amount of stuff (kg). Weight is the pull of gravity on it (N).' }] },
+
+    { id: 's6', title: 'The floor pushes back', info: ['readW', 'readN'],
+      cards: [{ html: `<p>If gravity pulls the crate down, why doesn't it sink through the floor? Because the floor pushes back up!</p><p>This upward push is called the ${T('normal', 'normal force')}. On a flat floor, the floor pushes up exactly as hard as the weight pulls down.</p>` }],
+      setup() { S.mass = 50; S.floor = 'smooth'; }, adds: ['readW', 'readN'], sides: [], pullers: [],
+      tasks: [['Set the crate to 63 kg.', () => S.mass === 63]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What does the Weight readout show for the 63 kg crate?', unit: 'N', live: () => S.mass * G, need: () => S.mass === 63, needMsg: 'Set the crate to 63 kg first.', ok: 'Correct. 63 × 9.8 = 617.4 N.' },
+        { id: 'q2', type: 'reading', p: 'What does the Normal force readout show?', unit: 'N', live: () => S.mass * G, need: () => S.mass === 63, needMsg: 'Set the crate to 63 kg first.', ok: 'Right. The floor pushes up with 617.4 N, the same size as the weight.' },
+        { id: 'q3', type: 'mcq', p: 'Why doesn\'t the crate sink into the floor?', opts: ['The floor pushes up with a normal force as big as the weight', 'The crate has no weight when it sits still', 'Gravity switches off on a floor', 'The normal force is bigger than the weight'], a: 0, ok: 'Exactly. The two forces are the same size and point opposite ways, so they cancel out.', why: { 1: 'Check the Weight readout: the crate still has weight.', 2: 'Gravity never switches off on Earth.', 3: 'If the normal force were bigger, the crate would jump up into the air!' } }] },
+
+    { id: 's7', title: 'Contact and non-contact forces',
+      cards: [
+        { html: `<p>Some forces only act when things touch. These are ${T('contact', 'contact forces')}: a push, the ${T('tension')} in a rope, friction and the normal force.</p>` },
+        { html: `<p>Other forces act across a gap, without touching. These are ${T('noncontact', 'non-contact forces')}. Gravity is one: the Earth pulls on you even when you jump. Magnetic force is another: a magnet can pull a paper clip from a distance.</p>` },
+        { html: `<p>One more contact force to meet: ${T('airres', 'air resistance')}. When something moves through the air, the air pushes back against it. You will test it properly in the Drop Zone in Chapter 5.</p>` }],
+      setup() { S.floor = 'smooth'; S.left = ['adult']; S.right = ['adult']; }, adds: [], pullers: ['kid', 'dog', 'adult', 'strong'],
+      tasks: [['Press Pull! and watch the ropes go tight. The pull in a tight rope is tension, a contact force.', () => S.flags.pulled]],
+      qs: [
+        { id: 'q0', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that describes a contact force.', opts: ['A force that only acts when two things touch.', 'A force that acts across a gap, without touching.', 'A force that only acts on things that are moving.', 'A force that is always bigger than gravity.'], a: 0, ok: 'Yes! A contact force needs things to touch, like the rope pulling on the crate.', why: { 1: 'That describes a non-contact force, like gravity or magnetism.', 2: 'Forces act on still things too. Think about the rope and the crate.', 3: 'Contact forces can be big or small. What do they need in order to act?' } },
+        { id: 'q1', type: 'sort', p: 'Sort these forces into contact and non-contact forces.', groups: ['Contact force', 'Non-contact force'], items: [['Friction', 0], ['Weight (gravity)', 1], ['Normal force', 0], ['Tension in a rope', 0], ['Magnetic force between two magnets', 1], ['Air resistance', 0], ['A push from your hand', 0]] },
+        { id: 'q2', type: 'mcq', p: 'A skydiver jumps from a plane. Which force on her is a non-contact force?', opts: ['Her weight', 'Air resistance', 'The push from the plane door', 'Friction from her parachute straps'], a: 0, ok: 'Yes. Gravity pulls on her without touching her.', why: { 1: 'The air touches her as she falls, so air resistance is a contact force.', 2: 'She has to touch the door to push off it.', 3: 'The straps touch her, so that is a contact force.' } }] },
+
+    { id: 's11', title: 'Coming up in Force HQ',
+      cards: [
+        { html: `<p>Brilliant work! You now know what a force is, how to measure one, and the main types of force. Here's a sneak peek at what comes next.</p>` },
+        { html: `<p><b>Chapter 1 Extension: Free-body diagrams.</b> Learn to draw every force on an object as an arrow, then become an Arena Inspector. It has its own worksheet.</p>` },
+        { html: `<p><b>Chapter 2: Inertia.</b> Why is a heavy crate so hard to start moving, and so hard to stop? You'll find out in the Main Arena and the Space Dome.</p><p><b>Chapter 3: F = ma.</b> Race huskies in the Snow Arena and use a formula to predict how fast things speed up.</p>` },
+        { html: `<p><b>Chapter 4: Action and reaction.</b> Push off a space pod and discover that forces always come in pairs.</p><p><b>Chapter 5: Balanced forces.</b> Drop things in the new Drop Zone, where you can take the air out of the tower!</p><p><b>The Workshop.</b> Pulleys, levers, ramps, wedges and screws: machines that make a job feel easier.</p>` }],
+      setup() { S.left = ['adult', 'dog']; S.right = ['strong']; S.floor = 'ice'; }, adds: [],
+      qs: [{ id: 'q1', type: 'mcq', p: 'Before you move on: which of these is NOT a force?', opts: ['Mass', 'Weight', 'Friction', 'Tension'], a: 0, ok: 'Correct! Mass is the amount of stuff in an object, measured in kg. The others are all forces, measured in N.', why: { 1: 'Weight is the pull of gravity, so it is a force measured in newtons.', 2: 'Friction is a force between surfaces.', 3: 'Tension is the pulling force in a rope.' } }] },
+    { id: 's8', title: 'Free-body diagrams', info: ['fbd'],
+      cards: [{ html: `<p>Welcome to the Chapter 1 Extension! In the Foundation you met the main forces. Now you'll learn the way scientists draw them.</p>` }, { html: `<p>Scientists draw forces as arrows on a ${T('fbd')}. It shows every force on <b>one</b> object, and nothing else.</p><p>A new diagram has appeared under the arena. It shows the crate, with an arrow for each force. Watch it change as you add pullers.</p>` },
+        { html: `<p>Scientists often draw free-body diagrams ${T('scale', 'to scale')}. You choose a scale, and the same length always stands for the same number of newtons.</p><div class="example">Scale: <b>1 cm = 100 N</b>. A 300 N force gets an arrow <b>3 cm</b> long. A 100 N force gets <b>1 cm</b>.</div><p>You can work the scale out backwards too. If a 400 N arrow is 2 cm long, then each centimetre stands for 400 ÷ 2 = <b>200 N</b>.</p>` }],
+      setup() { S.mass = 50; S.floor = 'concrete'; S.right = ['adult']; }, adds: ['fbd'], pullers: ['kid', 'adult'], sides: ['right'],
+      tasks: [['Look at the free-body diagram, then add a kid to the right team.', () => right() === 'adult,kid']],
+      qs: [
+        { id: 'q1', type: 'mcq', p: 'One adult pulls (130 N). On the diagram, why is the weight arrow longer than the pull arrow?', opts: ['The weight (490 N) is a bigger force than the pull (130 N)', 'Weight always gets the longest arrow', 'The weight arrow points down', 'The pull is further from the crate'], a: 0, ok: 'That\'s it. Longer arrows mean bigger forces.', why: { 1: 'Arrow length depends on the size of the force, not its type.', 2: 'Direction tells you which way a force acts, not how big it is.' } },
+        { id: 'q2', type: 'reading', p: 'With the adult and the kid pulling, how big is the friction arrow?', unit: 'N', live: () => Math.abs(staticForces().fr), need: () => right() === 'adult,kid' && S.floor === 'concrete', needMsg: 'Put one adult and one kid on the right, on rough concrete.', ok: 'Correct. Friction holds the crate still with 190 N, matching the pull.' },
+        { id: 'q4', type: 'num', p: 'A diagram uses a scale of 1 cm = 100 N. How long should the arrow for a 500 N weight be?', ans: 5, unit: 'cm', tol: 0.05, ok: 'Correct! 500 N ÷ 100 N per cm = 5 cm.', hints: ['Each centimetre stands for 100 N.', 'How many lots of 100 N are there in 500 N?'] },
+        { id: 'q5', type: 'num', p: 'On another diagram, a 400 N arrow is 2 cm long. How long should the arrow for a 600 N force be?', ans: 3, unit: 'cm', tol: 0.05, ok: 'Brilliant! 2 cm stands for 400 N, so 1 cm stands for 200 N, and 600 N gets an arrow 3 cm long.', hints: ['First work out how many newtons 1 cm stands for: 400 ÷ 2.', 'Each centimetre is 200 N. How many lots of 200 N are in 600 N?'] },
+        { id: 'q3', type: 'gap', p: 'On a free-body diagram, every arrow starts at the ___ of the object, and a longer arrow means a ___ force.', ans: [['centre', 'center', 'middle'], ['bigger', 'larger', 'stronger', 'greater']], ok: 'Perfect. You are ready to draw your own.' }] },
+
+    { id: 's9', title: 'Draw your own: a crate at rest',
+      cards: [{ html: `<p>Time to draw a free-body diagram yourself, using the <b>diagram desk</b>.</p><p>A 38 kg crate is sitting still on the floor. Nobody is pulling it. Think about which forces are acting, and how big they are, before you draw anything.</p>` }],
+      setup() { S.mass = 38; S.floor = 'smooth'; }, adds: [], hide: ['fbd'], sides: [], pullers: [],
+      qs: [{ id: 'q1', type: 'desk', p: 'Draw the free-body diagram of the 38 kg crate sitting still on the floor.', deskTitle: 'A 38 kg crate sitting still',
+        scen: { id: 'c1s9', obj: 'crate', label: '38 kg', brief: '<p>A <b>38 kg crate</b> is sitting still on a flat floor. Nobody is pulling or pushing it.</p><p>Draw every force on the crate. Use the calculator for its weight.</p>', forces: [{ type: 'weight', dir: 'down', value: 372.4 }, { type: 'normal', dir: 'up', value: 372.4 }] } }] },
+
+    { id: 's10', title: 'Draw your own: a crate on the move',
+      cards: [{ html: `<p>Now a harder one, and this time the crate moves! A strong adult pulls a 55 kg crate across the smooth floor. Press Pull! and watch it slide.</p><p>Friction still acts on a sliding crate. Here it pushes back with <b>53.9 N</b>. Open the diagram desk and draw every force on the crate. The live diagram is hidden for this step, so it's all down to you!</p>` }],
+      setup() { S.mass = 55; S.floor = 'smooth'; S.right = ['strong']; }, adds: [], hide: ['fbd'], sides: ['right'], pullers: ['strong'],
+      qs: [
+        { id: 'q1', type: 'desk', p: 'Draw the free-body diagram of the 55 kg crate while the strong adult pulls it across the smooth floor.', deskTitle: 'A 55 kg crate sliding to the right',
+          scen: { id: 'c1s10', obj: 'crate', label: '55 kg', brief: '<p>A <b>55 kg crate</b> is sliding to the right across the smooth floor. A strong adult pulls it with <b>200 N</b>, and friction on the sliding crate is <b>53.9 N</b>.</p><p>Draw all four forces. Think about which arrow should be longer: the pull or friction?</p>', forces: [{ type: 'weight', dir: 'down', value: 539 }, { type: 'normal', dir: 'up', value: 539 }, { type: 'pull', dir: 'right', value: 200 }, { type: 'friction', dir: 'left', value: 53.9 }] } },
+        { id: 'q2', type: 'mcq', p: 'On your diagram, the pull arrow (200 N) is longer than the friction arrow (53.9 N). What does that tell you about the crate?', opts: ['The forces don\'t cancel out, so the crate keeps moving to the right', 'The forces cancel out, so the crate stays still', 'Friction wins, so the crate moves to the left', 'Nothing, because arrow length doesn\'t matter'], a: 0, ok: 'Exactly. The pull is bigger than friction, so the sideways forces don\'t cancel and the crate is pulled along. You will find out much more about this in Chapter 3.', why: { 1: 'The forces only cancel when they are the same size. Are 200 N and 53.9 N the same?', 2: 'Friction is the smaller force here, so it can\'t win.', 3: 'Longer arrows mean bigger forces, so arrow length tells you a lot.' } }] }
+  ]
+};

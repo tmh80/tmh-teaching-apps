@@ -1,0 +1,36 @@
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 1 Foundation: What is a force?". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 26 marks.
+
+Mark scheme
+Q1 (5 marks, 1 per row): Weight → The Earth's gravity pulling on an object; Normal force → A surface pushing back on an object resting on it; Friction → Two surfaces rubbing or trying to slide past each other; Tension → A stretched rope or string pulling; Air resistance → Air pushing against something moving through it.
+Q2 (7 marks, 1 per item): Contact force: Friction on a sliding sledge, The push of a foot on a football, The upward push of a chair on you, Water resistance on a swimmer. Non-contact force: The pull of a magnet on a paper clip, The Moon's gravity pulling on the oceans, The weight of a parachutist.
+Q3 (2 marks): 230.3 N (accept 230.15 to 230.45). 1 mark for the answer, 1 for correct working: Weight = mass × 9.8 = 23.5 × 9.8 = 230.3 N.
+Q4 (1 mark): Two forces act on it: its weight down and the normal force up, and they are the same size.
+Q5 (3 marks, 1 per gap): gap 1: newtons (also accept newton, n); gap 2: 9.8 (also accept g, 9.8 n kg); gap 3: against (also accept opposite, opposite to, opposite way to, opposing, in the opposite direction to, opposite direction to).
+Q6 (8 marks, 1 per cell): Unit: Mass = kilograms (kg), Weight = newtons (N); Is it a force?: Mass = No, it is not a force, Weight = Yes, it is a force; Measured with: Mass = a balance (scales), Weight = a newtonmeter; Changes on the Moon?: Mass = No, it stays the same, Weight = Yes, it gets smaller.
+Total: 26 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 1 Extension: What is a force?". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 15 marks.
+
+Mark scheme
+Q1 (2 marks): 110 kg (accept 109.85 to 110.15). 1 mark for the answer, 1 for correct working: Mass = weight ÷ 9.8 = 1078 ÷ 9.8 = 110 kg.
+Q2 (2 marks): Weight; Normal force; Tension (the pull of the rope); Friction. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.
+Q3 (6 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 490 N down; Normal force 490 N up; Pull (tension) 130 N to the left; Pull (tension) 260 N to the right; Friction 49 N to the left. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
+Q4 (1 mark): 1 cm.
+Q5 (4 marks, 1 per point): • Names friction as the force that stops the crate • Says friction acts against (opposite to) the pull • Says the forces cancel or balance on concrete, so the crate stays still • Says the air floor has no (or almost no) friction Model answer: On rough concrete, friction acts against the pull. It is big enough to match the kid's 60 N pull, so the forces cancel and the crate stays still. The air floor has no friction, so nothing pushes back against the pull and the crate starts to move.
+Total: 15 marks.

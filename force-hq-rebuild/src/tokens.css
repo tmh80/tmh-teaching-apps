@@ -1,0 +1,33 @@
+/* Layout: facility site plan → lab console (guide rail · arena scene · control desk) */
+:root{
+  --bg:#e8eef0; --panel:#fbfcfc; --ink:#13212a; --muted:#566a74; --line:#cbd7dc; --chip:#eef3f5;
+  --accent:#1f5f8b; --accent-soft:#d7e6f1; --hazard:#e3a51c; --hazard-soft:#f8ebc8;
+  --left:#c94a34; --left-soft:#f6ddd7; --right:#11806f; --right-soft:#d3eee9;
+  --res:#7446b0; --fric:#9a5d1f; --vert:#47637a; --good:#2a7d48; --bad:#b4412d;
+  --snow:#f6f9fb; --snow-shade:#d7e3ea; --pine:#2f6b5a; --mountain:#aebfc8; --space:#0b1324; --star:#f4f7ff; --hull:#d5dde2; --solar:#2b5d8f; --elephant:#8d989e; --husky:#56636b; --tarmac:#5b6164; --air:#e9f1f4;
+  --sky:#dfe9ee; --stand:#c7d4da; --crowd:#9fb2bb; --ice:#cfeaf4; --wood:#e2cfa9; --concrete:#b9bdbe; --speck:#8d9293;
+  --crate:#c99a5b; --crate-edge:#7a5426; --rope:#8a6a3c; --grid:#dfe7ea; --site:#dfe8e3; --road:#f3f6f4;
+  --carpet:#c98b98; --sand:#d8bf86; --s-perfect:#5363cf; --s-ice:#2479b5; --s-wood:#9a5d1f; --s-carpet:#b23a68; --s-sand:#8a6b0c;
+  --grass:#cfe2c3; --grass-2:#bfd8b0; --path:#efe9dc; --path-edge:#d4cab3; --tree:#7cad67; --tree-2:#5b8c4a; --trunk:#7a5a3a; --water:#9fd0e2; --shadow:rgba(30,50,35,.2);
+  --roof-on:#d7e6f1; --wall-on:#8fb2cb; --roof-off:#e3e7e8; --wall-off:#b7c1c5; --glass:#c4e3f0; --glass-line:#86b6cb;
+  --f-display:"Saira Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-num:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e161a; --panel:#152027; --ink:#e2eaee; --muted:#93a5ad; --line:#26363f; --chip:#1b2a32;
+  --accent:#6aaedc; --accent-soft:#183449; --hazard:#f0bf4c; --hazard-soft:#3b2f10;
+  --left:#f07c66; --left-soft:#41221c; --right:#43c3b0; --right-soft:#12352f;
+  --res:#b590ea; --fric:#dca061; --vert:#93b2c9; --good:#62c58c; --bad:#ef7b63;
+  --snow:#aebcc4; --snow-shade:#8698a2; --pine:#1d4a3d; --mountain:#2c3d46; --space:#05080f; --star:#e6ecff; --hull:#a9b5bc; --solar:#2b5d8f; --elephant:#78848a; --husky:#3c474e; --tarmac:#2d3336; --air:#1f3038;
+  --sky:#16242b; --stand:#22333c; --crowd:#3a4f5a; --ice:#1d4552; --wood:#5b4a2e; --concrete:#41484b; --speck:#5f686b;
+  --crate:#a77a42; --crate-edge:#e0b67a; --rope:#c9a66b; --grid:#1f2e36; --site:#14211d; --road:#1d2b27; --carpet:#5c2c3a; --sand:#5e4d26; --s-perfect:#8f9cf0; --s-ice:#6cb8ec; --s-wood:#dca061; --s-carpet:#ee7fa8; --s-sand:#e2c45a; --grass:#1a2b20; --grass-2:#203424; --path:#2b3632; --path-edge:#38453f; --tree:#356a3c; --tree-2:#26502d; --trunk:#5d4532; --water:#1f4f5e; --shadow:rgba(0,0,0,.38); --roof-on:#22435b; --wall-on:#173041; --roof-off:#2a363c; --wall-off:#1d272c; --glass:#25505f; --glass-line:#3f7488; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e161a; --panel:#152027; --ink:#e2eaee; --muted:#93a5ad; --line:#26363f; --chip:#1b2a32;
+  --accent:#6aaedc; --accent-soft:#183449; --hazard:#f0bf4c; --hazard-soft:#3b2f10;
+  --left:#f07c66; --left-soft:#41221c; --right:#43c3b0; --right-soft:#12352f;
+  --res:#b590ea; --fric:#dca061; --vert:#93b2c9; --good:#62c58c; --bad:#ef7b63;
+  --snow:#aebcc4; --snow-shade:#8698a2; --pine:#1d4a3d; --mountain:#2c3d46; --space:#05080f; --star:#e6ecff; --hull:#a9b5bc; --solar:#2b5d8f; --elephant:#78848a; --husky:#3c474e; --tarmac:#2d3336; --air:#1f3038;
+  --sky:#16242b; --stand:#22333c; --crowd:#3a4f5a; --ice:#1d4552; --wood:#5b4a2e; --concrete:#41484b; --speck:#5f686b;
+  --crate:#a77a42; --crate-edge:#e0b67a; --rope:#c9a66b; --grid:#1f2e36; --site:#14211d; --road:#1d2b27; --carpet:#5c2c3a; --sand:#5e4d26; --s-perfect:#8f9cf0; --s-ice:#6cb8ec; --s-wood:#dca061; --s-carpet:#ee7fa8; --s-sand:#e2c45a; --grass:#1a2b20; --grass-2:#203424; --path:#2b3632; --path-edge:#38453f; --tree:#356a3c; --tree-2:#26502d; --trunk:#5d4532; --water:#1f4f5e; --shadow:rgba(0,0,0,.38); --roof-on:#22435b; --wall-on:#173041; --roof-off:#2a363c; --wall-off:#1d272c; --glass:#25505f; --glass-line:#3f7488; color-scheme:dark}
+*{box-sizing:border-box}

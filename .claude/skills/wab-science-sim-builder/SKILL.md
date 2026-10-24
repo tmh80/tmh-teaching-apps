@@ -1,6 +1,6 @@
 ---
-name: wab-science-sim-builder
-description: Build or extend a self-contained interactive science simulation (HTML) for Tom's WAB MYP Grade 6–8 classes: free play and discovery for foundation building, review and extension, used independently via Toddle. Not for formative lab reports (use wab-virtual-lab-builder).
+name: "wab-science-sim-builder"
+description: "Build or extend a self-contained interactive science simulation (HTML) for Tom's WAB MYP Grade 6–8 classes: free play and discovery for foundation building, review and extension, used independently via Toddle. Not for formative lab reports (use wab-virtual-lab-builder)."
 ---
 
 # WAB Science Sim Builder
@@ -20,50 +20,71 @@ Students open the sim at home or in class with no teacher beside them. Every des
 - **Safe to experiment.** Reset buttons everywhere, undo where possible, no way to break or lose progress. Silly inputs give a fun, informative response rather than an error.
 - **Explore mode prompts real experiments.** Offer "try this" investigations (change one variable, keep the others the same, record what happens) so free play turns into fair testing.
 - **Catch misconceptions.** Where a common wrong idea exists (heavier falls faster, current gets used up), design a prediction that reveals it and a run that challenges it.
-- **Evidence of work for the teacher.** Because Tom isn't watching, the student's answers, sketches and progress export to a worksheet (see shell).
-- **Short chunks.** Missions take roughly 5–15 minutes, so a student can stop and come back. Progress saves automatically.
+- **Evidence of work for the teacher.** Because Tom isn't watching, the student's answers, sketches, builds and progress export to a worksheet or build sheet (sections 4b and 4e).
+- **Sections of 20–30 minutes that can be combined.** Split every chapter into self-contained sections (e.g. Foundation, Extension) of about 20–30 minutes. Each section has its own Learn steps, optional Challenge, Check questions, stamp and worksheet PDF, so a teacher can set one on its own or several together for a longer session. Every time shown to students or teachers says "approx." (e.g. "approx. 28 min"), estimated from the steps and question types. A finished section offers the next one in a "keep going" box. Progress saves automatically.
+- **Something to do in every step.** No step is just a run of info cards. Every Learn step has at least one "Do this" job in the sim and at least one question, even if it is a quick comprehension check on the cards just read, so the flow never stalls.
+- **Vary the situations.** Don't let a section's questions all use the same set-up (e.g. every crate sitting still). Mix still and moving, balanced and unbalanced, small and large values.
+- **Clues for multi-step reasoning.** Where a question or challenge needs a step students haven't been walked through (e.g. rearranging weight = mass × 9.8 to find the mass), add a "Need a clue?" fold-out that asks a guiding question rather than giving the method ("If you multiply mass by 9.8 to get the weight, what do you need to do to the weight and 9.8 to get the mass?").
+- **Do it before you're told it.** Let students try the thing first (rub the balloon on hair, then on a jumper, then hold it near paper), ask what they observed (an observation question for each test), and only then explain the science. Introduce every idea and word before any question or instruction relies on it (e.g. teach static vs current before a mission that uses them; don't ask for a "complete path" before it has been taught).
+- **Key ideas are impossible to miss, and students have to use them.** Any text that carries a learning outcome (the main idea of a step, a definition, a rule) is the most eye-catching text on the screen, never the smallest or palest. Learn-step instructions go in a large speech bubble (about 18px, slightly smaller on phones), with a tinted background, a strong coloured border and the key words in bold colour. Then make students act on the key idea so it can't be skimmed, choosing what fits the step:
+  - a **pop-out "Key idea" box** that stays open until the student answers a quick multiple-choice question about it;
+  - **"Tap the sentence that…"**: show the key text as 3–5 tappable sentences and ask students to tap the one that matches a paraphrase of the concept (e.g. "Tap the sentence that explains why the bulb went out"), with a hint after a wrong tap;
+  - a **key-word gap** the student types into.
+  Every key idea behind the unit's learning outcomes and standards gets one of these (the standards themselves stay off student screens; map them during planning). Answers are saved with the rest of the Learn answers.
+- **Answers are remembered.** Learn/guided answers are saved and shown again when a student returns, with a "Try this step again" button. A "📄 Save my work" PDF button sits in the tab bar so students can save their progress at any time.
+- **Never soft-lock.** A student must always be able to recover from a bad choice: undo, remove for a refund (things built this round), sell older items for part of their value, redo a round, go back a round, and start again from the beginning (two-tap confirm). Never leave them repeating a round they can't win.
 
 ## 2. Standing preferences
 
-- **Guided mode first, then explore mode.** Guided teaches the basics step by step; explore opens the sandbox once the basics are done.
+- **Guided mode first, then explore mode.** Guided teaches the basics step by step, introducing each panel slowly; explore shows everything. Explore opens once the first chapter's Foundation section is finished: until then its home card says when it opens, with a "Start Chapter 1" button and an "Open it anyway" button (never a hard block). The stamp pop-up for that section announces "Explore is now open!" with an "Open Explore" button. Teacher mode always gets in.
 - **Active, never passive.** Students predict, reason, build and test. Avoid "read this, click next" sequences anywhere in the sim.
-- **Challenges use the sim itself.** Build, draw or design something and compare it to an exemplar or a target. Avoid plain quizzes as the main challenge; varied formats (drag-to-sort, match with lines, tap-to-explore, sketch pad) are welcome as smaller checks.
-- **Voice.** Enthusiastic, warm and encouraging, in natural full sentences at a Grade 6–8 reading level. Avoid clipped, punchy, AI-sounding lines. Read every block of student text aloud in your head before shipping.
+- **Challenges use the sim itself.** Build, draw or design something and compare it to an exemplar or a target. Avoid plain quizzes as the main challenge.
+- **Open builders in every sim** (section 4e): free, drag-and-drop building of the unit's key things (a circuit, an atom, a power grid on a map, a food web, a machine), each with template build tasks that can be set as classwork or homework.
+- **Questions are varied, plentiful and not obvious** (section 4a-2): every section ends with a Review of about 10 questions in mixed formats, never a run of easy multiple choice.
+- **Free-form builders.** Where students build something, make it free-form and drag-and-drop like PhET (parts bin, stretchy wires, snapping ends, drag onto a map) rather than fixed grid slots.
+- **Teacher "set classwork or homework" page in every sim** (section 4c), reached from a button at the top of the home screen, with Toddle AI marking support (section 4d).
+- **Voice.** Enthusiastic, warm and encouraging, in natural sentences. Avoid clipped, punchy, AI-sounding lines. Read every block of student text aloud in your head before shipping.
+- **Short and simple, because reading stamina is low (especially Grade 6).** Short sentences, everyday words, one idea per sentence, explanations of two or three sentences at most. Use numbered steps for instructions. Put detail behind a "How do I read this?" or "Your mission" fold-out instead of on screen. Key terms that remain get glossary hover/tap definitions (section 4).
 - **Science conventions.** g = 9.8 N/kg (never 10); give students a pop-out calculator for it. Free-body diagrams show the actual object, with weight and normal force drawn from the centre. Use non-round, varied numbers in scenarios so answers aren't guessable.
 - **Purpose.** Sims are review, extension and support for a unit, not lesson-by-lesson first teaching. Summative tasks are handled separately.
-- **Standards** (ACARA, MYP criteria) are for Tom's planning only. Keep them off every student-facing screen and export.
-- **Originality.** Each sim gets its own concept and metaphor (Force HQ = map of lab buildings; Sparks = time travel). Don't reuse another sim's structure. Offer Tom 3–4 concept options and let him choose before building.
+- **Standards** (ACARA, MYP criteria) are for Tom's planning only. Keep them off every student-facing screen, worksheet and export. Worksheets don't need "I can" statements.
+- **Originality.** Each sim gets its own concept and metaphor (Force HQ = map of lab buildings; Sparks = time travel with a time machine). Don't reuse another sim's structure. Offer Tom 3–4 concept options and let him choose before building.
 - **Realism.** Physics and animation should look right: smoothed force ramps, sensible graph axes, scenes that stay in one believable setting.
 
 ## 3. Workflow
 
-1. **Ground it.** Ask for (or read from the repo/project) the unit overview and lesson sequence. Pull out the key concepts, vocabulary and likely misconceptions.
+1. **Ground it.** Ask for (or read from the project) the unit overview and lesson sequence. Pull out the key concepts, vocabulary and likely misconceptions.
 2. **Concept options.** Propose 3–4 distinct concepts in a few lines each. Wait for Tom's choice.
 3. **Science first for big features.** For any new model or engine, explain the science and how it will be modelled before writing code. Wait for a go-ahead.
-4. **Plan the stops/labs.** For each: what students predict, what they explore, the challenge, and the misconception targeted.
+4. **Plan the stops/labs.** For each: the key ideas tied to the learning outcomes and how each one is made prominent and checked (section 1), what students predict, what they explore, the challenge, the misconception targeted, the Review questions, the worksheet, and the key vocabulary and goal used on the teacher page. Plan the open builders and their build tasks too.
 5. **Build in stages** using the shared shell (section 4) and the file layout (section 5).
-6. **Test** (section 6) before every delivery.
-7. **Deliver** (section 7).
+6. **Test** (section 6) before every delivery, including feasibility checks for every build task.
+7. **Deliver** (section 7), including the Toddle files (blank template, answer key and marking scheme for every sheet).
 8. **Hand off.** At the end of a session, update the sim's brief and backlog (section 8) so the next chat starts cold without a catch-up.
 
 When Tom batches feedback (a list, or artifact comments), make a task list from it, address every item, and report briefly on each.
 
 ## 4. The shared lab shell
 
-Reuse these components across sims instead of rebuilding them. If `shared/` in the repo has them, copy them in and adapt the theme; if not, build them as reusable modules and add them to `shared/`.
+Reuse these components across sims instead of rebuilding them. If a `shell/` folder already exists, copy it in and adapt the theme; if not, build them as reusable modules the first time.
 
 - **Info cards:** small dismissible cards over the scene that deliver teaching content.
 - **Journal:** every info card and key result is saved to a persistent journal the student can reopen from anywhere.
-- **Question box:** questions sit in a large fixed box (not a popup) so students can keep using the sim while answering. Answers can be typed or drawn.
-- **Drawing pad:** pressure-sensitive sketch pad for diagrams (free-body diagrams, circuit sketches, models).
-- **Calculator:** pop-out calculator, plus formula-triangle helper where relevant (F = m × a, V = I × R, W = F × d).
-- **Glossary:** tappable key terms with short student-friendly definitions.
+- **Question box ("Your turn"):** Learn questions stay hidden while the student does the step. The Next button reads "Next: questions →"; pressing it with the Do this list unfinished shows a warning with "Continue anyway", then the questions pop up in a box. The box has "▾ Minimise" (Escape does the same), which docks it as a small "Your turn ⤢ Open" tab in the side column, and its footer has "← Back to the arena" and the next-step button. Diagram questions minimise it automatically. Answers can be typed or drawn.
+- **Every pop-up is draggable and never blocks the sim.** Any pop-up that can cover the simulation (the question box, info cards, how-to-read cards) is dragged by its header bar (a ⠿ grip, `cursor: grab`, `touch-action: none`) using pointer events, so mouse, pen and touch all work. Use one shared helper (`makeDraggable(box, handleSelector, key)`) for all of them. The layer behind a pop-up is transparent and click-through (`pointer-events: none` on the layer, `auto` on the box), so students can read meters and use controls with the questions open. The header always stays on screen (clamp the box so its header can't leave the viewport, measuring from the box top to the header bottom), the box keeps its spot while the page is open (also for the next card), and it re-clamps on resize. Buttons inside the header still work. Modals that genuinely need an answer (the name box, warnings) stay as normal modals. Test at phone width, where a pop-up is nearly full screen and dragging it down is how students uncover the sim.
+- **Labels stay on screen.** Readings drawn on a canvas (meters, labels, pills) are clamped inside the canvas in every state (e.g. when an object reaches the end of its track), so a question that reads them can always be answered.
+- **Drawing pad:** pressure-sensitive sketch pad for diagrams (free-body diagrams, circuit sketches, models), with pens, eraser, undo and clear. Saved as strokes plus a PNG for worksheets.
+- **Calculator:** a floating "🧮 Calculator" button on **every screen** (bottom-right, icon-only on phones, hidden in print) that pops out a draggable calculator: big display with the last sum shown above, keys C ( ) ⌫ 0–9 . ÷ × − + =, typing and Enter supported, friendly errors ("You can't divide by zero."). Evaluate with a small safe parser, never `eval`. Add a formula-triangle helper where relevant (F = m × a, V = I × R, W = F × d).
+- **Glossary:** key terms (about 50–80 per sim, including terms used in questions such as "whole-life CO₂" or "kWh") are automatically underlined with a dotted line wherever they appear (first use per card/question, via a MutationObserver over the app) and show a one- or two-sentence definition on hover (mouse), focus, or tap (touch, with a short toggle guard so the tap doesn't immediately close it). Hidden in print.
 - **Fun facts:** clickable facts tied to concepts already met.
 - **Onboarding tour:** first-run tour highlighting journal, calculator, glossary, question box and modes. Replayable.
-- **Progress and rewards:** badges/stamps/XP, with a visible map of what's done and what's next. Follow section 4a.
-- **My Worksheet export:** printable/PDF summary of answers, sketches and badges, with a fun celebratory design suitable for a parent portfolio; auto-marked checks on a separate page. Exclude incomplete challenges and run the pre-export check (section 4a) first.
-- **Save:** progress stored in localStorage, every read/write wrapped in try/catch, and the sim must work fully if storage is unavailable.
-- **Layout:** controls docked beside or under the simulation so students rarely scroll. Test desktop, iPad and phone widths. Support touch and mouse.
+- **Progress and rewards:** badges/stamps/XP, with a visible map of what's done and what's next. Show the stamp images themselves (on the home screen and when earned, with a stamp-down animation). Follow section 4a.
+- **Review engine, worksheets, teacher page, AI marking and open builders:** sections 4a-2 to 4e.
+- **Who's using it:** ask for the student's **name and class at the very start** (a simple modal before the home screen). **Nobody gets in without a name or the teacher code:** closing the box (Cancel, Escape or clicking outside) sends them back to it. Build the box as plain divs with click and Enter handlers rather than a `<form>`, because sandboxed previews block form submission. Show the name at the top left of every screen as a chip with a "Change" button. Worksheets and build sheets **can't be saved as PDF without a name and class** (the print view shows "No name, no worksheet!"): this discourages copying. An "I'm a teacher" option asks for the teacher code (section 4d); teacher mode unlocks every stop, step and chapter and lets PDFs save without a name, with a "Switch to student mode" button so Tom can play through as a student and switch back.
+- **Save:** progress and answers stored in localStorage, every read/write wrapped in try/catch, and the sim must work fully if storage is unavailable.
+- **Layout:** controls docked beside or under the simulation so students rarely scroll. Big game-like activities get a **wide layout** (up to ~1500 px, simulation left and controls right) and a **focus mode** that hides the surrounding page chrome; put the briefing in a collapsible "📋 Your mission" panel (open only before the first attempt) and results in **tabs** ("What happened", "Scorecard", "Money") in a fixed-height scroll box. Keep the main action button and every "what next" button (next round, redo, back, start again, undo) **together in one row**. Test desktop, iPad and phone widths. Support touch and mouse.
+- **Actions appear where you tap.** In builders and boards, tapping a part, connection or junction opens a small pop-up menu right beside it (positioned at the tap point, kept inside the board) with only the actions for that thing, clear icons (✂ Cut / ✂ Disconnect here, ➕ Add a joining point, Turn it around, Remove) and a ✕ to close. No action bar tucked away below the board. Put one line under the board: "Tap a part, a wire or a dot to see what you can do with it."
+- **Hidden elements:** add `[hidden]{display:none !important}` to the stylesheet so a component's own `display` rule never reveals something meant to stay hidden (for example a model answer before the student has tried).
 
 ## 4a. Progress, freedom and measuring (learned from classroom use)
 
@@ -75,21 +96,97 @@ Reuse these components across sims instead of rebuilding them. If `shared/` in t
 
 **Freedom**
 - **Block only what the next activity can't run without.** Everything else warns with "Continue anyway". Never disable a Next button for unfinished but non-essential work.
+- **Order of a section:** Learn → Challenge (optional) → Check. The Check (and its worksheet) opens once the Challenge is complete, or once Learn is complete if the section has no Challenge, with a "Continue anyway" option, so the worksheet shows understanding built in the sim.
+- **Make each finished step look finished:** a green tick, a "Step complete" banner and a clearly highlighted Next button.
 - When something essential is missing, take the student straight to it, outline it in red and explain in a pop-up (shown after any intro pop-up).
 
 **Measuring by hand**
-- Let students measure for themselves where possible (read scales, time events, calculate), with simple aids: zoomed scales, countdowns, the needed control highlighted, the reading shown beside the entry box, a keep-or-redo choice, a calculator. In a simulation it is fine to then check the value and explain, because sims are for learning.
+- Let students measure for themselves where possible (read scales, time events, calculate), with simple aids: zoomed scales, countdowns, the needed control highlighted, the reading shown beside the entry box, a keep-or-redo choice, a calculator. Once the student has typed a value, the sim can check it and explain, because sims are for learning.
+- **Students type every reading. Never auto-fill a results table.** When a meter or scale shows a value (ammeter, voltmeter, stopwatch, force meter), the step isn't complete until the student reads it and types it in. Use a reading table: each row unlocks once that set-up is on screen, the student types the value, and the sim checks it within a small tolerance ("Look again at the meter. Copy the number exactly.") before ticking the row. Saved like other Learn answers. Students should never be passengers.
 - **Never jump the page or steal keyboard focus while a student is using a control** (for example a running stopwatch). Use buttons to move between the experiment and the results ("📋 Write it in my table ↓", "⬆ Back to the experiment"). Show only the tools a measurement needs.
 
-**Worksheet export**
-- Before saving, list every unfinished part with "Go there" buttons and "Save anyway".
-- Keep the student's work clean and short (about 3 pages), with any auto-marked checks on a separate feedback page or sheet.
+## 4a-2. Review questions (every section)
+
+Each section/stop ends with a **Review** tab (unlocked after the guided steps) holding **about 10 questions**, defined as data in one content module so the same items drive the sim, the final mixed review, the worksheets, the answer keys and the marking schemes.
+
+- **Mix the formats in every section.** Use at least five of these types per section:
+  - *Match it up* — grid of rows with a select per column; supports three-way matches (e.g. model ↔ scientist ↔ year) and picture rows (symbols, model drawings).
+  - *Complete the table* — compare/contrast tables (similarities and differences between two things, e.g. series vs parallel, Thomson vs Rutherford, AC vs DC) and property tables (particle → charge → location → mass).
+  - *Sort it* — items into 2–3 groups.
+  - *Put in order* — sequences, timelines and energy chains (move up/down).
+  - *Tick all that apply* — several right answers, scored all-or-nothing, showing right/wrong/missed.
+  - *Calculate* — numeric answer with tolerance and unit, worked explanation; use non-round values.
+  - *Fill the gaps* — typed blanks with accepted spellings. Word bank only when Tom asks for a cloze activity.
+  - *Choose one* — only where the distractors are genuinely tempting, ideally built from misconceptions or a diagram/data to interpret.
+  - *Draw it* — drawing pad, then reveal an exemplar and a "Did you include…?" checklist the student ticks (self-assessed).
+  - *Explain it* — written answer, then a model answer and checklist (self-assessed).
+- **Every question has a model answer** (draw: an exemplar drawing; explain: a written model answer; calculate: a worked explanation) and every draw/explain item has a checklist of 2–4 points: these feed the answer key and become the marks in the marking scheme (section 4d). Check this with a script before shipping.
+- **Make them think.** Prefer application, data interpretation, diagrams, prediction and misconception items over recall. Never make the first option always the right one (shuffle in the sim, seeded shuffle on paper).
+- **One go per question.** Every auto-marked question (in Learn, the Challenge and the Check) locks after its first check, right or wrong. A wrong answer shows the right one ("Whoops! The answer is …", followed by the reason): choose-one questions mark the right option with a dashed green outline; sort, match, table and gap questions put a green "→ correct" tag beside each wrong part. Say under each card: "You get one go, so check your answer carefully before you press Check." Diagram builders get one check, then the diagram locks and "Your diagram" is shown beside "The correct diagram" with ✓/✗ chips. "Try this step again" in Learn still resets a whole step.
+- **Points per part.** Score multi-part questions per part so one slip doesn't lose everything: choose one, tap, calculate and reading 1; tick all 2 (minus one per mistake); gap, sort and match 1 per gap, item or row; table 1 per cell; diagrams 1 per builder check (e.g. 6); explain 1 per self-ticked checklist point; challenge missions per objective met. Show "Points so far: x of y" on the Check page, "n of m points" on each card, and points per question on the worksheet's feedback page.
+- **Accept synonyms in typed answers.** Typed gaps and key words accept sensible synonyms through one shared list of word groups, so every word in a group counts when one of them is accepted (bigger / more / larger / greater / stronger; smaller / less / weaker; centre / center / middle; against / opposite / opposing; newtons / N). Ignore case, punctuation and a leading "a", "an" or "the". The marking scheme lists every accepted word for each gap.
+- **Every Check question is taught first.** Before shipping, check each Check question against the Learn steps (and Challenge) of its own section. If a skill (e.g. drawing to scale) isn't taught, add a card and a practice question to Learn, or change the question.
+- **Card states:** each question is a card with type label, To do/Done pill (showing its points once done), its own Check button and explained feedback. A sticky bar shows "x of N done", the points so far and chips that jump to each card.
+- **Final mixed review** (e.g. Sparks' Time Test) draws auto-marked items from every section's Review rather than a separate easy MCQ bank.
+
+## 4b. Worksheets (printable, PDF, Toddle-ready)
+
+Every section has a worksheet built from its Review questions, in three modes from one function (`buildWorksheet(section, mode)`):
+- **Student** — the student's own answers and drawings, name and date, stamps earned; auto-marked results go on a separate **Feedback page** so the work itself stays clean. **No teacher comment box on any PDF:** Tom leaves comments directly on Toddle. Before making it, list unanswered questions with "Go to …" buttons and "Make it anyway". **Everything the student added prints in blue** (answers, ticks, table cells, typed text, ordered lists, outlined drawings), with a line under the name bar: "Everything printed in blue was added by the student in the sim." This lets Toddle AI tell the student's work from the template.
+- **Blank (the template)** — attached to the Toddle task and printable: answer lines, working boxes, empty tables with a choices list, order boxes (A, B, C … with the correct order to write in), large dashed drawing boxes, ruled lines for explanations. It must have exactly the same questions, order and layout as the student version.
+- **Answer key** — the same sheet with every answer filled in and a model answer for every question: model drawings, model written answers, worked calculations and "Look for" checklists. Attached to the Toddle task as a teacher-only resource. Never reachable from student screens.
+
+Design: A4, always light theme, a coloured header with the sim brand, section title and topic, Name/Class/Date bar, Part A (auto-markable) then Part B (draw and explain). About 3–4 pages per section; questions never split across pages (`break-inside: avoid`), headings never orphaned (`break-after: avoid`), print background white.
+
+In the sim: a "Make my worksheet" button opens a full-screen preview with "Print or save as PDF" (`window.print()` with print CSS that hides everything but the worksheet; tell students to choose "Save as PDF" and upload to Toddle). The artifact preview blocks printing; the Toddle/browser file works. Also offer a "Blank copy" button.
+
+For Tom: generate static PDFs with a Playwright script (`make-worksheets.js`) that loads the built file and renders, for each section and each build task (section 4e), the blank template, the answer key and the marking scheme page, calling `page.pdf({format:'A4', printBackground:true})`. Package a **Toddle files zip** with **one folder per sheet** containing `1-Blank-Template.pdf`, `2-Answer-Key.pdf` and `3-Marking-Scheme.pdf`, plus a "READ ME" (attach all three files from a folder for each sheet you set) and all schemes as one .txt. Also merge all answer keys into one PDF (`pdfunite`). Delete stale files from renamed tasks before packing.
+
+## 4c. Teacher page: set classwork or homework
+
+Every sim has a **"For teachers: set classwork or homework"** page, reached from a button **at the top of the home screen** (above the hero, right-aligned), that writes a prompt for Tom to paste into the **Toddle AI task maker**.
+
+- **1. Choose:** tick boxes for the sections/stops (any number; "Select all" and "Clear") and the open-builder **build tasks** (section 4e). Keep these rows clean (no buttons on them).
+- **2. What they do:** Learn steps, Challenge missions, Review questions + worksheet, Explore free play, plus extras such as a final mixed review/test and a progress screenshot (stamps/passport).
+- **3. Details:** class, where it happens (In class / At home / Both, which changes the wording: splitting across evenings or lessons, a note about switching devices) and an optional message to students. **No due date field**: Tom sets dates in Toddle after the task is made. Choices save in localStorage.
+- **4. Copy into Toddle:** the live prompt in a read-only box with a "Copy instructions" button (clipboard inside the click handler, falling back to selecting the text with a "Press Ctrl+C" prompt), and an estimated total time (e.g. Learn ≈ 2.5 min per step, Challenge ≈ 15, Review ≈ 20, Explore ≈ 10, each build task its own estimate). Under it: "Paste this prompt into Toddle's AI task maker, together with the files from step 5."
+- **5. Files for Toddle** (section 4d): a clear instruction box, "Attach all three files for each sheet when you give your prompt to Toddle's AI task maker", explaining 1. Blank template, 2. Answer key, 3. Marking scheme in one line each; then one row per selected sheet (title, type, total marks) with three buttons that open printable pages to save as PDF. If stops are ticked without "Review questions + worksheet", say they have no worksheet.
+- **The generated prompt**, in this order: what to create (class, sim name, "an HTML file I will attach"); task title; estimated time; a short description of the resource (including "use the same device and browser so progress saves"); numbered student instructions per selected section, part and build task, in friendly student language with the exact button names ("Make my worksheet", "Make my build sheet", "Save as PDF"); what students submit (one worksheet PDF per section, one build sheet PDF per build task, screenshot, test score); learning goals per section and build task as plain verbs (no "I can", no standards codes); key vocabulary; teacher-only notes; and an **AI marking** block: three teacher-only PDFs are attached for each sheet (blank template, answer key, marking scheme), students must not see the answer keys or schemes, the list of sheets, mark only what the student added (in blue), and the total marks.
+- Give each section and each build task a short goal sentence, and each section a vocabulary list, in the content module. Keep task steps and briefs in the same data the sim uses, so the teacher prompt never goes out of date when a task changes.
+- Test: tick several sections, parts and build tasks; check the prompt reads well and the time adds up; check copy works; open every file button; check the page at phone width.
+
+## 4d. Toddle AI marking: templates, answer keys and marking schemes
+
+Every sheet the teacher page can set must be markable by Toddle AI, and comes with **three files**: blank template, answer key (model answers for every question) and marking scheme.
+
+- **Marking scheme generator** built from the same question data (`markItem`, `schemeForSection`, `schemeForTask`, `markingInstructions`). Marks per type: choose one 1; tick all 2 (1 if one missing or extra); match/table/sort 1 per cell; order 2 (1 if one neighbouring swap); calculate 2 (answer with tolerance range + working/method); fill the gaps 1 per gap with accepted spellings; draw/explain 1 per checklist point, plus the model answer and "accept any correct scientific wording". Picture-only rows are named "Row N (picture)" in the order the template shows them. Build tasks use their own rubric (section 4e).
+- **Each marking scheme page opens with the marking instructions**, so it works when attached on its own: the blank template and answer key are attached too; compare the upload with the template and **mark only what the student added** (printed in blue); the template's own text, choices and word banks are not student work; the answer key is the standard (students needn't match it word for word); use the sim's feedback page to confirm, and if it disagrees with the visible answer, trust the visible answer and say so; blank questions or an empty template score 0 with a kind note of what is missing; feedback for Grade 6–8: score per sheet with a per-question breakdown, one or two specific strengths quoting the student, one next step with a hint rather than the answer; no marks off for spelling unless meaning is unclear. End with the total marks.
+- **Teacher code:** answer keys and marking schemes on the teacher page, and the "I'm a teacher" mode, are **locked behind a code that is the first word of the sim's name in capitals** (Sparks Through Time → SPARKS; Force HQ → FORCE; Adapt Lab → ADAPT), case-insensitive. Remember the unlock in localStorage with a "Lock again" button. Locked buttons show 🔒 and scroll to the code box. Blank templates are never locked.
+- Below the files, an optional "All marking schemes in one" text box with a copy button, for when Toddle asks for AI marking instructions as text.
+
+## 4e. Open builders and build tasks
+
+Open interaction matters: every sim has a **Builder's Workshop** (or the sim's equivalent) on the home screen with 2–4 open builders of the unit's key things. Examples: circuit builder (free-form PhET-style board, all parts), atom builder (protons/neutrons/electrons with element card and charge), power grid designer (randomised map), food web builder, ecosystem/island designer, simple machine builder.
+
+- **Free build** plus **template build tasks**. Each task has: id, title, minutes, a goal sentence, a brief, 2–4 **live checks** shown as chips that turn green only when the build really passes (computed from the model, e.g. the circuit solver with what-if tests: "each switch turns off only its own bulb"), a results table (filled from what the student actually did), 1–3 Review-style questions about their own build (each with a model answer), a marking rubric `[[criterion, marks], …]`, a **model build** description and **example results** for the answer key.
+- **Builders save and restore state** (`getState()` / `state` option) and expose the SVG for a snapshot.
+- **Map builders are randomised from a seed** with varied conditions (coast, river, mountains, windy hills, volcano, forest, farmland; weather such as sun, wind, rain and tides; demand). Students tap squares to read conditions and drag objects onto the map (ghost tile shows green/red for allowed/not allowed, with a reason when refused), use a remove tool (refund if built this round, part-value sale if older, with undo), then run a simulation. Limits keep it honest (e.g. two dams per river, three biomass plants). Tasks can force conditions (calm and cloudy) and set budgets. Draw each square's objects so they never overlap (one object per square, connections drawn between square centres).
+- **Students build the connections too** (power lines, pipes, food-web arrows) by dragging square to square, and connections have real consequences: cost per square by terrain, losses with length, capacity limits and upgrades (e.g. high-voltage lines). Unconnected items get a red "!" badge.
+- **Simulate a whole year, show an average day.** Run the model across the seasons (e.g. 12 typical days weighted by month), replay the **average day** hour by hour on the map and chart, then summarise in plain words: "There were blackouts on 42 days this year. They happened between 17:00 and 21:00. Why? The sun has set, and the battery is empty. When in the year? Dec, Jan, Feb." Every failure is explained with its cause; nothing goes wrong silently.
+- **Charts explain themselves:** a short legend under the chart (line = what's needed, bars = what was made, faded = stored, striped = wasted, red = shortfall) and a "How do I read this chart?" fold-out.
+- **Story mode for scaffolding.** Before (or beside) free build, offer 4–5 short chapters that each teach one idea with a prediction first, a few live goals and a short debrief, unlocking in order (teacher mode unlocks all). End with a big open challenge with real trade-offs, e.g. The Big Switch: start from a realistic existing system (a coal and gas grid, already paid for and connected), play in 5-year rounds to 2050 with income, fuel, upkeep, a rising carbon tax, falling clean-tech prices and blackout costs, so switching too fast goes bankrupt and too slow is ruined by the tax. Free build and design tasks also start from the existing fossil system so students have something to work from.
+- **Scorecard of positives and consequences.** After each run, show star ratings (reliability, cost, climate) and a card per item listing what's good ✅ and what it costs ⚠️ (materials, whole-life CO₂, land flooded, waste), with totals. Use verified figures with a source line (e.g. IPCC whole-life gCO₂/kWh medians) and avoid oversimplified claims; check every science claim before shipping.
+- **Check every build task and story chapter is achievable** with a script before shipping: a Node harness that loads the model source and runs an exhaustive or greedy search over many seeds for the cheapest valid build. **Re-check whenever the model changes** (e.g. moving from one day to a whole year). Then set budgets/targets a little above the hardest map so the challenge is real but always possible.
+- **Build sheet** (`buildSheet(builder, task, mode)`), same three modes as worksheets: student (snapshot of the build from the sim, ticked checklist, results table, question answers, all in blue, then a feedback page with the checks passed, no teacher comment box); blank template (dashed "paste a screenshot or draw it" box, empty checklist and results table with the same columns, answer lines); answer key (checklist ticked, marking rubric, model build, example results labelled "students' will differ", model answers). "Make my build sheet" lists anything unfinished with "Go to …" buttons and "Make it anyway".
+- Build tasks appear on the teacher page, in step 5 and in the marking schemes like any section.
 
 ## 5. Build setup
 
-- Source in `<app>/src/` split by concern (shell, physics/model, each lab or stop, content text, styles). A small `build.js` concatenates into:
-  - `<app>/<Name>-offline.html`: the clean single-file deliverable.
-  - `<app>/dist/test.html`: same build plus a debug hook on `window.__<short>` exposing state and key functions for tests.
+- Source in `src/` split by concern (shell, physics/model, each lab or stop, review question data, builders, workshop tasks, marking, teacher page, glossary, calculator, styles). A small `build.js`/`build.py` concatenates into:
+  - `dist/<Name>-offline.html`: the clean single-file deliverable.
+  - `dist/test.html`: same build plus a debug hook on `window.__<short>` exposing state and key functions for tests.
+  - `dist/worksheets/`, `dist/build-sheets/`, `dist/marking-schemes/` and the Toddle files zip.
+- In Tom's GitHub repo (`tmh80/tmh-teaching-apps`) each app has its own folder: `<app>/src/`, `<app>/build.js`, `<app>/tests/`, `<app>/docs/`, with the Toddle file `<app>/<Name>-offline.html` at the folder root and the Toddle files in `<app>/worksheets/`. The repo keeps its own copy of this skill in `.claude/skills/`; keep both copies in step.
 - **Self-contained offline file.** No external requests at runtime: no Google-hosted fonts, no CDN links. Inline libraries and embed fonts/images as data URIs. Keep the file under 16 MB.
 - Keep student-facing text in one content module so voice rewrites touch one place.
 - Run `node --check` on each source file, not only the bundle, so syntax errors point to the right file.
@@ -99,32 +196,44 @@ Reuse these components across sims instead of rebuilding them. If `shared/` in t
 Code-drawn SVG/canvas is the default. When richer art is needed:
 - **Sprite sheet:** ask Tom for one generated image containing every part in one style on a flat background. Slice with PIL, remove the background, trim, and embed.
 - **Trace to vector:** convert supplied art to SVG (potrace or vtracer) when parts must stay reshapeable.
-- **Open-licence assets:** PhyloPic (organism silhouettes), Kenney, OpenMoji. Check licences and record credits in the brief. Try npm/GitHub first, since other sites are usually blocked from the sandbox; otherwise ask Tom to attach files.
+- **Open-licence assets:** PhyloPic (organism silhouettes), Kenney, OpenMoji. Check licences and record credits in the backlog/brief. Try npm/GitHub first, since other sites are usually blocked from the sandbox; otherwise ask Tom to attach files.
 - Ask for 2–3 reference screenshots before any art pass.
 
 ## 6. Testing (before every delivery)
 
-- Headless Playwright on the test build: load, check for console errors, then play through guided mode, each mission and explore mode using the debug hook (`page.evaluate`) where custom interactions are hard to click.
-- For custom SVG drag-and-drop, use `page.mouse.move/down/up` with intermediate steps rather than built-in drag helpers.
-- Verify physics and maths with a script (expected values at g = 9.8 N/kg, formula results, edge cases like zero or huge inputs).
-- Screenshot each lab at desktop, iPad and phone widths; review them as a tiled contact sheet.
+- Headless Playwright on `dist/test.html`: load, check for console errors, then play through guided mode, each mission, explore mode and each builder using the debug hook (`page.evaluate`) where custom interactions are hard to click. Expose each workshop builder on its own hook (e.g. `window.__wsBoard`), because model drawings on the same page may create other boards.
+- For custom SVG drag-and-drop (parts bins, map palettes), use `page.mouse.move/down/up` with intermediate steps rather than built-in drag helpers, and convert model coordinates to screen coordinates with the SVG's `getScreenCTM()`; scroll the target into view first.
+- Prediction options are shuffled: click the right one by its text, not by position.
+- Verify physics and maths with a script (expected values at g = 9.8 N/kg, formula results, edge cases), check every Review calculation's stated answer, check every question has a model answer, and check every build task is achievable (section 4e).
+- Answer each Review type at least once (right and wrong), including drawing on the pad with real mouse moves. Check that one go locks each question and shows the right answer, that synonyms are accepted, and that the points add up.
+- Drag every pop-up by its header with real mouse moves and with touch (`has_touch`) at desktop and phone widths: it follows the pointer, its header stays on screen, its spot is kept, buttons in the header still work, and the sim behind it can still be clicked.
+- Check the name gate: Cancel, Escape and clicking outside return to the name box, and the teacher code gets in. Complete each build task and confirm every check turns green, and that a wrong build (e.g. series instead of parallel) leaves the right check grey.
+- For round-based games, test the recovery paths: go bankrupt, then redo, go back a round, undo, sell, and start again, and confirm money and buildings restore correctly.
+- Screenshot each lab at desktop, iPad and phone widths; review them as a tiled contact sheet. Check `scrollWidth` equals the viewport width at phone size on every page, including the teacher page and workshops.
 - Check the offline file makes no network requests.
 - Run a half-finished playthrough: confirm the "To do" states, the "On this page" bar, the exact prerequisite messages, the "Continue anyway" warnings, the redirect to anything essential and the pre-export list.
-- Test every manual-measuring flow with real mouse clicks and key presses (not only the debug hook), including optional tools such as a stopwatch in a distance test. Check the page never scrolls by itself while a control is in use.
-- Render the worksheet PDF to images and check it, including the page count.
-- **Independent-use check:** play through as a confused Grade 7 student with no teacher. Note any moment where the next step is unclear, a hint is missing, or text reads as clipped or too hard. Fix before shipping. For major releases, run this check with a separate agent that hasn't seen the build.
+- Test every manual-measuring flow with real mouse clicks and key presses (not only the debug hook). Check the page never scrolls by itself while a control is in use.
+- Render every worksheet and build sheet PDF (student, blank, key) and every marking scheme to images and check them: page count, no split questions or orphan headings, white background, answers not always in the first option, drawings and build snapshots exported, student content in blue, blank template matching the student layout, every question answered in the key.
+- Generate the teacher prompt for a multi-section + build-task selection and read it through as Tom pasting it into Toddle; check the locked buttons (wrong code refused, right code accepted) and read a marking scheme through as Toddle AI would, checking every row is identifiable and the totals add up.
+- **Independent-use check:** play through as a confused Grade 6 student with no teacher. Note any moment where the next step is unclear, a hint is missing, a question is too obvious, a term is unexplained, or text reads as clipped, too long or too hard. Fix before shipping. For major releases, run this check with a separate agent that hasn't seen the build.
 
 ## 7. Delivery
 
-In this repo (Claude Code or a claude.ai chat with the repo attached):
-- Commit with a clear message and push. The `-offline.html` file is the Toddle deliverable; tell Tom its path.
-- In claude.ai, also publish/republish the Artifact at the same URL for an online preview (read the live artifact first in case it changed elsewhere), and send the offline file with SendUserFile.
+In claude.ai:
+- Publish/republish the Artifact at the same URL (online preview). Read the live artifact first in case it changed elsewhere.
+- Send `dist/<Name>-offline.html` with SendUserFile: this is the file Tom uploads to Toddle.
+- Send the Toddle files zip (one folder per sheet) and the merged answer-key PDF when questions, build tasks or schemes change.
+- Save the current source build to the project at `claude/<Name>.html`, replacing the previous copy. Don't keep multiple old offline copies in the project; it has a size limit.
+- Tell Tom the teacher code (first word of the sim's name).
+
+In Claude Code:
+- Commit to the repo with a clear message; the offline file and Toddle files are the deliverables. Tell Tom the paths.
 
 Then give a short summary: what changed, anything not done, one suggested next step.
 
 ## 8. Brief and backlog
 
-Keep two short docs per sim in `<app>/docs/`:
-- `Brief.md`: what the sim is, file structure, debug hook functions, what must not break, art style, credits.
-- `Backlog.md`: ideas and requests banked for later, with any open questions for Tom.
+Keep two short docs per sim (in the project, or in the repo's `docs/`):
+- `<Name>_Brief.md`: what the sim is, file structure, debug hook functions, what must not break, art style, credits, teacher code.
+- `<Name>_Backlog.md`: ideas and requests banked for later, with any open questions for Tom.
 Update both at the end of every working session.

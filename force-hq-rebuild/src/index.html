@@ -1,0 +1,126 @@
+<header class="top">
+  <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
+    <svg viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" rx="9" fill="var(--ink)"/><path d="M8 20h9M23 20h9" stroke="var(--hazard)" stroke-width="4" stroke-linecap="round"/><path d="M12 15l-5 5 5 5M28 15l5 5-5 5" fill="none" stroke="var(--hazard)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="16" y="15" width="8" height="10" rx="2" fill="var(--crate)"/></svg>
+    <b>FORCE<span>HQ</span></b>
+  </button>
+  <div class="who" id="whoTop" aria-live="polite"></div>
+  <div class="crumb" id="crumb"></div>
+  <div class="topright">
+    <button type="button" class="ghost sm" data-journal>📓 Journal <span class="jc" id="jCount">0</span></button>
+    <button type="button" class="ghost sm" id="saveWorkBtn">📄 Save my work</button>
+  </div>
+</header>
+
+<main id="main">
+  <!-- HOME -->
+  <section id="vHome" class="view">
+    <div class="teachrow"><button type="button" class="ghost sm" id="teacherBtn">For teachers: set classwork or homework</button></div>
+    <div class="hero panel">
+      <canvas id="cvHome" role="img" aria-label="The Force HQ arena complex: the Main Arena, the Snow Arena, the Space Dome, the Drop Zone tower and the Workshop"></canvas>
+      <div class="herotext">
+        <h1>Welcome to Force HQ</h1>
+        <p id="hello">Every force is a push or a pull. Here in the Force Arenas you can test them yourself, with tug-of-war teams, husky sleds, space pods and more.</p>
+        <p class="whoLine" id="whoLine"></p>
+      </div>
+    </div>
+    <h2 class="sech">The Force Arenas: guided chapters</h2>
+    <p class="secp">Each chapter is split into sections of approx. 20 to 30 minutes. Start with the <b>Foundation</b>. The <b>Extension</b> goes further, for when your teacher sets it or you want an extra challenge. Every section makes its own worksheet to save and upload.</p>
+    <div class="chapters" id="chapterCards"></div>
+    <div class="homegrid">
+      <div class="panel homecard" id="exploreCard"></div>
+      <div class="panel homecard" id="workshopCard"></div>
+    </div>
+    <div class="panel stamps" id="stampRow"></div>
+  </section>
+
+  <!-- CHAPTER -->
+  <section id="vChapter" class="view" hidden>
+    <div class="chhead">
+      <div><span class="lbl" id="chKicker"></span><h1 id="chTitle"></h1></div>
+      <div class="partsw" id="partSw" role="group" aria-label="Choose a section"></div>
+      <div class="tabs" role="tablist" id="chTabs">
+        <button type="button" role="tab" data-ctab="learn">1 · Learn</button>
+        <button type="button" role="tab" data-ctab="challenge">2 · Challenge</button>
+        <button type="button" role="tab" data-ctab="review">3 · Review</button>
+      </div>
+    </div>
+    <div class="onpage" id="onPage"></div>
+    <div id="learnHost"></div>
+    <div id="challengeHost" hidden></div>
+    <div id="reviewHost" hidden></div>
+  </section>
+
+  <!-- EXPLORE -->
+  <section id="vExplore" class="view" hidden>
+    <div class="chhead"><div><span class="lbl">Explore · Main Arena</span><h1>Tug-of-war sandbox</h1></div></div>
+    <div id="exploreHost"></div>
+  </section>
+
+  <!-- TEACHER -->
+  <section id="vTeacher" class="view" hidden></section>
+</main>
+
+<!-- the arena lab: moved into whichever view needs it -->
+<div id="labPark" hidden>
+<div id="lab" class="lab">
+  <div class="leftcol">
+    <aside class="panel rail" id="rail" aria-label="Guide"></aside>
+    <section class="panel qcard" id="qCard" aria-label="Your turn" hidden></section>
+  </div>
+  <div class="panel stagecard">
+    <div class="stagerow">
+      <aside class="kit" aria-label="Controls">
+        <div class="pal" data-panel="pal">
+          <div class="lbl">Drag onto the arena</div>
+          <div class="ptiles" id="ptiles" role="group" aria-label="Pullers you can add"></div>
+          <p class="palhint" id="palHint"></p>
+          <div class="palsel" id="palSel" hidden><span>Add to</span><button type="button" class="mini" data-side="left">◀ Left team</button><button type="button" class="mini" data-side="right">Right team ▶</button></div>
+          <div class="row"><button class="mini" id="palUndo" type="button">↶ Undo</button><button class="mini" id="palClear" type="button">✕ Clear all</button></div>
+        </div>
+        <div data-panel="floor">
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="friction">Floor</button></h3><button type="button" class="info" data-info="floor" aria-label="How do I use the floor buttons?">ⓘ</button></div>
+          <div class="seg two" id="floors"></div>
+        </div>
+        <div data-panel="mass">
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="num" id="massOut">50 kg</span></div>
+          <input type="range" id="mass" min="10" max="150" step="1" value="50" aria-label="Crate mass in kilograms">
+        </div>
+      </aside>
+      <div class="stagecol">
+        <div class="chunk" id="chunk" hidden aria-live="polite"></div>
+        <canvas id="cvScene" role="img" aria-label="The Main Arena tug-of-war, with the crate in the middle. Drop pullers here to add them to a team."></canvas>
+        <div class="scenebar">
+          <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
+          <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove">Reset</button>
+        </div>
+        <div class="underrow">
+          <div class="fbdcol" data-panel="fbd">
+            <div class="lbl"><button type="button" class="term tl" data-t="fbd">Free-body diagram of the crate</button><button type="button" class="info" data-info="fbd" aria-label="How do I read the free-body diagram?">ⓘ</button></div>
+            <canvas id="cvFBD" role="img" aria-label="Live free-body diagram of the crate"></canvas>
+            <div class="legend" id="legend"></div>
+            <div class="scaleNote" id="scaleNote"></div>
+          </div>
+          <div class="underside">
+            <div class="reads" id="reads"></div>
+            <div class="toggles" data-panel="toggles">
+              <div class="lbl">Show on the diagram</div>
+              <label><input type="checkbox" id="tgVert" checked> Weight and normal force</label>
+              <label><input type="checkbox" id="tgRes" checked> Resultant force arrow</label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="desk" id="desk" hidden></div>
+  </div>
+</div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button type="button" class="calcFab" id="calcFab" aria-label="Open the calculator">🧮<span> Calculator</span></button>
+<div class="calc" id="calc" hidden role="dialog" aria-label="Calculator"></div>
+<div class="gpop" id="gpop" hidden role="tooltip"></div>
+<div class="qpop" id="qPop" hidden><div class="qpopbox" id="qPopBox" role="dialog" aria-label="Your turn: questions"></div></div>
+<div class="modalback" id="modal" hidden></div>
+<div id="printArea" class="printArea"></div>
