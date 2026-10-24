@@ -40,7 +40,7 @@ Students open the sim at home or in class with no teacher beside them. Every des
 - **Active, never passive.** Students predict, reason, build and test. Avoid "read this, click next" sequences anywhere in the sim.
 - **Challenges use the sim itself.** Build, draw or design something and compare it to an exemplar or a target. Avoid plain quizzes as the main challenge.
 - **Open builders in every sim** (section 4e): free, drag-and-drop building of the unit's key things (a circuit, an atom, a power grid on a map, a food web, a machine), each with template build tasks that can be set as classwork or homework.
-- **Questions are varied, plentiful and not obvious** (section 4a-2): every section ends with a Review of about 10 questions in mixed formats, never a run of easy multiple choice.
+- **Questions are varied, plentiful and not obvious** (section 4a-2): every section ends with a Check (Review) of about 5–10 questions in mixed formats, sized to fit the section's 20–30 minutes, never a run of easy multiple choice.
 - **Free-form builders.** Where students build something, make it free-form and drag-and-drop like PhET (parts bin, stretchy wires, snapping ends, drag onto a map) rather than fixed grid slots.
 - **Teacher "set classwork or homework" page in every sim** (section 4c), reached from a button at the top of the home screen, with Toddle AI marking support (section 4d).
 - **Voice.** Enthusiastic, warm and encouraging, in natural sentences. Avoid clipped, punchy, AI-sounding lines. Read every block of student text aloud in your head before shipping.
@@ -107,7 +107,7 @@ Reuse these components across sims instead of rebuilding them. If a `shell/` fol
 
 ## 4a-2. Review questions (every section)
 
-Each section/stop ends with a **Review** tab (unlocked after the guided steps) holding **about 10 questions**, defined as data in one content module so the same items drive the sim, the final mixed review, the worksheets, the answer keys and the marking schemes.
+Each section/stop ends with a **Check** tab (the Review; unlocked after the Challenge, or after Learn if there is no Challenge) holding **about 5–10 questions**, sized to fit the section's 20–30 minutes, defined as data in one content module so the same items drive the sim, the final mixed review, the worksheets, the answer keys and the marking schemes.
 
 - **Mix the formats in every section.** Use at least five of these types per section:
   - *Match it up* — grid of rows with a select per column; supports three-way matches (e.g. model ↔ scientist ↔ year) and picture rows (symbols, model drawings).
