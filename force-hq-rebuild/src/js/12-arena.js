@@ -153,10 +153,10 @@ function renderControls() {
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
-  $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); });
+  $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); if (S.running) runMark('pull'); else runEnd('paused'); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
-  $('#shoveBtn').addEventListener('click', () => { shove(); labChanged(); });
-  $('#launchBtn').addEventListener('click', () => { launch(); labChanged(); });
+  $('#shoveBtn').addEventListener('click', () => { shove(); runMark('push'); labChanged(); });
+  $('#launchBtn').addEventListener('click', () => { launch(); runMark('launch'); labChanged(); });
   const setBrake = v => { S.brakeF = clamp(Math.round(v), 5, 200); if (!S.running) resetSim(); labChanged(); };
   $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
   $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
@@ -262,7 +262,7 @@ let lastT = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (S.running) updateSim(dt);
-  const f = forces();
+  const f = forces(); runTick(f, dt);
   if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); drawVT(); readouts(f); if (LAB.tick) LAB.tick(f); }
   requestAnimationFrame(frame);
 }

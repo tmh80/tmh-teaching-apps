@@ -20,10 +20,12 @@
   - `10-engine.js`: tug-of-war physics: `PUL` puller strengths, `FLOORS`, `forces()`, `staticForces()`, `stepSim()`. Chapter 2 adds a launcher and a brake: the crate starts at `S.x0`, `launch()` sets it moving at `S.v0`, and once it crosses the brake line `S.brakeX` a brake of `S.brakeF` newtons pushes against the motion until it stops (`f.brk`; it never pushes backwards). `clearCh2()` switches it all off; it runs on every step change, in Explore and in the Challenge.
   - `11-draw.js`: canvas helpers, people, and flat animals (dog, husky, pony, horse) each with their own silhouette, plus the arena.
   - `12-arena.js`: the lab. `LAB.show` holds the panels on screen; there is drag-and-drop (drag on, off and across), readouts, the live FBD and the main loop.
+  - `19-home-art.js`: the home illustration (`drawHomeArt`): a stadium with stands, crowd, roof and floodlights; the Snow Arena dome with pines; the Drop Zone lattice tower with a parachutist; the Space Dome with stars and an orbit ring; the brick Workshop with a crane; plaza, trees and people. Its own fixed daytime palette; click targets in `HOMEHIT`.
   - `20-shell.js`: views, home (with the zoomed-in arena complex), name and class, teacher code.
   - `21-calc.js`: pop-out calculator with a safe parser (no eval).
   - `22-glossary.js`: `TERMS`, and auto-underlining of any `.gl` container through a MutationObserver.
   - `23-cards.js`: info cards, the "How do I read this?" `INFO` cards, the Journal (with notes) and evidence.
+  - `24-runs.js`: **My runs**, the run history. Every Pull!, push and launch starts a run (`runMark`), which updates live (`runTick`) and is saved in `DB.runs` (latest 200) with a sentence (`runText`) and number chips (`runChips`). It shows in a side panel opened from the "📋 My runs" tab on the right edge (filters: this step, this section, all; on screens of 1180 px and wider it pushes the page aside), at the top of the Your turn box for the current step, and in the Journal with a "Pop out ↗" button.
   - `30-fbd-builder.js`: free-body diagram builder: `FBDB.mount / check / hint / svg / model`.
   - `35-questions.js`: the question engine (`QT` types), used by both Learn and Review.
   - `40-guided.js`: the Learn engine. Steps reveal panels cumulatively (`adds`, `hide`), plus the tour and the diagram desk.
@@ -40,7 +42,7 @@
   - `dist/test.html` (with the `window.__fhq` debug hook)
   - `dist/artifact.html`
 - `tools/make_worksheets.py`: builds `dist/toddle-files/` (one folder per sheet) and `dist/Force-HQ-Toddle-files.zip`.
-- `tests/`: Playwright scripts. `play_c1.py` plays through Learn, `review.py` covers the Review, and `misc.py` covers Explore, the teacher page, Save my work, the Journal, mission 4 and the different screen widths. `stamp.py`, `dark.py` and `net.py` check the stamp, dark mode and network requests. `qpop.py`, `qdrag.py` and `carddrag.py` cover the Your turn pop-up and the info cards (opening, docking, dragging, click-through), `explore.py` the Explore unlock, `play_c2.py` plays all of Chapter 2 (Learn, Challenge, Check) with real clicks, `onego.py` the one-go rule and `who.py` the name gate.
+- `tests/`: Playwright scripts. `play_c1.py` plays through Learn, `review.py` covers the Review, and `misc.py` covers Explore, the teacher page, Save my work, the Journal, mission 4 and the different screen widths. `stamp.py`, `dark.py` and `net.py` check the stamp, dark mode and network requests. `qpop.py`, `qdrag.py` and `carddrag.py` cover the Your turn pop-up and the info cards (opening, docking, dragging, click-through), `explore.py` the Explore unlock, `play_c2.py` plays all of Chapter 2 (Learn, Challenge, Check) with real clicks, `runs.py` covers the run history, `onego.py` the one-go rule and `who.py` the name gate.
 
 ## Debug hook (`dist/test.html`)
 `__fhq.S`, `LAB`, `CHDATA`, `FBDB`, `setStep(i)`, `openChapter(id, tab)`, `setCTab`, `forces`, `staticForces`, `dbGet`, `dbSet`, `resetDB`, `buildWorksheet`, `schemeHTML`, `schemeText`, `teacherPrompt`, `progressHTML`, `openExplore`, `calcEval`, `WS_CSS`, `ev(code)` (runs code inside the app's scope).

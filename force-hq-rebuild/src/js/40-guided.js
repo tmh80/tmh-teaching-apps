@@ -127,9 +127,11 @@ function qChrome() {
     const last = GI === CHDATA[CH.id].steps.length - 1, chd = CHDATA[CH.id];
     ft.innerHTML = `<button type="button" class="ghost" id="qBack">← Back to the arena</button><button type="button" class="go ${done ? 'ready' : ''}" id="qNext">${last ? (chd.challenge ? 'To the Challenge →' : 'To the Check →') : 'Next step →'}</button>`;
     $('#qBack').addEventListener('click', () => qPlace('dock')); $('#qNext').addEventListener('click', tryNext);
+    const old = $('.qruns', qc); if (old) old.remove();
+    if (['run', 'shove', 'launch'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
     hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
-    $('#qOpen').addEventListener('click', () => qPlace('pop'));
+    $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qruns', qc); if (old) old.remove();
     ft.innerHTML = '';
   }
   const n = $('#gNext'); if (n && !stepDone(CH.id, GI) && hasQs() && !done) n.textContent = 'Next: questions →';

@@ -508,7 +508,7 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .sectile .open{align-self:auto}
 .minis{font-size:12.5px;color:var(--muted);font-weight:700}.minis.on{color:var(--good)}.minis.on::before{content:'✓ '}
 .route{margin-top:14px;display:flex;flex-direction:column;gap:8px}
-.routegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;position:relative}
+.routegrid{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:12px;position:relative}
 .routegrid::before{content:'';position:absolute;left:24px;right:24px;top:-4px;border-top:2.5px dashed var(--line)}
 .stop{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;position:relative}
 .stop::before{content:'';position:absolute;top:-9px;left:22px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2.5px solid var(--line)}
@@ -580,6 +580,34 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .blog li.ok{color:var(--good);font-weight:700}
 .qfig{margin:8px 0 2px}
 #brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:nowrap;align-items:center}
+/* ===== My runs: history of pushes, pulls and launches ===== */
+.runstab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:62;writing-mode:vertical-rl;background:var(--herobg);color:#fff;border:0;border-radius:12px 0 0 12px;padding:14px 9px;font-family:var(--f-display);font-weight:800;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:8px;box-shadow:-4px 6px 18px rgba(0,0,0,.25)}
+.runstab .rc{writing-mode:horizontal-tb;background:var(--hazard);color:#1b1404;border-radius:999px;min-width:22px;padding:1px 6px;font-size:13px;text-align:center}
+body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runspanel,body.runsopen .runstab{display:none}
+.runspanel{position:fixed;top:0;right:0;bottom:0;width:min(380px,100%);z-index:63;background:var(--panel);border-left:1px solid var(--line);box-shadow:-14px 0 30px rgba(0,0,0,.18);padding:14px 16px 24px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.rphead{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-14px;background:var(--panel);padding:4px 0;z-index:1}
+.rphead h2{font-size:26px}
+.seg3{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg3 button{flex:1;border:0;background:var(--chip);padding:7px 6px;font-weight:700;font-size:14px}
+.seg3 button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.rempty{color:var(--muted);margin:0}
+.runlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.run{border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;background:var(--bg);display:flex;flex-direction:column;gap:5px}
+.run.live{border-color:var(--hazard);background:var(--hazard-soft)}
+.run .rh{display:flex;gap:4px 8px;align-items:baseline;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.run .rh b{font-family:var(--f-display);font-size:17px;color:var(--ink)}
+.run .rh .tm{margin-left:auto}
+.run p{margin:0;font-size:14.5px;line-height:1.45}
+.rchips{display:flex;flex-wrap:wrap;gap:4px}
+.rchips span{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-family:var(--f-num);font-size:12.5px;font-weight:700;display:flex;flex-direction:column;line-height:1.2}
+.rchips small{font-family:var(--f-body);font-weight:700;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.qruns{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.qrh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.runlist.mini .run{background:var(--panel)}
+.linkbtn2{background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:0;font-size:14px}
+.jrh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media (min-width:1180px){body.runsopen main,body.runsopen .top{margin-right:396px;margin-left:16px;max-width:none}}
+@media print{.runstab,.runspanel{display:none!important}}
 
 </style>
 <header class="top">
@@ -856,7 +884,7 @@ function stepSim(dt) {
   if (Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
-function resetSim() { S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
+function resetSim() { if (RUN) runEnd('reset'); S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
 function clearCh2() { S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
@@ -1241,10 +1269,10 @@ function renderControls() {
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
-  $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); });
+  $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); if (S.running) runMark('pull'); else runEnd('paused'); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
-  $('#shoveBtn').addEventListener('click', () => { shove(); labChanged(); });
-  $('#launchBtn').addEventListener('click', () => { launch(); labChanged(); });
+  $('#shoveBtn').addEventListener('click', () => { shove(); runMark('push'); labChanged(); });
+  $('#launchBtn').addEventListener('click', () => { launch(); runMark('launch'); labChanged(); });
   const setBrake = v => { S.brakeF = clamp(Math.round(v), 5, 200); if (!S.running) resetSim(); labChanged(); };
   $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
   $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
@@ -1350,9 +1378,145 @@ let lastT = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (S.running) updateSim(dt);
-  const f = forces();
+  const f = forces(); runTick(f, dt);
   if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); drawVT(); readouts(f); if (LAB.tick) LAB.tick(f); }
   requestAnimationFrame(frame);
+}
+
+/* ===== Home illustration: the Force HQ arena complex (900 × 420 logical px) =====
+   Flat, outline-free shapes with simple two-tone shading; light comes from the upper left.
+   The picture uses its own fixed daytime palette in both themes, because it sits in the dark hero card. */
+function drawHomeArt(c, hit) {
+  const W = 900, H = 420, R = rng(11);
+  const E = (x, y, rx, ry, a0 = 0, a1 = Math.PI * 2) => { c.beginPath(); c.ellipse(x, y, rx, ry, 0, a0, a1); };
+  const F = (col, a = 1) => { c.globalAlpha = a; c.fillStyle = col; c.fill(); c.globalAlpha = 1; };
+  const lin = (x0, y0, x1, y1, stops) => { const g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, col]) => g.addColorStop(o, col)); return g; };
+  const poly = (pts) => { c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); c.closePath(); };
+
+  /* sky, sun and clouds */
+  c.fillStyle = lin(0, 0, 0, 250, [[0, '#8ccbed'], [.65, '#cbe8f4'], [1, '#e9f5f2']]); c.fillRect(0, 0, W, H);
+  const sg = c.createRadialGradient(170, 70, 6, 170, 70, 120); sg.addColorStop(0, 'rgba(255,248,214,1)'); sg.addColorStop(.18, 'rgba(255,240,190,.9)'); sg.addColorStop(.45, 'rgba(255,236,180,.28)'); sg.addColorStop(1, 'rgba(255,236,180,0)');
+  c.fillStyle = sg; c.fillRect(40, 0, 260, 200);
+  const cloud = (x, y, k) => { c.fillStyle = 'rgba(255,255,255,.95)'; E(x, y, 30 * k, 11 * k); c.fill(); E(x - 20 * k, y + 3 * k, 18 * k, 8 * k); c.fill(); E(x + 22 * k, y + 2 * k, 20 * k, 9 * k); c.fill(); E(x + 2 * k, y - 8 * k, 16 * k, 11 * k); c.fill(); c.fillStyle = 'rgba(160,190,210,.25)'; E(x, y + 7 * k, 40 * k, 4 * k); c.fill(); };
+  cloud(330, 52, 1.1); cloud(560, 34, .8); cloud(820, 70, 1); cloud(470, 96, .6);
+
+  /* mountains: far, then near with snow caps on the left */
+  c.fillStyle = '#b8d2e1'; poly([[0, 205], [70, 128], [130, 168], [210, 110], [300, 178], [390, 140], [470, 185], [560, 150], [650, 190], [740, 135], [830, 175], [900, 150], [900, 250], [0, 250]]); c.fill();
+  c.fillStyle = '#a2c1d3'; poly([[0, 230], [60, 170], [120, 205], [190, 150], [260, 212], [330, 196], [420, 222], [900, 222], [900, 250], [0, 250]]); c.fill();
+  c.fillStyle = '#f7fbfd'; for (const [x, y, w] of [[60, 170, 18], [190, 150, 22], [210, 110, 16], [70, 128, 12]]) { poly([[x, y], [x - w, y + w * .9], [x - w * .4, y + w * .65], [x, y + w * .9], [x + w * .45, y + w * .6], [x + w, y + w * .9]]); c.fill(); }
+
+  /* ground: lawn, then the plaza and paths */
+  c.fillStyle = lin(0, 228, 0, H, [[0, '#b9dca1'], [.5, '#a6d08b'], [1, '#93c27a']]); poly([[0, 238], [180, 226], [420, 232], [650, 224], [900, 232], [900, H], [0, H]]); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.18)'; for (let i = 0; i < 70; i++) { const x = R() * W, y = 250 + R() * 160; c.fillRect(x, y, 2, 1); }
+  c.fillStyle = '#ece3cf'; E(430, 372, 360, 58); c.fill();
+  c.fillStyle = '#e0d5bd'; E(430, 378, 330, 46); c.fill();
+  c.strokeStyle = 'rgba(160,140,100,.25)'; c.lineWidth = 1; for (let k = 1; k < 6; k++) { E(430, 378, 330 * k / 6, 46 * k / 6); c.stroke(); }
+  c.strokeStyle = '#ece3cf'; c.lineCap = 'round';
+  for (const [x1, y1, cx1, cy1, x2, y2, w] of [[190, 372, 110, 350, 104, 290, 12]]) { c.lineWidth = w; c.beginPath(); c.moveTo(x1, y1); c.quadraticCurveTo(cx1, cy1, x2, y2); c.stroke(); }
+
+  /* trees */
+  const pine = (x, y, k, snow) => { c.fillStyle = '#6b4e33'; c.fillRect(x - 2 * k, y - 6 * k, 4 * k, 8 * k); for (let i = 0; i < 3; i++) { const yy = y - 6 * k - i * 9 * k, w = (13 - i * 3) * k; c.fillStyle = i % 2 ? '#2f6b5a' : '#3a7d69'; poly([[x, yy - 15 * k], [x - w, yy], [x + w, yy]]); c.fill(); c.fillStyle = 'rgba(0,0,0,.12)'; poly([[x, yy - 15 * k], [x + w, yy], [x, yy]]); c.fill(); if (snow) { c.fillStyle = '#fbfdff'; poly([[x, yy - 15 * k], [x - w * .35, yy - 9 * k], [x + w * .35, yy - 9 * k]]); c.fill(); } } };
+  const tree = (x, y, k) => { c.fillStyle = 'rgba(30,60,30,.18)'; E(x + 6 * k, y + 2, 14 * k, 3.5 * k); c.fill(); c.fillStyle = '#7a5a3a'; c.fillRect(x - 2 * k, y - 12 * k, 4 * k, 13 * k); c.fillStyle = '#5b8c4a'; E(x, y - 22 * k, 14 * k, 15 * k); c.fill(); c.fillStyle = '#76a85f'; E(x - 4 * k, y - 26 * k, 9 * k, 9 * k); c.fill(); c.fillStyle = '#4a7a3c'; E(x + 6 * k, y - 18 * k, 7 * k, 7 * k); c.fill(); };
+
+  /* ---------- Snow Arena (left) ---------- */
+  pine(18, 286, 1.1, true); pine(192, 276, .85, true);
+  c.fillStyle = 'rgba(40,70,90,.18)'; E(106, 286, 96, 11); c.fill();
+  c.fillStyle = lin(20, 0, 192, 0, [[0, '#ffffff'], [.6, '#e8f0f5'], [1, '#c9d9e3']]); E(106, 284, 86, 62, Math.PI, 0); c.fill();
+  c.strokeStyle = 'rgba(130,160,180,.45)'; c.lineWidth = 1.3; for (let i = 1; i < 5; i++) { E(106, 284, 86 * i / 5, 62, Math.PI, 0); c.stroke(); } for (let k = 1; k < 3; k++) { E(106, 284, 86, 62 * k / 3, Math.PI, 0); c.stroke(); }
+  c.fillStyle = '#c3d3dd'; c.fillRect(20, 276, 172, 10); c.fillStyle = '#5c7685'; c.beginPath(); c.roundRect(90, 256, 32, 30, [15, 15, 0, 0]); c.fill(); c.fillStyle = '#87a8bb'; c.fillRect(94, 261, 24, 3);
+  c.fillStyle = '#ffffff'; for (const [x, w] of [[40, 22], [170, 24], [128, 14]]) { E(x, 287, w, 7, Math.PI, 0); c.fill(); }
+  pine(58, 304, .8, true); pine(160, 306, .7, true);
+  c.strokeStyle = '#4b5d68'; c.lineWidth = 2; c.beginPath(); c.moveTo(106, 222); c.lineTo(106, 200); c.stroke(); c.fillStyle = '#56636b'; poly([[106, 200], [127, 205], [106, 211]]); c.fill();
+  hit.push({ x0: 10, x1: 200, y0: 175, y1: 305, id: 'snow' });
+
+  /* ---------- Drop Zone tower (behind, centre right) ---------- */
+  const tx = 690, tTop = 74, tBase = 262;
+  c.fillStyle = 'rgba(40,70,90,.15)'; E(tx + 10, tBase + 2, 34, 6); c.fill();
+  c.strokeStyle = '#6f8894'; c.lineWidth = 4; c.beginPath(); c.moveTo(tx - 24, tBase); c.lineTo(tx - 12, tTop + 12); c.moveTo(tx + 24, tBase); c.lineTo(tx + 12, tTop + 12); c.stroke();
+  c.lineWidth = 1.6; c.strokeStyle = '#8aa1ac'; for (let y = tTop + 22; y < tBase - 4; y += 24) { const a = (y - tTop) / (tBase - tTop), b = (y + 24 - tTop) / (tBase - tTop), wa = 12 + a * 12, wb = 12 + Math.min(1, b) * 12; c.beginPath(); c.moveTo(tx - wa, y); c.lineTo(tx + wb, Math.min(tBase, y + 24)); c.moveTo(tx + wa, y); c.lineTo(tx - wb, Math.min(tBase, y + 24)); c.moveTo(tx - wa, y); c.lineTo(tx + wa, y); c.stroke(); }
+  c.fillStyle = '#2b3b45'; c.fillRect(tx - 26, tTop, 52, 13); c.fillStyle = '#3d515d'; c.fillRect(tx - 16, tTop - 16, 32, 16); c.fillStyle = '#bfe3f2'; c.fillRect(tx - 12, tTop - 12, 10, 8); c.fillRect(tx + 2, tTop - 12, 10, 8);
+  c.strokeStyle = '#2b3b45'; c.lineWidth = 2; c.beginPath(); c.moveTo(tx + 26, tTop); c.lineTo(tx + 54, tTop); c.stroke();
+  c.fillStyle = '#e04b3a'; c.beginPath(); c.arc(tx, tTop - 20, 4, 0, 7); c.fill(); c.fillStyle = 'rgba(224,75,58,.25)'; c.beginPath(); c.arc(tx, tTop - 20, 9, 0, 7); c.fill();
+  // parachutist drifting down beside the tower
+  const px = 752, py = 128;
+  c.fillStyle = '#e3a51c'; E(px, py, 26, 17, Math.PI, 0); c.fill(); c.fillStyle = '#c94a34'; c.beginPath(); c.moveTo(px - 9, py); c.ellipse(px, py, 9, 17, 0, Math.PI, 0); c.closePath(); c.fill(); c.fillStyle = 'rgba(0,0,0,.12)'; c.fillRect(px - 26, py - 2, 52, 3);
+  c.strokeStyle = '#6b5a45'; c.lineWidth = 1; c.beginPath(); for (const ox of [-25, -9, 9, 25]) { c.moveTo(px + ox, py); c.lineTo(px, py + 26); } c.stroke();
+  c.fillStyle = '#1f5f8b'; c.beginPath(); c.roundRect(px - 3.5, py + 25, 7, 10, 2); c.fill(); c.fillStyle = '#f1c9a5'; c.beginPath(); c.arc(px, py + 22, 3.6, 0, 7); c.fill();
+  hit.push({ x0: 650, x1: 785, y0: 20, y1: 250, id: 'drop' });
+
+  /* ---------- Space Dome (right) ---------- */
+  const sx = 808, sb = 266;
+  c.fillStyle = 'rgba(30,50,70,.2)'; E(sx + 8, sb + 4, 96, 10); c.fill();
+  c.fillStyle = '#cfd8e1'; c.fillRect(sx - 90, sb - 14, 180, 18); c.fillStyle = '#9fb0bd'; c.fillRect(sx - 90, sb - 2, 180, 6);
+  c.fillStyle = '#7fa3bd'; for (let x = sx - 80; x < sx + 82; x += 20) c.fillRect(x, sb - 10, 10, 5);
+  c.fillStyle = lin(sx - 80, 0, sx + 80, 0, [[0, '#2b4470'], [.5, '#17284a'], [1, '#0c162d']]); E(sx, sb - 14, 80, 74, Math.PI, 0); c.fill();
+  c.fillStyle = '#f4f7ff'; const R2 = rng(5); for (let i = 0; i < 46; i++) { const a = Math.PI + R2() * Math.PI, r = Math.sqrt(R2()) * .9, x = sx + Math.cos(a) * 80 * r, y = sb - 14 + Math.sin(a) * 74 * r; c.globalAlpha = .45 + R2() * .55; c.beginPath(); c.arc(x, y, R2() * 1.3 + .4, 0, 7); c.fill(); } c.globalAlpha = 1;
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(sx + 30, sb - 52, 9, 0, 7); c.fill(); c.strokeStyle = 'rgba(255,220,150,.9)'; c.lineWidth = 2; E(sx + 30, sb - 52, 16, 4); c.stroke();
+  c.strokeStyle = 'rgba(160,200,240,.35)'; c.lineWidth = 1.2; for (let i = 1; i < 4; i++) { E(sx, sb - 14, 80 * i / 4, 74, Math.PI, 0); c.stroke(); } for (let k = 1; k < 3; k++) { E(sx, sb - 14, 80, 74 * k / 3, Math.PI, 0); c.stroke(); }
+  c.fillStyle = 'rgba(255,255,255,.16)'; E(sx - 34, sb - 52, 22, 30, -0.5, 0.9); c.fill();
+  c.strokeStyle = 'rgba(200,220,255,.75)'; c.lineWidth = 2; c.save(); c.translate(sx, sb - 46); c.rotate(-0.18); E(0, 0, 108, 18, Math.PI * 1.05, Math.PI * 1.95); c.stroke(); c.restore();
+  c.fillStyle = '#d5dde2'; c.beginPath(); c.roundRect(sx - 52, sb - 70, 26, 11, 5); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(sx - 52, sb - 66, 26, 3);
+  c.strokeStyle = '#8aa1ac'; c.lineWidth = 2.5; c.beginPath(); c.moveTo(sx + 84, sb - 10); c.lineTo(sx + 84, sb - 40); c.stroke(); c.fillStyle = '#e8eef2'; E(sx + 84, sb - 44, 12, 7, -0.6, Math.PI - 0.6); c.fill();
+  hit.push({ x0: 715, x1: 900, y0: 160, y1: 280, id: 'space' });
+
+  /* ---------- Workshop (front right) ---------- */
+  const wx = 660, wy = 318, ww = 160, wh = 60;
+  c.fillStyle = 'rgba(30,50,40,.22)'; E(wx + ww / 2 + 10, wy + wh + 2, ww / 2 + 16, 8); c.fill();
+  c.fillStyle = '#b86343'; c.fillRect(wx, wy, ww, wh); c.fillStyle = '#9e5236'; c.fillRect(wx + ww - 46, wy, 46, wh);
+  c.strokeStyle = 'rgba(80,35,20,.25)'; c.lineWidth = 1; for (let y = wy + 6; y < wy + wh; y += 6) { c.beginPath(); c.moveTo(wx, y); c.lineTo(wx + ww, y); c.stroke(); }
+  for (let i = 0; i < 4; i++) { const x0 = wx + i * ww / 4, x1 = x0 + ww / 4; c.fillStyle = '#5d6b75'; poly([[x0, wy], [x0, wy - 22], [x1, wy]]); c.fill(); c.fillStyle = '#bfe3f2'; poly([[x0 + 2, wy - 3], [x0 + 2, wy - 18], [x0 + 12, wy - 9]]); c.fill(); }
+  c.fillStyle = '#5d6b75'; c.fillRect(wx + 28, wy - 38, 10, 22);
+  c.fillStyle = '#3d4a52'; c.beginPath(); c.roundRect(wx + 18, wy + 22, 50, 42, [4, 4, 0, 0]); c.fill(); c.strokeStyle = '#56656e'; c.lineWidth = 1.5; for (let y = wy + 28; y < wy + 64; y += 6) { c.beginPath(); c.moveTo(wx + 20, y); c.lineTo(wx + 66, y); c.stroke(); }
+  c.fillStyle = '#e3a51c'; for (let k = 0; k < 5; k++) c.fillRect(wx + 18 + k * 10, wy + 16, 6, 4);
+  c.fillStyle = '#bfe3f2'; c.fillRect(wx + 84, wy + 22, 26, 16); c.fillRect(wx + 128, wy + 22, 26, 16); c.fillStyle = '#e8f6fb'; c.fillRect(wx + 84, wy + 22, 8, 16); c.fillRect(wx + 128, wy + 22, 8, 16);
+  c.save(); c.translate(wx + 119, wy + 52); c.fillStyle = '#e3a51c'; for (let i = 0; i < 8; i++) { c.rotate(Math.PI / 4); c.fillRect(-2.5, -11, 5, 5); } c.beginPath(); c.arc(0, 0, 8, 0, 7); c.fill(); c.fillStyle = '#b86343'; c.beginPath(); c.arc(0, 0, 3, 0, 7); c.fill(); c.restore();
+  // crane with a crate
+  const cx2 = wx + ww + 28; c.strokeStyle = '#e3a51c'; c.lineWidth = 3; c.beginPath(); c.moveTo(cx2, wy + wh); c.lineTo(cx2, wy - 34); c.lineTo(cx2 - 50, wy - 34); c.stroke(); c.lineWidth = 1.2; for (let y = wy + wh; y > wy - 30; y -= 10) { c.beginPath(); c.moveTo(cx2 - 4, y); c.lineTo(cx2 + 4, y - 10); c.stroke(); }
+  c.strokeStyle = '#3d4a52'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(cx2 - 42, wy - 34); c.lineTo(cx2 - 42, wy - 6); c.stroke(); c.fillStyle = '#c99a5b'; c.fillRect(cx2 - 50, wy - 6, 16, 14); c.strokeStyle = '#7a5426'; c.lineWidth = 1.5; c.strokeRect(cx2 - 50, wy - 6, 16, 14);
+  hit.push({ x0: 650, x1: 880, y0: 270, y1: 400, id: 'workshop' });
+
+  /* ---------- Main Arena: a proper stadium (front centre) ---------- */
+  const ax = 420, rimY = 214, rx = 212, ry = 46, baseY = 318;
+  c.fillStyle = 'rgba(30,50,40,.25)'; E(ax + 16, baseY + 6, rx + 18, 30); c.fill();
+  // outer wall (front half): between the rim and the base
+  c.beginPath(); c.ellipse(ax, rimY, rx, ry, 0, 0, Math.PI); c.lineTo(ax - rx, baseY); c.ellipse(ax, baseY, rx, ry * .82, 0, Math.PI, 0, true); c.closePath();
+  c.fillStyle = lin(ax - rx, 0, ax + rx, 0, [[0, '#f2f5f7'], [.45, '#dde5ea'], [1, '#aebdc6']]); c.fill();
+  // pillars and a window band follow the curve
+  for (let i = 1; i < 18; i++) { const a = Math.PI * i / 18, x = ax - Math.cos(a) * rx, yt = rimY + Math.sin(a) * ry, yb = baseY + Math.sin(a) * ry * .82; c.strokeStyle = i < 9 ? 'rgba(120,145,160,.35)' : 'rgba(90,110,125,.45)'; c.lineWidth = 3; c.beginPath(); c.moveTo(x, yt + 4); c.lineTo(x, yb - 2); c.stroke(); }
+  for (let i = 0; i < 18; i++) { const a = Math.PI * (i + .5) / 18, x = ax - Math.cos(a) * rx, y = rimY + Math.sin(a) * ry + 38, wd = 9 * Math.max(.35, Math.sin(a)); c.fillStyle = i < 9 ? '#4d6f87' : '#3f5f75'; c.beginPath(); c.roundRect(x - wd / 2, y, wd, 14, [4, 4, 1, 1]); c.fill(); }
+  c.fillStyle = '#13212a'; c.beginPath(); c.ellipse(ax, rimY + 2, rx, ry, 0, 0, Math.PI); c.ellipse(ax, rimY + 9, rx, ry, 0, Math.PI, 0, true); c.closePath(); c.fill();
+  // inside: stands, crowd and the arena floor
+  c.fillStyle = '#7f97a5'; E(ax, rimY, rx, ry); c.fill();
+  c.fillStyle = '#93a9b5'; E(ax, rimY + 4, rx - 18, ry - 7); c.fill();
+  const team = ['#c94a34', '#11806f', '#e3a51c', '#1f5f8b', '#f4f7ff'];
+  for (let i = 0; i < 260; i++) { const a = R() * Math.PI * 2, rr = .62 + R() * .34, x = ax + Math.cos(a) * (rx - 10) * rr, y = rimY + 4 + Math.sin(a) * (ry - 4) * rr; c.fillStyle = team[Math.floor(R() * team.length)]; c.globalAlpha = .85; c.fillRect(x - 1.2, y - 1.2, 2.4, 2.4); } c.globalAlpha = 1;
+  c.fillStyle = '#d9c39a'; E(ax, rimY + 8, rx * .54, ry * .5); c.fill(); c.fillStyle = '#e6d2ab'; E(ax - 8, rimY + 6, rx * .44, ry * .36); c.fill();
+  c.strokeStyle = '#fbf6ea'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(ax, rimY - 14); c.lineTo(ax, rimY + 30); c.stroke();
+  c.strokeStyle = '#8a6a3c'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(ax - 52, rimY + 8); c.lineTo(ax + 52, rimY + 8); c.stroke(); c.fillStyle = '#c99a5b'; c.fillRect(ax - 6, rimY + 3, 12, 10);
+  for (const [s, col] of [[-1, '#c94a34'], [1, '#11806f']]) for (let k = 0; k < 3; k++) { const x = ax + s * (18 + k * 11); c.fillStyle = col; c.fillRect(x - 1.6, rimY + 4, 3.2, 7); c.beginPath(); c.arc(x - s * 1.2, rimY + 2.5, 2.2, 0, 7); c.fill(); }
+  // roof canopy over the back stands
+  c.beginPath(); c.ellipse(ax, rimY - 6, rx + 6, ry + 6, 0, Math.PI, 0); c.ellipse(ax, rimY + 2, rx - 34, ry - 14, 0, 0, Math.PI, true); c.closePath(); c.fillStyle = 'rgba(248,251,253,.94)'; c.fill();
+  c.strokeStyle = 'rgba(150,170,185,.6)'; c.lineWidth = 1; for (let i = 1; i < 14; i++) { const a = Math.PI + Math.PI * i / 14; c.beginPath(); c.moveTo(ax + Math.cos(a) * (rx + 6), rimY - 6 + Math.sin(a) * (ry + 6)); c.lineTo(ax + Math.cos(a) * (rx - 34), rimY + 2 + Math.sin(a) * (ry - 14)); c.stroke(); }
+  // floodlights
+  for (const [x, top] of [[ax - rx + 18, 120], [ax + rx - 18, 120], [ax - 90, 150], [ax + 90, 150]]) {
+    c.strokeStyle = '#5c6f7a'; c.lineWidth = 3; c.beginPath(); c.moveTo(x, rimY - 8); c.lineTo(x, top + 10); c.stroke();
+    const lg = c.createRadialGradient(x, top + 4, 2, x, top + 4, 30); lg.addColorStop(0, 'rgba(255,248,200,.85)'); lg.addColorStop(1, 'rgba(255,248,200,0)'); c.fillStyle = lg; c.fillRect(x - 32, top - 26, 64, 60);
+    c.fillStyle = '#2b3b45'; c.fillRect(x - 13, top - 2, 26, 13); c.fillStyle = '#fff6c9'; for (let k = 0; k < 3; k++) for (let j = 0; j < 2; j++) c.fillRect(x - 11 + k * 8, top + j * 5.5, 6, 4);
+  }
+  // entrance gate, sign and team banners
+  c.fillStyle = '#13212a'; c.beginPath(); c.roundRect(ax - 34, baseY + 4, 68, 32, [14, 14, 0, 0]); c.fill(); c.fillStyle = '#2a3c48'; c.fillRect(ax - 26, baseY + 12, 52, 24);
+  c.fillStyle = '#13212a'; c.beginPath(); c.roundRect(ax - 62, baseY - 22, 124, 24, 6); c.fill(); txt(c, 'MAIN ARENA', ax, baseY - 9.5, '#e3a51c', `800 15px ${C.fd}`);
+  for (const [s, col] of [[-1, '#c94a34'], [1, '#11806f']]) { const x = ax + s * 120, y = rimY + 32; c.fillStyle = col; poly([[x - 9, y], [x + 9, y], [x + 9, y + 34], [x, y + 28], [x - 9, y + 34]]); c.fill(); c.fillStyle = 'rgba(255,255,255,.85)'; c.beginPath(); c.arc(x, y + 12, 4, 0, 7); c.fill(); }
+  hit.push({ x0: 200, x1: 640, y0: 110, y1: 360, id: 'main' });
+
+  /* foreground: trees, lamps and a few people on the plaza */
+  tree(28, 384, 1.15); tree(206, 378, .8); tree(620, 396, .9); tree(880, 392, 1.1); tree(852, 410, .75);
+  for (const x of [170, 310, 530, 640]) { c.strokeStyle = '#3d4a52'; c.lineWidth = 2; c.beginPath(); c.moveTo(x, 392); c.lineTo(x, 366); c.stroke(); c.fillStyle = '#fff3c4'; c.beginPath(); c.arc(x, 364, 3.5, 0, 7); c.fill(); }
+  for (const [x, y, col] of [[215, 384, '#c94a34'], [228, 388, '#1f5f8b'], [470, 396, '#11806f'], [520, 380, '#e3a51c'], [355, 398, '#7446b0'], [640, 390, '#c94a34']]) { c.fillStyle = 'rgba(0,0,0,.15)'; E(x + 2, y + 9, 4, 1.5); c.fill(); c.fillStyle = col; c.beginPath(); c.roundRect(x - 2.5, y - 2, 5, 10, 2); c.fill(); c.fillStyle = '#e8c4a0'; c.beginPath(); c.arc(x, y - 4.5, 2.6, 0, 7); c.fill(); }
+
+  /* labels: a pill with a little pointer */
+  const label = (s, x, y, dark) => { c.font = `800 14px ${C.fd}`; const w = c.measureText(s).width + 22; c.save(); c.shadowColor = 'rgba(10,25,35,.25)'; c.shadowBlur = 8; c.shadowOffsetY = 2; c.fillStyle = dark ? '#13212a' : 'rgba(255,255,255,.96)'; c.beginPath(); c.roundRect(x - w / 2, y - 13, w, 26, 13); c.fill(); c.restore(); c.fillStyle = dark ? '#13212a' : 'rgba(255,255,255,.96)'; poly([[x - 6, y + 12], [x + 6, y + 12], [x, y + 19]]); c.fill(); txt(c, s, x, y + .5, dark ? '#e3a51c' : '#13212a', `800 14px ${C.fd}`); };
+  label('SNOW ARENA', 106, 182); label('DROP ZONE', 690, 30); label('SPACE DOME', 812, 152); label('WORKSHOP', 740, 274);
 }
 
 /* ===== Shell: views, home, name and class, teacher mode ===== */
@@ -1429,7 +1593,7 @@ function renderHome() {
   /* chapters: open ones in full, the rest as a route of upcoming stops */
   const open = CHAPTERS.filter(c => c.ready && SECTIONS.some(s => s.ch === c.id)), soon = CHAPTERS.filter(c => !open.includes(c));
   $('#chapterCards').innerHTML = open.map(ch => `<div class="panel chfeat"><div class="chside"><span class="chnum">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}<div><span class="kicker2">Chapter ${ch.n} · ${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p></div></div><div class="sectiles">${SECTIONS.filter(s => s.ch === ch.id).map(secRow).join('')}</div></div>`).join('')
-    + (soon.length ? `<div class="route"><div class="routehd"><span class="kicker2">Coming soon</span></div><div class="routegrid">${soon.map(ch => `<div class="stop"><div class="stophd"><span class="chnum sm">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}</div><span class="kicker2">${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p><span class="pillst todo">Coming soon</span></div>`).join('')}</div></div>` : '');
+    + (soon.length ? `<div class="route"><div class="routehd"><span class="kicker2">Coming soon</span></div><div class="routegrid" style="--n:${soon.length}">${soon.map(ch => `<div class="stop"><div class="stophd"><span class="chnum sm">${String(ch.n).padStart(2, '0')}</span>${chIcon(ch.icon)}</div><span class="kicker2">${ch.arena}</span><h3>${ch.title}</h3><p>${ch.blurb}</p><span class="pillst todo">Coming soon</span></div>`).join('')}</div></div>` : '');
   $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
     ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
@@ -1451,51 +1615,8 @@ function awardStamp(id) {
 const HOMEHIT = [];
 function drawHome() {
   const cv = $('#cvHome'); if (!cv || !cv.offsetParent) return; readColors(); const c = fit(cv, 900, 420); HOMEHIT.length = 0;
-  const g = c.createLinearGradient(0, 0, 0, 300); g.addColorStop(0, '#cfe6f2'); g.addColorStop(1, '#eef6f2'); c.fillStyle = g; c.fillRect(0, 0, 900, 420);
-  // sun, clouds and distant hills
-  const sg = c.createRadialGradient(470, 70, 4, 470, 70, 90); sg.addColorStop(0, 'rgba(255,240,190,.95)'); sg.addColorStop(.25, 'rgba(255,236,170,.55)'); sg.addColorStop(1, 'rgba(255,236,170,0)'); c.fillStyle = sg; c.fillRect(380, 0, 180, 170);
-  c.fillStyle = 'rgba(255,255,255,.85)'; for (const [x, y, k] of [[90, 70, 1], [300, 48, .8], [690, 60, 1.1], [840, 110, .7]]) { c.beginPath(); c.ellipse(x, y, 34 * k, 11 * k, 0, 0, 7); c.ellipse(x - 16 * k, y + 3, 20 * k, 9 * k, 0, 0, 7); c.ellipse(x + 18 * k, y + 2, 22 * k, 10 * k, 0, 0, 7); c.fill(); }
-  c.fillStyle = '#b9cfd9'; c.beginPath(); c.moveTo(0, 230); c.lineTo(90, 175); c.lineTo(170, 215); c.lineTo(260, 160); c.lineTo(360, 220); c.lineTo(480, 185); c.lineTo(560, 215); c.lineTo(680, 150); c.lineTo(790, 205); c.lineTo(900, 170); c.lineTo(900, 260); c.lineTo(0, 260); c.fill();
-  c.fillStyle = '#c4d9c8'; c.beginPath(); c.moveTo(0, 250); c.quadraticCurveTo(200, 200, 420, 240); c.quadraticCurveTo(650, 280, 900, 220); c.lineTo(900, 420); c.lineTo(0, 420); c.fill();
-  c.fillStyle = '#d9e7d6'; c.fillRect(0, 300, 900, 120);
-  c.fillStyle = '#efe9dc'; c.beginPath(); c.moveTo(0, 360); c.quadraticCurveTo(450, 330, 900, 372); c.lineTo(900, 395); c.quadraticCurveTo(450, 352, 0, 385); c.fill();
-  const label = (s, x, y, on) => { c.font = `800 15px ${C.fd}`; const w = c.measureText(s).width + 20; c.fillStyle = on ? C.ink : '#8a9aa2'; c.beginPath(); c.roundRect(x - w / 2, y - 13, w, 26, 6); c.fill(); txt(c, s, x, y + .5, on ? C.hazard : '#eef2f3', `800 15px ${C.fd}`); };
-  // Snow Arena (left back)
-  c.fillStyle = '#e6eef3'; c.beginPath(); c.ellipse(130, 285, 110, 95, 0, Math.PI, 0); c.fill(); c.fillStyle = '#ffffff'; c.beginPath(); c.ellipse(130, 285, 110, 30, 0, Math.PI, 0); c.fill();
-  c.strokeStyle = '#b9cbd6'; c.lineWidth = 2; for (let i = 1; i < 6; i++) { c.beginPath(); c.ellipse(130, 285, 110 * i / 6, 95, 0, Math.PI, 0); c.stroke(); }
-  for (const x of [40, 222]) { c.fillStyle = '#2f6b5a'; c.beginPath(); c.moveTo(x, 236); c.lineTo(x - 16, 288); c.lineTo(x + 16, 288); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.moveTo(x, 236); c.lineTo(x - 6, 254); c.lineTo(x + 6, 254); c.fill(); }
-  label('SNOW ARENA', 120, 176, false); HOMEHIT.push({ x0: 20, x1: 240, y0: 190, y1: 320, id: 'snow' });
-  // Space Dome (right back)
-  c.fillStyle = '#16233a'; c.beginPath(); c.ellipse(770, 280, 112, 100, 0, Math.PI, 0); c.fill();
-  c.fillStyle = '#f4f7ff'; const R2 = rng(4); for (let i = 0; i < 40; i++) { const a = Math.PI + R2() * Math.PI, r = R2() * 0.9; c.beginPath(); c.arc(770 + Math.cos(a) * 112 * r, 280 + Math.sin(a) * 100 * r, R2() * 1.6 + .4, 0, 7); c.fill(); }
-  c.strokeStyle = 'rgba(160,190,230,.5)'; c.lineWidth = 1.5; for (let i = 1; i < 6; i++) { c.beginPath(); c.ellipse(770, 280, 112 * i / 6, 100, 0, Math.PI, 0); c.stroke(); }
-  c.fillStyle = '#d5dde2'; c.beginPath(); c.roundRect(745, 238, 50, 24, 12); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(745, 247, 50, 5);
-  label('SPACE DOME', 790, 166, false); HOMEHIT.push({ x0: 660, x1: 885, y0: 180, y1: 320, id: 'space' });
-  // Drop Zone tower (back middle-right)
-  c.fillStyle = '#9fb0b8'; c.fillRect(600, 110, 26, 190); c.fillStyle = '#7d8f97'; for (let y = 120; y < 300; y += 22) { c.fillRect(600, y, 26, 3); }
-  c.fillStyle = C.ink; c.fillRect(588, 104, 50, 10);
-  c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(660, 150, 20, Math.PI, 0); c.fill(); c.strokeStyle = '#8a6a3c'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(641, 150); c.lineTo(660, 176); c.lineTo(679, 150); c.stroke(); c.fillStyle = '#c94a34'; c.beginPath(); c.arc(660, 180, 5, 0, 7); c.fill();
-  label('DROP ZONE', 613, 92, false); HOMEHIT.push({ x0: 580, x1: 690, y0: 80, y1: 300, id: 'drop' });
-  // Workshop (front right)
-  c.fillStyle = '#c99a5b'; c.fillRect(640, 300, 170, 70); c.fillStyle = '#7a5426'; c.beginPath(); c.moveTo(630, 302); c.lineTo(725, 262); c.lineTo(820, 302); c.fill();
-  c.fillStyle = '#efe9dc'; c.fillRect(705, 325, 40, 45); c.fillStyle = '#c4e3f0'; c.fillRect(655, 318, 34, 22); c.fillRect(760, 318, 34, 22);
-  c.save(); c.translate(725, 288); c.fillStyle = '#e3a51c'; for (let i = 0; i < 8; i++) { c.rotate(Math.PI / 4); c.fillRect(-3, -14, 6, 7); } c.beginPath(); c.arc(0, 0, 10, 0, 7); c.fill(); c.fillStyle = '#7a5426'; c.beginPath(); c.arc(0, 0, 4, 0, 7); c.fill(); c.restore();
-  c.strokeStyle = '#47637a'; c.lineWidth = 4; c.beginPath(); c.moveTo(830, 370); c.lineTo(830, 250); c.lineTo(880, 250); c.stroke(); c.lineWidth = 1.5; c.beginPath(); c.moveTo(872, 250); c.lineTo(872, 290); c.stroke(); c.fillStyle = '#c99a5b'; c.fillRect(864, 290, 16, 14);
-  label('WORKSHOP', 725, 388, false); HOMEHIT.push({ x0: 630, x1: 890, y0: 250, y1: 400, id: 'workshop' });
-  // paths to each building and a few trees
-  c.strokeStyle = '#efe9dc'; c.lineWidth = 9; c.lineCap = 'round'; for (const [x1, y1, x2, y2] of [[390, 380, 150, 292], [390, 380, 613, 300], [390, 380, 725, 372]]) { c.beginPath(); c.moveTo(x1, y1); c.quadraticCurveTo((x1 + x2) / 2, y1 + 10, x2, y2); c.stroke(); }
-  for (const [x, y, k] of [[262, 330, 1], [520, 342, .9], [30, 330, .8], [870, 330, 1], [600, 330, .7]]) { c.fillStyle = '#7a5a3a'; c.fillRect(x - 2 * k, y - 4, 4 * k, 12 * k); c.fillStyle = '#5b8c4a'; c.beginPath(); c.arc(x, y - 10 * k, 12 * k, 0, 7); c.fill(); c.fillStyle = '#7cad67'; c.beginPath(); c.arc(x - 3 * k, y - 13 * k, 7 * k, 0, 7); c.fill(); }
-  // Main Arena (front centre, biggest)
-  c.fillStyle = '#b7c7cf'; c.beginPath(); c.ellipse(390, 330, 230, 60, 0, 0, 7); c.fill();
-  c.fillStyle = '#d7e6f1'; c.beginPath(); c.ellipse(390, 312, 230, 175, 0, Math.PI, 0); c.fill();
-  c.strokeStyle = '#8fb2cb'; c.lineWidth = 2.5; for (let i = 1; i < 8; i++) { c.beginPath(); c.ellipse(390, 312, 230 * i / 8, 175, 0, Math.PI, 0); c.stroke(); }
-  for (let k = 1; k < 4; k++) { c.beginPath(); c.ellipse(390, 312, 230, 175 * k / 4, 0, Math.PI, 0); c.stroke(); }
-  c.fillStyle = C.ink; c.fillRect(160, 300, 460, 26); for (let x = 175; x < 610; x += 115) txt(c, 'MAIN ARENA', x + 50, 313.5, C.hazard, `800 12px ${C.fd}`);
-  c.fillStyle = '#13212a'; c.beginPath(); c.roundRect(350, 326, 80, 44, [10, 10, 0, 0]); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(356, 332, 68, 6);
-  for (const [x, col] of [[220, '#c94a34'], [560, '#11806f']]) { c.strokeStyle = '#47637a'; c.lineWidth = 3; c.beginPath(); c.moveTo(x, 300); c.lineTo(x, 200); c.stroke(); c.fillStyle = col; c.beginPath(); c.moveTo(x, 200); c.lineTo(x + 36, 210); c.lineTo(x, 222); c.fill(); }
-  person(c, 300, -1, 'adult', '#c94a34', .5, true, 296, 272); person(c, 480, 1, 'adult', '#11806f', .5, true, 296, 272);
-  c.strokeStyle = '#8a6a3c'; c.lineWidth = 3; c.beginPath(); c.moveTo(286, 272); c.lineTo(494, 272); c.stroke(); drawCrate(c, 390, 296, null, 36, 30);
-  label('MAIN ARENA', 390, 120, true); HOMEHIT.push({ x0: 160, x1: 620, y0: 130, y1: 380, id: 'main' });
+  drawHomeArt(c, HOMEHIT);
+  HOMEHIT.sort((a, b) => ['workshop', 'drop', 'space', 'snow', 'main'].indexOf(a.id) - ['workshop', 'drop', 'space', 'snow', 'main'].indexOf(b.id));   // smaller targets win where they overlap
 }
 function homeClick(e) {
   const r = $('#cvHome').getBoundingClientRect(), x = (e.clientX - r.left) * 900 / r.width, y = (e.clientY - r.top) * 420 / r.height;
@@ -1739,8 +1860,11 @@ function openJournal() {
   const groups = {}; J.order.forEach(k => { const e = J.entries[k]; (groups[e.where] = groups[e.where] || []).push(k); });
   const back = h('div', { class: 'modalback', style: 'z-index:71' }); const sid = s => 'jg-' + s.replace(/\W+/g, '-');
   back.innerHTML = `<aside class="journal" role="dialog" aria-modal="true" aria-labelledby="jT"><div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
-    ${J.order.length ? `<nav class="jtoc"><div class="lbl">Contents</div><ul>${Object.keys(groups).map(g => `<li><button type="button" data-jgo="${sid(g)}"><b>${esc(g)}</b> · ${groups[g].length} card${groups[g].length > 1 ? 's' : ''}</button></li>`).join('')}<li><button type="button" data-jgo="jg-evidence"><b>Evidence of my learning</b> · ${E.length}</button></li></ul></nav>` : '<p>Your journal is empty for now. Every information card you read is saved here, along with the maths and questions you get right.</p>'}
+    ${J.order.length ? `<nav class="jtoc"><div class="lbl">Contents</div><ul>${Object.keys(groups).map(g => `<li><button type="button" data-jgo="${sid(g)}"><b>${esc(g)}</b> · ${groups[g].length} card${groups[g].length > 1 ? 's' : ''}</button></li>`).join('')}<li><button type="button" data-jgo="jg-runs"><b>My runs</b> · ${runsAll().length}</button></li><li><button type="button" data-jgo="jg-evidence"><b>Evidence of my learning</b> · ${E.length}</button></li></ul></nav>` : '<p>Your journal is empty for now. Every information card you read is saved here, along with the maths and questions you get right.</p>'}
     ${Object.keys(groups).map(g => `<section id="${sid(g)}"><h3 style="font-size:22px;margin-top:8px">${esc(g)}</h3>${groups[g].map(k => { const e = J.entries[k]; return `<details class="jent" ${k === J.last ? 'open' : ''}><summary>${esc(e.title)}${notes[k] ? ' <span title="Has my notes">✏️</span>' : ''}</summary><div class="gbody">${e.html}</div><label class="jnote"><span>My notes and questions</span><textarea data-jnote="${k}" rows="2" placeholder="Add your own notes, an example, or a question for your teacher.">${esc(notes[k] || '')}</textarea></label></details>`; }).join('')}</section>`).join('')}
+    <section id="jg-runs"><div class="jrh"><h3 style="font-size:22px;margin-top:8px">My runs</h3><button type="button" class="go sm" data-runs>Pop out ↗</button></div>
+    <p class="scaleNote">Every push, pull and launch, newest first. Press <b>Pop out</b> to keep them open beside the arena while you work.</p>
+    ${runsAll().length ? `<ol class="runlist">${runsAll().slice(-12).reverse().map(runItem).join('')}</ol>${runsAll().length > 12 ? `<p class="scaleNote">Showing your latest 12 of ${runsAll().length} runs. Pop out to see them all.</p>` : ''}` : '<p class="scaleNote">Your runs will appear here when you press Pull!, push or launch the crate.</p>'}</section>
     <section id="jg-evidence"><h3 style="font-size:22px;margin-top:8px">Evidence of my learning</h3>
     ${E.length ? `<ul class="evl">${E.slice().reverse().map(e => `<li>${EVICON[e.kind] || '•'} ${esc(e.text)}<small>${new Date(e.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></li>`).join('')}</ul>` : '<p class="scaleNote">Correct maths, finished questions and challenges will appear here automatically.</p>'}
     <div class="evadd"><textarea id="evOwn" rows="2" placeholder="Add your own evidence, for example: I worked out the weight of a 47 kg crate."></textarea><button type="button" class="ghost sm" id="evAdd" style="margin-top:6px">Add to my evidence</button></div></section></aside>`;
@@ -1754,6 +1878,137 @@ function openJournal() {
   setTimeout(() => $('#jClose', back).focus({ preventScroll: true }), 20);
 }
 let JOURNAL_OPENED = false;
+
+/* ===== My runs: a history of every push, pull and launch =====
+   Each button action starts a run. The run updates live while the crate moves, then is saved with a
+   plain-English sentence and the key numbers, so students can answer questions without re-running.
+   Shown in a pop-out side panel ("📋 My runs"), in the Journal, and under the Your turn questions. */
+let RUN = null, RUNSEQ = 0, RUNDIRTY = 0, RUNFILTER = 'step';
+const runsAll = () => dbGet('runs', []);
+function runWhere() {
+  if (VIEW === 'vExplore') return { sec: 'explore', label: 'Explore' };
+  if (VIEW === 'vChapter' && CH) {
+    const st = CHDATA[CH.id].steps[GI];
+    if (CTAB === 'challenge') return { sec: CH.id, step: 'challenge', label: `Chapter ${CH.n} ${CH.part} · Challenge` };
+    return { sec: CH.id, step: st && st.id, label: `Chapter ${CH.n} ${CH.part} · step ${GI + 1}` };
+  }
+  return { sec: 'other', label: 'Force HQ' };
+}
+/* start a run: called by the Pull!, push and launch buttons */
+function runMark(kind) {
+  if (RUN) runEnd('new');
+  const R = runsAll(); RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
+  const f = forces();
+  RUN = Object.assign({ n: RUNSEQ, kind, at: Date.now(), live: true, mass: S.mass, floor: S.floor, L: tot(S.left), R: tot(S.right), x0: S.x, t0: S.t,
+    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W }, runWhere());
+  R.push(RUN); if (R.length > 200) R.splice(0, R.length - 200); dbSet('runs', R); RUNDIRTY = 1;
+}
+/* update the live run every frame */
+function runTick(f, dt) {
+  if (!RUN) return;
+  const av = Math.abs(S.v);
+  if (av > RUN.top) RUN.top = av;
+  if (av > 0.005) { RUN.moved = true; RUN.lastV = av; }
+  RUN.dist = Math.abs(S.x - RUN.x0); RUN.dir = Math.sign(S.x - RUN.x0) || RUN.dir;
+  if (f.shove > RUN.push) RUN.push = f.shove;
+  if (av < 1e-6 && Math.abs(f.fr) > 0.5) { RUN.fs = Math.max(RUN.fs, Math.abs(f.fr)); if (S.running) RUN.stuckT += dt; }
+  if (av > 0.005 && Math.abs(f.fr) > 0.5) RUN.fk = Math.abs(f.fr);
+  RUN.L = Math.max(RUN.L, f.L); RUN.R = Math.max(RUN.R, f.R);
+  if (S.brakeFrom != null) { RUN.bd = S.x - S.brakeFrom; RUN.bt = S.t - S.brakeT; }
+  RUN.t = S.t - RUN.t0;
+  if (!S.running) runEnd(S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
+  else if (av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
+  RUNDIRTY = 1;
+}
+function runEnd(why) {
+  if (!RUN) return; RUN.live = false; RUN.out = why === 'new' || why === 'reset' ? (RUN.out === 'running' ? 'reset' : RUN.out) : why;
+  const R = runsAll(), i = R.findIndex(r => r.n === RUN.n && r.at === RUN.at); if (i >= 0) R[i] = RUN; dbSet('runs', R); RUN = null; RUNDIRTY = 1;
+}
+/* the sentence a student reads */
+const m2 = v => fmt(v, 2) + ' m', ms = v => fmt(v, 2) + ' m/s', NN = v => fmt(v, v < 100 && v % 1 ? 1 : 0) + ' N';
+function runText(r) {
+  const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
+  const dirw = r.dir > 0 ? 'right' : 'left', live = r.live && r.out === 'running';
+  if (r.kind === 'launch') {
+    const head = `You launched ${crate} at ${ms(r.v0)}${r.brakeOn ? ` with a ${NN(r.brakeF)} brake` : ''}.`;
+    if (live) return head + (r.bd != null ? ` The brake is on: it has slid ${m2(r.bd)} so far…` : ' It is gliding towards the brake line…');
+    if (r.out === 'braked') return head + ` It stopped ${m2(r.bd)} after the brake line, ${fmt(r.bt, 1)} s after the brake came on.`;
+    if (r.out === 'end') return head + ` It reached the end of the arena before it could stop${r.bd != null ? ` (it slid ${m2(r.bd)} after the brake line)` : ''}.`;
+    return head + ` The run stopped early after ${m2(r.dist)}.`;
+  }
+  if (r.kind === 'push') {
+    const head = `You pushed ${crate}.`;
+    if (live) return head + ` It is moving at ${ms(Math.abs(S.v))} and has travelled ${m2(r.dist)} so far…`;
+    if (!r.moved || r.out === 'still') return head + ` It didn't move: friction held it still${r.fs ? ` with up to ${NN(r.fs)}` : ''}.`;
+    if (r.out === 'end') return head + (Math.abs(r.lastV - r.top) < 0.02 ? ` It reached ${ms(r.top)} and kept that steady speed for ${m2(r.dist)}, all the way to the end of the arena.` : ` Its top speed was ${ms(r.top)}, and it travelled ${m2(r.dist)} to the end of the arena.`);
+    if (r.out === 'friction') return head + ` Its top speed was ${ms(r.top)}. Friction${r.fk ? ` (${NN(r.fk)})` : ''} slowed it down and it stopped after ${m2(r.dist)}, ${fmt(r.t, 1)} s after the push.`;
+    return head + (steady ? ` It glided at a steady ${ms(r.top)} and had travelled ${m2(r.dist)} when the run was stopped.` : ` Its top speed was ${ms(r.top)}, and it travelled ${m2(r.dist)} before the run was stopped.`);
+  }
+  const head = r.L < 0.5 ? `The right team pulled ${crate} with ${NN(r.R)}.` : r.R < 0.5 ? `The left team pulled ${crate} with ${NN(r.L)}.` : `Tug-of-war on ${crate}: left team ${NN(r.L)}, right team ${NN(r.R)}.`;
+  if (!r.moved) return head + (Math.abs(r.L - r.R) < 0.5 ? ' The pulls were balanced, so the crate stayed still.' : ` Friction held the crate still with ${NN(r.fs || Math.abs(r.L - r.R))}.`) + (live ? '' : '');
+  if (live) return head + ` The crate is moving ${dirw} at ${ms(Math.abs(S.v))} and has travelled ${m2(r.dist)} so far…`;
+  if (r.out === 'end') return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} to the end of the arena.`;
+  return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
+}
+function runChips(r) {
+  const c = [['Mass', r.mass + ' kg'], ['Floor', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor]];
+  if (r.kind === 'pull') { c.push(['Left', NN(r.L)], ['Right', NN(r.R)]); }
+  if (r.kind === 'launch') { c.push(['Launch speed', ms(r.v0)]); if (r.brakeOn) c.push(['Brake', NN(r.brakeF)]); }
+  if (r.fs && !r.moved) c.push(['Friction', NN(r.fs)]); else if (r.fk) c.push(['Friction', NN(r.fk)]);
+  c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]);
+  if (r.bd != null) c.push(['After brake line', m2(r.bd)], ['Time to stop', fmt(r.bt, 1) + ' s']);
+  return c;
+}
+const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
+const KINDICON = { push: '👋', pull: '🪢', launch: '🚀' };
+function runItem(r) {
+  const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return `<li class="run ${r.live ? 'live' : ''}"><div class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></div><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></li>`;
+}
+function runsFor(filter) {
+  const w = runWhere(), R = runsAll().slice().reverse();
+  if (filter === 'step') return R.filter(r => r.sec === w.sec && r.step === w.step);
+  if (filter === 'section') return R.filter(r => r.sec === w.sec);
+  return R;
+}
+/* ---- the pop-out panel ---- */
+function runsPanelHTML() {
+  const L = runsFor(RUNFILTER), w = runWhere();
+  return `<div class="rphead"><h2>📋 My runs</h2><button type="button" class="ghost sm" id="rpClose" aria-label="Close my runs">✕</button></div>
+    <p class="scaleNote">Every push, pull and launch is saved here, newest first, so you can look back at your results while you answer questions.</p>
+    <div class="seg3" role="group" aria-label="Which runs to show">${[['step', w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'], ['section', 'This section'], ['all', 'All']].map(([k, t]) => `<button type="button" data-rf="${k}" aria-pressed="${RUNFILTER === k}">${t}</button>`).join('')}</div>
+    ${L.length ? `<ol class="runlist">${L.map(runItem).join('')}</ol>` : `<p class="rempty">No runs here yet. Press <b>Pull!</b>, give the crate a push or launch it, and your results will appear here.</p>`}
+    ${runsAll().length ? `<button type="button" class="mini" id="rpClear">Clear all my runs</button>` : ''}`;
+}
+function runsOpen(on) {
+  const p = $('#runsPanel'); if (!p) return; const open = on == null ? p.hidden : on;
+  p.hidden = !open; document.body.classList.toggle('runsopen', open); $('#runsTab').setAttribute('aria-expanded', open);
+  if (open) { RUNDIRTY = 1; runsRefresh(true); }
+}
+function runsRefresh(force) {
+  if (!RUNDIRTY && !force) return; RUNDIRTY = 0;
+  const p = $('#runsPanel');
+  if (p && !p.hidden) { const sc = p.scrollTop; p.innerHTML = runsPanelHTML(); p.scrollTop = sc; }
+  const mini = $('#qCard .qruns'); if (mini) mini.outerHTML = qRunsHTML();
+  const tab = $('#runsTab .rc'); if (tab) tab.textContent = runsFor('step').length;
+}
+/* a short list under the Your turn questions */
+function qRunsHTML() {
+  const L = runsFor('step').slice(0, 3);
+  return `<div class="qruns"><div class="qrh"><span class="lbl">Your runs in this step</span><button type="button" class="linkbtn2" data-runs>All my runs ↗</button></div>${L.length ? `<ol class="runlist mini">${L.map(runItem).join('')}</ol>` : `<p class="scaleNote">No runs yet in this step. Close this box and try it in the arena: your results will appear here.</p>`}</div>`;
+}
+function initRuns() {
+  const tab = h('button', { type: 'button', class: 'runstab', id: 'runsTab', 'aria-expanded': 'false', 'aria-controls': 'runsPanel' }, `<span>📋 My runs</span><span class="rc">0</span>`);
+  const panel = h('aside', { class: 'runspanel', id: 'runsPanel', hidden: '', 'aria-label': 'My runs' });
+  document.body.append(tab, panel);
+  document.addEventListener('click', e => {
+    if (e.target.closest('#runsTab') || e.target.closest('[data-runs]')) { const fromJ = e.target.closest('.journal'); if (fromJ) { const b = fromJ.closest('.modalback'); if (b) b.remove(); } runsOpen(e.target.closest('#runsTab') ? null : true); return; }
+    if (e.target.closest('#rpClose')) { runsOpen(false); return; }
+    const f = e.target.closest('[data-rf]'); if (f) { RUNFILTER = f.dataset.rf; runsRefresh(true); return; }
+    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
+  });
+  setInterval(() => runsRefresh(), 250);
+}
 
 /* ===== Free-body diagram builder: drag arrows from the centre, label them, auto-check =====
    Scenario: { id, obj:'crate'|'book'|'ball', label, brief, forces:[{type,dir,value}], toScale, scale } */
@@ -2229,9 +2484,11 @@ function qChrome() {
     const last = GI === CHDATA[CH.id].steps.length - 1, chd = CHDATA[CH.id];
     ft.innerHTML = `<button type="button" class="ghost" id="qBack">← Back to the arena</button><button type="button" class="go ${done ? 'ready' : ''}" id="qNext">${last ? (chd.challenge ? 'To the Challenge →' : 'To the Check →') : 'Next step →'}</button>`;
     $('#qBack').addEventListener('click', () => qPlace('dock')); $('#qNext').addEventListener('click', tryNext);
+    const old = $('.qruns', qc); if (old) old.remove();
+    if (['run', 'shove', 'launch'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
     hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
-    $('#qOpen').addEventListener('click', () => qPlace('pop'));
+    $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qruns', qc); if (old) old.remove();
     ft.innerHTML = '';
   }
   const n = $('#gNext'); if (n && !stepDone(CH.id, GI) && hasQs() && !done) n.textContent = 'Next: questions →';
@@ -3007,7 +3264,7 @@ function openExplore() {
   LAB.onChange = null; LAB.tick = () => { TRYTHIS.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDone', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho();
+  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);

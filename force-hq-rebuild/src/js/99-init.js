@@ -15,7 +15,7 @@ function openExplore() {
   LAB.onChange = null; LAB.tick = () => { TRYTHIS.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDone', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho();
+  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);

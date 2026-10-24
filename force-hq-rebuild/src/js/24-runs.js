@@ -1,0 +1,130 @@
+/* ===== My runs: a history of every push, pull and launch =====
+   Each button action starts a run. The run updates live while the crate moves, then is saved with a
+   plain-English sentence and the key numbers, so students can answer questions without re-running.
+   Shown in a pop-out side panel ("📋 My runs"), in the Journal, and under the Your turn questions. */
+let RUN = null, RUNSEQ = 0, RUNDIRTY = 0, RUNFILTER = 'step';
+const runsAll = () => dbGet('runs', []);
+function runWhere() {
+  if (VIEW === 'vExplore') return { sec: 'explore', label: 'Explore' };
+  if (VIEW === 'vChapter' && CH) {
+    const st = CHDATA[CH.id].steps[GI];
+    if (CTAB === 'challenge') return { sec: CH.id, step: 'challenge', label: `Chapter ${CH.n} ${CH.part} · Challenge` };
+    return { sec: CH.id, step: st && st.id, label: `Chapter ${CH.n} ${CH.part} · step ${GI + 1}` };
+  }
+  return { sec: 'other', label: 'Force HQ' };
+}
+/* start a run: called by the Pull!, push and launch buttons */
+function runMark(kind) {
+  if (RUN) runEnd('new');
+  const R = runsAll(); RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
+  const f = forces();
+  RUN = Object.assign({ n: RUNSEQ, kind, at: Date.now(), live: true, mass: S.mass, floor: S.floor, L: tot(S.left), R: tot(S.right), x0: S.x, t0: S.t,
+    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W }, runWhere());
+  R.push(RUN); if (R.length > 200) R.splice(0, R.length - 200); dbSet('runs', R); RUNDIRTY = 1;
+}
+/* update the live run every frame */
+function runTick(f, dt) {
+  if (!RUN) return;
+  const av = Math.abs(S.v);
+  if (av > RUN.top) RUN.top = av;
+  if (av > 0.005) { RUN.moved = true; RUN.lastV = av; }
+  RUN.dist = Math.abs(S.x - RUN.x0); RUN.dir = Math.sign(S.x - RUN.x0) || RUN.dir;
+  if (f.shove > RUN.push) RUN.push = f.shove;
+  if (av < 1e-6 && Math.abs(f.fr) > 0.5) { RUN.fs = Math.max(RUN.fs, Math.abs(f.fr)); if (S.running) RUN.stuckT += dt; }
+  if (av > 0.005 && Math.abs(f.fr) > 0.5) RUN.fk = Math.abs(f.fr);
+  RUN.L = Math.max(RUN.L, f.L); RUN.R = Math.max(RUN.R, f.R);
+  if (S.brakeFrom != null) { RUN.bd = S.x - S.brakeFrom; RUN.bt = S.t - S.brakeT; }
+  RUN.t = S.t - RUN.t0;
+  if (!S.running) runEnd(S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
+  else if (av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
+  RUNDIRTY = 1;
+}
+function runEnd(why) {
+  if (!RUN) return; RUN.live = false; RUN.out = why === 'new' || why === 'reset' ? (RUN.out === 'running' ? 'reset' : RUN.out) : why;
+  const R = runsAll(), i = R.findIndex(r => r.n === RUN.n && r.at === RUN.at); if (i >= 0) R[i] = RUN; dbSet('runs', R); RUN = null; RUNDIRTY = 1;
+}
+/* the sentence a student reads */
+const m2 = v => fmt(v, 2) + ' m', ms = v => fmt(v, 2) + ' m/s', NN = v => fmt(v, v < 100 && v % 1 ? 1 : 0) + ' N';
+function runText(r) {
+  const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
+  const dirw = r.dir > 0 ? 'right' : 'left', live = r.live && r.out === 'running';
+  if (r.kind === 'launch') {
+    const head = `You launched ${crate} at ${ms(r.v0)}${r.brakeOn ? ` with a ${NN(r.brakeF)} brake` : ''}.`;
+    if (live) return head + (r.bd != null ? ` The brake is on: it has slid ${m2(r.bd)} so far…` : ' It is gliding towards the brake line…');
+    if (r.out === 'braked') return head + ` It stopped ${m2(r.bd)} after the brake line, ${fmt(r.bt, 1)} s after the brake came on.`;
+    if (r.out === 'end') return head + ` It reached the end of the arena before it could stop${r.bd != null ? ` (it slid ${m2(r.bd)} after the brake line)` : ''}.`;
+    return head + ` The run stopped early after ${m2(r.dist)}.`;
+  }
+  if (r.kind === 'push') {
+    const head = `You pushed ${crate}.`;
+    if (live) return head + ` It is moving at ${ms(Math.abs(S.v))} and has travelled ${m2(r.dist)} so far…`;
+    if (!r.moved || r.out === 'still') return head + ` It didn't move: friction held it still${r.fs ? ` with up to ${NN(r.fs)}` : ''}.`;
+    if (r.out === 'end') return head + (Math.abs(r.lastV - r.top) < 0.02 ? ` It reached ${ms(r.top)} and kept that steady speed for ${m2(r.dist)}, all the way to the end of the arena.` : ` Its top speed was ${ms(r.top)}, and it travelled ${m2(r.dist)} to the end of the arena.`);
+    if (r.out === 'friction') return head + ` Its top speed was ${ms(r.top)}. Friction${r.fk ? ` (${NN(r.fk)})` : ''} slowed it down and it stopped after ${m2(r.dist)}, ${fmt(r.t, 1)} s after the push.`;
+    return head + (steady ? ` It glided at a steady ${ms(r.top)} and had travelled ${m2(r.dist)} when the run was stopped.` : ` Its top speed was ${ms(r.top)}, and it travelled ${m2(r.dist)} before the run was stopped.`);
+  }
+  const head = r.L < 0.5 ? `The right team pulled ${crate} with ${NN(r.R)}.` : r.R < 0.5 ? `The left team pulled ${crate} with ${NN(r.L)}.` : `Tug-of-war on ${crate}: left team ${NN(r.L)}, right team ${NN(r.R)}.`;
+  if (!r.moved) return head + (Math.abs(r.L - r.R) < 0.5 ? ' The pulls were balanced, so the crate stayed still.' : ` Friction held the crate still with ${NN(r.fs || Math.abs(r.L - r.R))}.`) + (live ? '' : '');
+  if (live) return head + ` The crate is moving ${dirw} at ${ms(Math.abs(S.v))} and has travelled ${m2(r.dist)} so far…`;
+  if (r.out === 'end') return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} to the end of the arena.`;
+  return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
+}
+function runChips(r) {
+  const c = [['Mass', r.mass + ' kg'], ['Floor', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor]];
+  if (r.kind === 'pull') { c.push(['Left', NN(r.L)], ['Right', NN(r.R)]); }
+  if (r.kind === 'launch') { c.push(['Launch speed', ms(r.v0)]); if (r.brakeOn) c.push(['Brake', NN(r.brakeF)]); }
+  if (r.fs && !r.moved) c.push(['Friction', NN(r.fs)]); else if (r.fk) c.push(['Friction', NN(r.fk)]);
+  c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]);
+  if (r.bd != null) c.push(['After brake line', m2(r.bd)], ['Time to stop', fmt(r.bt, 1) + ' s']);
+  return c;
+}
+const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
+const KINDICON = { push: '👋', pull: '🪢', launch: '🚀' };
+function runItem(r) {
+  const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+  return `<li class="run ${r.live ? 'live' : ''}"><div class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></div><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></li>`;
+}
+function runsFor(filter) {
+  const w = runWhere(), R = runsAll().slice().reverse();
+  if (filter === 'step') return R.filter(r => r.sec === w.sec && r.step === w.step);
+  if (filter === 'section') return R.filter(r => r.sec === w.sec);
+  return R;
+}
+/* ---- the pop-out panel ---- */
+function runsPanelHTML() {
+  const L = runsFor(RUNFILTER), w = runWhere();
+  return `<div class="rphead"><h2>📋 My runs</h2><button type="button" class="ghost sm" id="rpClose" aria-label="Close my runs">✕</button></div>
+    <p class="scaleNote">Every push, pull and launch is saved here, newest first, so you can look back at your results while you answer questions.</p>
+    <div class="seg3" role="group" aria-label="Which runs to show">${[['step', w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'], ['section', 'This section'], ['all', 'All']].map(([k, t]) => `<button type="button" data-rf="${k}" aria-pressed="${RUNFILTER === k}">${t}</button>`).join('')}</div>
+    ${L.length ? `<ol class="runlist">${L.map(runItem).join('')}</ol>` : `<p class="rempty">No runs here yet. Press <b>Pull!</b>, give the crate a push or launch it, and your results will appear here.</p>`}
+    ${runsAll().length ? `<button type="button" class="mini" id="rpClear">Clear all my runs</button>` : ''}`;
+}
+function runsOpen(on) {
+  const p = $('#runsPanel'); if (!p) return; const open = on == null ? p.hidden : on;
+  p.hidden = !open; document.body.classList.toggle('runsopen', open); $('#runsTab').setAttribute('aria-expanded', open);
+  if (open) { RUNDIRTY = 1; runsRefresh(true); }
+}
+function runsRefresh(force) {
+  if (!RUNDIRTY && !force) return; RUNDIRTY = 0;
+  const p = $('#runsPanel');
+  if (p && !p.hidden) { const sc = p.scrollTop; p.innerHTML = runsPanelHTML(); p.scrollTop = sc; }
+  const mini = $('#qCard .qruns'); if (mini) mini.outerHTML = qRunsHTML();
+  const tab = $('#runsTab .rc'); if (tab) tab.textContent = runsFor('step').length;
+}
+/* a short list under the Your turn questions */
+function qRunsHTML() {
+  const L = runsFor('step').slice(0, 3);
+  return `<div class="qruns"><div class="qrh"><span class="lbl">Your runs in this step</span><button type="button" class="linkbtn2" data-runs>All my runs ↗</button></div>${L.length ? `<ol class="runlist mini">${L.map(runItem).join('')}</ol>` : `<p class="scaleNote">No runs yet in this step. Close this box and try it in the arena: your results will appear here.</p>`}</div>`;
+}
+function initRuns() {
+  const tab = h('button', { type: 'button', class: 'runstab', id: 'runsTab', 'aria-expanded': 'false', 'aria-controls': 'runsPanel' }, `<span>📋 My runs</span><span class="rc">0</span>`);
+  const panel = h('aside', { class: 'runspanel', id: 'runsPanel', hidden: '', 'aria-label': 'My runs' });
+  document.body.append(tab, panel);
+  document.addEventListener('click', e => {
+    if (e.target.closest('#runsTab') || e.target.closest('[data-runs]')) { const fromJ = e.target.closest('.journal'); if (fromJ) { const b = fromJ.closest('.modalback'); if (b) b.remove(); } runsOpen(e.target.closest('#runsTab') ? null : true); return; }
+    if (e.target.closest('#rpClose')) { runsOpen(false); return; }
+    const f = e.target.closest('[data-rf]'); if (f) { RUNFILTER = f.dataset.rf; runsRefresh(true); return; }
+    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
+  });
+  setInterval(() => runsRefresh(), 250);
+}

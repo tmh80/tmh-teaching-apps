@@ -457,7 +457,7 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .sectile .open{align-self:auto}
 .minis{font-size:12.5px;color:var(--muted);font-weight:700}.minis.on{color:var(--good)}.minis.on::before{content:'✓ '}
 .route{margin-top:14px;display:flex;flex-direction:column;gap:8px}
-.routegrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;position:relative}
+.routegrid{display:grid;grid-template-columns:repeat(var(--n,4),minmax(0,1fr));gap:12px;position:relative}
 .routegrid::before{content:'';position:absolute;left:24px;right:24px;top:-4px;border-top:2.5px dashed var(--line)}
 .stop{background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;position:relative}
 .stop::before{content:'';position:absolute;top:-9px;left:22px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2.5px solid var(--line)}
@@ -529,3 +529,31 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .blog li.ok{color:var(--good);font-weight:700}
 .qfig{margin:8px 0 2px}
 #brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:nowrap;align-items:center}
+/* ===== My runs: history of pushes, pulls and launches ===== */
+.runstab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:62;writing-mode:vertical-rl;background:var(--herobg);color:#fff;border:0;border-radius:12px 0 0 12px;padding:14px 9px;font-family:var(--f-display);font-weight:800;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:8px;box-shadow:-4px 6px 18px rgba(0,0,0,.25)}
+.runstab .rc{writing-mode:horizontal-tb;background:var(--hazard);color:#1b1404;border-radius:999px;min-width:22px;padding:1px 6px;font-size:13px;text-align:center}
+body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runspanel,body.runsopen .runstab{display:none}
+.runspanel{position:fixed;top:0;right:0;bottom:0;width:min(380px,100%);z-index:63;background:var(--panel);border-left:1px solid var(--line);box-shadow:-14px 0 30px rgba(0,0,0,.18);padding:14px 16px 24px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.rphead{display:flex;justify-content:space-between;align-items:center;position:sticky;top:-14px;background:var(--panel);padding:4px 0;z-index:1}
+.rphead h2{font-size:26px}
+.seg3{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg3 button{flex:1;border:0;background:var(--chip);padding:7px 6px;font-weight:700;font-size:14px}
+.seg3 button[aria-pressed="true"]{background:var(--accent);color:#fff}
+.rempty{color:var(--muted);margin:0}
+.runlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.run{border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;background:var(--bg);display:flex;flex-direction:column;gap:5px}
+.run.live{border-color:var(--hazard);background:var(--hazard-soft)}
+.run .rh{display:flex;gap:4px 8px;align-items:baseline;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.run .rh b{font-family:var(--f-display);font-size:17px;color:var(--ink)}
+.run .rh .tm{margin-left:auto}
+.run p{margin:0;font-size:14.5px;line-height:1.45}
+.rchips{display:flex;flex-wrap:wrap;gap:4px}
+.rchips span{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:1px 7px;font-family:var(--f-num);font-size:12.5px;font-weight:700;display:flex;flex-direction:column;line-height:1.2}
+.rchips small{font-family:var(--f-body);font-weight:700;font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.qruns{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.qrh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.runlist.mini .run{background:var(--panel)}
+.linkbtn2{background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px;padding:0;font-size:14px}
+.jrh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+@media (min-width:1180px){body.runsopen main,body.runsopen .top{margin-right:396px;margin-left:16px;max-width:none}}
+@media print{.runstab,.runspanel{display:none!important}}
