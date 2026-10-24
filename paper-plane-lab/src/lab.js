@@ -180,8 +180,11 @@ function drawTape(){
   c.fillStyle=S.env==='outside'?'#6db35e':'#cdb084';c.fillRect(0,74,W,H-74);
   c.fillStyle='#f4e08a';c.fillRect(0,74,W,46);c.strokeStyle='#8a7a2a';c.lineWidth=1.5;c.strokeRect(0,74,W,46);
   c.fillStyle='#4a3f10';c.font='bold 18px system-ui,sans-serif';c.textAlign='center';
-  /* same marks as the big tape: long every 100 cm, medium every 50 cm, short every 10 cm */
-  for(let cm=x0;cm<=x0+100;cm+=10){const X=(cm-x0)*pxcm,big=cm%100===0,mid=cm%50===0;c.beginPath();c.moveTo(X,74);c.lineTo(X,74+(big?34:mid?24:14));c.stroke();if(mid&&X>30&&X<W-30)c.fillText(String(cm),X,116)}
+  /* same marks as the big tape: long every 100 cm, medium every 50 cm, short every 10 cm.
+     Every 10 cm mark has a number, so there are always several numbers to work out the gaps from. */
+  for(let cm=x0;cm<=x0+100;cm+=10){const X=(cm-x0)*pxcm,big=cm%100===0,mid=cm%50===0;c.beginPath();c.moveTo(X,74);c.lineTo(X,74+(big?34:mid?24:14));c.stroke();
+    if(X>48&&X<W-30){c.font=(big?'bold 19px ':mid?'bold 17px ':'15px ')+'system-ui,sans-serif';c.fillText(String(cm),X,116)}}
+  c.font='bold 18px system-ui,sans-serif';
   c.textAlign='left';c.fillText('cm',6,116);
   const nx=(LAB.res.fl.landX*100-x0)*pxcm;
   c.save();c.translate(nx,72);c.fillStyle='#f7f7f2';c.strokeStyle='#4a5565';c.lineWidth=2;
@@ -244,10 +247,10 @@ function stopwatchHTML(need){
     <button class="btn" data-act="lab:swreset" ${can?'':'disabled'}>Reset</button>
     <span class="note">Press <b>Start</b> when the plane leaves the ${S.launch==='launcher'&&!isExplore()?'launcher':'hand'} and <b>Stop</b> when it lands. The space bar works too.</span></div></div>`;
 }
-function tapeInner(){return`<p class="note" style="margin:0 0 6px">The red dashed line shows where the nose of the plane touched the ground. The tape has a mark every 10 cm. Read the tape and <b>estimate the last digit</b>.</p><canvas id="tape" class="cv" width="${TAPE_N}" height="128" aria-label="Zoomed tape measure" style="margin-bottom:8px"></canvas>`}
+function tapeInner(){return`<p class="note" style="margin:0 0 6px">The red dashed line shows where the nose of the plane touched the ground. The numbers on the tape are in cm, with a mark every 10 cm. Read the tape and <b>estimate the last digit</b>.</p><canvas id="tape" class="cv" width="${TAPE_N}" height="128" aria-label="Zoomed tape measure" style="margin-bottom:8px"></canvas>`}
 function tapePanelHTML(){
   return`<div class="panel"><h4>Read the tape${S.dv==='time'?' (optional)':''}</h4>
-    <p class="note" style="margin-bottom:6px">The red dashed line shows where the nose of the plane touched the ground. The tape has a mark every 10 cm. Read the tape and <b>estimate the last digit</b>.${S.dv==='dist'?' Type your reading into your results table.':''}</p>
+    <p class="note" style="margin-bottom:6px">The red dashed line shows where the nose of the plane touched the ground. The numbers on the tape are in cm, with a mark every 10 cm. Read the tape and <b>estimate the last digit</b>.${S.dv==='dist'?' Type your reading into your results table.':''}</p>
     <canvas id="tape" class="cv" width="${TAPE_N}" height="128" aria-label="Zoomed tape measure"></canvas></div>`;
 }
 function cellFb(){

@@ -78,6 +78,7 @@ Students choose a level at the start; it is then locked and printed in the heade
 
 **Measuring by hand**
 - Students measure everything themselves: read the scale and estimate the last digit (never show the value), time with a stopwatch, type averages.
+- **Every zoomed scale shows at least two numbers**, ideally one on every marked line (e.g. 1120, 1130, 1140 … on a tape marked every 10 cm), so students can always work out what each gap is worth. A view with only one number in it is unreadable.
 - Make it simple: a zoomed scale, a 3-2-1 countdown before timed events, the needed control highlighted, the reading shown beside the entry box ("⏱ Your stopwatch reads 1.78 s"), a "Keep it or redo it?" box, a calculator.
 - **Never jump the page or steal keyboard focus during measuring** (the space bar must still work the stopwatch). Use buttons instead: "📋 Write my time in my table ↓" and "⬆ Back to the flight view"; after keep or redo, go back up to the experiment. Show only the tools the measurement needs.
 
