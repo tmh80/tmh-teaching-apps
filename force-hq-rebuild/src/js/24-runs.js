@@ -2,7 +2,7 @@
    Each button action starts a run. The run updates live while the crate moves, then is saved with a
    plain-English sentence and the key numbers, so students can answer questions without re-running.
    Shown in a pop-out side panel ("📋 My runs"), in the Journal, and under the Your turn questions. */
-let RUN = null, RUNSEQ = 0, RUNDIRTY = 0, RUNFILTER = 'step';
+let RUN = null, RUNSEQ = 0, RUNDIRTY = 0;
 const runsAll = () => dbGet('runs', []);
 function runWhere() {
   if (VIEW === 'vExplore') return { sec: 'explore', label: 'Explore' };
@@ -80,51 +80,36 @@ function runChips(r) {
 }
 const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
 const KINDICON = { push: '👋', pull: '🪢', launch: '🚀' };
-function runItem(r) {
-  const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  return `<li class="run ${r.live ? 'live' : ''}"><div class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></div><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></li>`;
+/* one run: this step's runs are open; earlier runs fold to a one-line summary (the student can open any of them) */
+const RUNOPEN = {};
+function runItem(r, open) {
+  const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), id = r.n + '-' + r.at;
+  const isOpen = RUNOPEN[id] != null ? RUNOPEN[id] : open;
+  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
 }
-function runsFor(filter) {
-  const w = runWhere(), R = runsAll().slice().reverse();
-  if (filter === 'step') return R.filter(r => r.sec === w.sec && r.step === w.step);
-  if (filter === 'section') return R.filter(r => r.sec === w.sec);
-  return R;
+const sameStep = r => { const w = runWhere(); return r.sec === w.sec && r.step === w.step; };
+function runsTabHTML() {
+  const R = runsAll().slice().reverse(), here = R.filter(sameStep), rest = R.filter(r => !sameStep(r)), w = runWhere();
+  if (!R.length) return `<p class="rempty">No runs yet. Press <b>Pull!</b>, give the crate a push or launch it, and every result is saved here with its numbers, so you can look back at it while you answer questions.</p>`;
+  return `<p class="scaleNote">Every push, pull and launch is saved here, newest first. Runs from this step are open. Tap any older run to open it.</p>
+    <h3 class="jh3">${w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'}</h3>${here.length ? `<ol class="runlist">${here.map(r => runItem(r, true)).join('')}</ol>` : '<p class="scaleNote">No runs in this step yet.</p>'}
+    ${rest.length ? `<h3 class="jh3">Earlier runs</h3><ol class="runlist">${rest.map(r => runItem(r, false)).join('')}</ol>` : ''}
+    <button type="button" class="mini" id="rpClear">Clear all my runs</button>`;
 }
-/* ---- the pop-out panel ---- */
-function runsPanelHTML() {
-  const L = runsFor(RUNFILTER), w = runWhere();
-  return `<div class="rphead"><h2>📋 My runs</h2><button type="button" class="ghost sm" id="rpClose" aria-label="Close my runs">✕</button></div>
-    <p class="scaleNote">Every push, pull and launch is saved here, newest first, so you can look back at your results while you answer questions.</p>
-    <div class="seg3" role="group" aria-label="Which runs to show">${[['step', w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'], ['section', 'This section'], ['all', 'All']].map(([k, t]) => `<button type="button" data-rf="${k}" aria-pressed="${RUNFILTER === k}">${t}</button>`).join('')}</div>
-    ${L.length ? `<ol class="runlist">${L.map(runItem).join('')}</ol>` : `<p class="rempty">No runs here yet. Press <b>Pull!</b>, give the crate a push or launch it, and your results will appear here.</p>`}
-    ${runsAll().length ? `<button type="button" class="mini" id="rpClear">Clear all my runs</button>` : ''}`;
-}
-function runsOpen(on) {
-  const p = $('#runsPanel'); if (!p) return; const open = on == null ? p.hidden : on;
-  p.hidden = !open; document.body.classList.toggle('runsopen', open); $('#runsTab').setAttribute('aria-expanded', open);
-  if (open) { RUNDIRTY = 1; runsRefresh(true); }
-}
+const runsFor = () => runsAll().filter(sameStep);
 function runsRefresh(force) {
   if (!RUNDIRTY && !force) return; RUNDIRTY = 0;
-  const p = $('#runsPanel');
-  if (p && !p.hidden) { const sc = p.scrollTop; p.innerHTML = runsPanelHTML(); p.scrollTop = sc; }
-  const mini = $('#qCard .qruns'); if (mini) mini.outerHTML = qRunsHTML();
-  const tab = $('#runsTab .rc'); if (tab) tab.textContent = runsFor('step').length;
+  if (typeof journalOpen === 'function' && journalOpen() && JTAB === 'runs') renderJournal();
+  const b = $('#qCard .qrunsbtn .rc'); if (b) b.textContent = runsFor().length;
 }
-/* a short list under the Your turn questions */
+/* the big "See my runs" button in the Your turn box */
 function qRunsHTML() {
-  const L = runsFor('step').slice(0, 3);
-  return `<div class="qruns"><div class="qrh"><span class="lbl">Your runs in this step</span><button type="button" class="linkbtn2" data-runs>All my runs ↗</button></div>${L.length ? `<ol class="runlist mini">${L.map(runItem).join('')}</ol>` : `<p class="scaleNote">No runs yet in this step. Close this box and try it in the arena: your results will appear here.</p>`}</div>`;
+  const n = runsFor().length;
+  return `<button type="button" class="qrunsbtn" data-runs><span class="ic">📋</span><span><b>See my runs</b><small>Your results are saved in your Journal</small></span><span class="rc">${n}</span></button>`;
 }
 function initRuns() {
-  const tab = h('button', { type: 'button', class: 'runstab', id: 'runsTab', 'aria-expanded': 'false', 'aria-controls': 'runsPanel' }, `<span>📋 My runs</span><span class="rc">0</span>`);
-  const panel = h('aside', { class: 'runspanel', id: 'runsPanel', hidden: '', 'aria-label': 'My runs' });
-  document.body.append(tab, panel);
   document.addEventListener('click', e => {
-    if (e.target.closest('#runsTab') || e.target.closest('[data-runs]')) { const fromJ = e.target.closest('.journal'); if (fromJ) { const b = fromJ.closest('.modalback'); if (b) b.remove(); } runsOpen(e.target.closest('#runsTab') ? null : true); return; }
-    if (e.target.closest('#rpClose')) { runsOpen(false); return; }
-    const f = e.target.closest('[data-rf]'); if (f) { RUNFILTER = f.dataset.rf; runsRefresh(true); return; }
-    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
+    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); RUNDIRTY = 1; runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
   });
   setInterval(() => runsRefresh(), 250);
 }

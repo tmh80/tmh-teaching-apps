@@ -12,8 +12,8 @@ with sync_playwright() as p:
   assert 'force' in v1 and 'resultant' not in v1, 'only words on screen count'
   ev("setStep(4)"); pg.wait_for_timeout(1800); v2 = ev("Object.keys(dbGet('vocab',{}))"); print('after resultant step:', v2)
   assert 'resultant' in v2
-  pg.locator('.top [data-journal]').click(); pg.wait_for_timeout(400)
+  pg.locator('.top [data-journal]').click(); pg.wait_for_timeout(300); pg.locator('#journal [data-jtab="vocab"]').click(); pg.wait_for_timeout(300)
   n = pg.locator('.journal .vitem').count(); print('journal words:', n); assert n == len(v2)
-  pg.locator('#jg-vocab').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'vocab_journal.png')
+  pg.screenshot(path=OUT + 'vocab_journal.png')
   pg.fill('#vSearch', 'resul'); pg.wait_for_timeout(100); shown = pg.locator('.journal .vitem:not([hidden])').count(); print('search "resul":', shown); assert shown >= 1 and pg.locator('.journal .vitem[data-v="resultant force"]').is_visible()
   print('errors', errs)

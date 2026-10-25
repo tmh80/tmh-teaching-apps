@@ -26,6 +26,8 @@ const WS_CSS = `
 .ws .opt{margin:2px 0}
 .ws .look{background:#eef8f1;border:1px solid #9ccfae;border-radius:6px;padding:4px 8px;margin-top:4px;font-size:10pt}
 .ws .qfig{margin:4px 0 6px}.ws .qfig svg{width:95mm!important;max-width:95mm!important;border:1px solid #cbd7dc}
+.ws .stepsum ul{columns:2;column-gap:8mm;list-style:none;padding:0;margin:2px 0 6px;font-size:10pt}.ws .stepsum li{break-inside:avoid;margin:1px 0}
+.ws .words{margin:2px 0 6px;font-size:10.5pt}
 .ws .fbdbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .ws .fbdbox svg{width:100%;height:auto}
 .ws .mk{float:right;font-size:9pt;color:#555;font-weight:400}
@@ -56,15 +58,23 @@ function wsQuestion(q, i, mode, s) {
   else if (q.type === 'sort') body = `<table><tr><th>Item</th>${q.groups.map(g => `<th style="width:22%">${g}</th>`).join('')}</tr>${sortItems(q).map(ii => `<tr><td>${q.items[ii][0]}</td>${q.groups.map((_, gi) => `<td style="text-align:center">${(stu && v && v[ii] === gi) || (key && q.items[ii][1] === gi) ? W('✓') : ''}</td>`).join('')}</tr>`).join('')}</table><p class="note">Tick one box in each row.</p>`;
   else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
   else if (q.type === 'fbd') body = `<div class="fbdbox"><div>${q.scen.brief}${key ? `<div class="look"><b>Look for:</b><br>${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N, ${DIRWORD[f.dir]}`).join('<br>')}<br>All arrows start at the centre; bigger forces have longer arrows.</div>` : stu && s && s.v && s.v.lastRes ? `<p style="font-size:10pt">Checks passed in the sim: ${s.v.lastRes.chips.filter(c => c[2]).map(c => c[1]).join(', ') || 'none'}</p>` : ''}</div><div>${stu ? (v && v.arrows && v.arrows.length ? `<div class="stu">${FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true })}</div>` : '<div class="box" style="height:60mm">Not drawn in the sim.</div>') : key ? FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }) : `<div style="border:1.5px dashed #9aa9b0;border-radius:6px">${blankFbd(q.scen)}</div>`}</div></div>`;
-  else if (q.type === 'explain') body = stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6);
+  else if (q.type === 'explain') body = (q.words ? `<p class="words"><b>Words to use in a good answer:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6));
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   return `<div class="q"><div class="qh">Question ${i + 1}. ${q.type === 'gap' ? 'Fill the gaps.' : qp} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
+}
+/* "Steps completed in the sim": a tick list of the Learn steps and Challenge missions, so the teacher (and Toddle AI)
+   can see the student did the work that leads up to the questions. Blue ticks are from the sim. */
+function stepsSummary(chId, mode) {
+  const d = CHDATA[chId], done = dbGet('learnDone.' + chId, {}), chal = d.challenge ? dbGet('chal.' + chId, {}) : {}, stu = mode === 'student';
+  const box = ok => stu && ok ? '<span class="stu">☑</span>' : '☐';
+  const rows = d.steps.map((s, i) => `<li>${box(done[s.id])} Learn step ${i + 1}: ${esc(s.title)}</li>`).concat(d.challenge ? d.challenge.missions.map(m => `<li>${box(chal[m.id] && chal[m.id].tried)} Challenge: ${esc(m.title)}</li>`) : []);
+  return `<div class="stepsum"><h2>Steps completed in the sim</h2><p class="note">${stu ? 'A blue tick means the sim recorded this step as done.' : mode === 'key' ? 'Students tick these in the sim. Not marked: they show the work done before the questions.' : 'The sim ticks each step the student finished before answering the questions.'}</p><ul>${rows.join('')}</ul></div>`;
 }
 function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
   const partA = R.filter(q => !['fbd', 'explain'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain'].includes(q.type));
   const num = q => R.indexOf(q);
-  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -81,6 +91,7 @@ function markingInstructions(title, total) {
   <ul><li>Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.</li>
   <li>The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.</li>
   <li>The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.</li>
+  <li>The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.</li>
   <li>A blank question, or an empty template, scores 0. Add a kind note saying what is missing.</li>
   <li>Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.</li></ul><p><b>Total: ${total} marks.</b></p>`;
 }
@@ -95,7 +106,7 @@ function markItem(q, i) {
     case 'gap': return `Q${n} (${m} marks, 1 per gap): ` + q.ans.map((a, k) => `gap ${k + 1}: ${a[0]} (also accept ${gapAccepts(a).filter(w => w !== gapNorm(a[0])).join(', ') || 'any correct scientific word'})`).join('; ') + '.';
     case 'table': return `Q${n} (${m} marks, 1 per cell): ` + q.rows.map(r => `${r[0]}: ${q.cols.map((c, j) => `${c} = ${q.choices[j][r[1][j]]}`).join(', ')}`).join('; ') + '.';
     case 'fbd': return `Q${n} (${m} marks): 1 mark for each correct arrow (right force, right direction, right size): ${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N ${DIRWORD[f.dir]}`).join('; ')}. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.`;
-    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
+    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
   }
   return '';
 }

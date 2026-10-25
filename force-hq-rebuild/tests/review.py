@@ -17,7 +17,7 @@ async def main():
       t=(await r.locator('span').inner_text()).strip(); await r.locator('select').select_option(label='Non-contact force' if ('magnet' in t or 'gravity' in t or 'weight' in t) else 'Contact force')
     await q(2).locator('.qchk').click()
     await q(3).locator('.ansin').fill('230.3'); await q(3).locator('.qchk').click()
-    await q(5).locator('button[data-o]', has_text='Two forces act').click()
+    await q(5).locator('button[data-o]', has_text='and they are the same size').click()
     ins=q(9).locator('.gapin'); await ins.nth(0).fill('newtons'); await ins.nth(1).fill('9.8'); await ins.nth(2).fill('against'); await q(9).locator('.qchk').click()
     vals=[['kilograms (kg)','newtons (N)'],['No, it is not a force','Yes, it is a force'],['a balance (scales)','a newtonmeter'],['No, it stays the same','Yes, it gets smaller']]
     for i in range(4):

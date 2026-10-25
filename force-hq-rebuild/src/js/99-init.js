@@ -15,13 +15,13 @@ function openExplore() {
   LAB.onChange = null; LAB.tick = () => { TRYTHIS.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDone', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
   document.addEventListener('click', e => {
     const t = e.target;
-    if (t.closest('[data-journal]')) { openJournal(); return; }
+    if (t.closest('[data-journal]')) { if (journalOpen()) closeJournal(); else openJournal(); return; }
     const op = t.closest('[data-open]'); if (op) { if (op.closest('[data-close]') || op.closest('.modal')) closeModal(); openChapter(op.dataset.open); return; }
     const tab = t.closest('#chTabs [data-ctab]'); if (tab) { setCTab(tab.dataset.ctab); return; }
     const tg = t.closest('[data-ctab-go]'); if (tg) { setCTab(tg.dataset.ctabGo); return; }
@@ -37,7 +37,7 @@ function init() {
     if (t.closest('#saveWorkBtn')) { if (!user().name && !isTeacher()) { askWho(false); return; } openSheet(null, 'progress'); return; }
   });
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#modal').hidden) closeModal(); else if (QSTATE === 'pop') qPlace('dock'); });
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#modal').hidden) closeModal(); else if (QSTATE === 'pop') qPlace('dock'); else if (journalOpen()) closeJournal(); });
   qDragInit();   // the pop-up layer is click-through now, so clicks on the arena reach the arena
   show('vHome');
   if (!user().name && !user().teacher) askWho(true);

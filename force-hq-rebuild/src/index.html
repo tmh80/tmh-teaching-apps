@@ -92,12 +92,13 @@
           <div class="seg two" id="floors"></div>
         </div>
         <div data-panel="mass">
-          <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="num" id="massOut">50 kg</span></div>
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="numbox"><input type="number" id="massNum" min="10" max="150" step="1" value="50" inputmode="numeric" aria-label="Crate mass in kilograms: type a number"><span>kg</span></span></div>
           <input type="range" id="mass" min="10" max="150" step="1" value="50" aria-label="Crate mass in kilograms">
         </div>
         <div data-panel="brake">
-          <div class="ctlh"><h3><button type="button" class="term tl" data-t="brake">Brake force</button></h3><span class="num" id="brakeOut">40 N</span><button type="button" class="info" data-info="brake" aria-label="How does the brake work?">ⓘ</button></div>
-          <input type="range" id="brakeF" min="5" max="200" step="1" value="40" aria-label="Brake force in newtons">
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="brake">Brake force</button></h3><span class="numbox"><input type="number" id="brakeNum" min="5" max="200" step="1" value="40" inputmode="numeric" aria-label="Brake force in newtons: type a number"><span>N</span></span><button type="button" class="info" data-info="brake" aria-label="How does the brake work?">ⓘ</button></div>
+          <div class="slidewrap"><input type="range" id="brakeF" min="5" max="200" step="1" value="40" aria-label="Brake force in newtons"><div class="bmarks" id="bMarks" aria-hidden="true"></div></div>
+          <p class="bmnote" id="bmNote" hidden></p>
           <div class="nudge"><button type="button" class="mini" data-bk="-1">−1 N</button><button type="button" class="mini" data-bk="1">+1 N</button></div>
         </div>
       </aside>

@@ -50,7 +50,7 @@ with sync_playwright() as p:
   pg.screenshot(path=OUT + 'i1.png')
   import json; S1 = json.loads(sp)
   print(num('q1', f"{S1['24']:.2f}"), '|', num('q2', f"{S1['61']:.2f}"), '|', num('q3', f"{S1['147']:.2f}"), '|', opt('q4', '6 times more slowly')); state('i1'); nxt()
-  cards(); push(150); print(opt('q1', 'how hard it is to change')); print(gap('q2', ['mass', 'more difficult'])); state('i2'); nxt()
+  cards(); push(48); v48 = ev('S.flags.sp[48]'); print(opt('q1', 'how hard it is to change')); print(gap('q2', ['mass', 'more difficult'])); print(num('q3', f'{v48:.2f}'), '|', num('q4', '0.78')); state('i2'); nxt()
   cards(); push(61); pg.wait_for_timeout(1200); pg.locator('#cvVT').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'i3_graph.png')
   v = ev("S.flags.sp[61]"); print(num('q1', f"{v:.1f}"), '|', opt('q2', 'steady speed')); state('i3'); nxt()
   cards(); pg.click('#rail [data-pred="1"]'); launch(24); pg.screenshot(path=OUT + 'i4_24.png'); launch(61); pg.screenshot(path=OUT + 'i4_61.png')
@@ -66,9 +66,9 @@ with sync_playwright() as p:
   launch(); pg.locator('#cvVT').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'x1.png', full_page=True)
   st = ev("S.flags.st[55]"); print('stop time', st)
   print(num('q1', '1.8'), '|', num('q2', f"{st:.1f}"), '|', opt('q3', 'Only the weight and the normal force')); state('x1'); nxt()
-  cards(); launch(40, 48); launch(120, 48); launch(120, 144); pg.screenshot(path=OUT + 'x2.png')
+  cards(); launch(40, 48); launch(120, 48); launch(120, 150); print('marks', ev('JSON.stringify(LAB.bmarks)')); launch(120, 144); pg.screenshot(path=OUT + 'x2.png')
   f2 = ev("JSON.stringify([S.flags.car48, S.flags.truck48, S.flags.truckOK])"); print('x2 flags', f2); c48, t48, ok = json.loads(f2)
-  print(num('q1', f"{c48:.2f}"), '|', num('q2', f"{t48:.2f}"), '|', num('q3', '144'), '|', opt('q4', '3 times the brake force')); state('x2'); nxt(); pg.wait_for_timeout(500)
+  print(num('q1', f"{c48:.2f}"), '|', num('q2', f"{t48:.2f}"), '|', num('q3', '3'), '|', num('q4', f'{t48/c48:.2f}'), '|', num('q5', '144'), '|', opt('q6', '3 times the brake force')); state('x2'); nxt(); pg.wait_for_timeout(500)
   print('tab', ev("CTAB"))
   # challenge: crate 1 miss then hit, crate 2 hit, crate 3 hit
   def ch_launch(F):

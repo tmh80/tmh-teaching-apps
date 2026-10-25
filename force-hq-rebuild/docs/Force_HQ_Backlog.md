@@ -19,6 +19,7 @@
 
 ## Banked ideas
 - **Flashcards with spaced repetition** (Tom, 25 Oct 2026; for every sim and lab, not just Force HQ): cards built from the key vocabulary each student has met (`DB.vocab`), reviewed on a spaced-repetition schedule. Once built, add it to the sim builder and virtual lab builder skills.
+- Chapter 2 polish from Tom's play-through (25 Oct 2026) done: slider number boxes, too-high/too-low markers, Journal tabs, scaffolded maths, words to use, steps summary, distractor rewrite. Ask Tom to replay the Inertia Extension and brake Challenge.
 - Chapter 2: small drawings for the real-life inertia examples (seatbelt, tablecloth, bowling ball).
 - Chapter 2: a "Put in order" question type (order objects by inertia) for the worksheets.
 - Port the fun facts from the old build, gated by chapter.

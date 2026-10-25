@@ -106,7 +106,7 @@ const QT = {
     show(q, v) { return (v || []).map(i => '☑ ' + q.opts[i]).join('<br>') || '–'; }, model(q) { return q.a.map(i => '☑ ' + q.opts[i]).join('<br>'); }
   },
   explain: {
-    html(q, s) { return `<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${s && s.v ? esc(s.v.text || '') : ''}</textarea><button type="button" class="ghost sm qchk" style="align-self:flex-start">Show the model answer</button><div class="modelwrap"></div>`; },
+    html(q, s) { return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${s && s.v ? esc(s.v.text || '') : ''}</textarea><button type="button" class="ghost sm qchk" style="align-self:flex-start">Show the model answer</button><div class="modelwrap"></div>`; },
     bind(el, q, api) {
       const showModel = (ticks) => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p><div class="lbl">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks && ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div>`;
         $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const t = $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck); api.answer({ text: $('.explain', el).value, ticks: t }, null, null, { quiet: true, score: t.length }); })); };

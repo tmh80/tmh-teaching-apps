@@ -350,7 +350,7 @@ textarea.explain{font:inherit;font-size:15px;width:100%;min-height:90px;border:1
 .modal h2{font-size:28px}
 .modal input[type=text],.modal input[type=password]{font:inherit;font-size:17px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%;background:var(--panel);color:var(--ink)}
 .modal label{font-weight:700;display:flex;flex-direction:column;gap:4px}
-.journal{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);z-index:72;background:var(--panel);box-shadow:-10px 0 30px rgba(0,0,0,.3);padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.journal{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);z-index:64;background:var(--panel);border-left:1px solid var(--line);box-shadow:-14px 0 30px rgba(0,0,0,.18);display:flex;flex-direction:column}
 .jtop{display:flex;justify-content:space-between;align-items:center}
 .jtop h2{font-size:30px}
 .jtoc{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--chip)}
@@ -579,7 +579,7 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .blog{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:2px;font-size:15px}.blog:empty{display:none}
 .blog li.ok{color:var(--good);font-weight:700}
 .qfig{margin:8px 0 2px}
-#brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:nowrap;align-items:center}
+#brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:wrap;align-items:center;row-gap:4px}
 /* ===== My runs: history of pushes, pulls and launches ===== */
 .runstab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:62;writing-mode:vertical-rl;background:var(--herobg);color:#fff;border:0;border-radius:12px 0 0 12px;padding:14px 9px;font-family:var(--f-display);font-weight:800;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:8px;box-shadow:-4px 6px 18px rgba(0,0,0,.25)}
 .runstab .rc{writing-mode:horizontal-tb;background:var(--hazard);color:#1b1404;border-radius:999px;min-width:22px;padding:1px 6px;font-size:13px;text-align:center}
@@ -615,6 +615,42 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
 .vitem dt{font-family:var(--f-display);font-weight:800;font-size:18px}
 .vitem dd{margin:2px 0 0;font-size:15px}
 .vitem dd small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+
+/* Journal side panel with tabs (Runs, Notes, Vocab) */
+.journal .jtop{padding:14px 16px 8px}
+.jtabs{display:flex;gap:4px;padding:0 12px;border-bottom:1.5px solid var(--line)}
+.jtabs button{flex:1;border:0;background:none;padding:9px 6px;font-weight:800;font-size:15px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+.jtabs button span{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:0 7px;font-size:12px;font-weight:700}
+.jtabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.jbody{flex:1;overflow:auto;padding:12px 16px 90px;display:flex;flex-direction:column;gap:8px}
+.jh3{font-size:21px;margin-top:6px}
+.run > summary{cursor:pointer;list-style:none}
+.run > summary::-webkit-details-marker{display:none}
+.run > summary b::before{content:'▸ ';color:var(--muted)} .run[open] > summary b::before{content:'▾ '}
+.run:not([open]){padding:7px 11px}
+.qrunsbtn{display:flex;align-items:center;gap:12px;width:100%;border:2px solid var(--accent);background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;text-align:left}
+.qrunsbtn .ic{font-size:26px}
+.qrunsbtn b{display:block;font-family:var(--f-display);font-size:21px}
+.qrunsbtn small{color:var(--muted);font-size:13.5px}
+.qrunsbtn .rc{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;min-width:28px;padding:2px 9px;text-align:center;font-weight:800}
+@media (min-width:1180px){body.jopen main,body.jopen .top{margin-right:446px;margin-left:16px;max-width:none}}
+.calcFab{z-index:69}
+@media (min-width:1180px){body.jopen .calcFab{right:446px}}
+@media (max-width:1179px){body.jopen .calcFab{bottom:16px;right:16px}}
+/* typed number boxes beside sliders, and too-high / too-low markers */
+.numbox{display:inline-flex;align-items:center;gap:4px;font-family:var(--f-num);font-weight:700}
+.numbox input{width:64px;font:inherit;font-size:15px;padding:3px 6px;border:1.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);text-align:right}
+.numbox input:focus{border-color:var(--accent)}
+.slidewrap{position:relative}
+.slidewrap input[type=range]{width:100%}
+.bmarks{position:absolute;left:8px;right:8px;top:50%;height:0;pointer-events:none}
+.bmarks i{position:absolute;top:-11px;width:5px;height:22px;border-radius:3px;transform:translateX(-50%);box-shadow:0 0 0 1.5px var(--panel)}
+.bmarks i.hi{background:#d6402c}.bmarks i.lo{background:#e3b21c}
+.bmnote{margin:2px 0 0;font-size:13px;color:var(--muted);line-height:1.35}
+.bmnote .hi{color:#d6402c}.bmnote .lo{color:#c99a10}
+.wordsuse{border:1.5px dashed var(--accent);border-radius:10px;padding:7px 10px;background:var(--accent-soft);display:flex;flex-direction:column;gap:4px}
+.wordsuse div{display:flex;flex-wrap:wrap;gap:6px}
+.wordsuse b{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:14.5px}
 
 </style>
 <header class="top">
@@ -711,12 +747,13 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
           <div class="seg two" id="floors"></div>
         </div>
         <div data-panel="mass">
-          <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="num" id="massOut">50 kg</span></div>
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="mass">Crate mass</button></h3><span class="numbox"><input type="number" id="massNum" min="10" max="150" step="1" value="50" inputmode="numeric" aria-label="Crate mass in kilograms: type a number"><span>kg</span></span></div>
           <input type="range" id="mass" min="10" max="150" step="1" value="50" aria-label="Crate mass in kilograms">
         </div>
         <div data-panel="brake">
-          <div class="ctlh"><h3><button type="button" class="term tl" data-t="brake">Brake force</button></h3><span class="num" id="brakeOut">40 N</span><button type="button" class="info" data-info="brake" aria-label="How does the brake work?">ⓘ</button></div>
-          <input type="range" id="brakeF" min="5" max="200" step="1" value="40" aria-label="Brake force in newtons">
+          <div class="ctlh"><h3><button type="button" class="term tl" data-t="brake">Brake force</button></h3><span class="numbox"><input type="number" id="brakeNum" min="5" max="200" step="1" value="40" inputmode="numeric" aria-label="Brake force in newtons: type a number"><span>N</span></span><button type="button" class="info" data-info="brake" aria-label="How does the brake work?">ⓘ</button></div>
+          <div class="slidewrap"><input type="range" id="brakeF" min="5" max="200" step="1" value="40" aria-label="Brake force in newtons"><div class="bmarks" id="bMarks" aria-hidden="true"></div></div>
+          <p class="bmnote" id="bmNote" hidden></p>
           <div class="nudge"><button type="button" class="mini" data-bk="-1">−1 N</button><button type="button" class="mini" data-bk="1">+1 N</button></div>
         </div>
       </aside>
@@ -893,8 +930,10 @@ function stepSim(dt) {
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
 function resetSim() { if (RUN) runEnd('reset'); S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
-function launch() { resetSim(); S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
+function clearCh2() { if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+/* after a braked run aimed at a target distance, move the too-high / too-low markers */
+function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
 /* ===== Drawing: arena, pullers, animals, live free-body diagram ===== */
 let C = {};
@@ -1270,9 +1309,13 @@ function initPal() {
 function syncRun() { const b = $('#runBtn'); if (!b) return; b.textContent = S.running ? 'Pause' : 'Pull!'; b.classList.toggle('pause', S.running); }
 function renderControls() {
   $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => !LAB.floors || LAB.floors.includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
-  const m = $('#mass'); m.value = S.mass; $('#massOut').textContent = S.mass + ' kg';
+  const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
-  const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; $('#brakeOut').textContent = S.brakeF + ' N'; }
+  const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
+  /* trial-and-error markers: red = a brake force that was too strong (stopped short), yellow = too weak (slid past) */
+  const B = LAB.bmarks, mk = $('#bMarks'), note = $('#bmNote');
+  if (mk) { const pos = v => `${(v - 5) / 195 * 100}%`; mk.innerHTML = B ? (B.hi != null ? `<i class="hi" style="left:${pos(B.hi)}" title="Too high"></i>` : '') + (B.lo != null ? `<i class="lo" style="left:${pos(B.lo)}" title="Too low"></i>` : '') : '';
+    note.hidden = !B || (B.hi == null && B.lo == null); if (B) note.innerHTML = `${B.lo != null ? `<span class="lo">●</span> too low: ${B.lo} N` : ''}${B.lo != null && B.hi != null ? ' · ' : ''}${B.hi != null ? `<span class="hi">●</span> too high: ${B.hi} N` : ''}${B.lo != null && B.hi != null ? `<br>The right brake force is between them.` : ''}`; }
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
@@ -1284,7 +1327,11 @@ function initControls() {
   $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
   $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
   $('#floors').addEventListener('click', e => { const b = e.target.closest('[data-floor]'); if (!b) return; S.floor = b.dataset.floor; resetSim(); labChanged(); });
-  $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massOut').textContent = S.mass + ' kg'; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
+  $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massNum').value = S.mass; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
+  /* typed number boxes: any value the slider allows can be typed in (applied on Enter or when the box loses focus) */
+  const typed = (inp, lo, hi, set) => { const go = () => { const v = parseNum(inp.value); if (isNaN(v)) { renderControls(); return; } set(clamp(Math.round(v), lo, hi)); }; inp.addEventListener('change', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); inp.blur(); } }); };
+  typed($('#massNum'), 10, 150, v => { S.mass = v; if (!S.running) resetSim(); labChanged(); });
+  typed($('#brakeNum'), 5, 200, v => setBrake(v));
   $('#tgVert').addEventListener('change', e => { LAB.showVert = e.target.checked; });
   $('#tgRes').addEventListener('change', e => { LAB.showRes = e.target.checked; });
 }
@@ -1675,7 +1722,7 @@ function refreshWho() {
 
 /* ===== Pop-out calculator (safe parser, never eval) ===== */
 function calcEval(src) {
-  const s = src.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/\s+/g, '').replace(/g/gi, '(9.8)');
+  const s = src.replace(/[×xX]/g, '*').replace(/÷/g, '/').replace(/−/g, '-').replace(/\s+/g, '').replace(/g/gi, '(9.8)');
   let i = 0;
   const peek = () => s[i], eat = ch => { if (s[i] === ch) { i++; return true; } return false; };
   function num() { const m = /^(\d+\.?\d*|\.\d+)/.exec(s.slice(i)); if (!m) throw new Error('Check your sum: something is missing.'); i += m[0].length; return parseFloat(m[0]); }
@@ -1692,11 +1739,12 @@ function initCalc() {
     <div class="disp"><div class="last" id="calcLast"></div><input id="calcIn" inputmode="decimal" aria-label="Calculator display" autocomplete="off"></div>
     <div class="cmsg" id="calcMsg"></div>
     <div class="keys">${['C', '(', ')', '⌫', '7', '8', '9', '÷', '4', '5', '6', '×', '1', '2', '3', '−', '0', '.', 'g', '+'].map(k => `<button type="button" data-k="${k}" class="${'÷×−+'.includes(k) ? 'op' : k === 'g' ? 'g' : ''}" ${k === 'g' ? 'title="g = 9.8 N/kg"' : ''}>${k}</button>`).join('')}<button type="button" data-k="=" class="eq" style="grid-column:1/-1">=</button></div>
-    <div class="scaleNote">The <b>g</b> key is 9.8 N/kg. Weight = mass × g.</div>`;
+    <div class="scaleNote">The <b>g</b> key is 9.8 N/kg. Weight = mass × g. You can type <b>x</b> or <b>*</b> to multiply and <b>/</b> to divide.</div>`;
   const inp = $('#calcIn');
   const run = () => { try { const v = calcEval(inp.value); if (v === '') return; $('#calcLast').textContent = inp.value + ' ='; inp.value = String(v); $('#calcMsg').textContent = ''; } catch (e) { $('#calcMsg').textContent = e.message; } };
   el.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; const k = b.dataset.k;
     if (k === 'C') { inp.value = ''; $('#calcLast').textContent = ''; $('#calcMsg').textContent = ''; } else if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '=') run(); else inp.value += k; });
+  inp.addEventListener('input', () => { const v = inp.value, w = v.replace(/[xX*]/g, '×').replace(/\//g, '÷'); if (w !== v) { const p = inp.selectionStart; inp.value = w; inp.setSelectionRange(p, p); } });   // typing x or * shows ×, / shows ÷
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); run(); } if (e.key === 'Escape') toggleCalc(false); });
   $('#calcX').addEventListener('click', () => toggleCalc(false));
   $('#calcFab').addEventListener('click', () => toggleCalc());
@@ -1882,29 +1930,46 @@ function vocabHTML() {
     <input type="search" class="vsearch" id="vSearch" placeholder="Find a word…" aria-label="Find a word">
     <dl class="vocab">${ks.map(k => `<div class="vitem" data-v="${esc(TERMS[k][0].toLowerCase())}"><dt>${esc(TERMS[k][0])}</dt><dd>${esc(TERMS[k][1])}${V[k].where ? `<small>First met: ${esc(V[k].where)}</small>` : ''}</dd></div>`).join('')}</dl>`;
 }
-function openJournal() {
+/* The Journal: a side panel beside the arena with three tabs.
+   Runs: every push, pull and launch (this step's runs open, earlier ones folded). Notes: the saved info cards
+   with the student's own notes, plus evidence of learning. Vocab: every key word met so far. */
+let JTAB = 'runs', JRUNS_SEEN = false;
+function openJournal(tab) {
+  if (tab) JTAB = tab; const p = $('#journal'); if (!p) return;
+  p.hidden = false; document.body.classList.add('jopen'); renderJournal();
+  JOURNAL_OPENED = true; if (JTAB === 'runs') JRUNS_SEEN = true; if (LAB.onChange) LAB.onChange();
+  setTimeout(() => { const c = $('#jClose'); if (c) c.focus({ preventScroll: true }); }, 20);
+}
+function closeJournal() { const p = $('#journal'); if (!p || p.hidden) return; p.hidden = true; document.body.classList.remove('jopen'); }
+const journalOpen = () => { const p = $('#journal'); return !!(p && !p.hidden); };
+function journalNotesHTML() {
   const J = dbGet('journal', { order: [], entries: {} }), notes = dbGet('jnotes', {}), E = dbGet('evidence', []);
   const groups = {}; J.order.forEach(k => { const e = J.entries[k]; (groups[e.where] = groups[e.where] || []).push(k); });
-  const back = h('div', { class: 'modalback', style: 'z-index:71' }); const sid = s => 'jg-' + s.replace(/\W+/g, '-');
-  back.innerHTML = `<aside class="journal" role="dialog" aria-modal="true" aria-labelledby="jT"><div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
-    ${J.order.length ? `<nav class="jtoc"><div class="lbl">Contents</div><ul>${Object.keys(groups).map(g => `<li><button type="button" data-jgo="${sid(g)}"><b>${esc(g)}</b> · ${groups[g].length} card${groups[g].length > 1 ? 's' : ''}</button></li>`).join('')}<li><button type="button" data-jgo="jg-vocab"><b>Key vocabulary</b> · ${Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length}</button></li><li><button type="button" data-jgo="jg-runs"><b>My runs</b> · ${runsAll().length}</button></li><li><button type="button" data-jgo="jg-evidence"><b>Evidence of my learning</b> · ${E.length}</button></li></ul></nav>` : '<p>Your journal is empty for now. Every information card you read is saved here, along with the maths and questions you get right.</p>'}
-    ${Object.keys(groups).map(g => `<section id="${sid(g)}"><h3 style="font-size:22px;margin-top:8px">${esc(g)}</h3>${groups[g].map(k => { const e = J.entries[k]; return `<details class="jent" ${k === J.last ? 'open' : ''}><summary>${esc(e.title)}${notes[k] ? ' <span title="Has my notes">✏️</span>' : ''}</summary><div class="gbody">${e.html}</div><label class="jnote"><span>My notes and questions</span><textarea data-jnote="${k}" rows="2" placeholder="Add your own notes, an example, or a question for your teacher.">${esc(notes[k] || '')}</textarea></label></details>`; }).join('')}</section>`).join('')}
-    <section id="jg-vocab"><h3 style="font-size:22px;margin-top:8px">Key vocabulary</h3>${vocabHTML()}</section>
-    <section id="jg-runs"><div class="jrh"><h3 style="font-size:22px;margin-top:8px">My runs</h3><button type="button" class="go sm" data-runs>Pop out ↗</button></div>
-    <p class="scaleNote">Every push, pull and launch, newest first. Press <b>Pop out</b> to keep them open beside the arena while you work.</p>
-    ${runsAll().length ? `<ol class="runlist">${runsAll().slice(-12).reverse().map(runItem).join('')}</ol>${runsAll().length > 12 ? `<p class="scaleNote">Showing your latest 12 of ${runsAll().length} runs. Pop out to see them all.</p>` : ''}` : '<p class="scaleNote">Your runs will appear here when you press Pull!, push or launch the crate.</p>'}</section>
-    <section id="jg-evidence"><h3 style="font-size:22px;margin-top:8px">Evidence of my learning</h3>
-    ${E.length ? `<ul class="evl">${E.slice().reverse().map(e => `<li>${EVICON[e.kind] || '•'} ${esc(e.text)}<small>${new Date(e.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></li>`).join('')}</ul>` : '<p class="scaleNote">Correct maths, finished questions and challenges will appear here automatically.</p>'}
-    <div class="evadd"><textarea id="evOwn" rows="2" placeholder="Add your own evidence, for example: I worked out the weight of a 47 kg crate."></textarea><button type="button" class="ghost sm" id="evAdd" style="margin-top:6px">Add to my evidence</button></div></section></aside>`;
-  document.body.appendChild(back);
-  const close = () => { back.remove(); document.removeEventListener('keydown', k); }, k = e => { if (e.key === 'Escape') close(); };
-  document.addEventListener('keydown', k); back.addEventListener('click', e => { if (e.target === back) close(); }); $('#jClose', back).addEventListener('click', close);
-  $$('[data-jgo]', back).forEach(b => b.addEventListener('click', () => { const t = $('#' + b.dataset.jgo, back); if (t) t.scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth' }); }));
-  $$('[data-jnote]', back).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
-  const vs = $('#vSearch', back); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', back).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
-  $('#evAdd', back).addEventListener('click', () => { const v = $('#evOwn', back).value.trim(); if (!v) return; addEvidence('own', v); close(); openJournal(); });
-  JOURNAL_OPENED = true; if (LAB.onChange) LAB.onChange();
-  setTimeout(() => $('#jClose', back).focus({ preventScroll: true }), 20);
+  return (J.order.length ? Object.keys(groups).map(g => `<section><h3 class="jh3">${esc(g)}</h3>${groups[g].map(k => { const e = J.entries[k]; return `<details class="jent" ${k === J.last ? 'open' : ''}><summary>${esc(e.title)}${notes[k] ? ' <span title="Has my notes">✏️</span>' : ''}</summary><div class="gbody">${e.html}</div><label class="jnote"><span>My notes and questions</span><textarea data-jnote="${k}" rows="2" placeholder="Add your own notes, an example, or a question for your teacher.">${esc(notes[k] || '')}</textarea></label></details>`; }).join('')}</section>`).join('')
+    : '<p class="scaleNote">Every information card you read is saved here, so you can read it again and add your own notes.</p>')
+    + `<section><h3 class="jh3">Evidence of my learning</h3>${E.length ? `<ul class="evl">${E.slice().reverse().map(e => `<li>${EVICON[e.kind] || '•'} ${esc(e.text)}<small>${new Date(e.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></li>`).join('')}</ul>` : '<p class="scaleNote">Correct maths, finished questions and challenges will appear here automatically.</p>'}
+      <div class="evadd"><textarea id="evOwn" rows="2" placeholder="Add your own evidence, for example: I worked out the weight of a 47 kg crate."></textarea><button type="button" class="ghost sm" id="evAdd" style="margin-top:6px">Add to my evidence</button></div></section>`;
+}
+function renderJournal() {
+  const p = $('#journal'); if (!p || p.hidden) return;
+  const nR = runsAll().length, nV = Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length, nN = dbGet('journal', { order: [] }).order.length;
+  const sc = $('.jbody', p) ? $('.jbody', p).scrollTop : 0, same = p.dataset.tab === JTAB;
+  p.innerHTML = `<div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
+    <div class="jtabs" role="tablist" aria-label="Journal sections">${[['runs', '📋 Runs', nR], ['notes', '📝 Notes', nN], ['vocab', '🔤 Vocab', nV]].map(([k, t, n]) => `<button type="button" role="tab" data-jtab="${k}" aria-selected="${JTAB === k}">${t}<span>${n}</span></button>`).join('')}</div>
+    <div class="jbody">${JTAB === 'runs' ? runsTabHTML() : JTAB === 'notes' ? journalNotesHTML() : `<h3 class="jh3">Key vocabulary</h3>${vocabHTML()}`}</div>`;
+  p.dataset.tab = JTAB; if (same) $('.jbody', p).scrollTop = sc;
+  $$('[data-jnote]', p).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
+  const vs = $('#vSearch', p); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', p).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
+  const ea = $('#evAdd', p); if (ea) ea.addEventListener('click', () => { const v = $('#evOwn', p).value.trim(); if (!v) return; addEvidence('own', v); renderJournal(); });
+  $$('details.run', p).forEach(d => d.addEventListener('toggle', () => { RUNOPEN[d.dataset.run] = d.open; }));
+}
+function initJournal() {
+  const p = h('aside', { class: 'journal', id: 'journal', hidden: '', 'aria-label': 'My Journal' }); document.body.appendChild(p);
+  document.addEventListener('click', e => {
+    if (e.target.closest('#jClose')) { closeJournal(); return; }
+    const t = e.target.closest('[data-jtab]'); if (t) { JTAB = t.dataset.jtab; if (JTAB === 'runs') JRUNS_SEEN = true; renderJournal(); if (LAB.onChange) LAB.onChange(); return; }
+    if (e.target.closest('[data-runs]')) { openJournal('runs'); return; }
+  });
 }
 let JOURNAL_OPENED = false;
 
@@ -1912,7 +1977,7 @@ let JOURNAL_OPENED = false;
    Each button action starts a run. The run updates live while the crate moves, then is saved with a
    plain-English sentence and the key numbers, so students can answer questions without re-running.
    Shown in a pop-out side panel ("📋 My runs"), in the Journal, and under the Your turn questions. */
-let RUN = null, RUNSEQ = 0, RUNDIRTY = 0, RUNFILTER = 'step';
+let RUN = null, RUNSEQ = 0, RUNDIRTY = 0;
 const runsAll = () => dbGet('runs', []);
 function runWhere() {
   if (VIEW === 'vExplore') return { sec: 'explore', label: 'Explore' };
@@ -1990,51 +2055,36 @@ function runChips(r) {
 }
 const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
 const KINDICON = { push: '👋', pull: '🪢', launch: '🚀' };
-function runItem(r) {
-  const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-  return `<li class="run ${r.live ? 'live' : ''}"><div class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></div><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></li>`;
+/* one run: this step's runs are open; earlier runs fold to a one-line summary (the student can open any of them) */
+const RUNOPEN = {};
+function runItem(r, open) {
+  const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), id = r.n + '-' + r.at;
+  const isOpen = RUNOPEN[id] != null ? RUNOPEN[id] : open;
+  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
 }
-function runsFor(filter) {
-  const w = runWhere(), R = runsAll().slice().reverse();
-  if (filter === 'step') return R.filter(r => r.sec === w.sec && r.step === w.step);
-  if (filter === 'section') return R.filter(r => r.sec === w.sec);
-  return R;
+const sameStep = r => { const w = runWhere(); return r.sec === w.sec && r.step === w.step; };
+function runsTabHTML() {
+  const R = runsAll().slice().reverse(), here = R.filter(sameStep), rest = R.filter(r => !sameStep(r)), w = runWhere();
+  if (!R.length) return `<p class="rempty">No runs yet. Press <b>Pull!</b>, give the crate a push or launch it, and every result is saved here with its numbers, so you can look back at it while you answer questions.</p>`;
+  return `<p class="scaleNote">Every push, pull and launch is saved here, newest first. Runs from this step are open. Tap any older run to open it.</p>
+    <h3 class="jh3">${w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'}</h3>${here.length ? `<ol class="runlist">${here.map(r => runItem(r, true)).join('')}</ol>` : '<p class="scaleNote">No runs in this step yet.</p>'}
+    ${rest.length ? `<h3 class="jh3">Earlier runs</h3><ol class="runlist">${rest.map(r => runItem(r, false)).join('')}</ol>` : ''}
+    <button type="button" class="mini" id="rpClear">Clear all my runs</button>`;
 }
-/* ---- the pop-out panel ---- */
-function runsPanelHTML() {
-  const L = runsFor(RUNFILTER), w = runWhere();
-  return `<div class="rphead"><h2>📋 My runs</h2><button type="button" class="ghost sm" id="rpClose" aria-label="Close my runs">✕</button></div>
-    <p class="scaleNote">Every push, pull and launch is saved here, newest first, so you can look back at your results while you answer questions.</p>
-    <div class="seg3" role="group" aria-label="Which runs to show">${[['step', w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'], ['section', 'This section'], ['all', 'All']].map(([k, t]) => `<button type="button" data-rf="${k}" aria-pressed="${RUNFILTER === k}">${t}</button>`).join('')}</div>
-    ${L.length ? `<ol class="runlist">${L.map(runItem).join('')}</ol>` : `<p class="rempty">No runs here yet. Press <b>Pull!</b>, give the crate a push or launch it, and your results will appear here.</p>`}
-    ${runsAll().length ? `<button type="button" class="mini" id="rpClear">Clear all my runs</button>` : ''}`;
-}
-function runsOpen(on) {
-  const p = $('#runsPanel'); if (!p) return; const open = on == null ? p.hidden : on;
-  p.hidden = !open; document.body.classList.toggle('runsopen', open); $('#runsTab').setAttribute('aria-expanded', open);
-  if (open) { RUNDIRTY = 1; runsRefresh(true); }
-}
+const runsFor = () => runsAll().filter(sameStep);
 function runsRefresh(force) {
   if (!RUNDIRTY && !force) return; RUNDIRTY = 0;
-  const p = $('#runsPanel');
-  if (p && !p.hidden) { const sc = p.scrollTop; p.innerHTML = runsPanelHTML(); p.scrollTop = sc; }
-  const mini = $('#qCard .qruns'); if (mini) mini.outerHTML = qRunsHTML();
-  const tab = $('#runsTab .rc'); if (tab) tab.textContent = runsFor('step').length;
+  if (typeof journalOpen === 'function' && journalOpen() && JTAB === 'runs') renderJournal();
+  const b = $('#qCard .qrunsbtn .rc'); if (b) b.textContent = runsFor().length;
 }
-/* a short list under the Your turn questions */
+/* the big "See my runs" button in the Your turn box */
 function qRunsHTML() {
-  const L = runsFor('step').slice(0, 3);
-  return `<div class="qruns"><div class="qrh"><span class="lbl">Your runs in this step</span><button type="button" class="linkbtn2" data-runs>All my runs ↗</button></div>${L.length ? `<ol class="runlist mini">${L.map(runItem).join('')}</ol>` : `<p class="scaleNote">No runs yet in this step. Close this box and try it in the arena: your results will appear here.</p>`}</div>`;
+  const n = runsFor().length;
+  return `<button type="button" class="qrunsbtn" data-runs><span class="ic">📋</span><span><b>See my runs</b><small>Your results are saved in your Journal</small></span><span class="rc">${n}</span></button>`;
 }
 function initRuns() {
-  const tab = h('button', { type: 'button', class: 'runstab', id: 'runsTab', 'aria-expanded': 'false', 'aria-controls': 'runsPanel' }, `<span>📋 My runs</span><span class="rc">0</span>`);
-  const panel = h('aside', { class: 'runspanel', id: 'runsPanel', hidden: '', 'aria-label': 'My runs' });
-  document.body.append(tab, panel);
   document.addEventListener('click', e => {
-    if (e.target.closest('#runsTab') || e.target.closest('[data-runs]')) { const fromJ = e.target.closest('.journal'); if (fromJ) { const b = fromJ.closest('.modalback'); if (b) b.remove(); } runsOpen(e.target.closest('#runsTab') ? null : true); return; }
-    if (e.target.closest('#rpClose')) { runsOpen(false); return; }
-    const f = e.target.closest('[data-rf]'); if (f) { RUNFILTER = f.dataset.rf; runsRefresh(true); return; }
-    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
+    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); RUNDIRTY = 1; runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
   });
   setInterval(() => runsRefresh(), 250);
 }
@@ -2310,7 +2360,7 @@ const QT = {
     show(q, v) { return (v || []).map(i => '☑ ' + q.opts[i]).join('<br>') || '–'; }, model(q) { return q.a.map(i => '☑ ' + q.opts[i]).join('<br>'); }
   },
   explain: {
-    html(q, s) { return `<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${s && s.v ? esc(s.v.text || '') : ''}</textarea><button type="button" class="ghost sm qchk" style="align-self:flex-start">Show the model answer</button><div class="modelwrap"></div>`; },
+    html(q, s) { return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${s && s.v ? esc(s.v.text || '') : ''}</textarea><button type="button" class="ghost sm qchk" style="align-self:flex-start">Show the model answer</button><div class="modelwrap"></div>`; },
     bind(el, q, api) {
       const showModel = (ticks) => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p><div class="lbl">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks && ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div>`;
         $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const t = $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck); api.answer({ text: $('.explain', el).value, ticks: t }, null, null, { quiet: true, score: t.length }); })); };
@@ -2425,7 +2475,7 @@ function setStep(i) {
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
   const st = chd.steps[GI]; LASTSIG = '';
   // arena state
-  clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false;
+  clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false; JRUNS_SEEN = journalOpen() && JTAB === 'runs';
   LAB.sides = st.sides || ['left', 'right']; LAB.pullers = st.pullers || ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = st.floors || null; LAB.showVert = true; LAB.showRes = true; LAB.idle = st.idle || null;
   if (st.setup) st.setup(); resetSim();
   LAB.show = panelsFor(CH.id, GI);
@@ -2513,11 +2563,11 @@ function qChrome() {
     const last = GI === CHDATA[CH.id].steps.length - 1, chd = CHDATA[CH.id];
     ft.innerHTML = `<button type="button" class="ghost" id="qBack">← Back to the arena</button><button type="button" class="go ${done ? 'ready' : ''}" id="qNext">${last ? (chd.challenge ? 'To the Challenge →' : 'To the Check →') : 'Next step →'}</button>`;
     $('#qBack').addEventListener('click', () => qPlace('dock')); $('#qNext').addEventListener('click', tryNext);
-    const old = $('.qruns', qc); if (old) old.remove();
+    const old = $('.qrunsbtn', qc); if (old) old.remove();
     if (['run', 'shove', 'launch'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
     hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
-    $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qruns', qc); if (old) old.remove();
+    $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qrunsbtn', qc); if (old) old.remove();
     ft.innerHTML = '';
   }
   const n = $('#gNext'); if (n && !stepDone(CH.id, GI) && hasQs() && !done) n.textContent = 'Next: questions →';
@@ -2560,7 +2610,7 @@ const TOUR = [
   ['#cvScene', 'This is the Main Arena. Everything you change shows up here straight away.'],
   ['#rail .tasks', 'Your jobs for each step are in the Do this list. They tick themselves when you have done them.'],
   ['#gNext', 'When you have done the jobs, press Next. Your questions pop up in the middle of the screen. Minimise them whenever you need the arena again.'],
-  ['#rail [data-journal]', 'Every information card you read is saved in your Journal. Open it whenever you need a reminder.'],
+  ['#rail [data-journal]', 'Your Journal keeps your runs, the cards you read and the key words you meet. Open it whenever you need a reminder.'],
   ['#calcFab', 'Need to do some maths? Open the calculator here. Its g key is 9.8 N/kg.'],
   ['#saveWorkBtn', 'Press Save my work at any time to save everything you have done so far as a PDF.']
 ];
@@ -2605,11 +2655,12 @@ CHDATA.c1 = {
     { id: 's0', title: 'How Force HQ works', tour: true,
       cards: [
         { html: `<p>Welcome to the Main Arena! This is where you will test forces for yourself.</p><p>Information arrives in small cards like this one. Read each card, then press Next. When you reach the last card, it is saved in your <b>Journal</b>, so you can read it again whenever you like.</p>` },
+        { html: `<p>Your <b>Journal</b> opens beside the arena and has three tabs:</p><p><b>📋 Runs</b> saves every push, pull and launch with its numbers, so you never have to remember them. <b>📝 Notes</b> keeps these cards and your own notes. <b>🔤 Vocab</b> collects every key word you meet.</p>` },
         { html: `<p>Your jobs for each step are in the <b>Do this</b> list on the left. They tick themselves when you have done them.</p><p>Questions appear in the <b>Your turn</b> box just under that list. A step is finished when every job is ticked and every question is answered.</p>` },
         { html: `<p>Words with a dotted line under them, like ${T('force')}, are in the glossary. Tap one (or hover over it) to see what it means.</p><p>When you close these cards, a quick tour will show you where everything is.</p>` }],
       setup() { S.left = ['adult']; S.right = ['adult', 'kid']; S.floor = 'smooth'; },
       adds: ['run'], idle: 'Press Pull! to start the tug-of-war',
-      tasks: [['Press Pull! and watch what happens.', () => S.flags.pulled], ['Open your Journal, then close it again.', () => JOURNAL_OPENED || dbGet('journalOpened')], ['Open the calculator, then close it.', () => CALC_USED || dbGet('calcOpened')]],
+      tasks: [['Press Pull! and watch what happens.', () => S.flags.pulled], ['Press Pull!, then open your Journal and look at the <b>Runs</b> tab. Your run is saved there. Close the Journal when you are done.', () => JRUNS_SEEN && S.flags.pulled], ['Open the calculator, then close it.', () => CALC_USED || dbGet('calcOpened')]],
       qs: [{ id: 'q1', type: 'mcq', p: 'You closed an information card too quickly. Where can you read it again?', opts: ['In my Journal', 'Nowhere, it has gone for good', 'In the calculator', 'On the arena scoreboard'], a: 0, ok: 'That\'s right! Every card you read is saved in your Journal.' }] },
 
     { id: 's1', title: 'Pushes and pulls',
@@ -2648,7 +2699,7 @@ CHDATA.c1 = {
       tasks: [['Make the forces <b>balanced</b> (the same total pull on each side), then press Pull! and watch.', () => S.flags.bal], ['Make them <b>unbalanced</b>, then press Pull! again.', () => S.flags.unbal]],
       qs: [
         { id: 'q1', type: 'reading', p: 'Put <b>one adult</b> on the left, and <b>a strong adult and a kid</b> on the right. What does the Resultant force readout say?', unit: 'N', live: () => Math.abs(staticForces().net), need: () => left() === 'adult' && right() === 'kid,strong', needMsg: 'Set up the teams first: one adult on the left, a strong adult and a kid on the right.', ok: 'Correct! 200 + 60 = 260 N on the right, take away 130 N on the left: 130 N.', hints: ['Add up each team first.', 'Then take the smaller total away from the bigger one.'] },
-        { id: 'q2', type: 'mcq', p: 'Which way does that resultant force point?', opts: ['To the right, the same way as the stronger team', 'To the left', 'Straight up', 'It has no direction'], a: 0, ok: 'Yes. The resultant points the same way as the bigger force, so the crate moves right.', why: { 1: 'Which team pulls harder?', 2: 'Both teams pull sideways, so the resultant is sideways too.', 3: 'Every force has a direction, including the resultant.' } },
+        { id: 'q2', type: 'mcq', p: 'Which way does that resultant force point?', opts: ['To the right, the same way as the stronger team', 'To the left, the same way as the weaker team', 'Straight up, away from the floor', 'Nowhere, because the two pulls cancel out'], a: 0, ok: 'Yes. The resultant points the same way as the bigger force, so the crate moves right.', why: { 1: 'Which team pulls harder?', 2: 'Both teams pull sideways, so the resultant is sideways too.', 3: 'The pulls only cancel out when they are equal. Here one team pulls harder.' } },
         { id: 'q3', type: 'num', p: 'A dog (70 N) and a kid (60 N) both pull a sledge to the right. What is the resultant force on the sledge?', ans: 130, unit: 'N', tol: 0.5, ok: 'Spot on! Forces in the same direction add up: 70 + 60 = 130 N.', hints: ['Both forces point the same way.', 'Same direction: add them.'] },
         { id: 'q4', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true.', opts: ['When the forces are balanced, the resultant force is 0 N.', 'When the forces are balanced, the crate always moves.', 'The resultant force is the biggest force on the crate.', 'Forces in opposite directions are added together.'], a: 0, ok: 'Exactly. Balanced forces cancel out, so the resultant is 0 N.', why: { 1: 'Balanced forces cancel out. Look at what happened when you made the teams equal.', 2: 'The resultant is what is left over after the forces cancel, so it is often smaller than the biggest force.', 3: 'Opposite forces cancel, so we take one away from the other.' } }] },
 
@@ -2661,8 +2712,8 @@ CHDATA.c1 = {
       tasks: [['With one kid pulling on rough concrete, press Pull! Does the crate move?', () => S.flags.stuckConcrete], ['Change to the air floor and press Pull! again.', () => S.flags.movedAir]],
       qs: [
         { id: 'q1', type: 'reading', p: 'Switch back to rough concrete with the kid pulling. What does the Friction readout say?', unit: 'N', live: () => Math.abs(staticForces().fr), need: () => S.floor === 'concrete' && right() === 'kid', needMsg: 'Choose rough concrete and keep one kid on the right.', ok: 'Yes! Friction pushes back with exactly 60 N, so it cancels the kid\'s pull and the crate stays still.', hints: ['Look at the Friction readout under the arena.', 'Friction matches the pull when the crate is stuck. How hard is the kid pulling?'] },
-        { id: 'q2', type: 'mcq', p: 'The kid pulls the crate to the right. Which way does friction act on the crate?', opts: ['To the left', 'To the right', 'Straight up', 'It doesn\'t act on a still crate'], a: 0, ok: 'That\'s right. Friction acts against the pull, so it points to the left.', why: { 1: 'Friction works against the pull. Look at the arrow in the Friction readout.', 3: 'The crate is still, but friction is still there. It is what holds the crate in place!' } },
-        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains why the crate glides on the air floor.', opts: ['The air floor has no friction, so nothing pushes back against the pull.', 'The air floor makes the crate lighter.', 'The kid pulls harder on the air floor.', 'Air pushes the crate along.'], a: 0, ok: 'Exactly. With no friction, even a small pull gets the crate moving.', why: { 1: 'The crate\'s mass doesn\'t change. What is missing on the air floor?', 2: 'The rope still reads 60 N. Check the newtonmeter.', 3: 'The air floats the crate, but it doesn\'t push it sideways.' } }] },
+        { id: 'q2', type: 'mcq', p: 'The kid pulls the crate to the right. Which way does friction act on the crate?', opts: ['To the left, against the pull', 'To the right, the same way as the pull', 'Straight up, away from the floor', 'Nowhere, because a still crate has no friction'], a: 0, ok: 'That\'s right. Friction acts against the pull, so it points to the left.', why: { 1: 'Friction works against the pull. Look at the arrow in the Friction readout.', 3: 'The crate is still, but friction is still there. It is what holds the crate in place!' } },
+        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains why the crate glides on the air floor.', opts: ['The air floor has no friction, so nothing pushes back against the pull.', 'The air floor makes the crate lighter, so the pull can move it.', 'The kid pulls harder on the air floor, so the crate starts to slide.', 'Air pushes the crate along, so it moves even without the pull.'], a: 0, ok: 'Exactly. With no friction, even a small pull gets the crate moving.', why: { 1: 'The crate\'s mass doesn\'t change. What is missing on the air floor?', 2: 'The rope still reads 60 N. Check the newtonmeter.', 3: 'The air floats the crate, but it doesn\'t push it sideways.' } }] },
 
     { id: 's5', title: 'Weight and mass',
       cards: [
@@ -2673,7 +2724,7 @@ CHDATA.c1 = {
       qs: [
         { id: 'q1', type: 'num', p: 'Work out the weight of the 47 kg crate.', ans: 460.6, unit: 'N', ok: 'Brilliant! 47 × 9.8 = 460.6 N.', hints: ['Multiply the mass by 9.8.', 'Type 47 × 9.8 into the calculator.'] },
         { id: 'q2', type: 'num', p: 'A crate has a mass of 120 kg. What is its weight?', ans: 1176, unit: 'N', ok: 'Correct! 120 × 9.8 = 1176 N.', hints: ['Weight = mass × 9.8.', 'Type 120 × 9.8 into the calculator.'] },
-        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true.', opts: ['Mass is measured in kilograms, and weight is a force measured in newtons.', 'Mass and weight are the same thing.', 'Weight is measured in kilograms.', 'Mass is the pull of gravity.'], a: 0, ok: 'Yes. Mass is the amount of stuff (kg). Weight is the pull of gravity on it (N).' }] },
+        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true.', opts: ['Mass is measured in kilograms, and weight is a force measured in newtons.', 'Mass and weight are the same thing, and both are measured in kilograms.', 'Weight is measured in kilograms, and mass is a force measured in newtons.', 'Mass is the pull of gravity, and weight is the amount of stuff in an object.'], a: 0, ok: 'Yes. Mass is the amount of stuff (kg). Weight is the pull of gravity on it (N).' }] },
 
     { id: 's6', title: 'The floor pushes back', info: ['readW', 'readN'],
       cards: [{ html: `<p>If gravity pulls the crate down, why doesn't it sink through the floor? Because the floor pushes back up!</p><p>This upward push is called the ${T('normal', 'normal force')}. On a flat floor, the floor pushes up exactly as hard as the weight pulls down.</p>` }],
@@ -2682,7 +2733,7 @@ CHDATA.c1 = {
       qs: [
         { id: 'q1', type: 'reading', p: 'What does the Weight readout show for the 63 kg crate?', unit: 'N', live: () => S.mass * G, need: () => S.mass === 63, needMsg: 'Set the crate to 63 kg first.', ok: 'Correct. 63 × 9.8 = 617.4 N.' },
         { id: 'q2', type: 'reading', p: 'What does the Normal force readout show?', unit: 'N', live: () => S.mass * G, need: () => S.mass === 63, needMsg: 'Set the crate to 63 kg first.', ok: 'Right. The floor pushes up with 617.4 N, the same size as the weight.' },
-        { id: 'q3', type: 'mcq', p: 'Why doesn\'t the crate sink into the floor?', opts: ['The floor pushes up with a normal force as big as the weight', 'The crate has no weight when it sits still', 'Gravity switches off on a floor', 'The normal force is bigger than the weight'], a: 0, ok: 'Exactly. The two forces are the same size and point opposite ways, so they cancel out.', why: { 1: 'Check the Weight readout: the crate still has weight.', 2: 'Gravity never switches off on Earth.', 3: 'If the normal force were bigger, the crate would jump up into the air!' } }] },
+        { id: 'q3', type: 'mcq', p: 'Why doesn\'t the crate sink into the floor?', opts: ['The floor pushes up with a normal force as big as the weight', 'The crate has no weight while it is sitting still on the floor', 'Gravity switches off once the crate is resting on a floor', 'The normal force is bigger than the weight, so it holds the crate up'], a: 0, ok: 'Exactly. The two forces are the same size and point opposite ways, so they cancel out.', why: { 1: 'Check the Weight readout: the crate still has weight.', 2: 'Gravity never switches off on Earth.', 3: 'If the normal force were bigger, the crate would jump up into the air!' } }] },
 
     { id: 's7', title: 'Contact and non-contact forces',
       cards: [
@@ -2710,7 +2761,7 @@ CHDATA.c1 = {
       setup() { S.mass = 50; S.floor = 'concrete'; S.right = ['adult']; }, adds: ['fbd'], pullers: ['kid', 'adult'], sides: ['right'],
       tasks: [['Look at the free-body diagram, then add a kid to the right team.', () => right() === 'adult,kid']],
       qs: [
-        { id: 'q1', type: 'mcq', p: 'One adult pulls (130 N). On the diagram, why is the weight arrow longer than the pull arrow?', opts: ['The weight (490 N) is a bigger force than the pull (130 N)', 'Weight always gets the longest arrow', 'The weight arrow points down', 'The pull is further from the crate'], a: 0, ok: 'That\'s it. Longer arrows mean bigger forces.', why: { 1: 'Arrow length depends on the size of the force, not its type.', 2: 'Direction tells you which way a force acts, not how big it is.' } },
+        { id: 'q1', type: 'mcq', p: 'One adult pulls (130 N). On the diagram, why is the weight arrow longer than the pull arrow?', opts: ['The weight (490 N) is a bigger force than the pull (130 N)', 'Weight always gets the longest arrow, whatever its size', 'The weight arrow points down, and downward arrows are drawn longer', 'The pull arrow starts further from the crate, so it looks shorter'], a: 0, ok: 'That\'s it. Longer arrows mean bigger forces.', why: { 1: 'Arrow length depends on the size of the force, not its type.', 2: 'Direction tells you which way a force acts, not how big it is.' } },
         { id: 'q2', type: 'reading', p: 'With the adult and the kid pulling, how big is the friction arrow?', unit: 'N', live: () => Math.abs(staticForces().fr), need: () => right() === 'adult,kid' && S.floor === 'concrete', needMsg: 'Put one adult and one kid on the right, on rough concrete.', ok: 'Correct. Friction holds the crate still with 190 N, matching the pull.' },
         { id: 'q4', type: 'num', p: 'A diagram uses a scale of 1 cm = 100 N. How long should the arrow for a 500 N weight be?', ans: 5, unit: 'cm', tol: 0.05, ok: 'Correct! 500 N ÷ 100 N per cm = 5 cm.', hints: ['Each centimetre stands for 100 N.', 'How many lots of 100 N are there in 500 N?'] },
         { id: 'q5', type: 'num', p: 'On another diagram, a 400 N arrow is 2 cm long. How long should the arrow for a 600 N force be?', ans: 3, unit: 'cm', tol: 0.05, ok: 'Brilliant! 2 cm stands for 400 N, so 1 cm stands for 200 N, and 600 N gets an arrow 3 cm long.', hints: ['First work out how many newtons 1 cm stands for: 400 ÷ 2.', 'Each centimetre is 200 N. How many lots of 200 N are in 600 N?'] },
@@ -2756,6 +2807,8 @@ function ch2Record() {
   if (S.shoveT < 0 && S.lastShoveT != null && S.running && F.pushMass === S.mass && Math.abs(S.x) < LIM - 0.05) F.sp[S.mass] = S.v;
   if (S.shoveT < 0 && !S.running) F.pushMass = null;
   if (F.stopped && S.brakeFrom != null && !S.running) { F.sd[S.mass] = S.x - S.brakeFrom; F.st[S.mass] = S.t - S.brakeT; F.sdF = F.sdF || {}; F.sdF[S.mass] = S.brakeF; }
+  // too-high / too-low markers on the brake slider, once per launch
+  const B = LAB.bmarks; if (B && S.launchMass === B.mass && S.mass === B.mass && S.launchN && F.bmN !== S.launchN && !S.running && ((F.stopped && S.brakeFrom != null) || /end of the arena/.test(S.msg))) { F.bmN = S.launchN; brakeMark(B, F.stopped ? S.x - S.brakeFrom : null, S.brakeF); renderControls(); }
 }
 const sp = m => S.flags.sp && S.flags.sp[m], sd = m => S.flags.sd && S.flags.sd[m];
 /* the launcher course used in Chapter 2: start at -7 m, brake line at -4 m */
@@ -2781,14 +2834,16 @@ CHDATA.c2 = {
 
     { id: 'i2', title: 'Inertia', floors: ['air'],
       cards: [
-        { html: `<p>The heavy crate was much harder to get moving. Scientists say it has more ${T('inertia')}.</p><div class="law"><b>Inertia</b> is how hard it is to change the way an object is moving. The more mass an object has, the more inertia it has.</div>` },
-        { html: `<p>Inertia works both ways. A heavy object is hard to <b>start</b> moving, and once it is moving, it is hard to <b>stop</b>. You'll test the stopping part soon.</p>` }],
-      setup() { S.floor = 'air'; S.mass = 150; }, adds: [], sides: [], pullers: [], idle: 'Give the crate a push',
+        { html: `<p>The heavy crate was much harder to get moving. Scientists say it has more ${T('inertia')}.</p><div class="law"><b>Inertia</b> is how hard it is to change the way an object is moving. The more mass an object has, the more inertia it has.</div><p>Inertia works both ways. A heavy object is hard to <b>start</b> moving, and once it is moving, it is hard to <b>stop</b>.</p>` },
+        { html: `<p>There is a pattern in your speeds. With the same push, <b>2 times the mass</b> gives <b>half the speed</b>, 3 times the mass gives a third of the speed, and so on.</p><div class="example">The 24 kg crate went 3.13 m/s. A 48 kg crate has 2 times the mass (48 ÷ 24 = 2), so the same push gives it 3.13 ÷ 2 = <b>1.56 m/s</b>.</div><p>Test it for yourself with a 48 kg crate.</p>` }],
+      setup() { S.floor = 'air'; S.mass = 48; }, adds: [], sides: [], pullers: [], idle: 'Give the crate a push',
       tick() { ch2Record(); },
-      tasks: [['Set the crate to <b>150 kg</b>, the heaviest it can be, and give it a push. Watch how slowly it sets off.', () => S.flags.shoved && S.mass === 150]],
+      tasks: [['Set the crate to <b>48 kg</b> (2 times the mass of the 24 kg crate) and give it a push.', () => sp(48) != null]],
       qs: [
-        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that says what inertia is.', opts: ['Inertia is how hard it is to change the way an object is moving.', 'Inertia is the force that keeps things moving.', 'Inertia is how fast an object is moving.', 'Inertia is the pull of gravity on an object.'], a: 0, ok: 'Yes! Inertia is how hard it is to change an object\'s motion: to start it, stop it, or change its speed.', why: { 1: 'Inertia isn\'t a force. It is a property that every object has, because it has mass.', 2: 'That describes speed. A still crate has inertia too.', 3: 'That describes weight.' } },
-        { id: 'q2', type: 'gap', p: 'An object with more ___ has more inertia, so it is ___ to get it moving.', ans: [['mass'], ['harder', 'more difficult']], ok: 'Perfect. More mass means more inertia.' }] },
+        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that says what inertia is.', opts: ['Inertia is how hard it is to change the way an object is moving.', 'Inertia is the force that keeps a moving object moving.', 'Inertia is how fast an object is moving at the start.', 'Inertia is the pull of gravity on an object\'s mass.'], a: 0, ok: 'Yes! Inertia is how hard it is to change an object\'s motion: to start it, stop it, or change its speed.', why: { 1: 'Inertia isn\'t a force. It is a property that every object has, because it has mass.', 2: 'That describes speed. A still crate has inertia too.', 3: 'That describes weight.' } },
+        { id: 'q2', type: 'gap', p: 'An object with more ___ has more inertia, so it is ___ to get it moving.', ans: [['mass'], ['harder', 'more difficult']], ok: 'Perfect. More mass means more inertia.' },
+        { id: 'q3', type: 'reading', p: 'What speed did the push give the <b>48 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(48), need: () => sp(48) != null, needMsg: 'Push the 48 kg crate first.', ok: 'Correct! About half of the 24 kg crate\'s 3.13 m/s, just as the pattern says.' },
+        { id: 'q4', type: 'num', p: 'A 96 kg crate has 4 times the mass of the 24 kg crate. The same push gave the 24 kg crate 3.13 m/s. What speed will it give the 96 kg crate?', unit: 'm/s', ans: 0.78, tol: 0.02, ok: 'Brilliant! 4 times the mass gives a quarter of the speed: 3.13 ÷ 4 = 0.78 m/s.', hints: ['4 times the mass gives a quarter of the speed.', 'Type 3.13 ÷ 4 into the calculator.'] }] },
 
     { id: 'i3', title: 'The velocity–time graph', info: ['vt'], floors: ['air'],
       cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's speed as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the speed from the graph instead.</p>` }],
@@ -2810,7 +2865,7 @@ CHDATA.c2 = {
       qs: [
         { id: 'q1', type: 'reading', p: 'How far did the <b>24 kg</b> crate slide after the brake line?', unit: 'm', tol: 0.04, live: () => sd(24), need: () => sd(24) != null, needMsg: 'Launch the 24 kg crate first.', ok: 'Correct!' },
         { id: 'q2', type: 'reading', p: 'How far did the <b>61 kg</b> crate slide after the brake line?', unit: 'm', tol: 0.04, live: () => sd(61), need: () => sd(61) != null, needMsg: 'Launch the 61 kg crate first.', ok: 'Correct! It slid much further.' },
-        { id: 'q3', type: 'mcq', p: 'Why did the 61 kg crate slide further, even though the brake was the same?', opts: ['It has more mass, so it has more inertia and is harder to stop', 'The brake works less well on big crates', 'It was moving faster', 'Heavy crates have less friction'], a: 0, ok: 'Exactly. More mass means more inertia, so the same brake takes longer to stop it.', why: { 1: 'The brake pushed with 36 N both times. Check the brake label in the arena.', 2: 'Both crates were launched at 2.4 m/s.', 3: 'The air floor has no friction for either crate.' } }] },
+        { id: 'q3', type: 'mcq', p: 'Why did the 61 kg crate slide further, even though the brake was the same?', opts: ['It has more mass, so it has more inertia and is harder to stop', 'The brake works less well on big crates, so it pushed back less', 'It was moving faster when it reached the brake line, so it went further', 'Heavy crates have less friction on the air floor, so they slide further'], a: 0, ok: 'Exactly. More mass means more inertia, so the same brake takes longer to stop it.', why: { 1: 'The brake pushed with 36 N both times. Check the brake label in the arena.', 2: 'Both crates were launched at 2.4 m/s.', 3: 'The air floor has no friction for either crate.' } }] },
 
     { id: 'i5', title: 'Newton\'s first law', floors: ['air'],
       cards: [
@@ -2820,8 +2875,8 @@ CHDATA.c2 = {
       tick() { ch2Record(); },
       tasks: [['Give the 47 kg crate a push and watch the graph stay flat as it glides.', () => sp(47) != null]],
       qs: [
-        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s first law.', opts: ['An object stays still, or keeps moving at a steady speed in a straight line, unless an unbalanced force acts on it.', 'Every moving object slows down and stops by itself.', 'The bigger the force, the faster an object moves.', 'Heavy objects always move more slowly than light ones.'], a: 0, ok: 'Yes! That is Newton\'s first law. Moving things only slow down when a force, like a brake or friction, acts on them.', why: { 1: 'On the air floor, the crate kept going. Things only slow down when a force acts on them.', 2: 'That is about how forces change speed. You\'ll meet it in Chapter 3.', 3: 'A heavy object can move fast, it just takes a bigger force to get it there.' } },
-        { id: 'q2', type: 'mcq', p: 'A space pod is gliding through empty space at 3.6 m/s. Its engines are off and nothing touches it. What happens next?', opts: ['It keeps gliding at 3.6 m/s in a straight line', 'It slowly comes to a stop', 'It speeds up', 'It starts to fall'], a: 0, ok: 'Exactly. No force acts on it, so nothing changes its motion.', why: { 1: 'What force could slow it down? There is no air and nothing touching it.', 2: 'Speeding up needs a force, and the engines are off.', 3: 'Far out in space, there is nothing nearby to pull it.' } }] },
+        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s first law.', opts: ['An object stays still, or keeps moving at a steady speed in a straight line, unless an unbalanced force acts on it.', 'Every moving object slows down and stops by itself after a while, even when no force acts on it.', 'An object only keeps moving at a steady speed while a force keeps pushing it along in a straight line.', 'Heavy objects always move more slowly than light ones, whatever forces act on them.'], a: 0, ok: 'Yes! That is Newton\'s first law. Moving things only slow down when a force, like a brake or friction, acts on them.', why: { 1: 'On the air floor, the crate kept going. Things only slow down when a force acts on them.', 2: 'On the air floor the crate kept gliding with nothing pushing it. A force is only needed to change its motion.', 3: 'A heavy object can move fast, it just takes a bigger force to get it there.' } },
+        { id: 'q2', type: 'mcq', p: 'A space pod is gliding through empty space at 3.6 m/s. Its engines are off and nothing touches it. What happens next?', opts: ['It keeps gliding at 3.6 m/s in a straight line', 'It slowly comes to a stop, because nothing keeps pushing it', 'It speeds up past 3.6 m/s, because nothing slows it down', 'It slows down below 3.6 m/s and drifts in a curve'], a: 0, ok: 'Exactly. No force acts on it, so nothing changes its motion.', why: { 1: 'What force could slow it down? There is no air and nothing touching it.', 2: 'Speeding up needs a force, and the engines are off.', 3: 'Far out in space, there is nothing nearby to pull it.' } }] },
 
     { id: 'i6', title: 'Inertia in real life',
       cards: [{ html: `<p>Inertia is all around you. Think of the crate as a car. When the brake stops the car, anything loose inside it keeps going, because it has inertia too.</p><p>Launch the crate once more, then try three everyday puzzles in the Your turn box.</p>` }],
@@ -2829,8 +2884,8 @@ CHDATA.c2 = {
       tick() { ch2Record(); },
       tasks: [['Launch the crate and watch the brake stop it.', () => S.flags.stopped]],
       qs: [
-        { id: 'q1', type: 'mcq', p: 'A car brakes hard. A passenger who isn\'t wearing a seatbelt lurches forwards. Why?', opts: ['Their body has inertia, so it keeps moving forwards when the car slows down', 'The brakes push the passenger forwards', 'The seat throws them forwards', 'Gravity pulls them forwards'], a: 0, ok: 'Yes. The car slows down, but the passenger keeps going until something stops them. A seatbelt is that something.', why: { 1: 'The brakes act on the wheels, not on the passenger.', 2: 'The seat doesn\'t push forwards. The passenger keeps moving on their own.', 3: 'Gravity pulls down, not forwards.' } },
-        { id: 'q2', type: 'mcq', p: 'A magician whips a tablecloth away very quickly, and the plates stay on the table. Why do the plates stay put?', opts: ['The plates have inertia, so they tend to stay still', 'The plates are glued down', 'The tablecloth pushes the plates down', 'Plates have no mass'], a: 0, ok: 'That\'s it. The plates are still, and their inertia keeps them still. The cloth moves so fast that friction has no time to drag them along.', why: { 1: 'No glue needed! Think about what still objects tend to do.', 2: 'The cloth slides away underneath. What keeps the plates still?', 3: 'Plates do have mass, so they have inertia.' } },
+        { id: 'q1', type: 'mcq', p: 'A car brakes hard. A passenger who isn\'t wearing a seatbelt lurches forwards. Why?', opts: ['Their body has inertia, so it keeps moving forwards when the car slows down', 'The brakes push the passenger forwards when they slow the car down', 'The seat throws them forwards when the car stops suddenly', 'Gravity pulls them forwards as the car tips onto its front wheels'], a: 0, ok: 'Yes. The car slows down, but the passenger keeps going until something stops them. A seatbelt is that something.', why: { 1: 'The brakes act on the wheels, not on the passenger.', 2: 'The seat doesn\'t push forwards. The passenger keeps moving on their own.', 3: 'Gravity pulls down, not forwards.' } },
+        { id: 'q2', type: 'mcq', p: 'A magician whips a tablecloth away very quickly, and the plates stay on the table. Why do the plates stay put?', opts: ['The plates have inertia, so they tend to stay still', 'The plates are glued down, so the cloth slides out from under them', 'The tablecloth pushes the plates down, holding them in place', 'Plates have no mass, so the cloth cannot move them'], a: 0, ok: 'That\'s it. The plates are still, and their inertia keeps them still. The cloth moves so fast that friction has no time to drag them along.', why: { 1: 'No glue needed! Think about what still objects tend to do.', 2: 'The cloth slides away underneath. What keeps the plates still?', 3: 'Plates do have mass, so they have inertia.' } },
         { id: 'q3', type: 'mcq', p: 'A bowling ball (7.3 kg) and a football (0.43 kg) roll towards you at the same speed. Which is harder to stop?', opts: ['The bowling ball', 'The football', 'They are just as hard to stop'], a: 0, ok: 'Correct. The bowling ball has far more mass, so it has far more inertia.', why: { 1: 'Which one has more mass?', 2: 'They have the same speed, but their masses are very different.' } }] },
 
     /* ---------- Extension ---------- */
@@ -2848,29 +2903,36 @@ CHDATA.c2 = {
 
     { id: 'x2', title: 'Car versus truck', info: [], floors: ['air'],
       cards: [
-        { html: `<p>Think of a 40 kg crate as a car and a 120 kg crate as a truck, with 3 times the mass. Both arrive at 2.4 m/s.</p><p>First give them both the same 48 N brake. Then use the <b>Brake force</b> slider to find the brake the truck needs to stop in the <b>same distance</b> as the car.</p>` }],
-      setup() { course(40, 2.4, 48); }, adds: ['brake'], hide: ['shove', 'fbd', 'readW', 'readN'], sides: [], pullers: [], idle: 'Press Launch the crate',
+        { html: `<p>Think of a 40 kg crate as a car and a 120 kg crate as a truck. Both arrive at 2.4 m/s.</p><p>To find how many times heavier one thing is than another, divide the masses.</p><div class="example">A 90 kg crate compared with a 30 kg crate: 90 ÷ 30 = <b>3</b>, so it is 3 times heavier.</div>` },
+        { html: `<p>First give the car and the truck the same <b>48 N</b> brake, and compare how far they slide.</p><p>Then find the brake force the truck needs to stop in the <b>same distance</b> as the car. Type a number in the <b>Brake force</b> box, or use the slider.</p><div class="example">After each try, a <b>red mark</b> on the slider shows a force that was too strong (the truck stopped short) and a <b>yellow mark</b> shows one that was too weak (it slid too far). The right force is between them.</div>` }],
+      setup() { course(40, 2.4, 48); LAB.bmarks = { mass: 120, target: 2.41, tol: 0.05, hi: null, lo: null }; }, adds: ['brake'], hide: ['shove', 'fbd', 'readW', 'readN'], sides: [], pullers: [], idle: 'Press Launch the crate',
       tick() { ch2Record(); const F = S.flags; if (F.sd && F.sd[120] != null && F.sdF[120] >= 140 && Math.abs(F.sd[120] - 2.4) <= 0.06) F.truckOK = true; if (F.sd && F.sd[120] != null && F.sdF[120] === 48) F.truck48 = F.sd[120]; if (F.sd && F.sd[40] != null && F.sdF[40] === 48) F.car48 = F.sd[40]; },
-      tasks: [['Launch the <b>40 kg</b> car with a <b>48 N</b> brake.', () => S.flags.car48 != null], ['Launch the <b>120 kg</b> truck with the same <b>48 N</b> brake.', () => S.flags.truck48 != null], ['Change the brake force until the truck stops in the same distance as the car (within 5 cm).', () => !!S.flags.truckOK]],
+      tasks: [['Launch the <b>40 kg</b> car with a <b>48 N</b> brake.', () => S.flags.car48 != null], ['Launch the <b>120 kg</b> truck with the same <b>48 N</b> brake.', () => S.flags.truck48 != null], ['Find the brake force that stops the truck in the same distance as the car (within 5 cm). Use the red and yellow marks on the slider to close in on it.', () => !!S.flags.truckOK]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the 48 N brake, how far did the <b>40 kg car</b> slide?', unit: 'm', tol: 0.04, live: () => S.flags.car48, need: () => S.flags.car48 != null, needMsg: 'Launch the 40 kg crate with a 48 N brake first.', ok: 'Correct!' },
-        { id: 'q2', type: 'reading', p: 'With the same 48 N brake, how far did the <b>120 kg truck</b> slide?', unit: 'm', tol: 0.06, live: () => S.flags.truck48, need: () => S.flags.truck48 != null, needMsg: 'Launch the 120 kg crate with a 48 N brake first.', ok: 'Correct! It slid 3 times as far.' },
-        { id: 'q3', type: 'num', p: 'What brake force made the 120 kg truck stop in the same distance as the car?', unit: 'N', ans: 144, tol: 2, ok: 'Spot on: 144 N, which is 3 × 48 N.', hints: ['Look at the Brake force number when the truck stopped in about 2.4 m.', 'The truck has 3 times the mass of the car. Try 3 × 48 N.'] },
-        { id: 'q4', type: 'mcq', p: 'The truck has 3 times the mass of the car. To stop in the same distance from the same speed, it needs…', opts: ['3 times the brake force', 'the same brake force', 'a third of the brake force', '9 times the brake force'], a: 0, ok: 'Yes. 3 times the mass means 3 times the inertia, so it needs 3 times the force. That is why trucks have much bigger brakes than cars.', why: { 1: 'With the same 48 N, the truck slid much further. It needs more.', 2: 'Less force would make it slide even further!', 3: 'Check the number on the slider when the truck stopped in the right distance.' } }] }
+        { id: 'q2', type: 'reading', p: 'With the same 48 N brake, how far did the <b>120 kg truck</b> slide?', unit: 'm', tol: 0.06, live: () => S.flags.truck48, need: () => S.flags.truck48 != null, needMsg: 'Launch the 120 kg crate with a 48 N brake first.', ok: 'Correct!' },
+        { id: 'q3', type: 'num', p: 'How many times heavier is the truck than the car? Divide the masses: 120 kg ÷ 40 kg.', unit: 'times', ans: 3, tol: 0.01, ok: 'Yes: 120 ÷ 40 = 3. The truck has 3 times the mass of the car.', hints: ['Type 120 ÷ 40 into the calculator.'] },
+        { id: 'q4', type: 'num', p: 'With the same 48 N brake, how many times further did the truck slide than the car? Divide the truck\'s distance by the car\'s distance.', unit: 'times', ans: 3, tol: 0.1, ok: 'That\'s it: about 3 times further. 3 times the mass slid 3 times as far with the same brake.', hints: ['Use your two readings, or open your Journal\'s Runs tab to find them.', 'Truck distance ÷ car distance.'] },
+        { id: 'q5', type: 'num', p: 'What brake force made the truck stop in the same distance as the car?', unit: 'N', ans: 144, tol: 2, ok: 'Spot on: 144 N. That is 3 × 48 N, so 3 times the mass needed 3 times the brake force.', hints: ['Look at the Brake force box when the truck stopped in about 2.4 m.', 'The truck has 3 times the mass. Try 3 × 48 in the calculator.'] },
+        { id: 'q6', type: 'mcq', p: 'The truck has 3 times the mass of the car. To stop in the same distance from the same speed, it needs…', opts: ['3 times the brake force', 'the same brake force', 'a third of the brake force', '9 times the brake force'], a: 0, ok: 'Yes. 3 times the mass means 3 times the inertia, so it needs 3 times the force. That is why trucks have much bigger brakes than cars.', why: { 1: 'With the same 48 N, the truck slid much further. It needs more.', 2: 'Less force would make it slide even further!', 3: 'Check the number in the Brake force box when the truck stopped in the right distance.' } }] }
   ],
   review: [
     { id: 'c2r1', type: 'tick', p: 'Tick every statement about inertia that is true.', opts: ['A heavier object has more inertia', 'Inertia makes a moving object keep moving', 'Inertia is a force that pushes things along', 'An object at rest stays at rest unless a force acts on it', 'Light objects have no inertia'], a: [0, 1, 3], work: 'More mass means more inertia; moving objects keep moving and still objects stay still unless a force acts. Inertia is not a force, and every object with mass has some.' },
     { id: 'c2r2', type: 'num', p: 'On the air floor, a shove gives a 30 kg crate a speed of 2.5 m/s. The same shove hits a crate with 5 times the mass (150 kg). What speed does it get?', ans: 0.5, unit: 'm/s', tol: 0.02, work: '5 times the mass gives a speed 5 times smaller: 2.5 ÷ 5 = 0.5 m/s', hints: ['More mass means less speed from the same push.', '5 times the mass, so divide the speed by 5.'] },
-    { id: 'c2r3', type: 'mcq', p: 'This velocity–time graph shows a crate on the air floor. What is the crate doing between 2 s and 6 s?' + vtSVG([{ pts: [[0, 0], [1, 0], [1.6, 1.8], [6, 1.8], [8, 1.8]] }], { tMax: 8, vMax: 2.5, vStep: 0.5, alt: 'Velocity rises from 0 to 1.8 m/s between 1 and 1.6 seconds, then stays flat at 1.8 m/s' }), opts: ['Moving at a steady speed of 1.8 m/s', 'Speeding up', 'Slowing down', 'Standing still'], a: 0, work: 'The line is flat at 1.8 m/s, so the speed is not changing.', why: { 1: 'Speeding up would make the line slope upwards.', 2: 'Slowing down would make the line slope downwards.', 3: 'Standing still would put the line along 0.' } },
+    { id: 'c2r3', type: 'mcq', p: 'This velocity–time graph shows a crate on the air floor. What is the crate doing between 2 s and 6 s?' + vtSVG([{ pts: [[0, 0], [1, 0], [1.6, 1.8], [6, 1.8], [8, 1.8]] }], { tMax: 8, vMax: 2.5, vStep: 0.5, alt: 'Velocity rises from 0 to 1.8 m/s between 1 and 1.6 seconds, then stays flat at 1.8 m/s' }), opts: ['Moving at a steady speed of 1.8 m/s', 'Speeding up to 1.8 m/s', 'Slowing down to 1.8 m/s', 'Standing still, 1.8 m from the start'], a: 0, work: 'The line is flat at 1.8 m/s, so the speed is not changing.', why: { 1: 'Speeding up would make the line slope upwards.', 2: 'Slowing down would make the line slope downwards.', 3: 'Standing still would put the line along 0.' } },
     { id: 'c2r4', type: 'sort', p: 'Sort these into things that are hard to start or stop, and things that are easy to start or stop.', groups: ['Hard to start or stop', 'Easy to start or stop'], items: [['A loaded lorry', 0], ['A table-tennis ball', 1], ['A full shopping trolley', 0], ['An empty shopping trolley', 1], ['A cargo ship', 0], ['A paper cup', 1]] },
     { id: 'c2r5', type: 'gap', p: 'Newton\'s first law: an object stays ___, or keeps moving at a steady ___ in a straight line, unless an unbalanced ___ acts on it.', ans: [['still', 'at rest', 'stationary'], ['speed', 'velocity'], ['force']] },
-    { id: 'c2r6', type: 'explain', p: 'A passenger is standing on a bus. The bus brakes suddenly and the passenger lurches forwards. Use the word inertia to explain why.', model: 'The passenger was moving forwards with the bus. When the bus brakes, the brakes slow the bus down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards, so they lurch forwards until they grab a pole or their feet stop them.', check: ['Says the passenger was moving forwards with the bus', 'Uses the word inertia', 'Says the passenger keeps moving forwards when the bus slows down', 'Says a force (a pole, a seatbelt, their feet) is needed to stop them'] },
+    { id: 'c2r6', type: 'explain', p: 'A passenger is standing on a bus. The bus brakes suddenly and the passenger lurches forwards. Explain why.', words: ['inertia', 'keeps moving', 'unbalanced force'],
+      model: 'The passenger was moving forwards at the same speed as the bus. When the bus brakes, the bus slows down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards. To stop them, an unbalanced force has to act on them, such as the pull of a pole they grab or friction on their feet.',
+      check: ['Says the passenger was moving forwards at the same speed as the bus', 'Uses inertia to explain that the passenger keeps moving forwards when the bus slows down', 'States that an unbalanced force (from a pole, a seat or their feet) has to act on the passenger to bring them to a stop'] },
     /* Extension */
     { id: 'c2r7', type: 'match', colA: 'Shape of the line', p: 'Match each shape of line on a velocity–time graph to what the object is doing.', rows: [['A flat line above 0', 'Moving at a steady speed'], ['A line sloping upwards', 'Speeding up'], ['A line sloping down to 0', 'Slowing down and stopping'], ['A flat line along 0', 'Standing still']] },
     { id: 'c2r8', type: 'mcq', p: 'Two crates arrive at the same speed and get the same brake force. The graph shows them both. Which line belongs to the heavier crate?' + vtSVG([{ pts: [[0, 2.2], [1, 2.2], [2.5, 0], [8, 0]], col: '#c94a34', label: 'Line 1', lab: 1 }, { pts: [[0, 2.2], [1, 2.2], [6.2, 0], [8, 0]], col: '#11806f', label: 'Line 2', lab: 2 }], { tMax: 8, vMax: 2.5, vStep: 0.5, alt: 'Two lines start at 2.2 m/s. Line 1 drops to 0 at 2.5 seconds; line 2 drops to 0 at 6.2 seconds' }), opts: ['Line 2, because it takes longer to stop', 'Line 1, because it stops more quickly', 'You can\'t tell from the graph', 'Both lines are the same crate'], a: 0, work: 'With the same brake, the crate with more mass (more inertia) takes longer to stop, so its line slopes down more gently: line 2.', why: { 1: 'A heavy crate is harder to stop. Would it stop quickly or slowly?', 2: 'Look at how long each line takes to reach 0.', 3: 'The lines are different, so they are different crates.' } },
     { id: 'c2r9', type: 'num', p: 'A 40 kg crate stops in 2.4 m with a 48 N brake. A 120 kg crate arrives at the same speed and has to stop in the same 2.4 m. What brake force does it need?', ans: 144, unit: 'N', tol: 1, work: '120 kg is 3 times 40 kg, so it needs 3 times the force: 3 × 48 = 144 N', hints: ['How many times heavier is the second crate?', '3 times the mass needs 3 times the force.'] },
     { id: 'c2r12', type: 'fbd', p: 'Draw the free-body diagram of this crate.', scen: { id: 'c2r12', obj: 'crate', label: '52 kg', brief: '<p>A <b>52 kg crate</b> glides to the right across the air floor at a steady <b>1.7 m/s</b>. Nothing is pushing or pulling it, and the air floor has no friction.</p>', forces: [{ type: 'weight', dir: 'down', value: 509.6 }, { type: 'normal', dir: 'up', value: 509.6 }] } },
-    { id: 'c2r11', type: 'explain', p: 'Explain why a loaded lorry needs much stronger brakes than a small car, even when they travel at the same speed.', model: 'The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force it would take much longer and much further to stop. To stop in a safe distance, it needs a much bigger brake force, so it needs stronger brakes.', check: ['Says the lorry has more mass', 'Says more mass means more inertia', 'Says it would take longer or further to stop with the same force', 'Says it needs a bigger force to stop in the same distance'] }
+    { id: 'c2r11', type: 'explain', p: 'Explain why a loaded lorry needs much stronger brakes than a small car, even when they travel at the same speed.', words: ['mass', 'inertia', 'brake force', 'braking distance'],
+      model: 'The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force, the lorry would have a much longer braking distance. To stop in a safe distance, it needs a much bigger brake force: for example, 3 times the mass needs 3 times the brake force. So it needs stronger brakes.',
+      check: ['Says the lorry has more mass than the car, so it has more inertia', 'Says that with the same brake force, the lorry would have a longer braking distance', 'Says the lorry needs a bigger brake force to stop in the same distance (for example, 3 times the mass needs 3 times the force)'] }
   ]
 };
 CHDATA.c2.review.forEach(q => { if (q.build) q.build(); });
@@ -2962,7 +3024,7 @@ function renderBrakeCourse(ch, bm, host, save) {
   let cur = Math.max(0, bm.findIndex(m => !get(m.id).done)), active = false;
   const card = h('section', { class: 'panel mission', id: 'mi-course' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a crate"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>If the crate slid <b>past</b> the target, it needs a <b>bigger</b> brake force. If it stopped <b>short</b> of the target, use a <b>smaller</b> one.</p><p>A heavier crate has more inertia, so it needs a bigger brake force than a light one. In Car versus truck, 3 times the mass needed 3 times the force to stop in the same distance.</p></div></details>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>If the crate slid <b>past</b> the target, it needs a <b>bigger</b> brake force. If it stopped <b>short</b> of the target, use a <b>smaller</b> one. The yellow (too low) and red (too high) marks on the slider remember your tries.</p><p>A heavier crate has more inertia, so it needs a bigger brake force than a light one. In Car versus truck, 3 times the mass needed 3 times the force to stop in the same distance.</p></div></details>
     <div class="labhost"></div><div class="fb" id="bkFb" hidden></div><ol class="blog" id="bkLog"></ol><ul class="objs" data-o></ul><div class="row" id="bkMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.show = new Set(['launch', 'brake', 'readD', 'readM', 'vt']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.onChange = null; LAB.idle = 'Choose a brake force, then press Launch the crate';
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc'); applyPanels();
@@ -2977,7 +3039,7 @@ function renderBrakeCourse(ch, bm, host, save) {
     const gv = $('#bkGive'); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} launches. The brake force that works is about ${Math.round(m.mass * m.v0 * m.v0 / (2 * m.target))} N. You scored 1 of 4 points.` }); paint(); });
   };
   const load = i => {
-    cur = i; const m = bm[cur], s = get(m.id); clearCh2(); S.left = []; S.right = []; course(m.mass, m.v0, s.F || 40); S.target = m.target; S.flags = newFlags(); resetSim(); active = false; labChanged(); paint();
+    cur = i; const m = bm[cur], s = get(m.id); clearCh2(); S.left = []; S.right = []; course(m.mass, m.v0, s.F || 40); S.target = m.target; LAB.bmarks = { mass: m.mass, target: m.target, tol: 0.15, hi: s.hi != null ? s.hi : null, lo: s.lo != null ? s.lo : null }; S.flags = newFlags(); resetSim(); active = false; labChanged(); paint();
   };
   card.addEventListener('click', e => { const b = e.target.closest('[data-cr]'); if (b) load(+b.dataset.cr); });
   LAB.tick = () => {
@@ -2985,8 +3047,8 @@ function renderBrakeCourse(ch, bm, host, save) {
     if (!active || S.running) return;
     active = false; const m = bm[cur], s = get(m.id); if (s.done) { paint(); return; }
     const d = S.brakeFrom != null && S.flags.stopped ? S.x - S.brakeFrom : null, hit = d != null && Math.abs(d - m.target) <= 0.15, n = (s.n || 0) + 1, log = (s.log || []).concat([{ F: S.brakeF, d, hit }]);
-    const best = hit ? Math.max(1, 5 - n) : 0;
-    save(m, { tried: true, n, log, F: S.brakeF, hit, done: hit, best, msg: hit ? `On target after ${n} launch${n > 1 ? 'es' : ''}! You scored ${best} of 4 points.` : `Not quite: ${d == null ? 'it reached the end of the arena' : `it stopped ${fmt(d, 2)} m after the brake line`}. The target is ${fmt(m.target, 1)} m. Change the brake force and launch again.` });
+    const best = hit ? Math.max(1, 5 - n) : 0; brakeMark(LAB.bmarks, d, S.brakeF); renderControls();
+    save(m, { tried: true, n, log, F: S.brakeF, hi: LAB.bmarks.hi, lo: LAB.bmarks.lo, hit, done: hit, best, msg: hit ? `On target after ${n} launch${n > 1 ? 'es' : ''}! You scored ${best} of 4 points.` : `Not quite: ${d == null ? 'it reached the end of the arena' : `it stopped ${fmt(d, 2)} m after the brake line`}. The target is ${fmt(m.target, 1)} m. Change the brake force and launch again.` });
     paint();
   };
   load(cur);
@@ -2999,14 +3061,16 @@ CHDATA.c1.review = [
   { id: 'r3', type: 'num', p: 'A husky has a mass of 23.5 kg. What is its weight on Earth?', ans: 230.3, unit: 'N', tol: 0.15, work: 'Weight = mass × 9.8 = 23.5 × 9.8 = 230.3 N', hints: ['Weight = mass × 9.8.', 'Type 23.5 × 9.8 into the calculator.'] },
   { id: 'r4', type: 'num', p: 'A crate on the arena floor has a weight of 1078 N. What is its mass?', ans: 110, unit: 'kg', tol: 0.15, work: 'Mass = weight ÷ 9.8 = 1078 ÷ 9.8 = 110 kg', hints: ['This time you know the weight. Divide it by 9.8.', 'Type 1078 ÷ 9.8 into the calculator.'] },
   { id: 'r13', type: 'num', p: 'In a tug-of-war, the left team pulls with 190 N and the right team pulls with 265 N. What is the size of the resultant force?', ans: 75, unit: 'N', tol: 0.5, work: 'Opposite directions, so subtract: 265 − 190 = 75 N (to the right)', hints: ['The teams pull in opposite directions.', 'Take the smaller pull away from the bigger one.'] },
-  { id: 'r5', seed: '0', type: 'mcq', p: 'A book is lying still on a table. Which statement is true?', opts: ['Two forces act on it: its weight down and the normal force up, and they are the same size', 'No forces act on it, because it isn\'t moving', 'Only its weight acts on it', 'The normal force is bigger than its weight, which is why it stays on the table'], a: 0, work: 'Still objects still have forces on them. The weight and normal force are equal and opposite, so they cancel out.', why: { 1: 'Still things still have forces on them. What would happen if the table vanished?', 2: 'If only weight acted, the book would fall through the table.', 3: 'If the normal force were bigger, the book would rise up off the table.' } },
+  { id: 'r5', seed: '0', type: 'mcq', p: 'A book is lying still on a table. Which statement is true?', opts: ['Two forces act on it: its weight down and the normal force up, and they are the same size', 'No forces act on it at all, because it is not moving and nothing is pushing it', 'Only its weight acts on it, pulling it down onto the table, and nothing pushes back', 'Two forces act on it, but the normal force is bigger than its weight, so it stays put'], a: 0, work: 'Still objects still have forces on them. The weight and normal force are equal and opposite, so they cancel out.', why: { 1: 'Still things still have forces on them. What would happen if the table vanished?', 2: 'If only weight acted, the book would fall through the table.', 3: 'If the normal force were bigger, the book would rise up off the table.' } },
   { id: 'r6', type: 'tick', p: 'A crate is being dragged to the right across rough concrete by a rope. Tick every force acting on the crate.', opts: ['Weight', 'Normal force', 'Tension (the pull of the rope)', 'Friction', 'The force of motion', 'The crate\'s inertia force'], a: [0, 1, 2, 3], work: 'Weight, normal force, the pull of the rope and friction. "Force of motion" and "inertia force" are not real forces.' },
   { id: 'r7', type: 'fbd', p: 'Draw the free-body diagram of this crate.', scen: { id: 'c1r7', obj: 'crate', label: '34 kg', brief: '<p>A <b>34 kg crate</b> on the air floor is pulled to the right by a rope with a force of <b>150 N</b>. There is no friction on the air floor.</p>', forces: [{ type: 'weight', dir: 'down', value: 333.2 }, { type: 'normal', dir: 'up', value: 333.2 }, { type: 'pull', dir: 'right', value: 150 }] } },
   { id: 'r8', type: 'fbd', p: 'Draw the free-body diagram of this crate.', scen: { id: 'c1r8', obj: 'crate', label: '50 kg', brief: '<p>A <b>50 kg crate</b> is in a tug-of-war on the smooth floor. The left team pulls with <b>130 N</b> and a pony pulls right with <b>260 N</b>. The crate slides to the right, and friction on the sliding crate is <b>49 N</b>.</p><p>Draw all five forces.</p>', forces: [{ type: 'weight', dir: 'down', value: 490 }, { type: 'normal', dir: 'up', value: 490 }, { type: 'pull', dir: 'left', value: 130 }, { type: 'pull', dir: 'right', value: 260 }, { type: 'friction', dir: 'left', value: 49 }] } },
   { id: 'r9', type: 'gap', p: 'Forces are measured in ___. To find an object\'s weight, multiply its mass by ___. Friction always acts ___ the way an object is moving.', ans: [['newtons', 'newton', 'n'], ['9.8', 'g'], ['against', 'opposite', 'opposite to', 'the opposite way to']] },
   { id: 'r10', type: 'table', p: 'Complete the table to compare mass and weight.', cols: ['Mass', 'Weight'], choices: [['kilograms (kg)', 'newtons (N)', 'metres (m)'], ['kilograms (kg)', 'newtons (N)', 'metres (m)']], rows: [['Unit', [0, 1]], ['Is it a force?', [null, null]], ['Measured with', [null, null]], ['Changes on the Moon?', [null, null]]],
     build() { this.cols = ['Mass', 'Weight']; this.choices = [['kilograms (kg)', 'newtons (N)', 'No, it is not a force', 'Yes, it is a force', 'a balance (scales)', 'a newtonmeter', 'No, it stays the same', 'Yes, it gets smaller'], ['kilograms (kg)', 'newtons (N)', 'No, it is not a force', 'Yes, it is a force', 'a balance (scales)', 'a newtonmeter', 'No, it stays the same', 'Yes, it gets smaller']]; this.rows = [['Unit', [0, 1]], ['Is it a force?', [2, 3]], ['Measured with', [4, 5]], ['Changes on the Moon?', [6, 7]]]; return this; } },
-  { id: 'r11', type: 'explain', p: 'One kid pulls a crate on rough concrete and it won\'t move. On the air floor, the same pull slides the crate easily. Explain why.', model: 'On rough concrete, friction acts against the pull. It is big enough to match the kid\'s 60 N pull, so the forces cancel and the crate stays still. The air floor has no friction, so nothing pushes back against the pull and the crate starts to move.', check: ['Names friction as the force that stops the crate', 'Says friction acts against (opposite to) the pull', 'Says the forces cancel or balance on concrete, so the crate stays still', 'Says the air floor has no (or almost no) friction'] }
+  { id: 'r11', type: 'explain', p: 'One kid pulls a crate on rough concrete and it won\'t move. On the air floor, the same pull slides the crate easily. Explain why.', words: ['friction', 'against', 'balanced', 'unbalanced', 'resultant force'],
+    model: 'On rough concrete, friction acts against the kid\'s pull. Friction matches the 60 N pull, so the forces are balanced and the resultant force is 0 N. The crate stays still. The air floor has no friction, so nothing acts against the pull. The forces are unbalanced, so there is a resultant force and the crate starts to move.',
+    check: ['Says that on concrete, friction acts against the kid\'s pull', 'Says the pull and friction are balanced (the same size), so the resultant force is 0 N and the crate stays still', 'Says the air floor has no friction to act against the pull', 'Says that on the air floor the forces are unbalanced, so there is a resultant force and the crate starts to move'] }
 ];
 CHDATA.c1.review.forEach(q => { if (q.build) q.build(); });
 function reviewProgress(ch) { const R = CHDATA[ch] ? CHDATA[ch].review || [] : []; const st = dbGet('review.' + ch, {}); return { done: R.filter(q => st[q.id] && st[q.id].done).length, total: R.length, right: R.filter(q => st[q.id] && st[q.id].ok).length, points: R.reduce((a, q) => a + qPoints(q, st[q.id]).score, 0), maxPoints: R.reduce((a, q) => a + simMax(q), 0) }; }
@@ -3104,6 +3168,8 @@ const WS_CSS = `
 .ws .opt{margin:2px 0}
 .ws .look{background:#eef8f1;border:1px solid #9ccfae;border-radius:6px;padding:4px 8px;margin-top:4px;font-size:10pt}
 .ws .qfig{margin:4px 0 6px}.ws .qfig svg{width:95mm!important;max-width:95mm!important;border:1px solid #cbd7dc}
+.ws .stepsum ul{columns:2;column-gap:8mm;list-style:none;padding:0;margin:2px 0 6px;font-size:10pt}.ws .stepsum li{break-inside:avoid;margin:1px 0}
+.ws .words{margin:2px 0 6px;font-size:10.5pt}
 .ws .fbdbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .ws .fbdbox svg{width:100%;height:auto}
 .ws .mk{float:right;font-size:9pt;color:#555;font-weight:400}
@@ -3134,15 +3200,23 @@ function wsQuestion(q, i, mode, s) {
   else if (q.type === 'sort') body = `<table><tr><th>Item</th>${q.groups.map(g => `<th style="width:22%">${g}</th>`).join('')}</tr>${sortItems(q).map(ii => `<tr><td>${q.items[ii][0]}</td>${q.groups.map((_, gi) => `<td style="text-align:center">${(stu && v && v[ii] === gi) || (key && q.items[ii][1] === gi) ? W('✓') : ''}</td>`).join('')}</tr>`).join('')}</table><p class="note">Tick one box in each row.</p>`;
   else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
   else if (q.type === 'fbd') body = `<div class="fbdbox"><div>${q.scen.brief}${key ? `<div class="look"><b>Look for:</b><br>${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N, ${DIRWORD[f.dir]}`).join('<br>')}<br>All arrows start at the centre; bigger forces have longer arrows.</div>` : stu && s && s.v && s.v.lastRes ? `<p style="font-size:10pt">Checks passed in the sim: ${s.v.lastRes.chips.filter(c => c[2]).map(c => c[1]).join(', ') || 'none'}</p>` : ''}</div><div>${stu ? (v && v.arrows && v.arrows.length ? `<div class="stu">${FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true })}</div>` : '<div class="box" style="height:60mm">Not drawn in the sim.</div>') : key ? FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }) : `<div style="border:1.5px dashed #9aa9b0;border-radius:6px">${blankFbd(q.scen)}</div>`}</div></div>`;
-  else if (q.type === 'explain') body = stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6);
+  else if (q.type === 'explain') body = (q.words ? `<p class="words"><b>Words to use in a good answer:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6));
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   return `<div class="q"><div class="qh">Question ${i + 1}. ${q.type === 'gap' ? 'Fill the gaps.' : qp} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
+}
+/* "Steps completed in the sim": a tick list of the Learn steps and Challenge missions, so the teacher (and Toddle AI)
+   can see the student did the work that leads up to the questions. Blue ticks are from the sim. */
+function stepsSummary(chId, mode) {
+  const d = CHDATA[chId], done = dbGet('learnDone.' + chId, {}), chal = d.challenge ? dbGet('chal.' + chId, {}) : {}, stu = mode === 'student';
+  const box = ok => stu && ok ? '<span class="stu">☑</span>' : '☐';
+  const rows = d.steps.map((s, i) => `<li>${box(done[s.id])} Learn step ${i + 1}: ${esc(s.title)}</li>`).concat(d.challenge ? d.challenge.missions.map(m => `<li>${box(chal[m.id] && chal[m.id].tried)} Challenge: ${esc(m.title)}</li>`) : []);
+  return `<div class="stepsum"><h2>Steps completed in the sim</h2><p class="note">${stu ? 'A blue tick means the sim recorded this step as done.' : mode === 'key' ? 'Students tick these in the sim. Not marked: they show the work done before the questions.' : 'The sim ticks each step the student finished before answering the questions.'}</p><ul>${rows.join('')}</ul></div>`;
 }
 function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
   const partA = R.filter(q => !['fbd', 'explain'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain'].includes(q.type));
   const num = q => R.indexOf(q);
-  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -3159,6 +3233,7 @@ function markingInstructions(title, total) {
   <ul><li>Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.</li>
   <li>The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.</li>
   <li>The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.</li>
+  <li>The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.</li>
   <li>A blank question, or an empty template, scores 0. Add a kind note saying what is missing.</li>
   <li>Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.</li></ul><p><b>Total: ${total} marks.</b></p>`;
 }
@@ -3173,7 +3248,7 @@ function markItem(q, i) {
     case 'gap': return `Q${n} (${m} marks, 1 per gap): ` + q.ans.map((a, k) => `gap ${k + 1}: ${a[0]} (also accept ${gapAccepts(a).filter(w => w !== gapNorm(a[0])).join(', ') || 'any correct scientific word'})`).join('; ') + '.';
     case 'table': return `Q${n} (${m} marks, 1 per cell): ` + q.rows.map(r => `${r[0]}: ${q.cols.map((c, j) => `${c} = ${q.choices[j][r[1][j]]}`).join(', ')}`).join('; ') + '.';
     case 'fbd': return `Q${n} (${m} marks): 1 mark for each correct arrow (right force, right direction, right size): ${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N ${DIRWORD[f.dir]}`).join('; ')}. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.`;
-    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
+    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
   }
   return '';
 }
@@ -3285,7 +3360,7 @@ function teacherPrompt(T1, mins, omins) {
   L.push(''); L.push('Learning goals:'); all.forEach(c => L.push(`- ${nm(c)}: ${CHDATA[c.id].goal}`));
   L.push(''); L.push('Key vocabulary: ' + [...new Set(all.flatMap(c => CHDATA[c.id].vocab))].join(', ') + '.');
   L.push(''); L.push('Teacher-only notes: g = 9.8 N/kg is used throughout. Answer keys are locked inside the simulation with a teacher code.');
-  if (parts.includes('review')) { L.push(''); L.push('AI marking: For each worksheet, I am attaching three teacher-only PDFs: (1) the blank template, (2) the answer key with model answers, and (3) the marking scheme. Students must not see the answer keys or marking schemes. Mark only what each student added to the template (their work is printed in blue). Mark each worksheet separately. An optional worksheet that wasn\'t submitted is not a missing piece of work.');
+  if (parts.includes('review')) { L.push(''); L.push('AI marking: For each worksheet, I am attaching three teacher-only PDFs: (1) the blank template, (2) the answer key with model answers, and (3) the marking scheme. Students must not see the answer keys or marking schemes. Each worksheet starts with "Steps completed in the sim": students are expected to complete these steps before answering the questions, and a blue tick means the sim recorded that step as done. The ticks are not marked, but mention any skipped steps in the feedback. Mark only what each student added to the template (their work is printed in blue). Mark each worksheet separately. An optional worksheet that wasn\'t submitted is not a missing piece of work.');
     all.forEach(c => L.push(`- ${nm(c)} worksheet${opt.includes(c) && req.length ? ' (optional)' : ''}: ${CHDATA[c.id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); }
   return L.join('\n');
 }
@@ -3307,13 +3382,13 @@ function openExplore() {
   LAB.onChange = null; LAB.tick = () => { TRYTHIS.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDone', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
   document.addEventListener('click', e => {
     const t = e.target;
-    if (t.closest('[data-journal]')) { openJournal(); return; }
+    if (t.closest('[data-journal]')) { if (journalOpen()) closeJournal(); else openJournal(); return; }
     const op = t.closest('[data-open]'); if (op) { if (op.closest('[data-close]') || op.closest('.modal')) closeModal(); openChapter(op.dataset.open); return; }
     const tab = t.closest('#chTabs [data-ctab]'); if (tab) { setCTab(tab.dataset.ctab); return; }
     const tg = t.closest('[data-ctab-go]'); if (tg) { setCTab(tg.dataset.ctabGo); return; }
@@ -3329,7 +3404,7 @@ function init() {
     if (t.closest('#saveWorkBtn')) { if (!user().name && !isTeacher()) { askWho(false); return; } openSheet(null, 'progress'); return; }
   });
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#modal').hidden) closeModal(); else if (QSTATE === 'pop') qPlace('dock'); });
+  document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#modal').hidden) closeModal(); else if (QSTATE === 'pop') qPlace('dock'); else if (journalOpen()) closeJournal(); });
   qDragInit();   // the pop-up layer is click-through now, so clicks on the arena reach the arena
   show('vHome');
   if (!user().name && !user().teacher) askWho(true);

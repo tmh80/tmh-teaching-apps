@@ -299,7 +299,7 @@ textarea.explain{font:inherit;font-size:15px;width:100%;min-height:90px;border:1
 .modal h2{font-size:28px}
 .modal input[type=text],.modal input[type=password]{font:inherit;font-size:17px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;width:100%;background:var(--panel);color:var(--ink)}
 .modal label{font-weight:700;display:flex;flex-direction:column;gap:4px}
-.journal{position:fixed;top:0;right:0;bottom:0;width:min(560px,100%);z-index:72;background:var(--panel);box-shadow:-10px 0 30px rgba(0,0,0,.3);padding:16px 18px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.journal{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);z-index:64;background:var(--panel);border-left:1px solid var(--line);box-shadow:-14px 0 30px rgba(0,0,0,.18);display:flex;flex-direction:column}
 .jtop{display:flex;justify-content:space-between;align-items:center}
 .jtop h2{font-size:30px}
 .jtoc{border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--chip)}
@@ -528,7 +528,7 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .blog{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:2px;font-size:15px}.blog:empty{display:none}
 .blog li.ok{color:var(--good);font-weight:700}
 .qfig{margin:8px 0 2px}
-#brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:nowrap;align-items:center}
+#brakeOut{white-space:nowrap} [data-panel="brake"] .ctlh h3{white-space:nowrap} [data-panel="brake"] .ctlh{flex-wrap:wrap;align-items:center;row-gap:4px}
 /* ===== My runs: history of pushes, pulls and launches ===== */
 .runstab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:62;writing-mode:vertical-rl;background:var(--herobg);color:#fff;border:0;border-radius:12px 0 0 12px;padding:14px 9px;font-family:var(--f-display);font-weight:800;font-size:17px;letter-spacing:.04em;display:flex;align-items:center;gap:8px;box-shadow:-4px 6px 18px rgba(0,0,0,.25)}
 .runstab .rc{writing-mode:horizontal-tb;background:var(--hazard);color:#1b1404;border-radius:999px;min-width:22px;padding:1px 6px;font-size:13px;text-align:center}
@@ -564,3 +564,39 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
 .vitem dt{font-family:var(--f-display);font-weight:800;font-size:18px}
 .vitem dd{margin:2px 0 0;font-size:15px}
 .vitem dd small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}
+
+/* Journal side panel with tabs (Runs, Notes, Vocab) */
+.journal .jtop{padding:14px 16px 8px}
+.jtabs{display:flex;gap:4px;padding:0 12px;border-bottom:1.5px solid var(--line)}
+.jtabs button{flex:1;border:0;background:none;padding:9px 6px;font-weight:800;font-size:15px;color:var(--muted);border-bottom:3px solid transparent;margin-bottom:-1.5px;display:flex;align-items:center;justify-content:center;gap:6px}
+.jtabs button span{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:0 7px;font-size:12px;font-weight:700}
+.jtabs button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
+.jbody{flex:1;overflow:auto;padding:12px 16px 90px;display:flex;flex-direction:column;gap:8px}
+.jh3{font-size:21px;margin-top:6px}
+.run > summary{cursor:pointer;list-style:none}
+.run > summary::-webkit-details-marker{display:none}
+.run > summary b::before{content:'▸ ';color:var(--muted)} .run[open] > summary b::before{content:'▾ '}
+.run:not([open]){padding:7px 11px}
+.qrunsbtn{display:flex;align-items:center;gap:12px;width:100%;border:2px solid var(--accent);background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;text-align:left}
+.qrunsbtn .ic{font-size:26px}
+.qrunsbtn b{display:block;font-family:var(--f-display);font-size:21px}
+.qrunsbtn small{color:var(--muted);font-size:13.5px}
+.qrunsbtn .rc{margin-left:auto;background:var(--accent);color:#fff;border-radius:999px;min-width:28px;padding:2px 9px;text-align:center;font-weight:800}
+@media (min-width:1180px){body.jopen main,body.jopen .top{margin-right:446px;margin-left:16px;max-width:none}}
+.calcFab{z-index:69}
+@media (min-width:1180px){body.jopen .calcFab{right:446px}}
+@media (max-width:1179px){body.jopen .calcFab{bottom:16px;right:16px}}
+/* typed number boxes beside sliders, and too-high / too-low markers */
+.numbox{display:inline-flex;align-items:center;gap:4px;font-family:var(--f-num);font-weight:700}
+.numbox input{width:64px;font:inherit;font-size:15px;padding:3px 6px;border:1.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);text-align:right}
+.numbox input:focus{border-color:var(--accent)}
+.slidewrap{position:relative}
+.slidewrap input[type=range]{width:100%}
+.bmarks{position:absolute;left:8px;right:8px;top:50%;height:0;pointer-events:none}
+.bmarks i{position:absolute;top:-11px;width:5px;height:22px;border-radius:3px;transform:translateX(-50%);box-shadow:0 0 0 1.5px var(--panel)}
+.bmarks i.hi{background:#d6402c}.bmarks i.lo{background:#e3b21c}
+.bmnote{margin:2px 0 0;font-size:13px;color:var(--muted);line-height:1.35}
+.bmnote .hi{color:#d6402c}.bmnote .lo{color:#c99a10}
+.wordsuse{border:1.5px dashed var(--accent);border-radius:10px;padding:7px 10px;background:var(--accent-soft);display:flex;flex-direction:column;gap:4px}
+.wordsuse div{display:flex;flex-wrap:wrap;gap:6px}
+.wordsuse b{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:14.5px}

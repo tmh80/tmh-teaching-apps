@@ -39,7 +39,7 @@ function setStep(i) {
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
   const st = chd.steps[GI]; LASTSIG = '';
   // arena state
-  clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false;
+  clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false; JRUNS_SEEN = journalOpen() && JTAB === 'runs';
   LAB.sides = st.sides || ['left', 'right']; LAB.pullers = st.pullers || ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = st.floors || null; LAB.showVert = true; LAB.showRes = true; LAB.idle = st.idle || null;
   if (st.setup) st.setup(); resetSim();
   LAB.show = panelsFor(CH.id, GI);
@@ -127,11 +127,11 @@ function qChrome() {
     const last = GI === CHDATA[CH.id].steps.length - 1, chd = CHDATA[CH.id];
     ft.innerHTML = `<button type="button" class="ghost" id="qBack">← Back to the arena</button><button type="button" class="go ${done ? 'ready' : ''}" id="qNext">${last ? (chd.challenge ? 'To the Challenge →' : 'To the Check →') : 'Next step →'}</button>`;
     $('#qBack').addEventListener('click', () => qPlace('dock')); $('#qNext').addEventListener('click', tryNext);
-    const old = $('.qruns', qc); if (old) old.remove();
+    const old = $('.qrunsbtn', qc); if (old) old.remove();
     if (['run', 'shove', 'launch'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
     hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
-    $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qruns', qc); if (old) old.remove();
+    $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qrunsbtn', qc); if (old) old.remove();
     ft.innerHTML = '';
   }
   const n = $('#gNext'); if (n && !stepDone(CH.id, GI) && hasQs() && !done) n.textContent = 'Next: questions →';
@@ -174,7 +174,7 @@ const TOUR = [
   ['#cvScene', 'This is the Main Arena. Everything you change shows up here straight away.'],
   ['#rail .tasks', 'Your jobs for each step are in the Do this list. They tick themselves when you have done them.'],
   ['#gNext', 'When you have done the jobs, press Next. Your questions pop up in the middle of the screen. Minimise them whenever you need the arena again.'],
-  ['#rail [data-journal]', 'Every information card you read is saved in your Journal. Open it whenever you need a reminder.'],
+  ['#rail [data-journal]', 'Your Journal keeps your runs, the cards you read and the key words you meet. Open it whenever you need a reminder.'],
   ['#calcFab', 'Need to do some maths? Open the calculator here. Its g key is 9.8 N/kg.'],
   ['#saveWorkBtn', 'Press Save my work at any time to save everything you have done so far as a PDF.']
 ];

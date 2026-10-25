@@ -65,28 +65,45 @@ function vocabHTML() {
     <input type="search" class="vsearch" id="vSearch" placeholder="Find a word…" aria-label="Find a word">
     <dl class="vocab">${ks.map(k => `<div class="vitem" data-v="${esc(TERMS[k][0].toLowerCase())}"><dt>${esc(TERMS[k][0])}</dt><dd>${esc(TERMS[k][1])}${V[k].where ? `<small>First met: ${esc(V[k].where)}</small>` : ''}</dd></div>`).join('')}</dl>`;
 }
-function openJournal() {
+/* The Journal: a side panel beside the arena with three tabs.
+   Runs: every push, pull and launch (this step's runs open, earlier ones folded). Notes: the saved info cards
+   with the student's own notes, plus evidence of learning. Vocab: every key word met so far. */
+let JTAB = 'runs', JRUNS_SEEN = false;
+function openJournal(tab) {
+  if (tab) JTAB = tab; const p = $('#journal'); if (!p) return;
+  p.hidden = false; document.body.classList.add('jopen'); renderJournal();
+  JOURNAL_OPENED = true; if (JTAB === 'runs') JRUNS_SEEN = true; if (LAB.onChange) LAB.onChange();
+  setTimeout(() => { const c = $('#jClose'); if (c) c.focus({ preventScroll: true }); }, 20);
+}
+function closeJournal() { const p = $('#journal'); if (!p || p.hidden) return; p.hidden = true; document.body.classList.remove('jopen'); }
+const journalOpen = () => { const p = $('#journal'); return !!(p && !p.hidden); };
+function journalNotesHTML() {
   const J = dbGet('journal', { order: [], entries: {} }), notes = dbGet('jnotes', {}), E = dbGet('evidence', []);
   const groups = {}; J.order.forEach(k => { const e = J.entries[k]; (groups[e.where] = groups[e.where] || []).push(k); });
-  const back = h('div', { class: 'modalback', style: 'z-index:71' }); const sid = s => 'jg-' + s.replace(/\W+/g, '-');
-  back.innerHTML = `<aside class="journal" role="dialog" aria-modal="true" aria-labelledby="jT"><div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
-    ${J.order.length ? `<nav class="jtoc"><div class="lbl">Contents</div><ul>${Object.keys(groups).map(g => `<li><button type="button" data-jgo="${sid(g)}"><b>${esc(g)}</b> · ${groups[g].length} card${groups[g].length > 1 ? 's' : ''}</button></li>`).join('')}<li><button type="button" data-jgo="jg-vocab"><b>Key vocabulary</b> · ${Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length}</button></li><li><button type="button" data-jgo="jg-runs"><b>My runs</b> · ${runsAll().length}</button></li><li><button type="button" data-jgo="jg-evidence"><b>Evidence of my learning</b> · ${E.length}</button></li></ul></nav>` : '<p>Your journal is empty for now. Every information card you read is saved here, along with the maths and questions you get right.</p>'}
-    ${Object.keys(groups).map(g => `<section id="${sid(g)}"><h3 style="font-size:22px;margin-top:8px">${esc(g)}</h3>${groups[g].map(k => { const e = J.entries[k]; return `<details class="jent" ${k === J.last ? 'open' : ''}><summary>${esc(e.title)}${notes[k] ? ' <span title="Has my notes">✏️</span>' : ''}</summary><div class="gbody">${e.html}</div><label class="jnote"><span>My notes and questions</span><textarea data-jnote="${k}" rows="2" placeholder="Add your own notes, an example, or a question for your teacher.">${esc(notes[k] || '')}</textarea></label></details>`; }).join('')}</section>`).join('')}
-    <section id="jg-vocab"><h3 style="font-size:22px;margin-top:8px">Key vocabulary</h3>${vocabHTML()}</section>
-    <section id="jg-runs"><div class="jrh"><h3 style="font-size:22px;margin-top:8px">My runs</h3><button type="button" class="go sm" data-runs>Pop out ↗</button></div>
-    <p class="scaleNote">Every push, pull and launch, newest first. Press <b>Pop out</b> to keep them open beside the arena while you work.</p>
-    ${runsAll().length ? `<ol class="runlist">${runsAll().slice(-12).reverse().map(runItem).join('')}</ol>${runsAll().length > 12 ? `<p class="scaleNote">Showing your latest 12 of ${runsAll().length} runs. Pop out to see them all.</p>` : ''}` : '<p class="scaleNote">Your runs will appear here when you press Pull!, push or launch the crate.</p>'}</section>
-    <section id="jg-evidence"><h3 style="font-size:22px;margin-top:8px">Evidence of my learning</h3>
-    ${E.length ? `<ul class="evl">${E.slice().reverse().map(e => `<li>${EVICON[e.kind] || '•'} ${esc(e.text)}<small>${new Date(e.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></li>`).join('')}</ul>` : '<p class="scaleNote">Correct maths, finished questions and challenges will appear here automatically.</p>'}
-    <div class="evadd"><textarea id="evOwn" rows="2" placeholder="Add your own evidence, for example: I worked out the weight of a 47 kg crate."></textarea><button type="button" class="ghost sm" id="evAdd" style="margin-top:6px">Add to my evidence</button></div></section></aside>`;
-  document.body.appendChild(back);
-  const close = () => { back.remove(); document.removeEventListener('keydown', k); }, k = e => { if (e.key === 'Escape') close(); };
-  document.addEventListener('keydown', k); back.addEventListener('click', e => { if (e.target === back) close(); }); $('#jClose', back).addEventListener('click', close);
-  $$('[data-jgo]', back).forEach(b => b.addEventListener('click', () => { const t = $('#' + b.dataset.jgo, back); if (t) t.scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth' }); }));
-  $$('[data-jnote]', back).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
-  const vs = $('#vSearch', back); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', back).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
-  $('#evAdd', back).addEventListener('click', () => { const v = $('#evOwn', back).value.trim(); if (!v) return; addEvidence('own', v); close(); openJournal(); });
-  JOURNAL_OPENED = true; if (LAB.onChange) LAB.onChange();
-  setTimeout(() => $('#jClose', back).focus({ preventScroll: true }), 20);
+  return (J.order.length ? Object.keys(groups).map(g => `<section><h3 class="jh3">${esc(g)}</h3>${groups[g].map(k => { const e = J.entries[k]; return `<details class="jent" ${k === J.last ? 'open' : ''}><summary>${esc(e.title)}${notes[k] ? ' <span title="Has my notes">✏️</span>' : ''}</summary><div class="gbody">${e.html}</div><label class="jnote"><span>My notes and questions</span><textarea data-jnote="${k}" rows="2" placeholder="Add your own notes, an example, or a question for your teacher.">${esc(notes[k] || '')}</textarea></label></details>`; }).join('')}</section>`).join('')
+    : '<p class="scaleNote">Every information card you read is saved here, so you can read it again and add your own notes.</p>')
+    + `<section><h3 class="jh3">Evidence of my learning</h3>${E.length ? `<ul class="evl">${E.slice().reverse().map(e => `<li>${EVICON[e.kind] || '•'} ${esc(e.text)}<small>${new Date(e.at).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></li>`).join('')}</ul>` : '<p class="scaleNote">Correct maths, finished questions and challenges will appear here automatically.</p>'}
+      <div class="evadd"><textarea id="evOwn" rows="2" placeholder="Add your own evidence, for example: I worked out the weight of a 47 kg crate."></textarea><button type="button" class="ghost sm" id="evAdd" style="margin-top:6px">Add to my evidence</button></div></section>`;
+}
+function renderJournal() {
+  const p = $('#journal'); if (!p || p.hidden) return;
+  const nR = runsAll().length, nV = Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length, nN = dbGet('journal', { order: [] }).order.length;
+  const sc = $('.jbody', p) ? $('.jbody', p).scrollTop : 0, same = p.dataset.tab === JTAB;
+  p.innerHTML = `<div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
+    <div class="jtabs" role="tablist" aria-label="Journal sections">${[['runs', '📋 Runs', nR], ['notes', '📝 Notes', nN], ['vocab', '🔤 Vocab', nV]].map(([k, t, n]) => `<button type="button" role="tab" data-jtab="${k}" aria-selected="${JTAB === k}">${t}<span>${n}</span></button>`).join('')}</div>
+    <div class="jbody">${JTAB === 'runs' ? runsTabHTML() : JTAB === 'notes' ? journalNotesHTML() : `<h3 class="jh3">Key vocabulary</h3>${vocabHTML()}`}</div>`;
+  p.dataset.tab = JTAB; if (same) $('.jbody', p).scrollTop = sc;
+  $$('[data-jnote]', p).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
+  const vs = $('#vSearch', p); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', p).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
+  const ea = $('#evAdd', p); if (ea) ea.addEventListener('click', () => { const v = $('#evOwn', p).value.trim(); if (!v) return; addEvidence('own', v); renderJournal(); });
+  $$('details.run', p).forEach(d => d.addEventListener('toggle', () => { RUNOPEN[d.dataset.run] = d.open; }));
+}
+function initJournal() {
+  const p = h('aside', { class: 'journal', id: 'journal', hidden: '', 'aria-label': 'My Journal' }); document.body.appendChild(p);
+  document.addEventListener('click', e => {
+    if (e.target.closest('#jClose')) { closeJournal(); return; }
+    const t = e.target.closest('[data-jtab]'); if (t) { JTAB = t.dataset.jtab; if (JTAB === 'runs') JRUNS_SEEN = true; renderJournal(); if (LAB.onChange) LAB.onChange(); return; }
+    if (e.target.closest('[data-runs]')) { openJournal('runs'); return; }
+  });
 }
 let JOURNAL_OPENED = false;

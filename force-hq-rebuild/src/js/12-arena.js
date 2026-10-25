@@ -147,9 +147,13 @@ function initPal() {
 function syncRun() { const b = $('#runBtn'); if (!b) return; b.textContent = S.running ? 'Pause' : 'Pull!'; b.classList.toggle('pause', S.running); }
 function renderControls() {
   $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => !LAB.floors || LAB.floors.includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
-  const m = $('#mass'); m.value = S.mass; $('#massOut').textContent = S.mass + ' kg';
+  const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
-  const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; $('#brakeOut').textContent = S.brakeF + ' N'; }
+  const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
+  /* trial-and-error markers: red = a brake force that was too strong (stopped short), yellow = too weak (slid past) */
+  const B = LAB.bmarks, mk = $('#bMarks'), note = $('#bmNote');
+  if (mk) { const pos = v => `${(v - 5) / 195 * 100}%`; mk.innerHTML = B ? (B.hi != null ? `<i class="hi" style="left:${pos(B.hi)}" title="Too high"></i>` : '') + (B.lo != null ? `<i class="lo" style="left:${pos(B.lo)}" title="Too low"></i>` : '') : '';
+    note.hidden = !B || (B.hi == null && B.lo == null); if (B) note.innerHTML = `${B.lo != null ? `<span class="lo">●</span> too low: ${B.lo} N` : ''}${B.lo != null && B.hi != null ? ' · ' : ''}${B.hi != null ? `<span class="hi">●</span> too high: ${B.hi} N` : ''}${B.lo != null && B.hi != null ? `<br>The right brake force is between them.` : ''}`; }
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
@@ -161,7 +165,11 @@ function initControls() {
   $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
   $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
   $('#floors').addEventListener('click', e => { const b = e.target.closest('[data-floor]'); if (!b) return; S.floor = b.dataset.floor; resetSim(); labChanged(); });
-  $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massOut').textContent = S.mass + ' kg'; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
+  $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massNum').value = S.mass; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
+  /* typed number boxes: any value the slider allows can be typed in (applied on Enter or when the box loses focus) */
+  const typed = (inp, lo, hi, set) => { const go = () => { const v = parseNum(inp.value); if (isNaN(v)) { renderControls(); return; } set(clamp(Math.round(v), lo, hi)); }; inp.addEventListener('change', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); inp.blur(); } }); };
+  typed($('#massNum'), 10, 150, v => { S.mass = v; if (!S.running) resetSim(); labChanged(); });
+  typed($('#brakeNum'), 5, 200, v => setBrake(v));
   $('#tgVert').addEventListener('change', e => { LAB.showVert = e.target.checked; });
   $('#tgRes').addEventListener('change', e => { LAB.showRes = e.target.checked; });
 }

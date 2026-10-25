@@ -4,6 +4,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 1 Foundation: What is
 • Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
 • The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
 • The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
 • A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
 Total: 28 marks.
@@ -24,6 +25,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 1 Extension: What is 
 • Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
 • The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
 • The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
 • A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
 Total: 15 marks.
@@ -33,7 +35,7 @@ Q1 (2 marks): 110 kg (accept 109.85 to 110.15). 1 mark for the answer, 1 for cor
 Q2 (2 marks): Weight; Normal force; Tension (the pull of the rope); Friction. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.
 Q3 (6 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 490 N down; Normal force 490 N up; Pull (tension) 130 N to the left; Pull (tension) 260 N to the right; Friction 49 N to the left. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
 Q4 (1 mark): 1 cm.
-Q5 (4 marks, 1 per point): • Names friction as the force that stops the crate • Says friction acts against (opposite to) the pull • Says the forces cancel or balance on concrete, so the crate stays still • Says the air floor has no (or almost no) friction Model answer: On rough concrete, friction acts against the pull. It is big enough to match the kid's 60 N pull, so the forces cancel and the crate stays still. The air floor has no friction, so nothing pushes back against the pull and the crate starts to move.
+Q5 (4 marks, 1 per point): The question gives the words to use (friction, against, balanced, unbalanced, resultant force); each point is about using one of them correctly. • Says that on concrete, friction acts against the kid's pull • Says the pull and friction are balanced (the same size), so the resultant force is 0 N and the crate stays still • Says the air floor has no friction to act against the pull • Says that on the air floor the forces are unbalanced, so there is a resultant force and the crate starts to move Model answer: On rough concrete, friction acts against the kid's pull. Friction matches the 60 N pull, so the forces are balanced and the resultant force is 0 N. The crate stays still. The air floor has no friction, so nothing acts against the pull. The forces are unbalanced, so there is a resultant force and the crate starts to move.
 Total: 15 marks.
 
 
@@ -42,9 +44,10 @@ This marking scheme is for the Force HQ worksheet "Chapter 2 Foundation: Inertia
 • Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
 • The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
 • The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
 • A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
-Total: 18 marks.
+Total: 17 marks.
 
 Mark scheme
 Q1 (2 marks): A heavier object has more inertia; Inertia makes a moving object keep moving; An object at rest stays at rest unless a force acts on it. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.
@@ -52,8 +55,8 @@ Q2 (2 marks): 0.5 m/s (accept 0.48 to 0.52). 1 mark for the answer, 1 for correc
 Q3 (1 mark): Moving at a steady speed of 1.8 m/s.
 Q4 (6 marks, 1 per item): Hard to start or stop: A loaded lorry, A full shopping trolley, A cargo ship. Easy to start or stop: A table-tennis ball, An empty shopping trolley, A paper cup.
 Q5 (3 marks, 1 per gap): gap 1: still (also accept at rest, stationary, not moving); gap 2: speed (also accept velocity); gap 3: force (also accept any correct scientific word).
-Q6 (4 marks, 1 per point): • Says the passenger was moving forwards with the bus • Uses the word inertia • Says the passenger keeps moving forwards when the bus slows down • Says a force (a pole, a seatbelt, their feet) is needed to stop them Model answer: The passenger was moving forwards with the bus. When the bus brakes, the brakes slow the bus down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards, so they lurch forwards until they grab a pole or their feet stop them.
-Total: 18 marks.
+Q6 (3 marks, 1 per point): The question gives the words to use (inertia, keeps moving, unbalanced force); each point is about using one of them correctly. • Says the passenger was moving forwards at the same speed as the bus • Uses inertia to explain that the passenger keeps moving forwards when the bus slows down • States that an unbalanced force (from a pole, a seat or their feet) has to act on the passenger to bring them to a stop Model answer: The passenger was moving forwards at the same speed as the bus. When the bus brakes, the bus slows down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards. To stop them, an unbalanced force has to act on them, such as the pull of a pole they grab or friction on their feet.
+Total: 17 marks.
 
 
 Marking instructions for Toddle AI
@@ -61,14 +64,15 @@ This marking scheme is for the Force HQ worksheet "Chapter 2 Extension: Inertia"
 • Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
 • The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
 • The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
 • A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
-Total: 14 marks.
+Total: 13 marks.
 
 Mark scheme
 Q1 (4 marks, 1 per row): A flat line above 0 → Moving at a steady speed; A line sloping upwards → Speeding up; A line sloping down to 0 → Slowing down and stopping; A flat line along 0 → Standing still.
 Q2 (1 mark): Line 2, because it takes longer to stop.
 Q3 (2 marks): 144 N (accept 143 to 145). 1 mark for the answer, 1 for correct working: 120 kg is 3 times 40 kg, so it needs 3 times the force: 3 × 48 = 144 N.
 Q4 (3 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 509.6 N down; Normal force 509.6 N up. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
-Q5 (4 marks, 1 per point): • Says the lorry has more mass • Says more mass means more inertia • Says it would take longer or further to stop with the same force • Says it needs a bigger force to stop in the same distance Model answer: The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force it would take much longer and much further to stop. To stop in a safe distance, it needs a much bigger brake force, so it needs stronger brakes.
-Total: 14 marks.
+Q5 (3 marks, 1 per point): The question gives the words to use (mass, inertia, brake force, braking distance); each point is about using one of them correctly. • Says the lorry has more mass than the car, so it has more inertia • Says that with the same brake force, the lorry would have a longer braking distance • Says the lorry needs a bigger brake force to stop in the same distance (for example, 3 times the mass needs 3 times the force) Model answer: The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force, the lorry would have a much longer braking distance. To stop in a safe distance, it needs a much bigger brake force: for example, 3 times the mass needs 3 times the brake force. So it needs stronger brakes.
+Total: 13 marks.

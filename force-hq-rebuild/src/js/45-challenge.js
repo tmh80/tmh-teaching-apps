@@ -73,7 +73,7 @@ function renderBrakeCourse(ch, bm, host, save) {
   let cur = Math.max(0, bm.findIndex(m => !get(m.id).done)), active = false;
   const card = h('section', { class: 'panel mission', id: 'mi-course' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a crate"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>If the crate slid <b>past</b> the target, it needs a <b>bigger</b> brake force. If it stopped <b>short</b> of the target, use a <b>smaller</b> one.</p><p>A heavier crate has more inertia, so it needs a bigger brake force than a light one. In Car versus truck, 3 times the mass needed 3 times the force to stop in the same distance.</p></div></details>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>If the crate slid <b>past</b> the target, it needs a <b>bigger</b> brake force. If it stopped <b>short</b> of the target, use a <b>smaller</b> one. The yellow (too low) and red (too high) marks on the slider remember your tries.</p><p>A heavier crate has more inertia, so it needs a bigger brake force than a light one. In Car versus truck, 3 times the mass needed 3 times the force to stop in the same distance.</p></div></details>
     <div class="labhost"></div><div class="fb" id="bkFb" hidden></div><ol class="blog" id="bkLog"></ol><ul class="objs" data-o></ul><div class="row" id="bkMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.show = new Set(['launch', 'brake', 'readD', 'readM', 'vt']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.onChange = null; LAB.idle = 'Choose a brake force, then press Launch the crate';
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc'); applyPanels();
@@ -88,7 +88,7 @@ function renderBrakeCourse(ch, bm, host, save) {
     const gv = $('#bkGive'); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} launches. The brake force that works is about ${Math.round(m.mass * m.v0 * m.v0 / (2 * m.target))} N. You scored 1 of 4 points.` }); paint(); });
   };
   const load = i => {
-    cur = i; const m = bm[cur], s = get(m.id); clearCh2(); S.left = []; S.right = []; course(m.mass, m.v0, s.F || 40); S.target = m.target; S.flags = newFlags(); resetSim(); active = false; labChanged(); paint();
+    cur = i; const m = bm[cur], s = get(m.id); clearCh2(); S.left = []; S.right = []; course(m.mass, m.v0, s.F || 40); S.target = m.target; LAB.bmarks = { mass: m.mass, target: m.target, tol: 0.15, hi: s.hi != null ? s.hi : null, lo: s.lo != null ? s.lo : null }; S.flags = newFlags(); resetSim(); active = false; labChanged(); paint();
   };
   card.addEventListener('click', e => { const b = e.target.closest('[data-cr]'); if (b) load(+b.dataset.cr); });
   LAB.tick = () => {
@@ -96,8 +96,8 @@ function renderBrakeCourse(ch, bm, host, save) {
     if (!active || S.running) return;
     active = false; const m = bm[cur], s = get(m.id); if (s.done) { paint(); return; }
     const d = S.brakeFrom != null && S.flags.stopped ? S.x - S.brakeFrom : null, hit = d != null && Math.abs(d - m.target) <= 0.15, n = (s.n || 0) + 1, log = (s.log || []).concat([{ F: S.brakeF, d, hit }]);
-    const best = hit ? Math.max(1, 5 - n) : 0;
-    save(m, { tried: true, n, log, F: S.brakeF, hit, done: hit, best, msg: hit ? `On target after ${n} launch${n > 1 ? 'es' : ''}! You scored ${best} of 4 points.` : `Not quite: ${d == null ? 'it reached the end of the arena' : `it stopped ${fmt(d, 2)} m after the brake line`}. The target is ${fmt(m.target, 1)} m. Change the brake force and launch again.` });
+    const best = hit ? Math.max(1, 5 - n) : 0; brakeMark(LAB.bmarks, d, S.brakeF); renderControls();
+    save(m, { tried: true, n, log, F: S.brakeF, hi: LAB.bmarks.hi, lo: LAB.bmarks.lo, hit, done: hit, best, msg: hit ? `On target after ${n} launch${n > 1 ? 'es' : ''}! You scored ${best} of 4 points.` : `Not quite: ${d == null ? 'it reached the end of the arena' : `it stopped ${fmt(d, 2)} m after the brake line`}. The target is ${fmt(m.target, 1)} m. Change the brake force and launch again.` });
     paint();
   };
   load(cur);
