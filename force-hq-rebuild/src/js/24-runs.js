@@ -19,7 +19,7 @@ function runMark(kind) {
   const R = runsAll(); RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
   const f = forces();
   RUN = Object.assign({ n: RUNSEQ, kind, at: Date.now(), live: true, mass: S.mass, floor: S.floor, L: tot(S.left), R: tot(S.right), x0: S.x, t0: S.t,
-    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W }, runWhere());
+    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W, scene: S.scene, nR: S.right.length, a: null, net: null, Rst: null, frS: null, v1: null, v2: null, v3: null, v4: null, finT: null, finV: null }, runWhere());
   R.push(RUN); if (R.length > 200) R.splice(0, R.length - 200); dbSet('runs', R); RUNDIRTY = 1;
 }
 /* update the live run every frame */
@@ -35,7 +35,11 @@ function runTick(f, dt) {
   RUN.L = Math.max(RUN.L, f.L); RUN.R = Math.max(RUN.R, f.R);
   if (S.brakeFrom != null) { RUN.bd = S.x - S.brakeFrom; RUN.bt = S.t - S.brakeT; }
   RUN.t = S.t - RUN.t0;
-  if (!S.running) runEnd(S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
+  /* Chapter 3: the steady acceleration, resultant and friction once the huskies are pulling at full strength, and the speed at 2 s and 4 s */
+  if (S.running && S.pullT > PULL_RAMP + 0.05 && f.R > 0) { RUN.a = f.a; RUN.net = f.net; RUN.Rst = f.R; RUN.frS = Math.abs(f.fr); }
+  [1, 2, 3, 4].forEach(k => { if (RUN['v' + k] == null && RUN.t >= k) RUN['v' + k] = S.v; });
+  if (S.flags.finished) { RUN.finT = S.finT - RUN.t0; RUN.finV = S.finV; }
+  if (!S.running) runEnd(S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
   else if (av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
   RUNDIRTY = 1;
 }
@@ -45,7 +49,18 @@ function runEnd(why) {
 }
 /* the sentence a student reads */
 const m2 = v => fmt(v, 2) + ' m', ms = v => fmt(v, 2) + ' m/s', NN = v => fmt(v, v < 100 && v % 1 ? 1 : 0) + ' N';
+const SNOWPH = { snow0: 'with friction switched off', snow: 'on packed snow', powder: 'on fresh powder' };
+function sledText(r) {
+  const hk = `${r.nR} husk${r.nR === 1 ? 'y' : 'ies'}`, live = r.live && r.out === 'running';
+  const head = `${hk} pulled the ${r.mass} kg sled with ${NN(r.R)} ${SNOWPH[r.floor] || ''}.`.replace(' .', '.');
+  if (!r.moved && !live) return head + (r.fs ? ` Friction held the sled still with ${NN(r.fs)}, so the resultant force was 0 N and the acceleration was 0 m/s².` : ' It did not move.');
+  const body = r.a != null ? ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².` : '';
+  if (live) return head + body + ` It is moving at ${ms(Math.abs(S.v))} and has gone ${m2(r.dist)} so far…`;
+  if (r.out === 'finish') return head + body + ` It crossed the finish line after ${fmt(r.finT, 1)} s, moving at ${ms(r.finV)}.`;
+  return head + body + ` Its top speed was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
+}
 function runText(r) {
+  if (r.scene === 'sled') return sledText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
   const dirw = r.dir > 0 ? 'right' : 'left', live = r.live && r.out === 'running';
   if (r.kind === 'launch') {
@@ -70,6 +85,14 @@ function runText(r) {
   return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
 function runChips(r) {
+  if (r.scene === 'sled') {
+    const c = [['Huskies', String(r.nR)], ['Mass', r.mass + ' kg'], ['Snow', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor], ['Pull', NN(r.R)]];
+    if (r.frS != null && r.frS > 0.5) c.push(['Friction', NN(r.frS)]); else if (r.fs) c.push(['Friction', NN(r.fs)]);
+    if (r.net != null) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
+    c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]); [1, 2, 3, 4].forEach(k => { if (r['v' + k] != null) c.push(['Speed at ' + k + ' s', ms(r['v' + k])]); });
+    if (r.finT != null) c.push(['Finish time', fmt(r.finT, 1) + ' s']);
+    return c;
+  }
   const c = [['Mass', r.mass + ' kg'], ['Floor', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor]];
   if (r.kind === 'pull') { c.push(['Left', NN(r.L)], ['Right', NN(r.R)]); }
   if (r.kind === 'launch') { c.push(['Launch speed', ms(r.v0)]); if (r.brakeOn) c.push(['Brake', NN(r.brakeF)]); }

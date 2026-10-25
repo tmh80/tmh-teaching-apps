@@ -4,7 +4,7 @@
 
 **Sections:** every chapter is split into self-contained sections of about 20–30 minutes (Foundation, Extension). Each section has its own Learn steps, optional Challenge, Check questions and worksheet PDF. They are defined in `src/js/55-sections.js` (`SECTIONS`, `secMins`). Chapter 1 Foundation (`c1f`) is about 28 minutes and Chapter 1 Extension (`c1x`) about 29 minutes. Chapter 1 Foundation has a step on resultant force (`s3r`: balanced and unbalanced forces on the air floor) after the two-team step; the "Coming up in Force HQ" preview step (`s11`) was taken out to keep the section to approx. 30 minutes (its data is still in `41-ch1.js`).
 
-**Status:** Chapters 1 and 2 are built, each as a Foundation and an Extension (Learn, Challenge where there is one, Check, worksheet and Toddle files). Chapter 2, "Inertia", has a Foundation (`c2f`, 6 steps, approx. 23 min) and an Extension (`c2x`, 2 steps plus the "Inertia obstacle course" Challenge, approx. 26 min). Chapters 3–5, the Drop Zone and the Workshop are still to come.
+**Status:** Chapters 1, 2 and 3 are built (Chapter 3, F = ma, on 25 Oct 2026), each as a Foundation and an Extension (Learn, Challenge where there is one, Check, worksheet and Toddle files). Chapter 2, "Inertia", has a Foundation (`c2f`, 6 steps, approx. 23 min) and an Extension (`c2x`, 2 steps plus the "Inertia obstacle course" Challenge, approx. 26 min). Chapters 3–5, the Drop Zone and the Workshop are still to come.
 
 **Home screen (October 2026 polish):** a dark "night stadium" hero with the arena illustration, an "Up next" card that resumes the first unfinished section, stats (stamps, sections done, Journal cards) and a hazard-stripe edge; open chapters as a featured card with a tile per section (progress bar, parts, stamp); later chapters as a "coming soon" route; Explore and Workshop cards; a stamp book. The "For teachers" button sits in the header on the home page only. The welcome (name) box has a matching dark header.
 
@@ -31,6 +31,7 @@
   - `40-guided.js`: the Learn engine. Steps reveal panels cumulatively (`adds`, `hide`), plus the tour and the diagram desk.
   - `41-ch1.js`: Chapter 1 content.
   - `42-ch2.js`: Chapter 2 content: the steps, Check questions, `vtSVG()` (velocity–time graphs for questions and worksheets), `ch2Record()` (stores each run's speed, braking distance and stopping time per crate mass, so questions check the student's own runs), `course()` (the launcher set-up) and the obstacle-course Challenge data.
+  - `43-ch3.js`: Chapter 3 content (Snow Arena, F = ma): steps a1–a6 and e1–e3, the Check, the mail-run Challenge data, the seeded maths bank `mq(level, seed, id)` (levels 1–5, hint ladder, unit picker) and `MBMORE` for the "Another one" buttons. Readings come from the student's saved sled runs (`sledRun`, `rA`, `rFr`, `rV`).
   - `45-challenge.js`: the Challenge engine: Chapter 1's "Arena Inspector" (diagram and build missions) and Chapter 2's brake missions (`renderBrakeCourse`: one shared arena, a tab per crate, a green target zone of ±15 cm; every launch counts, so on target at the 1st launch = 4 points, 2nd = 3, 3rd = 2, later = 1, and after 3 misses "Move on" scores 1).
   - `50-review.js`: Chapter 1 question bank and the Check page (gated by the Challenge, or by Learn when a section has no Challenge, with "Continue anyway" and a "keep going" box for the next section).
   - `55-sections.js`: splits each chapter into sections and estimates their minutes.
@@ -79,3 +80,11 @@
 
 ## Art
 Flat, rounded, outline-free shapes in team colours. Animals have dot eyes and dot noses, a mouth, and ears drawn as curved lines. Dogs and huskies have eyes near the front of the head; ponies and horses have eyes on the side.
+
+## Chapter 3 notes (25 Oct 2026)
+- One engine: the sled is `S.scene='sled'` (huskies are the right team, 90 N each, start -9 m, finish +6 m, which stops the run). Floors `snow0` (friction off), `snow` (packed) and `powder`. No top-speed taper, so a = F/m stays exact.
+- Friction is off in a1–a4 (disclaimer card and a "Friction: OFF" badge) and returns in a5 (second disclaimer). The Extension and the mail run always use the resultant.
+- Question engine additions (opt-in, so Chapters 1–2 are unchanged): `q.units` unit picker and `q.ladder` hint ladder on `num`; `step.more` adds "Another level n question" buttons.
+- Formula triangle helper lives in `21-calc.js` (`triHTML`). `vtSVG` takes `o.tri` for a run/rise triangle.
+- Mail run (`renderSledCourse`): 3 runs, a run counts at the finish line (or stops after 8 s), scored 4/3/2/1 by run number, "Move on" after 3 misses.
+- Tests: `tests/play_c3.py` plays both sections, the challenge and the Check.

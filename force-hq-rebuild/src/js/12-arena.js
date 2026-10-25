@@ -12,6 +12,7 @@ function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 900, 380); HITS = [];
+  if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
   arenaShell(c, 'MAIN ARENA');
   c.fillStyle = C.ink; c.fillRect(450 - 160, 92, 320, 30); txt(c, 'MAIN ARENA · TUG-OF-WAR', 450, 107.5, C.panel, `800 20px ${C.fd}`);
   drawFloor(c);
@@ -42,10 +43,69 @@ function drawScene(f, cvo) {
   hudBox(c, `Floor: ${FLOORS[S.floor].name}`, 886, 22, C.line, 'right');
   if (!cvo) { banners(c, f); drawDropZone(c); }
 }
+
+/* ---- Chapter 3: the Snow Arena. The huskies are the right team; the sled and its load are the "crate". ---- */
+const SLED_BASE = 40, PINES = Array.from({ length: 13 }, (_, i) => [60 + i * 66 + ((i * 37) % 16), 18 + ((i * 53) % 10)]);
+const sledBoxes = m => clamp(Math.round((m - SLED_BASE) / 15), 0, 8);
+function drawSledBody(c, cx, gy, mass) {
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+  c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.ellipse(cx, gy + 3, 64, 4, 0, 0, 7); c.fill();
+  c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 64, gy - 3); c.lineTo(cx + 50, gy - 3); c.quadraticCurveTo(cx + 64, gy - 3, cx + 62, gy - 16); c.stroke();
+  c.lineWidth = 2; for (const x of [-44, -10, 24]) { c.beginPath(); c.moveTo(cx + x, gy - 3); c.lineTo(cx + x, gy - 16); c.stroke(); }
+  c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.beginPath(); c.roundRect(cx - 48, gy - 34, 92, 18, 3); c.fill(); c.stroke();
+  const boxes = sledBoxes(mass), cols = [C.left, C.accent, C.hazard, C.right];
+  for (let i = 0; i < boxes; i++) { const col = i % 4, row = Math.floor(i / 4); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(cx - 34 + col * 19, gy - 50 - row * 15, 17, 14, 2); c.fill(); c.stroke(); }
+  c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 50, gy - 16); c.lineTo(cx - 54, gy - 70); c.lineTo(cx - 44, gy - 72); c.stroke();
+  const mx = cx - 62, hip = gy - 36, sh = gy - 64;   // the musher
+  c.strokeStyle = C.left; c.lineWidth = 8; c.beginPath(); c.moveTo(mx, gy - 3); c.lineTo(mx + 2, hip); c.lineTo(mx + 6, sh); c.stroke();
+  c.lineWidth = 5; c.beginPath(); c.moveTo(mx + 6, sh + 2); c.lineTo(mx + 12, gy - 58); c.lineTo(mx + 18, gy - 69); c.stroke();
+  c.fillStyle = C.ink; c.beginPath(); c.arc(mx + 8, sh - 12, 8, 0, 7); c.fill(); c.fillStyle = C.hazard; c.beginPath(); c.arc(mx + 8, sh - 15, 8, Math.PI, 0); c.fill();
+  c.restore();
+  pill(c, mass + ' kg', cx - 4, gy - (boxes > 4 ? 94 : 78), C.ink);
+}
+function drawSledScene(c, f) {
+  const tt = performance.now() / 1000, gy = GROUND;
+  c.fillStyle = C.sky; c.fillRect(0, 0, 900, 380);
+  c.fillStyle = C.mountain; c.beginPath(); c.moveTo(0, 250); for (let x = 0; x <= 900; x += 60) c.lineTo(x, 150 + ((x * 7) % 5) * 14 + (x % 180 === 0 ? -34 : 0)); c.lineTo(900, 250); c.closePath(); c.fill();
+  c.fillStyle = C.snow; c.fillRect(0, 251, 900, 49);
+  for (const [x, h] of PINES) { const b = 290; c.fillStyle = C.pine; c.beginPath(); c.moveTo(x, b - h * 1.7); c.lineTo(x - h * 0.5, b - 6); c.lineTo(x + h * 0.5, b - 6); c.closePath(); c.fill(); c.fillStyle = C.snow; c.beginPath(); c.moveTo(x, b - h * 1.7); c.lineTo(x - h * 0.18, b - h * 1.1); c.lineTo(x + h * 0.18, b - h * 1.1); c.closePath(); c.fill(); c.fillStyle = C.crate; c.fillRect(x - 7, b - 6, 14, 10); }
+  c.fillStyle = C.ink; c.fillRect(450 - 170, 92, 340, 30); txt(c, 'SNOW ARENA · HUSKY SLED RUN', 450, 107.5, C.panel, `800 19px ${C.fd}`);
+  c.fillStyle = C.snow; c.fillRect(0, gy - 14, 900, 50); c.fillStyle = C['snow-shade']; c.fillRect(0, gy + 2, 900, 3); c.fillRect(0, gy + 14, 900, 2);
+  if (S.floor === 'powder') { c.fillStyle = C['snow-shade']; for (let x = 10; x < 900; x += 26) { c.beginPath(); c.arc(x + (x % 52 ? 8 : 0), gy + 9 + (x % 3) * 8, 2.4, 0, 7); c.fill(); } }
+  c.fillStyle = C.panel; c.fillRect(0, gy + 36, 900, 44);   // the ruler under the track
+  c.strokeStyle = C.muted; c.lineWidth = 1.5;
+  for (let m = -9; m <= 9; m++) { const x = CX + m * PXM; c.beginPath(); c.moveTo(x, gy + 36); c.lineTo(x, gy + (m % 3 === 0 ? 46 : 42)); c.stroke(); if (m % 3 === 0) txt(c, (m > 0 ? '+' : '') + m + ' m', x, gy + 58, C.muted, `500 12px ${C.fn}`); }
+  const sx0 = CX + SLED_X0 * PXM, fx = CX + SLED_FIN * PXM;
+  c.fillStyle = C.right; c.fillRect(sx0 - 2, gy - 12, 4, 48); txt(c, 'START', sx0, gy + 72, C.muted, `700 11px ${C.fn}`);
+  c.fillStyle = C.ink; c.fillRect(fx - 2, gy - 64, 4, 100); for (let r = 0; r < 4; r++) for (let q = 0; q < 4; q++) { c.fillStyle = (r + q) % 2 ? C.ink : C.panel; c.fillRect(fx + 2 + q * 8, gy - 64 + r * 8, 8, 8); }
+  txt(c, 'FINISH', fx, gy + 72, C.muted, `700 11px ${C.fn}`);
+  const pulling = S.running && f.R > 0, stuck = pulling && S.v === 0 && f.app !== 0;
+  const cx = CX + S.x * PXM + (stuck && !RMOTION ? Math.sin(tt * 42) * 1.2 : 0), ph = S.running && !RMOTION ? tt * (8 + S.v * 1.2) : S.x * PXM / 9;
+  const n = S.right.length, front = cx + 58, ly = gy - 26;
+  if (n) {
+    const xs = S.right.map((_, i) => front + 44 + i * 60);
+    c.strokeStyle = C.rope; c.lineWidth = 3; c.beginPath(); c.moveTo(front, ly); c.lineTo(xs[n - 1] + 8, ly); c.stroke();
+    xs.forEach((x, i) => { animal(c, 'husky', x, gy, 1, C.husky, ph + i * 1.9, pulling, ly); HITS.push({ side: 'right', i, p: S.right[i], x, hw: 28, y0: gy - 70, y1: gy + 8 }); });
+    if (pulling) { c.save(); c.strokeStyle = C.right; c.lineWidth = 3; c.lineCap = 'round'; for (let k = 0; k < 3; k++) { const u = RMOTION ? k / 3 + 0.15 : (tt * 1.1 + k / 3) % 1, x = front + 8 + u * 30, y = ly + 12; c.globalAlpha = RMOTION ? 0.8 : Math.sin(u * Math.PI); c.beginPath(); c.moveTo(x - 5, y - 5); c.lineTo(x, y); c.lineTo(x - 5, y + 5); c.stroke(); } c.restore(); }
+    if (LAB.show.has('meter')) { const lbl = tot(S.right) + ' N', pw = (c.font = `700 13px ${C.fn}`, c.measureText(lbl).width + 12); pill(c, lbl, clamp(front + 22, pw / 2 + 4, 896 - pw / 2), ly - 20, C.right); }
+  }
+  if (Math.abs(S.v) > 0.3 && !RMOTION) { c.save(); c.fillStyle = C.snow; c.strokeStyle = C['snow-shade']; for (let i = 0; i < 6; i++) { const k = (tt * 3 + i / 6) % 1; c.globalAlpha = 1 - k; c.beginPath(); c.arc(cx - 62 - k * 30, gy - 4 - k * 16 - Math.sin(i) * 4, 3 + k * 3, 0, 7); c.fill(); c.stroke(); } c.restore(); }
+  drawSledBody(c, cx, gy, S.mass);
+  hudBox(c, `Time ${S.t.toFixed(1)} s`, 14, 22, C.line, 'left');
+  const off = S.floor === 'snow0';
+  hudBox(c, off ? 'Friction: OFF' : `Friction: on · ${FLOORS[S.floor].name}`, 886, 22, off ? C.accent : C.fric, 'right');
+  banners(c, f); drawDropZone(c);
+}
+/* the sled as the object in the live free-body diagram (arrows start at its centre) */
+function drawSledIcon(c, cx, cy) {
+  c.save(); c.lineCap = 'round'; c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 34, cy + 19); c.lineTo(cx + 26, cy + 19); c.quadraticCurveTo(cx + 36, cy + 19, cx + 35, cy + 12); c.stroke();
+  c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.lineWidth = 3; c.beginPath(); c.roundRect(cx - 30, cy - 12, 60, 26, 4); c.fill(); c.stroke();
+  c.fillStyle = C.accent; c.beginPath(); c.roundRect(cx - 18, cy - 12, 14, 12, 2); c.fill(); c.fillStyle = C.hazard; c.beginPath(); c.roundRect(cx + 2, cy - 12, 14, 12, 2); c.fill(); c.restore();
+}
 function banners(c, f) {
   const y = 50; let m = '', col = C.hazard, fg = '#1b1404', bg = C.hazard;
   if (S.msg) m = S.msg;
-  else if (S.running && S.v === 0 && f.app !== 0 && Math.abs(f.app) <= f.fmax + 1e-9 && S.pullT > PULL_RAMP && LAB.show.has('readF')) { m = `Friction (${Math.round(Math.abs(f.fr))} N) is holding the crate still`; bg = C.panel; fg = C.ink; col = C.fric; }
+  else if (S.running && S.v === 0 && f.app !== 0 && Math.abs(f.app) <= f.fmax + 1e-9 && S.pullT > PULL_RAMP && LAB.show.has('readF')) { m = `Friction (${Math.round(Math.abs(f.fr))} N) is holding the ${S.scene === 'sled' ? 'sled' : 'crate'} still`; bg = C.panel; fg = C.ink; col = C.fric; }
   else if (!S.running && S.t === 0) { txt(c, LAB.idle || 'Drag pullers onto the arena, then press Pull!', 450, y + 16, C.muted, `700 15px ${C.fb}`); return; }
   if (!m) return; c.font = `700 15px ${C.fb}`; const w = Math.min(880, c.measureText(m).width + 28);
   c.fillStyle = bg; c.strokeStyle = col; c.lineWidth = 2.5; c.beginPath(); c.roundRect(450 - w / 2, y, w, 32, 8); c.fill(); c.stroke(); txt(c, m, 450, y + 16.5, fg, `700 15px ${C.fb}`);
@@ -94,7 +154,7 @@ function renderPal() {
     requestAnimationFrame(() => $$('#ptiles .ptile').forEach(b => paintIcon(b.querySelector('canvas'), b.dataset.p, C.ink || '#333')));
   }
   const two = sides.length === 2;
-  $('#palHint').innerHTML = sides.length ? `Drop on the <b style="color:var(--left)">left</b> of the crate for the left team, or on the <b style="color:var(--right)">right</b> for the right team. Drag someone off the arena, or tap them, to send them back.${two ? '' : ` In this step, only the ${sides[0]} team is open.`}` : '';
+  $('#palHint').innerHTML = sides.length ? `Drop on the <b style="color:var(--left)">left</b> of the ${S.scene === 'sled' ? 'sled' : 'crate'} for the left team, or on the <b style="color:var(--right)">right</b> for the right team. Drag someone off the arena, or tap them, to send them back.${two ? '' : ` In this step, only the ${sides[0]} team is open.`}` : '';
   $('#palSel').hidden = !(PSEL && two); $$('#palSel [data-side]').forEach(b => b.hidden = !sides.includes(b.dataset.side));
   $('#palUndo').disabled = !(S.left.length || S.right.length); $('#palClear').disabled = !(S.left.length || S.right.length);
 }
@@ -146,7 +206,9 @@ function initPal() {
 /* ---- controls ---- */
 function syncRun() { const b = $('#runBtn'); if (!b) return; b.textContent = S.running ? 'Pause' : 'Pull!'; b.classList.toggle('pause', S.running); }
 function renderControls() {
-  $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => !LAB.floors || LAB.floors.includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
+  $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => (LAB.floors || FLOOR_MAIN).includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
+  const sl = S.scene === 'sled', obj = sl ? 'sled' : 'crate'; [['[data-panel="fbd"] .term', 'Free-body diagram of the ' + obj], ['[data-panel="vt"] .term', 'Velocity–time graph of the ' + obj]].forEach(([q, t]) => { const e = $(q); if (e) e.textContent = t; });
+  const ml = $('[data-panel="mass"] .term'); if (ml) ml.textContent = sl ? 'Sled and load mass' : 'Crate mass'; $('#mass').setAttribute('aria-label', sl ? 'Sled and load mass in kilograms' : 'Crate mass in kilograms'); $('#massNum').setAttribute('aria-label', sl ? 'Sled and load mass in kilograms: type a number' : 'Crate mass in kilograms: type a number');
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -212,7 +274,7 @@ function drawLiveFBD(f) {
   c.strokeStyle = C.grid; c.lineWidth = 1;
   for (let x = cx % 30; x <= 340; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 262); c.stroke(); }
   for (let y = cy % 30; y <= 262; y += 30) { c.beginPath(); c.moveTo(0, y); c.lineTo(340, y); c.stroke(); }
-  drawCrate(c, cx, cy + 20, null, 40, 40);
+  if (S.scene === 'sled') drawSledIcon(c, cx, cy); else drawCrate(c, cx, cy + 20, null, 40, 40);
   const lab = (s, x, y, col) => { c.font = `700 12px ${C.fn}`; const w = c.measureText(s).width + 8; x = Math.max(w / 2 + 2, Math.min(338 - w / 2, x)); c.fillStyle = C.panel; c.fillRect(x - w / 2, y - 8, w, 16); txt(c, s, x, y, col, `700 12px ${C.fn}`); };
   const brk = (x, y) => { c.save(); c.fillStyle = C.panel; c.fillRect(x - 9, y - 5, 18, 10); c.strokeStyle = C.vert; c.lineWidth = 2; c.beginPath(); c.moveTo(x - 8, y - 1); c.lineTo(x + 8, y - 6); c.moveTo(x - 8, y + 6); c.lineTo(x + 8, y + 1); c.stroke(); c.restore(); };
   let cut = false;

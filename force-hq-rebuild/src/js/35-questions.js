@@ -44,17 +44,26 @@ const QT = {
     bind(el, q, api) { QT.mcq.bind(el, q, api); }, lock(el, q, s) { QT.mcq.lock(el, q, s); }, show(q, v) { return v == null ? '' : q.opts[v]; }, model(q) { return q.opts[q.a]; }
   },
   num: {
-    html(q, s) { return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${s && s.v != null ? esc(s.v) : ''}"><span class="unit">${q.unit || ''}</span><button type="button" class="ghost sm qchk">Check</button></div>`; },
+    /* q.units: a unit picker (the student chooses the unit as well as typing the number).
+       q.ladder + q.hints: a "Need a clue?" fold-out that shows one hint at a time, never the final answer. */
+    html(q, s) {
+      const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length;
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${s && s.v != null ? esc(s.v) : ''}">${U ? `<select class="unitsel" aria-label="Unit"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${s && s.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+    },
     bind(el, q, api) {
-      const go = () => { if (api.locked()) return; const raw = $('.ansin', el).value, v = parseNum(raw); if (isNaN(v)) { api.say('Type your answer as a number.', 'no'); return; }
+      const U = q.units && q.units.length;
+      const lb = $('.cluebtn', el); if (lb) { let k = 0; lb.addEventListener('click', () => { if (api.locked()) return; const li = document.createElement('li'); li.innerHTML = q.hints[k]; $('.clist', el).appendChild(li); k++; if (k >= q.hints.length) { lb.disabled = true; lb.textContent = 'No more hints'; } else lb.textContent = 'Show another hint'; }); }
+      const go = () => { if (api.locked()) return; const raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v)) { api.say('Type your answer as a number.', 'no'); return; }
+        if (U && !u) { api.say('Choose a unit for your answer first.', 'no'); return; }
         if (q.need && !q.need()) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
-        const ans = q.live ? q.live() : q.ans, ok = near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01));
+        const ans = q.live ? q.live() : q.ans, numOk = near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
-        api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans }); };
+        api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
     },
-    lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
-    show(q, v) { return v == null ? '' : v + ' ' + (q.unit || ''); }, model(q) { return (q.ans != null ? fmt(q.ans, 2) : '(the arena reading)') + ' ' + (q.unit || ''); }
+    lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); const sel = $('.unitsel', el); if (sel) { sel.value = s.u || ''; sel.classList.add(s.u === q.unit ? 'right' : 'wrong'); }
+      if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
+    show(q, v, s) { return v == null ? '' : v + ' ' + ((s && s.u) || q.unit || ''); }, model(q) { return (q.ans != null ? fmt(q.ans, 2) : '(the arena reading)') + ' ' + (q.unit || ''); }
   },
   gap: {
     html(q, s) { let k = 0; return `<div class="gl noglos">${q.p.replace(/___/g, () => `<input class="gapin" data-g="${k}" aria-label="Gap ${k + 1}" autocomplete="off" value="${s && s.v ? esc(s.v[k++] || '') : (k++, '')}">`)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
@@ -156,7 +165,7 @@ function renderQuestion(host, q, ctx) {
       const st = dbGet(path, null) || { tries: 0 }; st.v = v;
       if (!x.quiet) st.tries = (st.tries || 0) + 1;
       if (ok != null) st.ok = ok; if (ok && st.tries === 1) st.first = true;
-      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (msg) st.msg = msg;
+      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (x.u != null) st.u = x.u; if (msg) st.msg = msg;
       const wasDone = st.done; st.done = true;
       dbSet(path, st);
       if (msg) api.say(msg, ok ? 'ok' : ok === false ? (st.score ? 'hint' : 'no') : 'hint');

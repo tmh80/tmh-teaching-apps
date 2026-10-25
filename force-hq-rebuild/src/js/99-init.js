@@ -6,7 +6,7 @@ const TRYTHIS = [
 ];
 function openExplore() {
   show('vExplore'); placeLab($('#exploreHost'));
-  S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
+  clearCh2(); S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
   clearCh2(); LAB.mode = 'explore'; LAB.show = new Set(PANELS.filter(k => !EXPLORE_HIDE.includes(k))); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
   applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDone', []));

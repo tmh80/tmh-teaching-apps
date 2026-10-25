@@ -2,7 +2,7 @@
 let C = {};
 function readColors() {
   const cs = getComputedStyle(document.documentElement);
-  for (const k of ['ink', 'muted', 'line', 'panel', 'chip', 'accent', 'hazard', 'left', 'right', 'res', 'fric', 'vert', 'sky', 'stand', 'crowd', 'ice', 'wood', 'concrete', 'speck', 'crate', 'crate-edge', 'rope', 'grid', 'bad', 'good', 'air', 'hazard-soft', 'husky'])
+  for (const k of ['ink', 'muted', 'line', 'panel', 'chip', 'accent', 'hazard', 'left', 'right', 'res', 'fric', 'vert', 'sky', 'stand', 'crowd', 'ice', 'wood', 'concrete', 'speck', 'crate', 'crate-edge', 'rope', 'grid', 'bad', 'good', 'air', 'hazard-soft', 'husky', 'snow', 'snow-shade', 'pine', 'mountain', 'hull'])
     C[k] = cs.getPropertyValue('--' + k).trim();
   C.fd = cs.getPropertyValue('--f-display').trim(); C.fn = cs.getPropertyValue('--f-num').trim(); C.fb = cs.getPropertyValue('--f-body').trim();
 }

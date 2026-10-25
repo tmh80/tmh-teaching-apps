@@ -652,6 +652,20 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
 .wordsuse div{display:flex;flex-wrap:wrap;gap:6px}
 .wordsuse b{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:1px 10px;font-size:14.5px}
 
+/* Chapter 3: formula triangle, unit picker, hint ladder, sled challenge */
+.tri{display:grid;justify-items:center;gap:8px;margin:8px 0}
+.tri svg{width:220px;max-width:100%;display:block}
+.trisum{font-family:var(--f-num);font-size:22px;padding:8px 14px;border:2px solid var(--hazard);border-radius:10px;background:var(--hazard-soft);min-width:250px;text-align:center;display:grid;gap:2px}
+.trisum small{font-family:var(--f-body);font-size:14px;font-weight:600;color:var(--ink)}
+.trib{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.trib .mini.on{background:var(--hazard);color:var(--ink);border-color:var(--ink)}
+.unitsel{font:inherit;font-family:var(--f-num);font-size:17px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.unitsel.right{border-color:var(--good)}.unitsel.wrong{border-color:var(--bad)}
+.clue.ladder{margin-top:8px}.clue.ladder .clist{margin:6px 0 6px 20px;padding:0}.clue.ladder .clist li{margin:3px 0}
+.clue.ladder .cluebtn{margin-top:4px}
+.notebox{border:2.5px solid var(--hazard);background:var(--hazard-soft);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:17px}
+.notebox b:first-child{display:block;font-family:var(--f-display);font-size:20px;margin-bottom:2px}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -880,8 +894,13 @@ const PUL = {
 };
 const FLOORS = {
   air: { name: 'Air floor', mu: 0, mus: 0, note: 'μ = 0' }, ice: { name: 'Ice', mu: 0.03, mus: 0.05, note: 'μ = 0.03' },
-  smooth: { name: 'Smooth floor', mu: 0.1, mus: 0.15, note: 'μ = 0.1' }, concrete: { name: 'Rough concrete', mu: 0.4, mus: 0.5, note: 'μ = 0.4' }
+  smooth: { name: 'Smooth floor', mu: 0.1, mus: 0.15, note: 'μ = 0.1' }, concrete: { name: 'Rough concrete', mu: 0.4, mus: 0.5, note: 'μ = 0.4' },
+  /* Chapter 3, Snow Arena. 'snow0' is packed snow with the friction switched off, so the husky pull is the whole resultant. */
+  snow0: { name: 'Friction off', mu: 0, mus: 0, note: 'μ = 0 (switched off)' }, snow: { name: 'Packed snow', mu: 0.05, mus: 0.07, note: 'μ = 0.05' },
+  powder: { name: 'Fresh powder', mu: 0.15, mus: 0.18, note: 'μ = 0.15' }
 };
+const FLOOR_MAIN = ['air', 'ice', 'smooth', 'concrete'];   // the Main Arena floors (Explore, Chapter 1 build missions)
+const SLED_X0 = -9, SLED_FIN = 6;                           // the Snow Arena: start line and finish line, in metres
 const PXM = 39, CX = 450, GROUND = 300, ROPEY = 262, CW = 88, CRH = 64, LIM = 9, MAXT = 6;
 const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 250;
 const S = {
@@ -889,7 +908,9 @@ const S = {
   running: false, hist: [], msg: '', flags: null, frozen: false,
   /* Chapter 2: a launcher and a brake. The crate starts at x0, Launch sets it moving at v0, and once it
      passes the brake line (brakeX) a brake pushes against the motion with brakeF newtons until it stops. */
-  x0: 0, v0: 2, brakeX: null, brakeF: 40, brakeFrom: null, brakeT: null
+  x0: 0, v0: 2, brakeX: null, brakeF: 40, brakeFrom: null, brakeT: null,
+  /* Chapter 3: scene = 'sled' swaps the crate and the two teams for the husky sled in the Snow Arena */
+  scene: null
 };
 const newFlags = () => ({ ran: false, shoved: false, moved: false, stuck: false, pulled: false, launched: false, stopped: false });
 S.flags = newFlags();
@@ -919,19 +940,20 @@ function stepSim(dt) {
   S.x += (S.v + v2) / 2 * dt; S.v = v2; S.t += dt; S.pullT += dt;
   if (S.brakeX != null && S.brakeFrom == null && S.v > 0 && S.x >= S.brakeX) { S.brakeFrom = S.brakeX; S.brakeT = S.t; }
   if (S.brakeFrom != null && S.v === 0 && S.running) { S.running = false; S.flags.stopped = true; S.msg = `The crate stopped ${fmt(S.x - S.brakeFrom, 2)} m past the brake line.`; syncRun(); }
+  if (S.scene === 'sled' && S.running && S.x >= SLED_FIN) { S.running = false; S.flags.finished = true; S.finT = S.t; S.finV = S.v; S.msg = `The sled crossed the finish line after ${fmt(S.t, 1)} s, moving at ${fmt(S.v, 1)} m/s. Press Reset to go again.`; syncRun(); }
   if (S.shoveT >= 0) { S.shoveT += dt; if (S.shoveT >= SHOVE_T) { S.shoveT = -1; S.lastShoveT = S.t; } }
   S.hist.push([S.t, S.v]); if (S.hist.length > 4000) S.hist.shift();
   const fl = S.flags; fl.ran = true;
   if (Math.abs(S.v) > 0.05) fl.moved = true;
   if (S.running && (f.L > 0 || f.R > 0)) fl.pulled = true;
   if (S.running && S.v === 0 && f.app !== 0 && S.pullT > PULL_RAMP) fl.stuck = true;
-  if (Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
+  if (S.scene === 'sled' ? S.x >= LIM : Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
-function resetSim() { if (RUN) runEnd('reset'); S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
+function resetSim() { if (RUN) runEnd('reset'); S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { S.scene = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
@@ -939,7 +961,7 @@ function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.
 let C = {};
 function readColors() {
   const cs = getComputedStyle(document.documentElement);
-  for (const k of ['ink', 'muted', 'line', 'panel', 'chip', 'accent', 'hazard', 'left', 'right', 'res', 'fric', 'vert', 'sky', 'stand', 'crowd', 'ice', 'wood', 'concrete', 'speck', 'crate', 'crate-edge', 'rope', 'grid', 'bad', 'good', 'air', 'hazard-soft', 'husky'])
+  for (const k of ['ink', 'muted', 'line', 'panel', 'chip', 'accent', 'hazard', 'left', 'right', 'res', 'fric', 'vert', 'sky', 'stand', 'crowd', 'ice', 'wood', 'concrete', 'speck', 'crate', 'crate-edge', 'rope', 'grid', 'bad', 'good', 'air', 'hazard-soft', 'husky', 'snow', 'snow-shade', 'pine', 'mountain', 'hull'])
     C[k] = cs.getPropertyValue('--' + k).trim();
   C.fd = cs.getPropertyValue('--f-display').trim(); C.fn = cs.getPropertyValue('--f-num').trim(); C.fb = cs.getPropertyValue('--f-body').trim();
 }
@@ -1174,6 +1196,7 @@ function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 900, 380); HITS = [];
+  if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
   arenaShell(c, 'MAIN ARENA');
   c.fillStyle = C.ink; c.fillRect(450 - 160, 92, 320, 30); txt(c, 'MAIN ARENA · TUG-OF-WAR', 450, 107.5, C.panel, `800 20px ${C.fd}`);
   drawFloor(c);
@@ -1204,10 +1227,69 @@ function drawScene(f, cvo) {
   hudBox(c, `Floor: ${FLOORS[S.floor].name}`, 886, 22, C.line, 'right');
   if (!cvo) { banners(c, f); drawDropZone(c); }
 }
+
+/* ---- Chapter 3: the Snow Arena. The huskies are the right team; the sled and its load are the "crate". ---- */
+const SLED_BASE = 40, PINES = Array.from({ length: 13 }, (_, i) => [60 + i * 66 + ((i * 37) % 16), 18 + ((i * 53) % 10)]);
+const sledBoxes = m => clamp(Math.round((m - SLED_BASE) / 15), 0, 8);
+function drawSledBody(c, cx, gy, mass) {
+  c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
+  c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.ellipse(cx, gy + 3, 64, 4, 0, 0, 7); c.fill();
+  c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 64, gy - 3); c.lineTo(cx + 50, gy - 3); c.quadraticCurveTo(cx + 64, gy - 3, cx + 62, gy - 16); c.stroke();
+  c.lineWidth = 2; for (const x of [-44, -10, 24]) { c.beginPath(); c.moveTo(cx + x, gy - 3); c.lineTo(cx + x, gy - 16); c.stroke(); }
+  c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.beginPath(); c.roundRect(cx - 48, gy - 34, 92, 18, 3); c.fill(); c.stroke();
+  const boxes = sledBoxes(mass), cols = [C.left, C.accent, C.hazard, C.right];
+  for (let i = 0; i < boxes; i++) { const col = i % 4, row = Math.floor(i / 4); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(cx - 34 + col * 19, gy - 50 - row * 15, 17, 14, 2); c.fill(); c.stroke(); }
+  c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 50, gy - 16); c.lineTo(cx - 54, gy - 70); c.lineTo(cx - 44, gy - 72); c.stroke();
+  const mx = cx - 62, hip = gy - 36, sh = gy - 64;   // the musher
+  c.strokeStyle = C.left; c.lineWidth = 8; c.beginPath(); c.moveTo(mx, gy - 3); c.lineTo(mx + 2, hip); c.lineTo(mx + 6, sh); c.stroke();
+  c.lineWidth = 5; c.beginPath(); c.moveTo(mx + 6, sh + 2); c.lineTo(mx + 12, gy - 58); c.lineTo(mx + 18, gy - 69); c.stroke();
+  c.fillStyle = C.ink; c.beginPath(); c.arc(mx + 8, sh - 12, 8, 0, 7); c.fill(); c.fillStyle = C.hazard; c.beginPath(); c.arc(mx + 8, sh - 15, 8, Math.PI, 0); c.fill();
+  c.restore();
+  pill(c, mass + ' kg', cx - 4, gy - (boxes > 4 ? 94 : 78), C.ink);
+}
+function drawSledScene(c, f) {
+  const tt = performance.now() / 1000, gy = GROUND;
+  c.fillStyle = C.sky; c.fillRect(0, 0, 900, 380);
+  c.fillStyle = C.mountain; c.beginPath(); c.moveTo(0, 250); for (let x = 0; x <= 900; x += 60) c.lineTo(x, 150 + ((x * 7) % 5) * 14 + (x % 180 === 0 ? -34 : 0)); c.lineTo(900, 250); c.closePath(); c.fill();
+  c.fillStyle = C.snow; c.fillRect(0, 251, 900, 49);
+  for (const [x, h] of PINES) { const b = 290; c.fillStyle = C.pine; c.beginPath(); c.moveTo(x, b - h * 1.7); c.lineTo(x - h * 0.5, b - 6); c.lineTo(x + h * 0.5, b - 6); c.closePath(); c.fill(); c.fillStyle = C.snow; c.beginPath(); c.moveTo(x, b - h * 1.7); c.lineTo(x - h * 0.18, b - h * 1.1); c.lineTo(x + h * 0.18, b - h * 1.1); c.closePath(); c.fill(); c.fillStyle = C.crate; c.fillRect(x - 7, b - 6, 14, 10); }
+  c.fillStyle = C.ink; c.fillRect(450 - 170, 92, 340, 30); txt(c, 'SNOW ARENA · HUSKY SLED RUN', 450, 107.5, C.panel, `800 19px ${C.fd}`);
+  c.fillStyle = C.snow; c.fillRect(0, gy - 14, 900, 50); c.fillStyle = C['snow-shade']; c.fillRect(0, gy + 2, 900, 3); c.fillRect(0, gy + 14, 900, 2);
+  if (S.floor === 'powder') { c.fillStyle = C['snow-shade']; for (let x = 10; x < 900; x += 26) { c.beginPath(); c.arc(x + (x % 52 ? 8 : 0), gy + 9 + (x % 3) * 8, 2.4, 0, 7); c.fill(); } }
+  c.fillStyle = C.panel; c.fillRect(0, gy + 36, 900, 44);   // the ruler under the track
+  c.strokeStyle = C.muted; c.lineWidth = 1.5;
+  for (let m = -9; m <= 9; m++) { const x = CX + m * PXM; c.beginPath(); c.moveTo(x, gy + 36); c.lineTo(x, gy + (m % 3 === 0 ? 46 : 42)); c.stroke(); if (m % 3 === 0) txt(c, (m > 0 ? '+' : '') + m + ' m', x, gy + 58, C.muted, `500 12px ${C.fn}`); }
+  const sx0 = CX + SLED_X0 * PXM, fx = CX + SLED_FIN * PXM;
+  c.fillStyle = C.right; c.fillRect(sx0 - 2, gy - 12, 4, 48); txt(c, 'START', sx0, gy + 72, C.muted, `700 11px ${C.fn}`);
+  c.fillStyle = C.ink; c.fillRect(fx - 2, gy - 64, 4, 100); for (let r = 0; r < 4; r++) for (let q = 0; q < 4; q++) { c.fillStyle = (r + q) % 2 ? C.ink : C.panel; c.fillRect(fx + 2 + q * 8, gy - 64 + r * 8, 8, 8); }
+  txt(c, 'FINISH', fx, gy + 72, C.muted, `700 11px ${C.fn}`);
+  const pulling = S.running && f.R > 0, stuck = pulling && S.v === 0 && f.app !== 0;
+  const cx = CX + S.x * PXM + (stuck && !RMOTION ? Math.sin(tt * 42) * 1.2 : 0), ph = S.running && !RMOTION ? tt * (8 + S.v * 1.2) : S.x * PXM / 9;
+  const n = S.right.length, front = cx + 58, ly = gy - 26;
+  if (n) {
+    const xs = S.right.map((_, i) => front + 44 + i * 60);
+    c.strokeStyle = C.rope; c.lineWidth = 3; c.beginPath(); c.moveTo(front, ly); c.lineTo(xs[n - 1] + 8, ly); c.stroke();
+    xs.forEach((x, i) => { animal(c, 'husky', x, gy, 1, C.husky, ph + i * 1.9, pulling, ly); HITS.push({ side: 'right', i, p: S.right[i], x, hw: 28, y0: gy - 70, y1: gy + 8 }); });
+    if (pulling) { c.save(); c.strokeStyle = C.right; c.lineWidth = 3; c.lineCap = 'round'; for (let k = 0; k < 3; k++) { const u = RMOTION ? k / 3 + 0.15 : (tt * 1.1 + k / 3) % 1, x = front + 8 + u * 30, y = ly + 12; c.globalAlpha = RMOTION ? 0.8 : Math.sin(u * Math.PI); c.beginPath(); c.moveTo(x - 5, y - 5); c.lineTo(x, y); c.lineTo(x - 5, y + 5); c.stroke(); } c.restore(); }
+    if (LAB.show.has('meter')) { const lbl = tot(S.right) + ' N', pw = (c.font = `700 13px ${C.fn}`, c.measureText(lbl).width + 12); pill(c, lbl, clamp(front + 22, pw / 2 + 4, 896 - pw / 2), ly - 20, C.right); }
+  }
+  if (Math.abs(S.v) > 0.3 && !RMOTION) { c.save(); c.fillStyle = C.snow; c.strokeStyle = C['snow-shade']; for (let i = 0; i < 6; i++) { const k = (tt * 3 + i / 6) % 1; c.globalAlpha = 1 - k; c.beginPath(); c.arc(cx - 62 - k * 30, gy - 4 - k * 16 - Math.sin(i) * 4, 3 + k * 3, 0, 7); c.fill(); c.stroke(); } c.restore(); }
+  drawSledBody(c, cx, gy, S.mass);
+  hudBox(c, `Time ${S.t.toFixed(1)} s`, 14, 22, C.line, 'left');
+  const off = S.floor === 'snow0';
+  hudBox(c, off ? 'Friction: OFF' : `Friction: on · ${FLOORS[S.floor].name}`, 886, 22, off ? C.accent : C.fric, 'right');
+  banners(c, f); drawDropZone(c);
+}
+/* the sled as the object in the live free-body diagram (arrows start at its centre) */
+function drawSledIcon(c, cx, cy) {
+  c.save(); c.lineCap = 'round'; c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 34, cy + 19); c.lineTo(cx + 26, cy + 19); c.quadraticCurveTo(cx + 36, cy + 19, cx + 35, cy + 12); c.stroke();
+  c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.lineWidth = 3; c.beginPath(); c.roundRect(cx - 30, cy - 12, 60, 26, 4); c.fill(); c.stroke();
+  c.fillStyle = C.accent; c.beginPath(); c.roundRect(cx - 18, cy - 12, 14, 12, 2); c.fill(); c.fillStyle = C.hazard; c.beginPath(); c.roundRect(cx + 2, cy - 12, 14, 12, 2); c.fill(); c.restore();
+}
 function banners(c, f) {
   const y = 50; let m = '', col = C.hazard, fg = '#1b1404', bg = C.hazard;
   if (S.msg) m = S.msg;
-  else if (S.running && S.v === 0 && f.app !== 0 && Math.abs(f.app) <= f.fmax + 1e-9 && S.pullT > PULL_RAMP && LAB.show.has('readF')) { m = `Friction (${Math.round(Math.abs(f.fr))} N) is holding the crate still`; bg = C.panel; fg = C.ink; col = C.fric; }
+  else if (S.running && S.v === 0 && f.app !== 0 && Math.abs(f.app) <= f.fmax + 1e-9 && S.pullT > PULL_RAMP && LAB.show.has('readF')) { m = `Friction (${Math.round(Math.abs(f.fr))} N) is holding the ${S.scene === 'sled' ? 'sled' : 'crate'} still`; bg = C.panel; fg = C.ink; col = C.fric; }
   else if (!S.running && S.t === 0) { txt(c, LAB.idle || 'Drag pullers onto the arena, then press Pull!', 450, y + 16, C.muted, `700 15px ${C.fb}`); return; }
   if (!m) return; c.font = `700 15px ${C.fb}`; const w = Math.min(880, c.measureText(m).width + 28);
   c.fillStyle = bg; c.strokeStyle = col; c.lineWidth = 2.5; c.beginPath(); c.roundRect(450 - w / 2, y, w, 32, 8); c.fill(); c.stroke(); txt(c, m, 450, y + 16.5, fg, `700 15px ${C.fb}`);
@@ -1256,7 +1338,7 @@ function renderPal() {
     requestAnimationFrame(() => $$('#ptiles .ptile').forEach(b => paintIcon(b.querySelector('canvas'), b.dataset.p, C.ink || '#333')));
   }
   const two = sides.length === 2;
-  $('#palHint').innerHTML = sides.length ? `Drop on the <b style="color:var(--left)">left</b> of the crate for the left team, or on the <b style="color:var(--right)">right</b> for the right team. Drag someone off the arena, or tap them, to send them back.${two ? '' : ` In this step, only the ${sides[0]} team is open.`}` : '';
+  $('#palHint').innerHTML = sides.length ? `Drop on the <b style="color:var(--left)">left</b> of the ${S.scene === 'sled' ? 'sled' : 'crate'} for the left team, or on the <b style="color:var(--right)">right</b> for the right team. Drag someone off the arena, or tap them, to send them back.${two ? '' : ` In this step, only the ${sides[0]} team is open.`}` : '';
   $('#palSel').hidden = !(PSEL && two); $$('#palSel [data-side]').forEach(b => b.hidden = !sides.includes(b.dataset.side));
   $('#palUndo').disabled = !(S.left.length || S.right.length); $('#palClear').disabled = !(S.left.length || S.right.length);
 }
@@ -1308,7 +1390,9 @@ function initPal() {
 /* ---- controls ---- */
 function syncRun() { const b = $('#runBtn'); if (!b) return; b.textContent = S.running ? 'Pause' : 'Pull!'; b.classList.toggle('pause', S.running); }
 function renderControls() {
-  $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => !LAB.floors || LAB.floors.includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
+  $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => (LAB.floors || FLOOR_MAIN).includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
+  const sl = S.scene === 'sled', obj = sl ? 'sled' : 'crate'; [['[data-panel="fbd"] .term', 'Free-body diagram of the ' + obj], ['[data-panel="vt"] .term', 'Velocity–time graph of the ' + obj]].forEach(([q, t]) => { const e = $(q); if (e) e.textContent = t; });
+  const ml = $('[data-panel="mass"] .term'); if (ml) ml.textContent = sl ? 'Sled and load mass' : 'Crate mass'; $('#mass').setAttribute('aria-label', sl ? 'Sled and load mass in kilograms' : 'Crate mass in kilograms'); $('#massNum').setAttribute('aria-label', sl ? 'Sled and load mass in kilograms: type a number' : 'Crate mass in kilograms: type a number');
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -1374,7 +1458,7 @@ function drawLiveFBD(f) {
   c.strokeStyle = C.grid; c.lineWidth = 1;
   for (let x = cx % 30; x <= 340; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 262); c.stroke(); }
   for (let y = cy % 30; y <= 262; y += 30) { c.beginPath(); c.moveTo(0, y); c.lineTo(340, y); c.stroke(); }
-  drawCrate(c, cx, cy + 20, null, 40, 40);
+  if (S.scene === 'sled') drawSledIcon(c, cx, cy); else drawCrate(c, cx, cy + 20, null, 40, 40);
   const lab = (s, x, y, col) => { c.font = `700 12px ${C.fn}`; const w = c.measureText(s).width + 8; x = Math.max(w / 2 + 2, Math.min(338 - w / 2, x)); c.fillStyle = C.panel; c.fillRect(x - w / 2, y - 8, w, 16); txt(c, s, x, y, col, `700 12px ${C.fn}`); };
   const brk = (x, y) => { c.save(); c.fillStyle = C.panel; c.fillRect(x - 9, y - 5, 18, 10); c.strokeStyle = C.vert; c.lineWidth = 2; c.beginPath(); c.moveTo(x - 8, y - 1); c.lineTo(x + 8, y - 6); c.moveTo(x - 8, y + 6); c.lineTo(x + 8, y + 1); c.stroke(); c.restore(); };
   let cut = false;
@@ -1577,7 +1661,7 @@ function drawHomeArt(c, hit) {
 const CHAPTERS = [
   { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
-  { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: false, arena: 'Snow Arena', icon: 'tri' },
+  { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: false, arena: 'Space Dome', icon: 'pair' },
   { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady speeds and the new Drop Zone.', stamp: 'Balance Master', ready: false, arena: 'Drop Zone', icon: 'chute' }
 ];
@@ -1676,6 +1760,7 @@ function homeClick(e) {
   const r = $('#cvHome').getBoundingClientRect(), x = (e.clientX - r.left) * 900 / r.width, y = (e.clientY - r.top) * 420 / r.height;
   const hit = HOMEHIT.find(hh => x >= hh.x0 && x <= hh.x1 && y >= hh.y0 && y <= hh.y1); if (!hit) return;
   if (hit.id === 'main') { $('#chapterCards').scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); return; }
+  if (hit.id === 'snow' && CHDATA.c3f) { openChapter('c3f'); return; }
   toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', space: 'The Space Dome opens in Chapter 4.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is being built. Coming soon!' }[hit.id]);
 }
 
@@ -1756,6 +1841,21 @@ function initCalc() {
 function toggleCalc(on) { const el = $('#calc'); on = on == null ? el.hidden : on; el.hidden = !on; if (on) { CALC_USED = true; if (LAB.onChange) LAB.onChange(); setTimeout(() => $('#calcIn').focus({ preventScroll: true }), 20); } }
 let CALC_USED = false;
 
+/* ---- formula triangle: F = m × a. Tap a letter to cover it and see the sum that finds it. ---- */
+const TRI = { F: ['F = m × a', 'Multiply the two letters that are left (side by side).'], m: ['m = F ÷ a', 'F is above a, so divide: force ÷ acceleration.'], a: ['a = F ÷ m', 'F is above m, so divide: force ÷ mass.'] };
+function triInner(cov) {
+  const L = (k, x, y) => cov === k ? `<rect x="${x - 21}" y="${y - 21}" width="42" height="42" rx="9" fill="var(--hazard)" stroke="var(--ink)" stroke-width="2.5"/><text x="${x}" y="${y + 8}" text-anchor="middle" font-size="26" font-weight="800" fill="var(--ink)">?</text>` : `<text x="${x}" y="${y + 12}" text-anchor="middle" font-size="36" font-weight="800" font-family="var(--f-num)" fill="var(--ink)">${k}</text>`;
+  const sum = cov ? `<b>${TRI[cov][0]}</b><small>${TRI[cov][1]}</small>` : '<small>Tap a letter to cover it.</small>';
+  return `<svg viewBox="0 0 220 154" role="img" aria-label="Formula triangle: F on top, m and a underneath"><polygon points="110,8 18,146 202,146" fill="var(--panel)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><line x1="64" y1="77" x2="156" y2="77" stroke="var(--ink)" stroke-width="3"/><line x1="110" y1="77" x2="110" y2="146" stroke="var(--ink)" stroke-width="3"/>${L('F', 110, 50)}${L('m', 66, 112)}${L('a', 154, 112)}</svg>
+    <div class="trisum" aria-live="polite">${sum}</div><div class="trib">${['F', 'm', 'a'].map(k => `<button type="button" class="mini ${cov === k ? 'on' : ''}" data-tri="${k}" aria-pressed="${cov === k}">Cover ${k}</button>`).join('')}<button type="button" class="mini" data-tri="">Show all</button></div>`;
+}
+const triHTML = () => `<div class="tri noglos">${triInner('')}</div>`;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-tri]'); if (!b) return; const root = b.closest('.tri'), k = b.dataset.tri;
+  root.innerHTML = triInner(k); const bb = $(`[data-tri="${k}"]`, root); if (bb) bb.focus({ preventScroll: true });
+  if (k) { S.flags.tri = S.flags.tri || {}; S.flags.tri[k] = true; if (LAB.onChange) LAB.onChange(); }
+});
+
 /* ===== Glossary: dotted underline + tap/hover definitions ===== */
 const TERMS = {
   force: ['Force', 'A push or a pull. Forces can make things start moving, stop, speed up, slow down or change direction.', ['forces', 'force']],
@@ -1803,6 +1903,12 @@ const TERMS = {
   mechadv: ['Mechanical advantage', 'How many times a machine multiplies your force: load ÷ effort.', []],
   work: ['Work', 'Energy transferred when a force moves something. Work (J) = force (N) × distance (m).', []],
   terminal: ['Terminal velocity', 'The top speed of a falling object, reached when air resistance grows to match its weight.', ['terminal velocity']],
+  triangle: ['Formula triangle', 'A triangle with F on top, and m and a side by side underneath. Cover the letter you want to find. What is left tells you the sum: side by side means multiply, one above the other means divide.', ['formula triangle']],
+  mps2: ['Metres per second squared (m/s²)', 'The unit of acceleration. An acceleration of 2 m/s² means the speed goes up by 2 m/s every second.', []],
+  slope: ['Slope (gradient)', 'How steep a line is. On a velocity–time graph, the steeper the line, the bigger the acceleration.', ['slope', 'gradient']],
+  decel: ['Deceleration', 'Slowing down. It is an acceleration that points the opposite way to the motion.', ['deceleration']],
+  unit: ['Unit', 'What a measurement is counted in, such as N, kg or m/s². An answer needs its unit as well as its number.', ['unit', 'units']],
+  proportional: ['Directly proportional', 'Two things are directly proportional when doubling one doubles the other, and halving one halves the other.', ['directly proportional']],
   shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */
@@ -1994,7 +2100,7 @@ function runMark(kind) {
   const R = runsAll(); RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
   const f = forces();
   RUN = Object.assign({ n: RUNSEQ, kind, at: Date.now(), live: true, mass: S.mass, floor: S.floor, L: tot(S.left), R: tot(S.right), x0: S.x, t0: S.t,
-    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W }, runWhere());
+    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W, scene: S.scene, nR: S.right.length, a: null, net: null, Rst: null, frS: null, v1: null, v2: null, v3: null, v4: null, finT: null, finV: null }, runWhere());
   R.push(RUN); if (R.length > 200) R.splice(0, R.length - 200); dbSet('runs', R); RUNDIRTY = 1;
 }
 /* update the live run every frame */
@@ -2010,7 +2116,11 @@ function runTick(f, dt) {
   RUN.L = Math.max(RUN.L, f.L); RUN.R = Math.max(RUN.R, f.R);
   if (S.brakeFrom != null) { RUN.bd = S.x - S.brakeFrom; RUN.bt = S.t - S.brakeT; }
   RUN.t = S.t - RUN.t0;
-  if (!S.running) runEnd(S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
+  /* Chapter 3: the steady acceleration, resultant and friction once the huskies are pulling at full strength, and the speed at 2 s and 4 s */
+  if (S.running && S.pullT > PULL_RAMP + 0.05 && f.R > 0) { RUN.a = f.a; RUN.net = f.net; RUN.Rst = f.R; RUN.frS = Math.abs(f.fr); }
+  [1, 2, 3, 4].forEach(k => { if (RUN['v' + k] == null && RUN.t >= k) RUN['v' + k] = S.v; });
+  if (S.flags.finished) { RUN.finT = S.finT - RUN.t0; RUN.finV = S.finV; }
+  if (!S.running) runEnd(S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
   else if (av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
   RUNDIRTY = 1;
 }
@@ -2020,7 +2130,18 @@ function runEnd(why) {
 }
 /* the sentence a student reads */
 const m2 = v => fmt(v, 2) + ' m', ms = v => fmt(v, 2) + ' m/s', NN = v => fmt(v, v < 100 && v % 1 ? 1 : 0) + ' N';
+const SNOWPH = { snow0: 'with friction switched off', snow: 'on packed snow', powder: 'on fresh powder' };
+function sledText(r) {
+  const hk = `${r.nR} husk${r.nR === 1 ? 'y' : 'ies'}`, live = r.live && r.out === 'running';
+  const head = `${hk} pulled the ${r.mass} kg sled with ${NN(r.R)} ${SNOWPH[r.floor] || ''}.`.replace(' .', '.');
+  if (!r.moved && !live) return head + (r.fs ? ` Friction held the sled still with ${NN(r.fs)}, so the resultant force was 0 N and the acceleration was 0 m/s².` : ' It did not move.');
+  const body = r.a != null ? ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².` : '';
+  if (live) return head + body + ` It is moving at ${ms(Math.abs(S.v))} and has gone ${m2(r.dist)} so far…`;
+  if (r.out === 'finish') return head + body + ` It crossed the finish line after ${fmt(r.finT, 1)} s, moving at ${ms(r.finV)}.`;
+  return head + body + ` Its top speed was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
+}
 function runText(r) {
+  if (r.scene === 'sled') return sledText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
   const dirw = r.dir > 0 ? 'right' : 'left', live = r.live && r.out === 'running';
   if (r.kind === 'launch') {
@@ -2045,6 +2166,14 @@ function runText(r) {
   return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
 function runChips(r) {
+  if (r.scene === 'sled') {
+    const c = [['Huskies', String(r.nR)], ['Mass', r.mass + ' kg'], ['Snow', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor], ['Pull', NN(r.R)]];
+    if (r.frS != null && r.frS > 0.5) c.push(['Friction', NN(r.frS)]); else if (r.fs) c.push(['Friction', NN(r.fs)]);
+    if (r.net != null) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
+    c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]); [1, 2, 3, 4].forEach(k => { if (r['v' + k] != null) c.push(['Speed at ' + k + ' s', ms(r['v' + k])]); });
+    if (r.finT != null) c.push(['Finish time', fmt(r.finT, 1) + ' s']);
+    return c;
+  }
   const c = [['Mass', r.mass + ' kg'], ['Floor', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor]];
   if (r.kind === 'pull') { c.push(['Left', NN(r.L)], ['Right', NN(r.R)]); }
   if (r.kind === 'launch') { c.push(['Launch speed', ms(r.v0)]); if (r.brakeOn) c.push(['Brake', NN(r.brakeF)]); }
@@ -2110,6 +2239,8 @@ const BW = 520, BH = 400, BCX = 260, BCY = 200, GRID = 26;
 const svgNS = 'http://www.w3.org/2000/svg';
 function objSVG(o, label) {
   if (o === 'book') return `<rect x="${BCX - 52}" y="${BCY - 18}" width="104" height="36" rx="5" fill="#3f78b5"/><rect x="${BCX - 46}" y="${BCY - 12}" width="92" height="7" rx="2" fill="#fffaf2" opacity=".85"/><rect x="${BCX - 46}" y="${BCY + 3}" width="92" height="3" rx="1.5" fill="#fffaf2" opacity=".6"/>`;
+  if (o === 'sled') return `<path d="M${BCX - 66} ${BCY + 36} H${BCX + 52} q18 0 15 -14" fill="none" stroke="#13212a" stroke-width="5" stroke-linecap="round"/><rect x="${BCX - 54}" y="${BCY - 30}" width="108" height="54" rx="6" fill="#c99a5b" stroke="#7a5426" stroke-width="3"/><rect x="${BCX - 40}" y="${BCY - 30}" width="32" height="24" rx="3" fill="#3f78b5"/><rect x="${BCX + 4}" y="${BCY - 30}" width="32" height="24" rx="3" fill="#e8735c"/>` +
+    (label ? `<rect x="${BCX + 46}" y="${BCY + 24}" width="58" height="20" rx="4" fill="#fffaf2" stroke="#7a5426"/><text x="${BCX + 75}" y="${BCY + 38.5}" text-anchor="middle" font-size="13" font-weight="700" style="font-family:var(--f-num)" fill="#13212a">${esc(label)}</text>` : '');
   if (o === 'ball') return `<circle cx="${BCX}" cy="${BCY}" r="34" fill="#e8735c"/><path d="M${BCX - 34} ${BCY} q34 -16 68 0" stroke="#fffaf2" stroke-width="4" fill="none" opacity=".7"/>`;
   return `<rect x="${BCX - 40}" y="${BCY - 40}" width="80" height="80" rx="5" fill="#c99a5b" stroke="#7a5426" stroke-width="3"/><path d="M${BCX - 34} ${BCY - 34}L${BCX + 34} ${BCY + 34}M${BCX + 34} ${BCY - 34}L${BCX - 34} ${BCY + 34}" stroke="#7a5426" stroke-width="2.5"/>` +
     (label ? `<rect x="${BCX + 44}" y="${BCY + 22}" width="58" height="20" rx="4" fill="#fffaf2" stroke="#7a5426"/><text x="${BCX + 73}" y="${BCY + 36.5}" text-anchor="middle" font-size="13" font-weight="700" style="font-family:var(--f-num)" fill="#13212a">${esc(label)}</text>` : '');
@@ -2298,17 +2429,26 @@ const QT = {
     bind(el, q, api) { QT.mcq.bind(el, q, api); }, lock(el, q, s) { QT.mcq.lock(el, q, s); }, show(q, v) { return v == null ? '' : q.opts[v]; }, model(q) { return q.opts[q.a]; }
   },
   num: {
-    html(q, s) { return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${s && s.v != null ? esc(s.v) : ''}"><span class="unit">${q.unit || ''}</span><button type="button" class="ghost sm qchk">Check</button></div>`; },
+    /* q.units: a unit picker (the student chooses the unit as well as typing the number).
+       q.ladder + q.hints: a "Need a clue?" fold-out that shows one hint at a time, never the final answer. */
+    html(q, s) {
+      const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length;
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${s && s.v != null ? esc(s.v) : ''}">${U ? `<select class="unitsel" aria-label="Unit"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${s && s.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+    },
     bind(el, q, api) {
-      const go = () => { if (api.locked()) return; const raw = $('.ansin', el).value, v = parseNum(raw); if (isNaN(v)) { api.say('Type your answer as a number.', 'no'); return; }
+      const U = q.units && q.units.length;
+      const lb = $('.cluebtn', el); if (lb) { let k = 0; lb.addEventListener('click', () => { if (api.locked()) return; const li = document.createElement('li'); li.innerHTML = q.hints[k]; $('.clist', el).appendChild(li); k++; if (k >= q.hints.length) { lb.disabled = true; lb.textContent = 'No more hints'; } else lb.textContent = 'Show another hint'; }); }
+      const go = () => { if (api.locked()) return; const raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v)) { api.say('Type your answer as a number.', 'no'); return; }
+        if (U && !u) { api.say('Choose a unit for your answer first.', 'no'); return; }
         if (q.need && !q.need()) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
-        const ans = q.live ? q.live() : q.ans, ok = near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01));
+        const ans = q.live ? q.live() : q.ans, numOk = near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
-        api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans }); };
+        api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
     },
-    lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
-    show(q, v) { return v == null ? '' : v + ' ' + (q.unit || ''); }, model(q) { return (q.ans != null ? fmt(q.ans, 2) : '(the arena reading)') + ' ' + (q.unit || ''); }
+    lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); const sel = $('.unitsel', el); if (sel) { sel.value = s.u || ''; sel.classList.add(s.u === q.unit ? 'right' : 'wrong'); }
+      if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
+    show(q, v, s) { return v == null ? '' : v + ' ' + ((s && s.u) || q.unit || ''); }, model(q) { return (q.ans != null ? fmt(q.ans, 2) : '(the arena reading)') + ' ' + (q.unit || ''); }
   },
   gap: {
     html(q, s) { let k = 0; return `<div class="gl noglos">${q.p.replace(/___/g, () => `<input class="gapin" data-g="${k}" aria-label="Gap ${k + 1}" autocomplete="off" value="${s && s.v ? esc(s.v[k++] || '') : (k++, '')}">`)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
@@ -2410,7 +2550,7 @@ function renderQuestion(host, q, ctx) {
       const st = dbGet(path, null) || { tries: 0 }; st.v = v;
       if (!x.quiet) st.tries = (st.tries || 0) + 1;
       if (ok != null) st.ok = ok; if (ok && st.tries === 1) st.first = true;
-      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (msg) st.msg = msg;
+      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (x.u != null) st.u = x.u; if (msg) st.msg = msg;
       const wasDone = st.done; st.done = true;
       dbSet(path, st);
       if (msg) api.say(msg, ok ? 'ok' : ok === false ? (st.score ? 'hint' : 'no') : 'hint');
@@ -2531,6 +2671,11 @@ function renderStepQs() {
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
   qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => checkStep(true) }));
+  if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
+    const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
+    wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });
+    qc.appendChild(wrap);
+  }
   if (stepDone(CH.id, GI) && (qs.length || (st.tasks || []).length)) { const b = h('button', { type: 'button', class: 'again' }, '↺ Try this step again'); b.addEventListener('click', () => { dbDel(stepKey(CH.id, GI)); const d = dbGet('learnDone.' + CH.id, {}); delete d[st.id]; dbSet('learnDone.' + CH.id, d); setStep(GI); }); qc.appendChild(b); }
   qc.appendChild(h('div', { class: 'qfoot' }));
   qChrome();
@@ -2798,6 +2943,11 @@ function vtSVG(lines, o = {}) {
     g += `<polyline points="${l.pts.map(([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${l.col || '#1f5f8b'}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>`;
     if (l.label) { const [t, v] = l.pts[l.lab || 0]; g += `<text x="${X(t) + 6}" y="${Y(v) - 7}" font-size="12" font-weight="800" fill="${l.col || '#1f5f8b'}">${l.label}</text>`; }
   });
+  if (o.tri) {   // a dashed run-and-rise triangle: [[t0, v0], [t1, v1]] (two corners), or three points
+    const P = o.tri.length === 3 ? o.tri : [o.tri[0], [o.tri[1][0], o.tri[0][1]], o.tri[1]], pt = ([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`;
+    g += `<polyline points="${P.map(pt).join(' ')}" fill="none" stroke="#13212a" stroke-width="2" stroke-dasharray="6 4"/>`;
+    if (o.triLab !== false) g += `<text x="${(X(P[0][0]) + X(P[1][0])) / 2}" y="${Y(P[0][1]) + 16}" text-anchor="middle" font-size="12" font-weight="800" fill="#13212a">Δt = ${+(P[1][0] - P[0][0]).toFixed(2)} s</text><text x="${X(P[1][0]) - 6}" y="${(Y(P[1][1]) + Y(P[1][1] === P[0][1] ? P[2][1] : P[0][1])) / 2}" text-anchor="end" font-size="12" font-weight="800" fill="#13212a">Δv = ${+(P[2][1] - P[1][1]).toFixed(2)} m/s</text>`;
+  }
   return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" style="width:100%;max-width:440px;display:block;background:#fff;border-radius:8px">${g}</svg></div>`;
 }
 /* record what the student measured, per crate mass, so questions can check their own runs */
@@ -2949,6 +3099,208 @@ CHDATA.c2.challenge = {
   ]
 };
 
+/* ===== Chapter 3: F = ma (Newton's second law), all in the Snow Arena =====
+   Foundation (a1–a6): friction OFF for the first steps, so the husky pull is the whole resultant force.
+   Friction comes back in a5, with a second disclaimer. Extension (e1–e3) and the mail-run Challenge use the resultant every time. */
+
+/* ---- the student's own sled runs (saved in the Runs tab, so a question never forces a re-run) ---- */
+const sledRun = (n, m, fl) => { const R = runsFor().filter(r => r.scene === 'sled' && r.nR === n && r.mass === m && r.floor === fl && r.a != null); return R.length ? R[R.length - 1] : null; };
+const rA = (n, m, fl) => { const r = sledRun(n, m, fl); return r ? r.a : null; };
+const rFr = (n, m, fl) => { const r = sledRun(n, m, fl); return r ? r.frS : null; };
+const rV = (n, m, fl, k) => { const r = sledRun(n, m, fl); return r ? r['v' + k] : null; };
+const rHas = (n, m, fl) => sledRun(n, m, fl) != null;
+/* the Snow Arena set-up used by the Learn steps */
+function snow(m, fl, huskies) { S.scene = 'sled'; S.x0 = SLED_X0; S.mass = m; S.floor = fl; S.left = []; S.right = Array(huskies || 0).fill('husky'); }
+const UNITS = ['N', 'kg', 'm/s', 'm/s²'];
+
+/* ---- the maths bank: seeded questions in five levels, each with a hint ladder, a unit picker and non-round numbers ----
+   level 1 find F · 2 find a · 3 find m · 4 two steps (resultant first, then a) · 5 weight and mass mixed in */
+function rngSeed(seed) { let a = (seed * 2654435761) >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const MB_THINGS = [['A husky sled', 'the huskies'], ['A shopping trolley', 'a shopper'], ['A go-kart', 'its engine'], ['A cyclist and bike', 'the cyclist'], ['A skateboarder', 'a push'], ['A rocket sled', 'its rocket'], ['A wheelchair racer', 'the racer'], ['A model train', 'its motor']];
+const r1 = v => Math.round(v * 10) / 10, r2 = v => Math.round(v * 100) / 100;
+function mq(level, seed, id) {
+  const R = rngSeed(seed * 31 + level * 977), pick = a => a[Math.floor(R() * a.length)], int = (a, b) => a + Math.floor(R() * (b - a + 1));
+  const th = pick(MB_THINGS), who = th[0], q = { id: id || `mb${level}_${seed}`, type: 'num', units: UNITS, ladder: true, mb: level, seed: String(seed) };
+  const cap = s => s[0].toUpperCase() + s.slice(1), force = (P, f, m) => `a pull of ${P} N forwards, with friction of ${f} N backwards`;
+  if (level === 1) {
+    const m = int(6, 96), a = pick([0.6, 0.8, 1.2, 1.5, 1.8, 2.4, 2.5, 3.2, 3.6, 4.5]) , F = r1(m * a);
+    Object.assign(q, { p: `${who} has a mass of ${m} kg. It accelerates at ${a} m/s². What resultant force acts on it?`, ans: F, unit: 'N', tol: Math.max(0.15, F * 0.005), work: `F = m × a = ${m} × ${a} = ${F} N`,
+      hints: ['You want the force, so cover F in the formula triangle. The letters left are side by side, so multiply.', `F = m × a. The mass is ${m} kg and the acceleration is ${a} m/s².`, `Type ${m} × ${a} into the calculator. A force is measured in newtons.`] });
+  } else if (level === 2) {
+    const m = pick([8, 12, 16, 20, 24, 25, 32, 40, 48, 50, 64, 75, 80, 96, 120]), a = pick([0.5, 0.75, 1.25, 1.5, 2, 2.5, 3.2, 4]), F = r1(m * a + pick([0, 0, 2, 4, 6]));
+    const ans = r2(F / m); Object.assign(q, { p: `A resultant force of ${F} N acts on ${who.toLowerCase()} with a mass of ${m} kg. What is its acceleration?`, ans, unit: 'm/s²', tol: 0.02, work: `a = F ÷ m = ${F} ÷ ${m} = ${fmt(ans, 2)} m/s²`,
+      hints: ['You want the acceleration, so cover a in the formula triangle. F is above m, so divide.', `a = F ÷ m. The force is ${F} N and the mass is ${m} kg.`, `Type ${F} ÷ ${m} into the calculator. Acceleration is measured in m/s².`] });
+  } else if (level === 3) {
+    const m = int(5, 120), a = pick([0.6, 0.8, 1.2, 1.5, 1.6, 2.4, 2.5, 3.2, 3.6]), F = r1(m * a);
+    Object.assign(q, { p: `A resultant force of ${F} N makes ${who.toLowerCase()} accelerate at ${a} m/s². What is its mass?`, ans: m, unit: 'kg', tol: 0.3, work: `m = F ÷ a = ${F} ÷ ${a} = ${m} kg`,
+      hints: ['You want the mass, so cover m in the formula triangle. F is above a, so divide.', `m = F ÷ a. The force is ${F} N and the acceleration is ${a} m/s².`, `Type ${F} ÷ ${a} into the calculator. Mass is measured in kg.`] });
+  } else if (level === 4) {
+    const m = int(40, 150), P = pick([180, 270, 360, 450]), f = r1(P * pick([0.08, 0.1, 0.12, 0.15, 0.2]) + R() * 5), net = r1(P - f), ans = r2(net / m);
+    Object.assign(q, { p: `${who} has a mass of ${m} kg. It has ${force(P, f, m)}. What is its acceleration?`, ans, unit: 'm/s²', tol: 0.02, work: `Resultant = ${P} − ${f} = ${fmt(net, 1)} N. Then a = F ÷ m = ${fmt(net, 1)} ÷ ${m} = ${fmt(ans, 2)} m/s²`,
+      hints: ['Friction pushes against the pull, so the pull is not the resultant. Find the resultant first.', `Resultant force = pull − friction = ${P} − ${f}. Then cover a in the triangle: a = F ÷ m, with m = ${m} kg.`, `Type (${P} − ${f}) ÷ ${m} into the calculator. Use the brackets.`] });
+  } else {
+    const kind = Math.floor(R() * 3), m = int(30, 140), W = r1(m * 9.8);
+    if (kind === 0) { const a = pick([0.8, 1.2, 1.5, 2.4, 2.5, 3.2]), F = r1(m * a); Object.assign(q, { p: `${who} has a weight of ${W} N. A resultant force of ${F} N acts on it. What is its acceleration? (g = 9.8 N/kg)`, ans: a, unit: 'm/s²', tol: 0.02, work: `Mass = weight ÷ 9.8 = ${W} ÷ 9.8 = ${m} kg. Then a = F ÷ m = ${F} ÷ ${m} = ${a} m/s²`,
+      hints: ['Weight is a force in newtons, not a mass. Turn it into a mass first: mass = weight ÷ 9.8.', `m = ${W} ÷ 9.8. Then cover a in the triangle: a = F ÷ m.`, `Type ${W} ÷ 9.8 to get the mass, then ${F} ÷ that mass.`] }); }
+    else if (kind === 1) { const a = pick([0.8, 1.2, 1.5, 2.4, 2.5, 3.2]), F = r1(m * a); Object.assign(q, { p: `${who} accelerates at ${a} m/s² under a resultant force of ${F} N. What is its weight? (g = 9.8 N/kg)`, ans: W, unit: 'N', tol: Math.max(0.3, W * 0.005), work: `Mass = F ÷ a = ${F} ÷ ${a} = ${m} kg. Weight = mass × 9.8 = ${m} × 9.8 = ${W} N`,
+      hints: ['Weight needs the mass first. You can find the mass from the force and the acceleration.', `m = F ÷ a = ${F} ÷ ${a}. Then weight = mass × 9.8.`, `Type ${F} ÷ ${a} to get the mass, then multiply it by 9.8.`] }); }
+    else { const P = pick([270, 360, 450]), f = r1(0.05 * W), net = r1(P - f), ans = r2(net / m); Object.assign(q, { p: `${who} has a weight of ${W} N. It has ${force(P, f, m)}. What is its acceleration? (g = 9.8 N/kg)`, ans, unit: 'm/s²', tol: 0.02, work: `Mass = ${W} ÷ 9.8 = ${m} kg. Resultant = ${P} − ${f} = ${fmt(net, 1)} N. a = ${fmt(net, 1)} ÷ ${m} = ${fmt(ans, 2)} m/s²`,
+      hints: ['There are two jobs before F = ma. Turn the weight into a mass, and find the resultant force.', `Mass = ${W} ÷ 9.8. Resultant = ${P} − ${f}. Then a = F ÷ m.`, `Type ${W} ÷ 9.8 for the mass, then (${P} − ${f}) ÷ that mass.`] }); }
+  }
+  return q;
+}
+/* "Give me another one": a fresh question from the same level, saved as evidence when it is right */
+const MBMORE = (level, n) => mq(level, 100 + n, `more${level}_${n}`);
+
+CHDATA.c3 = {
+  goal: 'Use Newton\'s second law, F = ma, to link resultant force, mass and acceleration, with the formula triangle, and work out the resultant force when friction acts.',
+  vocab: ['acceleration', 'm/s²', 'resultant force', 'Newton\'s second law', 'formula triangle', 'friction', 'weight', 'mass', 'unit'],
+  steps: [
+    /* ---------- Foundation ---------- */
+    { id: 'a1', title: 'The husky sled', info: ['readA'], floors: ['snow0'],
+      cards: [
+        { html: `<p>Welcome to Chapter 3 and the <b>Snow Arena</b>! A team of huskies pulls a sled across the snow.</p><p>When the sled speeds up, we say it ${T('acceleration', 'accelerates')}. The <b>acceleration</b> tells you how much faster the sled goes every second. We measure it in ${T('mps2', 'm/s²')}.</p><div class="law">An acceleration of 2 m/s² means the speed goes up by 2 m/s every second.</div>` },
+        { html: `<div class="notebox"><b>Friction is switched off</b><p>Real snow does have some friction. For the first few steps we have switched it off, so you can see force, mass and acceleration on their own. Look for the <b>Friction: OFF</b> label in the corner of the arena. Friction comes back in step 5.</p></div>` },
+        { hi: '[data-panel="pal"]', html: `<p>Drag a <b>husky</b> from the palette onto the snow, in front of the sled. Each husky pulls with <b>90 N</b>. Then press <b>Pull!</b></p><p>With no friction, the huskies' pull is the whole ${T('resultant', 'resultant force')}. Watch the <b>Acceleration</b> readout.</p>` }],
+      predict: { q: 'One husky pulls a 100 kg sled. Then a second husky joins in. What will happen to the sled\'s acceleration?', opts: ['It will be about twice as big', 'It will stay about the same', 'It will be about half as big', 'It will be about four times as big'] },
+      setup() { snow(100, 'snow0', 0); }, adds: ['pal', 'run', 'meter', 'readR', 'readM', 'readRes', 'readA', 'readV'], sides: ['right'], pullers: ['husky'], idle: 'Drag a husky onto the snow, then press Pull!',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Drag <b>1 husky</b> onto the arena and press <b>Pull!</b> Let the sled cross the finish line.', () => rHas(1, 100, 'snow0')], ['Press <b>Reset</b>, add a <b>second husky</b> and pull again.', () => rHas(2, 100, 'snow0')]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What acceleration did <b>one husky</b> give the 100 kg sled?', unit: 'm/s²', tol: 0.03, live: () => rA(1, 100, 'snow0'), need: () => rA(1, 100, 'snow0') != null, needMsg: 'Pull the sled with 1 husky first. Your runs are in the Journal.', ok: 'Correct! 90 N on 100 kg gives 0.9 m/s².' },
+        { id: 'q2', type: 'reading', p: 'What acceleration did <b>two huskies</b> give the same sled?', unit: 'm/s²', tol: 0.03, live: () => rA(2, 100, 'snow0'), need: () => rA(2, 100, 'snow0') != null, needMsg: 'Pull the sled with 2 huskies first. Your runs are in the Journal.', ok: 'Correct! 180 N on 100 kg gives 1.8 m/s².' },
+        { id: 'q3', type: 'mcq', p: 'Two huskies pull with twice the force of one husky. What happened to the sled\'s acceleration?', opts: ['It doubled, because the resultant force doubled', 'It stayed the same, because the sled has the same mass', 'It halved, because there were more huskies to pull', 'It went up a little, because the sled got lighter'], a: 0, ok: 'Yes. Twice the resultant force gave twice the acceleration.', why: { 1: 'The mass stayed the same, but the force did not. Compare your two readings.', 2: 'Compare your two readings: did the acceleration go down?', 3: 'The mass of the sled stayed at 100 kg the whole time.' } }] },
+
+    { id: 'a2', title: 'More mass, less acceleration', floors: ['snow0'],
+      cards: [
+        { html: `<p>Now keep the huskies the same and change the <b>mass</b> of the sled. A sled loaded with more mail is heavier.</p><p>You can change the mass with the slider, or type a number in the box beside it.</p>` }],
+      predict: { q: 'Two huskies pull the sled. The sled\'s mass doubles, from 60 kg to 120 kg. What will happen to its acceleration?', opts: ['It will halve', 'It will double', 'It will stay the same', 'It will drop to zero'] },
+      setup() { snow(60, 'snow0', 0); }, adds: ['mass'], sides: ['right'], pullers: ['husky'], idle: 'Drag 2 huskies onto the snow, then press Pull!',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Set the mass to <b>60 kg</b>, add <b>2 huskies</b> and pull.', () => rHas(2, 60, 'snow0')], ['Set the mass to <b>120 kg</b> (twice as heavy), keep the 2 huskies and pull again.', () => rHas(2, 120, 'snow0')]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What acceleration did the two huskies give the <b>60 kg</b> sled?', unit: 'm/s²', tol: 0.04, live: () => rA(2, 60, 'snow0'), need: () => rA(2, 60, 'snow0') != null, needMsg: 'Pull the 60 kg sled with 2 huskies first.', ok: 'Correct! 180 N on 60 kg gives 3.0 m/s².' },
+        { id: 'q2', type: 'reading', p: 'What acceleration did the same two huskies give the <b>120 kg</b> sled?', unit: 'm/s²', tol: 0.04, live: () => rA(2, 120, 'snow0'), need: () => rA(2, 120, 'snow0') != null, needMsg: 'Pull the 120 kg sled with 2 huskies first.', ok: 'Correct! 180 N on 120 kg gives 1.5 m/s². Twice the mass gave half the acceleration.' },
+        { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that sums up what you found.', opts: ['A bigger resultant force gives a bigger acceleration. A bigger mass gives a smaller acceleration.', 'A bigger resultant force gives a smaller acceleration. A bigger mass gives a bigger acceleration.', 'A bigger resultant force gives a bigger acceleration. The mass makes no difference to it.', 'A bigger mass gives a bigger resultant force. The acceleration stays the same either way.'], a: 0, ok: 'Yes! That is the idea behind Newton\'s second law.', why: { 1: 'Check your readings. Two huskies gave a bigger acceleration than one.', 2: 'Your 60 kg and 120 kg readings were different, so the mass does matter.', 3: 'With the same two huskies, the acceleration changed when the mass changed.' } },
+        { id: 'q4', type: 'gap', p: 'More ___ gives a bigger acceleration, and more ___ gives a smaller acceleration.', ans: [['force', 'resultant force', 'pull'], ['mass']], ok: 'Perfect.' }] },
+
+    { id: 'a3', title: 'The formula triangle', floors: ['snow0'],
+      cards: [
+        { html: `<p>Newton worked out the exact rule. It is called ${T('newton2', 'Newton\'s second law')}:</p><div class="law"><b>Resultant force = mass × acceleration</b><br>F = m × a</div><p>F is in newtons (N), m is in kilograms (kg) and a is in m/s².</p>` },
+        { html: `<p>The ${T('triangle', 'formula triangle')} helps you remember it. <b>Cover the letter you want to find.</b> What is left is the sum.</p>${triHTML()}<p>Try each letter now.</p>` },
+        { html: `<div class="example"><b>Worked example.</b> Two huskies (180 N) pull a 60 kg sled. To find <b>a</b>, cover <b>a</b>. F is above m, so divide: a = 180 ÷ 60 = <b>3 m/s²</b>. That is what you measured in the last step.</div><p>Now it is your turn. <b>Work out the answer first, then run the sled to check it.</b></p>` }],
+      predict: { q: 'Three huskies (270 N) pull a 72 kg sled. Which sum gives its acceleration?', opts: ['270 ÷ 72', '270 × 72', '72 ÷ 270', '270 − 72'], then: 'Work it out with the calculator, then run the sled and see if the readout agrees.' },
+      setup() { snow(72, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Set 72 kg, drag 3 huskies on, then press Pull!',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Open the formula triangle card and cover <b>F</b>, <b>m</b> and <b>a</b> in turn.', () => { const t = S.flags.tri; return !!(t && t.F && t.m && t.a); }], ['Set the mass to <b>72 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 72, 'snow0')]],
+      qs: [
+        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s second law.', opts: ['The resultant force on an object equals its mass multiplied by its acceleration.', 'The resultant force on an object equals its mass divided by its acceleration.', 'The acceleration of an object equals its mass multiplied by the resultant force.', 'The mass of an object equals its acceleration multiplied by the resultant force.'], a: 0, ok: 'Yes: F = m × a.', why: { 1: 'F = m × a. The mass and the acceleration are multiplied, not divided.', 2: 'Look at the triangle. F is on its own at the top.', 3: 'The mass is not found by multiplying the acceleration and the force.' } },
+        { id: 'q2', type: 'num', p: 'Three huskies pull a 72 kg sled with no friction. The resultant force is 270 N. Work out the sled\'s acceleration.', unit: 'm/s²', units: UNITS, ans: 3.75, tol: 0.02, ladder: true, work: 'a = F ÷ m = 270 ÷ 72 = 3.75 m/s²', ok: 'Right! 270 ÷ 72 = 3.75 m/s².', hints: ['Cover a in the triangle. F is above m, so divide.', 'a = F ÷ m. The force is 3 × 90 N = 270 N, and the mass is 72 kg.', 'Type 270 ÷ 72 into the calculator.'] },
+        { id: 'q3', type: 'reading', p: 'Now check it. What acceleration does the readout show for your run?', unit: 'm/s²', tol: 0.03, live: () => rA(3, 72, 'snow0'), need: () => rA(3, 72, 'snow0') != null, needMsg: 'Set the mass to 72 kg, add 3 huskies and pull first.', ok: 'It matches your sum. The formula works!' }] },
+
+    { id: 'a4', title: 'Finding the force and the mass', floors: ['snow0'],
+      cards: [
+        { html: `<p>The triangle works for any letter. Cover the one you want to find.</p><div class="example"><b>Finding F.</b> A 90 kg sled must accelerate at 2 m/s². Cover F, then multiply: F = 90 × 2 = <b>180 N</b>. That is 2 huskies.</div><div class="example"><b>Finding m.</b> Three huskies (270 N) make a sled accelerate at 2.7 m/s². Cover m, then divide: m = 270 ÷ 2.7 = <b>100 kg</b>.</div>` },
+        { html: `<p>Two jobs. In each one, <b>work out your answer first</b>, then set up the sled and pull to check it.</p>` }],
+      setup() { snow(108, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work it out first, then set up the sled and pull',
+      tasks: [['<b>Job 1.</b> A 108 kg sled has to accelerate at 2.5 m/s². Work out the force it needs, add that many huskies (90 N each) and pull.', () => rHas(3, 108, 'snow0')], ['<b>Job 2.</b> Two huskies make a sled accelerate at 2.25 m/s². Work out its mass, set the slider to that mass and pull.', () => rHas(2, 80, 'snow0')]],
+      qs: [
+        { id: 'q1', type: 'num', p: '<b>Job 1.</b> What resultant force does a 108 kg sled need to accelerate at 2.5 m/s²?', unit: 'N', units: UNITS, ans: 270, tol: 0.6, ladder: true, work: 'F = m × a = 108 × 2.5 = 270 N', ok: 'Yes: 270 N.', hints: ['Cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 108 × 2.5.', 'Type 108 × 2.5 into the calculator.'] },
+        { id: 'q2', type: 'num', p: 'Each husky pulls with 90 N. How many huskies give 270 N?', unit: 'huskies', ans: 3, tol: 0.05, work: '270 ÷ 90 = 3 huskies', ok: 'Yes: 3 huskies.', hints: ['Divide the force you need by the force of one husky.', '270 ÷ 90.'] },
+        { id: 'q3', type: 'num', p: '<b>Job 2.</b> Two huskies (180 N) make a sled accelerate at 2.25 m/s². What is the sled\'s mass?', unit: 'kg', units: UNITS, ans: 80, tol: 0.3, ladder: true, work: 'm = F ÷ a = 180 ÷ 2.25 = 80 kg', ok: 'Yes: 80 kg.', hints: ['Cover m in the triangle. F is above a, so divide.', 'm = F ÷ a = 180 ÷ 2.25.', 'Type 180 ÷ 2.25 into the calculator.'] },
+        { id: 'q4', type: 'reading', p: 'Check Job 2. What acceleration did the 80 kg sled have with 2 huskies?', unit: 'm/s²', tol: 0.03, live: () => rA(2, 80, 'snow0'), need: () => rA(2, 80, 'snow0') != null, needMsg: 'Set the mass to 80 kg, add 2 huskies and pull first.', ok: 'It was 2.25 m/s², just as your sum said.' }] },
+
+    { id: 'a5', title: 'Friction is back', info: ['readF', 'fbd'], floors: ['snow'],
+      cards: [
+        { html: `<div class="notebox"><b>Friction is back on</b><p>The snow now has its normal friction. The label in the corner says <b>Friction: on</b>. Friction pushes against the sled, so the huskies' pull is <b>no longer the resultant force</b>.</p></div>` },
+        { html: `<p>Now there are <b>two steps</b>.</p><ol><li>Find the ${T('resultant', 'resultant force')}: <b>pull − friction</b>.</li><li>Use F = m × a with that resultant: <b>a = resultant ÷ m</b>.</li></ol><div class="example"><b>Worked example.</b> Three huskies (270 N) pull a 60 kg sled. The Friction readout shows 29.4 N. Resultant = 270 − 29.4 = 240.6 N. Then a = 240.6 ÷ 60 = <b>4.01 m/s²</b>.</div>` }],
+      predict: { q: 'Two huskies pull an 80 kg sled. Without friction, the acceleration would be 180 ÷ 80 = 2.25 m/s². With friction back on, the acceleration will be…', opts: ['smaller than 2.25 m/s²', 'bigger than 2.25 m/s²', 'exactly 2.25 m/s²', 'zero'] },
+      setup() { snow(80, 'snow', 0); }, adds: ['readF', 'fbd'], sides: ['right'], pullers: ['husky'], idle: 'Set 80 kg, drag 2 huskies on, then press Pull!',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Set the mass to <b>80 kg</b>, add <b>2 huskies</b> and pull. Watch the friction arrow in the free-body diagram.', () => rHas(2, 80, 'snow')]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show when the sled was moving?', unit: 'N', tol: 0.4, live: () => rFr(2, 80, 'snow'), need: () => rFr(2, 80, 'snow') != null, needMsg: 'Pull the 80 kg sled with 2 huskies first.', ok: 'Correct! The friction was 39.2 N.' },
+        { id: 'q2', type: 'num', p: '<b>Step 1.</b> Work out the resultant force: the pull of 2 huskies (180 N) minus your friction reading.', unit: 'N', units: UNITS, ans: 140.8, tol: 0.7, ladder: true, work: 'Resultant = pull − friction = 180 − 39.2 = 140.8 N', ok: 'Yes: 140.8 N.', hints: ['Friction pushes against the pull, so subtract it.', 'Resultant = 180 − your friction reading.', 'Type 180 − 39.2 into the calculator.'] },
+        { id: 'q3', type: 'num', p: '<b>Step 2.</b> Use F = m × a to find the acceleration. The resultant is 140.8 N and the mass is 80 kg.', unit: 'm/s²', units: UNITS, ans: 1.76, tol: 0.02, ladder: true, work: 'a = F ÷ m = 140.8 ÷ 80 = 1.76 m/s²', ok: 'Yes: 1.76 m/s².', hints: ['Cover a in the triangle. F is above m, so divide.', 'Use the resultant, not the pull: 140.8 ÷ 80.', 'Type 140.8 ÷ 80 into the calculator.'] },
+        { id: 'q4', type: 'reading', p: 'Check it. What acceleration does the readout show?', unit: 'm/s²', tol: 0.03, live: () => rA(2, 80, 'snow'), need: () => rA(2, 80, 'snow') != null, needMsg: 'Pull the 80 kg sled with 2 huskies first.', ok: 'It matches your sum.' },
+        { id: 'q5', type: 'mcq', p: 'Why is the acceleration smaller than the 2.25 m/s² it would be with no friction?', opts: ['Friction acts against the pull, so the resultant force is smaller', 'Friction makes the sled heavier, so its mass is bigger', 'Friction makes the huskies pull less, so the pull is smaller', 'Friction adds to the pull, but only after the first second'], a: 0, ok: 'Exactly. The pull is the same, but the resultant is smaller.', why: { 1: 'The mass stayed at 80 kg. Check the Mass readout.', 2: 'The pull is still 180 N. Check the Right pull readout.', 3: 'Friction never helps the pull. It acts against it.' } }] },
+
+    { id: 'a6', title: 'Maths practice', info: [], floors: ['snow'],
+      cards: [
+        { html: `<p>Time to practise! Every question has a <b>Need a clue?</b> box. It gives you one hint at a time, and never the answer.</p><p>Choose the <b>unit</b> as well as typing the number. Use the calculator, and take your time over each one.</p>` }],
+      setup() { snow(80, 'snow', 0); }, adds: [], sides: [], pullers: [], idle: 'Use the calculator for the maths questions',
+      tasks: [['Open the calculator (the 🧮 button) and use it for the questions.', () => CALC_USED]],
+      more: [1, 2, 3],
+      qs: [mq(1, 1, 'q1'), mq(1, 2, 'q2'), mq(2, 3, 'q3'), mq(2, 4, 'q4'), mq(3, 5, 'q5'), mq(3, 6, 'q6')] },
+
+    /* ---------- Extension ---------- */
+    { id: 'e1', title: 'Acceleration on a graph', floors: ['snow'], info: ['vt'],
+      cards: [
+        { html: `<p>Welcome to the Chapter 3 Extension! A ${T('vtgraph', 'velocity–time graph')} shows acceleration as a <b>straight sloping line</b>. The steeper the ${T('slope', 'slope')}, the bigger the acceleration.</p><p>To work out the acceleration, take two points on the line: <b>acceleration = change in speed ÷ time taken</b>.</p>` },
+        { html: `<p>Here is a sled that speeds up steadily.</p>${vtSVG([{ pts: [[0, 0], [5, 8]], col: '#1f5f8b' }], { tMax: 6, vMax: 9, vStep: 1, tri: [[1, 1.6], [4, 6.4]], alt: 'A straight line from 0 at 0 s up to 8 m/s at 5 s. A dashed triangle marks the speed rising from 1.6 to 6.4 m/s between 1 s and 4 s.' })}<div class="example">From 1 s to 4 s, the speed goes from 1.6 to 6.4 m/s. Change in speed = 4.8 m/s. Time taken = 3 s. Acceleration = 4.8 ÷ 3 = <b>1.6 m/s²</b>.</div>` }],
+      setup() { snow(90, 'snow', 2); }, adds: ['vt'], hide: ['mass'], sides: [], pullers: [], idle: 'Press Pull!',
+      tasks: [['Press <b>Pull!</b> and watch the graph. Let the sled cross the finish line.', () => rHas(2, 90, 'snow')]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'Read the graph. How fast was the sled going after <b>1 s</b>?', unit: 'm/s', tol: 0.25, live: () => rV(2, 90, 'snow', 1), need: () => rV(2, 90, 'snow', 1) != null, needMsg: 'Pull the sled first.', ok: 'Good reading!', hints: ['Find 1 on the time axis, go straight up to the line, then read across.'] },
+        { id: 'q2', type: 'reading', p: 'How fast was the sled going after <b>3 s</b>?', unit: 'm/s', tol: 0.25, live: () => rV(2, 90, 'snow', 3), need: () => rV(2, 90, 'snow', 3) != null, needMsg: 'Pull the sled first.', ok: 'Good reading!', hints: ['Find 3 on the time axis, go straight up to the line, then read across.'] },
+        { id: 'q3', type: 'num', p: 'Use your two readings. The speed changed from the 1 s reading to the 3 s reading, which took 2 s. What was the sled\'s acceleration? (Change in speed ÷ time taken.)', unit: 'm/s²', units: UNITS, live: () => { const r = sledRun(2, 90, 'snow'); return r ? r.a : null; }, need: () => sledRun(2, 90, 'snow') != null, needMsg: 'Pull the sled first.', tol: 0.12, ladder: true, work: 'Acceleration = (speed at 3 s − speed at 1 s) ÷ 2 s. Both readings come from your run.', ok: 'Yes! It matches the Acceleration readout.', hints: ['Take the 1 s reading away from the 3 s reading to find the change in speed.', 'Divide the change in speed by the time taken, 2 s.'] },
+        { id: 'q4', type: 'mcq', p: 'The line on the graph is straight and slopes upwards. What does that tell you?', opts: ['The sled has a steady acceleration, so it speeds up by the same amount every second', 'The sled has a steady speed, so it covers the same distance every second', 'The sled has a growing acceleration, so it speeds up by more every second', 'The sled has no acceleration, so it stays at the same speed all the time'], a: 0, ok: 'Yes. A straight sloping line means a steady acceleration.', why: { 1: 'A steady speed would be a flat line.', 2: 'If the acceleration grew, the line would curve upwards.', 3: 'No acceleration would mean a flat line.' } }] },
+
+    { id: 'e2', title: 'Resultant first, then F = ma', floors: ['snow', 'powder'],
+      cards: [
+        { html: `<p>Friction is bigger on <b>fresh powder</b> than on packed snow. Soft snow grips the sled more. So the same huskies leave a smaller resultant force.</p><p>For any problem with friction, use <b>two steps</b>: find the resultant (pull − friction), then use F = m × a.</p>` }],
+      predict: { q: 'Four huskies pull a 120 kg sled. On packed snow, the acceleration would be about 2.5 m/s². On fresh powder, the sled\'s acceleration will be…', opts: ['smaller, because the friction is bigger', 'bigger, because the snow is softer', 'the same, because the huskies pull just as hard', 'the same, because the mass has not changed'] },
+      setup() { snow(120, 'powder', 0); }, adds: ['mass'], sides: ['right'], pullers: ['husky'], idle: 'Choose Fresh powder, set 120 kg, add 4 huskies, then Pull!',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose <b>Fresh powder</b> and set the mass to <b>120 kg</b>. Add <b>4 huskies</b> and pull.', () => rHas(4, 120, 'powder')]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show on the fresh powder?', unit: 'N', tol: 0.5, live: () => rFr(4, 120, 'powder'), need: () => rFr(4, 120, 'powder') != null, needMsg: 'Pull the 120 kg sled with 4 huskies on fresh powder first.', ok: 'Correct: 176.4 N. That is a lot more than on packed snow.' },
+        { id: 'q2', type: 'num', p: 'Four huskies pull with 360 N. Work out the resultant force.', unit: 'N', units: UNITS, ans: 183.6, tol: 0.9, ladder: true, work: 'Resultant = 360 − 176.4 = 183.6 N', ok: 'Yes: 183.6 N.', hints: ['Friction acts against the pull, so subtract it.', 'Resultant = 360 − your friction reading.', 'Type 360 − 176.4 into the calculator.'] },
+        { id: 'q3', type: 'num', p: 'Now find the acceleration of the 120 kg sled.', unit: 'm/s²', units: UNITS, ans: 1.53, tol: 0.02, ladder: true, work: 'a = F ÷ m = 183.6 ÷ 120 = 1.53 m/s²', ok: 'Yes: 1.53 m/s².', hints: ['Use the resultant, not the pull.', 'Cover a in the triangle: a = F ÷ m = 183.6 ÷ 120.', 'Type 183.6 ÷ 120 into the calculator.'] },
+        { id: 'q4', type: 'reading', p: 'Check it. What acceleration does the readout show?', unit: 'm/s²', tol: 0.03, live: () => rA(4, 120, 'powder'), need: () => rA(4, 120, 'powder') != null, needMsg: 'Pull the sled first.', ok: 'It matches.' },
+        mq(4, 21, 'q5'), mq(4, 22, 'q6')] },
+
+    { id: 'e3', title: 'Weight, mass and F = ma', floors: ['snow'], info: ['readW'],
+      cards: [
+        { html: `<p>Be careful: <b>weight</b> and <b>mass</b> are different. Mass is in kg. Weight is a force in newtons.</p><div class="law">weight = mass × 9.8, so mass = weight ÷ 9.8</div><p>F = m × a needs the <b>mass</b>. If a question gives you the weight, turn it into a mass first.</p><div class="example">A sled weighs 882 N. Its mass is 882 ÷ 9.8 = <b>90 kg</b>.</div>` }],
+      setup() { snow(85, 'snow', 0); }, adds: ['readW', 'readN'], sides: ['right'], pullers: ['husky'], idle: 'Set 85 kg, add 3 huskies, then Pull!',
+      tasks: [['Set the mass to <b>85 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 85, 'snow')]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What does the Weight readout show for the 85 kg sled?', unit: 'N', tol: 0.5, live: () => 85 * G, need: () => S.mass === 85, needMsg: 'Set the mass to 85 kg first.', ok: 'Correct: 85 × 9.8 = 833 N.' },
+        { id: 'q2', type: 'num', p: 'A sled has a weight of 833 N. Three huskies pull with 270 N, and the friction is 41.65 N. What is its acceleration? (g = 9.8 N/kg)', unit: 'm/s²', units: UNITS, ans: 2.69, tol: 0.02, ladder: true, work: 'Mass = 833 ÷ 9.8 = 85 kg. Resultant = 270 − 41.65 = 228.35 N. a = 228.35 ÷ 85 = 2.69 m/s²', ok: 'Yes: 2.69 m/s².', hints: ['There are two jobs before F = ma: turn the weight into a mass, and find the resultant force.', 'Mass = 833 ÷ 9.8. Resultant = 270 − 41.65. Then a = F ÷ m.', 'Type 833 ÷ 9.8 for the mass, then (270 − 41.65) ÷ that mass.'] },
+        { id: 'q3', type: 'reading', p: 'Check it. What acceleration does the readout show?', unit: 'm/s²', tol: 0.03, live: () => rA(3, 85, 'snow'), need: () => rA(3, 85, 'snow') != null, needMsg: 'Set the mass to 85 kg, add 3 huskies and pull first.', ok: 'It matches your sum.' },
+        mq(5, 31, 'q4'), mq(5, 32, 'q5')] }
+  ],
+
+  /* ---------- Check ---------- */
+  review: [
+    mq(1, 41, 'c3r1'), mq(2, 42, 'c3r2'), mq(3, 43, 'c3r3'),
+    { id: 'c3r4', type: 'mcq', p: 'Two huskies pull a sled and give it an acceleration of 1.6 m/s². Two more huskies join the team (4 in total). The mass and the friction do not change, and the friction is small enough to ignore. What is the sled\'s acceleration now?', opts: ['3.2 m/s²', '1.6 m/s²', '0.8 m/s²', '6.4 m/s²'], a: 0, work: 'Twice the pull on the same mass gives twice the acceleration: 2 × 1.6 = 3.2 m/s².', why: { 1: 'The force doubled, so the acceleration changes.', 2: 'More force means more acceleration, not less.', 3: 'The force only doubled. It did not go up four times.' } },
+    { id: 'c3r5', type: 'gap', p: 'Newton\'s second law: the resultant ___ on an object equals its ___ multiplied by its ___.', ans: [['force'], ['mass'], ['acceleration']] },
+    { id: 'c3r6', type: 'tick', p: 'Tick every statement that is true.', opts: ['With the same pull, a heavier sled accelerates more slowly', 'A bigger resultant force on the same mass gives a bigger acceleration', 'Acceleration is measured in newtons', 'With friction acting, the resultant force is the pull minus the friction', 'If the resultant force is zero, the sled must be standing still'], a: [0, 1, 3], work: 'More mass means less acceleration, and more resultant force means more acceleration. With friction, resultant = pull − friction. Acceleration is in m/s², and a sled with no resultant force can keep moving at a steady speed.' },
+    mq(4, 44, 'c3r7'),
+    { id: 'c3r8', type: 'explain', p: 'Two huskies pull an empty sled, and then they pull the same sled loaded with mail. The loaded sled speeds up more slowly. Explain why, using F = ma.', words: ['resultant force', 'mass', 'acceleration'],
+      model: 'The two huskies pull with the same force both times, so the resultant force is the same. The loaded sled has more mass. Because F = m × a, the same resultant force on a bigger mass gives a smaller acceleration, so the loaded sled speeds up more slowly.',
+      check: ['Says the resultant force is the same both times, because the huskies pull just as hard', 'Says the loaded sled has more mass', 'Uses F = ma (or the formula triangle) to explain that the same resultant force on a bigger mass gives a smaller acceleration'] },
+    /* Extension */
+    { id: 'c3r9', type: 'num', p: 'This graph shows a sled speeding up steadily. Work out its acceleration.' + vtSVG([{ pts: [[0, 0], [6, 4.5]], col: '#1f5f8b' }], { tMax: 8, vMax: 5, vStep: 0.5, tri: [[2, 1.5], [6, 1.5], [6, 4.5]], triLab: false, alt: 'A straight line from 0 at 0 s up to 4.5 m/s at 6 s' }), unit: 'm/s²', units: UNITS, ans: 0.75, tol: 0.03, ladder: true, work: 'Between 2 s and 6 s the speed goes from 1.5 to 4.5 m/s: a change of 3 m/s in 4 s. a = 3 ÷ 4 = 0.75 m/s²', hints: ['Pick two points on the line and read their speeds and times.', 'Change in speed ÷ time taken.', 'At 2 s the speed is 1.5 m/s, and at 6 s it is 4.5 m/s. Divide the change by 4 s.'] },
+    { id: 'c3r10', type: 'mcq', p: 'The graph shows two sleds that start from rest. Which line shows the sled with the bigger acceleration?' + vtSVG([{ pts: [[0, 0], [6, 3]], col: '#c94a34', label: 'Line 1', lab: 1 }, { pts: [[0, 0], [6, 5]], col: '#11806f', label: 'Line 2', lab: 1 }], { tMax: 8, vMax: 5, vStep: 1, alt: 'Two straight lines from the origin. Line 1 reaches 3 m/s at 6 s. Line 2 reaches 5 m/s at 6 s.' }), opts: ['Line 2, because its speed goes up by more every second', 'Line 1, because its speed goes up by less every second', 'Line 2, because it has a steady speed all the way along', 'Neither, because both lines slope upwards in a straight line'], a: 0, work: 'Line 2 is steeper: it reaches 5 m/s in 6 s, while line 1 only reaches 3 m/s. A steeper slope means a bigger acceleration.', why: { 1: 'A line that rises by less each second is less steep.', 2: 'A steady speed would be a flat line, and neither line is flat.', 3: 'Both lines are straight, but one is steeper. The steeper line has the bigger acceleration.' } },
+    mq(4, 45, 'c3r11'), mq(5, 46, 'c3r12'),
+    { id: 'c3r13', type: 'fbd', p: 'Draw the free-body diagram of this sled.', scen: { id: 'c3r13', obj: 'sled', label: '85 kg', brief: '<p>Three huskies pull an <b>85 kg sled</b> to the right across packed snow with <b>270 N</b>. The friction on the sled is <b>41.65 N</b>. The sled is speeding up.</p>', forces: [{ type: 'weight', dir: 'down', value: 833 }, { type: 'normal', dir: 'up', value: 833 }, { type: 'pull', dir: 'right', value: 270 }, { type: 'friction', dir: 'left', value: 41.65 }] } },
+    { id: 'c3r14', type: 'explain', p: 'The same four huskies pull the same sled on packed snow and then on fresh powder. The sled accelerates more slowly on the powder. Explain why.', words: ['friction', 'resultant force', 'acceleration'],
+      model: 'Fresh powder has more friction than packed snow. The huskies pull with the same force, but more of it is used up against the bigger friction, so the resultant force (pull − friction) is smaller. A smaller resultant force on the same mass gives a smaller acceleration, because a = F ÷ m.',
+      check: ['Says there is more friction on the fresh powder', 'Says the resultant force (pull − friction) is smaller on the powder, even though the huskies pull just as hard', 'Uses F = ma to say that a smaller resultant force on the same mass gives a smaller acceleration'] }
+  ]
+};
+CHDATA.c3.review.forEach(q => { if (q.build) q.build(); });
+
+/* Challenge: the mail run. Work out how many huskies the sled needs, then run it.
+   Each run is judged at the finish line. Every run counts: on target first time = 4 points, then 3, 2, 1. */
+CHDATA.c3.challenge = {
+  title: 'The mail run',
+  intro: 'The mail has to get through! Each sled must speed up enough to arrive on time, but not so fast that the mail sacks tumble off. Work out how many huskies you need first, then run it. Your score is highest if you get it right in as few runs as you can.',
+  missions: [
+    { id: 'n1', kind: 'sled', title: 'Run 1: a light load', mass: 80, floor: 'snow', lo: 1.0, hi: 2.4, huskies: 2, brief: 'The sled and its load have a <b>mass of 80 kg</b>, on packed snow. The acceleration has to be <b>between 1.0 and 2.4 m/s²</b>.' },
+    { id: 'n2', kind: 'sled', title: 'Run 2: fresh powder', mass: 120, floor: 'powder', lo: 1.2, hi: 2.0, huskies: 4, brief: 'The sled and its load have a <b>mass of 120 kg</b>, on fresh powder. The acceleration has to be <b>between 1.2 and 2.0 m/s²</b>. The powder has a lot of friction!' },
+    { id: 'n3', kind: 'sled', title: 'Run 3: the heavy load', mass: 150, floor: 'snow', lo: 1.8, hi: 2.2, huskies: 4, setMass: true, brief: 'The sled and its load have a <b>weight of 1470 N</b>, on packed snow. Work out its mass, then set the slider. The acceleration has to be <b>between 1.8 and 2.2 m/s²</b>.' }
+  ]
+};
+
 /* ===== Chapter challenges ===== */
 CHDATA.c1.challenge = {
   title: 'Arena Inspector',
@@ -2981,7 +3333,8 @@ function renderChallenge(ch) {
   host.appendChild(h('div', { class: 'panel mission gl' }, `<span class="lbl">Challenge</span><h3>${C1.title}</h3><p>${C1.intro}</p>`));
   const save = (m, patch) => { const st = dbGet('chal.' + ch, {}); st[m.id] = Object.assign(st[m.id] || {}, patch); dbSet('chal.' + ch, st); renderOnPage(); tabTicks(); if (challengeDone(ch)) { addEvidence('challenge', `Chapter ${CH.n} ${CH.part} Challenge: ${C1.title}, ${challengeState(ch).score} of ${challengeState(ch).max} objectives met.`); maybeStamp(ch); } };
   const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
-  C1.missions.filter(m => m.kind !== 'brake').forEach(m => {
+  const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);
+  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -3054,6 +3407,51 @@ function renderBrakeCourse(ch, bm, host, save) {
   load(cur);
 }
 
+/* Chapter 3 Challenge: the mail run (one shared Snow Arena, a tab per run).
+   The student works out how many huskies to use, then runs the sled. A run counts when the sled crosses the finish line, and
+   it is judged on its acceleration. Every run counts: on target at the 1st run = 4 points, 2nd = 3, 3rd = 2, later = 1. "Move on" after 3 misses scores 1. */
+function renderSledCourse(ch, sm, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, sm.findIndex(m => !get(m.id).done)), active = false;
+  const card = h('section', { class: 'panel mission', id: 'mi-sled' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a run"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>Work in two steps. First find the friction: pull the sled once and read the Friction readout. A run only counts when the sled crosses the finish line, so you can press Reset first, for free.</p><p>Then, for each number of huskies, work out the <b>resultant force = pull − friction</b> and the <b>acceleration = resultant ÷ mass</b>. Which number of huskies lands inside the target?</p></div></details>
+    <div class="labhost"></div><div class="fb" id="snFb" hidden></div><ol class="blog" id="snLog"></ol><ul class="objs" data-o></ul><div class="row" id="snMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = true; LAB.onChange = null; LAB.idle = 'Add huskies, then press Pull!';
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
+  const paint = () => {
+    const m = sm[cur], s = get(m.id);
+    $('.mtabs', card).innerHTML = sm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-sr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p>`;
+    $('#snLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Run ${i + 1}: ${r.n} husk${r.n === 1 ? 'y' : 'ies'}, ${r.mass} kg, acceleration ${fmt(r.a, 2)} m/s²${r.hit ? ' ✓ on target!' : r.mass !== m.mass ? ' (wrong mass)' : r.a < m.lo ? ' (too small)' : ' (too big)'}</li>`).join('');
+    const fb = $('#snFb'); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.best === 4 ? 'ok' : 'hint') : 'no'); fb.textContent = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Run the sled to the finish line (every run counts)', s.tried], [`Get the acceleration between ${fmt(m.lo, 1)} and ${fmt(m.hi, 1)} m/s²`, s.done && s.hit], ['Do it on your first run', s.best === 4]].map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#snMore', card).innerHTML = s.done ? (cur < sm.length - 1 ? `<button type="button" class="go" data-sr="${cur + 1}">Next run →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="snGive">Move on (1 point)</button>` : '');
+    const gv = $('#snGive'); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} runs. ${m.huskies} huskies work for this sled. You scored 1 of 4 points.` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = sm[cur];
+    clearCh2(); S.scene = 'sled'; S.x0 = SLED_X0; S.left = []; S.right = []; S.mass = m.setMass ? 100 : m.mass; S.floor = m.floor; S.flags = newFlags(); resetSim(); active = false;
+    LAB.show = new Set(['pal', 'run', 'meter', 'readR', 'readM', 'readRes', 'readA', 'readF', 'readV', 'fbd'].concat(m.setMass ? ['mass'] : [])); LAB.sides = ['right']; LAB.pullers = ['husky']; LAB.floors = [m.floor];
+    applyPanels(); labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-sr]'); if (b) load(+b.dataset.sr); });
+  LAB.tick = () => {
+    if (S.running) active = true;
+    let late = false;
+    if (S.running && S.t >= 8 && !S.flags.finished) { S.running = false; syncRun(); S.msg = 'The sled had not reached the finish line after 8 s. Press Reset to go again.'; late = true; }   // too little pull: do not wait for ever
+    if (!active || S.running) return;
+    active = false; if (!S.flags.finished && !late) return;
+    const m = sm[cur], s = get(m.id); if (s.done) { paint(); return; }
+    const a = forces().a, nR = S.right.length, hit = S.mass === m.mass && a >= m.lo - 1e-9 && a <= m.hi + 1e-9, n = (s.n || 0) + 1, log = (s.log || []).concat([{ n: nR, mass: S.mass, a, hit }]);
+    const best = hit ? Math.max(1, 5 - n) : 0;
+    const why = S.mass !== m.mass ? `The sled's mass was ${S.mass} kg, but this run needs ${m.mass} kg.` : a < m.lo ? `${nR} husk${nR === 1 ? 'y' : 'ies'} gave ${fmt(a, 2)} m/s². That is too small, so the mail would be late. Try more huskies.` : `${nR} huskies gave ${fmt(a, 2)} m/s². That is too big, so the mail sacks would tumble off. Try fewer huskies.`;
+    save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `On target after ${n} run${n > 1 ? 's' : ''}! ${nR} huskies gave ${fmt(a, 2)} m/s². You scored ${best} of 4 points.` : `Not quite. ${why}` });
+    paint();
+  };
+  load(cur);
+}
+
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
 CHDATA.c1.review = [
   { id: 'r1', type: 'match', p: 'Match each force to what causes it.', rows: [['Weight', 'The Earth\'s gravity pulling on an object'], ['Normal force', 'A surface pushing back on an object resting on it'], ['Friction', 'Two surfaces rubbing or trying to slide past each other'], ['Tension', 'A stretched rope or string pulling'], ['Air resistance', 'Air pushing against something moving through it']] },
@@ -3120,9 +3518,19 @@ const SECTIONS = [
     blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
     steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
     goal: 'Describe motion from the shape of a velocity–time graph; explain why more mass needs a bigger force to stop in the same distance; draw the free-body diagram of an object gliding at a steady speed.',
-    vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] }
+    vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] },
+  { id: 'c3f', ch: 'c3', n: 3, title: 'F = ma', part: 'Foundation', stamp: 'Formula Pro',
+    blurb: 'Husky sleds in the Snow Arena: acceleration, the formula triangle, finding F, m and a, friction, and lots of maths practice.',
+    steps: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'], challenge: null, review: ['c3r1', 'c3r2', 'c3r3', 'c3r4', 'c3r5', 'c3r6', 'c3r7', 'c3r8'],
+    goal: 'Describe how the resultant force and the mass of an object affect its acceleration; use F = ma and the formula triangle to find the force, the mass or the acceleration; work out the resultant force when friction acts, then use it in F = ma.',
+    vocab: ['acceleration', 'm/s²', 'resultant force', 'Newton\'s second law', 'formula triangle', 'friction', 'mass', 'unit'] },
+  { id: 'c3x', ch: 'c3', n: 3, title: 'F = ma', part: 'Extension', stamp: 'Mail Run Master',
+    blurb: 'Read acceleration from a graph, work with friction on fresh powder, mix weight and mass, then run the mail.',
+    steps: ['e1', 'e2', 'e3'], challenge: ['n1', 'n2', 'n3'], review: ['c3r9', 'c3r10', 'c3r11', 'c3r12', 'c3r13', 'c3r14'], needs: 'c3f',
+    goal: 'Find acceleration from the slope of a velocity–time graph; solve two-step problems (resultant force first, then F = ma); turn weight into mass before using F = ma; choose the number of huskies for a target acceleration; draw the free-body diagram of an accelerating sled.',
+    vocab: ['acceleration', 'velocity–time graph', 'slope', 'resultant force', 'friction', 'weight', 'mass', 'Newton\'s second law'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];
@@ -3194,7 +3602,7 @@ function wsQuestion(q, i, mode, s) {
   let body = '';
   if (q.type === 'mcq' || q.type === 'tap') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v === oi) || (key && q.a === oi) ? W('☑') : '☐'} ${LET[k]}. ${q.opts[oi]}</div>`).join('');
   else if (q.type === 'tick') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v && v.includes(oi)) || (key && q.a.includes(oi)) ? W('☑') : '☐'} ${q.opts[oi]}</div>`).join('') + (key ? `<div class="look">${q.work || ''}</div>` : '');
-  else if (q.type === 'num') body = `<div class="box">Working: ${stu ? '' : key ? W(q.work) : ''}<br><br></div><p>Answer: ${stu && v != null ? W(esc(v)) : key ? W(fmt(q.ans, 2)) : '____________'} ${q.unit}</p>`;
+  else if (q.type === 'num') body = `<div class="box">Working: ${stu ? '' : key ? W(q.work) : ''}<br><br></div><p>Answer: ${stu && v != null ? W(esc(v)) : key ? W(fmt(q.ans, 2)) : '____________'} ${q.units ? (stu ? W(esc((s && s.u) || '')) : key ? W(q.unit) : '________ <small>(write the unit)</small>') : q.unit}</p>`;
   else if (q.type === 'gap') { let k = 0; body = `<p>${q.p.replace(/___/g, () => { const j = k++; return stu && v ? W('<u>' + esc(v[j] || '') + '</u>') : key ? W('<u>' + esc(q.ans[j][0]) + '</u>') : '______________'; })}</p>`; }
   else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>${q.colA || "Force"}</th><th>Letter</th></tr>${q.rows.map((r, ri) => `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
   else if (q.type === 'sort') body = `<table><tr><th>Item</th>${q.groups.map(g => `<th style="width:22%">${g}</th>`).join('')}</tr>${sortItems(q).map(ii => `<tr><td>${q.items[ii][0]}</td>${q.groups.map((_, gi) => `<td style="text-align:center">${(stu && v && v[ii] === gi) || (key && q.items[ii][1] === gi) ? W('✓') : ''}</td>`).join('')}</tr>`).join('')}</table><p class="note">Tick one box in each row.</p>`;
@@ -3244,7 +3652,7 @@ function markItem(q, i) {
     case 'tick': return `Q${n} (2 marks): ${q.a.map(a => q.opts[a]).join('; ')}. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.`;
     case 'match': return `Q${n} (${m} marks, 1 per row): ` + q.rows.map(r => `${r[0]} → ${r[1]}`).join('; ') + '.';
     case 'sort': return `Q${n} (${m} marks, 1 per item): ` + q.groups.map((g, gi) => `${g}: ${q.items.filter(x => x[1] === gi).map(x => plain(x[0])).join(', ')}`).join('. ') + '.';
-    case 'num': return `Q${n} (2 marks): ${fmt(q.ans, 2)} ${q.unit} (accept ${fmt(q.ans - (q.tol || 0.15), 2)} to ${fmt(q.ans + (q.tol || 0.15), 2)}). 1 mark for the answer, 1 for correct working: ${q.work}.`;
+    case 'num': return `Q${n} (2 marks): ${fmt(q.ans, 2)} ${q.unit} (accept ${fmt(q.ans - (q.tol || 0.15), 2)} to ${fmt(q.ans + (q.tol || 0.15), 2)}). 1 mark for the answer${q.units ? ' with its unit (' + q.unit + ')' : ''}, 1 for correct working: ${q.work}.`;
     case 'gap': return `Q${n} (${m} marks, 1 per gap): ` + q.ans.map((a, k) => `gap ${k + 1}: ${a[0]} (also accept ${gapAccepts(a).filter(w => w !== gapNorm(a[0])).join(', ') || 'any correct scientific word'})`).join('; ') + '.';
     case 'table': return `Q${n} (${m} marks, 1 per cell): ` + q.rows.map(r => `${r[0]}: ${q.cols.map((c, j) => `${c} = ${q.choices[j][r[1][j]]}`).join(', ')}`).join('; ') + '.';
     case 'fbd': return `Q${n} (${m} marks): 1 mark for each correct arrow (right force, right direction, right size): ${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N ${DIRWORD[f.dir]}`).join('; ')}. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.`;
@@ -3284,7 +3692,7 @@ function progressHTML() {
     const chd = CHDATA[ch.id], L = learnProgress(ch.id); if (!L.done && !reviewProgress(ch.id).done && !challengeState(ch.id).tried) return;
     out += `<div class="page">${wsHeader(ch, 'My work so far', 'student')}<h2>Learn: ${L.done} of ${L.total} steps done</h2>`;
     chd.steps.forEach((s, i) => { const qs = (s.qs || []).map(q => [q, dbGet(`learn.${ch.id}.${s.id}.${q.id}`, null)]).filter(([, a]) => a);
-      out += `<div class="q"><div class="qh">Step ${i + 1}: ${s.title} <span>${stepDone(ch.id, i) ? '✓ Done' : 'Not finished'}</span></div>${qs.length ? qs.map(([q, a]) => `<p style="margin:2px 0">${plain(q.p)}<br><span class="stu">${q.type === 'desk' || q.type === 'fbd' ? (a.v && a.v.arrows && a.v.arrows.length ? '<div style="max-width:300px">' + FBDB.svg(q.scen, a.v.arrows, { blue: true, noDot: true }) + '</div>' : '') : QT[q.type].show(q, a.v)}</span>${a.ok ? ' ✓' : ''}</p>`).join('') : '<p class="note">No answers yet.</p>'}</div>`; });
+      out += `<div class="q"><div class="qh">Step ${i + 1}: ${s.title} <span>${stepDone(ch.id, i) ? '✓ Done' : 'Not finished'}</span></div>${qs.length ? qs.map(([q, a]) => `<p style="margin:2px 0">${plain(q.p)}<br><span class="stu">${q.type === 'desk' || q.type === 'fbd' ? (a.v && a.v.arrows && a.v.arrows.length ? '<div style="max-width:300px">' + FBDB.svg(q.scen, a.v.arrows, { blue: true, noDot: true }) + '</div>' : '') : QT[q.type].show(q, a.v, a)}</span>${a.ok ? ' ✓' : ''}</p>`).join('') : '<p class="note">No answers yet.</p>'}</div>`; });
     const C2 = challengeState(ch.id); if (CHDATA[ch.id].challenge) out += `<h2>Challenge: ${C2.tried} of ${C2.total} missions tried, ${C2.score} of ${C2.max} objectives</h2>`;
     const P = reviewProgress(ch.id); out += `<h2>Check: ${P.done} of ${P.total} questions answered</h2><p class="note">Use "Make my worksheet" on the Check tab for the full worksheet.</p></div>`;
   });
@@ -3373,7 +3781,7 @@ const TRYTHIS = [
 ];
 function openExplore() {
   show('vExplore'); placeLab($('#exploreHost'));
-  S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
+  clearCh2(); S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
   clearCh2(); LAB.mode = 'explore'; LAB.show = new Set(PANELS.filter(k => !EXPLORE_HIDE.includes(k))); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
   applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDone', []));

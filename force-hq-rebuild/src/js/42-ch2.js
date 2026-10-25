@@ -13,6 +13,11 @@ function vtSVG(lines, o = {}) {
     g += `<polyline points="${l.pts.map(([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${l.col || '#1f5f8b'}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>`;
     if (l.label) { const [t, v] = l.pts[l.lab || 0]; g += `<text x="${X(t) + 6}" y="${Y(v) - 7}" font-size="12" font-weight="800" fill="${l.col || '#1f5f8b'}">${l.label}</text>`; }
   });
+  if (o.tri) {   // a dashed run-and-rise triangle: [[t0, v0], [t1, v1]] (two corners), or three points
+    const P = o.tri.length === 3 ? o.tri : [o.tri[0], [o.tri[1][0], o.tri[0][1]], o.tri[1]], pt = ([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`;
+    g += `<polyline points="${P.map(pt).join(' ')}" fill="none" stroke="#13212a" stroke-width="2" stroke-dasharray="6 4"/>`;
+    if (o.triLab !== false) g += `<text x="${(X(P[0][0]) + X(P[1][0])) / 2}" y="${Y(P[0][1]) + 16}" text-anchor="middle" font-size="12" font-weight="800" fill="#13212a">Δt = ${+(P[1][0] - P[0][0]).toFixed(2)} s</text><text x="${X(P[1][0]) - 6}" y="${(Y(P[1][1]) + Y(P[1][1] === P[0][1] ? P[2][1] : P[0][1])) / 2}" text-anchor="end" font-size="12" font-weight="800" fill="#13212a">Δv = ${+(P[2][1] - P[1][1]).toFixed(2)} m/s</text>`;
+  }
   return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" style="width:100%;max-width:440px;display:block;background:#fff;border-radius:8px">${g}</svg></div>`;
 }
 /* record what the student measured, per crate mass, so questions can check their own runs */

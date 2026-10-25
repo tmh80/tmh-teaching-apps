@@ -95,6 +95,11 @@ function renderStepQs() {
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
   qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => checkStep(true) }));
+  if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
+    const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
+    wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });
+    qc.appendChild(wrap);
+  }
   if (stepDone(CH.id, GI) && (qs.length || (st.tasks || []).length)) { const b = h('button', { type: 'button', class: 'again' }, '↺ Try this step again'); b.addEventListener('click', () => { dbDel(stepKey(CH.id, GI)); const d = dbGet('learnDone.' + CH.id, {}); delete d[st.id]; dbSet('learnDone.' + CH.id, d); setStep(GI); }); qc.appendChild(b); }
   qc.appendChild(h('div', { class: 'qfoot' }));
   qChrome();

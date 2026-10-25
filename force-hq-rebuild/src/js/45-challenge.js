@@ -30,7 +30,8 @@ function renderChallenge(ch) {
   host.appendChild(h('div', { class: 'panel mission gl' }, `<span class="lbl">Challenge</span><h3>${C1.title}</h3><p>${C1.intro}</p>`));
   const save = (m, patch) => { const st = dbGet('chal.' + ch, {}); st[m.id] = Object.assign(st[m.id] || {}, patch); dbSet('chal.' + ch, st); renderOnPage(); tabTicks(); if (challengeDone(ch)) { addEvidence('challenge', `Chapter ${CH.n} ${CH.part} Challenge: ${C1.title}, ${challengeState(ch).score} of ${challengeState(ch).max} objectives met.`); maybeStamp(ch); } };
   const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
-  C1.missions.filter(m => m.kind !== 'brake').forEach(m => {
+  const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);
+  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -98,6 +99,51 @@ function renderBrakeCourse(ch, bm, host, save) {
     const d = S.brakeFrom != null && S.flags.stopped ? S.x - S.brakeFrom : null, hit = d != null && Math.abs(d - m.target) <= 0.15, n = (s.n || 0) + 1, log = (s.log || []).concat([{ F: S.brakeF, d, hit }]);
     const best = hit ? Math.max(1, 5 - n) : 0; brakeMark(LAB.bmarks, d, S.brakeF); renderControls();
     save(m, { tried: true, n, log, F: S.brakeF, hi: LAB.bmarks.hi, lo: LAB.bmarks.lo, hit, done: hit, best, msg: hit ? `On target after ${n} launch${n > 1 ? 'es' : ''}! You scored ${best} of 4 points.` : `Not quite: ${d == null ? 'it reached the end of the arena' : `it stopped ${fmt(d, 2)} m after the brake line`}. The target is ${fmt(m.target, 1)} m. Change the brake force and launch again.` });
+    paint();
+  };
+  load(cur);
+}
+
+/* Chapter 3 Challenge: the mail run (one shared Snow Arena, a tab per run).
+   The student works out how many huskies to use, then runs the sled. A run counts when the sled crosses the finish line, and
+   it is judged on its acceleration. Every run counts: on target at the 1st run = 4 points, 2nd = 3, 3rd = 2, later = 1. "Move on" after 3 misses scores 1. */
+function renderSledCourse(ch, sm, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, sm.findIndex(m => !get(m.id).done)), active = false;
+  const card = h('section', { class: 'panel mission', id: 'mi-sled' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a run"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>Work in two steps. First find the friction: pull the sled once and read the Friction readout. A run only counts when the sled crosses the finish line, so you can press Reset first, for free.</p><p>Then, for each number of huskies, work out the <b>resultant force = pull − friction</b> and the <b>acceleration = resultant ÷ mass</b>. Which number of huskies lands inside the target?</p></div></details>
+    <div class="labhost"></div><div class="fb" id="snFb" hidden></div><ol class="blog" id="snLog"></ol><ul class="objs" data-o></ul><div class="row" id="snMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = true; LAB.onChange = null; LAB.idle = 'Add huskies, then press Pull!';
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
+  const paint = () => {
+    const m = sm[cur], s = get(m.id);
+    $('.mtabs', card).innerHTML = sm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-sr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p>`;
+    $('#snLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Run ${i + 1}: ${r.n} husk${r.n === 1 ? 'y' : 'ies'}, ${r.mass} kg, acceleration ${fmt(r.a, 2)} m/s²${r.hit ? ' ✓ on target!' : r.mass !== m.mass ? ' (wrong mass)' : r.a < m.lo ? ' (too small)' : ' (too big)'}</li>`).join('');
+    const fb = $('#snFb'); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.best === 4 ? 'ok' : 'hint') : 'no'); fb.textContent = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Run the sled to the finish line (every run counts)', s.tried], [`Get the acceleration between ${fmt(m.lo, 1)} and ${fmt(m.hi, 1)} m/s²`, s.done && s.hit], ['Do it on your first run', s.best === 4]].map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#snMore', card).innerHTML = s.done ? (cur < sm.length - 1 ? `<button type="button" class="go" data-sr="${cur + 1}">Next run →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="snGive">Move on (1 point)</button>` : '');
+    const gv = $('#snGive'); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} runs. ${m.huskies} huskies work for this sled. You scored 1 of 4 points.` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = sm[cur];
+    clearCh2(); S.scene = 'sled'; S.x0 = SLED_X0; S.left = []; S.right = []; S.mass = m.setMass ? 100 : m.mass; S.floor = m.floor; S.flags = newFlags(); resetSim(); active = false;
+    LAB.show = new Set(['pal', 'run', 'meter', 'readR', 'readM', 'readRes', 'readA', 'readF', 'readV', 'fbd'].concat(m.setMass ? ['mass'] : [])); LAB.sides = ['right']; LAB.pullers = ['husky']; LAB.floors = [m.floor];
+    applyPanels(); labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-sr]'); if (b) load(+b.dataset.sr); });
+  LAB.tick = () => {
+    if (S.running) active = true;
+    let late = false;
+    if (S.running && S.t >= 8 && !S.flags.finished) { S.running = false; syncRun(); S.msg = 'The sled had not reached the finish line after 8 s. Press Reset to go again.'; late = true; }   // too little pull: do not wait for ever
+    if (!active || S.running) return;
+    active = false; if (!S.flags.finished && !late) return;
+    const m = sm[cur], s = get(m.id); if (s.done) { paint(); return; }
+    const a = forces().a, nR = S.right.length, hit = S.mass === m.mass && a >= m.lo - 1e-9 && a <= m.hi + 1e-9, n = (s.n || 0) + 1, log = (s.log || []).concat([{ n: nR, mass: S.mass, a, hit }]);
+    const best = hit ? Math.max(1, 5 - n) : 0;
+    const why = S.mass !== m.mass ? `The sled's mass was ${S.mass} kg, but this run needs ${m.mass} kg.` : a < m.lo ? `${nR} husk${nR === 1 ? 'y' : 'ies'} gave ${fmt(a, 2)} m/s². That is too small, so the mail would be late. Try more huskies.` : `${nR} huskies gave ${fmt(a, 2)} m/s². That is too big, so the mail sacks would tumble off. Try fewer huskies.`;
+    save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `On target after ${n} run${n > 1 ? 's' : ''}! ${nR} huskies gave ${fmt(a, 2)} m/s². You scored ${best} of 4 points.` : `Not quite. ${why}` });
     paint();
   };
   load(cur);

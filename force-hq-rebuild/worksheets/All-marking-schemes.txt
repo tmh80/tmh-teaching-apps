@@ -76,3 +76,45 @@ Q3 (2 marks): 144 N (accept 143 to 145). 1 mark for the answer, 1 for correct wo
 Q4 (3 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 509.6 N down; Normal force 509.6 N up. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
 Q5 (3 marks, 1 per point): The question gives the words to use (mass, inertia, brake force, braking distance); each point is about using one of them correctly. • Says the lorry has more mass than the car, so it has more inertia • Says that with the same brake force, the lorry would have a longer braking distance • Says the lorry needs a bigger brake force to stop in the same distance (for example, 3 times the mass needs 3 times the force) Model answer: The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force, the lorry would have a much longer braking distance. To stop in a safe distance, it needs a much bigger brake force: for example, 3 times the mass needs 3 times the brake force. So it needs stronger brakes.
 Total: 13 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 3 Foundation: F = ma". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 17 marks.
+
+Mark scheme
+Q1 (2 marks): 112.8 N (accept 112.24 to 113.36). 1 mark for the answer with its unit (N), 1 for correct working: F = m × a = 47 × 2.4 = 112.8 N.
+Q2 (2 marks): 3.35 m/s² (accept 3.33 to 3.37). 1 mark for the answer with its unit (m/s²), 1 for correct working: a = F ÷ m = 134 ÷ 40 = 3.35 m/s².
+Q3 (2 marks): 101 kg (accept 100.7 to 101.3). 1 mark for the answer with its unit (kg), 1 for correct working: m = F ÷ a = 121.2 ÷ 1.2 = 101 kg.
+Q4 (1 mark): 3.2 m/s².
+Q5 (3 marks, 1 per gap): gap 1: force (also accept any correct scientific word); gap 2: mass (also accept any correct scientific word); gap 3: acceleration (also accept any correct scientific word).
+Q6 (2 marks): With the same pull, a heavier sled accelerates more slowly; A bigger resultant force on the same mass gives a bigger acceleration; With friction acting, the resultant force is the pull minus the friction. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.
+Q7 (2 marks): 2.64 m/s² (accept 2.62 to 2.66). 1 mark for the answer with its unit (m/s²), 1 for correct working: Resultant = 360 − 32.2 = 327.8 N. Then a = F ÷ m = 327.8 ÷ 124 = 2.64 m/s².
+Q8 (3 marks, 1 per point): The question gives the words to use (resultant force, mass, acceleration); each point is about using one of them correctly. • Says the resultant force is the same both times, because the huskies pull just as hard • Says the loaded sled has more mass • Uses F = ma (or the formula triangle) to explain that the same resultant force on a bigger mass gives a smaller acceleration Model answer: The two huskies pull with the same force both times, so the resultant force is the same. The loaded sled has more mass. Because F = m × a, the same resultant force on a bigger mass gives a smaller acceleration, so the loaded sled speeds up more slowly.
+Total: 17 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 3 Extension: F = ma". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 15 marks.
+
+Mark scheme
+Q1 (2 marks): 0.75 m/s² (accept 0.72 to 0.78). 1 mark for the answer with its unit (m/s²), 1 for correct working: Between 2 s and 6 s the speed goes from 1.5 to 4.5 m/s: a change of 3 m/s in 4 s. a = 3 ÷ 4 = 0.75 m/s².
+Q2 (1 mark): Line 2, because its speed goes up by more every second.
+Q3 (2 marks): 3.21 m/s² (accept 3.19 to 3.23). 1 mark for the answer with its unit (m/s²), 1 for correct working: Resultant = 450 − 49 = 401 N. Then a = F ÷ m = 401 ÷ 125 = 3.21 m/s².
+Q4 (2 marks): 1234.8 N (accept 1228.63 to 1240.97). 1 mark for the answer with its unit (N), 1 for correct working: Mass = F ÷ a = 302.4 ÷ 2.4 = 126 kg. Weight = mass × 9.8 = 126 × 9.8 = 1234.8 N.
+Q5 (5 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 833 N down; Normal force 833 N up; Pull (tension) 270 N to the right; Friction 41.7 N to the left. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
+Q6 (3 marks, 1 per point): The question gives the words to use (friction, resultant force, acceleration); each point is about using one of them correctly. • Says there is more friction on the fresh powder • Says the resultant force (pull − friction) is smaller on the powder, even though the huskies pull just as hard • Uses F = ma to say that a smaller resultant force on the same mass gives a smaller acceleration Model answer: Fresh powder has more friction than packed snow. The huskies pull with the same force, but more of it is used up against the bigger friction, so the resultant force (pull − friction) is smaller. A smaller resultant force on the same mass gives a smaller acceleration, because a = F ÷ m.
+Total: 15 marks.

@@ -2,7 +2,7 @@
 
 Start here. This is a **streamlining job**: the old Force HQ already contains most of the physics, drawings, events and question banks. Move pieces across from the old build and adapt them. Don't write something from scratch when the old build has it. Read this file, then `Force_HQ_Brief.md` (file map and the "must not break" rules). Open `Force_HQ_Rebuild_Brief.md` (the plan for every chapter) only for the section you're building. All three are in `force-hq-rebuild/docs/` in the repo and in the project under `claude/`.
 
-**Next job: Chapter 3, F = ma**, built as a Foundation (`c3f`) and an Extension (`c3x`), like Chapters 1 and 2.
+**Chapter 3 (F = ma, `c3f` and `c3x`) is built and tested (25 Oct 2026). Next job: Chapter 4, Action and reaction** (Space Dome and docking orders; see the Backlog). Sections 1–2 below still apply; the Chapter 3 port table in section 3 is now history.
 
 ## 1. Getting set up (GitHub is the source of truth)
 - **Repo:** `tmh80/tmh-teaching-apps`. Attach it with `add_repo` (access: push), clone it to `/home/claude/tmh-teaching-apps`, then `register_repo_root`. Work directly in `force-hq-rebuild/`. No zips are needed any more.

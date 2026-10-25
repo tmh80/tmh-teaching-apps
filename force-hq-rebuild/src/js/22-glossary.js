@@ -45,6 +45,12 @@ const TERMS = {
   mechadv: ['Mechanical advantage', 'How many times a machine multiplies your force: load ÷ effort.', []],
   work: ['Work', 'Energy transferred when a force moves something. Work (J) = force (N) × distance (m).', []],
   terminal: ['Terminal velocity', 'The top speed of a falling object, reached when air resistance grows to match its weight.', ['terminal velocity']],
+  triangle: ['Formula triangle', 'A triangle with F on top, and m and a side by side underneath. Cover the letter you want to find. What is left tells you the sum: side by side means multiply, one above the other means divide.', ['formula triangle']],
+  mps2: ['Metres per second squared (m/s²)', 'The unit of acceleration. An acceleration of 2 m/s² means the speed goes up by 2 m/s every second.', []],
+  slope: ['Slope (gradient)', 'How steep a line is. On a velocity–time graph, the steeper the line, the bigger the acceleration.', ['slope', 'gradient']],
+  decel: ['Deceleration', 'Slowing down. It is an acceleration that points the opposite way to the motion.', ['deceleration']],
+  unit: ['Unit', 'What a measurement is counted in, such as N, kg or m/s². An answer needs its unit as well as its number.', ['unit', 'units']],
+  proportional: ['Directly proportional', 'Two things are directly proportional when doubling one doubles the other, and halving one halves the other.', ['directly proportional']],
   shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */

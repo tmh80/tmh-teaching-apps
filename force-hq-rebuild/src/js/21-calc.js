@@ -33,3 +33,18 @@ function initCalc() {
 }
 function toggleCalc(on) { const el = $('#calc'); on = on == null ? el.hidden : on; el.hidden = !on; if (on) { CALC_USED = true; if (LAB.onChange) LAB.onChange(); setTimeout(() => $('#calcIn').focus({ preventScroll: true }), 20); } }
 let CALC_USED = false;
+
+/* ---- formula triangle: F = m × a. Tap a letter to cover it and see the sum that finds it. ---- */
+const TRI = { F: ['F = m × a', 'Multiply the two letters that are left (side by side).'], m: ['m = F ÷ a', 'F is above a, so divide: force ÷ acceleration.'], a: ['a = F ÷ m', 'F is above m, so divide: force ÷ mass.'] };
+function triInner(cov) {
+  const L = (k, x, y) => cov === k ? `<rect x="${x - 21}" y="${y - 21}" width="42" height="42" rx="9" fill="var(--hazard)" stroke="var(--ink)" stroke-width="2.5"/><text x="${x}" y="${y + 8}" text-anchor="middle" font-size="26" font-weight="800" fill="var(--ink)">?</text>` : `<text x="${x}" y="${y + 12}" text-anchor="middle" font-size="36" font-weight="800" font-family="var(--f-num)" fill="var(--ink)">${k}</text>`;
+  const sum = cov ? `<b>${TRI[cov][0]}</b><small>${TRI[cov][1]}</small>` : '<small>Tap a letter to cover it.</small>';
+  return `<svg viewBox="0 0 220 154" role="img" aria-label="Formula triangle: F on top, m and a underneath"><polygon points="110,8 18,146 202,146" fill="var(--panel)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><line x1="64" y1="77" x2="156" y2="77" stroke="var(--ink)" stroke-width="3"/><line x1="110" y1="77" x2="110" y2="146" stroke="var(--ink)" stroke-width="3"/>${L('F', 110, 50)}${L('m', 66, 112)}${L('a', 154, 112)}</svg>
+    <div class="trisum" aria-live="polite">${sum}</div><div class="trib">${['F', 'm', 'a'].map(k => `<button type="button" class="mini ${cov === k ? 'on' : ''}" data-tri="${k}" aria-pressed="${cov === k}">Cover ${k}</button>`).join('')}<button type="button" class="mini" data-tri="">Show all</button></div>`;
+}
+const triHTML = () => `<div class="tri noglos">${triInner('')}</div>`;
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-tri]'); if (!b) return; const root = b.closest('.tri'), k = b.dataset.tri;
+  root.innerHTML = triInner(k); const bb = $(`[data-tri="${k}"]`, root); if (bb) bb.focus({ preventScroll: true });
+  if (k) { S.flags.tri = S.flags.tri || {}; S.flags.tri[k] = true; if (LAB.onChange) LAB.onChange(); }
+});

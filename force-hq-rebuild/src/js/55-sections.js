@@ -21,9 +21,19 @@ const SECTIONS = [
     blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
     steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
     goal: 'Describe motion from the shape of a velocity–time graph; explain why more mass needs a bigger force to stop in the same distance; draw the free-body diagram of an object gliding at a steady speed.',
-    vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] }
+    vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] },
+  { id: 'c3f', ch: 'c3', n: 3, title: 'F = ma', part: 'Foundation', stamp: 'Formula Pro',
+    blurb: 'Husky sleds in the Snow Arena: acceleration, the formula triangle, finding F, m and a, friction, and lots of maths practice.',
+    steps: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'], challenge: null, review: ['c3r1', 'c3r2', 'c3r3', 'c3r4', 'c3r5', 'c3r6', 'c3r7', 'c3r8'],
+    goal: 'Describe how the resultant force and the mass of an object affect its acceleration; use F = ma and the formula triangle to find the force, the mass or the acceleration; work out the resultant force when friction acts, then use it in F = ma.',
+    vocab: ['acceleration', 'm/s²', 'resultant force', 'Newton\'s second law', 'formula triangle', 'friction', 'mass', 'unit'] },
+  { id: 'c3x', ch: 'c3', n: 3, title: 'F = ma', part: 'Extension', stamp: 'Mail Run Master',
+    blurb: 'Read acceleration from a graph, work with friction on fresh powder, mix weight and mass, then run the mail.',
+    steps: ['e1', 'e2', 'e3'], challenge: ['n1', 'n2', 'n3'], review: ['c3r9', 'c3r10', 'c3r11', 'c3r12', 'c3r13', 'c3r14'], needs: 'c3f',
+    goal: 'Find acceleration from the slope of a velocity–time graph; solve two-step problems (resultant force first, then F = ma); turn weight into mass before using F = ma; choose the number of huskies for a target acceleration; draw the free-body diagram of an accelerating sled.',
+    vocab: ['acceleration', 'velocity–time graph', 'slope', 'resultant force', 'friction', 'weight', 'mass', 'Newton\'s second law'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];
