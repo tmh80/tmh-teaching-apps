@@ -50,9 +50,15 @@ Start here. This is a **streamlining job**: the old Force HQ already contains mo
 | Formula triangle (F = m × a) | `buildTri`, `bindTri`, `triHTML`, `TRIF` | a helper in `21-calc.js` (the skill asks for one beside the calculator) and a Learn card |
 | Levelled maths bank (find F, a, m, two-step, mixed) | `LEVELS`, `genQ`, `OBJ`, `makePractice`, `nf` | turn it into seeded `num` questions with a hint ladder (cover the letter, substitute, answer with unit), non-round values and a unit picker; correct answers go to Journal evidence (`addEvidence`) |
 | Mail-run challenge (sled) | the sled event state and checks in the old `checkMissions` / `MISSIONS` | a `renderSledCourse` in `45-challenge.js`, scored like the brake course |
-| Docking orders (space) | `genOrder`, `renderOrder`, `drawSpaceScene`, `drawPod`, `drawAstro` | **wait for Tom** (see section 6). It may belong in Chapter 4. |
+| Docking orders (space) | `genOrder`, `renderOrder`, `drawSpaceScene`, `drawPod`, `drawAstro` | **Not in Chapter 3** (Tom, 25 Oct): the Space Dome stays in Chapter 4, and the docking orders are its challenge. |
 | v–t graph with acceleration (sloped line) | `drawVT` (the rebuild's `vtSVG` in `42-ch2.js` already exists) | extend `vtSVG` to draw a sloped line and read off acceleration |
 | Fun facts (banked) | `FACTS`, `factPop`, `factList`, `FACTSTEP` | gate each fact by chapter; small, so it can go in with Chapter 3 |
+
+**Tom's decision (25 Oct 2026): the Space Dome stays in Chapter 4; all of Chapter 3 is in the Snow Arena.**
+- **Friction off for the first steps.** The Foundation's opening steps (formula triangle, predict → calculate → run) run the sled with friction switched off, so the husky pull is the resultant and a = F ÷ m works directly. Add a `mu: 0` option for the snow (like the air floor in Chapters 1–2) and set it in those steps.
+- **Disclaimer when it's switched off.** A clear card at the first friction-free step: real snow and ice do have some friction, but it has been switched off for the first few steps so you can see F = ma on its own. Show a small "Friction: off" badge on the arena while it is off.
+- **Disclaimer when it returns.** A card at the step where friction comes back: friction is back on, so the husky's pull is no longer the resultant; work out the resultant first (pull − friction), then use F = ma. The badge switches to "Friction: on". Friction should return by the end of the Foundation or the start of the Extension, so the Extension and the mail-run challenge use the resultant every time.
+- The Chapter 3 challenge is the sled mail run only.
 
 Chapter 3 content plan (from the rebuild brief):
 - Resultant force first (Chapter 1 already teaches it in s3r, so recap only).
@@ -99,7 +105,7 @@ Chapter 3 content plan (from the rebuild brief):
   - fixed the home toast so the Space Dome says Chapter 4
 
 ## 6. Open questions for Tom (ask at the start)
-1. **Space Dome:** Chapter 4 (action and reaction), with Chapter 3's challenge being the sled mail run only? Or should the docking orders also be a Chapter 3 challenge? He has been asked twice and hasn't answered yet. The rebuild currently lists the Space Dome under Chapter 4.
+1. (Answered 25 Oct: the Space Dome stays in Chapter 4; Chapter 3 starts with friction switched off, with a disclaimer, and a second disclaimer when it returns. See section 3.)
 2. Has Tom replayed the Inertia Extension and the brake Challenge since round 6?
 
 ## 7. Skill checklist: still missing in Force HQ

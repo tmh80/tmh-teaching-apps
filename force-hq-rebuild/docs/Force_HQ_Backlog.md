@@ -2,8 +2,8 @@
 
 ## Next milestones (from the rebuild brief)
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.
-2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Still to check with Tom: the Space Dome moved to Chapter 4, where the push-off needs it; in Chapter 2 the air floor shows "keeps going" and the space pod is a real-life example.
-3. **Chapter 3, F = ma.**
+2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Tom confirmed (25 Oct): the Space Dome stays in Chapter 4 with the docking orders as its challenge.
+3. **Chapter 3, F = ma** (all in the Snow Arena; friction off with a disclaimer for the first steps, a second disclaimer when it returns).
    - Resultant force and the formula triangle.
    - A levelled maths bank.
    - Port the Snow Arena husky sled event.
