@@ -29,6 +29,8 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 
 ## Backlog
 
+- **Flashcards with spaced repetition, in every sim and lab:** cards built from the key vocabulary each student has met, reviewed on a spaced-repetition schedule. Force HQ already records the words each student meets (Journal → Key vocabulary).
+
 - **Force HQ rebuild:** Chapters 2–5, the Drop Zone and the Workshop. Reuse content from the old `force-hq/Force-HQ.html` where it fits the new section format. Brief and plan in `force-hq-rebuild/docs/`.
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.

@@ -3,10 +3,10 @@
    so a teacher can set one on its own, or put several together for a longer session. ===== */
 const SECTIONS = [
   { id: 'c1f', ch: 'c1', n: 1, title: 'What is a force?', part: 'Foundation', stamp: 'Force Spotter',
-    blurb: 'Pushes and pulls, newtons, friction, weight, the normal force, and contact and non-contact forces.',
-    steps: ['s0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's11'], challenge: null, review: ['r1', 'r2', 'r3', 'r5', 'r9', 'r10'],
-    goal: 'Describe a force as a push or a pull measured in newtons, read forces from a newtonmeter, calculate weight from mass (weight = mass × 9.8), and sort forces into contact and non-contact forces.',
-    vocab: ['force', 'push', 'pull', 'newton (N)', 'newtonmeter', 'friction', 'weight', 'mass', 'gravity', 'normal force', 'tension', 'air resistance', 'contact force', 'non-contact force'] },
+    blurb: 'Pushes and pulls, newtons, resultant force, friction, weight, the normal force, and contact and non-contact forces.',
+    steps: ['s0', 's1', 's2', 's3', 's3r', 's4', 's5', 's6', 's7'], challenge: null, review: ['r1', 'r2', 'r3', 'r13', 'r5', 'r9', 'r10'],
+    goal: 'Describe a force as a push or a pull measured in newtons, read forces from a newtonmeter, work out the resultant force and say whether forces are balanced or unbalanced, calculate weight from mass (weight = mass × 9.8), and sort forces into contact and non-contact forces.',
+    vocab: ['force', 'push', 'pull', 'newton (N)', 'newtonmeter', 'resultant force', 'balanced forces', 'unbalanced forces', 'friction', 'weight', 'mass', 'gravity', 'normal force', 'tension', 'air resistance', 'contact force', 'non-contact force'] },
   { id: 'c1x', ch: 'c1', n: 1, title: 'What is a force?', part: 'Extension', stamp: 'Diagram Detective',
     blurb: 'Free-body diagrams: draw every force on an object as an arrow, then become an Arena Inspector.',
     steps: ['s8', 's9', 's10'], challenge: ['m1', 'm2', 'm4'], review: ['r4', 'r6', 'r8', 'r12', 'r11'], needs: 'c1f',

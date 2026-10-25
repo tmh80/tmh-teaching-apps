@@ -58,13 +58,21 @@ function addEvidence(kind, text) {
   E.push({ kind, text, at: new Date().toISOString() }); if (E.length > 300) E.splice(0, E.length - 300); dbSet('evidence', E);
 }
 const EVICON = { maths: '🧮', check: '✅', challenge: '🏆', own: '✏️', review: '📝' };
+function vocabHTML() {
+  const V = dbGet('vocab', {}), ks = Object.keys(V).filter(k => TERMS[k]).sort((a, b) => TERMS[a][0].localeCompare(TERMS[b][0]));
+  if (!ks.length) return '<p class="scaleNote">Words with a dotted line under them are key vocabulary. Each one you meet in Force HQ is added here, with what it means.</p>';
+  return `<p class="scaleNote">${ks.length} key word${ks.length > 1 ? 's' : ''} you have met so far, in A to Z order. Words with a dotted line under them are added here when you meet them.</p>
+    <input type="search" class="vsearch" id="vSearch" placeholder="Find a word…" aria-label="Find a word">
+    <dl class="vocab">${ks.map(k => `<div class="vitem" data-v="${esc(TERMS[k][0].toLowerCase())}"><dt>${esc(TERMS[k][0])}</dt><dd>${esc(TERMS[k][1])}${V[k].where ? `<small>First met: ${esc(V[k].where)}</small>` : ''}</dd></div>`).join('')}</dl>`;
+}
 function openJournal() {
   const J = dbGet('journal', { order: [], entries: {} }), notes = dbGet('jnotes', {}), E = dbGet('evidence', []);
   const groups = {}; J.order.forEach(k => { const e = J.entries[k]; (groups[e.where] = groups[e.where] || []).push(k); });
   const back = h('div', { class: 'modalback', style: 'z-index:71' }); const sid = s => 'jg-' + s.replace(/\W+/g, '-');
   back.innerHTML = `<aside class="journal" role="dialog" aria-modal="true" aria-labelledby="jT"><div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
-    ${J.order.length ? `<nav class="jtoc"><div class="lbl">Contents</div><ul>${Object.keys(groups).map(g => `<li><button type="button" data-jgo="${sid(g)}"><b>${esc(g)}</b> · ${groups[g].length} card${groups[g].length > 1 ? 's' : ''}</button></li>`).join('')}<li><button type="button" data-jgo="jg-runs"><b>My runs</b> · ${runsAll().length}</button></li><li><button type="button" data-jgo="jg-evidence"><b>Evidence of my learning</b> · ${E.length}</button></li></ul></nav>` : '<p>Your journal is empty for now. Every information card you read is saved here, along with the maths and questions you get right.</p>'}
+    ${J.order.length ? `<nav class="jtoc"><div class="lbl">Contents</div><ul>${Object.keys(groups).map(g => `<li><button type="button" data-jgo="${sid(g)}"><b>${esc(g)}</b> · ${groups[g].length} card${groups[g].length > 1 ? 's' : ''}</button></li>`).join('')}<li><button type="button" data-jgo="jg-vocab"><b>Key vocabulary</b> · ${Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length}</button></li><li><button type="button" data-jgo="jg-runs"><b>My runs</b> · ${runsAll().length}</button></li><li><button type="button" data-jgo="jg-evidence"><b>Evidence of my learning</b> · ${E.length}</button></li></ul></nav>` : '<p>Your journal is empty for now. Every information card you read is saved here, along with the maths and questions you get right.</p>'}
     ${Object.keys(groups).map(g => `<section id="${sid(g)}"><h3 style="font-size:22px;margin-top:8px">${esc(g)}</h3>${groups[g].map(k => { const e = J.entries[k]; return `<details class="jent" ${k === J.last ? 'open' : ''}><summary>${esc(e.title)}${notes[k] ? ' <span title="Has my notes">✏️</span>' : ''}</summary><div class="gbody">${e.html}</div><label class="jnote"><span>My notes and questions</span><textarea data-jnote="${k}" rows="2" placeholder="Add your own notes, an example, or a question for your teacher.">${esc(notes[k] || '')}</textarea></label></details>`; }).join('')}</section>`).join('')}
+    <section id="jg-vocab"><h3 style="font-size:22px;margin-top:8px">Key vocabulary</h3>${vocabHTML()}</section>
     <section id="jg-runs"><div class="jrh"><h3 style="font-size:22px;margin-top:8px">My runs</h3><button type="button" class="go sm" data-runs>Pop out ↗</button></div>
     <p class="scaleNote">Every push, pull and launch, newest first. Press <b>Pop out</b> to keep them open beside the arena while you work.</p>
     ${runsAll().length ? `<ol class="runlist">${runsAll().slice(-12).reverse().map(runItem).join('')}</ol>${runsAll().length > 12 ? `<p class="scaleNote">Showing your latest 12 of ${runsAll().length} runs. Pop out to see them all.</p>` : ''}` : '<p class="scaleNote">Your runs will appear here when you press Pull!, push or launch the crate.</p>'}</section>
@@ -76,6 +84,7 @@ function openJournal() {
   document.addEventListener('keydown', k); back.addEventListener('click', e => { if (e.target === back) close(); }); $('#jClose', back).addEventListener('click', close);
   $$('[data-jgo]', back).forEach(b => b.addEventListener('click', () => { const t = $('#' + b.dataset.jgo, back); if (t) t.scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth' }); }));
   $$('[data-jnote]', back).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
+  const vs = $('#vSearch', back); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', back).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
   $('#evAdd', back).addEventListener('click', () => { const v = $('#evOwn', back).value.trim(); if (!v) return; addEvidence('own', v); close(); openJournal(); });
   JOURNAL_OPENED = true; if (LAB.onChange) LAB.onChange();
   setTimeout(() => $('#jClose', back).focus({ preventScroll: true }), 20);

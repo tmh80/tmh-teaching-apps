@@ -17,7 +17,8 @@ with sync_playwright() as p:
     assert abs((r1['x']-r0['x'])-dx)<12 and abs((r1['y']-r0['y'])-dy)<12, 'card should follow the pointer'
     pg.screenshot(path=OUT+f'carddrag_{tag}.png')
     # next card keeps the spot, buttons still work
-    pg.click('#chunk [data-cb=next]'); pg.wait_for_timeout(150); r2=ch.bounding_box(); assert abs(r2['y']-r1['y'])<4, ('spot not kept',r1,r2)
+    rel=lambda: pg.evaluate("(()=>{const a=document.querySelector('#chunk').getBoundingClientRect(),b=document.querySelector('#chunk').offsetParent;const r=b?b.getBoundingClientRect():{top:0,left:0};return [a.left-r.left,a.top-r.top]})()")
+    k1=rel(); pg.click('#chunk [data-cb=next]'); pg.wait_for_timeout(150); k2=rel(); assert abs(k1[0]-k2[0])<4 and abs(k1[1]-k2[1])<4, ('spot not kept',k1,k2)
     # drag far away: header stays visible
     hd=pg.locator('#chunk .chead').bounding_box(); pg.mouse.move(hd['x']+40,hd['y']+10); pg.mouse.down(); pg.mouse.move(hd['x']+40,h+400,steps=5); pg.mouse.up()
     hd2=pg.locator('#chunk .chead').bounding_box(); assert hd2['y']+hd2['height']<=h+1 and hd2['y']>=0, hd2

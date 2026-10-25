@@ -77,7 +77,7 @@ function initGlossary() {
   obs.observe(document.body, { childList: true, subtree: true });
   let lastTap = 0;
   const showDef = (el) => {
-    const t = TERMS[el.dataset.t]; if (!t) return; const p = $('#gpop'); p.innerHTML = `<b>${t[0]}</b><br>${t[1]}`; p.hidden = false;
+    const t = TERMS[el.dataset.t]; if (!t) return; if (!el.closest('.journal')) vocabMet(el.dataset.t); const p = $('#gpop'); p.innerHTML = `<b>${t[0]}</b><br>${t[1]}`; p.hidden = false;
     const r = el.getBoundingClientRect(); const w = Math.min(300, innerWidth - 20); p.style.maxWidth = w + 'px';
     const left = clamp(r.left, 10, innerWidth - w - 10); p.style.left = left + 'px';
     const below = r.bottom + 8, ph = p.offsetHeight; p.style.top = (below + ph > innerHeight - 10 ? Math.max(10, r.top - ph - 8) : below) + 'px';
@@ -89,5 +89,18 @@ function initGlossary() {
   document.addEventListener('focusout', e => { if (e.target.closest && e.target.closest('.gw,.term')) hide(); });
   document.addEventListener('click', e => { const el = e.target.closest('.gw,.term'); if (el) { if (Date.now() - lastTap < 250) return; lastTap = Date.now(); const p = $('#gpop'); if (!p.hidden && p.dataset.for === el.dataset.t) { hide(); p.dataset.for = ''; } else { showDef(el); p.dataset.for = el.dataset.t; } } else hide(); });
   window.addEventListener('scroll', hide, { passive: true });
+  setInterval(vocabWatch, 700);
+}
+/* Key vocabulary: a word is "met" once it is underlined on screen (or its definition pops up).
+   Met words collect in the Journal's Key vocabulary section, ready for flashcards later. */
+function vocabMet(k) {
+  if (!TERMS[k]) return; const V = dbGet('vocab', {}); if (V[k]) return;
+  V[k] = { at: Date.now(), where: typeof runWhere === 'function' ? runWhere().label : '' }; dbSet('vocab', V);
+}
+let VOCAB_IO = null;
+function vocabWatch() {
+  if (!('IntersectionObserver' in window)) { $$('.gw,.term').forEach(e => { if (e.offsetParent && !e.closest('.journal')) vocabMet(e.dataset.t); }); return; }
+  if (!VOCAB_IO) VOCAB_IO = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting && en.target.offsetParent && !en.target.closest('.journal')) { vocabMet(en.target.dataset.t); VOCAB_IO.unobserve(en.target); } }), { threshold: 0.6 });
+  $$('.gw:not([data-vw]),.term:not([data-vw])').forEach(e => { e.dataset.vw = '1'; VOCAB_IO.observe(e); });
 }
 const T = (k, txt) => `<span class="gw" data-t="${k}" tabindex="0">${txt || TERMS[k][0]}</span>`;

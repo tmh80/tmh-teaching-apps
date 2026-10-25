@@ -6,16 +6,17 @@ This marking scheme is for the Force HQ worksheet "Chapter 1 Foundation: What is
 • The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
 • A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
-Total: 26 marks.
+Total: 28 marks.
 
 Mark scheme
 Q1 (5 marks, 1 per row): Weight → The Earth's gravity pulling on an object; Normal force → A surface pushing back on an object resting on it; Friction → Two surfaces rubbing or trying to slide past each other; Tension → A stretched rope or string pulling; Air resistance → Air pushing against something moving through it.
 Q2 (7 marks, 1 per item): Contact force: Friction on a sliding sledge, The push of a foot on a football, The upward push of a chair on you, Water resistance on a swimmer. Non-contact force: The pull of a magnet on a paper clip, The Moon's gravity pulling on the oceans, The weight of a parachutist.
 Q3 (2 marks): 230.3 N (accept 230.15 to 230.45). 1 mark for the answer, 1 for correct working: Weight = mass × 9.8 = 23.5 × 9.8 = 230.3 N.
-Q4 (1 mark): Two forces act on it: its weight down and the normal force up, and they are the same size.
-Q5 (3 marks, 1 per gap): gap 1: newtons (also accept newton, n); gap 2: 9.8 (also accept g, 9.8 n kg); gap 3: against (also accept opposite, opposite to, opposite way to, opposing, in the opposite direction to, opposite direction to).
-Q6 (8 marks, 1 per cell): Unit: Mass = kilograms (kg), Weight = newtons (N); Is it a force?: Mass = No, it is not a force, Weight = Yes, it is a force; Measured with: Mass = a balance (scales), Weight = a newtonmeter; Changes on the Moon?: Mass = No, it stays the same, Weight = Yes, it gets smaller.
-Total: 26 marks.
+Q4 (2 marks): 75 N (accept 74.5 to 75.5). 1 mark for the answer, 1 for correct working: Opposite directions, so subtract: 265 − 190 = 75 N (to the right).
+Q5 (1 mark): Two forces act on it: its weight down and the normal force up, and they are the same size.
+Q6 (3 marks, 1 per gap): gap 1: newtons (also accept newton, n); gap 2: 9.8 (also accept g, 9.8 n kg); gap 3: against (also accept opposite, opposite to, opposite way to, opposing, in the opposite direction to, opposite direction to).
+Q7 (8 marks, 1 per cell): Unit: Mass = kilograms (kg), Weight = newtons (N); Is it a force?: Mass = No, it is not a force, Weight = Yes, it is a force; Measured with: Mass = a balance (scales), Weight = a newtonmeter; Changes on the Moon?: Mass = No, it stays the same, Weight = Yes, it gets smaller.
+Total: 28 marks.
 
 
 Marking instructions for Toddle AI
@@ -66,7 +67,7 @@ Total: 14 marks.
 
 Mark scheme
 Q1 (4 marks, 1 per row): A flat line above 0 → Moving at a steady speed; A line sloping upwards → Speeding up; A line sloping down to 0 → Slowing down and stopping; A flat line along 0 → Standing still.
-Q2 (1 mark): Line B, because it takes longer to stop.
+Q2 (1 mark): Line 2, because it takes longer to stop.
 Q3 (2 marks): 144 N (accept 143 to 145). 1 mark for the answer, 1 for correct working: 120 kg is 3 times 40 kg, so it needs 3 times the force: 3 × 48 = 144 N.
 Q4 (3 marks): 1 mark for each correct arrow (right force, right direction, right size): Weight 509.6 N down; Normal force 509.6 N up. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
 Q5 (4 marks, 1 per point): • Says the lorry has more mass • Says more mass means more inertia • Says it would take longer or further to stop with the same force • Says it needs a bigger force to stop in the same distance Model answer: The loaded lorry has much more mass than the car, so it has much more inertia. With the same brake force it would take much longer and much further to stop. To stop in a safe distance, it needs a much bigger brake force, so it needs stronger brakes.

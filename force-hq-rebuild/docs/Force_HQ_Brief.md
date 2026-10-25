@@ -2,7 +2,7 @@
 
 **What it is:** an interactive forces sim for Tom's Grade 7/8 Forces unit (WAB, IB MYP). Students use it alone at home or in class via Toddle. This is the October 2026 rebuild, which replaces the old multi-lab Force HQ. The full plan is in `Force_HQ_Rebuild_Brief.md` (project).
 
-**Sections:** every chapter is split into self-contained sections of about 20–30 minutes (Foundation, Extension). Each section has its own Learn steps, optional Challenge, Check questions and worksheet PDF. They are defined in `src/js/55-sections.js` (`SECTIONS`, `secMins`). Chapter 1 Foundation (`c1f`) is about 28 minutes and Chapter 1 Extension (`c1x`) about 29 minutes.
+**Sections:** every chapter is split into self-contained sections of about 20–30 minutes (Foundation, Extension). Each section has its own Learn steps, optional Challenge, Check questions and worksheet PDF. They are defined in `src/js/55-sections.js` (`SECTIONS`, `secMins`). Chapter 1 Foundation (`c1f`) is about 28 minutes and Chapter 1 Extension (`c1x`) about 29 minutes. Chapter 1 Foundation has a step on resultant force (`s3r`: balanced and unbalanced forces on the air floor) after the two-team step; the "Coming up in Force HQ" preview step (`s11`) was taken out to keep the section to approx. 30 minutes (its data is still in `41-ch1.js`).
 
 **Status:** Chapters 1 and 2 are built, each as a Foundation and an Extension (Learn, Challenge where there is one, Check, worksheet and Toddle files). Chapter 2, "Inertia", has a Foundation (`c2f`, 6 steps, approx. 23 min) and an Extension (`c2x`, 2 steps plus the "Inertia obstacle course" Challenge, approx. 26 min). Chapters 3–5, the Drop Zone and the Workshop are still to come.
 
@@ -23,8 +23,8 @@
   - `19-home-art.js`: the home illustration (`drawHomeArt`): a stadium with stands, crowd, roof and floodlights; the Snow Arena dome with pines; the Drop Zone lattice tower with a parachutist; the Space Dome with stars and an orbit ring; the brick Workshop with a crane; plaza, trees and people. Its own fixed daytime palette; click targets in `HOMEHIT`.
   - `20-shell.js`: views, home (with the zoomed-in arena complex), name and class, teacher code.
   - `21-calc.js`: pop-out calculator with a safe parser (no eval).
-  - `22-glossary.js`: `TERMS`, and auto-underlining of any `.gl` container through a MutationObserver.
-  - `23-cards.js`: info cards, the "How do I read this?" `INFO` cards, the Journal (with notes) and evidence.
+  - `22-glossary.js`: `TERMS`, `vocabMet`/`vocabWatch` (a word counts as met once it has been on screen, seen by an IntersectionObserver, or its definition has popped up; stored in `DB.vocab`), and auto-underlining of any `.gl` container through a MutationObserver.
+  - `23-cards.js`: info cards, the Journal's **Key vocabulary** section (`vocabHTML`: every glossary word the student has met, A to Z, with its meaning, where it was first met and a search box), the "How do I read this?" `INFO` cards, the Journal (with notes) and evidence.
   - `24-runs.js`: **My runs**, the run history. Every Pull!, push and launch starts a run (`runMark`), which updates live (`runTick`) and is saved in `DB.runs` (latest 200) with a sentence (`runText`) and number chips (`runChips`). It shows in a side panel opened from the "📋 My runs" tab on the right edge (filters: this step, this section, all; on screens of 1180 px and wider it pushes the page aside), at the top of the Your turn box for the current step, and in the Journal with a "Pop out ↗" button.
   - `30-fbd-builder.js`: free-body diagram builder: `FBDB.mount / check / hint / svg / model`.
   - `35-questions.js`: the question engine (`QT` types), used by both Learn and Review.
@@ -42,7 +42,7 @@
   - `dist/test.html` (with the `window.__fhq` debug hook)
   - `dist/artifact.html`
 - `tools/make_worksheets.py`: builds `dist/toddle-files/` (one folder per sheet) and `dist/Force-HQ-Toddle-files.zip`.
-- `tests/`: Playwright scripts. `play_c1.py` plays through Learn, `review.py` covers the Review, and `misc.py` covers Explore, the teacher page, Save my work, the Journal, mission 4 and the different screen widths. `stamp.py`, `dark.py` and `net.py` check the stamp, dark mode and network requests. `qpop.py`, `qdrag.py` and `carddrag.py` cover the Your turn pop-up and the info cards (opening, docking, dragging, click-through), `explore.py` the Explore unlock, `play_c2.py` plays all of Chapter 2 (Learn, Challenge, Check) with real clicks, `runs.py` covers the run history, `onego.py` the one-go rule and `who.py` the name gate.
+- `tests/`: Playwright scripts. `play_c1.py` plays through Learn, `review.py` covers the Review, and `misc.py` covers Explore, the teacher page, Save my work, the Journal, mission 4 and the different screen widths. `stamp.py`, `dark.py` and `net.py` check the stamp, dark mode and network requests. `qpop.py`, `qdrag.py` and `carddrag.py` cover the Your turn pop-up and the info cards (opening, docking, dragging, click-through), `explore.py` the Explore unlock, `play_c2.py` plays all of Chapter 2 (Learn, Challenge, Check) with real clicks, `runs.py` covers the run history, `vocab.py` the key vocabulary, `onego.py` the one-go rule and `who.py` the name gate.
 
 ## Debug hook (`dist/test.html`)
 `__fhq.S`, `LAB`, `CHDATA`, `FBDB`, `setStep(i)`, `openChapter(id, tab)`, `setCTab`, `forces`, `staticForces`, `dbGet`, `dbSet`, `resetDB`, `buildWorksheet`, `schemeHTML`, `schemeText`, `teacherPrompt`, `progressHTML`, `openExplore`, `calcEval`, `WS_CSS`, `ev(code)` (runs code inside the app's scope).
