@@ -2456,7 +2456,9 @@ const QT = {
     html(q, s) { let k = 0; return `<div class="gl noglos">${q.p.replace(/___/g, () => `<input class="gapin" data-g="${k}" aria-label="Gap ${k + 1}" autocomplete="off" value="${s && s.v ? esc(s.v[k++] || '') : (k++, '')}">`)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) {
       const go = () => { if (api.locked()) return; const v = $$('.gapin', el).map(i => i.value.trim()); if (v.some(x => !x)) { api.say('Fill in every gap first.', 'no'); return; }
-        const res = v.map((x, i) => gapOk(q.ans[i], x)), bad = res.map((r, i) => r ? -1 : i).filter(i => i >= 0);
+        let res = v.map((x, i) => gapOk(q.ans[i], x));
+        if (q.swap && !res.every(Boolean)) { const [a, b] = q.swap, alt = v.slice(); alt[a] = v[b]; alt[b] = v[a]; const r2 = alt.map((x, i) => gapOk(q.ans[i], x)); if (r2.every(Boolean)) res = r2; }   // two gaps that can go in either order (a × b = b × a)
+        const bad = res.map((r, i) => r ? -1 : i).filter(i => i >= 0);
         api.answer(v, !bad.length, !bad.length ? (q.ok || 'All correct!') : bad.length === 1 ? `Whoops! The missing word is ${qq(q.ans[bad[0]][0])}.` : `Whoops! ${bad.length} gaps weren't right. The right words are shown in green.`, { score: res.filter(Boolean).length }); };
       $('.qchk', el).addEventListener('click', go); $$('.gapin', el).forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }));
     },
@@ -3273,7 +3275,7 @@ CHDATA.c3 = {
   review: [
     mq(1, 41, 'c3r1'), mq(2, 42, 'c3r2'), mq(3, 43, 'c3r3'),
     { id: 'c3r4', type: 'mcq', p: 'Two huskies pull a sled and give it an acceleration of 1.6 m/s². Two more huskies join the team (4 in total). The mass and the friction do not change, and the friction is small enough to ignore. What is the sled\'s acceleration now?', opts: ['3.2 m/s²', '1.6 m/s²', '0.8 m/s²', '6.4 m/s²'], a: 0, work: 'Twice the pull on the same mass gives twice the acceleration: 2 × 1.6 = 3.2 m/s².', why: { 1: 'The force doubled, so the acceleration changes.', 2: 'More force means more acceleration, not less.', 3: 'The force only doubled. It did not go up four times.' } },
-    { id: 'c3r5', type: 'gap', p: 'Newton\'s second law: the resultant ___ on an object equals its ___ multiplied by its ___.', ans: [['force'], ['mass'], ['acceleration']] },
+    { id: 'c3r5', type: 'gap', p: 'Newton\'s second law: the resultant ___ on an object equals its ___ multiplied by its ___.', ans: [['force'], ['mass'], ['acceleration']], swap: [1, 2] },
     { id: 'c3r6', type: 'tick', p: 'Tick every statement that is true.', opts: ['With the same pull, a heavier sled accelerates more slowly', 'A bigger resultant force on the same mass gives a bigger acceleration', 'Acceleration is measured in newtons', 'With friction acting, the resultant force is the pull minus the friction', 'If the resultant force is zero, the sled must be standing still'], a: [0, 1, 3], work: 'More mass means less acceleration, and more resultant force means more acceleration. With friction, resultant = pull − friction. Acceleration is in m/s², and a sled with no resultant force can keep moving at a steady speed.' },
     mq(4, 44, 'c3r7'),
     { id: 'c3r8', type: 'explain', p: 'Two huskies pull an empty sled, and then they pull the same sled loaded with mail. The loaded sled speeds up more slowly. Explain why, using F = ma.', words: ['resultant force', 'mass', 'acceleration'],
@@ -3655,7 +3657,7 @@ function markItem(q, i) {
     case 'match': return `Q${n} (${m} marks, 1 per row): ` + q.rows.map(r => `${r[0]} → ${r[1]}`).join('; ') + '.';
     case 'sort': return `Q${n} (${m} marks, 1 per item): ` + q.groups.map((g, gi) => `${g}: ${q.items.filter(x => x[1] === gi).map(x => plain(x[0])).join(', ')}`).join('. ') + '.';
     case 'num': return `Q${n} (2 marks): ${fmt(q.ans, 2)} ${q.unit} (accept ${fmt(q.ans - (q.tol || 0.15), 2)} to ${fmt(q.ans + (q.tol || 0.15), 2)}). 1 mark for the answer${q.units ? ' with its unit (' + q.unit + ')' : ''}, 1 for correct working: ${q.work}.`;
-    case 'gap': return `Q${n} (${m} marks, 1 per gap): ` + q.ans.map((a, k) => `gap ${k + 1}: ${a[0]} (also accept ${gapAccepts(a).filter(w => w !== gapNorm(a[0])).join(', ') || 'any correct scientific word'})`).join('; ') + '.';
+    case 'gap': return `Q${n} (${m} marks, 1 per gap): ` + q.ans.map((a, k) => `gap ${k + 1}: ${a[0]} (also accept ${gapAccepts(a).filter(w => w !== gapNorm(a[0])).join(', ') || 'any correct scientific word'})`).join('; ') + (q.swap ? ` (gaps ${q.swap[0] + 1} and ${q.swap[1] + 1} can be given in either order.)` : '.');
     case 'table': return `Q${n} (${m} marks, 1 per cell): ` + q.rows.map(r => `${r[0]}: ${q.cols.map((c, j) => `${c} = ${q.choices[j][r[1][j]]}`).join(', ')}`).join('; ') + '.';
     case 'fbd': return `Q${n} (${m} marks): 1 mark for each correct arrow (right force, right direction, right size): ${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N ${DIRWORD[f.dir]}`).join('; ')}. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.`;
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;

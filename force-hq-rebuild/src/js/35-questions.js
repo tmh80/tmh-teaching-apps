@@ -69,7 +69,9 @@ const QT = {
     html(q, s) { let k = 0; return `<div class="gl noglos">${q.p.replace(/___/g, () => `<input class="gapin" data-g="${k}" aria-label="Gap ${k + 1}" autocomplete="off" value="${s && s.v ? esc(s.v[k++] || '') : (k++, '')}">`)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) {
       const go = () => { if (api.locked()) return; const v = $$('.gapin', el).map(i => i.value.trim()); if (v.some(x => !x)) { api.say('Fill in every gap first.', 'no'); return; }
-        const res = v.map((x, i) => gapOk(q.ans[i], x)), bad = res.map((r, i) => r ? -1 : i).filter(i => i >= 0);
+        let res = v.map((x, i) => gapOk(q.ans[i], x));
+        if (q.swap && !res.every(Boolean)) { const [a, b] = q.swap, alt = v.slice(); alt[a] = v[b]; alt[b] = v[a]; const r2 = alt.map((x, i) => gapOk(q.ans[i], x)); if (r2.every(Boolean)) res = r2; }   // two gaps that can go in either order (a × b = b × a)
+        const bad = res.map((r, i) => r ? -1 : i).filter(i => i >= 0);
         api.answer(v, !bad.length, !bad.length ? (q.ok || 'All correct!') : bad.length === 1 ? `Whoops! The missing word is ${qq(q.ans[bad[0]][0])}.` : `Whoops! ${bad.length} gaps weren't right. The right words are shown in green.`, { score: res.filter(Boolean).length }); };
       $('.qchk', el).addEventListener('click', go); $$('.gapin', el).forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }));
     },
