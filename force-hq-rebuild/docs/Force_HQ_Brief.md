@@ -88,3 +88,4 @@ Flat, rounded, outline-free shapes in team colours. Animals have dot eyes and do
 - Formula triangle helper lives in `21-calc.js` (`triHTML`). `vtSVG` takes `o.tri` for a run/rise triangle.
 - Mail run (`renderSledCourse`): 3 runs, a run counts at the finish line (or stops after 8 s), scored 4/3/2/1 by run number, "Move on" after 3 misses.
 - Tests: `tests/play_c3.py` plays both sections, the challenge and the Check.
+- Chapter 3 step a6 is "Five mystery sleds" (25 Oct 2026, from Tom's feedback that practice then Check was repetitive): one typed answer per sled, checked by running the sled in the arena. The Check keeps one calculation per skill; the extra maths-bank questions were removed from e2, e3 and both Checks. `MBMORE` "Another one" buttons stay as optional practice. Gap questions accept `swap: [i, j]` for interchangeable gaps.

@@ -24,12 +24,12 @@ const SECTIONS = [
     vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] },
   { id: 'c3f', ch: 'c3', n: 3, title: 'F = ma', part: 'Foundation', stamp: 'Formula Pro',
     blurb: 'Husky sleds in the Snow Arena: acceleration, the formula triangle, finding F, m and a, friction, and lots of maths practice.',
-    steps: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'], challenge: null, review: ['c3r1', 'c3r2', 'c3r3', 'c3r4', 'c3r5', 'c3r6', 'c3r7', 'c3r8'],
+    steps: ['a1', 'a2', 'a3', 'a4', 'a5', 'a6'], challenge: null, review: ['c3r2', 'c3r3', 'c3r4', 'c3r5', 'c3r6', 'c3r7', 'c3r8'],
     goal: 'Describe how the resultant force and the mass of an object affect its acceleration; use F = ma and the formula triangle to find the force, the mass or the acceleration; work out the resultant force when friction acts, then use it in F = ma.',
     vocab: ['acceleration', 'm/s²', 'resultant force', 'Newton\'s second law', 'formula triangle', 'friction', 'mass', 'unit'] },
   { id: 'c3x', ch: 'c3', n: 3, title: 'F = ma', part: 'Extension', stamp: 'Mail Run Master',
     blurb: 'Read acceleration from a graph, work with friction on fresh powder, mix weight and mass, then run the mail.',
-    steps: ['e1', 'e2', 'e3'], challenge: ['n1', 'n2', 'n3'], review: ['c3r9', 'c3r10', 'c3r11', 'c3r12', 'c3r13', 'c3r14'], needs: 'c3f',
+    steps: ['e1', 'e2', 'e3'], challenge: ['n1', 'n2', 'n3'], review: ['c3r9', 'c3r10', 'c3r12', 'c3r13', 'c3r14'], needs: 'c3f',
     goal: 'Find acceleration from the slope of a velocity–time graph; solve two-step problems (resultant force first, then F = ma); turn weight into mass before using F = ma; choose the number of huskies for a target acceleration; draw the free-body diagram of an accelerating sled.',
     vocab: ['acceleration', 'velocity–time graph', 'slope', 'resultant force', 'friction', 'weight', 'mass', 'Newton\'s second law'] }
 ];

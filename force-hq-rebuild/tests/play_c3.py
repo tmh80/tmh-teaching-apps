@@ -5,7 +5,7 @@ f = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/c3/
 pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
 RUNS = {  # step -> (huskies, mass, floor) runs the student does
   'a1': [(1, 100, 'snow0'), (2, 100, 'snow0')], 'a2': [(2, 60, 'snow0'), (2, 120, 'snow0')], 'a3': [(3, 72, 'snow0')],
-  'a4': [(3, 108, 'snow0'), (2, 80, 'snow0')], 'a5': [(2, 80, 'snow')], 'a6': [],
+  'a4': [(3, 108, 'snow0'), (2, 80, 'snow0')], 'a5': [(2, 80, 'snow')], 'a6': [(3, 85, 'snow0'), (2, 72, 'snow0'), (3, 120, 'snow0'), (2, 64, 'snow'), (3, 70, 'snow')],
   'e1': [(2, 90, 'snow')], 'e2': [(4, 120, 'powder')], 'e3': [(3, 85, 'snow')]}
 bad = []
 with sync_playwright() as p:
