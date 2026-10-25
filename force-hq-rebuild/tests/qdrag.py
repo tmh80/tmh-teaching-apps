@@ -1,7 +1,7 @@
 # Your turn pop-up: drag by header (mouse + touch), arena usable underneath, header stays on screen, position remembered
 import pathlib
 from playwright.sync_api import sync_playwright
-f=pathlib.Path('dist/test.html').resolve().as_uri(); OUT='/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/'
+f=pathlib.Path('dist/test.html').resolve().as_uri(); OUT='/tmp/fhq-shots/'
 with sync_playwright() as p:
   b=p.chromium.launch()
   for w,h,tag,touch in [(1280,860,'desk',False),(390,800,'phone',True)]:

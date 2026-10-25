@@ -101,7 +101,7 @@ function homeClick(e) {
   const r = $('#cvHome').getBoundingClientRect(), x = (e.clientX - r.left) * 900 / r.width, y = (e.clientY - r.top) * 420 / r.height;
   const hit = HOMEHIT.find(hh => x >= hh.x0 && x <= hh.x1 && y >= hh.y0 && y <= hh.y1); if (!hit) return;
   if (hit.id === 'main') { $('#chapterCards').scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); return; }
-  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', space: 'The Space Dome opens in Chapter 2.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is being built. Coming soon!' }[hit.id]);
+  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', space: 'The Space Dome opens in Chapter 4.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is being built. Coming soon!' }[hit.id]);
 }
 
 /* ---------- modal helpers ---------- */

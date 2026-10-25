@@ -29,9 +29,9 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 
 ## Backlog
 
-- **Flashcards with spaced repetition, in every sim and lab:** cards built from the key vocabulary each student has met, reviewed on a spaced-repetition schedule. Force HQ already records the words each student meets (Journal → Key vocabulary).
+- **Flashcards with spaced repetition, in every sim and lab:** cards built from the key vocabulary each student has met, reviewed on a spaced-repetition schedule. Force HQ already records the words each student meets (Journal → Vocab tab).
 
-- **Force HQ rebuild:** Chapters 2–5, the Drop Zone and the Workshop. Reuse content from the old `force-hq/Force-HQ.html` where it fits the new section format. Brief and plan in `force-hq-rebuild/docs/`.
+- **Force HQ rebuild:** Chapters 3–5, the Drop Zone and the Workshop. Port from the old `force-hq/Force-HQ.html` with `force-hq-rebuild/tools/old.py` rather than rebuilding. Start with `force-hq-rebuild/docs/Force_HQ_Handoff.md`.
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
 - **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.

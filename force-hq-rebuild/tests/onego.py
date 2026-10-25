@@ -1,6 +1,6 @@
 import pathlib
 from playwright.sync_api import sync_playwright
-f=pathlib.Path('dist/test.html').resolve().as_uri(); OUT='/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/'
+f=pathlib.Path('dist/test.html').resolve().as_uri(); OUT='/tmp/fhq-shots/'
 with sync_playwright() as p:
   b=p.chromium.launch(); pg=b.new_page(viewport={'width':1280,'height':900}); errs=[]; pg.on('pageerror',lambda e:errs.append(str(e)))
   pg.goto(f); pg.wait_for_timeout(300); pg.fill('#whoName','Mia'); pg.click('#whoGo')

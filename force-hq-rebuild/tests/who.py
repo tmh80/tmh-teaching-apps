@@ -19,9 +19,9 @@ with sync_playwright() as p:
         assert 'Mia Chen' in fr.locator('#whoTop').inner_text()
         box=fr.locator('#whoTop').bounding_box(); print(mode,'ok, chip x =',round(box['x']))
         if mode=='direct':
-            pg.screenshot(path='/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/who.png',clip={'x':0,'y':0,'width':1200,'height':80})
+            pg.screenshot(path='/tmp/fhq-shots/who.png',clip={'x':0,'y':0,'width':1200,'height':80})
             pg.set_viewport_size({'width':390,'height':800}); pg.wait_for_timeout(200)
-            pg.screenshot(path='/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/who_phone.png',clip={'x':0,'y':0,'width':390,'height':140})
+            pg.screenshot(path='/tmp/fhq-shots/who_phone.png',clip={'x':0,'y':0,'width':390,'height':140})
             print('phone scrollW', pg.evaluate('document.documentElement.scrollWidth'))
     print('errors',errs)
 # gate: cancel, Escape and backdrop click all return to the name box

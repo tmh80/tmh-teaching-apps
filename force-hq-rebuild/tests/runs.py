@@ -3,7 +3,7 @@
 # "See my runs" button; the calculator button stays visible over the Journal
 import pathlib
 from playwright.sync_api import sync_playwright
-f = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/'
+f = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/'
 with sync_playwright() as p:
   b = p.chromium.launch(); errs = []
   for w, h, tag in [(1440, 900, 'desk'), (390, 844, 'phone')]:

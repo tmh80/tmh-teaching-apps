@@ -11,7 +11,7 @@ async def nxt(pg):
     m=pg.locator('#modal #contAnyway')
     if await m.count() and await m.is_visible(): await m.click(); await pg.wait_for_timeout(150)
 
-D='/home/claude/force-hq/dist/'; OUT='/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/fhq/'
+D=__import__('os').path.abspath('dist')+'/'; OUT='/tmp/fhq-shots/fhq/'
 async def main():
   async with async_playwright() as p:
     b=await p.chromium.launch(); pg=await b.new_page(viewport={'width':1440,'height':900}); errs=[]

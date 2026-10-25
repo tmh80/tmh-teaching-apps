@@ -1,6 +1,6 @@
 import asyncio, sys
 from playwright.async_api import async_playwright
-D='/home/claude/force-hq/dist/'; OUT='/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/fhq/'
+D=__import__('os').path.abspath('dist')+'/'; OUT='/tmp/fhq-shots/fhq/'
 import os; os.makedirs(OUT,exist_ok=True)
 async def main():
   async with async_playwright() as p:

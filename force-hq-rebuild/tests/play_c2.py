@@ -1,7 +1,7 @@
 # Chapter 2 (Inertia): play both sections through Learn, the obstacle-course Challenge and the Check
 import pathlib, time
 from playwright.sync_api import sync_playwright
-f = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/claude-0/-home-claude/bb04eafb-6d4a-58c1-b55c-0bbcd535d898/scratchpad/c2/'
+f = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/c2/'
 pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
 with sync_playwright() as p:
   b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1440, 'height': 900}); errs = []
