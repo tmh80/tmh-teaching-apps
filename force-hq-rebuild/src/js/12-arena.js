@@ -47,14 +47,14 @@ function drawScene(f, cvo) {
 /* ---- Chapter 3: the Snow Arena. The huskies are the right team; the sled and its load are the "crate". ---- */
 const SLED_BASE = 40, PINES = Array.from({ length: 13 }, (_, i) => [60 + i * 66 + ((i * 37) % 16), 18 + ((i * 53) % 10)]);
 const sledBoxes = m => clamp(Math.round((m - SLED_BASE) / 15), 0, 8);
-function drawSledBody(c, cx, gy, mass) {
+function drawSledBody(c, cx, gy, mass, gone) {
   c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
   c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.ellipse(cx, gy + 3, 64, 4, 0, 0, 7); c.fill();
   c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 64, gy - 3); c.lineTo(cx + 50, gy - 3); c.quadraticCurveTo(cx + 64, gy - 3, cx + 62, gy - 16); c.stroke();
   c.lineWidth = 2; for (const x of [-44, -10, 24]) { c.beginPath(); c.moveTo(cx + x, gy - 3); c.lineTo(cx + x, gy - 16); c.stroke(); }
   c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.beginPath(); c.roundRect(cx - 48, gy - 34, 92, 18, 3); c.fill(); c.stroke();
   const boxes = sledBoxes(mass), cols = [C.left, C.accent, C.hazard, C.right];
-  for (let i = 0; i < boxes; i++) { const col = i % 4, row = Math.floor(i / 4); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(cx - 34 + col * 19, gy - 50 - row * 15, 17, 14, 2); c.fill(); c.stroke(); }
+  for (let i = 0; i < boxes; i++) { if (gone && gone(i)) continue; const col = i % 4, row = Math.floor(i / 4); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(cx - 34 + col * 19, gy - 50 - row * 15, 17, 14, 2); c.fill(); c.stroke(); }
   c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 50, gy - 16); c.lineTo(cx - 54, gy - 70); c.lineTo(cx - 44, gy - 72); c.stroke();
   const mx = cx - 62, hip = gy - 36, sh = gy - 64;   // the musher
   c.strokeStyle = C.left; c.lineWidth = 8; c.beginPath(); c.moveTo(mx, gy - 3); c.lineTo(mx + 2, hip); c.lineTo(mx + 6, sh); c.stroke();
@@ -90,7 +90,22 @@ function drawSledScene(c, f) {
     if (LAB.show.has('meter')) { const lbl = tot(S.right) + ' N', pw = (c.font = `700 13px ${C.fn}`, c.measureText(lbl).width + 12); pill(c, lbl, clamp(front + 22, pw / 2 + 4, 896 - pw / 2), ly - 20, C.right); }
   }
   if (Math.abs(S.v) > 0.3 && !RMOTION) { c.save(); c.fillStyle = C.snow; c.strokeStyle = C['snow-shade']; for (let i = 0; i < 6; i++) { const k = (tt * 3 + i / 6) % 1; c.globalAlpha = 1 - k; c.beginPath(); c.arc(cx - 62 - k * 30, gy - 4 - k * 16 - Math.sin(i) * 4, 3 + k * 3, 0, 7); c.fill(); c.stroke(); } c.restore(); }
-  drawSledBody(c, cx, gy, S.mass);
+  /* mail run: if the sled accelerates harder than the target allows, the packages tumble off the back */
+  const nb = sledBoxes(S.mass);
+  if (LAB.sledHi != null && !S.fall && S.running && S.t > 0.6 && f.a > LAB.sledHi + 1e-9) S.fall = { t0: S.t, b: [] };
+  const fall = S.fall, left = i => fall && S.t - fall.t0 - i * 0.14 >= 0;
+  drawSledBody(c, cx, gy, S.mass, left);
+  if (fall) {
+    const cols = [C.left, C.accent, C.hazard, C.right];
+    for (let i = 0; i < nb; i++) {
+      const tau = S.t - fall.t0 - i * 0.14; if (tau < 0) continue;
+      const col = i % 4, row = Math.floor(i / 4); let b = fall.b[i];
+      if (!b) b = fall.b[i] = { x: S.x + (-34 + col * 19) / PXM, v: S.v, y0: gy - 50 - row * 15 };
+      const age = Math.min(tau, 1.6), bx = CX + (b.x + b.v * age * 0.5 - age * age * 0.6) * PXM, by = Math.min(b.y0 + 0.5 * 340 * age * age, gy - 15 - (i % 3) * 2), ang = RMOTION ? 0.4 : Math.min(age * 3.2, 2.4) * (i % 2 ? 1 : -1);
+      c.save(); c.translate(bx + 8.5, by + 7); c.rotate(ang); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(-8.5, -7, 17, 14, 2); c.fill(); c.stroke(); c.restore();
+    }
+    pill(c, 'Too fast! The mail is falling off', 450, 140, C.bad);
+  }
   hudBox(c, `Time ${S.t.toFixed(1)} s`, 14, 22, C.line, 'left');
   const off = S.floor === 'snow0';
   hudBox(c, off ? 'Friction: OFF' : `Friction: on · ${FLOORS[S.floor].name}`, 886, 22, off ? C.accent : C.fric, 'right');
@@ -261,7 +276,8 @@ const RD = [
 function buildReads() {
   $('#reads').innerHTML = RD.map(([k, l, t, cl]) => `<div class="rd ${cl}" data-panel="${k}"><div class="lbl"><button type="button" class="term tl" data-t="${t}">${l}</button><button type="button" class="info" data-info="${k}" aria-label="How do I read the ${l} readout?">ⓘ</button></div><div class="v" id="v-${k}"></div></div>`).join('');
 }
-function readouts(f) { RD.forEach(([k, , , , fn]) => { const el = document.getElementById('v-' + k); if (el && !el.parentElement.hidden) el.textContent = fn(f); }); }
+const maskNow = () => S.scene === 'sled' && typeof sledMasked === 'function' ? sledMasked(S.right.length, S.mass, S.floor) : new Set();
+function readouts(f) { const mk = maskNow(); RD.forEach(([k, , , , fn]) => { const el = document.getElementById('v-' + k); if (el && !el.parentElement.hidden) el.textContent = mk.has(k) ? '? (work it out first)' : fn(f); }); }
 
 /* ---- live free-body diagram (shows the actual object; arrows start at its centre) ---- */
 function niceStep(mx) { const raw = mx / 3; const p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (raw <= m * p) return m * p; return 10 * p; }
@@ -291,7 +307,7 @@ function drawLiveFBD(f) {
   if (Math.abs(f.brk || 0) > 0.5) { arrow(c, cx, cy + 22, cx + f.brk * k, cy + 22, C.bad, 4); lab('brake ' + fmt(Math.abs(f.brk), 0) + ' N', cx + Math.sign(f.brk) * (Math.max(Math.abs(f.brk) * k, 40) / 2 + 22), cy + 36, C.bad); }
   if (f.shove > 0.5) { arrow(c, cx, cy - 36, cx + f.shove * k, cy - 36, C.ink, 4); lab('push ' + Math.round(f.shove) + ' N', cx + Math.max(f.shove * k, 60) / 2 + 30, cy - 50, C.ink); }
   c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 262.5); c.lineTo(340, 262.5); c.stroke();
-  if (LAB.showRes && (LAB.show.has('readRes') || LAB.mode === 'explore')) {
+  if (LAB.showRes && (LAB.show.has('readRes') || LAB.mode === 'explore') && !maskNow().has('readRes')) {
     const n = Math.round(f.net);
     if (n !== 0) { const L = Math.max(Math.abs(f.net * k), 24) * Math.sign(f.net); arrow(c, cx, 282, cx + L, 282, C.res, 4, true); const s2 = 'Resultant ' + Math.abs(n) + ' N ' + (n > 0 ? '→' : '←'); c.font = `700 12px ${C.fn}`; const w = c.measureText(s2).width + 8; lab(s2, n > 0 ? cx - 8 - w / 2 : cx + 8 + w / 2, 282, C.res); }
     else lab('Resultant = 0 N (balanced)', cx, 282, C.res);

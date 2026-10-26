@@ -128,7 +128,7 @@ function renderSledCourse(ch, sm, host, save) {
   };
   const load = i => {
     cur = i; const m = sm[cur];
-    clearCh2(); S.scene = 'sled'; S.x0 = SLED_X0; S.left = []; S.right = []; S.mass = m.setMass ? 100 : m.mass; S.floor = m.floor; S.flags = newFlags(); resetSim(); active = false;
+    clearCh2(); LAB.sledHi = m.hi; S.scene = 'sled'; S.x0 = SLED_X0; S.left = []; S.right = []; S.mass = m.setMass ? 100 : m.mass; S.floor = m.floor; S.flags = newFlags(); resetSim(); active = false;
     LAB.show = new Set(['pal', 'run', 'meter', 'readR', 'readM', 'readRes', 'readA', 'readF', 'readV', 'fbd'].concat(m.setMass ? ['mass'] : [])); LAB.sides = ['right']; LAB.pullers = ['husky']; LAB.floors = [m.floor];
     applyPanels(); labChanged(); paint();
   };

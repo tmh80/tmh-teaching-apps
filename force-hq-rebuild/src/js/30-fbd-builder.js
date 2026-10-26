@@ -72,8 +72,8 @@ const FBDB = {
     if (pairs.length < scen.forces.length) res.values = false;
     arrows.forEach(a => { if (Math.hypot(a.x - BCX, a.y - BCY) > 12) res.centre = false; });
     for (let i = 0; i < pairs.length; i++) for (let j = 0; j < pairs.length; j++) { if (i === j) continue; const [fa, aa] = pairs[i], [fb, ab] = pairs[j];
-      if (Math.abs(fa.value - fb.value) <= Math.max(fa.value, fb.value) * 0.03) { if (Math.abs(aa.len - ab.len) > Math.max(aa.len, ab.len) * 0.18) res.lengths = false; }
-      else if (fa.value > fb.value * 1.12 && aa.len <= ab.len) res.lengths = false; }
+      if (Math.abs(fa.value - fb.value) <= Math.max(fa.value, fb.value) * 0.03) { if (Math.abs(aa.len - ab.len) > Math.max(aa.len, ab.len) * 0.18) { res.lengths = false; res.lenBad = res.lenBad || { a: fa, b: fb, equal: true }; } }
+      else if (fa.value > fb.value * 1.12 && aa.len <= ab.len) { res.lengths = false; res.lenBad = res.lenBad || { a: fa, b: fb, equal: false }; } }
     if (scen.toScale) pairs.forEach(([f, a]) => { const want = f.value / scen.scale * GRID; if (Math.abs(a.len - want) > Math.max(10, want * 0.15)) res.lengths = false; });
     if (pairs.length < 2 && !scen.toScale) res.lengths = res.present && !res.extra && res.dir;
     res.chips = [['present', 'All the forces are there', res.present], ['extra', 'No extra forces', !res.extra], ['dir', 'Arrows point the right way', res.dir], ['values', 'Numbers are correct', res.values], ['centre', 'Arrows start at the centre', res.centre], ['lengths', scen.toScale ? 'Arrows drawn to scale' : 'Bigger forces have longer arrows', res.lengths]];
@@ -92,6 +92,8 @@ const FBDB = {
       return L === 1 ? 'One arrow points the wrong way.' : L === 2 ? `Check the ${FTYPES[t].name.toLowerCase()} arrow. ${FHINT[t] || ''}` : `The ${FTYPES[t].name.toLowerCase()} arrow should point ${DIRWORD[f.dir]}.`; }
     if (!res.values) { const f = res.wrongVal[0] || scen.forces[0];
       return L === 1 ? 'Check your numbers.' : L === 2 ? (f.type === 'weight' || f.type === 'normal' ? 'Use the calculator: weight = mass × 9.8. On a flat floor, the normal force is the same size as the weight.' : 'Look back at the brief for the size of each force.') : `The ${FTYPES[f.type].name.toLowerCase()} should be ${fmt(f.value, 1)} N.`; }
+    if (!res.lengths && res.lenBad && L >= 2 && !scen.toScale) { const B = res.lenBad, nm = f => FTYPES[f.type].name.toLowerCase();
+      return B.equal ? `The ${nm(B.a)} and the ${nm(B.b)} are the same size (${fmt(B.a.value, 1)} N), so their arrows should be about the same length.` : `The ${nm(B.a)} (${fmt(B.a.value, 1)} N) is much bigger than the ${nm(B.b)} (${fmt(B.b.value, 1)} N), so its arrow should be clearly longer. Drag an arrow's tip to change its length.`; }
     if (!res.lengths) return scen.toScale ? `Use the grid: 1 square = ${scen.scale} N. Drag each arrow tip so it is the right number of squares long.` : 'Make the arrow lengths match the sizes: equal forces get equal arrows, and a bigger force gets a longer arrow. Drag an arrow\'s tip to change its length.';
     return '';
   },

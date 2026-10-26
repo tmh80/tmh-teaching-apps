@@ -950,10 +950,10 @@ function stepSim(dt) {
   if (S.scene === 'sled' ? S.x >= LIM : Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
-function resetSim() { if (RUN) runEnd('reset'); S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
+function resetSim() { if (RUN) runEnd('reset'); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { S.scene = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { S.scene = null; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
@@ -1231,14 +1231,14 @@ function drawScene(f, cvo) {
 /* ---- Chapter 3: the Snow Arena. The huskies are the right team; the sled and its load are the "crate". ---- */
 const SLED_BASE = 40, PINES = Array.from({ length: 13 }, (_, i) => [60 + i * 66 + ((i * 37) % 16), 18 + ((i * 53) % 10)]);
 const sledBoxes = m => clamp(Math.round((m - SLED_BASE) / 15), 0, 8);
-function drawSledBody(c, cx, gy, mass) {
+function drawSledBody(c, cx, gy, mass, gone) {
   c.save(); c.lineCap = 'round'; c.lineJoin = 'round';
   c.fillStyle = 'rgba(0,0,0,.12)'; c.beginPath(); c.ellipse(cx, gy + 3, 64, 4, 0, 0, 7); c.fill();
   c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 64, gy - 3); c.lineTo(cx + 50, gy - 3); c.quadraticCurveTo(cx + 64, gy - 3, cx + 62, gy - 16); c.stroke();
   c.lineWidth = 2; for (const x of [-44, -10, 24]) { c.beginPath(); c.moveTo(cx + x, gy - 3); c.lineTo(cx + x, gy - 16); c.stroke(); }
   c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.beginPath(); c.roundRect(cx - 48, gy - 34, 92, 18, 3); c.fill(); c.stroke();
   const boxes = sledBoxes(mass), cols = [C.left, C.accent, C.hazard, C.right];
-  for (let i = 0; i < boxes; i++) { const col = i % 4, row = Math.floor(i / 4); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(cx - 34 + col * 19, gy - 50 - row * 15, 17, 14, 2); c.fill(); c.stroke(); }
+  for (let i = 0; i < boxes; i++) { if (gone && gone(i)) continue; const col = i % 4, row = Math.floor(i / 4); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(cx - 34 + col * 19, gy - 50 - row * 15, 17, 14, 2); c.fill(); c.stroke(); }
   c.strokeStyle = C.ink; c.lineWidth = 3; c.beginPath(); c.moveTo(cx - 50, gy - 16); c.lineTo(cx - 54, gy - 70); c.lineTo(cx - 44, gy - 72); c.stroke();
   const mx = cx - 62, hip = gy - 36, sh = gy - 64;   // the musher
   c.strokeStyle = C.left; c.lineWidth = 8; c.beginPath(); c.moveTo(mx, gy - 3); c.lineTo(mx + 2, hip); c.lineTo(mx + 6, sh); c.stroke();
@@ -1274,7 +1274,22 @@ function drawSledScene(c, f) {
     if (LAB.show.has('meter')) { const lbl = tot(S.right) + ' N', pw = (c.font = `700 13px ${C.fn}`, c.measureText(lbl).width + 12); pill(c, lbl, clamp(front + 22, pw / 2 + 4, 896 - pw / 2), ly - 20, C.right); }
   }
   if (Math.abs(S.v) > 0.3 && !RMOTION) { c.save(); c.fillStyle = C.snow; c.strokeStyle = C['snow-shade']; for (let i = 0; i < 6; i++) { const k = (tt * 3 + i / 6) % 1; c.globalAlpha = 1 - k; c.beginPath(); c.arc(cx - 62 - k * 30, gy - 4 - k * 16 - Math.sin(i) * 4, 3 + k * 3, 0, 7); c.fill(); c.stroke(); } c.restore(); }
-  drawSledBody(c, cx, gy, S.mass);
+  /* mail run: if the sled accelerates harder than the target allows, the packages tumble off the back */
+  const nb = sledBoxes(S.mass);
+  if (LAB.sledHi != null && !S.fall && S.running && S.t > 0.6 && f.a > LAB.sledHi + 1e-9) S.fall = { t0: S.t, b: [] };
+  const fall = S.fall, left = i => fall && S.t - fall.t0 - i * 0.14 >= 0;
+  drawSledBody(c, cx, gy, S.mass, left);
+  if (fall) {
+    const cols = [C.left, C.accent, C.hazard, C.right];
+    for (let i = 0; i < nb; i++) {
+      const tau = S.t - fall.t0 - i * 0.14; if (tau < 0) continue;
+      const col = i % 4, row = Math.floor(i / 4); let b = fall.b[i];
+      if (!b) b = fall.b[i] = { x: S.x + (-34 + col * 19) / PXM, v: S.v, y0: gy - 50 - row * 15 };
+      const age = Math.min(tau, 1.6), bx = CX + (b.x + b.v * age * 0.5 - age * age * 0.6) * PXM, by = Math.min(b.y0 + 0.5 * 340 * age * age, gy - 15 - (i % 3) * 2), ang = RMOTION ? 0.4 : Math.min(age * 3.2, 2.4) * (i % 2 ? 1 : -1);
+      c.save(); c.translate(bx + 8.5, by + 7); c.rotate(ang); c.fillStyle = cols[i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(-8.5, -7, 17, 14, 2); c.fill(); c.stroke(); c.restore();
+    }
+    pill(c, 'Too fast! The mail is falling off', 450, 140, C.bad);
+  }
   hudBox(c, `Time ${S.t.toFixed(1)} s`, 14, 22, C.line, 'left');
   const off = S.floor === 'snow0';
   hudBox(c, off ? 'Friction: OFF' : `Friction: on · ${FLOORS[S.floor].name}`, 886, 22, off ? C.accent : C.fric, 'right');
@@ -1445,7 +1460,8 @@ const RD = [
 function buildReads() {
   $('#reads').innerHTML = RD.map(([k, l, t, cl]) => `<div class="rd ${cl}" data-panel="${k}"><div class="lbl"><button type="button" class="term tl" data-t="${t}">${l}</button><button type="button" class="info" data-info="${k}" aria-label="How do I read the ${l} readout?">ⓘ</button></div><div class="v" id="v-${k}"></div></div>`).join('');
 }
-function readouts(f) { RD.forEach(([k, , , , fn]) => { const el = document.getElementById('v-' + k); if (el && !el.parentElement.hidden) el.textContent = fn(f); }); }
+const maskNow = () => S.scene === 'sled' && typeof sledMasked === 'function' ? sledMasked(S.right.length, S.mass, S.floor) : new Set();
+function readouts(f) { const mk = maskNow(); RD.forEach(([k, , , , fn]) => { const el = document.getElementById('v-' + k); if (el && !el.parentElement.hidden) el.textContent = mk.has(k) ? '? (work it out first)' : fn(f); }); }
 
 /* ---- live free-body diagram (shows the actual object; arrows start at its centre) ---- */
 function niceStep(mx) { const raw = mx / 3; const p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (raw <= m * p) return m * p; return 10 * p; }
@@ -1475,7 +1491,7 @@ function drawLiveFBD(f) {
   if (Math.abs(f.brk || 0) > 0.5) { arrow(c, cx, cy + 22, cx + f.brk * k, cy + 22, C.bad, 4); lab('brake ' + fmt(Math.abs(f.brk), 0) + ' N', cx + Math.sign(f.brk) * (Math.max(Math.abs(f.brk) * k, 40) / 2 + 22), cy + 36, C.bad); }
   if (f.shove > 0.5) { arrow(c, cx, cy - 36, cx + f.shove * k, cy - 36, C.ink, 4); lab('push ' + Math.round(f.shove) + ' N', cx + Math.max(f.shove * k, 60) / 2 + 30, cy - 50, C.ink); }
   c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 262.5); c.lineTo(340, 262.5); c.stroke();
-  if (LAB.showRes && (LAB.show.has('readRes') || LAB.mode === 'explore')) {
+  if (LAB.showRes && (LAB.show.has('readRes') || LAB.mode === 'explore') && !maskNow().has('readRes')) {
     const n = Math.round(f.net);
     if (n !== 0) { const L = Math.max(Math.abs(f.net * k), 24) * Math.sign(f.net); arrow(c, cx, 282, cx + L, 282, C.res, 4, true); const s2 = 'Resultant ' + Math.abs(n) + ' N ' + (n > 0 ? '→' : '←'); c.font = `700 12px ${C.fn}`; const w = c.measureText(s2).width + 8; lab(s2, n > 0 ? cx - 8 - w / 2 : cx + 8 + w / 2, 282, C.res); }
     else lab('Resultant = 0 N (balanced)', cx, 282, C.res);
@@ -2137,7 +2153,8 @@ function sledText(r) {
   const hk = `${r.nR} husk${r.nR === 1 ? 'y' : 'ies'}`, live = r.live && r.out === 'running';
   const head = `${hk} pulled the ${r.mass} kg sled with ${NN(r.R)} ${SNOWPH[r.floor] || ''}.`.replace(' .', '.');
   if (!r.moved && !live) return head + (r.fs ? ` Friction held the sled still with ${NN(r.fs)}, so the resultant force was 0 N and the acceleration was 0 m/s².` : ' It did not move.');
-  const body = r.a != null ? ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².` : '';
+  const mk = sledMasked(r.nR, r.mass, r.floor);
+  const body = r.a == null ? '' : mk.has('readA') && mk.has('readRes') ? '' : mk.has('readA') ? ` The resultant force was ${NN(r.net)}.` : mk.has('readRes') ? ` The acceleration was ${fmt(r.a, 2)} m/s².` : ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².`;
   if (live) return head + body + ` It is moving at ${ms(Math.abs(S.v))} and has gone ${m2(r.dist)} so far…`;
   if (r.out === 'finish') return head + body + ` It crossed the finish line after ${fmt(r.finT, 1)} s, moving at ${ms(r.finV)}.`;
   return head + body + ` Its top speed was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
@@ -2171,7 +2188,8 @@ function runChips(r) {
   if (r.scene === 'sled') {
     const c = [['Huskies', String(r.nR)], ['Mass', r.mass + ' kg'], ['Snow', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor], ['Pull', NN(r.R)]];
     if (r.frS != null && r.frS > 0.5) c.push(['Friction', NN(r.frS)]); else if (r.fs) c.push(['Friction', NN(r.fs)]);
-    if (r.net != null) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
+    const mk = sledMasked(r.nR, r.mass, r.floor);
+    if (r.net != null && !mk.has('readRes')) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null && !mk.has('readA')) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
     c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]); [1, 2, 3, 4].forEach(k => { if (r['v' + k] != null) c.push(['Speed at ' + k + ' s', ms(r['v' + k])]); });
     if (r.finT != null) c.push(['Finish time', fmt(r.finT, 1) + ' s']);
     return c;
@@ -2294,8 +2312,8 @@ const FBDB = {
     if (pairs.length < scen.forces.length) res.values = false;
     arrows.forEach(a => { if (Math.hypot(a.x - BCX, a.y - BCY) > 12) res.centre = false; });
     for (let i = 0; i < pairs.length; i++) for (let j = 0; j < pairs.length; j++) { if (i === j) continue; const [fa, aa] = pairs[i], [fb, ab] = pairs[j];
-      if (Math.abs(fa.value - fb.value) <= Math.max(fa.value, fb.value) * 0.03) { if (Math.abs(aa.len - ab.len) > Math.max(aa.len, ab.len) * 0.18) res.lengths = false; }
-      else if (fa.value > fb.value * 1.12 && aa.len <= ab.len) res.lengths = false; }
+      if (Math.abs(fa.value - fb.value) <= Math.max(fa.value, fb.value) * 0.03) { if (Math.abs(aa.len - ab.len) > Math.max(aa.len, ab.len) * 0.18) { res.lengths = false; res.lenBad = res.lenBad || { a: fa, b: fb, equal: true }; } }
+      else if (fa.value > fb.value * 1.12 && aa.len <= ab.len) { res.lengths = false; res.lenBad = res.lenBad || { a: fa, b: fb, equal: false }; } }
     if (scen.toScale) pairs.forEach(([f, a]) => { const want = f.value / scen.scale * GRID; if (Math.abs(a.len - want) > Math.max(10, want * 0.15)) res.lengths = false; });
     if (pairs.length < 2 && !scen.toScale) res.lengths = res.present && !res.extra && res.dir;
     res.chips = [['present', 'All the forces are there', res.present], ['extra', 'No extra forces', !res.extra], ['dir', 'Arrows point the right way', res.dir], ['values', 'Numbers are correct', res.values], ['centre', 'Arrows start at the centre', res.centre], ['lengths', scen.toScale ? 'Arrows drawn to scale' : 'Bigger forces have longer arrows', res.lengths]];
@@ -2314,6 +2332,8 @@ const FBDB = {
       return L === 1 ? 'One arrow points the wrong way.' : L === 2 ? `Check the ${FTYPES[t].name.toLowerCase()} arrow. ${FHINT[t] || ''}` : `The ${FTYPES[t].name.toLowerCase()} arrow should point ${DIRWORD[f.dir]}.`; }
     if (!res.values) { const f = res.wrongVal[0] || scen.forces[0];
       return L === 1 ? 'Check your numbers.' : L === 2 ? (f.type === 'weight' || f.type === 'normal' ? 'Use the calculator: weight = mass × 9.8. On a flat floor, the normal force is the same size as the weight.' : 'Look back at the brief for the size of each force.') : `The ${FTYPES[f.type].name.toLowerCase()} should be ${fmt(f.value, 1)} N.`; }
+    if (!res.lengths && res.lenBad && L >= 2 && !scen.toScale) { const B = res.lenBad, nm = f => FTYPES[f.type].name.toLowerCase();
+      return B.equal ? `The ${nm(B.a)} and the ${nm(B.b)} are the same size (${fmt(B.a.value, 1)} N), so their arrows should be about the same length.` : `The ${nm(B.a)} (${fmt(B.a.value, 1)} N) is much bigger than the ${nm(B.b)} (${fmt(B.b.value, 1)} N), so its arrow should be clearly longer. Drag an arrow's tip to change its length.`; }
     if (!res.lengths) return scen.toScale ? `Use the grid: 1 square = ${scen.scale} N. Drag each arrow tip so it is the right number of squares long.` : 'Make the arrow lengths match the sizes: equal forces get equal arrows, and a bigger force gets a longer arrow. Drag an arrow\'s tip to change its length.';
     return '';
   },
@@ -2674,7 +2694,7 @@ function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
-  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => checkStep(true) }));
+  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
     wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });
@@ -3114,8 +3134,17 @@ const rFr = (n, m, fl) => { const r = sledRun(n, m, fl); return r ? r.frS : null
 const rV = (n, m, fl, k) => { const r = sledRun(n, m, fl); return r ? r['v' + k] : null; };
 const rHas = (n, m, fl) => sledRun(n, m, fl) != null;
 /* the Snow Arena set-up used by the Learn steps */
-function snow(m, fl, huskies) { S.scene = 'sled'; S.x0 = SLED_X0; S.mass = m; S.floor = fl; S.left = []; S.right = Array(huskies || 0).fill('husky'); }
+function snow(m, fl, huskies) { LAB.sledHi = null; S.scene = 'sled'; S.x0 = SLED_X0; S.mass = m; S.floor = fl; S.left = []; S.right = Array(huskies || 0).fill('husky'); }
 const UNITS = ['N', 'kg', 'm/s', 'm/s²'];
+/* Readouts the student has to work out stay hidden ("?") in the arena and in the Journal's run sentences until the question that asks for them has been answered.
+   A step lists them in `mask: [{ q, keys, when(n, m, floor) }]`. */
+function sledMasked(n, m, fl) {
+  const out = new Set(); if (typeof CH === 'undefined' || !CH || LAB.mode !== 'guided') return out;
+  const st = CHDATA[CH.id] && CHDATA[CH.id].steps[GI]; if (!st || !st.mask) return out;
+  st.mask.forEach(M => { if (M.when(n, m, fl)) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
+  return out;
+}
+const ALL = () => true;
 
 /* ---- the maths bank: seeded questions in five levels, each with a hint ladder, a unit picker and non-round numbers ----
    level 1 find F · 2 find a · 3 find m · 4 two steps (resultant first, then a) · 5 weight and mass mixed in */
@@ -3194,6 +3223,7 @@ CHDATA.c3 = {
       predict: { q: 'Three huskies (270 N) pull a 72 kg sled. Which sum gives its acceleration?', opts: ['270 ÷ 72', '270 × 72', '72 ÷ 270', '270 − 72'], then: 'Work it out with the calculator, then run the sled and see if the readout agrees.' },
       setup() { snow(72, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Set 72 kg, drag 3 huskies on, then press Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['On the formula triangle card, tap the letters <b>F</b>, <b>m</b> and <b>a</b> in the triangle to cover each one in turn. The same triangle is saved in your Journal (Notes tab), so you can use it there too.', () => { const t = S.flags.tri; return !!(t && t.F && t.m && t.a); }], ['Set the mass to <b>72 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 72, 'snow0')]],
+      mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s second law.', opts: ['The resultant force on an object equals its mass multiplied by its acceleration.', 'The resultant force on an object equals its mass divided by its acceleration.', 'The acceleration of an object equals its mass multiplied by the resultant force.', 'The mass of an object equals its acceleration multiplied by the resultant force.'], a: 0, ok: 'Yes: F = m × a.', why: { 1: 'F = m × a. The mass and the acceleration are multiplied, not divided.', 2: 'Look at the triangle. F is on its own at the top.', 3: 'The mass is not found by multiplying the acceleration and the force.' } },
         { id: 'q2', type: 'num', p: 'Three huskies pull a 72 kg sled with no friction. The resultant force is 270 N. Work out the sled\'s acceleration.', unit: 'm/s²', units: UNITS, ans: 3.75, tol: 0.02, ladder: true, work: 'a = F ÷ m = 270 ÷ 72 = 3.75 m/s²', ok: 'Right! 270 ÷ 72 = 3.75 m/s².', hints: ['Cover a in the triangle. F is above m, so divide.', 'a = F ÷ m. The force is 3 × 90 N = 270 N, and the mass is 72 kg.', 'Type 270 ÷ 72 into the calculator.'] },
@@ -3205,6 +3235,7 @@ CHDATA.c3 = {
         { html: `<p>Two jobs. In each one, <b>work out your answer first</b>, then set up the sled and pull to check it.</p>` }],
       setup() { snow(108, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work it out first, then set up the sled and pull',
       tasks: [['<b>Job 1.</b> A 108 kg sled has to accelerate at 2.5 m/s². Work out the force it needs, add that many huskies (90 N each) and pull.', () => rHas(3, 108, 'snow0')], ['<b>Job 2.</b> Two huskies make a sled accelerate at 2.25 m/s². Work out its mass, set the slider to that mass and pull.', () => rHas(2, 80, 'snow0')]],
+      mask: [{ q: 'q1', keys: ['readA'], when: (n, m) => m === 108 }, { q: 'q3', keys: ['readA'], when: n => n === 2 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Job 1.</b> What resultant force does a 108 kg sled need to accelerate at 2.5 m/s²?', unit: 'N', units: UNITS, ans: 270, tol: 0.6, ladder: true, work: 'F = m × a = 108 × 2.5 = 270 N', ok: 'Yes: 270 N.', hints: ['Cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 108 × 2.5.', 'Type 108 × 2.5 into the calculator.'] },
         { id: 'q2', type: 'num', p: 'Each husky pulls with 90 N. How many huskies give 270 N?', unit: 'huskies', ans: 3, tol: 0.05, work: '270 ÷ 90 = 3 huskies', ok: 'Yes: 3 huskies.', hints: ['Divide the force you need by the force of one husky.', '270 ÷ 90.'] },
@@ -3218,6 +3249,7 @@ CHDATA.c3 = {
       predict: { q: 'Two huskies pull an 80 kg sled. Without friction, the acceleration would be 180 ÷ 80 = 2.25 m/s². With friction back on, the acceleration will be…', opts: ['smaller than 2.25 m/s²', 'bigger than 2.25 m/s²', 'exactly 2.25 m/s²', 'zero'] },
       setup() { snow(80, 'snow', 0); }, adds: ['readF', 'fbd'], sides: ['right'], pullers: ['husky'], idle: 'Set 80 kg, drag 2 huskies on, then press Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Set the mass to <b>80 kg</b>, add <b>2 huskies</b> and pull. Watch the friction arrow in the free-body diagram.', () => rHas(2, 80, 'snow')]],
+      mask: [{ q: 'q2', keys: ['readRes'], when: ALL }, { q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show when the sled was moving?', unit: 'N', tol: 0.4, live: () => rFr(2, 80, 'snow'), need: () => rFr(2, 80, 'snow') != null, needMsg: 'Pull the 80 kg sled with 2 huskies first.', ok: 'Correct! The friction was 39.2 N.' },
         { id: 'q2', type: 'num', p: '<b>Step 1.</b> Work out the resultant force: the pull of 2 huskies (180 N) minus your friction reading.', unit: 'N', units: UNITS, ans: 140.8, tol: 0.7, ladder: true, work: 'Resultant = pull − friction = 180 − 39.2 = 140.8 N', ok: 'Yes: 140.8 N.', hints: ['Friction pushes against the pull, so subtract it.', 'Resultant = 180 − your friction reading.', 'Type 180 − 39.2 into the calculator.'] },
@@ -3232,6 +3264,8 @@ CHDATA.c3 = {
       setup() { snow(85, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work out the answer first, then set up the sled and press Pull!',
       tasks: [['<b>Sled 1.</b> Set <b>85 kg</b>, add <b>3 huskies</b> (friction off) and pull to check your answer.', () => rHas(3, 85, 'snow0')], ['<b>Sled 2.</b> Set <b>72 kg</b>, add the huskies your force needs (friction off) and pull.', () => rHas(2, 72, 'snow0')], ['<b>Sled 3.</b> Set the mass you worked out, add <b>3 huskies</b> (friction off) and pull.', () => rHas(3, 120, 'snow0')], ['<b>Sled 4.</b> Choose <b>packed snow</b>, set <b>64 kg</b>, add <b>2 huskies</b>, pull and read the friction.', () => rHas(2, 64, 'snow')], ['<b>Sled 5.</b> Choose <b>packed snow</b>, set the mass you worked out, add <b>3 huskies</b> and pull.', () => rHas(3, 70, 'snow')]],
       more: [1, 2, 3],
+      mask: [{ q: 'q1', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 85 }, { q: 'q2', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 72 }, { q: 'q3', keys: ['readA'], when: (n, m, f) => f === 'snow0' && n === 3 },
+        { q: 'q4', keys: ['readA', 'readRes'], when: (n, m, f) => f === 'snow' && m === 64 }, { q: 'q5', keys: ['readA', 'readRes'], when: (n, m, f) => f === 'snow' && m === 70 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Sled 1: the mail sled.</b> A sled and its mail have a mass of 85 kg. Three huskies pull it with no friction. What is its acceleration?', unit: 'm/s²', units: UNITS, ans: 3.18, tol: 0.02, ladder: true, work: 'F = 3 × 90 = 270 N. a = F ÷ m = 270 ÷ 85 = 3.18 m/s²', ok: 'Yes: 3.18 m/s². Now pull and see if the Acceleration readout agrees.', hints: ['You want the acceleration, so cover a in the triangle. F is above m, so divide.', 'The force is 3 × 90 N = 270 N. The mass is 85 kg.', 'Type 270 ÷ 85 into the calculator.'] },
         { id: 'q2', type: 'num', p: '<b>Sled 2: the medical sled.</b> This 72 kg sled must speed up at 2.5 m/s² (no friction). What resultant force does it need?', unit: 'N', units: UNITS, ans: 180, tol: 0.5, ladder: true, work: 'F = m × a = 72 × 2.5 = 180 N, which is 2 huskies', ok: 'Yes: 180 N. That is 2 huskies. Add them and pull to check.', hints: ['You want the force, so cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 72 × 2.5.', 'Type 72 × 2.5 into the calculator. Then work out how many huskies (90 N each) give that force.'] },
@@ -3246,6 +3280,7 @@ CHDATA.c3 = {
         { html: `<p>Here is a sled that speeds up steadily.</p>${vtSVG([{ pts: [[0, 0], [5, 8]], col: '#1f5f8b' }], { tMax: 6, vMax: 9, vStep: 1, tri: [[1, 1.6], [4, 6.4]], alt: 'A straight line from 0 at 0 s up to 8 m/s at 5 s. A dashed triangle marks the speed rising from 1.6 to 6.4 m/s between 1 s and 4 s.' })}<div class="example">From 1 s to 4 s, the speed goes from 1.6 to 6.4 m/s. Change in speed = 4.8 m/s. Time taken = 3 s. Acceleration = 4.8 ÷ 3 = <b>1.6 m/s²</b>.</div>` }],
       setup() { snow(90, 'snow', 2); }, adds: ['vt'], hide: ['mass'], sides: [], pullers: [], idle: 'Press Pull!',
       tasks: [['Press <b>Pull!</b> and watch the graph. Let the sled cross the finish line.', () => rHas(2, 90, 'snow')]],
+      mask: [{ q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'Read the graph. How fast was the sled going after <b>1 s</b>?', unit: 'm/s', tol: 0.25, live: () => rV(2, 90, 'snow', 1), need: () => rV(2, 90, 'snow', 1) != null, needMsg: 'Pull the sled first.', ok: 'Good reading!', hints: ['Find 1 on the time axis, go straight up to the line, then read across.'] },
         { id: 'q2', type: 'reading', p: 'How fast was the sled going after <b>3 s</b>?', unit: 'm/s', tol: 0.25, live: () => rV(2, 90, 'snow', 3), need: () => rV(2, 90, 'snow', 3) != null, needMsg: 'Pull the sled first.', ok: 'Good reading!', hints: ['Find 3 on the time axis, go straight up to the line, then read across.'] },
@@ -3258,6 +3293,7 @@ CHDATA.c3 = {
       predict: { q: 'Four huskies pull a 120 kg sled. On packed snow, the acceleration would be about 2.5 m/s². On fresh powder, the sled\'s acceleration will be…', opts: ['smaller, because the friction is bigger', 'bigger, because the snow is softer', 'the same, because the huskies pull just as hard', 'the same, because the mass has not changed'] },
       setup() { snow(120, 'powder', 0); }, adds: ['mass'], sides: ['right'], pullers: ['husky'], idle: 'Choose Fresh powder, set 120 kg, add 4 huskies, then Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose <b>Fresh powder</b> and set the mass to <b>120 kg</b>. Add <b>4 huskies</b> and pull.', () => rHas(4, 120, 'powder')]],
+      mask: [{ q: 'q2', keys: ['readRes'], when: ALL }, { q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show on the fresh powder?', unit: 'N', tol: 0.5, live: () => rFr(4, 120, 'powder'), need: () => rFr(4, 120, 'powder') != null, needMsg: 'Pull the 120 kg sled with 4 huskies on fresh powder first.', ok: 'Correct: 176.4 N. That is a lot more than on packed snow.' },
         { id: 'q2', type: 'num', p: 'Four huskies pull with 360 N. Work out the resultant force.', unit: 'N', units: UNITS, ans: 183.6, tol: 0.9, ladder: true, work: 'Resultant = 360 − 176.4 = 183.6 N', ok: 'Yes: 183.6 N.', hints: ['Friction acts against the pull, so subtract it.', 'Resultant = 360 − your friction reading.', 'Type 360 − 176.4 into the calculator.'] },
@@ -3269,6 +3305,7 @@ CHDATA.c3 = {
         { html: `<p>Be careful: <b>weight</b> and <b>mass</b> are different. Mass is in kg. Weight is a force in newtons.</p><div class="law">weight = mass × 9.8, so mass = weight ÷ 9.8</div><p>F = m × a needs the <b>mass</b>. If a question gives you the weight, turn it into a mass first.</p><div class="example">A sled weighs 882 N. Its mass is 882 ÷ 9.8 = <b>90 kg</b>.</div>` }],
       setup() { snow(85, 'snow', 0); }, adds: ['readW', 'readN'], sides: ['right'], pullers: ['husky'], idle: 'Set 85 kg, add 3 huskies, then Pull!',
       tasks: [['Set the mass to <b>85 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 85, 'snow')]],
+      mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What does the Weight readout show for the 85 kg sled?', unit: 'N', tol: 0.5, live: () => 85 * G, need: () => S.mass === 85, needMsg: 'Set the mass to 85 kg first.', ok: 'Correct: 85 × 9.8 = 833 N.' },
         { id: 'q2', type: 'num', p: 'A sled has a weight of 833 N. Three huskies pull with 270 N, and the friction is 41.65 N. What is its acceleration? (g = 9.8 N/kg)', unit: 'm/s²', units: UNITS, ans: 2.69, tol: 0.02, ladder: true, work: 'Mass = 833 ÷ 9.8 = 85 kg. Resultant = 270 − 41.65 = 228.35 N. a = 228.35 ÷ 85 = 2.69 m/s²', ok: 'Yes: 2.69 m/s².', hints: ['There are two jobs before F = ma: turn the weight into a mass, and find the resultant force.', 'Mass = 833 ÷ 9.8. Resultant = 270 − 41.65. Then a = F ÷ m.', 'Type 833 ÷ 9.8 for the mass, then (270 − 41.65) ÷ that mass.'] },
@@ -3439,7 +3476,7 @@ function renderSledCourse(ch, sm, host, save) {
   };
   const load = i => {
     cur = i; const m = sm[cur];
-    clearCh2(); S.scene = 'sled'; S.x0 = SLED_X0; S.left = []; S.right = []; S.mass = m.setMass ? 100 : m.mass; S.floor = m.floor; S.flags = newFlags(); resetSim(); active = false;
+    clearCh2(); LAB.sledHi = m.hi; S.scene = 'sled'; S.x0 = SLED_X0; S.left = []; S.right = []; S.mass = m.setMass ? 100 : m.mass; S.floor = m.floor; S.flags = newFlags(); resetSim(); active = false;
     LAB.show = new Set(['pal', 'run', 'meter', 'readR', 'readM', 'readRes', 'readA', 'readF', 'readV', 'fbd'].concat(m.setMass ? ['mass'] : [])); LAB.sides = ['right']; LAB.pullers = ['husky']; LAB.floors = [m.floor];
     applyPanels(); labChanged(); paint();
   };

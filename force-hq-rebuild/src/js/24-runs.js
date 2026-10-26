@@ -54,7 +54,8 @@ function sledText(r) {
   const hk = `${r.nR} husk${r.nR === 1 ? 'y' : 'ies'}`, live = r.live && r.out === 'running';
   const head = `${hk} pulled the ${r.mass} kg sled with ${NN(r.R)} ${SNOWPH[r.floor] || ''}.`.replace(' .', '.');
   if (!r.moved && !live) return head + (r.fs ? ` Friction held the sled still with ${NN(r.fs)}, so the resultant force was 0 N and the acceleration was 0 m/s².` : ' It did not move.');
-  const body = r.a != null ? ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².` : '';
+  const mk = sledMasked(r.nR, r.mass, r.floor);
+  const body = r.a == null ? '' : mk.has('readA') && mk.has('readRes') ? '' : mk.has('readA') ? ` The resultant force was ${NN(r.net)}.` : mk.has('readRes') ? ` The acceleration was ${fmt(r.a, 2)} m/s².` : ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².`;
   if (live) return head + body + ` It is moving at ${ms(Math.abs(S.v))} and has gone ${m2(r.dist)} so far…`;
   if (r.out === 'finish') return head + body + ` It crossed the finish line after ${fmt(r.finT, 1)} s, moving at ${ms(r.finV)}.`;
   return head + body + ` Its top speed was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
@@ -88,7 +89,8 @@ function runChips(r) {
   if (r.scene === 'sled') {
     const c = [['Huskies', String(r.nR)], ['Mass', r.mass + ' kg'], ['Snow', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor], ['Pull', NN(r.R)]];
     if (r.frS != null && r.frS > 0.5) c.push(['Friction', NN(r.frS)]); else if (r.fs) c.push(['Friction', NN(r.fs)]);
-    if (r.net != null) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
+    const mk = sledMasked(r.nR, r.mass, r.floor);
+    if (r.net != null && !mk.has('readRes')) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null && !mk.has('readA')) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
     c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]); [1, 2, 3, 4].forEach(k => { if (r['v' + k] != null) c.push(['Speed at ' + k + ' s', ms(r['v' + k])]); });
     if (r.finT != null) c.push(['Finish time', fmt(r.finT, 1) + ' s']);
     return c;

@@ -63,7 +63,9 @@ with sync_playwright() as p:
       for r in RUNS[sid]: run(*r)
       if sid == 'a3': ev("S.flags.tri={F:true,m:true,a:true}; labChanged()")
       if sid == 'a6': ev("CALC_USED=true; labChanged()")
+      if sid in ('a3', 'a5', 'e3'): print(sid, 'readouts before answering:', pg.locator('#v-readA').inner_text(), '|', pg.locator('#v-readRes').inner_text() if pg.locator('#v-readRes').is_visible() else '-')
       res = [(q['id'], answer(q)) for q in qinfo(sec, idx)]
+      if sid in ('a3', 'a5', 'e3'): print(sid, 'readouts after answering:', pg.locator('#v-readA').inner_text(), '|', pg.locator('#v-readRes').inner_text() if pg.locator('#v-readRes').is_visible() else '-')
       for qid, fb in res:
         if not (fb.startswith('Correct') or fb.startswith('Yes') or fb.startswith('Right') or 'match' in fb or 'Perfect' in fb or 'Exactly' in fb or 'Good' in fb or 'It was' in fb or 'formula' in fb or fb.startswith('skip') or True): bad.append((sid, qid, fb))
       print(sid, res); state(sid); pg.screenshot(path=OUT + sid + '.png'); nxt()
@@ -80,6 +82,11 @@ with sync_playwright() as p:
     for i, (n, mass) in enumerate([(1, None), (2, None), (4, None), (4, 150)]):
       m = i if i < 3 else 2
       ev(f"1")
+    # too many huskies: the packages should tumble off
+    pg.locator('[data-sr="0"]').first.click(); pg.wait_for_timeout(200)
+    ev("S.mass=80; S.right=Array(4).fill('husky'); resetSim(); labChanged()"); pg.click('#runBtn'); pg.wait_for_timeout(2200)
+    print('fall started', ev('!!S.fall')); pg.locator('#cvScene').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'fall1.png')
+    pg.wait_for_timeout(2500); pg.screenshot(path=OUT + 'fall2.png'); print('too hard ->', pg.locator('#snFb').inner_text())
     plan = [(0, 1, 80), (0, 2, 80), (1, 2, 120), (1, 4, 120), (2, 4, 150)]
     for mi, n, mass in plan:
       pg.locator(f'[data-sr="{mi}"]').first.click(); pg.wait_for_timeout(200)

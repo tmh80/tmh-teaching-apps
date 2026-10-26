@@ -9,8 +9,17 @@ const rFr = (n, m, fl) => { const r = sledRun(n, m, fl); return r ? r.frS : null
 const rV = (n, m, fl, k) => { const r = sledRun(n, m, fl); return r ? r['v' + k] : null; };
 const rHas = (n, m, fl) => sledRun(n, m, fl) != null;
 /* the Snow Arena set-up used by the Learn steps */
-function snow(m, fl, huskies) { S.scene = 'sled'; S.x0 = SLED_X0; S.mass = m; S.floor = fl; S.left = []; S.right = Array(huskies || 0).fill('husky'); }
+function snow(m, fl, huskies) { LAB.sledHi = null; S.scene = 'sled'; S.x0 = SLED_X0; S.mass = m; S.floor = fl; S.left = []; S.right = Array(huskies || 0).fill('husky'); }
 const UNITS = ['N', 'kg', 'm/s', 'm/s²'];
+/* Readouts the student has to work out stay hidden ("?") in the arena and in the Journal's run sentences until the question that asks for them has been answered.
+   A step lists them in `mask: [{ q, keys, when(n, m, floor) }]`. */
+function sledMasked(n, m, fl) {
+  const out = new Set(); if (typeof CH === 'undefined' || !CH || LAB.mode !== 'guided') return out;
+  const st = CHDATA[CH.id] && CHDATA[CH.id].steps[GI]; if (!st || !st.mask) return out;
+  st.mask.forEach(M => { if (M.when(n, m, fl)) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
+  return out;
+}
+const ALL = () => true;
 
 /* ---- the maths bank: seeded questions in five levels, each with a hint ladder, a unit picker and non-round numbers ----
    level 1 find F · 2 find a · 3 find m · 4 two steps (resultant first, then a) · 5 weight and mass mixed in */
@@ -89,6 +98,7 @@ CHDATA.c3 = {
       predict: { q: 'Three huskies (270 N) pull a 72 kg sled. Which sum gives its acceleration?', opts: ['270 ÷ 72', '270 × 72', '72 ÷ 270', '270 − 72'], then: 'Work it out with the calculator, then run the sled and see if the readout agrees.' },
       setup() { snow(72, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Set 72 kg, drag 3 huskies on, then press Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['On the formula triangle card, tap the letters <b>F</b>, <b>m</b> and <b>a</b> in the triangle to cover each one in turn. The same triangle is saved in your Journal (Notes tab), so you can use it there too.', () => { const t = S.flags.tri; return !!(t && t.F && t.m && t.a); }], ['Set the mass to <b>72 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 72, 'snow0')]],
+      mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s second law.', opts: ['The resultant force on an object equals its mass multiplied by its acceleration.', 'The resultant force on an object equals its mass divided by its acceleration.', 'The acceleration of an object equals its mass multiplied by the resultant force.', 'The mass of an object equals its acceleration multiplied by the resultant force.'], a: 0, ok: 'Yes: F = m × a.', why: { 1: 'F = m × a. The mass and the acceleration are multiplied, not divided.', 2: 'Look at the triangle. F is on its own at the top.', 3: 'The mass is not found by multiplying the acceleration and the force.' } },
         { id: 'q2', type: 'num', p: 'Three huskies pull a 72 kg sled with no friction. The resultant force is 270 N. Work out the sled\'s acceleration.', unit: 'm/s²', units: UNITS, ans: 3.75, tol: 0.02, ladder: true, work: 'a = F ÷ m = 270 ÷ 72 = 3.75 m/s²', ok: 'Right! 270 ÷ 72 = 3.75 m/s².', hints: ['Cover a in the triangle. F is above m, so divide.', 'a = F ÷ m. The force is 3 × 90 N = 270 N, and the mass is 72 kg.', 'Type 270 ÷ 72 into the calculator.'] },
@@ -100,6 +110,7 @@ CHDATA.c3 = {
         { html: `<p>Two jobs. In each one, <b>work out your answer first</b>, then set up the sled and pull to check it.</p>` }],
       setup() { snow(108, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work it out first, then set up the sled and pull',
       tasks: [['<b>Job 1.</b> A 108 kg sled has to accelerate at 2.5 m/s². Work out the force it needs, add that many huskies (90 N each) and pull.', () => rHas(3, 108, 'snow0')], ['<b>Job 2.</b> Two huskies make a sled accelerate at 2.25 m/s². Work out its mass, set the slider to that mass and pull.', () => rHas(2, 80, 'snow0')]],
+      mask: [{ q: 'q1', keys: ['readA'], when: (n, m) => m === 108 }, { q: 'q3', keys: ['readA'], when: n => n === 2 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Job 1.</b> What resultant force does a 108 kg sled need to accelerate at 2.5 m/s²?', unit: 'N', units: UNITS, ans: 270, tol: 0.6, ladder: true, work: 'F = m × a = 108 × 2.5 = 270 N', ok: 'Yes: 270 N.', hints: ['Cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 108 × 2.5.', 'Type 108 × 2.5 into the calculator.'] },
         { id: 'q2', type: 'num', p: 'Each husky pulls with 90 N. How many huskies give 270 N?', unit: 'huskies', ans: 3, tol: 0.05, work: '270 ÷ 90 = 3 huskies', ok: 'Yes: 3 huskies.', hints: ['Divide the force you need by the force of one husky.', '270 ÷ 90.'] },
@@ -113,6 +124,7 @@ CHDATA.c3 = {
       predict: { q: 'Two huskies pull an 80 kg sled. Without friction, the acceleration would be 180 ÷ 80 = 2.25 m/s². With friction back on, the acceleration will be…', opts: ['smaller than 2.25 m/s²', 'bigger than 2.25 m/s²', 'exactly 2.25 m/s²', 'zero'] },
       setup() { snow(80, 'snow', 0); }, adds: ['readF', 'fbd'], sides: ['right'], pullers: ['husky'], idle: 'Set 80 kg, drag 2 huskies on, then press Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Set the mass to <b>80 kg</b>, add <b>2 huskies</b> and pull. Watch the friction arrow in the free-body diagram.', () => rHas(2, 80, 'snow')]],
+      mask: [{ q: 'q2', keys: ['readRes'], when: ALL }, { q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show when the sled was moving?', unit: 'N', tol: 0.4, live: () => rFr(2, 80, 'snow'), need: () => rFr(2, 80, 'snow') != null, needMsg: 'Pull the 80 kg sled with 2 huskies first.', ok: 'Correct! The friction was 39.2 N.' },
         { id: 'q2', type: 'num', p: '<b>Step 1.</b> Work out the resultant force: the pull of 2 huskies (180 N) minus your friction reading.', unit: 'N', units: UNITS, ans: 140.8, tol: 0.7, ladder: true, work: 'Resultant = pull − friction = 180 − 39.2 = 140.8 N', ok: 'Yes: 140.8 N.', hints: ['Friction pushes against the pull, so subtract it.', 'Resultant = 180 − your friction reading.', 'Type 180 − 39.2 into the calculator.'] },
@@ -127,6 +139,8 @@ CHDATA.c3 = {
       setup() { snow(85, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work out the answer first, then set up the sled and press Pull!',
       tasks: [['<b>Sled 1.</b> Set <b>85 kg</b>, add <b>3 huskies</b> (friction off) and pull to check your answer.', () => rHas(3, 85, 'snow0')], ['<b>Sled 2.</b> Set <b>72 kg</b>, add the huskies your force needs (friction off) and pull.', () => rHas(2, 72, 'snow0')], ['<b>Sled 3.</b> Set the mass you worked out, add <b>3 huskies</b> (friction off) and pull.', () => rHas(3, 120, 'snow0')], ['<b>Sled 4.</b> Choose <b>packed snow</b>, set <b>64 kg</b>, add <b>2 huskies</b>, pull and read the friction.', () => rHas(2, 64, 'snow')], ['<b>Sled 5.</b> Choose <b>packed snow</b>, set the mass you worked out, add <b>3 huskies</b> and pull.', () => rHas(3, 70, 'snow')]],
       more: [1, 2, 3],
+      mask: [{ q: 'q1', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 85 }, { q: 'q2', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 72 }, { q: 'q3', keys: ['readA'], when: (n, m, f) => f === 'snow0' && n === 3 },
+        { q: 'q4', keys: ['readA', 'readRes'], when: (n, m, f) => f === 'snow' && m === 64 }, { q: 'q5', keys: ['readA', 'readRes'], when: (n, m, f) => f === 'snow' && m === 70 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Sled 1: the mail sled.</b> A sled and its mail have a mass of 85 kg. Three huskies pull it with no friction. What is its acceleration?', unit: 'm/s²', units: UNITS, ans: 3.18, tol: 0.02, ladder: true, work: 'F = 3 × 90 = 270 N. a = F ÷ m = 270 ÷ 85 = 3.18 m/s²', ok: 'Yes: 3.18 m/s². Now pull and see if the Acceleration readout agrees.', hints: ['You want the acceleration, so cover a in the triangle. F is above m, so divide.', 'The force is 3 × 90 N = 270 N. The mass is 85 kg.', 'Type 270 ÷ 85 into the calculator.'] },
         { id: 'q2', type: 'num', p: '<b>Sled 2: the medical sled.</b> This 72 kg sled must speed up at 2.5 m/s² (no friction). What resultant force does it need?', unit: 'N', units: UNITS, ans: 180, tol: 0.5, ladder: true, work: 'F = m × a = 72 × 2.5 = 180 N, which is 2 huskies', ok: 'Yes: 180 N. That is 2 huskies. Add them and pull to check.', hints: ['You want the force, so cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 72 × 2.5.', 'Type 72 × 2.5 into the calculator. Then work out how many huskies (90 N each) give that force.'] },
@@ -141,6 +155,7 @@ CHDATA.c3 = {
         { html: `<p>Here is a sled that speeds up steadily.</p>${vtSVG([{ pts: [[0, 0], [5, 8]], col: '#1f5f8b' }], { tMax: 6, vMax: 9, vStep: 1, tri: [[1, 1.6], [4, 6.4]], alt: 'A straight line from 0 at 0 s up to 8 m/s at 5 s. A dashed triangle marks the speed rising from 1.6 to 6.4 m/s between 1 s and 4 s.' })}<div class="example">From 1 s to 4 s, the speed goes from 1.6 to 6.4 m/s. Change in speed = 4.8 m/s. Time taken = 3 s. Acceleration = 4.8 ÷ 3 = <b>1.6 m/s²</b>.</div>` }],
       setup() { snow(90, 'snow', 2); }, adds: ['vt'], hide: ['mass'], sides: [], pullers: [], idle: 'Press Pull!',
       tasks: [['Press <b>Pull!</b> and watch the graph. Let the sled cross the finish line.', () => rHas(2, 90, 'snow')]],
+      mask: [{ q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'Read the graph. How fast was the sled going after <b>1 s</b>?', unit: 'm/s', tol: 0.25, live: () => rV(2, 90, 'snow', 1), need: () => rV(2, 90, 'snow', 1) != null, needMsg: 'Pull the sled first.', ok: 'Good reading!', hints: ['Find 1 on the time axis, go straight up to the line, then read across.'] },
         { id: 'q2', type: 'reading', p: 'How fast was the sled going after <b>3 s</b>?', unit: 'm/s', tol: 0.25, live: () => rV(2, 90, 'snow', 3), need: () => rV(2, 90, 'snow', 3) != null, needMsg: 'Pull the sled first.', ok: 'Good reading!', hints: ['Find 3 on the time axis, go straight up to the line, then read across.'] },
@@ -153,6 +168,7 @@ CHDATA.c3 = {
       predict: { q: 'Four huskies pull a 120 kg sled. On packed snow, the acceleration would be about 2.5 m/s². On fresh powder, the sled\'s acceleration will be…', opts: ['smaller, because the friction is bigger', 'bigger, because the snow is softer', 'the same, because the huskies pull just as hard', 'the same, because the mass has not changed'] },
       setup() { snow(120, 'powder', 0); }, adds: ['mass'], sides: ['right'], pullers: ['husky'], idle: 'Choose Fresh powder, set 120 kg, add 4 huskies, then Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose <b>Fresh powder</b> and set the mass to <b>120 kg</b>. Add <b>4 huskies</b> and pull.', () => rHas(4, 120, 'powder')]],
+      mask: [{ q: 'q2', keys: ['readRes'], when: ALL }, { q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show on the fresh powder?', unit: 'N', tol: 0.5, live: () => rFr(4, 120, 'powder'), need: () => rFr(4, 120, 'powder') != null, needMsg: 'Pull the 120 kg sled with 4 huskies on fresh powder first.', ok: 'Correct: 176.4 N. That is a lot more than on packed snow.' },
         { id: 'q2', type: 'num', p: 'Four huskies pull with 360 N. Work out the resultant force.', unit: 'N', units: UNITS, ans: 183.6, tol: 0.9, ladder: true, work: 'Resultant = 360 − 176.4 = 183.6 N', ok: 'Yes: 183.6 N.', hints: ['Friction acts against the pull, so subtract it.', 'Resultant = 360 − your friction reading.', 'Type 360 − 176.4 into the calculator.'] },
@@ -164,6 +180,7 @@ CHDATA.c3 = {
         { html: `<p>Be careful: <b>weight</b> and <b>mass</b> are different. Mass is in kg. Weight is a force in newtons.</p><div class="law">weight = mass × 9.8, so mass = weight ÷ 9.8</div><p>F = m × a needs the <b>mass</b>. If a question gives you the weight, turn it into a mass first.</p><div class="example">A sled weighs 882 N. Its mass is 882 ÷ 9.8 = <b>90 kg</b>.</div>` }],
       setup() { snow(85, 'snow', 0); }, adds: ['readW', 'readN'], sides: ['right'], pullers: ['husky'], idle: 'Set 85 kg, add 3 huskies, then Pull!',
       tasks: [['Set the mass to <b>85 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 85, 'snow')]],
+      mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What does the Weight readout show for the 85 kg sled?', unit: 'N', tol: 0.5, live: () => 85 * G, need: () => S.mass === 85, needMsg: 'Set the mass to 85 kg first.', ok: 'Correct: 85 × 9.8 = 833 N.' },
         { id: 'q2', type: 'num', p: 'A sled has a weight of 833 N. Three huskies pull with 270 N, and the friction is 41.65 N. What is its acceleration? (g = 9.8 N/kg)', unit: 'm/s²', units: UNITS, ans: 2.69, tol: 0.02, ladder: true, work: 'Mass = 833 ÷ 9.8 = 85 kg. Resultant = 270 − 41.65 = 228.35 N. a = 228.35 ÷ 85 = 2.69 m/s²', ok: 'Yes: 2.69 m/s².', hints: ['There are two jobs before F = ma: turn the weight into a mass, and find the resultant force.', 'Mass = 833 ÷ 9.8. Resultant = 270 − 41.65. Then a = F ÷ m.', 'Type 833 ÷ 9.8 for the mass, then (270 − 41.65) ÷ that mass.'] },

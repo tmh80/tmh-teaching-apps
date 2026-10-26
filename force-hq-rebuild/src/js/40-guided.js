@@ -94,7 +94,7 @@ function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
-  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => checkStep(true) }));
+  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
     wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });

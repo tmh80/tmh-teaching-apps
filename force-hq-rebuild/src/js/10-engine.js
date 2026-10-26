@@ -62,9 +62,9 @@ function stepSim(dt) {
   if (S.scene === 'sled' ? S.x >= LIM : Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) { for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3); }
-function resetSim() { if (RUN) runEnd('reset'); S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
+function resetSim() { if (RUN) runEnd('reset'); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false; syncRun(); }
 function shove() { if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { S.scene = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { S.scene = null; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
