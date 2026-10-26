@@ -36,6 +36,7 @@
   - `50-review.js`: Chapter 1 question bank and the Check page (gated by the Challenge, or by Learn when a section has no Challenge, with "Continue anyway" and a "keep going" box for the next section).
   - `55-sections.js`: splits each chapter into sections and estimates their minutes.
   - `60-worksheet.js`: worksheets (student, blank, key), feedback page, marking schemes and Save my work.
+  - `70-backup.js`: 💾 Save progress. Saves the whole DB (Journal notes included) as a checksummed `.fhq.json` file or a copy-paste code (`FHQ1:`), loads it on any device from the name screen or the header button, with "Undo my last load". Teacher flag and teacher identity are never exported. "Not you? Start fresh" is on the Change screen.
   - `62-teacher.js`: the teacher page and the Toddle prompt.
   - `99-init.js`: Explore and start-up.
 - `build.py` produces three files:

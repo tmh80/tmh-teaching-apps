@@ -32,3 +32,8 @@
 - Ask Tom to play Chapter 3 and say whether the friction-off disclaimer and the maths ladder feel right.
 - Drop Zone objects and parachute canopy sizes: anything to add?
 - Once Chapter 1 is approved, should the rebuild replace the old Force HQ artifact and project copy?
+
+
+## Done: progress save and load (26 Oct)
+- Save and load progress file or code, for loaner devices and backups. Tested in `tests/backup.py`.
+- Open question: shared school computers share one browser save; "Not you? Start fresh" is the workaround.

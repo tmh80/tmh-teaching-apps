@@ -6,3 +6,4 @@ python3 build.py || exit 1
 for t in err play_c1 review misc stamp who qpop onego qdrag carddrag explore dark net play_c2 play_c3 runs vocab; do
   echo "== $t"; python3 tests/$t.py 2>&1 | tail -4
 done
+python3 tests/backup.py
