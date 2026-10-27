@@ -31,7 +31,8 @@ function renderChallenge(ch) {
   const save = (m, patch) => { const st = dbGet('chal.' + ch, {}); st[m.id] = Object.assign(st[m.id] || {}, patch); dbSet('chal.' + ch, st); renderOnPage(); tabTicks(); if (challengeDone(ch)) { addEvidence('challenge', `Chapter ${CH.n} ${CH.part} Challenge: ${C1.title}, ${challengeState(ch).score} of ${challengeState(ch).max} objectives met.`); maybeStamp(ch); } };
   const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
   const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);
-  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled').forEach(m => {
+  const om = C1.missions.filter(m => m.kind === 'orders'); if (om.length) renderOrdersCourse(ch, om, host, save);
+  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -144,6 +145,47 @@ function renderSledCourse(ch, sm, host, save) {
     const best = hit ? Math.max(1, 5 - n) : 0;
     const why = S.mass !== m.mass ? `The sled's mass was ${S.mass} kg, but this run needs ${m.mass} kg.` : a < m.lo ? `${nR} husk${nR === 1 ? 'y' : 'ies'} gave ${fmt(a, 2)} m/s². That is too small, so the mail would be late. Try more huskies.` : `${nR} huskies gave ${fmt(a, 2)} m/s². That is too big, so the mail sacks would tumble off. Try fewer huskies.`;
     save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `On target after ${n} run${n > 1 ? 's' : ''}! ${nR} huskies gave ${fmt(a, 2)} m/s². You scored ${best} of 4 points.` : `Not quite. ${why}` });
+    paint();
+  };
+  load(cur);
+}
+
+/* Chapter 4 Challenge: docking orders (one shared Space Dome, a tab per order).
+   Each push is judged when it finishes. On target at the 1st push = 4 points, 2nd = 3, 3rd = 2, later = 1. "Move on" after 3 misses scores 1. */
+function renderOrdersCourse(ch, om, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, om.findIndex(m => !get(m.id).done)), judged = false;
+  const card = h('section', { class: 'panel mission', id: 'mi-orders' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose an order"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl"><p>The push lasts 1 second, so the pod's <b>speed = force ÷ mass</b>. That means <b>force = mass × speed</b>.</p><p>Work out the smallest push (use the lowest speed in the order) and the biggest push (use the highest speed). Then choose a push in between. For the tether, remember that the astronaut feels the <b>same size force</b> as the pod: <b>astronaut speed = force ÷ astronaut mass</b>.</p></div></details>
+    <div class="labhost"></div><div class="fb" id="odFb" hidden></div><ol class="blog" id="odLog"></ol><ul class="objs" data-o></ul><div class="row" id="odMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null; LAB.idle = 'Set the push force, then press Push off!';
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
+  const paint = () => {
+    const m = om[cur], s = get(m.id);
+    $('.mtabs', card).innerHTML = om.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-or="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p>`;
+    $('#odLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Push ${i + 1}: ${fmt(r.F, 0)} N, pod speed ${fmt(r.vp, 2)} m/s${m.vaMax ? `, astronaut ${r.ma} kg at ${fmt(r.va, 2)} m/s` : ''}${r.hit ? ' ✓ on target!' : r.vp < m.lo - 1e-9 ? ' (pod too slow)' : r.vp > m.hi + 1e-9 ? ' (pod too fast)' : ' (tether snaps)'}</li>`).join('');
+    const fb = $('#odFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.best === 4 ? 'ok' : 'hint') : 'no'); fb.textContent = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Push the pod (every push counts)', s.tried], [`Dock at ${fmt(m.lo, 1)} to ${fmt(m.hi, 1)} m/s${m.vaMax ? ' without snapping the tether' : ''}`, s.done && s.hit], ['Do it on your first push', s.best === 4]].map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#odMore', card).innerHTML = s.done ? (cur < om.length - 1 ? `<button type="button" class="go" data-or="${cur + 1}">Next order →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="odGive">Move on (1 point)</button>` : '');
+    const gv = $('#odGive'); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} pushes. A push of about ${fmt(m.pod * (m.lo + m.hi) / 2, 0)} N works for this pod. You scored 1 of 4 points.` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = om[cur];
+    clearCh2(); S.scene = 'space'; S.x0 = POD_X0; S.left = []; S.right = []; S.mass = m.pod; S.astro = m.astro; S.pushF = 100; S.floor = 'air'; S.flags = newFlags(); resetSim(); judged = false;
+    LAB.show = new Set(['shove', 'pushf', 'readM', 'readAM', 'readV', 'readAV', 'warp', 'fbd'].concat(m.setAstro ? ['astro'] : [])); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air'];
+    applyPanels(); labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-or]'); if (b) load(+b.dataset.or); });
+  LAB.tick = () => {
+    if (!S.pushDone) { judged = false; return; }
+    if (judged) return; judged = true;
+    const m = om[cur], s = get(m.id); if (s.done) { paint(); return; }
+    const P = S.pushDone, n = (s.n || 0) + 1, okP = P.vp >= m.lo - 1e-9 && P.vp <= m.hi + 1e-9, okA = !m.vaMax || P.va <= m.vaMax + 1e-9, hit = okP && okA, log = (s.log || []).concat([{ F: P.F, vp: P.vp, va: P.va, ma: P.ma, hit }]);
+    const best = hit ? Math.max(1, 5 - n) : 0;
+    const why = !okP ? (P.vp < m.lo ? `A push of ${fmt(P.F, 0)} N gave the pod ${fmt(P.vp, 2)} m/s. That is too slow, so the pod would take too long to arrive. Try a bigger push.` : `A push of ${fmt(P.F, 0)} N gave the pod ${fmt(P.vp, 2)} m/s. That is too fast, so the pod would crash into the dock. Try a smaller push.`) : `The pod's speed was fine, but the ${P.ma} kg astronaut reached ${fmt(P.va, 2)} m/s. The tether snaps! The astronaut feels the same force, so a heavier astronaut goes slower.`;
+    save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `On target after ${n} push${n > 1 ? 'es' : ''}! The pod docks at ${fmt(P.vp, 2)} m/s. You scored ${best} of 4 points.` : `Not quite. ${why}` });
     paint();
   };
   load(cur);

@@ -1,8 +1,8 @@
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM'];
 /* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
-const EXPLORE_HIDE = ['launch', 'brake', 'readD'];
+const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -13,8 +13,9 @@ function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 900, 380); HITS = [];
   if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
+  if (S.scene === 'space' && !cvo) { drawSpaceScene(c, f); return; }
   arenaShell(c, 'MAIN ARENA');
-  c.fillStyle = C.ink; c.fillRect(450 - 160, 92, 320, 30); txt(c, 'MAIN ARENA · TUG-OF-WAR', 450, 107.5, C.panel, `800 20px ${C.fd}`);
+  if (!(LAB.show.has('pairs') && LAB.showPairs !== false)) { c.fillStyle = C.ink; c.fillRect(450 - 160, 92, 320, 30); txt(c, 'MAIN ARENA · TUG-OF-WAR', 450, 107.5, C.panel, `800 20px ${C.fd}`); }
   drawFloor(c);
   const tt = performance.now() / 1000, pulling = S.running && (f.L > 0 || f.R > 0), stuck = pulling && S.v === 0 && f.app !== 0;
   const cx = CX + S.x * PXM + (stuck && !RMOTION ? Math.sin(tt * 42) * 1.3 : 0), ph = S.running && !RMOTION ? tt * 7 : S.x * PXM / 9;
@@ -22,6 +23,7 @@ function drawScene(f, cvo) {
   const meter = LAB.show.has('meter');
   drawTeam(c, 'left', -1, C.left, cx - CW / 2, pulling, tt, ph, meter);
   drawTeam(c, 'right', 1, C.right, cx + CW / 2, pulling, tt, ph, meter);
+  if (LAB.show.has('pairs') && LAB.showPairs !== false) drawRopePairs(c, cx);
   if (S.brakeX != null) {   // Chapter 2: start mark and brake line on the floor
     const bx = CX + S.brakeX * PXM; c.save(); c.setLineDash([7, 5]); c.strokeStyle = C.bad; c.lineWidth = 3; c.beginPath(); c.moveTo(bx, GROUND - 92); c.lineTo(bx, GROUND + 8); c.stroke(); c.restore();
     pill(c, 'BRAKE LINE', bx, GROUND - 100, C.bad, 12);
@@ -42,6 +44,125 @@ function drawScene(f, cvo) {
   hudBox(c, `Time ${S.t.toFixed(1)} s`, 14, 22, C.line, 'left');
   hudBox(c, `Floor: ${FLOORS[S.floor].name}`, 886, 22, C.line, 'right');
   if (!cvo) { banners(c, f); drawDropZone(c); }
+}
+
+
+/* ---- Chapter 4: force pairs on the rope in the Main Arena. At each end of a rope, one pull on the rope and the matching pull back. ---- */
+function drawRopePairs(c, cx) {
+  [['left', -1, C.left], ['right', 1, C.right]].forEach(([side, s, col]) => {
+    const N = tot(S[side]); if (N < 1) return;
+    const edge = cx + s * CW / 2, L = clamp(18 + N / 6, 24, 78);
+    const arr = (x, y, dir, col2, lab, out) => { arrow(c, x, y, x + dir * L, y, col2, 5); pill(c, lab, clamp(x + dir * L / 2 + s * (out || 0), 90, 810), y - 15, col2, 12); };
+    /* team end: the team pulls the rope (away from the crate); the rope pulls the team (towards the crate) */
+    const tx = edge + s * 118;
+    arr(tx, ROPEY - 112, s, col, `team pulls rope ${N} N`, 20);
+    arr(tx + s * L, ROPEY - 142, -s, C.ink, `rope pulls team ${N} N`, 20);
+    /* crate end: the rope pulls the crate (towards the team); the crate pulls the rope (towards the crate) */
+    const kx = edge + s * 4;
+    arr(kx, ROPEY - 48, s, C.ink, `rope pulls crate ${N} N`, 50);
+    arr(kx + s * L, ROPEY - 78, -s, col, `crate pulls rope ${N} N`, 50);
+  });
+}
+
+/* ---- Chapter 4: the Space Dome. The pod is the "crate"; the astronaut is the other half of every force pair. ---- */
+const STARS = Array.from({ length: 48 }, (_, i) => [((i * 173) % 880) + 10, ((i * 89) % 215) + 14, 0.8 + ((i * 7) % 10) / 10 * 1.3, ((i * 37) % 100) / 100]);
+const podSize = m => clamp(0.74 + m / 800, 0.8, 1.36);
+function drawPod(c, x, gy, f) {
+  const sz = podSize(S.mass), w = 80 * sz, hh = 52 * sz, top = gy - 12 - hh, my = top + hh / 2;
+  c.save(); c.lineJoin = 'round'; c.fillStyle = C.muted; c.strokeStyle = C.ink; c.lineWidth = 2;
+  c.beginPath(); c.roundRect(x - w / 2 + 6, gy - 12, w - 12, 8, 3); c.fill(); c.stroke();
+  c.strokeStyle = '#7fd3ff'; c.globalAlpha = .7; c.beginPath(); c.moveTo(x - w / 2 + 8, gy - 3); c.lineTo(x + w / 2 - 8, gy - 3); c.stroke(); c.globalAlpha = 1; c.strokeStyle = C.ink;
+  c.fillStyle = C.hull; c.beginPath(); c.roundRect(x - w / 2, top, w, hh, 12); c.fill(); c.stroke();
+  c.fillStyle = C.hazard; c.fillRect(x - w / 2, my - 5, w, 10); c.strokeRect(x - w / 2, my - 5, w, 10);
+  c.fillStyle = C.space; c.beginPath(); c.roundRect(x + w / 2 - 28, top + 8, 20, 14, 5); c.fill(); c.stroke();
+  for (const sd of [-1, 1]) { c.fillStyle = C.muted; c.beginPath(); c.moveTo(x + sd * w / 2, my - 7); c.lineTo(x + sd * (w / 2 + 9), my - 11); c.lineTo(x + sd * (w / 2 + 9), my + 11); c.lineTo(x + sd * w / 2, my + 7); c.closePath(); c.fill(); c.stroke(); }
+  if (f.thr !== 0) {   // the thruster flame points the opposite way to the push on the pod
+    const sd = -Math.sign(f.thr), k = Math.abs(f.thr) / SP_THR_F, fl = 14 + k * 26 + (RMOTION ? 0 : Math.sin(performance.now() / 40) * 3), x0 = x + sd * (w / 2 + 9), gr = c.createLinearGradient(x0, 0, x0 + sd * fl, 0);
+    gr.addColorStop(0, '#ffd27a'); gr.addColorStop(1, 'rgba(255,120,40,0)'); c.fillStyle = gr; c.beginPath(); c.moveTo(x0, my - 9); c.lineTo(x0 + sd * fl, my); c.lineTo(x0, my + 9); c.closePath(); c.fill();
+    if (!RMOTION) { c.fillStyle = '#ffd9a0'; for (let q = 0; q < 5; q++) { const u = (performance.now() / 380 + q / 5) % 1; c.globalAlpha = 1 - u; c.beginPath(); c.arc(x0 + sd * (10 + u * 52), my + Math.sin(q * 2.4) * 8 * u, 2.6, 0, 7); c.fill(); } c.globalAlpha = 1; }
+  }
+  c.restore();
+  pill(c, S.mass + ' kg', x, top - 14, C.ink);
+}
+function drawAstro(c, x, gy, push) {
+  c.save(); c.fillStyle = C.muted; c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.ellipse(x + 2, gy - 5, 20, 5, 0, 0, 7); c.fill(); c.stroke();
+  c.translate(x, gy - 50); c.lineCap = 'round'; c.lineJoin = 'round';
+  const kit = Math.max(0, Math.round((S.astro - 60) / 20)); for (let i = 0; i < kit; i++) { c.fillStyle = [C.hazard, C.left, C.right, C.accent][i % 4]; c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.roundRect(-31, 8 - i * 9, 11, 8, 2); c.fill(); c.stroke(); }
+  c.fillStyle = C.hull; c.strokeStyle = C.ink; c.lineWidth = 2;
+  c.beginPath(); c.roundRect(-20, -24, 12, 36, 4); c.fill(); c.stroke();
+  c.beginPath(); c.roundRect(-10, -22, 22, 34, 8); c.fill(); c.stroke();
+  c.lineWidth = 7; c.strokeStyle = C.hull; c.beginPath(); c.moveTo(-2, 10); c.lineTo(-6, 40); c.moveTo(6, 10); c.lineTo(8, 40); c.stroke();
+  c.lineWidth = 2; c.strokeStyle = C.ink; c.beginPath(); c.moveTo(-9, 40); c.lineTo(-2, 40); c.moveTo(5, 40); c.lineTo(12, 40); c.stroke();
+  c.lineWidth = 6; c.strokeStyle = C.hull; c.beginPath(); c.moveTo(6, -14); c.lineTo(push ? 24 : 16, push ? -12 : 2); c.moveTo(6, -6); c.lineTo(push ? 24 : 14, push ? -2 : 10); c.stroke();
+  c.fillStyle = C.hull; c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.arc(2, -34, 13, 0, 7); c.fill(); c.stroke();
+  c.fillStyle = '#e0a23a'; c.beginPath(); c.ellipse(7, -34, 7, 8, 0, 0, 7); c.fill();
+  c.restore();
+  pill(c, S.astro + ' kg', x, gy - 108, C.ink);
+}
+function drawSpaceScene(c, f) {
+  const tt = performance.now() / 1000, gy = GROUND;
+  c.fillStyle = C.space; c.fillRect(0, 0, 900, gy - 14);
+  for (const [x, y, r, k] of STARS) { c.globalAlpha = RMOTION ? 0.8 : 0.45 + 0.45 * Math.sin(tt * 1.5 + k * 20); c.fillStyle = C.star; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); } c.globalAlpha = 1;
+  const e = c.createRadialGradient(780, 330, 40, 780, 330, 150); e.addColorStop(0, '#2f6fae'); e.addColorStop(1, '#163a5e'); c.fillStyle = e; c.beginPath(); c.arc(780, 330, 150, 0, 7); c.fill();
+  c.fillStyle = C.ink; c.fillRect(450 - 140, 92, 280, 30); txt(c, 'SPACE DOME · DOCK TRAINING', 450, 107.5, C.panel, `800 18px ${C.fd}`);
+  c.fillStyle = '#1d2935'; c.fillRect(0, gy - 14, 900, 50); c.fillStyle = '#7fd3ff'; c.globalAlpha = 0.55;   // the air floor
+  for (let x = 12; x < 900; x += 24) for (const y of [gy - 4, gy + 10, gy + 24]) { c.beginPath(); c.arc(x + (y > gy + 5 ? 12 : 0), y, 1.6, 0, 7); c.fill(); } c.globalAlpha = 1;
+  c.fillStyle = C.panel; c.fillRect(0, gy + 36, 900, 44); c.strokeStyle = C.muted; c.lineWidth = 1.5;   // the ruler under the floor
+  for (let m = -9; m <= 9; m++) { const x = CX + m * PXM; c.beginPath(); c.moveTo(x, gy + 36); c.lineTo(x, gy + (m % 3 === 0 ? 46 : 42)); c.stroke(); if (m % 3 === 0) txt(c, (m > 0 ? '+' : '') + m + ' m', x, gy + 58, C.muted, `500 12px ${C.fn}`); }
+  /* the station and its docking port */
+  const dockPx = CX + DOCK_X * PXM + 42 * podSize(S.mass) - 2;
+  c.save(); c.fillStyle = C.hull; c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.roundRect(dockPx + 16, gy - 178, 120, 178, 10); c.fill(); c.stroke();
+  c.fillRect(dockPx, gy - 66, 18, 48); c.strokeRect(dockPx, gy - 66, 18, 48); c.fillStyle = C.hazard; c.fillRect(dockPx - 2, gy - 70, 4, 56);
+  c.fillStyle = C.solar; c.fillRect(dockPx + 34, gy - 160, 84, 50); c.strokeRect(dockPx + 34, gy - 160, 84, 50); c.restore();
+  txt(c, 'DOCK', dockPx + 76, gy - 90, C.space, `800 16px ${C.fd}`);
+  /* the tether post and the astronaut's rope */
+  const anc = CX + (TETHER_X - 1.2) * PXM; c.fillStyle = C.hull; c.strokeStyle = C.ink; c.lineWidth = 2; c.fillRect(anc - 10, gy - 120, 10, 120); c.strokeRect(anc - 10, gy - 120, 10, 120);
+  const px = CX + S.x * PXM, ax = CX + S.ax * PXM, pushing = f.shove > 0.5;
+  c.save(); c.strokeStyle = C.star; c.globalAlpha = .6; c.lineWidth = 1.5; c.beginPath(); c.moveTo(anc, gy - 110); const sag = Math.max(4, 30 - (ax - anc) / 8); c.quadraticCurveTo((anc + ax) / 2, gy - 60 + sag, ax - 14, gy - 56); c.stroke(); c.restore();
+  drawPod(c, px, gy, f);
+  drawAstro(c, ax, gy, pushing);
+  /* the force pair, drawn on the two objects while the push lasts and for a few seconds after */
+  const since = S.pushEndT == null ? 0 : S.t - S.pushEndT, linger = !pushing && S.lastPush && S.pushEndT != null && since < 4;
+  if ((pushing || linger) && LAB.show.has('pairs') && LAB.showPairs !== false) {
+    const F = pushing ? Math.round(f.shove) : S.lastPush, L = Math.min(70, 14 + F / 5), sz = podSize(S.mass); c.save(); if (linger) c.globalAlpha = Math.max(0.35, 1 - since / 4);
+    arrow(c, px - 40 * sz, gy - 112, px - 40 * sz + L, gy - 112, C.right, 5); arrow(c, ax + 12, gy - 150, ax + 12 - L, gy - 150, C.left, 5);
+    pill(c, `astronaut pushes pod ${F} N`, clamp(px - 40 * sz + L / 2 + 30, 110, 790), gy - 134, C.right, 12); pill(c, `pod pushes astronaut ${F} N`, clamp(ax + 12 - L / 2 - 20, 110, 790), gy - 168, C.left, 12); c.restore();
+  } else if (pushing || linger) {
+    const F = pushing ? Math.round(f.shove) : S.lastPush; pill(c, `push ${F} N`, px, gy - 112 - 22 * podSize(S.mass), C.ink, 12);
+  }
+  if (f.thr !== 0 && LAB.show.has('pairs') && LAB.showPairs !== false) {   // the thruster pair
+    const sd = Math.sign(f.thr), Fm = Math.round(Math.abs(f.thr)), w = 80 * podSize(S.mass);
+    arrow(c, px, gy - 112, px + sd * 54, gy - 112, C.hazard, 5); pill(c, `gas pushes pod ${Fm} N`, px + sd * 28, gy - 134, C.hazard, 12);
+    arrow(c, px - sd * (w / 2 + 10), gy - 28, px - sd * (w / 2 + 64), gy - 28, C.bad, 5); pill(c, `pod pushes gas ${Fm} N`, px - sd * (w / 2 + 40), gy - 8, C.bad, 12);
+  }
+  hudBox(c, `Time ${S.t.toFixed(1)} s${S.warp > 1 ? ' (×' + S.warp + ')' : ''}`, 14, 22, C.line, 'left');
+  hudBox(c, `To the dock ${Math.max(0, DOCK_X - S.x).toFixed(1)} m`, 886, 22, C.line, 'right');
+  banners(c, f); drawDropZone(c);
+}
+/* the Space Dome's free-body diagrams: one for the astronaut and one for the pod, side by side, so the pair is easy to see */
+function drawSpaceFBD(f) {
+  const cv = $('#cvFBD'); if (!cv || !cv.offsetParent) return;
+  const c = fit(cv, 340, 300), ay = 128, ax0 = 112, px0 = 232;
+  c.fillStyle = C.panel; c.fillRect(0, 0, 340, 300);
+  const since = S.pushEndT == null ? 0 : S.t - S.pushEndT, linger = f.shove <= 0.5 && S.lastPush && S.pushEndT != null && since < 4;
+  const F = f.shove > 0.5 ? f.shove : linger ? S.lastPush : 0, Tn = Math.abs(f.thr), step = niceStep(Math.max(60, F, Tn)), k = 30 / step;
+  c.strokeStyle = C.grid; c.lineWidth = 1; for (let x = 10; x <= 340; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 262); c.stroke(); } for (let y = ay % 30; y <= 262; y += 30) { c.beginPath(); c.moveTo(0, y); c.lineTo(340, y); c.stroke(); }
+  c.fillStyle = C.hull; c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.roundRect(ax0 - 14, ay - 22, 28, 44, 9); c.fill(); c.stroke(); c.beginPath(); c.arc(ax0, ay - 32, 11, 0, 7); c.fill(); c.stroke();
+  const pw = 54, ph = 36; c.beginPath(); c.roundRect(px0 - pw / 2, ay - ph / 2, pw, ph, 9); c.fill(); c.stroke(); c.fillStyle = C.hazard; c.fillRect(px0 - pw / 2, ay - 4, pw, 8); c.strokeRect(px0 - pw / 2, ay - 4, pw, 8);
+  const lab = (s, x, y, col) => { c.font = `700 12px ${C.fn}`; const w = c.measureText(s).width + 8; x = Math.max(w / 2 + 2, Math.min(338 - w / 2, x)); c.fillStyle = C.panel; c.fillRect(x - w / 2, y - 8, w, 16); txt(c, s, x, y, col, `700 12px ${C.fn}`); };
+  if (F > 0.5) {
+    c.save(); if (linger) c.globalAlpha = Math.max(0.35, 1 - since / 4); const L = Math.min(F * k, 86);
+    arrow(c, px0, ay - 5, px0 + L, ay - 5, C.right, 4); lab(Math.round(F) + ' N', px0 + L / 2 + 6, ay - 22, C.right);
+    arrow(c, ax0, ay - 5, ax0 - L, ay - 5, C.left, 4); lab(Math.round(F) + ' N', ax0 - L / 2 - 6, ay - 22, C.left); c.restore();
+  }
+  if (Tn > 0.5) { const sd = Math.sign(f.thr), L = Math.min(Tn * k, 86); arrow(c, px0, ay + 14, px0 + sd * L, ay + 14, C.hazard, 4); lab('thrusters ' + Math.round(Tn) + ' N', px0 + sd * (L / 2 + 6), ay + 30, C.hazard); }
+  txt(c, 'Astronaut', ax0, 196, C.ink, `800 14px ${C.fd}`); txt(c, S.astro + ' kg', ax0, 214, C.muted, `700 12px ${C.fn}`);
+  txt(c, 'Pod', px0, 196, C.ink, `800 14px ${C.fd}`); txt(c, S.mass + ' kg', px0, 214, C.muted, `700 12px ${C.fn}`);
+  c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 262.5); c.lineTo(340, 262.5); c.stroke(); c.setLineDash([4, 4]); c.beginPath(); c.moveTo(172, 40); c.lineTo(172, 240); c.stroke(); c.setLineDash([]);
+  txt(c, F > 0.5 || Tn > 0.5 ? 'Two objects, two forces. One force on each.' : 'Push off to see the two forces.', 170, 282, C.muted, `600 13px ${C.fb}`);
+  $('#scaleNote').textContent = `Scale: 1 grid square = ${step} N. Each object has its own diagram.`;
+  const lg = [['right', 'Push on the pod'], ['left', 'Push on the astronaut']].concat(LAB.show.has('thrust') ? [['hazard', 'Thrusters on the pod']] : []);
+  const lh = lg.map(([k2, n]) => `<span><i style="background:var(--${k2})"></i>${n}</span>`).join(''); const le = $('#legend'); if (le.dataset.h !== lh) { le.innerHTML = lh; le.dataset.h = lh; }
 }
 
 /* ---- Chapter 3: the Snow Arena. The huskies are the right team; the sled and its load are the "crate". ---- */
@@ -224,7 +345,15 @@ function renderControls() {
   $('#floors').innerHTML = Object.entries(FLOORS).filter(([k]) => (LAB.floors || FLOOR_MAIN).includes(k)).map(([k, F]) => `<button type="button" data-floor="${k}" aria-pressed="${S.floor === k}">${F.name}<small>${F.note}</small></button>`).join('');
   const sl = S.scene === 'sled', obj = sl ? 'sled' : 'crate'; [['[data-panel="fbd"] .term', 'Free-body diagram of the ' + obj], ['[data-panel="vt"] .term', 'Velocity–time graph of the ' + obj]].forEach(([q, t]) => { const e = $(q); if (e) e.textContent = t; });
   const ml = $('[data-panel="mass"] .term'); if (ml) ml.textContent = sl ? 'Sled and load mass' : 'Crate mass'; $('#mass').setAttribute('aria-label', sl ? 'Sled and load mass in kilograms' : 'Crate mass in kilograms'); $('#massNum').setAttribute('aria-label', sl ? 'Sled and load mass in kilograms: type a number' : 'Crate mass in kilograms: type a number');
+  const sp = S.scene === 'space';
+  { const e = $('.fbdcol .lbl .term'); if (e) e.textContent = sp ? 'Free-body diagrams of the astronaut and pod' : 'Free-body diagram of the crate'; }
+  [['readV', sp ? 'Pod velocity' : 'Velocity'], ['readM', sp ? 'Pod mass' : 'Mass']].forEach(([k, t]) => { const e = $(`[data-panel="${k}"] .term`); if (e) e.textContent = t; });
+  if (sp) { if (ml) ml.textContent = 'Pod mass'; $('#mass').setAttribute('aria-label', 'Pod mass in kilograms'); $('#massNum').setAttribute('aria-label', 'Pod mass in kilograms: type a number'); }
+  const lo = sp ? 50 : 10, hi = sp ? 500 : 150, mst = sp ? 10 : 1; [$('#mass'), $('#massNum')].forEach(e => { e.min = lo; e.max = hi; }); $('#mass').step = mst;
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
+  const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
+  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal speed' : `Speed up time ×${SP_WARP}`; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
+  const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
   /* trial-and-error markers: red = a brake force that was too strong (stopped short), yellow = too weak (slid past) */
@@ -236,16 +365,26 @@ function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
   $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); if (S.running) runMark('pull'); else runEnd('paused'); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
-  $('#shoveBtn').addEventListener('click', () => { shove(); runMark('push'); labChanged(); });
+  $('#shoveBtn').addEventListener('click', () => { if (S.scene === 'space') { if (spacePush()) runMark('push'); labChanged(); return; } shove(); runMark('push'); labChanged(); });
+  const thr = d => { if (!thrust(d)) return; if (!RUN) runMark('thrust'); labChanged(); };
+  $('#thrFwd').addEventListener('click', () => thr(1)); $('#thrBack').addEventListener('click', () => thr(-1));
+  $('#warpBtn').addEventListener('click', () => { S.warp = S.warp > 1 ? 1 : SP_WARP; labChanged(); });
+  $('#tgPairs').addEventListener('change', e => { LAB.showPairs = e.target.checked; });
+  /* in the Space Dome, changing anything between runs starts a fresh set-up; a push in progress is never interrupted */
+  const spReset = () => { if (S.shoveT < 0 && S.thrT < 0) resetSim(); };
+  $('#astM').addEventListener('input', e => { S.astro = +e.target.value; $('#astNum').value = S.astro; spReset(); labChanged(); });
+  $('#pushF').addEventListener('input', e => { S.pushF = +e.target.value; $('#pushNum').value = S.pushF; spReset(); labChanged(); });
   $('#launchBtn').addEventListener('click', () => { launch(); runMark('launch'); labChanged(); });
   const setBrake = v => { S.brakeF = clamp(Math.round(v), 5, 200); if (!S.running) resetSim(); labChanged(); };
   $('#brakeF').addEventListener('input', e => setBrake(+e.target.value));
   $$('[data-bk]').forEach(b => b.addEventListener('click', () => setBrake(S.brakeF + +b.dataset.bk)));
   $('#floors').addEventListener('click', e => { const b = e.target.closest('[data-floor]'); if (!b) return; S.floor = b.dataset.floor; resetSim(); labChanged(); });
-  $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massNum').value = S.mass; if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
+  $('#mass').addEventListener('input', e => { S.mass = +e.target.value; $('#massNum').value = S.mass; if (S.scene === 'space') spReset(); else if (!S.running) resetSim(); if (LAB.onChange) LAB.onChange(); });
   /* typed number boxes: any value the slider allows can be typed in (applied on Enter or when the box loses focus) */
-  const typed = (inp, lo, hi, set) => { const go = () => { const v = parseNum(inp.value); if (isNaN(v)) { renderControls(); return; } set(clamp(Math.round(v), lo, hi)); }; inp.addEventListener('change', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); inp.blur(); } }); };
-  typed($('#massNum'), 10, 150, v => { S.mass = v; if (!S.running) resetSim(); labChanged(); });
+  const typed = (inp, lo, hi, set) => { const go = () => { const v = parseNum(inp.value); if (isNaN(v)) { renderControls(); return; } set(clamp(Math.round(v), +inp.min || lo, +inp.max || hi)); }; inp.addEventListener('change', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); inp.blur(); } }); };
+  typed($('#massNum'), 10, 150, v => { S.mass = v; if (S.scene === 'space') spReset(); else if (!S.running) resetSim(); labChanged(); });
+  typed($('#astNum'), 40, 160, v => { S.astro = v; spReset(); labChanged(); });
+  typed($('#pushNum'), 20, 500, v => { S.pushF = v; spReset(); labChanged(); });
   typed($('#brakeNum'), 5, 200, v => setBrake(v));
   $('#tgVert').addEventListener('change', e => { LAB.showVert = e.target.checked; });
   $('#tgRes').addEventListener('change', e => { LAB.showRes = e.target.checked; });
@@ -271,17 +410,20 @@ const RD = [
   ['readRes', 'Resultant force', 'resultant', 'res', f => Math.abs(f.net) < .5 ? '0 N (balanced)' : fmt(Math.abs(f.net), 1) + ' N ' + (f.net > 0 ? '→' : '←')],
   ['readA', 'Acceleration', 'acceleration', '', f => fmt(f.a, 2) + ' m/s²'],
   ['readV', 'Velocity', 'velocity', '', () => fmt(S.v, 2) + ' m/s'],
-  ['readD', 'Braking distance', 'brakingdist', '', () => S.brakeFrom == null ? '0.00 m' : fmt(S.x - S.brakeFrom, 2) + ' m']
+  ['readD', 'Braking distance', 'brakingdist', '', () => S.brakeFrom == null ? '0.00 m' : fmt(S.x - S.brakeFrom, 2) + ' m'],
+  ['readAV', 'Astronaut velocity', 'velocity', '', () => fmt(S.flags.tether ? -S.avPeak : S.av, 2) + ' m/s'],   // the tether stops the astronaut; the readout keeps the speed they pushed off at
+  ['readAM', 'Astronaut mass', 'mass', '', () => fmt(S.astro, 0) + ' kg']
 ];
 function buildReads() {
   $('#reads').innerHTML = RD.map(([k, l, t, cl]) => `<div class="rd ${cl}" data-panel="${k}"><div class="lbl"><button type="button" class="term tl" data-t="${t}">${l}</button><button type="button" class="info" data-info="${k}" aria-label="How do I read the ${l} readout?">ⓘ</button></div><div class="v" id="v-${k}"></div></div>`).join('');
 }
-const maskNow = () => S.scene === 'sled' && typeof sledMasked === 'function' ? sledMasked(S.right.length, S.mass, S.floor) : new Set();
+const maskNow = () => S.scene === 'sled' && typeof sledMasked === 'function' ? sledMasked(S.right.length, S.mass, S.floor) : S.scene === 'space' && typeof spaceMasked === 'function' ? spaceMasked(S.pushF, S.mass, S.astro) : new Set();
 function readouts(f) { const mk = maskNow(); RD.forEach(([k, , , , fn]) => { const el = document.getElementById('v-' + k); if (el && !el.parentElement.hidden) el.textContent = mk.has(k) ? '? (work it out first)' : fn(f); }); }
 
 /* ---- live free-body diagram (shows the actual object; arrows start at its centre) ---- */
 function niceStep(mx) { const raw = mx / 3; const p = Math.pow(10, Math.floor(Math.log10(raw))); for (const m of [1, 2, 2.5, 5, 10]) if (raw <= m * p) return m * p; return 10 * p; }
 function drawLiveFBD(f) {
+  if (S.scene === 'space') { drawSpaceFBD(f); return; }
   const cv = $('#cvFBD'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 340, 300), cx = 170, cy = 128, VMAX = 92;
   c.fillStyle = C.panel; c.fillRect(0, 0, 340, 300);

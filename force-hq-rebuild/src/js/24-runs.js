@@ -19,7 +19,7 @@ function runMark(kind) {
   const R = runsAll(); RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
   const f = forces();
   RUN = Object.assign({ n: RUNSEQ, kind, at: Date.now(), live: true, mass: S.mass, floor: S.floor, L: tot(S.left), R: tot(S.right), x0: S.x, t0: S.t,
-    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W, scene: S.scene, nR: S.right.length, a: null, net: null, Rst: null, frS: null, v1: null, v2: null, v3: null, v4: null, finT: null, finV: null }, runWhere());
+    v0: kind === 'launch' ? S.v0 : 0, brakeF: S.brakeF, brakeOn: S.brakeX != null, top: 0, lastV: 0, dist: 0, dir: 0, fs: 0, fk: 0, push: 0, stuckT: 0, moved: false, bd: null, bt: null, out: 'running', W: f.W, scene: S.scene, nR: S.right.length, a: null, net: null, Rst: null, frS: null, v1: null, v2: null, v3: null, v4: null, finT: null, finV: null, astro: S.astro, pushF: S.pushF, vp: null, va: null, bursts: [], dockV: null }, runWhere());
   R.push(RUN); if (R.length > 200) R.splice(0, R.length - 200); dbSet('runs', R); RUNDIRTY = 1;
 }
 /* update the live run every frame */
@@ -39,8 +39,10 @@ function runTick(f, dt) {
   if (S.running && S.pullT > PULL_RAMP + 0.05 && f.R > 0) { RUN.a = f.a; RUN.net = f.net; RUN.Rst = f.R; RUN.frS = Math.abs(f.fr); }
   [1, 2, 3, 4].forEach(k => { if (RUN['v' + k] == null && RUN.t >= k) RUN['v' + k] = S.v; });
   if (S.flags.finished) { RUN.finT = S.finT - RUN.t0; RUN.finV = S.finV; }
-  if (!S.running) runEnd(S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
-  else if (av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
+  /* Chapter 4: the speeds the pod and the astronaut reached when the push ended, any thruster bursts, and the docking speed */
+  if (S.scene === 'space') { if (S.pushDone && RUN.vp == null) { RUN.vp = S.pushDone.vp; RUN.va = S.pushDone.va; } RUN.bursts = S.bursts.slice(); if (S.flags.docked) RUN.dockV = S.dockV; RUN.curV = S.v; }
+  if (!S.running) runEnd(S.flags.docked ? 'dock' : S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.msg && /drifted/.test(S.msg) ? 'drift' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
+  else if (S.scene !== 'space' && av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
   RUNDIRTY = 1;
 }
 function runEnd(why) {
@@ -60,8 +62,22 @@ function sledText(r) {
   if (r.out === 'finish') return head + body + ` It crossed the finish line after ${fmt(r.finT, 1)} s, moving at ${ms(r.finV)}.`;
   return head + body + ` Its top speed was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
+function spaceText(r) {
+  const live = r.live && r.out === 'running', mk = spaceMasked(r.pushF, r.mass, r.astro), hv = k => mk.has(k);
+  if (r.kind === 'thrust') {
+    const head = `You fired the thrusters on the ${r.mass} kg pod.`, n = r.bursts.length;
+    if (!n) return head + (live ? ' The burst is happening…' : ' No burst finished.');
+    return head + ` After ${n === 1 ? 'one burst' : n + ' bursts'}, the pod's speed was ${r.bursts.map(ms).join(', then ')}.` + (r.dockV != null ? ` It docked at ${ms(r.dockV)}.` : '');
+  }
+  const head = `The ${r.astro} kg astronaut pushed the ${r.mass} kg pod with ${NN(r.pushF)}.`;
+  if (r.vp == null) return head + (live ? ' The push is happening…' : ' The run stopped before the push finished.');
+  const bits = [hv('readV') ? '' : ` The pod sped up to ${ms(r.vp)} to the right.`, hv('readAV') ? '' : ` The astronaut sped up to ${ms(r.va)} to the left.`].join('');
+  const end = r.dockV != null ? (hv('readV') ? ' The pod docked.' : ` The pod docked at ${ms(r.dockV)}.`) : r.out === 'drift' ? ' The pod drifted off into space.' : live ? ' The pod is gliding towards the dock…' : '';
+  return head + bits + end;
+}
 function runText(r) {
   if (r.scene === 'sled') return sledText(r);
+  if (r.scene === 'space') return spaceText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
   const dirw = r.dir > 0 ? 'right' : 'left', live = r.live && r.out === 'running';
   if (r.kind === 'launch') {
@@ -86,6 +102,13 @@ function runText(r) {
   return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
 function runChips(r) {
+  if (r.scene === 'space') {
+    const mk = spaceMasked(r.pushF, r.mass, r.astro), c = [['Pod mass', r.mass + ' kg'], ['Astronaut mass', r.astro + ' kg']];
+    if (r.kind === 'push') c.push(['Push', NN(r.pushF)]);
+    if (r.vp != null && !mk.has('readV')) c.push(['Pod speed', ms(r.vp)]); if (r.va != null && !mk.has('readAV')) c.push(['Astronaut speed', ms(r.va)]);
+    r.bursts.forEach((v, i) => c.push(['Speed after burst ' + (i + 1), ms(v)])); if (r.dockV != null && !mk.has('readV')) c.push(['Docking speed', ms(r.dockV)]);
+    return c;
+  }
   if (r.scene === 'sled') {
     const c = [['Huskies', String(r.nR)], ['Mass', r.mass + ' kg'], ['Snow', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor], ['Pull', NN(r.R)]];
     if (r.frS != null && r.frS > 0.5) c.push(['Friction', NN(r.frS)]); else if (r.fs) c.push(['Friction', NN(r.fs)]);
@@ -104,7 +127,7 @@ function runChips(r) {
   return c;
 }
 const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
-const KINDICON = { push: '👋', pull: '🪢', launch: '🚀' };
+const KINDICON = { push: '👋', pull: '🪢', launch: '🚀', thrust: '🔥' };
 /* one run: this step's runs are open; earlier runs fold to a one-line summary (the student can open any of them) */
 const RUNOPEN = {};
 function runItem(r, open) {

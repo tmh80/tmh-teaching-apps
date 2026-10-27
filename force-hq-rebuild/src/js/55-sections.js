@@ -31,9 +31,19 @@ const SECTIONS = [
     blurb: 'Read acceleration from a graph, work with friction on fresh powder, mix weight and mass, then run the mail.',
     steps: ['e1', 'e2', 'e3'], challenge: ['n1', 'n2', 'n3'], review: ['c3r9', 'c3r10', 'c3r12', 'c3r13', 'c3r14'], needs: 'c3f',
     goal: 'Find acceleration from the slope of a velocity–time graph; solve two-step problems (resultant force first, then F = ma); turn weight into mass before using F = ma; choose the number of huskies for a target acceleration; draw the free-body diagram of an accelerating sled.',
-    vocab: ['acceleration', 'velocity–time graph', 'slope', 'resultant force', 'friction', 'weight', 'mass', 'Newton\'s second law'] }
+    vocab: ['acceleration', 'velocity–time graph', 'slope', 'resultant force', 'friction', 'weight', 'mass', 'Newton\'s second law'] },
+  { id: 'c4f', ch: 'c4', n: 4, title: 'Action and reaction', part: 'Foundation', stamp: 'Pair Finder',
+    blurb: 'Push off in the Space Dome: force pairs, Newton\'s third law, and why the lighter object ends up going faster.',
+    steps: ['f1', 'f2', 'f3', 'f4', 'f5'], challenge: null, review: ['c4r1', 'c4r2', 'c4r3', 'c4r4', 'c4r5', 'c4r6', 'c4r7', 'c4r8'],
+    goal: 'State Newton\'s third law; describe a force pair (the same size, opposite directions, on different objects); use F = ma to explain why the lighter object in a pair speeds up more; explain why force pairs do not cancel.',
+    vocab: ['Newton\'s third law', 'force pair', 'action', 'reaction', 'mass', 'velocity', 'force', 'acceleration'] },
+  { id: 'c4x', ch: 'c4', n: 4, title: 'Action and reaction', part: 'Extension', stamp: 'Docking Commander',
+    blurb: 'Thrusters and rockets, then mission control\'s docking orders: work out the push that gives the right docking speed.',
+    steps: ['g1', 'g2'], challenge: ['o1', 'o2', 'o3'], review: ['c4r9', 'c4r10', 'c4r11', 'c4r12', 'c4r13'], needs: 'c4f',
+    goal: 'Explain how thrusters and rockets use force pairs; work out the push needed for a target speed using force = mass × speed; keep the astronaut\'s speed within a limit by choosing their mass.',
+    vocab: ['thruster', 'force pair', 'Newton\'s third law', 'Newton\'s first law', 'mass', 'force'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

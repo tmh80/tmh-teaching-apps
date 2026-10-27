@@ -2,7 +2,7 @@
 
 Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
-**Status:** Chapters 1, 2 and 3 are built, tested and pushed (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`), plus progress save and load. **Next job: Chapter 4, Action and reaction (Newton's third law)** in the Space Dome, with the docking orders as its challenge. Give Tom a plan before building (he asked for this on Chapter 3 and liked it).
+**Status:** Chapters 1, 2, 3 and 4 are built, tested and pushed (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`, `c4f`, `c4x`; Chapter 4 added 27 Oct 2026, see the Chapter 4 notes in the Brief), plus progress save and load. **Next job (was Chapter 4, now done; next is Chapter 5, balanced forces and the Drop Zone, or Tom's feedback on Chapter 4). Original Chapter 4 job: Action and reaction (Newton's third law)** in the Space Dome, with the docking orders as its challenge. Give Tom a plan before building (he asked for this on Chapter 3 and liked it).
 
 ## 1. Getting set up (GitHub is the source of truth)
 - **Repo:** `tmh80/tmh-teaching-apps`. Attach it with `add_repo` (access: push), clone it to `/home/claude/tmh-teaching-apps`, then `register_repo_root`. Work directly in `force-hq-rebuild/`. No zips are needed any more.
@@ -15,7 +15,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
   - `dist/Force-HQ-offline.html` (for Toddle)
   - `dist/test.html` (with the `window.__fhq` hook; `__fhq.ev(code)` runs code inside the app)
   - `dist/artifact.html`
-- **Tests:** `sh tests/run_all.sh` builds, then runs all 17 Playwright tests (the last one, `backup.py`, is outside the loop). Each test should print `errors []` (or `[]`), with no assertion errors. Screenshots go to `/tmp/fhq-shots/`. Paths are now relative, so the tests run from any clone. Add a `play_c4.py` modelled on `play_c3.py`.
+- **Tests:** `sh tests/run_all.sh` builds, then runs all 18 Playwright tests (the last one, `backup.py`, is outside the loop). Each test should print `errors []` (or `[]`), with no assertion errors. Screenshots go to `/tmp/fhq-shots/`. Paths are now relative, so the tests run from any clone. Add a `play_c4.py` modelled on `play_c3.py`.
 - **Toddle PDFs:** `python3 tools/make_worksheets.py` writes `dist/toddle-files/` and the zip. Add the new sections (`c4f`, `c4x`) to `SHEETS` in that script.
 - **Preview:** https://claude.ai/artifact/2qHdjKcuWWAjgMkjZdqEcy. Read it first, then republish `dist/artifact.html` to that URL, passing `url`.
 - **Deliver after each change:**

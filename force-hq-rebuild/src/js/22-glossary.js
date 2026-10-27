@@ -51,6 +51,10 @@ const TERMS = {
   decel: ['Deceleration', 'Slowing down. It is an acceleration that points the opposite way to the motion.', ['deceleration']],
   unit: ['Unit', 'What a measurement is counted in, such as N, kg or m/s². An answer needs its unit as well as its number.', ['unit', 'units']],
   proportional: ['Directly proportional', 'Two things are directly proportional when doubling one doubles the other, and halving one halves the other.', ['directly proportional']],
+  forcepair: ['Force pair', 'Two forces that two objects exert on each other. They are the same size, point in opposite directions, are the same type of force and act on different objects.', ['force pair', 'force pairs']],
+  action: ['Action', 'One force in a force pair. The other force is the reaction. Neither comes first: they happen at exactly the same time.', ['action']],
+  reaction: ['Reaction', 'The other force in a force pair: the push or pull back from the object you pushed or pulled.', ['reaction']],
+  thruster: ['Thruster', 'A small rocket on a spacecraft. It throws gas out one way, and the gas pushes the spacecraft the other way.', ['thrusters', 'thruster']],
   shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */

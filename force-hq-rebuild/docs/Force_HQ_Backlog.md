@@ -4,7 +4,7 @@
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.
 2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Tom confirmed (25 Oct): the Space Dome stays in Chapter 4 with the docking orders as its challenge.
 3. ~~Chapter 3, F = ma~~ (built 25 Oct 2026, all in the Snow Arena).
-4. **Chapter 4, Action and reaction.** Port the Space Dome event first. The astronaut and pod push log, rope pairs, and thrusters.
+4. ~~Chapter 4, Action and reaction~~ (built 27 Oct 2026: Space Dome push-offs, force pairs in the Space Dome and the tug-of-war, thrusters, docking-orders Challenge).
 5. **Chapter 5, Balanced forces and the Drop Zone.**
    - New arena with an air slider.
    - Objects to drop: feather, ball, crate, parachutist.
@@ -37,3 +37,6 @@
 ## Done: progress save and load (26 Oct)
 - Save and load progress file or code, for loaner devices and backups. Tested in `tests/backup.py`.
 - Open question: shared school computers share one browser save; "Not you? Start fresh" is the workaround.
+
+- Chapter 4: ask Tom to play it and say whether the ×8 time button, the tether and the "push lasts 1 s so speed = F ÷ m" shortcut feel right. Later idea: collisions (a second pod) and a momentum extension.
+- Chapter 4: both sections come out at about 29 min (Foundation) and 24 min (Extension) in `secMins`.
