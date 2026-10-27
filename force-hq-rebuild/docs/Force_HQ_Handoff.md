@@ -1,8 +1,8 @@
-# Force HQ rebuild: handoff for a new chat (25 Oct 2026)
+# Force HQ rebuild: handoff for a new chat (27 Oct 2026)
 
-Start here. This is a **streamlining job**: the old Force HQ already contains most of the physics, drawings, events and question banks. Move pieces across from the old build and adapt them. Don't write something from scratch when the old build has it. Read this file, then `Force_HQ_Brief.md` (file map and the "must not break" rules). Open `Force_HQ_Rebuild_Brief.md` (the plan for every chapter) only for the section you're building. All three are in `force-hq-rebuild/docs/` in the repo and in the project under `claude/`.
+Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
-**Chapter 3 (F = ma, `c3f` and `c3x`) is built and tested (25 Oct 2026). Next job: Chapter 4, Action and reaction** (Space Dome and docking orders; see the Backlog). Sections 1–2 below still apply; the Chapter 3 port table in section 3 is now history.
+**Status:** Chapters 1, 2 and 3 are built, tested and pushed (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`), plus progress save and load. **Next job: Chapter 4, Action and reaction (Newton's third law)** in the Space Dome, with the docking orders as its challenge. Give Tom a plan before building (he asked for this on Chapter 3 and liked it).
 
 ## 1. Getting set up (GitHub is the source of truth)
 - **Repo:** `tmh80/tmh-teaching-apps`. Attach it with `add_repo` (access: push), clone it to `/home/claude/tmh-teaching-apps`, then `register_repo_root`. Work directly in `force-hq-rebuild/`. No zips are needed any more.
@@ -15,8 +15,8 @@ Start here. This is a **streamlining job**: the old Force HQ already contains mo
   - `dist/Force-HQ-offline.html` (for Toddle)
   - `dist/test.html` (with the `window.__fhq` hook; `__fhq.ev(code)` runs code inside the app)
   - `dist/artifact.html`
-- **Tests:** `sh tests/run_all.sh` builds, then runs all 16 Playwright tests. Each test should print `errors []` (or `[]`), with no assertion errors. Screenshots go to `/tmp/fhq-shots/`. Paths are now relative, so the tests run from any clone. Add a `play_c3.py` modelled on `play_c2.py`.
-- **Toddle PDFs:** `python3 tools/make_worksheets.py` writes `dist/toddle-files/` and the zip. Add the new sections to `SHEETS` in that script.
+- **Tests:** `sh tests/run_all.sh` builds, then runs all 17 Playwright tests (the last one, `backup.py`, is outside the loop). Each test should print `errors []` (or `[]`), with no assertion errors. Screenshots go to `/tmp/fhq-shots/`. Paths are now relative, so the tests run from any clone. Add a `play_c4.py` modelled on `play_c3.py`.
+- **Toddle PDFs:** `python3 tools/make_worksheets.py` writes `dist/toddle-files/` and the zip. Add the new sections (`c4f`, `c4x`) to `SHEETS` in that script.
 - **Preview:** https://claude.ai/artifact/2qHdjKcuWWAjgMkjZdqEcy. Read it first, then republish `dist/artifact.html` to that URL, passing `url`.
 - **Deliver after each change:**
   - copy the offline file to `force-hq-rebuild/Force-HQ-Rebuild-offline.html`
@@ -41,34 +41,19 @@ Start here. This is a **streamlining job**: the old Force HQ already contains mo
   - worksheets, keys and schemes are generated automatically from the question data
 - Run only the tests that touch what you changed while you work. Run the full `run_all.sh` before you commit.
 
-## 3. What to port for Chapter 3
+## 2. Saving tokens: porting from the old build
+- **Never Read `force-hq/Force-HQ.html` whole** (550 KB). Use `tools/old.py`: `list <word>`, then print named definitions (`python3 tools/old.py drawAstro drawSpaceScene`), or `grep <text>`.
+- Port by copying the definition into the right `src/js/` module and adapting it to the new names (`S`, `LAB`, `forces()`, `C` colours, `fmt`, glossary auto-underline). Keep the old numbers and wording where they fit.
+- **Reuse the rebuild's engines. Don't add new ones.** Questions are `QT` data (`35-questions.js`); steps follow `43-ch3.js` (newest pattern); challenges go in `45-challenge.js`; sections in `55-sections.js`; worksheets, keys and schemes generate from the question data.
+- Run only the tests that touch what you changed while working. Run the full `sh tests/run_all.sh` before committing.
 
-| What Chapter 3 needs | Old-build source (`tools/old.py <name>`) | Where it goes |
-|---|---|---|
-| Husky sled race in the Snow Arena | `drawSled`, `drawSledScene`, `SLED_M` (with `VTOP`, `SLED_X0`, `SLED_FIN`), `SNOW`, `PINES`, `GROUNDS`, the sled branch of `forces` (top-speed taper), `EVENTS.sled`, `EVCTL` | `10-engine.js` (a `S.scene='sled'` branch), `11-draw.js`, `12-arena.js` |
-| Huskies as pullers | `PUL` already has husky 90 N; the rebuild already draws a distinct husky in `11-draw.js` | reuse as it is |
-| Formula triangle (F = m × a) | `buildTri`, `bindTri`, `triHTML`, `TRIF` | a helper in `21-calc.js` (the skill asks for one beside the calculator) and a Learn card |
-| Levelled maths bank (find F, a, m, two-step, mixed) | `LEVELS`, `genQ`, `OBJ`, `makePractice`, `nf` | turn it into seeded `num` questions with a hint ladder (cover the letter, substitute, answer with unit), non-round values and a unit picker; correct answers go to Journal evidence (`addEvidence`) |
-| Mail-run challenge (sled) | the sled event state and checks in the old `checkMissions` / `MISSIONS` | a `renderSledCourse` in `45-challenge.js`, scored like the brake course |
-| Docking orders (space) | `genOrder`, `renderOrder`, `drawSpaceScene`, `drawPod`, `drawAstro` | **Not in Chapter 3** (Tom, 25 Oct): the Space Dome stays in Chapter 4, and the docking orders are its challenge. |
-| v–t graph with acceleration (sloped line) | `drawVT` (the rebuild's `vtSVG` in `42-ch2.js` already exists) | extend `vtSVG` to draw a sloped line and read off acceleration |
-| Fun facts (banked) | `FACTS`, `factPop`, `factList`, `FACTSTEP` | gate each fact by chapter; small, so it can go in with Chapter 3 |
-
-**Tom's decision (25 Oct 2026): the Space Dome stays in Chapter 4; all of Chapter 3 is in the Snow Arena.**
-- **Friction off for the first steps.** The Foundation's opening steps (formula triangle, predict → calculate → run) run the sled with friction switched off, so the husky pull is the resultant and a = F ÷ m works directly. Add a `mu: 0` option for the snow (like the air floor in Chapters 1–2) and set it in those steps.
-- **Disclaimer when it's switched off.** A clear card at the first friction-free step: real snow and ice do have some friction, but it has been switched off for the first few steps so you can see F = ma on its own. Show a small "Friction: off" badge on the arena while it is off.
-- **Disclaimer when it returns.** A card at the step where friction comes back: friction is back on, so the husky's pull is no longer the resultant; work out the resultant first (pull − friction), then use F = ma. The badge switches to "Friction: on". Friction should return by the end of the Foundation or the start of the Extension, so the Extension and the mail-run challenge use the resultant every time.
-- The Chapter 3 challenge is the sled mail run only.
-
-Chapter 3 content plan (from the rebuild brief):
-- Resultant force first (Chapter 1 already teaches it in s3r, so recap only).
-- The formula triangle with the husky sled.
-- Predict → calculate → run.
-- A maths bank in levels.
-- Challenge: the mail run.
-- The Check is mostly calculations, plus one or two explain items.
-
-**Leave behind:** the Skid Track, Crash Bay, Atrium and old HQ map. The Crash Bay seatbelt model (`sMake`) is not needed.
+## 3. Chapter 4 plan (from the Rebuild Brief; propose it to Tom before building)
+- **Learn:** the astronaut and pod push off each other in the Space Dome (equal forces, opposite directions, on different objects); students predict both speeds before each push. Then the tug-of-war rope pair (team pulls rope, rope pulls team; the arena already has "third law pairs" arrows). Then thrusters (pod pushes gas back, gas pushes pod forward).
+- **Challenge:** mission control docking orders using one push and no thrusters.
+- **Check:** identify the pair for a given force; match the pairs; explain why the lighter one moves faster.
+- **Old-build parts:** `drawSpaceScene`, `drawAstro`, `genOrder`, `order`, `orderCheck`, `ordersDone`, `renderOrder`, `logPush`, `push`, `RUNPUSH`, `wasPush`, `drawPod`.
+- **Tom's standing decisions:** the Space Dome is Chapter 4. Leave behind the Skid Track, Crash Bay, Atrium and old HQ map.
+- **Likely new work:** a `S.scene='space'` branch in `10-engine.js` and `12-arena.js` (no friction, momentum from equal and opposite pushes), a `renderOrdersCourse` in `45-challenge.js` (modelled on `renderSledCourse`), and `c4f`/`c4x` entries in `55-sections.js`. Use answer masking (`mask` in step data) wherever a readout would hand over an answer.
 
 ## 4. Rules every new step must follow (from the sim-builder skill and Tom's feedback)
 - **Sections:** about 20–30 minutes each, shown as "approx.", estimated by `secMins`. Order: Learn → Challenge → Check. Every Learn step has a Do this job and at least one question.
@@ -88,29 +73,29 @@ Chapter 3 content plan (from the rebuild brief):
 - **Worksheets** get a "Steps completed in the sim" list automatically from the section data. Check the blank, key and scheme PDFs render cleanly.
 - **Voice:** warm, natural, short sentences. No "it isn't X, it's Y" construction, no standards on student screens, g = 9.8 N/kg.
 
-## 5. State at the end of this session (all tested and pushed)
-- Chapters 1 and 2 are complete (`c1f`, `c1x`, `c2f`, `c2x`), each with Learn, Challenge, Check, stamp and Toddle PDFs.
-- **Round 6 of Tom's feedback is done:**
-  - the Journal is a side panel with Runs, Notes and Vocab tabs, and there's a See my runs button
-  - slider number boxes, and brake markers
-  - Chapter 2 maths scaffolded
-  - distractors rewritten
-  - words to use in explain items
-  - worksheet steps summary, plus the Toddle AI note about it
-  - the calculator takes x, and its button stays visible
-- Both skills were updated through `propose_skills`. The repo copies match.
-- **This session also:**
-  - made the test paths portable
-  - added `tests/run_all.sh` and `tools/old.py`
-  - fixed the home toast so the Space Dome says Chapter 4
+## 5. Lessons from Chapter 3 (reuse these)
+- **Students copy readouts.** Any question whose answer a readout shows must use the step `mask` and `sledMasked()` pattern so the number stays hidden until the student answers.
+- **Mystery-object final steps beat long question runs.** Tom found a Learn step of many questions then a Review of more "brutal"; the Chapter 3 fix was a final step with several mystery objects the student fills in within the sim (`a6`, "Five mystery sleds"), and a lighter Review.
+- **Formula triangle letters are tappable** (`21-calc.js`, `.trik`). Gap questions can allow interchangeable answers with `swap`.
+- **Animation feedback** (packages falling when acceleration is too high) went down well; add similar cause-and-effect animation where cheap.
+- **Scoring in challenges:** 4/3/2/1 by run number, with a Move on button and an 8 s timeout for runs that never finish.
+- **FBD arrow lengths:** the checker has a length margin (`res.lenBad`) and the hint names the arrows.
 
-## 6. Open questions for Tom (ask at the start)
-1. (Answered 25 Oct: the Space Dome stays in Chapter 4; Chapter 3 starts with friction switched off, with a disclaimer, and a second disclaimer when it returns. See section 3.)
-2. Has Tom replayed the Inertia Extension and the brake Challenge since round 6?
+## 6. Progress save and load (new, 26 Oct)
+- `70-backup.js`: 💾 Save progress in the header saves the whole `DB` (Journal notes included) as a checksummed `.fhq.json` file or a copy-paste code (`FHQ1:`). Loading is on the name screen ("I have a progress file") or the same header button, with a confirm screen and "Undo my last load". The teacher flag is never exported. "Not you? Start fresh" is on the Change screen.
+- Built for a loaner-device student. Toddle serves the app from a stable origin, so localStorage survives re-uploads on the same device and browser (Tom tested this).
+- **If you add new saved state, put it in `DB`.** Anything outside `DB` is not backed up.
+- Tested by `tests/backup.py`. Not yet tested: the Undo button, or a real upload on Toddle.
 
-## 7. Skill checklist: still missing in Force HQ
+## 7. Open questions for Tom (ask at the start)
+1. Has he replayed the Chapter 3 Extension and the Inertia Extension? Collect feedback before building Chapter 4.
+2. Did the loaner-device student manage to save and load their progress?
+3. Shared school computers share one browser save. "Not you? Start fresh" is the workaround; ask whether that is enough.
+
+## 8. Skill checklist: still missing in Force HQ
 - **Open builders and build tasks (skill 4e):** the Workshop is "Coming soon". Port `MSTEPS`, `PROBS`, `PARTS`, `mCalc`, `mDrawLever`, `mDrawPulley`, `mDrawCrane`, `genMach` when its milestone comes. Also add FBD build tasks for the teacher page.
-- **Final mixed review:** add it once more chapters exist.
-- **Fun facts:** see the table above.
+- **Final mixed review** once more chapters exist.
+- **Fun facts:** `FACTS`, `factPop`, `factList`, `FACTSTEP` in the old build; gate each fact by chapter.
 - **Glossary:** grow it to 50–80 terms.
-- **Flashcards with spaced repetition** from `DB.vocab`. Tom wants these for every sim and lab; they're banked.
+- **Flashcards with spaced repetition** from `DB.vocab`. Tom wants these for every sim and lab; banked.
+- **Example worksheet:** a filled-in student worksheet was rendered for the team by `/tmp/play_example.py`, a copy of `play_c3.py` with deliberate wrong answers. If Tom asks for another, repeat that approach.
