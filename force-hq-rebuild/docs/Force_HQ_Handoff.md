@@ -54,7 +54,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
 - **Controls:** every slider gets a typed number box. Target-finding tasks get red too-high and yellow too-low markers (`LAB.bmarks`).
 - **Pop-ups** use `makeDraggable`. New glossary words go into `TERMS` (about 46 now; the skill wants 50 to 80).
 - **Voice:** warm, natural, short sentences. No "it isn't X, it's Y" construction, no standards on student screens, g = 9.8 N/kg.
-- **Terminology (Tom, 28 Oct):** students say **velocity**, not speed. Use "velocity" in all student text. The verb "speed up" is fine. The time-warp button is "Fast-forward ×8". Thruster buttons are "Thrust forward" and "Thrust backward".
+- **Terminology (Tom, 28 Oct):** students say **velocity**, not speed. Use "velocity" in all student text. The verb "speed up" is fine. The time-warp button is "Fast-forward" (Tom, 28 Oct: no "×8", because students would ask why 8). Thruster buttons are "Thrust forward" and "Thrust backward".
 
 ## 4. Patterns added on 28 Oct (reuse these)
 - **Calculation steps are two kinds of task** (see "Working out calculations" and "Review fixes" in the Brief):
@@ -77,14 +77,12 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
 - Not yet tested by Tom: the Undo button, or a real upload on Toddle.
 
 ## 6. Open questions for Tom (ask at the start)
-1. Has he replayed Chapter 3 and Chapter 4 after the 28 Oct fixes? Collect feedback before building Chapter 5.
-2. Do the ×8 time button, the tether and the "push lasts 1 s, so velocity = F ÷ m" shortcut feel right in Chapter 4?
-3. Did the loaner-device student manage to save and load their progress?
-4. Shared school computers share one browser save. Is "Not you? Start fresh" enough?
-5. Chapter 5: explain the drag model to him before coding it, and ask about Drop Zone objects and parachute sizes.
+Answered 28 Oct: Tom has played every section, but class testing has not happened yet. Chapter 4's Fast-forward, tether and shortcut are fine. Loaner devices and shared computers are not a worry for now ("Continue anyway" covers the rare cases). The drag model was explained to him. His Chapter 5 decisions are in the Backlog (item 5): a drop high enough to reach terminal velocity, opening the parachute mid-fall, gravity on other planets, and side-by-side lanes.
+1. Collect feedback from class testing when it happens.
+2. Chapter 5: which planets, any extra objects, and how many canopy sizes?
 
 ## 7. Still missing (skill checklist)
-- **Chapter 5, Drop Zone** (new arena with an air slider; feather, ball, crate, parachutist; terminal velocity; helicopter hover extension). **Workshop** (pulleys, levers, wheel and axle, ramps, wedges and screws, compound machines, efficiency; machine builder with build tasks). **Explore** "draw what's happening now" FBD check.
+- **Chapter 5, Drop Zone** (new arena with an air slider; feather, ball, crate, parachutist; terminal velocity; helicopter hover extension; tall drop with a following camera, parachute opened mid-fall, planet picker, side-by-side lanes: see Backlog item 5). **Workshop** (pulleys, levers, wheel and axle, ramps, wedges and screws, compound machines, efficiency; machine builder with build tasks). **Explore** "draw what's happening now" FBD check.
 - **Final mixed review** once more chapters exist.
 - **Fun facts** (`FACTS`, `factPop`, `factList`, `FACTSTEP` in the old build), gated by chapter.
 - **Glossary** up to 50 to 80 terms.

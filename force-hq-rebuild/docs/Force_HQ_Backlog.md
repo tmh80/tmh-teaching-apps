@@ -6,11 +6,16 @@
 3. ~~Chapter 3, F = ma~~ (built 25 Oct 2026, all in the Snow Arena).
 4. ~~Chapter 4, Action and reaction~~ (built 27 Oct 2026: Space Dome push-offs, force pairs in the Space Dome and the tug-of-war, thrusters, docking-orders Challenge).
 5. **Chapter 5, Balanced forces and the Drop Zone.**
-   - New arena with an air slider.
+   - New arena with an air slider ("% air removed").
    - Objects to drop: feather, ball, crate, parachutist.
    - Terminal velocity.
-   - Explain the drag model to Tom before coding it.
    - Helicopter hover extension, with no falling helicopters.
+   - **Tom's decisions (28 Oct):**
+     - **Drop from high enough to reach terminal velocity.** Students should see the acceleration stop and the forces become balanced again. Rough heights to reach 95% of terminal velocity on Earth: ball (about 20 m/s) 50 m, crate (about 40 m/s) 190 m, parachutist with canopy closed (about 50 m/s) 300 m. A tower cannot show that, so the camera follows the falling object, with an altitude scale and the Fast-forward button.
+     - **The student opens the parachute during the fall.** Air resistance jumps above the weight, the resultant points up and the parachutist slows down (still moving downwards), until a new, lower terminal velocity where the forces balance again. Open the canopy over about 2 s so the deceleration stays believable. The live free-body diagram is the star here.
+     - **Gravity on other planets** (links to the Earth in Space unit, and it is fun). A planet picker sets g and how thick the air is; the air slider still removes a % of that planet's air. Rough idea (confirm the list with Tom): Earth 9.8 N/kg; Moon 1.6, no air; Mars 3.7, very thin air (terminal velocity about 5× Earth's, so a parachutist may never reach it); Venus 8.9, very thick air (terminal velocity a few m/s even without a canopy); Titan 1.4, thick air; Jupiter 24.8 at the cloud tops (no surface to land on). W = mg uses the planet's g.
+     - **Compare drops side by side**: two lanes, each with its own planet, object and air setting, so students can race them (for example the same crate on Earth and the Moon, or with and without air).
+   - **Drag model (explained to Tom 28 Oct, he has not objected):** weight = m × g pulls down. Air resistance pushes up, starts at zero and grows with velocity squared, with the area facing the air, and with how thick the air is. When air resistance equals the weight the forces are balanced and the object falls at a steady terminal velocity. Students never calculate drag: they watch the arrows, read velocities and type them in.
 6. **Workshop.** Machine sections in this order: pulleys and mechanical advantage first, then levers, wheel and axle, ramps, wedges and screws, compound machines, and an efficiency extension. Add a machine builder with build tasks.
 7. **Explore.** "Draw what's happening now", which checks a student's FBD against the live forces.
 
@@ -29,16 +34,16 @@
 - Make the FBD board text larger on phones.
 
 ## Open questions for Tom
-- Ask Tom to play Chapter 3 and say whether the friction-off disclaimer and the maths ladder feel right.
-- Drop Zone objects and parachute canopy sizes: anything to add?
+- Class testing of Chapters 1 to 4 has not happened yet (Tom has played every section himself, 28 Oct).
+- Drop Zone: which planets, any extra objects, and how many canopy sizes (suggested: 2 or 3)?
 - Once Chapter 1 is approved, should the rebuild replace the old Force HQ artifact and project copy?
 
 
 ## Done: progress save and load (26 Oct)
 - Save and load progress file or code, for loaner devices and backups. Tested in `tests/backup.py`.
-- Open question: shared school computers share one browser save; "Not you? Start fresh" is the workaround.
+- Shared school computers share one browser save. Tom (28 Oct): not a big deal for now, students can use "Continue anyway" in the rare cases.
 
-- Chapter 4: ask Tom to play it and say whether the ×8 time button, the tether and the "push lasts 1 s so speed = F ÷ m" shortcut feel right. Later idea: collisions (a second pod) and a momentum extension.
+- Chapter 4: Tom played it (28 Oct). Fast-forward, the tether and the "push lasts 1 s" shortcut are fine; the "×8" was dropped from the button and the time readout. Later idea: collisions (a second pod) and a momentum extension.
 - Chapter 4: both sections come out at about 29 min (Foundation) and 24 min (Extension) in `secMins`.
 
 ## Done: working out calculations (28 Oct)

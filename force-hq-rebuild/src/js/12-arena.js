@@ -137,7 +137,7 @@ function drawSpaceScene(c, f) {
     arrow(c, px, gy - 112, px + sd * 54, gy - 112, C.hazard, 5); pill(c, `gas pushes pod ${Fm} N`, px + sd * 28, gy - 134, C.hazard, 12);
     arrow(c, px - sd * (w / 2 + 10), gy - 28, px - sd * (w / 2 + 64), gy - 28, C.bad, 5); pill(c, `pod pushes gas ${Fm} N`, px - sd * (w / 2 + 40), gy - 8, C.bad, 12);
   }
-  hudBox(c, `Time ${S.t.toFixed(1)} s${S.warp > 1 ? ' (×' + S.warp + ')' : ''}`, 14, 22, C.line, 'left');
+  hudBox(c, `Time ${S.t.toFixed(1)} s${S.warp > 1 ? ' (fast-forward)' : ''}`, 14, 22, C.line, 'left');
   hudBox(c, `To the dock ${Math.max(0, DOCK_X - S.x).toFixed(1)} m`, 886, 22, C.line, 'right');
   banners(c, f); drawDropZone(c);
 }
@@ -355,7 +355,7 @@ function renderControls() {
   const lo = sp ? 50 : 10, hi = sp ? 500 : 150, mst = sp ? 10 : 1; [$('#mass'), $('#massNum')].forEach(e => { e.min = lo; e.max = hi; }); $('#mass').step = mst;
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
-  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : `Fast-forward ×${SP_WARP}`; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
+  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }

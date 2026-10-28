@@ -95,7 +95,7 @@ Flat, rounded, outline-free shapes in team colours. Animals have dot eyes and do
 
 ## Chapter 4 notes (27 Oct 2026)
 - One engine: the Space Dome is `S.scene='space'` (pod starts -3 m, dock at +4.5 m, astronaut tethered at -9.3 m). `spaceForces()`/`stepSpace()` in `10-engine.js`. The astronaut pushes the pod with a 1.2 s profile (`pprof`) whose impulse is exactly F × 1 s, so pod speed = F ÷ mass and astronaut speed = F ÷ astronaut mass (the astronaut feels `react = -push`). Thrusters (50 N bursts) act on the pod only.
-- Time warp ×8 (`S.warp`, fixed 0.01 s sub-steps), so the readings stay exact. The Journal records the pod and astronaut speeds at the end of the push (`pushDone`). The astronaut readout keeps its peak speed once the tether catches them.
+- Time warp: the "Fast-forward" button runs time 8 times faster (`S.warp`, `SP_WARP`; the "×8" is not shown to students, fixed 0.01 s sub-steps), so the readings stay exact. The Journal records the pod and astronaut speeds at the end of the push (`pushDone`). The astronaut readout keeps its peak speed once the tether catches them.
 - New panels (all in `PANELS`/`EXPLORE_HIDE`): `astro`, `pushf`, `thrust`, `warp`, `pairs`, `readAV`, `readAM`. Panels accumulate over a chapter's steps, so f4 (Main Arena) hides the space panels and f5/g1/g2 hide the Main Arena ones (`SPACE_HIDE_MAIN`).
 - Force pair arrows: `drawSpaceScene` (pod and astronaut) and `drawRopePairs` (four pairs per team in the Main Arena, f4). `drawSpaceFBD` draws two free-body diagrams side by side.
 - Docking orders (`renderOrdersCourse`): three orders, a run is judged when the push finishes (pod speed in the window; order 3 also needs the astronaut under 2.0 m/s, so the student picks the astronaut's mass). Scored 4/3/2/1 by push number, "Move on" after 3 misses.
@@ -117,7 +117,7 @@ Added after a review of the Chapter 4 "Mystery push-offs" step, where students c
 - Test: `tests/answer_box.py`.
 
 ## Review fixes (28 Oct 2026, later)
-- Wording: students say "velocity", so the app says velocity everywhere it used to say speed (the verb "speed up" stays). The thruster buttons are "Thrust forward ▶" and "◀ Thrust backward" (a backward burst can speed the pod up the other way). The time-warp button is "Fast-forward ×8".
+- Wording: students say "velocity", so the app says velocity everywhere it used to say speed (the verb "speed up" stays). The thruster buttons are "Thrust forward ▶" and "◀ Thrust backward" (a backward burst can speed the pod up the other way). The time-warp button is "Fast-forward" (no "×8"; the time readout says "(fast-forward)").
 - Calculation tasks are two tasks: a calculate task (`{ q }` with an answer box, ticked once the answer is checked, `hasAns`) and a short "Check it" task ticked by making it happen in the simulation. Reading questions marked `auto: true` ("Check it. What does the readout show?") complete themselves when the run is made (`autoQs` in `40-guided.js`), so nobody retypes a number. Tests skip questions that are already locked.
 - The Space Dome free-body diagram keeps the latest force the student made (push or thruster burst, `S.lastPush`, `S.lastThr`, `S.lastKind`) until Reset.
 - Docking orders: the edges of the window count as on target (`DOCK_EPS`, because the simulation reads 0.4999 for an exact 0.5). A pass is shown green and starts "Congratulations!" in all the Challenge courses.

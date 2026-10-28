@@ -853,7 +853,7 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
           <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
-          <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward ×8</button>
+          <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
           <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch">Reset</button>
         </div>
         <div class="underrow">
@@ -1434,7 +1434,7 @@ function drawSpaceScene(c, f) {
     arrow(c, px, gy - 112, px + sd * 54, gy - 112, C.hazard, 5); pill(c, `gas pushes pod ${Fm} N`, px + sd * 28, gy - 134, C.hazard, 12);
     arrow(c, px - sd * (w / 2 + 10), gy - 28, px - sd * (w / 2 + 64), gy - 28, C.bad, 5); pill(c, `pod pushes gas ${Fm} N`, px - sd * (w / 2 + 40), gy - 8, C.bad, 12);
   }
-  hudBox(c, `Time ${S.t.toFixed(1)} s${S.warp > 1 ? ' (×' + S.warp + ')' : ''}`, 14, 22, C.line, 'left');
+  hudBox(c, `Time ${S.t.toFixed(1)} s${S.warp > 1 ? ' (fast-forward)' : ''}`, 14, 22, C.line, 'left');
   hudBox(c, `To the dock ${Math.max(0, DOCK_X - S.x).toFixed(1)} m`, 886, 22, C.line, 'right');
   banners(c, f); drawDropZone(c);
 }
@@ -1652,7 +1652,7 @@ function renderControls() {
   const lo = sp ? 50 : 10, hi = sp ? 500 : 150, mst = sp ? 10 : 1; [$('#mass'), $('#massNum')].forEach(e => { e.min = lo; e.max = hi; }); $('#mass').step = mst;
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
-  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : `Fast-forward ×${SP_WARP}`; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
+  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -2332,7 +2332,7 @@ const INFO = {
   pushf: { title: 'How to set the push force', cards: [{ hi: '[data-panel="pushf"]', html: `<p>The <b>Push force</b> is how hard the astronaut pushes the pod, in newtons (N). Use the slider, or type a number in the box. Each push lasts exactly <b>1 second</b>.</p><div class="example">A 100 N push on a 50 kg pod gives it a velocity of 100 ÷ 50 = 2 m/s.</div>` }] },
   thrust: { title: 'How to use the thrusters', cards: [{ hi: '[data-panel="thrust"]', html: `<p>Each press fires a burst of <b>50 N</b> for 1 second on the pod. <b>Thrust forward ▶</b> pushes the pod towards the dock. <b>◀ Thrust backward</b> pushes it back the other way.</p><p>The thrusters push the pod only. The astronaut is not affected.</p>` }] },
   pairs: { title: 'How to read the force pair arrows', cards: [{ hi: '#cvScene', html: `<p>Pair arrows join up in matching colours. Each pair has two arrows of exactly the same length, pointing in opposite directions, and each one acts on a <b>different object</b>.</p><p>Tick or untick <b>Show the force pairs</b> to switch them on and off.</p>` }] },
-  warp: { title: 'What does ×8 time do?', cards: [{ hi: '[data-panel="warp"]', html: `<p>The <b>×8 time</b> button makes the Space Dome run eight times faster, so slow pushes do not take ages. Every number stays exactly the same.</p>` }] },
+  warp: { title: 'What does Fast-forward do?', cards: [{ hi: '[data-panel="warp"]', html: `<p>The <b>Fast-forward</b> button makes the Space Dome run faster, so slow pushes do not take ages. Every number stays exactly the same.</p>` }] },
   readA: { title: 'How to read the Acceleration readout', cards: [{ hi: '[data-panel="readA"]', html: `<p>The <b>Acceleration</b> readout shows how quickly the crate's velocity is changing, in metres per second squared (m/s²). Zero means the velocity isn't changing.</p><p>You'll use it in Chapter 3.</p>` }] },
   readV: { title: 'How to read the Velocity readout', cards: [{ hi: '[data-panel="readV"]', html: `<p>The <b>Velocity</b> readout shows how fast the crate is moving, in metres per second (m/s). A minus sign means it is moving to the left.</p>` }] },
   readD: { title: 'How to read the Braking distance readout', cards: [{ hi: '[data-panel="readD"]', html: `<p>The <b>Braking distance</b> readout shows how far the crate has slid since it crossed the red brake line, in metres (m). When the crate stops, the number stops changing.</p><div class="example">The crate crosses the brake line and stops 1.92 m later, so the readout shows <b>1.92 m</b>.</div>` }] },
@@ -3798,7 +3798,7 @@ CHDATA.c4 = {
     { id: 'f1', title: 'Push off in space', info: ['readAV'], floors: ['air'],
       cards: [
         { html: `<p>Welcome to Chapter 4 and the <b>Space Dome</b>! An astronaut is floating beside a space pod. There is no air and no friction out here, so anything that is moving keeps moving.</p><p>The astronaut pushes the pod towards the docking station. Before you read on, think about what happens to the <b>astronaut</b> when they push.</p>` },
-        { html: `<div class="notebox"><b>Time runs faster</b><p>Pushes in space are slow and gentle. The <b>×8 time</b> button velocities the Space Dome up, so you do not have to wait. It does not change any of the numbers.</p></div><p>Press <b>Push off!</b> and watch the pod <i>and</i> the astronaut. The readouts show how fast each one goes.</p>` }],
+        { html: `<div class="notebox"><b>Time runs faster</b><p>Pushes in space are slow and gentle. The <b>Fast-forward</b> button speeds up the Space Dome, so you do not have to wait. It does not change any of the numbers.</p></div><p>Press <b>Push off!</b> and watch the pod <i>and</i> the astronaut. The readouts show how fast each one goes.</p>` }],
       predict: { q: 'The astronaut pushes the pod to the right. What will happen to the astronaut?', opts: ['The astronaut will move to the left', 'The astronaut will stay perfectly still', 'The astronaut will move to the right, behind the pod', 'The astronaut will move to the left, but much faster than the pod'], then: 'Press Push off! and watch both of them.' },
       setup() { space(100, 100, 100); }, adds: ['shove', 'readM', 'readAM', 'readV', 'readAV', 'warp'], sides: [], pullers: [], idle: 'Press Push off! to push the pod',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Press <b>Push off!</b> and watch the astronaut and the pod.', () => sHas(100, 100, 100)]],
@@ -3891,7 +3891,7 @@ CHDATA.c4 = {
 
       qs: [
         { id: 'q1', type: 'num', p: '<b>Order 1.</b> The 250 kg pod must dock at <b>0.6 m/s</b>. What push does the astronaut need?', unit: 'N', units: UNITS, ans: 150, tol: 1, ladder: true, work: 'force = mass × velocity = 250 × 0.6 = 150 N', ok: 'Yes: 150 N.', hints: ['You want the force, so cover F in the formula triangle. The letters left are side by side, so multiply.', 'force = mass × velocity. The mass is 250 kg and the velocity is 0.6 m/s.', 'Type 250 × 0.6 into the calculator.'] },
-        { id: 'q2', type: 'reading', auto: true, p: 'Check it. What was the pod\'s docking velocity?', unit: 'm/s', tol: 0.03, live: () => sDock(150, 250, 100), need: () => sDock(150, 250, 100) != null, needMsg: 'Push with 150 N and let the pod reach the dock. The ×8 time button helps.', ok: 'Right on the order!' },
+        { id: 'q2', type: 'reading', auto: true, p: 'Check it. What was the pod\'s docking velocity?', unit: 'm/s', tol: 0.03, live: () => sDock(150, 250, 100), need: () => sDock(150, 250, 100) != null, needMsg: 'Push with 150 N and let the pod reach the dock. The Fast-forward button helps.', ok: 'Right on the order!' },
         { id: 'q3', type: 'num', p: '<b>Order 2.</b> Mission control now wants the same pod to dock at <b>0.4 m/s</b>. What push does the astronaut need?', unit: 'N', units: UNITS, ans: 100, tol: 1, ladder: true, work: 'force = mass × velocity = 250 × 0.4 = 100 N', ok: 'Yes: 100 N.', hints: ['It is the same sum with a different velocity.', 'force = mass × velocity. The mass is 250 kg and the velocity is 0.4 m/s.', 'Type 250 × 0.4 into the calculator.'] },
         { id: 'q4', type: 'num', p: '<b>Tether limit.</b> The astronaut has a mass of 100 kg. The tether snaps if the astronaut goes faster than <b>2 m/s</b>. What is the biggest push the astronaut can safely use?', unit: 'N', units: UNITS, ans: 200, tol: 1, ladder: true, work: 'The astronaut feels the same force as the pod. force = mass × velocity = 100 × 2 = 200 N', ok: 'Yes: 200 N. The astronaut feels the same force as the pod, so their own mass sets the limit.', hints: ['The astronaut feels the same force as the pod. Use the astronaut\'s mass.', 'force = mass × velocity. The astronaut\'s mass is 100 kg and the top velocity is 2 m/s.', 'Type 100 × 2 into the calculator.'] }] }
   ],
