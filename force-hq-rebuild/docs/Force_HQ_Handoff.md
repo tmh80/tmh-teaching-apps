@@ -1,6 +1,6 @@
 # Force HQ rebuild: handoff for a new chat (updated 28 Oct 2026, evening)
 
-Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
+Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. For Chapter 5 also read `docs/Question_Types_Guide.md` (new question types, the pause/snapshot tools, and where each type fits). Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
 ## 0. Where things stand
 - **Built, tested and pushed:** Chapters 1 to 4, each with a Foundation and an Extension section (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`, `c4f`, `c4x`), each section with Learn, Challenge and Check. Also progress save and load, Toddle worksheets (blank, key, marking scheme) and a preview artifact.
@@ -83,6 +83,7 @@ Answered 28 Oct: Tom has played every section, but class testing has not happene
 
 ## 7. Still missing (skill checklist)
 - **Chapter 5, Drop Zone** (new arena with an air slider; feather, ball, crate, parachutist; terminal velocity; helicopter hover extension; tall drop with a following camera, parachute opened mid-fall, planet picker, side-by-side lanes: see Backlog item 5). **Workshop** (pulleys, levers, wheel and axle, ramps, wedges and screws, compound machines, efficiency; machine builder with build tasks). **Explore** "draw what's happening now" FBD check.
+- **New question types** (28 Oct, `docs/Question_Types_Guide.md`): `order`, `pick`, `reason` (two-tier, with a "Who's right?" cartoon mode), `fix` (spot the mistake), `freeze` (freeze-frame table from paused snapshots), `spot` (tap a point on a graph), `sketch` (sketch the v–t graph), and the "How sure are you?" add-on. Tom wants Chapter 5 to be observation-heavy: live FBD beside the drop, a big Pause button, questions on the trends in the arrow sizes.
 - **Final mixed review** once more chapters exist.
 - **Fun facts** (`FACTS`, `factPop`, `factList`, `FACTSTEP` in the old build), gated by chapter.
 - **Glossary** up to 50 to 80 terms.
