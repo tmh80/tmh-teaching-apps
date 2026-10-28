@@ -1,6 +1,6 @@
 /* ===== Question engine shared by Learn steps and Reviews =====
    Every question: {id, type, p, ...}. Saved state: {v, ok, tries, done}.
-   Types: mcq, tap, num, reading, gap, sort, match, table, tick, fbd, explain */
+   Types: mcq, tap, num, reading, gap, sort, match, table, tick, fbd, explain. More types (order, pick, reason, fix) are in 36-qtypes.js. */
 /* ---- answer drafts: a number and unit typed under a Do-this task are copied into the matching question's answer box (and the other way round) ---- */
 const draftOf = (store, id) => (dbGet(store + '.draft', {}) || {})[id] || null;
 function draftSave(store, id, part, val, src) {
@@ -36,13 +36,19 @@ const art = g => (/^[aeiou]/i.test(g) ? 'an ' : 'a ') + g.toLowerCase();
 const qq = t => '“' + plain(t) + '”';
 function corr(after, text) { const c = document.createElement('span'); c.className = 'corr'; c.textContent = '→ ' + plain(text); after.after(c); }
 function lockInputs(el) { $$('input,select,textarea,button', el).forEach(x => { if (!x.classList.contains('qopen')) x.disabled = true; }); $$('.qchk', el).forEach(b => b.hidden = true); }
-function simMax(q) { switch (q.type) { case 'tick': return 2; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; default: return 1; } }
+function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; default: return 1; } }
+/* "How sure are you?" (opt-in: sure:true on mcq, reason and pick). Three buttons; the student must choose one before checking.
+   Not marked. Saved as st.sure ('guess' | 'fair' | 'cert') so the feedback page can show answers that were certain but wrong. */
+const SURE_LABEL = { guess: 'Guessing', fair: 'Fairly sure', cert: 'Certain' };
+const sureHTML = (q, s) => q.sure ? `<div class="surerow" role="group" aria-label="How sure are you?"><span class="sq">How sure are you?</span>${Object.entries(SURE_LABEL).map(([k, l]) => `<button type="button" class="surebtn${s && s.sure === k ? ' on' : ''}" data-sure="${k}" aria-pressed="${!!(s && s.sure === k)}">${l}</button>`).join('')}</div>` : '';
+const sureGet = el => { const b = $('.surebtn.on', el); return b ? b.dataset.sure : null; };
 
 const QT = {
   mcq: {
-    html(q) { return `<div class="opts">${optOrder(q).map(i => `<button type="button" data-o="${i}">${q.opts[i]}</button>`).join('')}</div>`; },
+    html(q, s) { return `${sureHTML(q, s)}<div class="opts">${optOrder(q).map(i => `<button type="button" data-o="${i}">${q.opts[i]}</button>`).join('')}</div>`; },
     bind(el, q, api) { el.addEventListener('click', e => { const b = e.target.closest('[data-o]'); if (!b || api.locked()) return; const i = +b.dataset.o, ok = i === q.a;
-      api.answer(i, ok, ok ? (q.ok || 'That\'s right!') : `Whoops! The answer is ${qq(q.opts[q.a])}. ${(q.why && q.why[i]) || q.work || ''}`.trim(), { score: ok ? 1 : 0 }); }); },
+      if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first, then pick your answer.', 'no'); return; }
+      api.answer(i, ok, ok ? (q.ok || 'That\'s right!') : `Whoops! The answer is ${qq(q.opts[q.a])}. ${(q.why && q.why[i]) || q.work || ''}`.trim(), { score: ok ? 1 : 0, sure: q.sure ? sureGet(el) : null }); }); },
     lock(el, q, s) { $$('[data-o]', el).forEach(b => { const i = +b.dataset.o; b.className = i === s.v ? (s.ok ? 'right' : 'wrong') : i === q.a ? 'answer' : ''; }); lockInputs(el); },
     show(q, v) { return v == null ? '' : q.opts[v]; }, model(q) { return q.opts[q.a]; }
   },
@@ -160,7 +166,7 @@ QT.tap.show = QT.mcq.show;
 function renderQuestion(host, q, ctx) {
   const path = ctx.store + '.' + q.id; let s = dbGet(path, null);
   const box = h('div', { class: 'qitem' + (s && s.done ? ' locked' + (s.ok ? ' ok' : '') : ''), 'data-q': q.id });
-  box.innerHTML = `<div class="qtype"><span>${QLABEL[q.type] || ''}</span><span class="pts"></span></div>${q.type === 'gap' ? '' : `<div class="qp gl">${q.p}</div>`}<div class="qbody"></div><div class="fb"></div>`;
+  box.innerHTML = `<div class="qtype"><span>${QLABEL[q.type] || ''}</span><span class="pts"></span></div>${q.type === 'gap' || q.type === 'pick' ? '' : `<div class="qp gl">${q.p}</div>`}<div class="qbody"></div><div class="fb"></div>`;   // gap and pick put the sentence inside the answer area
   host.appendChild(box);
   const body = $('.qbody', box), fbEl = $('.fb', box);
   const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
@@ -177,7 +183,7 @@ function renderQuestion(host, q, ctx) {
       const st = dbGet(path, null) || { tries: 0 }; st.v = v;
       if (!x.quiet) st.tries = (st.tries || 0) + 1;
       if (ok != null) st.ok = ok; if (ok && st.tries === 1) st.first = true;
-      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (x.u != null) st.u = x.u; if (msg) st.msg = msg;
+      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (x.u != null) st.u = x.u; if (x.sure != null) st.sure = x.sure; if (msg) st.msg = msg;
       const wasDone = st.done; st.done = true;
       dbSet(path, st);
       if (msg) api.say(msg, ok ? 'ok' : ok === false ? (st.score ? 'hint' : 'no') : 'hint');
@@ -190,6 +196,7 @@ function renderQuestion(host, q, ctx) {
   };
   body.innerHTML = QT[q.type].html(q, s, api);
   QT[q.type].bind(body, q, api);
+  if (q.sure) body.addEventListener('click', e => { const b = e.target.closest('.surebtn'); if (!b || api.locked()) return; $$('.surebtn', body).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); });
   if (s && s.done) {
     if (QT[q.type].lock) QT[q.type].lock(body, q, s);
     pts(s);

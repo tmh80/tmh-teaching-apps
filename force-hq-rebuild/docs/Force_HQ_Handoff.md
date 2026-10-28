@@ -9,6 +9,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
   - Chapter 3: F = ma in the Snow Arena (huskies and sled), friction, formula triangle, delivery challenge.
   - Chapter 4: action and reaction in the Space Dome (pod, astronaut, tether, thrusters, force pairs), docking-orders challenge.
 - **Next: build Chapter 5 from `docs/Chapter5_Script.md`** (written 28 Oct by Opus; the coding model builds it, following the script's section J build order). Physics reference: `tools/dropzone_model.py` (the JS engine must match it). New question types: `docs/Question_Types_Guide.md`. After Chapter 5: the Workshop, then Explore. See the Backlog.
+- **Chapter 5 progress (section J of the script):** step 1 is done and pushed (28 Oct): the `order`, `pick`, `reason` and `fix` question types and the "How sure are you?" add-on (`src/js/36-qtypes.js`, `tests/qtypes.py`). Next is step 2, the Drop Zone engine and scene, checked against `tools/dropzone_model.py`. Build log and data conventions are at the end of `Force_HQ_Brief.md`.
 - **Tom's latest feedback has all been actioned** (28 Oct, last commit `31d4a46`). He has not yet replayed everything after those fixes, so expect another round of review comments.
 
 ## 1. Getting set up (GitHub is the source of truth)

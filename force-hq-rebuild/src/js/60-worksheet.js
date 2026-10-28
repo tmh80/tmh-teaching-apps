@@ -44,13 +44,16 @@ function wsHeader(ch, title, mode) {
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
-  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': return 2; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; default: return 1; }
+  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; default: return 1; }
 }
+/* a line under questions that ask "How sure are you?": blank on the template, the student's choice in blue, not marked */
+const sureLine = (q, mode, s) => !q.sure || mode === 'key' ? '' : mode === 'student' ? `<p class="note" style="margin:4px 0 0">How sure I was: ${s && s.done && s.sure ? `<span class="stu">${SURE_LABEL[s.sure]}</span>` : '–'}</p>` : '<p class="note" style="margin:4px 0 0">How sure were you? ☐ Guessing &nbsp; ☐ Fairly sure &nbsp; ☐ Certain</p>';
+const paperTap = t => t.replace(/\bTap\b/g, 'Circle').replace(/\btap\b/g, 'circle');   // "Tap it" becomes "Circle it" on paper
 function wsQuestion(q, i, mode, s) {
-  const v = s ? s.v : null, stu = mode === 'student', key = mode === 'key';
+  const v = s ? s.v : null, stu = mode === 'student', key = mode === 'key', dv = s && s.done ? s.v : null;   // dv: the locked answer (drafts are not printed)
   const W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x;
   let body = '';
-  if (q.type === 'mcq' || q.type === 'tap') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v === oi) || (key && q.a === oi) ? W('☑') : '☐'} ${LET[k]}. ${q.opts[oi]}</div>`).join('');
+  if (q.type === 'mcq' || q.type === 'tap') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v === oi) || (key && q.a === oi) ? W('☑') : '☐'} ${LET[k]}. ${q.opts[oi]}</div>`).join('') + sureLine(q, mode, s);
   else if (q.type === 'tick') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v && v.includes(oi)) || (key && q.a.includes(oi)) ? W('☑') : '☐'} ${q.opts[oi]}</div>`).join('') + (key ? `<div class="look">${q.work || ''}</div>` : '');
   else if (q.type === 'num') body = `<div class="box">Working: ${stu ? '' : key ? W(q.work) : ''}<br><br></div><p>Answer: ${stu && v != null ? W(esc(v)) : key ? W(fmt(q.ans, 2)) : '____________'} ${q.units ? (stu ? W(esc((s && s.u) || '')) : key ? W(q.unit) : '________ <small>(write the unit)</small>') : q.unit}</p>`;
   else if (q.type === 'gap') { let k = 0; body = `<p>${q.p.replace(/___/g, () => { const j = k++; return stu && v ? W('<u>' + esc(v[j] || '') + '</u>') : key ? W('<u>' + esc(q.ans[j][0]) + '</u>') : '______________'; })}</p>`; }
@@ -59,8 +62,25 @@ function wsQuestion(q, i, mode, s) {
   else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
   else if (q.type === 'fbd') body = `<div class="fbdbox"><div>${q.scen.brief}${key ? `<div class="look"><b>Look for:</b><br>${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N, ${DIRWORD[f.dir]}`).join('<br>')}<br>All arrows start at the centre; bigger forces have longer arrows.</div>` : stu && s && s.v && s.v.lastRes ? `<p style="font-size:10pt">Checks passed in the sim: ${s.v.lastRes.chips.filter(c => c[2]).map(c => c[1]).join(', ') || 'none'}</p>` : ''}</div><div>${stu ? (v && v.arrows && v.arrows.length ? `<div class="stu">${FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true })}</div>` : '<div class="box" style="height:60mm">Not drawn in the sim.</div>') : key ? FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }) : `<div style="border:1.5px dashed #9aa9b0;border-radius:6px">${blankFbd(q.scen)}</div>`}</div></div>`;
   else if (q.type === 'explain') body = (q.words ? `<p class="words"><b>Words to use in a good answer:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6));
+  else if (q.type === 'order') {   // lettered cards in the seeded shuffled order, then the letters written in order
+    const perm = orderPerm(q), L2 = it => LET[perm.indexOf(it)];
+    body = (q.first ? `<p class="note" style="margin:0"><b>First:</b> ${q.first}</p>` : '') + perm.map((it, k) => `<div class="opt">${LET[k]}. ${q.items[it]}</div>`).join('') + (q.last ? `<p class="note" style="margin:2px 0"><b>Last:</b> ${q.last}</p>` : '')
+      + `<table style="margin-top:6px"><tr>${q.items.map((_, k) => `<th style="text-align:center">${ORD(k + 1)}</th>`).join('')}</tr><tr>${q.items.map((_, k) => `<td style="text-align:center;height:26px">${stu ? (Array.isArray(dv) ? W(L2(dv[k])) : '') : key ? W(L2(k)) : ''}</td>`).join('')}</tr></table><p class="note">Write the letters in order, one in each box.</p>`;
+  }
+  else if (q.type === 'pick') body = `<p>${pickSentence(q, k => '(' + q.picks[k][0].map((o, j) => (stu && Array.isArray(dv) && dv[k] === j) || (key && q.picks[k][1] === j) ? W('<u>' + o + '</u>') : o).join(' / ') + ')')}</p><p class="note">Circle one choice in each bracket.</p>${sureLine(q, mode, s)}`;
+  else if (q.type === 'reason') {
+    const oa = rOrderA(q), orr = rOrderR(q), ro = rOpts(q), cb = (on) => on ? W('☑') : '☐';
+    body = `<p style="margin:2px 0"><b>${q.voices ? 'Who is right?' : 'Answer'}</b></p>${oa.map((oi, k) => `<div class="opt">${cb((stu && dv && dv.a === oi) || (key && q.a === oi))} ${LET[k]}. ${ro[oi]}</div>`).join('')}<p style="margin:6px 0 2px"><b>Reason</b></p>${orr.map((rj, k) => `<div class="opt">${cb((stu && dv && dv.r === rj) || (key && q.r === rj))} ${LET[k]}. ${q.reasons[rj]}</div>`).join('')}${sureLine(q, mode, s)}${key && rWhyAll(q) ? `<div class="look">${rWhyAll(q)}</div>` : ''}`;
+  }
+  else if (q.type === 'fix') {
+    const f = q.fix, fo = f.kind === 'mcq' ? fixOrder(q) : [];
+    body = `<div class="box" style="min-height:0">${q.who ? `<b>${esc(q.who)}'s answer</b>` : ''}${q.lines.map((t, k) => `<div class="opt">${k + 1}. ${t}</div>`).join('')}</div><p>The mistake is in line ${stu && dv ? W(dv.line + 1) : key ? W(q.bad + 1) : '____'}.</p>`
+      + (f.kind === 'num' ? `<p>The correct answer is: ${stu && dv ? W(esc(dv.fix == null ? '' : dv.fix) + ' ' + esc((s && s.u) || '')) : key ? W(fmt(f.ans, 2) + ' ' + (f.unit || '')) : '____________'} ${f.units && f.units.length && !stu && !key ? '<small>(write the unit)</small>' : ''}</p>` : `<p style="margin:4px 0 2px">The correct line is:</p>${fo.map((oi, k) => `<div class="opt">${(stu && dv && dv.fix === oi) || (key && f.a === oi) ? W('☑') : '☐'} ${LET[k]}. ${f.opts[oi]}</div>`).join('')}`)
+      + (key && q.why ? `<div class="look">${q.why}</div>` : '');
+  }
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
-  return `<div class="q"><div class="qh">Question ${i + 1}. ${q.type === 'gap' ? 'Fill the gaps.' : qp} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
+  const head = q.type === 'gap' ? 'Fill the gaps.' : q.type === 'pick' ? 'Choose the right words.' : q.type === 'fix' ? paperTap(qp) : qp;
+  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
 }
 /* "Steps completed in the sim": a tick list of the Learn steps and Challenge missions, so the teacher (and Toddle AI)
    can see the student did the work that leads up to the questions. Blue ticks are from the sim. */
@@ -82,17 +102,19 @@ function feedbackPage(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {}), L = learnProgress(chId), C2 = challengeState(chId), P = reviewProgress(chId);
   return `<div class="page">${wsHeader(ch, 'Feedback page', 'student')}<h2>How I did in the sim</h2>
     <table><tr><th>Part</th><th>Result</th></tr><tr><td>Learn steps</td><td class="stu">${L.done} of ${L.total} done</td></tr>${CHDATA[chId].challenge ? `<tr><td>Challenge: ${CHDATA[chId].challenge.title}</td><td class="stu">${C2.tried} of ${C2.total} missions tried · ${C2.score} of ${C2.max} objectives met</td></tr>` : ''}<tr><td>Check questions</td><td class="stu">${P.done} of ${P.total} answered · ${P.points} of ${P.maxPoints} points</td></tr></table>
-    <h2>Check questions</h2><table><tr><th>Q</th><th>Type</th><th>In the sim</th></tr>${R.map((q, i) => { const s = st[q.id]; const r = !s || !s.done ? 'Not answered' : q.type === 'explain' ? `Self-checked: ${s.v && s.v.ticks ? s.v.ticks.length : 0} of ${q.check.length} points` : (p => `${s.ok ? '✓' : p.score ? '◐' : '✗'} ${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, s)); return `<tr><td>${i + 1}</td><td>${QLABEL[q.type]}</td><td class="stu">${r}</td></tr>`; }).join('')}</table>
+    <h2>Check questions</h2><table><tr><th>Q</th><th>Type</th><th>In the sim</th></tr>${R.map((q, i) => { const s = st[q.id]; const r = !s || !s.done ? 'Not answered' : q.type === 'explain' ? `Self-checked: ${s.v && s.v.ticks ? s.v.ticks.length : 0} of ${q.check.length} points` : (p => `${s.ok ? '✓' : p.score ? '◐' : '✗'} ${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, s)); return `<tr><td>${i + 1}</td><td>${QLABEL[q.type]}</td><td class="stu">${r}${q.sure && s && s.done && s.sure ? ` · ${SURE_LABEL[s.sure]}` : ''}</td></tr>`; }).join('')}</table>
+    ${(sw => sw.length ? `<h2>Certain but not right</h2><p class="note">These answers were marked "Certain" in the sim, but were not fully right. They are worth talking about.</p><p class="stu">${sw.map(([q, i]) => `Question ${i + 1} (${QLABEL[q.type]})`).join(', ')}</p>` : '')(R.map((q, i) => [q, i]).filter(([q, i]) => q.sure && st[q.id] && st[q.id].done && st[q.id].sure === 'cert' && !st[q.id].ok))}
 </div>`;   /* no teacher comment box: Tom leaves comments directly on Toddle */
 }
 /* ---------- marking scheme (also on the answer key) ---------- */
-function markingInstructions(title, total) {
+function markingInstructions(title, total, hasSure) {
   return `<h2>Marking instructions for Toddle AI</h2><p>This marking scheme is for the Force HQ worksheet "${title}". The blank template and the answer key for this worksheet are attached too.</p>
   <ul><li>Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.</li>
   <li>The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.</li>
   <li>The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.</li>
   <li>The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.</li>
   <li>A blank question, or an empty template, scores 0. Add a kind note saying what is missing.</li>
+  ${hasSure ? '<li>Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.</li>' : ''}
   <li>Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.</li></ul><p><b>Total: ${total} marks.</b></p>`;
 }
 function markItem(q, i) {
@@ -106,13 +128,17 @@ function markItem(q, i) {
     case 'gap': return `Q${n} (${m} marks, 1 per gap): ` + q.ans.map((a, k) => `gap ${k + 1}: ${a[0]} (also accept ${gapAccepts(a).filter(w => w !== gapNorm(a[0])).join(', ') || 'any correct scientific word'})`).join('; ') + (q.swap ? ` (gaps ${q.swap[0] + 1} and ${q.swap[1] + 1} can be given in either order.)` : '.');
     case 'table': return `Q${n} (${m} marks, 1 per cell): ` + q.rows.map(r => `${r[0]}: ${q.cols.map((c, j) => `${c} = ${q.choices[j][r[1][j]]}`).join(', ')}`).join('; ') + '.';
     case 'fbd': return `Q${n} (${m} marks): 1 mark for each correct arrow (right force, right direction, right size): ${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N ${DIRWORD[f.dir]}`).join('; ')}. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.`;
+    case 'order': { const perm = orderPerm(q); return `Q${n} (2 marks): The correct order is ` + q.items.map((t, k) => `${ORD(k + 1)} ${LET[perm.indexOf(k)]} (${plain(t)})`).join(', ') + '. 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0.'; }
+    case 'pick': return `Q${n} (${m} mark${m > 1 ? 's, 1 per choice' : ''}): ` + pickSentence(q, k => '[' + q.picks[k][0][q.picks[k][1]] + ']') + '. 1 mark for each right choice.';
+    case 'reason': return `Q${n} (2 marks): 1 mark for the answer: ${plain(rOpts(q)[q.a])}. 1 mark for the reason: ${plain(q.reasons[q.r])}.${rWhyAll(q) ? ' ' + rWhyAll(q) : ''}${q.sure ? ' Confidence is not marked.' : ''}`;
+    case 'fix': { const f = q.fix; return `Q${n} (2 marks): 1 mark for the line with the mistake: line ${q.bad + 1} (${plain(q.lines[q.bad])}). 1 mark for the correction: ` + (f.kind === 'num' ? `${fmt(f.ans, 2)} ${f.unit || ''} (accept ${fmt(f.ans - fixTol(f), 2)} to ${fmt(f.ans + fixTol(f), 2)}${f.units && f.units.length ? ', with the unit' : ''})` : plain(f.opts[f.a])) + '.' + (q.why ? ' ' + plain(q.why) : ''); }
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
   }
   return '';
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total)}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)}</p>`).join('')}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)}</p>`).join('')}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 
@@ -142,7 +168,7 @@ function progressHTML() {
     const chd = CHDATA[ch.id], L = learnProgress(ch.id); if (!L.done && !reviewProgress(ch.id).done && !challengeState(ch.id).tried) return;
     out += `<div class="page">${wsHeader(ch, 'My work so far', 'student')}<h2>Learn: ${L.done} of ${L.total} steps done</h2>`;
     chd.steps.forEach((s, i) => { const qs = (s.qs || []).map(q => [q, dbGet(`learn.${ch.id}.${s.id}.${q.id}`, null)]).filter(([, a]) => a);
-      out += `<div class="q"><div class="qh">Step ${i + 1}: ${s.title} <span>${stepDone(ch.id, i) ? '✓ Done' : 'Not finished'}</span></div>${qs.length ? qs.map(([q, a]) => `<p style="margin:2px 0">${plain(q.p)}<br><span class="stu">${q.type === 'desk' || q.type === 'fbd' ? (a.v && a.v.arrows && a.v.arrows.length ? '<div style="max-width:300px">' + FBDB.svg(q.scen, a.v.arrows, { blue: true, noDot: true }) + '</div>' : '') : QT[q.type].show(q, a.v, a)}</span>${a.ok ? ' ✓' : ''}</p>`).join('') : '<p class="note">No answers yet.</p>'}</div>`; });
+      out += `<div class="q"><div class="qh">Step ${i + 1}: ${s.title} <span>${stepDone(ch.id, i) ? '✓ Done' : 'Not finished'}</span></div>${qs.length ? qs.map(([q, a]) => `<p style="margin:2px 0">${q.type === 'pick' ? pickPlain(q) : plain(q.p)}<br><span class="stu">${q.type === 'desk' || q.type === 'fbd' ? (a.v && a.v.arrows && a.v.arrows.length ? '<div style="max-width:300px">' + FBDB.svg(q.scen, a.v.arrows, { blue: true, noDot: true }) + '</div>' : '') : QT[q.type].show(q, a.v, a)}</span>${a.ok ? ' ✓' : ''}</p>`).join('') : '<p class="note">No answers yet.</p>'}</div>`; });
     const C2 = challengeState(ch.id); if (CHDATA[ch.id].challenge) out += `<h2>Challenge: ${C2.tried} of ${C2.total} missions tried, ${C2.score} of ${C2.max} objectives</h2>`;
     const P = reviewProgress(ch.id); out += `<h2>Check: ${P.done} of ${P.total} questions answered</h2><p class="note">Use "Make my worksheet" on the Check tab for the full worksheet.</p></div>`;
   });
