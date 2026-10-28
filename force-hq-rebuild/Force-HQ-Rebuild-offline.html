@@ -2435,7 +2435,7 @@ function renderJournal() {
 }
 function initJournal() {
   const p = h('aside', { class: 'journal', id: 'journal', hidden: '', 'aria-label': 'My Journal' }); document.body.appendChild(p);
-  document.body.appendChild(h('button', { type: 'button', class: 'jtab', 'data-journal': '', 'aria-controls': 'journal', 'aria-expanded': 'false', title: 'Open or close your Journal' }, `<span class="jtl">📓 Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span>`));
+  document.body.appendChild(h('button', { type: 'button', class: 'jtab', 'data-journal': '', 'aria-controls': 'journal', 'aria-expanded': 'false', title: 'Open or close your Journal' }, `<span class="jtl">📓 Journal</span>`));
   document.addEventListener('click', e => {
     if (e.target.closest('#jClose')) { closeJournal(); return; }
     const t = e.target.closest('[data-jtab]'); if (t) { JTAB = t.dataset.jtab; if (JTAB === 'runs') JRUNS_SEEN = true; renderJournal(); if (LAB.onChange) LAB.onChange(); return; }
