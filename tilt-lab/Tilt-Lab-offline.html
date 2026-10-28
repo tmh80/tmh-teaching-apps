@@ -737,6 +737,9 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
 .homeCap{background:rgba(4,6,13,.62);padding:10px 14px;border-radius:12px}
 .uchip{white-space:nowrap}.hdrSpace button{white-space:nowrap}
 @media (max-width:1100px){header.top .hdrSpace{display:flex;justify-content:center;flex-wrap:wrap}}
+.lockn{font-size:13px;color:var(--muted);font-weight:600;text-align:right;max-width:9em}
+.librow.okrow{border-color:#2f9e63;background:#eef9f2}
+.primary:disabled{opacity:.45;cursor:not-allowed}
 
 </style>
 
@@ -746,7 +749,7 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
     <div class="modes" role="group" aria-label="View mode" id="modes">
       <button type="button" data-m="guided"><b>🧭 Guided</b><small>Step-by-step challenges</small></button><button type="button" data-m="explore"><b>🔭 Exploration</b><small>Your own dashboard</small></button>
     </div>
-    <div class="hdrSpace"><button type="button" class="mini homebtn" id="homeBtn">🏠 Home</button><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini nbbtn" id="nbBtn">📓 My investigation</button><button type="button" class="mini wsbtn" id="wsBtn">📄 My worksheet</button><button type="button" class="mini teachbtn" id="teachBtn">For teachers</button></div>
+    <div class="hdrSpace"><button type="button" class="mini homebtn" id="homeBtn">🏠 Home</button><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini nbbtn" id="nbBtn">📓 My investigation</button><button type="button" class="mini wsbtn" id="wsBtn">📄 My worksheets</button><button type="button" class="mini teachbtn" id="teachBtn">For teachers</button></div>
   </header>
 
   <section class="strip" aria-label="Main controls">
@@ -817,7 +820,7 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
       <div class="ghead">
         <div class="gtop"><span class="lbl" id="gCount">Challenge 1 of 8</span><button type="button" class="coopchip" id="gCoop" hidden></button><div class="gdots"><button type="button" id="gIntroBtn" class="gintro" aria-label="Introduction">i</button><span id="gDots" class="gdots"></span></div></div>
         <div class="gmodes" id="gmodes" role="group" aria-label="Mode"><button type="button" data-m="guided"><b>🧭 Guided</b></button><button type="button" data-m="explore"><b>🔭 Exploration</b></button></div>
-        <div class="gextra"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini" id="gHome">🏠 Home</button><button type="button" class="mini" id="gMap">☰ All stages</button><button type="button" class="mini" id="gNb">📓 My investigation</button><button type="button" class="mini" id="gWs">📄 My worksheet</button></div>
+        <div class="gextra"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini" id="gHome">🏠 Home</button><button type="button" class="mini" id="gMap">☰ All stages</button><button type="button" class="mini" id="gNb">📓 My investigation</button><button type="button" class="mini" id="gWs">📄 My worksheets</button></div>
       </div>
       <div class="gbody" id="gBody">
         <div class="gleft">
@@ -2395,7 +2398,7 @@ function renderStep(){
   $("gStep").innerHTML=h;renderPlay();initWidgets();
   const last=pos===n-1, lastC=S.gi===CHALLENGES.length-1;
   const nxt=CHALLENGES[S.gi+1];
-  $("gNext").textContent=!last?"Next step →":!nxt?"Finish: make my worksheet →":nxt.tier==="check"?"Go to the check-in →":nxt.tier!==c.tier?`Start the ${TIERS[nxt.tier]} →`:"Next challenge →";
+  $("gNext").textContent=!last?"Next step →":(!nxt||(secOf(S.gi)&&secOf(S.gi).gis[secOf(S.gi).gis.length-1]===S.gi))?`Finish the ${secOf(S.gi).name} →`:nxt.tier==="check"?"Go to the check-in →":nxt.tier!==c.tier?`Start the ${TIERS[nxt.tier]} →`:"Next challenge →";
   $("gNext").disabled=false;$("gNext").classList.toggle("ready",isDone);hideWarn();
   $("gPrev").disabled=false;refreshDots();
   const tx=$("gTxt");if(tx)tx.addEventListener("input",()=>{MEM.text[S.gs]=tx.value;tx.closest(".gans").classList.toggle("ok",tx.value.trim().length>0);$("gNext").classList.toggle("ready",stepComplete());const sp=document.querySelector(".gstat");if(sp){const d=stepComplete();sp.className="gstat "+(d?"ok":"todo");sp.textContent=d?"✓ Done":"To do · "+WHAT_TO_DO.write}const jn=document.querySelector(".gjump");if(jn&&stepComplete())jn.remove();refreshDots();saveSoon()});
@@ -2446,14 +2449,13 @@ function guideTick(g,t){
 function hideWarn(){const w=$("gWarn");if(w){w.hidden=true;w.innerHTML=""}}
 function nextStep(force){
   if(S.inSetup)return;
-  if(S.intro){if(S.finish){openWs();return}goChallenge(S.gi);return}
+  if(S.intro){if(S.finish){if(S.finishNext>=0)goChallenge(S.finishNext);else goIntro();return}goChallenge(S.gi);return}
   if(force!==true&&!stepComplete()){const w=$("gWarn");w.hidden=false;w.innerHTML=`<b>You have not finished this step.</b> ${missingMsg(curStep())} <span class="gwbtns"><button type="button" class="mini" id="gStay">Stay and finish it</button><button type="button" class="mini gwgo" id="gGoOn">Continue anyway</button></span>`;
     $("gStay").addEventListener("click",hideWarn);$("gGoOn").addEventListener("click",()=>nextStep(true));w.scrollIntoView({block:"nearest"});return}
   hideWarn();const c=CHALLENGES[S.gi];
   let k=S.gs+1;while(k<c.steps.length&&!stepVisible(c.steps[k]))k++;
   if(k<c.steps.length)enterStep(k);
-  else if(S.gi<CHALLENGES.length-1)goChallenge(S.gi+1);
-  else showFinish();
+  else{const sc=secOf(S.gi);if(sc&&sc.gis[sc.gis.length-1]===S.gi)showSecEnd(sc);else if(S.gi<CHALLENGES.length-1)goChallenge(S.gi+1);else showSecEnd(sc)}
 }
 function prevStep(){if(S.intro||S.inSetup)return;let k=S.gs-1;const c=CHALLENGES[S.gi];while(k>=0&&!stepVisible(c.steps[k]))k--;if(k>=0)enterStep(k);else if(S.gi>0)goChallenge(S.gi-1);else goIntro()}
 function skipStep(){MEM.done[S.gs]="skip";renderStep()}
@@ -3453,7 +3455,7 @@ function EXPLORE_HTML(){
    <li>Students open <b>My investigation</b>, then write their own question or pick a <b>Try this</b> idea. Picking an idea sets up the model for them.</li>
    <li>They set up the model (planet, place, date, tilt) and press <b>Add a reading</b>. The notebook records the set-up. <b>They read the numbers from the screen and type them in.</b> The model checks each number and shows where to look if one is off.</li>
    <li>They write what they noticed and a conclusion. Each question can have its own readings, and one student can run several investigations.</li>
-   <li>They press <b>📄 My worksheet</b>. It prints their question, their readings table, their notes, and a set of writing prompts that depend on what they varied: planets, dates, places or tilts. Students choose “Save as PDF” to upload it to Toddle. Approx. 25 to 35 minutes for a first investigation.</li>
+   <li>They press <b>📄 Save worksheet</b> at the bottom of the notebook. It becomes available once they have a question and a reading, and it prints their question, their readings table, their notes, and a set of writing prompts that depend on what they varied: planets, dates, places or tilts. Students choose “Save as PDF” to upload it to Toddle. Approx. 25 to 35 minutes for a first investigation.</li>
   </ol>
   <h4 class="xh4">Ways to run it</h4>
   <div class="xways">${XWAYS.map(w=>`<div>${w}</div>`).join("")}</div>
@@ -3509,7 +3511,7 @@ const TEACH_HTML=`<div class="tbox" role="dialog" aria-modal="true" aria-labelle
  <div><b>Extension</b><span>8 challenges · about two lessons</span><small>Tropics and polar circles, the overhead Sun, midnight Sun, other tilts and Uranus.</small></div>
  <div><b>Investigation</b><span>3 investigations · one to two lessons</span><small>Evidence sorts, testing claims, a design brief, claim–evidence–reasoning writing.</small></div>
 </div>
-<p>Each challenge runs Learn → Predict → Explore → Check → Write. Check-ins before the Extension and the Investigation let students rate what they know and revisit steps. Students can work on their own, in pairs on one computer (roles swap), or in pairs on two computers (A/B questions they check for each other). The answer key and worksheet notes are in the project doc <i>Tilt_Lab_Day9_Worksheet_Notes</i>. For classrooms without claude.ai access, use the offline copy (<i>Tilt-Lab-offline.html</i>), which opens in any browser. Students type their name and class when they open Tilt Lab. Their work is saved on that computer, under that name, so they can close the page and carry on later. A home page lets them choose Guided challenges, Exploration or My investigation, and “My completed worksheets” lists a worksheet for every challenge they have finished. Every stage is open: students can jump to any challenge or step, leave Guided mode for the Exploration dashboard at any time, and press “My worksheet” to print what they have done.</p>
+<p>Each challenge runs Learn → Predict → Explore → Check → Write. Check-ins before the Extension and the Investigation let students rate what they know and revisit steps. Students can work on their own, in pairs on one computer (roles swap), or in pairs on two computers (A/B questions they check for each other). The answer key and worksheet notes are in the project doc <i>Tilt_Lab_Day9_Worksheet_Notes</i>. For classrooms without claude.ai access, use the offline copy (<i>Tilt-Lab-offline.html</i>), which opens in any browser. Students type their name and class when they open Tilt Lab. Their work is saved on that computer, under that name, so they can close the page and carry on later. A home page lets them choose Guided challenges, Exploration or My investigation. Every stage is open: students can jump to any challenge or step and leave Guided mode for the Exploration dashboard at any time. Each section (Foundation, Extension, Investigation) has its own worksheet. When a student finishes every challenge in a section, a “Save worksheet” button appears on the end screen and in “My completed worksheets” on the home page. The worksheet holds all of their answers for that section. Teachers can open any worksheet at any time, with a blank copy and an answer key.</p>
 <h3 id="t-lo">Learning objectives</h3>
 <div class="tlo"><div><b>Foundation</b><ul>
  <li>Explain how the angle of sunlight changes the energy each area of ground receives (the same amount of sunlight spread over more ground).</li>
@@ -3543,7 +3545,7 @@ ${STD.map(r=>`<tr><th>${r[0]}<small>${r[1]}</small></th><td>${r[2]}</td><td>${r[
  <li><b>Planet tour.</b> Compare other planets: Mercury and Mars are modelled (stretched orbits matter), Venus and the giant planets use measured values (thick air and winds spread heat). Ask what besides tilt affects temperature.</li>
  <li><b>Type exact values.</b> Students can type a tilt, latitude or Sun height instead of dragging, which helps when testing precise cases such as tilt 45°.</li>
  <li><b>Exit tickets.</b> Use one Write-step prompt with its command term (Explain, Outline, Predict, Justify, Compare, Evaluate) as a quick check.</li>
- <li><b>Worksheet at the end.</b> “My worksheet” builds a printable sheet from the challenges each student worked on and their own investigation. Students choose “Save as PDF” to upload it to Toddle. Sentence starters and prompts change with what they explored.</li>
+ <li><b>Worksheet at the end of each section.</b> Finishing Foundation, Extension or Investigation unlocks that section’s “Save worksheet” button. It builds a printable sheet with all of the student’s answers. Students choose “Save as PDF” to upload it to Toddle. Their own investigation has its own worksheet once they have a question and a reading.</li>
  <li><b>Pairs.</b> For one shared computer, the model swaps who drives and who records. For two computers, the partner tasks give A and B different questions that each checks for the other.</li>
 </ul>
 ${EXPLORE_HTML()}
@@ -3615,17 +3617,38 @@ function mapHTML(){
   });
   return `<h3 class="glearn">Go to any stage</h3><p class="gtext">Start wherever you like. Every stage is open, and inside a challenge you can jump to any step with the bars at the top. You can leave for Exploration at any time with the big buttons at the top. Your answers are saved under your name.</p><div class="chlist">${rows}</div>`;
 }
-const actionsHTML=()=>`<div class="introact"><button type="button" class="gaction" data-act="nb">📓 Start my own investigation</button><button type="button" class="gaction" data-act="ws">📄 Make my worksheet</button></div>`;
-function introHTML(){return INTRO_TOP+mapHTML()+actionsHTML()+`<p class="note tlinkrow">Teacher? <a href="#" id="teachLink">How to use this model (for teachers)</a></p>`}
-function finishHTML(){
-  let done=0,ck=0,right=0;
-  CHALLENGES.forEach((c,gi)=>{if(c.tier!=="check"&&chStatus(gi)==="done")done++;const M=STORE[gi];if(!M)return;c.steps.forEach((s,i)=>{if(s.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}})});
-  return `<div class="fin"><div class="gbadge b-write">All done</div><h3 class="glearn">You reached the end! 🎉</h3>
-  <div class="sumrow"><span><b>${done}</b>challenges finished</span><span><b>${right} / ${ck}</b>check questions right</span></div>
-  <p class="gtext">Make your worksheet now. It has your answers and your own investigation, and you can save it as a PDF to upload to Toddle. You can also go back to any stage below.</p>
-  <div class="introact"><button type="button" class="primary" data-act="ws">📄 Make my worksheet</button><button type="button" class="gaction" data-act="nb">📓 My own investigation</button></div></div>`;
+const actionsHTML=()=>`<div class="introact"><button type="button" class="gaction" data-act="nb">📓 Start my own investigation</button><button type="button" class="gaction" data-act="lib">📄 My worksheets</button></div>`;
+/* ----- sections: one worksheet for each ----- */
+function secList(){
+  const out=[];
+  CHALLENGES.forEach((c,gi)=>{
+    if(c.tier==="check"){if(out.length)out[out.length-1].gis.push(gi);return}
+    let s=out.find(x=>x.id===c.tier);if(!s){s={id:c.tier,name:TIERS[c.tier],gis:[],core:[]};out.push(s)}
+    s.gis.push(gi);s.core.push(gi)});
+  return out;
 }
-function showFinish(){goIntro();S.finish=true;$("gStep").innerHTML=finishHTML()+mapHTML();$("gNext").textContent="Make my worksheet →";$("gCount").textContent="Finished";$("gTitle").textContent="Well done!"}
+const secOf=gi=>secList().find(s=>s.gis.includes(gi));
+function secProg(s){const d=s.core.filter(gi=>chStatus(gi)==="done").length;return {done:d,total:s.core.length,ok:d===s.core.length}}
+const secUnlocked=s=>USER.teacher||secProg(s).ok;
+function secChecks(s){let ck=0,right=0;s.gis.forEach(gi=>{const c=CHALLENGES[gi],M=STORE[gi];if(!M)return;c.steps.forEach((st,i)=>{if(st.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}})});return {ck,right}}
+function invReady(){return INV.list.some(v=>v.q.trim()&&v.rows.length)}
+function libCount(){return secList().filter(s=>secProg(s).ok).length+(invReady()?1:0)}
+function introHTML(){return INTRO_TOP+mapHTML()+actionsHTML()+`<p class="note tlinkrow">Teacher? <a href="#" id="teachLink">How to use this model (for teachers)</a></p>`}
+function secEndHTML(s){
+  const p=secProg(s),k=secChecks(s);
+  const act=p.ok?`<p class="gtext">You finished every challenge in the ${esc(s.name)}. Save your worksheet now. It has all your answers, and you can save it as a PDF to upload to Toddle.</p>
+  <div class="introact"><button type="button" class="primary" data-wsec="${s.id}">📄 Save worksheet</button></div>`
+  :`<p class="gtext">${p.done} of ${p.total} challenges are finished. Your worksheet opens when you finish all ${p.total}. Use the list below to go back to the ones you left.</p>`;
+  return `<div class="fin"><div class="gbadge b-write">${esc(s.name)}</div><h3 class="glearn">${p.ok?`${esc(s.name)} finished! 🎉`:`End of the ${esc(s.name)}`}</h3>
+  <div class="sumrow"><span><b>${p.done} / ${p.total}</b>challenges finished</span>${k.ck?`<span><b>${k.right} / ${k.ck}</b>check questions right</span>`:""}</div>${act}</div>`;
+}
+function showSecEnd(s){
+  goIntro();const last=s.gis[s.gis.length-1],nxt=last+1<CHALLENGES.length?last+1:-1;
+  S.finish=true;S.finishNext=nxt;
+  $("gStep").innerHTML=secEndHTML(s)+mapHTML();
+  $("gNext").textContent=nxt>=0?`Continue to the ${esc(secOf(nxt).name)} →`:"Back to all stages";
+  $("gCount").textContent=s.name+" finished";$("gTitle").textContent="Well done!";
+}
 function resetChallenge(){
   const w=$("gWarn");w.hidden=false;
   w.innerHTML=`<b>Start this challenge again?</b> This clears your answers for this challenge only. <span class="gwbtns"><button type="button" class="mini" id="gKeep">Keep my answers</button><button type="button" class="mini gwgo" id="gClear">Yes, clear them</button></span>`;
@@ -3795,7 +3818,8 @@ function renderNb(){
    <div class="nbadd"><button type="button" class="primary" data-add="day">＋ Add a reading</button><button type="button" class="mini" data-add="year">＋ Add a whole-year reading</button></div>
    ${inv.rows.length?inv.rows.map(rowHTML).join(""):`<p class="note">No readings yet. Set the planet, tilt, place and time you want, then press Add a reading.</p>`}
    <div class="nbprompts"><span class="lbl">Think and write</span><p class="note">These questions change depending on what you tested.</p><div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">${prompts}</div></div>
-   <div class="nbadd"><button type="button" class="primary" data-mkws="1">📄 Make my worksheet</button><button type="button" class="mini" data-nbdel="1">${NBDEL?"Tap again to delete this investigation":"Delete this investigation"}</button></div>
+   <div class="nbadd"><button type="button" class="primary" data-mkws="1" ${invReady()||USER.teacher?"":"disabled"}>📄 Save worksheet</button><button type="button" class="mini" data-nbdel="1">${NBDEL?"Tap again to delete this investigation":"Delete this investigation"}</button></div>
+   <p class="note" id="nbMkNote" ${invReady()||USER.teacher?"hidden":""}>Your worksheet opens when you have written a question and added at least one reading.</p>
   </div>`;
   const nb2=nb.querySelector(".nbbody");if(nb2)nb2.scrollTop=sc;
 }
@@ -3838,12 +3862,13 @@ function wireNb(){
       t.className="";const sm=t.closest("label").querySelector("small");if(sm){sm.textContent="";sm.className=""}
       const row=t.closest(".nbrow");row.classList.remove("done");const pill=row.querySelector(".pill");pill.className="pill todo";pill.textContent="To do";
     }
+    const mk=nb.querySelector("[data-mkws]");if(mk){const ok=invReady()||USER.teacher;mk.disabled=!ok;const n=$("nbMkNote");if(n)n.hidden=ok}
     saveSoon();
   });
 }
 
 /* ----- worksheet ----- */
-const WS={sel:new Set(),blank:false,key:false};
+const WS={sel:new Set(),blank:false,key:false,name:""};
 function hasWork(gi){
   const c=CHALLENGES[gi],M=STORE[gi];
   if(c.tier==="check"){const st=c.steps[0];return !!(st&&st.cid&&S.ck[st.cid]&&Object.keys(S.ck[st.cid]).length)}
@@ -3955,7 +3980,7 @@ function wsInv(o){
 function buildWorksheet(){
   const o={blank:WS.blank&&USER.teacher,key:WS.key&&USER.teacher};
   const sel=[...WS.sel].filter(x=>x!=="inv").map(Number).sort((a,b)=>a-b);
-  let h=`<div class="wshead"><h1>Tilt <span>Lab</span> · Worksheet</h1><small>Why do we have seasons?${o.key?" · ANSWER KEY":""}${o.blank?" · BLANK COPY":""}</small></div>
+  let h=`<div class="wshead"><h1>Tilt <span>Lab</span> · Worksheet</h1><small>${esc(WS.name)} · Why do we have seasons?${o.key?" · ANSWER KEY":""}${o.blank?" · BLANK COPY":""}</small></div>
   <div class="wsbar"><div><b>Name</b><span>${o.blank?"":esc(USER.name)}</span></div><div><b>Class</b><span>${o.blank?"":esc(USER.cls)}</span></div><div><b>Date</b><span>${o.blank?"":new Date().toLocaleDateString("en-GB")}</span></div></div>
   <p class="wskey"><i>Blue</i> writing is my own work.</p>`;
   if(!o.blank&&sel.length){
@@ -3966,37 +3991,32 @@ function buildWorksheet(){
     if(rows)h+=`<h2>Summary</h2><table class="wst"><thead><tr><th>Challenge</th><th>Steps finished</th><th>Check questions right</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
   sel.forEach(gi=>{h+=wsChallenge(gi,o)});
-  if(WS.sel.has("inv")||o.blank)h+=wsInv(o);
-  if(!sel.length&&!WS.sel.has("inv"))h+=`<p>Nothing is chosen yet. Open “Choose what goes on my worksheet” above and tick the parts you want.</p>`;
+  if(WS.sel.has("inv"))h+=wsInv(o);
   return h;
 }
 function showDoc(title,docHTML,toolHTML){
   const v=$("wsv");v.innerHTML=`<div class="wstool"><div class="wsrow"><b>${esc(title)}</b><button type="button" class="primary" data-wsprint="1">🖨 Print or save as PDF</button><button type="button" class="mini" data-wsclose="1">Close ✕</button></div>${toolHTML||""}</div>
   <div class="wsnote">Press “Print or save as PDF”, then choose “Save as PDF” as the printer if you want a file to upload to Toddle.</div><div class="wsdoc" id="wsdoc">${docHTML}</div>`;
   v.hidden=false;v.scrollTop=0;document.body.dataset.ws="1";syncInert();
-  WS.title=document.title;document.title=`Tilt Lab worksheet${USER.name?" - "+USER.name:""}${USER.cls?" "+USER.cls:""}`;
+  WS.title=document.title;document.title=`Tilt Lab ${WS.name} worksheet${USER.name?" - "+USER.name:""}${USER.cls?" "+USER.cls:""}`;
 }
 function printDoc(title,html){showDoc(title,html,"")}
 function closeWs(){const v=$("wsv");if(!v||v.hidden)return;v.hidden=true;v.innerHTML="";delete document.body.dataset.ws;if(WS.title)document.title=WS.title;syncInert()}
 function openWs(opt){
-  if(!$("wsv").hidden)return;
-  if(opt&&opt.sel)WS.sel=new Set(opt.sel);
-  else{WS.sel=new Set();CHALLENGES.forEach((c,gi)=>{if(hasWork(gi))WS.sel.add(gi)});if(invHasWork()||(opt&&opt.inv))WS.sel.add("inv")}
-  WS.blank=false;WS.key=false;
-  let pick="",last="";
-  CHALLENGES.forEach((c,gi)=>{if(c.tier!==last){pick+=`<b>${c.tier==="check"?"Check-in":TIERS[c.tier]}</b>`;last=c.tier}
-    pick+=`<label><input type="checkbox" data-wsp="${gi}" ${WS.sel.has(gi)?"checked":""}> ${c.tier==="check"?esc(c.title):`${c.num}. ${esc(c.title)}`}${hasWork(gi)?"":" <small>(no answers yet)</small>"}</label>`});
-  pick+=`<b>My own work</b><label><input type="checkbox" data-wsp="inv" ${WS.sel.has("inv")?"checked":""}> My own investigation</label>`;
-  const tool=`<details><summary>Choose what goes on my worksheet</summary><div class="wspick">${pick}</div></details>`+
-    (USER.teacher?`<div class="wsrow"><label><input type="checkbox" data-wsb="blank"> Blank copy (no answers)</label><label><input type="checkbox" data-wsb="key"> Answer key</label></div>`:"");
-  showDoc("📄 My worksheet",buildWorksheet(),tool);
+  if(!$("wsv").hidden)return;opt=opt||{};
+  WS.blank=false;WS.key=false;WS.sel=new Set();WS.name="";
+  if(opt.sec){const s=secList().find(x=>x.id===opt.sec);if(!s||!secUnlocked(s))return;
+    s.gis.forEach(gi=>{if(USER.teacher||hasWork(gi))WS.sel.add(gi)});WS.name=s.name}
+  else if(opt.inv){if(!(invReady()||USER.teacher))return;WS.sel.add("inv");WS.name="My own investigation"}
+  else return;
+  const tool=USER.teacher?`<div class="wsrow"><label><input type="checkbox" data-wsb="blank"> Blank copy (no answers)</label><label><input type="checkbox" data-wsb="key"> Answer key</label></div>`:"";
+  showDoc(`📄 ${WS.name} worksheet`,buildWorksheet(),tool);
 }
 function wireWs(){
   const v=$("wsv");
   v.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.wsclose)closeWs();else if(b.dataset.wsprint)window.print()});
   v.addEventListener("change",e=>{const t=e.target;
-    if(t.dataset.wsp!==undefined){const k=t.dataset.wsp==="inv"?"inv":+t.dataset.wsp;t.checked?WS.sel.add(k):WS.sel.delete(k)}
-    else if(t.dataset.wsb){WS[t.dataset.wsb]=t.checked}
+    if(t.dataset.wsb){WS[t.dataset.wsb]=t.checked}
     else return;
     $("wsdoc").innerHTML=buildWorksheet();
   });
@@ -4006,11 +4026,12 @@ function wireWs(){
 function wireNew(){
   document.querySelectorAll(".uChange").forEach(b=>b.addEventListener("click",()=>{saveProgress();showGate(true)}));
   [$("nbBtn"),$("gNb")].forEach(b=>b.addEventListener("click",()=>nbToggle()));
-  [$("wsBtn"),$("gWs")].forEach(b=>b.addEventListener("click",()=>openWs()));
+  [$("wsBtn"),$("gWs")].forEach(b=>b.addEventListener("click",()=>showLib()));
   $("gMap").addEventListener("click",()=>{if(MEM&&!S.intro&&!S.inSetup)captureModel();goIntro()});
   $("gStep").addEventListener("click",e=>{
     const g=e.target.closest("[data-gch]");if(g){goChallenge(+g.dataset.gch);return}
-    const a=e.target.closest("[data-act]");if(a){if(a.dataset.act==="ws")openWs();else nbToggle(true)}
+    const w=e.target.closest("[data-wsec]");if(w){openWs({sec:w.dataset.wsec});return}
+    const a=e.target.closest("[data-act]");if(a){if(a.dataset.act==="lib")showLib();else nbToggle(true)}
   });
   wireNb();wireWs();wireLib();
   document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("wsv").hidden)closeWs();else if(!$("teach").hidden)return;else if(!$("lib").hidden)closeLib();else if(NB&&$("home").hidden)closeNb()}});
@@ -4102,7 +4123,7 @@ function homeRings(ctx,cx,cy,R,back){
       if(!pen){ctx.moveTo(X,Y);pen=true}else ctx.lineTo(X,Y);
     }
     ctx.lineWidth=Math.max(1,R*(i===5?0.012:i===2?0.018:0.009));
-    ctx.strokeStyle=i===5?"rgba(190,225,245,.35)":i%2?"rgba(205,235,250,.55)":"rgba(170,215,240,.42)";
+    ctx.strokeStyle=i===5?"rgba(190,225,245,.17)":i%2?"rgba(205,235,250,.27)":"rgba(170,215,240,.2)";
     ctx.stroke();
   });
 }
@@ -4159,15 +4180,10 @@ function homeCounts(){
   let done=0,total=0;CHALLENGES.forEach((c,gi)=>{if(c.tier==="check")return;total++;if(chStatus(gi)==="done")done++});
   return {done,total};
 }
-function libItems(){
-  const out={done:[],started:[]};
-  CHALLENGES.forEach((c,gi)=>{if(c.tier==="check")return;const s=chStatus(gi);if(s==="done")out.done.push(gi);else if(s==="started"||hasWork(gi))out.started.push(gi)});
-  return out;
-}
 function renderHome(){
-  const c=homeCounts(),started=Object.keys(STORE).length>0,L=libItems(),inv=invHasWork();
+  const c=homeCounts(),started=Object.keys(STORE).length>0;
   const g=$("home").querySelector('[data-home="guided"] em');if(g)g.textContent=started?`Continue · ${c.done} of ${c.total} challenges done →`:"Start →";
-  const w=$("home").querySelector('[data-home="lib"] span');if(w)w.textContent=`My completed worksheets (${L.done.length+(inv?1:0)})`;
+  const w=$("home").querySelector('[data-home="lib"] span');if(w)w.textContent=`My completed worksheets (${libCount()})`;
 }
 function showHome(){
   if(MEM&&S.mode==="guided"&&!S.intro&&!S.inSetup)captureModel();
@@ -4217,20 +4233,16 @@ function wireHome(){
 
 /* ----- my completed worksheets ----- */
 function showLib(){
-  const L=libItems(),inv=invHasWork(),box=$("lib");
-  const row=(gi)=>{const c=CHALLENGES[gi],idx=c.steps.map((s,i)=>stepVisible(s)&&s.type!=="learn"?i:-1).filter(i=>i>=0),n=idx.filter(i=>isStepDone(gi,i)).length;
-    let ck=0,right=0;const M=STORE[gi];if(M)c.steps.forEach((s,i)=>{if(s.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}});
-    return `<div class="librow"><div><b>${TIERS[c.tier]} ${c.num}: ${esc(c.title)}</b><small>${n} of ${idx.length} steps finished${ck?` · ${right} of ${ck} check questions right`:""}</small></div><button type="button" class="mini" data-lopen="${gi}">Open worksheet</button></div>`};
-  const invRow=()=>{const rows=INV.list.reduce((a,v)=>a+v.rows.length,0);return `<div class="librow"><div><b>My own investigation</b><small>${INV.list.length} investigation${INV.list.length>1?"s":""} · ${rows} reading${rows===1?"":"s"}</small></div><button type="button" class="mini" data-lopen="inv">Open worksheet</button></div>`};
-  const doneRows=L.done.map(row).join("")+(inv?invRow():"");
-  const all=L.done.length+(inv?1:0);
+  const box=$("lib");
+  const rows=secList().map(s=>{const p=secProg(s),k=secChecks(s),ok=secUnlocked(s);
+    const info=`${p.done} of ${p.total} challenges finished${k.ck?` · ${k.right} of ${k.ck} check questions right`:""}`;
+    return `<div class="librow ${p.ok?"okrow":""}"><div><b>${p.ok?"✓ ":""}${esc(s.name)}</b><small>${info}</small></div>${ok?`<button type="button" class="${p.ok?"primary":"mini"}" data-lsec="${s.id}">📄 Save worksheet</button>`:`<span class="lockn">Finish all ${p.total} to save</span>`}</div>`}).join("");
+  const rdy=invReady()||USER.teacher,nrows=INV.list.reduce((a,v)=>a+v.rows.length,0);
+  const invRow=`<div class="librow ${invReady()?"okrow":""}"><div><b>${invReady()?"✓ ":""}My own investigation</b><small>${invReady()?`${INV.list.length} investigation${INV.list.length>1?"s":""} · ${nrows} reading${nrows===1?"":"s"}`:"Write a question and add a reading to unlock it"}</small></div>${rdy?`<button type="button" class="${invReady()?"primary":"mini"}" data-linv="1">📄 Save worksheet</button>`:`<span class="lockn">Not finished yet</span>`}</div>`;
   box.innerHTML=`<div class="gbox libbox" role="dialog" aria-modal="true" aria-labelledby="libT">
    <div class="libhead"><h2 id="libT">📄 My completed worksheets</h2><button type="button" class="mini" data-lclose="1">Close ✕</button></div>
-   ${all?`<p>Every challenge you finish gets its own worksheet. Open one to read it, print it or save it as a PDF.</p>
-     ${all>1?`<div class="librow all"><div><b>Everything I have completed</b><small>One worksheet with all of the work below</small></div><button type="button" class="primary" data-lopen="all">Open worksheet</button></div>`:""}
-     <h3>Finished</h3>${doneRows}`:`<p>Nothing is finished yet. Finish a challenge, or write up your own investigation, and a worksheet shows up here.</p>`}
-   ${L.started.length?`<h3>Still in progress</h3><p class="note">You can make a worksheet from unfinished work too.</p>${L.started.map(row).join("")}`:""}
-   <div class="grow"><button type="button" class="mini" data-lopen="custom">Make a custom worksheet</button></div>
+   <p>You get one worksheet for each section. When you finish every challenge in a section, its “Save worksheet” button opens. The worksheet has all your answers, and you can save it as a PDF to upload to Toddle.</p>
+   ${rows}<h3>Your own work</h3>${invRow}
   </div>`;
   box.hidden=false;syncInert();
   const f=box.querySelector("button");if(f)f.focus();
@@ -4240,10 +4252,8 @@ function wireLib(){
   $("lib").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;const d=b.dataset;
     if(d.lclose){closeLib();return}
-    if(d.lopen==="custom"){openWs({from:"lib"});return}
-    if(d.lopen==="all"){const L=libItems();openWs({sel:L.done.concat(invHasWork()?["inv"]:[]),from:"lib"});return}
-    if(d.lopen==="inv"){openWs({sel:["inv"],from:"lib"});return}
-    if(d.lopen!==undefined)openWs({sel:[+d.lopen],from:"lib"});
+    if(d.lsec){openWs({sec:d.lsec});return}
+    if(d.linv)openWs({inv:true});
   });
 }
 
