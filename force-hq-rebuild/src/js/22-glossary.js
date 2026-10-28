@@ -54,7 +54,14 @@ const TERMS = {
   action: ['Action', 'One force in a force pair. The other force is the reaction. Neither comes first: they happen at exactly the same time.', ['action']],
   reaction: ['Reaction', 'The other force in a force pair: the push or pull back from the object you pushed or pulled.', ['reaction']],
   thruster: ['Thruster', 'A small rocket on a spacecraft. It throws gas out one way, and the gas pushes the spacecraft the other way.', ['thrusters', 'thruster']],
-  shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []]
+  shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []],
+  /* Chapter 5 words (4th item: the chapters where the word is auto-underlined, because lift, drag and hover are ordinary words elsewhere) */
+  parachute: ['Parachute', 'A big fabric canopy that a skydiver or a crate opens to make the air resistance much bigger, so it falls much more slowly.', ['parachute', 'parachutes'], [5]],
+  canopy: ['Canopy', 'The large fabric part of a parachute. A bigger canopy pushes more air out of the way, so the air resistance is bigger.', ['canopy', 'canopies'], [5]],
+  lift: ['Lift', 'The upward force on a helicopter or a plane. A helicopter\'s blades push air down, so the air pushes the helicopter up.', ['lift'], [5]],
+  hover: ['Hover', 'To stay still in the air. A hovering helicopter\'s lift is exactly equal to its weight.', ['hover', 'hovers', 'hovering'], [5]],
+  vacuum: ['Vacuum', 'A space with no air in it at all, so there is no air resistance.', ['vacuum'], [5]],
+  drag: ['Drag', 'Another name for air resistance (or water resistance): a force that pushes against an object moving through a fluid.', ['drag'], [5]]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */
 const GL_ALIASES = Object.entries(TERMS).flatMap(([k, [, , al]]) => (al || []).map(a => [a.toLowerCase(), k])).sort((a, b) => b[0].length - a[0].length);
@@ -67,8 +74,8 @@ function glossify(root) {
     let guard = 0;
     while (node && guard++ < 6) {
       const m = GL_RE.exec(node.nodeValue); if (!m) break;
-      const key = GL_ALIASES.find(a => a[0] === m[1].toLowerCase())[1];
-      if (seen.has(key)) { // skip this occurrence, look further along
+      const key = GL_ALIASES.find(a => a[0] === m[1].toLowerCase())[1], only = TERMS[key][3];
+      if (seen.has(key) || (only && !(typeof CH !== 'undefined' && CH && only.includes(CH.n)))) { // skip this occurrence, look further along
         const rest = node.splitText(m.index + m[0].length); node = rest; continue;
       }
       seen.add(key);

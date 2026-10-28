@@ -12,7 +12,7 @@ def chk(name, cond, extra=''):
 STAGES = ['The skydiver speeds up quickly', 'Air resistance grows as the velocity grows', 'Air resistance equals the weight, so the velocity is steady', 'The canopy opens and air resistance jumps up', 'The skydiver slows down and air resistance shrinks', 'The forces balance again at a much lower velocity']
 def order_q(i): return dict(id=i, type='order', p='Put the stages of a skydive in order.', first='Leaves the helicopter', last='Lands', items=STAGES)
 SCALE = ['gets bigger', 'stays the same', 'gets smaller']
-def pick_q(i): return dict(id=i, type='pick', p='As the crate fell faster and faster, its weight {0} and the air resistance on it {1}.', picks=[[SCALE, 1], [SCALE, 0]], after='Weight is mass × g, and neither changes during the fall.')
+def pick_q(i): return dict(id=i, type='pick', p='As the crate fell faster and faster, its weight {0} and the air resistance on it {1}.', picks=[[SCALE, 1], [SCALE, 0]], after='Weight is mass × g, so it stays the same during the fall.')
 OPTS = ['Air resistance is equal to their weight', 'Air resistance is bigger than their weight', 'Air resistance is smaller than their weight', 'There are no forces acting on them at all']
 REAS = ['Their velocity is steady, so the resultant force must be zero', 'They are still falling, so there must be a downward resultant', 'They are moving fast, so air resistance must be winning', 'They have stopped speeding up, so gravity has switched off']
 def reason_q(i, **kw): return dict(id=i, type='reason', p='A skydiver with the canopy closed is falling at a steady 54 m/s. Which is true about the forces on them?', opts=OPTS, a=0, reasons=REAS, r=0, why=dict(r={'1': 'A steady velocity needs no resultant force.'}, a={'3': 'Both forces are still there.'}), **kw)
@@ -69,7 +69,7 @@ with sync_playwright() as p:
     chk('pick: sentence has two drop-downs and no separate question line', pg.locator('#rq-qp1 .pickin').count() == 2 and pg.locator('#rq-qp1 .qp').count() == 0)
     pg.locator('#rq-qp1 .qchk').click(); chk('pick: asks for every gap', 'every gap' in fb(pg, 'qp1'), fb(pg, 'qp1'))
     pg.locator('#rq-qp1 .pickin').nth(0).select_option(label='stays the same'); pg.locator('#rq-qp1 .pickin').nth(1).select_option(label='gets bigger'); pg.locator('#rq-qp1 .qchk').click(); pg.wait_for_timeout(100)
-    chk('pick: all right = 2 of 2', pts(pg, 'qp1') == '2 of 2 points', pts(pg, 'qp1')); chk('pick: feedback adds the after line', 'neither changes' in fb(pg, 'qp1'))
+    chk('pick: all right = 2 of 2', pts(pg, 'qp1') == '2 of 2 points', pts(pg, 'qp1')); chk('pick: feedback adds the after line', 'stays the same during the fall' in fb(pg, 'qp1'))
     chk('pick: drop-downs locked and green', pg.locator('#rq-qp1 .pickin.right').count() == 2 and pg.locator('#rq-qp1 .pickin').first.is_disabled())
     pg.locator('#rq-qp2 .pickin').nth(0).select_option(label='gets bigger'); pg.locator('#rq-qp2 .pickin').nth(1).select_option(label='gets bigger'); pg.locator('#rq-qp2 .qchk').click(); pg.wait_for_timeout(100)
     chk('pick: one wrong = 1 of 2, red drop-down with the green answer', pts(pg, 'qp2') == '1 of 2 points' and pg.locator('#rq-qp2 .pickin.wrong').count() == 1 and 'stays the same' in pg.locator('#rq-qp2 .corr').first.inner_text(), pts(pg, 'qp2'))

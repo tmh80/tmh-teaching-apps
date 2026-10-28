@@ -220,6 +220,14 @@ function dzGraphs() {
     ser.forEach((s, i) => { if (s.length < 1) return; c.strokeStyle = DZ_LANECOL()[i]; c.lineWidth = 3.5; c.lineJoin = 'round'; c.beginPath(); const st = Math.max(1, Math.floor(s.length / 700)); s.forEach(([t, v], k) => { if (k % st && k < s.length - 1) return; k ? c.lineTo(X(t), Y(v)) : c.moveTo(X(t), Y(v)); }); c.stroke(); const l = s[s.length - 1]; c.fillStyle = DZ_LANECOL()[i]; c.beginPath(); c.arc(X(l[0]), Y(l[1]), 5, 0, 7); c.fill(); });
     lanes.forEach((L, i) => { if (L.opened != null && (!DZ.paused || DZ.viewT >= L.opened)) { const bx = X(L.opened); c.save(); c.setLineDash([6, 4]); c.strokeStyle = DZ_LANECOL()[i]; c.lineWidth = 1.8; c.beginPath(); c.moveTo(bx, y0); c.lineTo(bx, y1); c.stroke(); c.restore(); pill(c, 'canopy opened', bx, y0 + 12 + i * 20, DZ_LANECOL()[i], 11); } });
     if (DZ.two) lanes.forEach((L, i) => pill(c, `Lane ${L.id}`, x1 - 40, y0 + 14 + i * 22, DZ_LANECOL()[i], 12));
+
+    // the student's sketch prediction (Predict first), stretched over this run: the "canopy opens" column lands on the moment the canopy really opened
+    const ps = typeof CH !== 'undefined' && CH && LAB.mode === 'guided' && predSketch(), P = ps && CHDATA[CH.id].steps[GI].predict;
+    if (ps && P && ser[0] && ser[0].length > 1) {
+      const n = P.cols, mc = P.marks && P.marks[0] ? P.marks[0].col : null, tOp = lanes[0].opened, pts = ps.map((l, i) => { const t = mc != null && tOp != null ? (i <= mc ? tOp * i / mc : tOp + (tMax - tOp) * (i - mc) / (n - 1 - mc)) : tMax * i / (n - 1); return [X(t), Y(l / P.levels * top)]; });
+      c.save(); c.strokeStyle = C.warn || '#e08a1e'; c.lineWidth = 3; c.setLineDash([8, 5]); c.beginPath(); pts.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.setLineDash([]); c.fillStyle = c.strokeStyle; pts.forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 4, 0, 6.3); c.fill(); }); c.restore();
+      pill(c, 'Your prediction', x1 - 70, y1 - 16, C.warn || '#e08a1e', 12);
+    }
   }
   const cf = $('#cvDFT'); if (cf && cf.offsetParent) {
     const W = 900, H = 200, c = fit(cf, W, H); c.fillStyle = C.panel; c.fillRect(0, 0, W, H);

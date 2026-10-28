@@ -152,7 +152,7 @@ q1 | reading | The crate's velocity stopped going up. What velocity did it settl
 q2 | pick | As the crate fell faster and faster, its weight {0} and the air resistance on it {1}.
    {0}: gets bigger / stays the same / gets smaller → stays the same
    {1}: gets bigger / stays the same / gets smaller → gets bigger
-   Feedback after: Weight is mass × g, and neither changes during the fall. Air resistance grows as the velocity grows.
+   Feedback after: Weight is mass × g, so it stays the same during the fall. Air resistance grows as the velocity grows.
 q3 | mcq | Why did the air resistance arrow grow during the fall?
    Options: Air resistance gets bigger as the crate's velocity gets bigger · Air resistance gets bigger as the crate gets closer to the ground · Air resistance gets bigger as the crate's weight gets bigger · Air resistance gets bigger as the air gets colder lower down
    correct 0

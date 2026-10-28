@@ -220,3 +220,6 @@ function predSketchBind(P) {
     dbSet(stepKey(CH.id, GI) + '.pred', { sk: p.slice() }); renderRail(); checkStep();
   });
 }
+
+/* how many rows of a freeze question (in the current Learn step) have a moment attached: used by "Do this" tasks */
+const frzCount = qid => { const s = dbGet(stepKey(CH.id, GI) + '.' + qid, null); return s && s.v && Array.isArray(s.v.rows) ? s.v.rows.filter(r => r.snap).length : 0; };

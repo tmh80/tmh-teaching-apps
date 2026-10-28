@@ -41,9 +41,14 @@ const SECTIONS = [
     blurb: 'Thrusters and rockets, then mission control\'s docking orders: work out the push that gives the right docking velocity.',
     steps: ['g1', 'g2'], challenge: ['o1', 'o2', 'o3'], review: ['c4r9', 'c4r10', 'c4r11', 'c4r12', 'c4r13'], needs: 'c4f',
     goal: 'Explain how thrusters and rockets use force pairs; work out the push needed for a target velocity using force = mass × velocity; keep the astronaut\'s velocity within a limit by choosing their mass.',
-    vocab: ['thruster', 'force pair', 'Newton\'s third law', 'Newton\'s first law', 'mass', 'force'] }
+    vocab: ['thruster', 'force pair', 'Newton\'s third law', 'Newton\'s first law', 'mass', 'force'] },
+  { id: 'c5f', ch: 'c5', n: 5, title: 'Falling and terminal velocity', part: 'Foundation', stamp: 'Skydive Spotter',
+    blurb: 'Drop a crate and a skydiver, pause the fall to read the forces, and find out why the velocity stops going up and what a parachute does.',
+    steps: ['d1', 'd2', 'd3', 'd4'], challenge: null, review: ['c5r1', 'c5r2', 'c5r3', 'c5r4', 'c5r5', 'c5r6', 'c5r7'],
+    goal: 'Describe how weight and air resistance change during a fall; use balanced forces to explain terminal velocity; say what happens to the forces and the velocity when a parachute opens.',
+    vocab: ['air resistance', 'weight', 'terminal velocity', 'balanced forces', 'resultant force', 'parachute', 'canopy'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

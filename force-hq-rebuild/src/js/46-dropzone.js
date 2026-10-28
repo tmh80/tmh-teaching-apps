@@ -294,7 +294,7 @@ function initDrop() {
   on('#dzDrop', 'click', () => { if (dzDrop()) labChanged(); });
   on('#dzPause', 'click', () => { dzPause(); labChanged(); });
   on('#dzBack', 'click', () => { dzStepView(-1); labChanged(); }); on('#dzFwd', 'click', () => { dzStepView(1); labChanged(); });
-  on('#dzSnap', 'click', () => { if (dzSnapNow()) { toast('📸 Snapshot saved in your Journal (Runs tab).', 'good'); labChanged(); } });
+  on('#dzSnap', 'click', () => { if (dzSnapNow()) { S.flags.snapBtn = true; toast('📸 Snapshot saved in your Journal (Runs tab).', 'good'); labChanged(); } });
   on('#dzOpen', 'click', () => { dzOpenAll(); labChanged(); });
   document.addEventListener('click', e => {
     if (S.scene !== 'drop') return;
