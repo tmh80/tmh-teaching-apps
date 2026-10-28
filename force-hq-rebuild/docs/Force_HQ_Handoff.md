@@ -64,7 +64,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
   - Leave a task's text empty (`''`) when the question already holds the numbers. Tom finds extra instruction lines "take too much space".
 - **Mask answers** a readout would hand over (`mask` in step data, `spaceMasked`/`sledMasked`), so the number stays hidden until the student answers.
 - **Calculator:** Calculator and Formulas tabs. All formulas always visible; those for the current chapter glow gold (`ch: [..]` in `FORMULAS`). Tappable triangles for F = ma and W = mg. A "Save to Journal" button stores a calculation and optional working note.
-- **Journal:** tabs Runs, Working, Notes, Vocab, plus a fixed tab on the right edge of the screen (no count on it). The Working tab has a free-typing pad per step (`DB.jwork`).
+- **Journal:** tabs Runs, Working, Notes, Vocab, plus a fixed tab on the right edge of the screen. None of the Journal buttons (header, tab, step list) shows a number. The Working tab has a free-typing pad per step (`DB.jwork`).
 - **Space Dome free-body diagram** keeps the latest push or thruster burst until Reset.
 - **Challenge feedback:** a pass is green and starts "Congratulations!". Window edges count as on target (`DOCK_EPS`), because the sim reads 0.4999 for an exact 0.5.
 - **Mystery-object final steps** beat long question runs (Chapter 3 `a6`, Chapter 4 `f5`).
@@ -90,3 +90,33 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
 - **Glossary** up to 50 to 80 terms.
 - **Flashcards with spaced repetition** from `DB.vocab` (Tom wants these in every sim and lab; banked).
 - Other small ideas are in the Backlog (answer boxes for Chapter 2 `x2`, diagonal FBD arrows, light/dark toggle, bigger FBD text on phones).
+
+## 8. Script format for the planning model (use this when it writes the teaching cards)
+Ask the planning model for one markdown file per chapter in `docs/` (for example `Chapter5_Script.md`), one block per step, written so the coding model can copy it straight into the step data. If the coding model has to change wording to fit the screen or to stop a readout giving an answer away, it changes the script file too, so the script and the app do not drift apart.
+
+```
+### Step f5: Mystery push-offs   (Foundation, about 5 min)
+Arena: <which scene, which panels are added or hidden>
+Formulas unlocked in the calculator: <none, or the ids>
+
+CARDS (1 to 3; each at most about 60 words, so it fits the card without clipping)
+1. <text>
+   Worked example (only where a calculation is taught): <numbers and working>
+   Key idea (optional): <one sentence to highlight>
+
+PREDICT FIRST (optional)
+Question: <text>   Options: <4 options, all about the same length>   After: <one line>
+
+DO THIS (short; leave a task's text empty when the question already holds the numbers)
+- Calculate: <question text>  -> answer box, unit <unit>
+- Check it: <what to do in the sim>   (a "Check it" reading question completes itself when this is done)
+
+YOUR TURN QUESTIONS
+q1 | num | <question> | answer <n> | unit <u> | tolerance <t>
+   Hints (3, from nudge to the sum): ...
+   Working shown after: <one line>
+q2 | mcq | <question> | options (same length and detail) | correct <n> | why each wrong option is wrong, one line each
+Glossary words to underline: <words>
+Masked readouts: <which readout stays hidden until which question is answered>
+```
+Voice and terminology rules for the script are in section 3 (velocity, not speed; short sentences; no "it isn't X, it's Y"; no standards on student screens; g = 9.8 N/kg).

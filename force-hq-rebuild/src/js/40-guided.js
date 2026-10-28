@@ -113,7 +113,7 @@ function renderRail() {
     ${st.predict ? predictBox(st) : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
-    <button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button>
+    <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();

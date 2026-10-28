@@ -733,7 +733,7 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
   <div class="who" id="whoTop" aria-live="polite"></div>
   <div class="crumb" id="crumb"></div>
   <div class="topright">
-    <button type="button" class="ghost sm" data-journal>📓 Journal <span class="jc" id="jCount">0</span></button>
+    <button type="button" class="ghost sm" data-journal>📓 Journal</button>
     <button type="button" class="ghost sm" id="bkBtn">💾 Save progress</button>
     <button type="button" class="ghost sm" id="saveWorkBtn">📄 Save my work</button>
     <button type="button" class="ghost sm teachbtn" id="teacherBtn">For teachers</button>
@@ -2351,7 +2351,7 @@ function journalAdd(key, where, title, html) {
   const J = dbGet('journal', { order: [], entries: {} }); if (!J.entries[key]) J.order.push(key);
   J.entries[key] = { where, title, html, at: Date.now() }; J.last = key; dbSet('journal', J); updateJCount();
 }
-function updateJCount() { const J = dbGet('journal', { order: [] }); $('#jCount').textContent = J.order.length; $$('.jbtn .jc, .jtab .jc').forEach(e => e.textContent = J.order.length); }
+function updateJCount() { /* the Journal buttons show no number (Tom, 28 Oct) */ }
 function addEvidence(kind, text) {
   const E = dbGet('evidence', []); if (kind === 'challenge' && E.some(e => e.text === text)) return;
   E.push({ kind, text, at: new Date().toISOString() }); if (E.length > 300) E.splice(0, E.length - 300); dbSet('evidence', E);
@@ -3084,7 +3084,7 @@ function renderRail() {
     ${st.predict ? predictBox(st) : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
-    <button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button>
+    <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();
@@ -4556,7 +4556,7 @@ function openExplore() {
   clearCh2(); LAB.mode = 'explore'; LAB.show = new Set(PANELS.filter(k => !EXPLORE_HIDE.includes(k))); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
   applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDone', []));
-  const draw = () => { $('#rail').innerHTML = `<span class="lbl">Explore · Main Arena</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${TRYTHIS.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
+  const draw = () => { $('#rail').innerHTML = `<span class="lbl">Explore · Main Arena</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${TRYTHIS.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();
   LAB.onChange = null; LAB.tick = () => { TRYTHIS.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDone', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }

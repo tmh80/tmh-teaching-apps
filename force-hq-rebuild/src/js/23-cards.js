@@ -59,7 +59,7 @@ function journalAdd(key, where, title, html) {
   const J = dbGet('journal', { order: [], entries: {} }); if (!J.entries[key]) J.order.push(key);
   J.entries[key] = { where, title, html, at: Date.now() }; J.last = key; dbSet('journal', J); updateJCount();
 }
-function updateJCount() { const J = dbGet('journal', { order: [] }); $('#jCount').textContent = J.order.length; $$('.jbtn .jc, .jtab .jc').forEach(e => e.textContent = J.order.length); }
+function updateJCount() { /* the Journal buttons show no number (Tom, 28 Oct) */ }
 function addEvidence(kind, text) {
   const E = dbGet('evidence', []); if (kind === 'challenge' && E.some(e => e.text === text)) return;
   E.push({ kind, text, at: new Date().toISOString() }); if (E.length > 300) E.splice(0, E.length - 300); dbSet('evidence', E);
