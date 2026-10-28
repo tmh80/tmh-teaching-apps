@@ -11,7 +11,7 @@ Interactive science sims and labs for WAB MS Science (Grade 6–8). Each app is 
 | `sparks-through-time/` | Sparks Through Time | G6 Electricity | `Sparks-Through-Time.html` | Ready |
 | `adapt-lab/` | Adapt Lab | G7/8 Adaptations & evolution | `Adapt-Lab-offline.html` | Ready |
 | `paper-plane-lab/` | Paper Plane Lab | G6 Scientific method | `Paper-Plane-Lab-offline.html` | Ready (source in `src/`, rebuild with `node build.js`) |
-| `tilt-lab/` | Tilt Lab | G7/8 Earth in Space (seasons) | `Tilt-Lab-offline.html` | Ready. Name and class screen (teacher code `TILT`), answers saved per student, every stage and step open, My investigation notebook with checked readings, generated worksheet (print or save as PDF), and an exploration section with group tables on the teacher page |
+| `tilt-lab/` | Tilt Lab | G7/8 Earth in Space (seasons) | `Tilt-Lab-offline.html` | Ready. Landing page (rolling Uranus with the Sun behind) with Guided, Exploration, My investigation, My completed worksheets and a teacher button. Name and class screen (teacher code `TILT`), answers saved per student, every stage and step open. Two big modes: Guided and Exploration (a dashboard where students add or remove any views). My investigation notebook with checked readings, generated worksheets (print or save as PDF), and exploration ideas with group tables on the teacher page |
 
 `Force-HQ.html` and `Adapt-Lab.html` are the sources used for the online Claude previews; each `-offline` copy is the same app wrapped as a full web page, with its fonts (and, for Adapt Lab, the jsPDF library used for PDF exports) embedded so it makes no internet requests.
 

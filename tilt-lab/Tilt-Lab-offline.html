@@ -665,6 +665,78 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
 .guide.intro #gMap{display:none}
 @media (min-width:1101px){header.top{grid-template-columns:auto auto minmax(0,1fr);justify-content:space-between}.hdrSpace{flex-wrap:wrap;justify-content:flex-end}}
 .app[data-free="1"] .hdrSpace .uchip,.app[data-free="1"] .hdrSpace .nbbtn,.app[data-free="1"] .hdrSpace .wsbtn{display:none}
+/* ---- two modes, dashboard, home page, worksheet library ---- */
+.modes button{padding:12px 34px!important;min-width:220px}
+.modes button b{font-size:21px}
+.modes button small{font-size:12.5px}
+@media (max-width:560px){.modes button{min-width:0;padding:8px 14px!important}.modes button b{font-size:16px}}
+.gmodes{display:inline-flex;background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:3px;gap:3px}
+.gmodes button{font:inherit;font-weight:700;font-size:16px;border:0;background:transparent;color:var(--muted);border-radius:11px;padding:8px 18px;cursor:pointer}
+.gmodes button[aria-pressed="true"]{background:var(--sun);color:#fff}
+.vbar{display:none}
+.app[data-mode="explore"] .vbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.vbar .vchips{display:flex;flex-wrap:wrap;gap:8px}
+.vbar .vchips button{font:inherit;font-weight:600;font-size:15px;padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--chip);color:var(--ink);cursor:pointer}
+.vbar .vchips button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.vbar .vchips button::before{content:"＋ ";font-weight:800}
+.vbar .vchips button[aria-pressed="true"]::before{content:"✓ "}
+.vbar .note{margin:0}
+.pclose{display:none;font:inherit;font-size:13px;line-height:1;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:var(--chip);color:var(--muted);cursor:pointer;align-items:center;justify-content:center;margin-left:4px}
+.pclose:hover{background:var(--ink);color:var(--panel)}
+.app[data-mode="explore"] .pclose{display:inline-flex}
+.app[data-mode="explore"] .grid{grid-template-areas:none;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr))}
+.app[data-mode="explore"] .panel{grid-area:auto}
+.app[data-mode="explore"] .p-sky .cv,.app[data-mode="explore"] .p-globe .cv{max-width:min(100%,70vh);margin-inline:auto}
+.app[data-mode="explore"] .p-heat .cv{max-width:min(100%,62vh);margin-inline:auto}
+/* home page */
+.home{position:fixed;inset:0;z-index:70;background:#04060d;color:#fff;overflow:hidden}
+.home canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.homeUI{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;padding:16px 24px 20px;overflow-y:auto}
+.homeTop{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.home .uchip{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff}
+.home .uchip small{color:#cfd8e6}
+.home .uchip .mini{background:rgba(255,255,255,.15);color:#fff;border-color:rgba(255,255,255,.3)}
+.hbtn{font:inherit;font-weight:700;font-size:15px;color:#fff;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.4);border-radius:999px;padding:9px 18px;cursor:pointer}
+.hbtn:hover{background:rgba(255,255,255,.22)}
+.homeMain{margin:auto 0;width:min(560px,100%);display:flex;flex-direction:column;gap:20px;padding:10px 0}
+.homeTitle h1{margin:0;font-size:clamp(46px,7vw,78px);line-height:1;letter-spacing:.01em}
+.homeTitle h1 span{color:var(--sun)}
+.homeTitle p{margin:10px 0 0;font-size:clamp(16px,2vw,20px);color:#e6edf8;max-width:28em;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+.homeCards{display:flex;flex-direction:column;gap:12px}
+.hcard{font:inherit;text-align:left;color:#fff;background:rgba(8,13,28,.74);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1.5px solid rgba(255,255,255,.22);border-radius:16px;padding:16px 20px 16px 80px;position:relative;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-height:96px;justify-content:center;transition:transform .12s,border-color .12s}
+.hcard i{position:absolute;left:20px;top:50%;transform:translateY(-50%);font-style:normal;font-size:40px}
+.hcard b{font-size:23px}
+.hcard small{font-size:14.5px;color:#d3dcec;line-height:1.35}
+.hcard em{font-style:normal;font-weight:700;color:#ffb866;font-size:14px;margin-top:2px}
+.hcard:hover,.hcard:focus-visible{transform:translateX(5px);border-color:var(--sun);outline:none}
+.hcard.guided{border-color:rgba(243,162,75,.75)}
+.homeLinks{display:flex;gap:10px;flex-wrap:wrap}
+.hlink{font:inherit;font-weight:700;font-size:16px;color:#fff;background:transparent;border:0;border-bottom:2px solid rgba(255,255,255,.5);padding:6px 2px;cursor:pointer}
+.hlink:hover,.hlink:focus-visible{border-color:var(--sun);color:#ffe2b0;outline:none}
+.homeCap{position:absolute;right:3vw;bottom:4vh;width:min(400px,36vw);margin:0;font-size:14px;line-height:1.5;color:#e6edf8;text-shadow:0 1px 8px rgba(0,0,0,.8)}
+@media (max-width:959px){
+  .homeUI{padding:12px 16px 24px}
+  .homeMain{margin:34vh 0 0;gap:16px}
+  .homeCap{position:static;width:auto;margin-top:6px}
+  .hcard{min-height:84px;padding:12px 16px 12px 66px}.hcard i{left:14px;font-size:32px}.hcard b{font-size:20px}
+}
+@media (prefers-reduced-motion:reduce){.hcard{transition:none}}
+/* worksheet library */
+.lib{position:fixed;inset:0;z-index:72;background:rgba(4,6,13,.92);display:flex;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
+.lib .gbox{background:var(--panel);color:var(--ink);border-radius:16px;max-width:660px;width:100%;padding:22px 24px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.lib h2{margin:0;font-size:24px}.lib h3{margin:6px 0 0;font-size:15px}.lib p{margin:0;font-size:15px;line-height:1.5}
+.libhead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.librow{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--bg)}
+.librow.all{border-color:var(--sun)}
+.librow small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.librow .primary{margin-left:0}
+.lib .grow{display:flex;gap:10px}
+.lib .mini{color:var(--ink);background:var(--chip)}
+.app[data-mode="explore"] .grid{align-items:start}
+.app[data-mode="explore"] .p-heat .cv{max-width:min(100%,420px)}
+.homeCap{background:rgba(4,6,13,.62);padding:10px 14px;border-radius:12px}
+.uchip{white-space:nowrap}.hdrSpace button{white-space:nowrap}
+@media (max-width:1100px){header.top .hdrSpace{display:flex;justify-content:center;flex-wrap:wrap}}
 
 </style>
 
@@ -672,9 +744,9 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
   <header class="top">
     <div class="brand"><h1>Tilt <span>Lab</span></h1><p>Explore how a planet's tilt makes seasons</p></div>
     <div class="modes" role="group" aria-label="View mode" id="modes">
-      <button type="button" data-m="guided"><b>Guided</b><small>Step-by-step challenges</small></button><button type="button" data-m="focus"><b>Focus</b><small>Explore one view at a time</small></button><button type="button" data-m="full"><b>Full</b><small>Everything at once</small></button>
+      <button type="button" data-m="guided"><b>🧭 Guided</b><small>Step-by-step challenges</small></button><button type="button" data-m="explore"><b>🔭 Exploration</b><small>Your own dashboard</small></button>
     </div>
-    <div class="hdrSpace"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini nbbtn" id="nbBtn">📓 My investigation</button><button type="button" class="mini wsbtn" id="wsBtn">📄 My worksheet</button><button type="button" class="mini teachbtn" id="teachBtn">For teachers</button></div>
+    <div class="hdrSpace"><button type="button" class="mini homebtn" id="homeBtn">🏠 Home</button><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini nbbtn" id="nbBtn">📓 My investigation</button><button type="button" class="mini wsbtn" id="wsBtn">📄 My worksheet</button><button type="button" class="mini teachbtn" id="teachBtn">For teachers</button></div>
   </header>
 
   <section class="strip" aria-label="Main controls">
@@ -744,8 +816,8 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
     <aside class="guide" id="guide" role="dialog" aria-modal="true" aria-label="Guided challenge">
       <div class="ghead">
         <div class="gtop"><span class="lbl" id="gCount">Challenge 1 of 8</span><button type="button" class="coopchip" id="gCoop" hidden></button><div class="gdots"><button type="button" id="gIntroBtn" class="gintro" aria-label="Introduction">i</button><span id="gDots" class="gdots"></span></div></div>
-        <div class="gexit"><span class="lbl">Leave guided mode:</span><button type="button" class="mini" id="gToFocus">Focus</button><button type="button" class="mini" id="gToFull">Full</button></div>
-        <div class="gextra"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini" id="gMap">☰ All stages</button><button type="button" class="mini" id="gOpen" aria-pressed="false">🔓 Open all the tools</button><button type="button" class="mini" id="gNb">📓 My investigation</button><button type="button" class="mini" id="gWs">📄 My worksheet</button></div>
+        <div class="gmodes" id="gmodes" role="group" aria-label="Mode"><button type="button" data-m="guided"><b>🧭 Guided</b></button><button type="button" data-m="explore"><b>🔭 Exploration</b></button></div>
+        <div class="gextra"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini" id="gHome">🏠 Home</button><button type="button" class="mini" id="gMap">☰ All stages</button><button type="button" class="mini" id="gNb">📓 My investigation</button><button type="button" class="mini" id="gWs">📄 My worksheet</button></div>
       </div>
       <div class="gbody" id="gBody">
         <div class="gleft">
@@ -764,13 +836,7 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
     </aside>
 
     <div class="viewwrap">
-      <nav class="tabs" id="tabs" aria-label="Choose a view">
-        <div class="seg" id="tabMain" role="group" aria-label="Main view">
-          <button type="button" data-v="sky">Sky</button><button type="button" data-v="map">Map</button><button type="button" data-v="globe">Globe</button><button type="button" data-v="graph">Graphs</button><button type="button" data-v="heat">Heat</button><button type="button" data-v="read">Numbers</button>
-        </div>
-        <label class="ctl"><span class="lbl">Add a second view</span>
-          <select id="tabSecond"><option value="">Nothing</option><option value="sky">Sky</option><option value="map">Map</option><option value="globe">Globe</option><option value="graph">Graphs</option><option value="heat">Heat</option><option value="read">Numbers</option></select></label>
-      </nav>
+      <nav class="vbar" id="vbar" aria-label="Your dashboard: choose your views"><span class="lbl">Your dashboard</span><div class="vchips"></div><p class="note" id="vEmpty" hidden>Your dashboard is empty. Press a view button to add it.</p></nav>
 
       <main class="grid" id="grid">
         <section class="panel p-globe" data-v="globe">
@@ -831,6 +897,8 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
     </details>
   </footer>
 </div>
+<div class="home" id="home" hidden></div>
+<div class="lib" id="lib" hidden></div>
 <div class="gate" id="gate" hidden></div>
 <aside class="nb" id="nb" hidden aria-label="My investigation"></aside>
 <div class="wsv" id="wsv" hidden></div>
@@ -1649,8 +1717,8 @@ function wire(){
   $("guides").addEventListener("click",()=>{S.guides=!S.guides;syncUI();requestRender()});
   $("moreBtn").addEventListener("click",()=>{S.more=!S.more;syncUI()});
   $("modes").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;setMode(b.dataset.m)});
-  $("tabMain").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.tab=b.dataset.v;if(S.tab2===S.tab)S.tab2="";syncUI();requestRender()});
-  $("tabSecond").addEventListener("change",e=>{S.tab2=e.target.value===S.tab?"":e.target.value;syncUI();requestRender()});
+  $("vbar").addEventListener("click",e=>{const b=e.target.closest("button[data-v]");if(b)toggleView(b.dataset.v)});
+  $("gmodes").addEventListener("click",e=>{const b=e.target.closest("button[data-m]");if(b)setMode(b.dataset.m)});
   $("gPrev").addEventListener("click",prevStep);
   $("gNext").addEventListener("click",nextStep);
   $("gSkip").addEventListener("click",skipStep);
@@ -1658,8 +1726,8 @@ function wire(){
   $("gSteps").addEventListener("click",e=>{const b=e.target.closest("button[data-si]");if(b)jumpStep(+b.dataset.si)});
   $("gPlay").addEventListener("click",playClick);
   $("gIntroBtn").addEventListener("click",goIntro);
-  $("gToFocus").addEventListener("click",()=>setMode("focus"));
-  $("gToFull").addEventListener("click",()=>setMode("full"));
+
+
   $("gDots").addEventListener("click",e=>{const b=e.target.closest("button");if(b)goChallenge(+b.dataset.i)});
   // map drag
   const mc=$("mapCv");let mdrag=false;
@@ -2249,10 +2317,8 @@ function enterStep(k){
   const c=CHALLENGES[S.gi];S.gs=clamp(k,0,c.steps.length-1);const st=curStep();
   if(st.enter&&!MEM.done[S.gs])st.enter(MEM);
   S.intro=false;S.finish=false;$("guide").classList.remove("intro");S.playing=false;MEM.playMsg="";MEM.pos=S.gs;MEM.seen=MEM.seen||{};MEM.seen[S.gs]=1;MEM.text=MEM.text||{};
-  mountTools((st.free||S.openTools)?[]:stepTools(st));
-  renderStep();applyLayout();
-  if(S.openTools&&st.play){$("gTools").hidden=false;$("gBody").classList.remove("notools");$("gSlots").classList.add("nobig","nosmall")}
-  requestRender();saveSoon();
+  mountTools(st.free?[]:stepTools(st));
+  renderStep();applyLayout();requestRender();saveSoon();
 }
 const answered=gs=>!!(MEM.tries[gs]&&MEM.tries[gs].n>=1);
 const hasText=gs=>((MEM.text&&MEM.text[gs])||"").trim().length>0;
@@ -2331,7 +2397,7 @@ function renderStep(){
   const nxt=CHALLENGES[S.gi+1];
   $("gNext").textContent=!last?"Next step →":!nxt?"Finish: make my worksheet →":nxt.tier==="check"?"Go to the check-in →":nxt.tier!==c.tier?`Start the ${TIERS[nxt.tier]} →`:"Next challenge →";
   $("gNext").disabled=false;$("gNext").classList.toggle("ready",isDone);hideWarn();
-  $("gPrev").disabled=false;refreshDots();syncOpenBtn();
+  $("gPrev").disabled=false;refreshDots();
   const tx=$("gTxt");if(tx)tx.addEventListener("input",()=>{MEM.text[S.gs]=tx.value;tx.closest(".gans").classList.toggle("ok",tx.value.trim().length>0);$("gNext").classList.toggle("ready",stepComplete());const sp=document.querySelector(".gstat");if(sp){const d=stepComplete();sp.className="gstat "+(d?"ok":"todo");sp.textContent=d?"✓ Done":"To do · "+WHAT_TO_DO.write}const jn=document.querySelector(".gjump");if(jn&&stepComplete())jn.remove();refreshDots();saveSoon()});
   saveSoon();
   $("gSkip").hidden=!(st.type==="do"&&!MEM.done[S.gs]&&(!st.ask||((MEM.tries[S.gs]||{}).n||0)>=3));
@@ -2395,19 +2461,21 @@ function jumpStep(i){if(S.intro||S.inSetup)return;const c=CHALLENGES[S.gi];if(!c
 const checkReason=st=>{const t=String(st.right||"").replace(/^(Yes|Correct|Right|Exactly|Both)[.,:!]\s*/i,"");return t.charAt(0).toUpperCase()+t.slice(1)};
 
 function setMode(m){
-  const was=S.mode;if(was==="guided"&&MEM&&!S.intro)captureModel();S.mode=m;try{localStorage.setItem("tiltlab-mode",m)}catch(e){}
-  if(was==="guided"&&m!=="guided"){unmountTools();S.playing=false;S.intro=false}
+  m=m==="guided"?"guided":"explore";
+  const was=S.mode;if(was==="guided"&&MEM&&!S.intro&&!S.inSetup)captureModel();
+  S.mode=m;
+  if(was==="guided"&&m!=="guided"){unmountTools();S.playing=false;S.intro=false;S.inSetup=false;S.finish=false}
   if(m==="guided"&&was!=="guided")goIntro();
-  syncUI();requestRender();
+  syncUI();requestRender();saveSoon();
 }
 function applyLayout(){
-  $("app").dataset.mode=S.mode;setPressed("modes","m",S.mode);setPressed("tabMain","v",S.tab);$("tabSecond").value=S.tab2||"";
+  $("app").dataset.mode=S.mode;setPressed("modes","m",S.mode);setPressed("gmodes","m",S.mode);syncViews();
   let show;
-  const free=S.mode==="guided"&&!S.intro&&MEM&&(curStep().free||S.openTools);$("app").dataset.mode=free?"full":S.mode;$("app").dataset.free=free?"1":"0";
+  const free=S.mode==="guided"&&!S.intro&&MEM&&curStep().free;$("app").dataset.mode=free?"full":S.mode;$("app").dataset.free=free?"1":"0";
   document.querySelector(".p-graph").classList.toggle("pickable",!!(free&&curStep().type==="table"));
-  if(S.mode==="full"||free)show=null;
+  if(free)show=null;
   else if(S.mode==="guided")show=CHALLENGES[S.gi].show;
-  else show=[S.tab].concat(S.tab2&&S.tab2!==S.tab?[S.tab2]:[]);
+  else show=S.views.slice();
   document.querySelectorAll("#grid .panel").forEach(p=>{const v=p.dataset.v;p.hidden=show?!show.includes(v):false;p.style.order=show?show.indexOf(v):""});
   $("grid").style.setProperty("--n",show?show.length:1);$("grid").dataset.n=show?show.length:"all";
   applySpots();
@@ -2473,7 +2541,7 @@ const INTRO_TOP=`<div class="gbadge b-learn">Introduction</div>
 function goIntro(){
   S.intro=true;S.playing=false;unmountTools();$("guide").classList.add("intro");$("gTools").hidden=true;$("gBody").classList.add("notools");
   $("gCount").textContent="Introduction";$("gTitle").textContent="Tilt Lab challenges";$("gSteps").innerHTML="";
-  S.returnTo=null;S.inSetup=false;S.finish=false;coopChip();$("gStep").innerHTML=introHTML();$("gNext").textContent=Object.keys(STORE).length?"Continue →":"Start the Foundation →";$("gNext").disabled=false;$("gNext").classList.remove("ready");$("gPrev").disabled=true;$("gSkip").hidden=true;hideWarn();refreshDots();syncOpenBtn();
+  S.returnTo=null;S.inSetup=false;S.finish=false;coopChip();$("gStep").innerHTML=introHTML();$("gNext").textContent=Object.keys(STORE).length?"Continue →":"Start the Foundation →";$("gNext").disabled=false;$("gNext").classList.remove("ready");$("gPrev").disabled=true;$("gSkip").hidden=true;hideWarn();refreshDots();
   document.querySelectorAll("#gDots button").forEach(b=>b.setAttribute("aria-current","false"));$("gIntroBtn").setAttribute("aria-current","true");
   syncUI();
 }
@@ -3380,7 +3448,7 @@ function xCard(t){
 }
 function EXPLORE_HTML(){
   return `<h3 id="t-explore">Exploration mode: ideas and group tables</h3>
-  <p>Use this when students choose their own path, for example in a student-choice workshop or as an extension. Everything in Tilt Lab is open: students can jump to any challenge, open every tool, and use Focus or Full mode whenever they like. The button <b>📓 My investigation</b> (top bar, and in the Guided panel) is their notebook.</p>
+  <p>Use this when students choose their own path, for example in a student-choice workshop or as an extension. Everything in Tilt Lab is open. Students pick Guided challenges, Exploration or My investigation on the home page, and they can swap between Guided and Exploration whenever they like with the two big buttons at the top. <b>Exploration is a dashboard:</b> the “Your dashboard” buttons add or remove views (Sky, Flat map, Planet from space, Year graphs, Heat, All the numbers), so a student can build exactly the screen their question needs. The button <b>📓 My investigation</b> is their notebook.</p>
   <ol class="ttips">
    <li>Students open <b>My investigation</b>, then write their own question or pick a <b>Try this</b> idea. Picking an idea sets up the model for them.</li>
    <li>They set up the model (planet, place, date, tilt) and press <b>Add a reading</b>. The notebook records the set-up. <b>They read the numbers from the screen and type them in.</b> The model checks each number and shows where to look if one is off.</li>
@@ -3441,7 +3509,7 @@ const TEACH_HTML=`<div class="tbox" role="dialog" aria-modal="true" aria-labelle
  <div><b>Extension</b><span>8 challenges · about two lessons</span><small>Tropics and polar circles, the overhead Sun, midnight Sun, other tilts and Uranus.</small></div>
  <div><b>Investigation</b><span>3 investigations · one to two lessons</span><small>Evidence sorts, testing claims, a design brief, claim–evidence–reasoning writing.</small></div>
 </div>
-<p>Each challenge runs Learn → Predict → Explore → Check → Write. Check-ins before the Extension and the Investigation let students rate what they know and revisit steps. Students can work on their own, in pairs on one computer (roles swap), or in pairs on two computers (A/B questions they check for each other). The answer key and worksheet notes are in the project doc <i>Tilt_Lab_Day9_Worksheet_Notes</i>. For classrooms without claude.ai access, use the offline copy (<i>Tilt-Lab-offline.html</i>), which opens in any browser. Students type their name and class when they open Tilt Lab. Their work is saved on that computer, under that name, so they can close the page and carry on later. Every stage is open: students can jump to any challenge or step, open every tool, and press “My worksheet” at any time to print what they have done.</p>
+<p>Each challenge runs Learn → Predict → Explore → Check → Write. Check-ins before the Extension and the Investigation let students rate what they know and revisit steps. Students can work on their own, in pairs on one computer (roles swap), or in pairs on two computers (A/B questions they check for each other). The answer key and worksheet notes are in the project doc <i>Tilt_Lab_Day9_Worksheet_Notes</i>. For classrooms without claude.ai access, use the offline copy (<i>Tilt-Lab-offline.html</i>), which opens in any browser. Students type their name and class when they open Tilt Lab. Their work is saved on that computer, under that name, so they can close the page and carry on later. A home page lets them choose Guided challenges, Exploration or My investigation, and “My completed worksheets” lists a worksheet for every challenge they have finished. Every stage is open: students can jump to any challenge or step, leave Guided mode for the Exploration dashboard at any time, and press “My worksheet” to print what they have done.</p>
 <h3 id="t-lo">Learning objectives</h3>
 <div class="tlo"><div><b>Foundation</b><ul>
  <li>Explain how the angle of sunlight changes the energy each area of ground receives (the same amount of sunlight spread over more ground).</li>
@@ -3467,9 +3535,9 @@ ${STD.map(r=>`<tr><th>${r[0]}<small>${r[1]}</small></th><td>${r[2]}</td><td>${r[
 </tbody></table></div>
 <h3 id="t-tips">Using Tilt Lab beyond guided mode</h3>
 <ul class="ttips">
- <li><b>Focus mode for teaching from the front.</b> Show one or two views large on the projector (for example the Flat map with Planet from space) while you narrate a date change.</li>
+ <li><b>Exploration mode for teaching from the front.</b> Use the “Your dashboard” buttons to show just one or two views large on the projector (for example the Flat map with Planet from space) while you narrate a date change.</li>
  <li><b>Predict, then reveal.</b> Set a place and date, ask students to predict the midday Sun height or daylight on mini-whiteboards, then reveal with the model.</li>
- <li><b>Do Now in Full mode.</b> Give one question (“Find a place with 24-hour daylight today”) and five minutes of free exploration.</li>
+ <li><b>Do Now in Exploration mode.</b> Give one question (“Find a place with 24-hour daylight today”) and five minutes of free exploration. Students add the views they want to their dashboard.</li>
  <li><b>Hemispheres side by side.</b> Switch between Beijing and Sydney on the same date to show reversed seasons.</li>
  <li><b>Map layers.</b> The Sunlight and Temperature buttons on the Flat map support discussion of climate zones and the tropics.</li>
  <li><b>Planet tour.</b> Compare other planets: Mercury and Mars are modelled (stretched orbits matter), Venus and the giant planets use measured values (thick air and winds spread heat). Ask what besides tilt affects temperature.</li>
@@ -3509,7 +3577,7 @@ function saveProgress(){clearTimeout(saveT);saveT=null;if(USER.teacher||!USER.na
     localStorage.setItem(ukey(),JSON.stringify({v:2,at:Date.now(),user:{name:USER.name,cls:USER.cls},gi:S.gi,store:STORE,ck:S.ck,coop:S.coop||null,inv:INV}))}catch(e){}}
 function saveSoon(){if(saveT||USER.teacher||!USER.name)return;saveT=setTimeout(saveProgress,600)}
 function loadProgress(){
-  Object.keys(STORE).forEach(k=>delete STORE[k]);S.ck={};MEM=null;S.openTools=false;S.finish=false;S.gi=0;S.returnTo=null;
+  Object.keys(STORE).forEach(k=>delete STORE[k]);S.ck={};MEM=null;S.finish=false;S.gi=0;S.returnTo=null;
   INV.list=[newInv()];INV.cur=0;
   if(USER.teacher||!USER.name)return false;
   let d=null;try{d=JSON.parse(localStorage.getItem(ukey())||"null")}catch(e){}
@@ -3536,7 +3604,6 @@ function chStatus(gi){
   return "";
 }
 function refreshDots(){document.querySelectorAll("#gDots button[data-i]").forEach(b=>{const s=chStatus(+b.dataset.i);b.classList.toggle("dn",s==="done");b.classList.toggle("st",s==="started")})}
-function syncOpenBtn(){const b=$("gOpen");if(!b)return;b.setAttribute("aria-pressed",String(!!S.openTools));b.textContent=S.openTools?"🔓 All the tools are open (tap to go back)":"🔓 Open all the tools"}
 
 /* ----- introduction: stage map ----- */
 function mapHTML(){
@@ -3546,7 +3613,7 @@ function mapHTML(){
     const s=chStatus(i);
     rows+=`<button type="button" class="chbtn ${s}" data-gch="${i}"><span class="chm" aria-hidden="true">${s==="done"?"✓":s==="started"?"●":"○"}</span><span>${c.tier==="check"?esc(c.title):`${c.num}. ${esc(c.title)}`}${s==="done"?" <small>(done)</small>":s==="started"?" <small>(started)</small>":""}</span></button>`;
   });
-  return `<h3 class="glearn">Go to any stage</h3><p class="gtext">Start wherever you like. Every stage is open, and inside a challenge you can jump to any step with the bars at the top. Your answers are saved under your name.</p><div class="chlist">${rows}</div>`;
+  return `<h3 class="glearn">Go to any stage</h3><p class="gtext">Start wherever you like. Every stage is open, and inside a challenge you can jump to any step with the bars at the top. You can leave for Exploration at any time with the big buttons at the top. Your answers are saved under your name.</p><div class="chlist">${rows}</div>`;
 }
 const actionsHTML=()=>`<div class="introact"><button type="button" class="gaction" data-act="nb">📓 Start my own investigation</button><button type="button" class="gaction" data-act="ws">📄 Make my worksheet</button></div>`;
 function introHTML(){return INTRO_TOP+mapHTML()+actionsHTML()+`<p class="note tlinkrow">Teacher? <a href="#" id="teachLink">How to use this model (for teachers)</a></p>`}
@@ -3572,18 +3639,18 @@ function applyUser(u,keepCoop){
   if(USER.name&&!USER.teacher)saveProgress();
   USER=u;try{sessionStorage.setItem("tiltlab-user",JSON.stringify(u))}catch(e){}
   if(!keepCoop){S.coop=null;try{sessionStorage.removeItem("tiltlab-coop")}catch(e){}}
-  closeNb(true);closeWs();
-  $("gate").hidden=true;$("gate").innerHTML="";$("app").inert=false;
+  closeNb(true);closeWs();closeLib(true);
+  $("gate").hidden=true;$("gate").innerHTML="";syncInert();
   const had=loadProgress();renderUser();
-  unmountTools();S.intro=false;S.inSetup=false;S.playing=false;
-  if(S.mode==="guided")goIntro();else{syncUI();requestRender()}
+  unmountTools();S.intro=false;S.inSetup=false;S.playing=false;S.mode="explore";
+  syncUI();requestRender();showHome();
   if(had)toast(`Welcome back, ${u.name}! Your saved work is loaded.`);
 }
 function showGate(change){
   let u=null;
   if(!change){try{u=JSON.parse(sessionStorage.getItem("tiltlab-user")||"null")}catch(e){}}
   if(u&&(u.teacher||(u.name&&u.cls))){applyUser(u,true);return}
-  const g=$("gate");g.hidden=false;$("app").inert=true;
+  const g=$("gate");g.hidden=false;syncInert();
   g.innerHTML=`<div class="gbox" role="dialog" aria-modal="true" aria-labelledby="gateT">
     <h2 id="gateT">Welcome to Tilt Lab 🌍</h2>
     <p>Type your name and your class. Your answers are saved on this computer under your name, and they go on your worksheet.</p>
@@ -3688,8 +3755,8 @@ function invPrompts(inv){
 let NB=false,NBDEL=false;
 function ensureModel(){
   if(S.mode!=="guided")return;
-  if(S.intro||S.inSetup||!MEM){S.inSetup=false;setMode("full");toast("The full model is open so you can read numbers. Guided mode is one tap away at the top.");return}
-  if(!(curStep().free||S.openTools)){S.openTools=true;enterStep(S.gs);syncOpenBtn()}
+  const free=!S.intro&&!S.inSetup&&MEM&&curStep().free;
+  if(!free){S.inSetup=false;setMode("explore");toast("Opened in Exploration mode so you can see the model while you work. Guided mode is one tap away at the top.")}
 }
 function nbToggle(forceOpen){if(NB&&forceOpen!==true){closeNb();return}if(!NB)nbOpen()}
 function nbOpen(){
@@ -3906,14 +3973,15 @@ function buildWorksheet(){
 function showDoc(title,docHTML,toolHTML){
   const v=$("wsv");v.innerHTML=`<div class="wstool"><div class="wsrow"><b>${esc(title)}</b><button type="button" class="primary" data-wsprint="1">🖨 Print or save as PDF</button><button type="button" class="mini" data-wsclose="1">Close ✕</button></div>${toolHTML||""}</div>
   <div class="wsnote">Press “Print or save as PDF”, then choose “Save as PDF” as the printer if you want a file to upload to Toddle.</div><div class="wsdoc" id="wsdoc">${docHTML}</div>`;
-  v.hidden=false;v.scrollTop=0;document.body.dataset.ws="1";$("app").inert=true;
+  v.hidden=false;v.scrollTop=0;document.body.dataset.ws="1";syncInert();
   WS.title=document.title;document.title=`Tilt Lab worksheet${USER.name?" - "+USER.name:""}${USER.cls?" "+USER.cls:""}`;
 }
 function printDoc(title,html){showDoc(title,html,"")}
-function closeWs(){const v=$("wsv");if(!v||v.hidden)return;v.hidden=true;v.innerHTML="";delete document.body.dataset.ws;if(WS.title)document.title=WS.title;if($("gate").hidden)$("app").inert=false}
+function closeWs(){const v=$("wsv");if(!v||v.hidden)return;v.hidden=true;v.innerHTML="";delete document.body.dataset.ws;if(WS.title)document.title=WS.title;syncInert()}
 function openWs(opt){
   if(!$("wsv").hidden)return;
-  WS.sel=new Set();CHALLENGES.forEach((c,gi)=>{if(hasWork(gi))WS.sel.add(gi)});if(invHasWork()||(opt&&opt.inv))WS.sel.add("inv");
+  if(opt&&opt.sel)WS.sel=new Set(opt.sel);
+  else{WS.sel=new Set();CHALLENGES.forEach((c,gi)=>{if(hasWork(gi))WS.sel.add(gi)});if(invHasWork()||(opt&&opt.inv))WS.sel.add("inv")}
   WS.blank=false;WS.key=false;
   let pick="",last="";
   CHALLENGES.forEach((c,gi)=>{if(c.tier!==last){pick+=`<b>${c.tier==="check"?"Check-in":TIERS[c.tier]}</b>`;last=c.tier}
@@ -3940,28 +4008,256 @@ function wireNew(){
   [$("nbBtn"),$("gNb")].forEach(b=>b.addEventListener("click",()=>nbToggle()));
   [$("wsBtn"),$("gWs")].forEach(b=>b.addEventListener("click",()=>openWs()));
   $("gMap").addEventListener("click",()=>{if(MEM&&!S.intro&&!S.inSetup)captureModel();goIntro()});
-  $("gOpen").addEventListener("click",()=>{S.openTools=!S.openTools;syncOpenBtn();if(S.intro||S.inSetup||!MEM)return;unmountTools();enterStep(S.gs)});
   $("gStep").addEventListener("click",e=>{
     const g=e.target.closest("[data-gch]");if(g){goChallenge(+g.dataset.gch);return}
     const a=e.target.closest("[data-act]");if(a){if(a.dataset.act==="ws")openWs();else nbToggle(true)}
   });
-  wireNb();wireWs();
-  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("wsv").hidden)closeWs();else if(NB&&$("teach").hidden)closeNb()}});
+  wireNb();wireWs();wireLib();
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("wsv").hidden)closeWs();else if(!$("teach").hidden)return;else if(!$("lib").hidden)closeLib();else if(NB&&$("home").hidden)closeNb()}});
   window.addEventListener("pagehide",saveProgress);
   document.addEventListener("visibilitychange",()=>{if(document.hidden)saveProgress()});
   window.addEventListener("afterprint",()=>{});
 }
 
+/* ---------- Home page, completed worksheets, exploration dashboard (Oct 2026) ---------- */
+const VIEW_LIST=[["sky","Sky"],["map","Flat map"],["globe","Planet from space"],["graph","Year graphs"],["heat","Heat"],["read","All the numbers"]];
+function syncInert(){$("app").inert=!($("gate").hidden&&$("home").hidden&&$("wsv").hidden&&$("lib").hidden)}
+function syncViews(){
+  document.querySelectorAll("#vbar button[data-v]").forEach(b=>b.setAttribute("aria-pressed",String(S.views.includes(b.dataset.v))));
+  const e=$("vEmpty");if(e)e.hidden=S.views.length>0;
+}
+function toggleView(v){
+  const i=S.views.indexOf(v);if(i>=0)S.views.splice(i,1);else S.views.push(v);
+  try{localStorage.setItem("tiltlab-views",JSON.stringify(S.views))}catch(e){}
+  syncUI();requestRender();
+}
+
+/* ----- Uranus rolling around the Sun ----- */
+const HOME={raf:0,w:0,h:0,N:0,pre:null,off:null,oc:null,img:null,stars:null,still:false};
+function homeStars(){const a=[];let seed=11;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;for(let i=0;i<240;i++)a.push({x:r(),y:r(),s:r()*1.3+.3,p:r()*6.28,k:.5+r()*1.5});return a}
+const AX=(()=>{const a=[0.96,-0.15,0.24],l=Math.hypot(...a);return a.map(x=>x/l)})();
+function homeBasis(){
+  // u and v are perpendicular to the spin axis
+  const a=AX;let u=[a[1],-a[0],0];const l=Math.hypot(...u);u=u.map(x=>x/l);
+  const v=[a[1]*u[2]-a[2]*u[1],a[2]*u[0]-a[0]*u[2],a[0]*u[1]-a[1]*u[0]];
+  return {u,v};
+}
+function homePre(N){
+  // per-pixel values that do not change from frame to frame
+  const B=homeBasis(),n=N*N,p={N,nx:new Float32Array(n),ny:new Float32Array(n),nz:new Float32Array(n),al:new Float32Array(n),lat:new Float32Array(n),sL:new Float32Array(n),cL:new Float32Array(n),cosLat:new Float32Array(n),sinLat:new Float32Array(n)};
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){
+    const k=j*N+i,x=(i+.5-N/2)/(N/2),y=-(j+.5-N/2)/(N/2),r2=x*x+y*y;
+    if(r2>=1.02){p.al[k]=0;continue}
+    const z=Math.sqrt(Math.max(0,1-r2));
+    p.nx[k]=x;p.ny[k]=y;p.nz[k]=z;
+    p.al[k]=r2<=0.985?1:Math.max(0,(1.02-r2)/0.035);
+    const sl=x*AX[0]+y*AX[1]+z*AX[2];p.sinLat[k]=sl;p.lat[k]=Math.asin(Math.max(-1,Math.min(1,sl)));p.cosLat[k]=Math.sqrt(Math.max(0,1-sl*sl));
+    const cu=x*B.u[0]+y*B.u[1]+z*B.u[2],cv=x*B.v[0]+y*B.v[1]+z*B.v[2],lon=Math.atan2(cv,cu);
+    p.sL[k]=Math.sin(lon);p.cL[k]=Math.cos(lon);
+  }
+  return p;
+}
+const STORMS=[[0.4,0.6,.16,.55],[2.4,-0.5,.2,.45],[4.1,0.15,.12,.5],[5.3,-0.9,.18,.4]]; // lon, lat, size, strength
+function homeRenderPlanet(phi,L){
+  const p=HOME.pre,N=p.N,d=HOME.img.data,cp=Math.cos(phi),sp=Math.sin(phi);
+  const storm=STORMS.map(s=>({x:Math.cos(s[1])*Math.cos(s[0]),y:Math.cos(s[1])*Math.sin(s[0]),z:Math.sin(s[1]),w:s[2],a:s[3]}));
+  for(let k=0;k<N*N;k++){
+    const o=k*4;
+    if(p.al[k]===0){d[o+3]=0;continue}
+    const nx=p.nx[k],ny=p.ny[k],nz=p.nz[k],cl=p.cosLat[k],sl=p.sinLat[k],lat=p.lat[k];
+    const s0=p.sL[k],c0=p.cL[k],sLn=s0*cp+c0*sp,cLn=c0*cp-s0*sp;           // spin: longitude + phi
+    // body-frame direction
+    const bx=cl*cLn,by=cl*sLn,bz=sl;
+    // base colour: pale cyan with soft latitude bands
+    const band=0.5+0.5*Math.sin(lat*7.5+0.6);
+    let r=118+22*band,g=206+14*band,b=214+10*band;
+    const pole=Math.max(0,Math.abs(sl)-0.55)/0.45;r+=pole*34;g+=pole*22;b+=pole*18;
+    // cloud storms
+    let st=0;for(let q=0;q<storm.length;q++){const S2=storm[q],dt=bx*S2.x+by*S2.y+bz*S2.z,ang=1-dt;st+=S2.a*Math.exp(-ang*ang/(S2.w*S2.w*0.5*0.5+1e-4)*0.5)}
+    r+=st*70;g+=st*55;b+=st*40;
+    // faint grid so the rolling can be seen
+    const lonA=Math.atan2(sLn,cLn);
+    const mer=1-Math.min(1,Math.abs(Math.sin(lonA*6))/0.05),par=1-Math.min(1,Math.abs(Math.sin(lat*6))/0.05);
+    const gr=Math.max(mer*Math.min(1,cl*1.8),par)*0.2;r+=(255-r)*gr;g+=(255-g)*gr;b+=(255-b)*gr;
+    // light from the Sun
+    const lam=nx*L[0]+ny*L[1]+nz*L[2],lit=lam<=-0.05?0:lam>=0.35?1:((lam+0.05)/0.4),sh=0.045+0.955*lit*(0.5+0.5*Math.min(1,Math.max(0,lam)*1.4));
+    const rim=Math.pow(1-nz,2.6)*0.5*(0.25+0.75*lit);
+    r=r*sh+130*rim;g=g*sh+215*rim;b=b*sh+255*rim;
+    // north pole marker
+    if(sl>0.985){const m=(sl-0.985)/0.015;r+=(255-r)*m*.9;g+=(255-g)*m*.9;b+=(255-b)*m*.9}
+    d[o]=r>255?255:r;d[o+1]=g>255?255:g;d[o+2]=b>255?255:b;d[o+3]=255*p.al[k];
+  }
+  HOME.oc.putImageData(HOME.img,0,0);
+}
+function homeRings(ctx,cx,cy,R,back){
+  const B=homeBasis(),radii=[1.42,1.5,1.58,1.66,1.74,1.9];
+  radii.forEach((rho,i)=>{
+    ctx.beginPath();let pen=false;
+    for(let s=0;s<=180;s++){
+      const th=s/180*Math.PI*2,c=Math.cos(th),sn=Math.sin(th);
+      const x=rho*(c*B.u[0]+sn*B.v[0]),y=rho*(c*B.u[1]+sn*B.v[1]),z=rho*(c*B.u[2]+sn*B.v[2]);
+      const isBack=z<0;
+      if(isBack!==back){pen=false;continue}
+      const X=cx+x*R,Y=cy-y*R;
+      if(!pen){ctx.moveTo(X,Y);pen=true}else ctx.lineTo(X,Y);
+    }
+    ctx.lineWidth=Math.max(1,R*(i===5?0.012:i===2?0.018:0.009));
+    ctx.strokeStyle=i===5?"rgba(190,225,245,.35)":i%2?"rgba(205,235,250,.55)":"rgba(170,215,240,.42)";
+    ctx.stroke();
+  });
+}
+function drawHome(now){
+  const cv=$("homeCv"),ctx=cv.getContext("2d"),d=Math.min(1.5,window.devicePixelRatio||1);
+  const W=Math.max(2,Math.round(cv.clientWidth*d)),H=Math.max(2,Math.round(cv.clientHeight*d));
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+  const t=HOME.still?3:now/1000,wide=cv.clientWidth>=960;
+  // space
+  const bg=ctx.createLinearGradient(0,0,W,0);bg.addColorStop(0,"#1a0f06");bg.addColorStop(0.35,"#070b16");bg.addColorStop(1,"#03050b");
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  if(!HOME.stars)HOME.stars=homeStars();
+  HOME.stars.forEach(s=>{const tw=0.5+0.5*Math.sin(t*s.k+s.p);ctx.fillStyle=`rgba(255,255,255,${0.25+0.55*tw})`;ctx.fillRect(s.x*W,s.y*H,s.s*d,s.s*d)});
+  // the Sun, large and partly off the left edge
+  const sx=wide?-0.03*W:-0.08*W,sy=wide?0.52*H:0.2*H,sr=wide?0.2*H:0.16*H;
+  const pulse=1+0.015*Math.sin(t*0.9);
+  let gl=ctx.createRadialGradient(sx,sy,sr*0.4,sx,sy,sr*5.2*pulse);
+  gl.addColorStop(0,"rgba(255,190,80,.55)");gl.addColorStop(0.25,"rgba(255,140,40,.22)");gl.addColorStop(1,"rgba(255,120,30,0)");
+  ctx.fillStyle=gl;ctx.fillRect(0,0,W,H);
+  gl=ctx.createRadialGradient(sx,sy,0,sx,sy,sr*1.25);
+  gl.addColorStop(0,"#fffbe0");gl.addColorStop(0.55,"#ffd770");gl.addColorStop(0.85,"#ffa43a");gl.addColorStop(1,"rgba(255,150,40,0)");
+  ctx.fillStyle=gl;ctx.beginPath();ctx.arc(sx,sy,sr*1.25,0,Math.PI*2);ctx.fill();
+  // Uranus on its orbit
+  const R=wide?Math.min(0.3*H,0.19*W):Math.min(0.17*H,0.3*W);
+  const cx0=wide?0.7*W:0.5*W,cy0=wide?0.47*H:0.2*H,rad=Math.hypot(cx0-sx,cy0-sy);
+  const ang=Math.atan2(cy0-sy,cx0-sx)+0.025*Math.sin(t*0.13);
+  const cx=sx+rad*Math.cos(ang),cy=sy+rad*Math.sin(ang);
+  ctx.save();ctx.setLineDash([6*d,10*d]);ctx.strokeStyle="rgba(255,255,255,.13)";ctx.lineWidth=1.2*d;ctx.beginPath();ctx.arc(sx,sy,rad,-Math.PI/2.2,Math.PI/2.2);ctx.stroke();ctx.restore();
+  // light direction (screen y points down, so flip it)
+  let lx=sx-cx,ly=-(sy-cy);const ll=Math.hypot(lx,ly)||1;lx/=ll;ly/=ll;const L=[lx*0.93,ly*0.93,0.36];
+  const N=Math.max(160,Math.min(380,Math.round(R*2*0.8)));
+  if(!HOME.pre||HOME.pre.N!==N){HOME.pre=homePre(N);HOME.off=document.createElement("canvas");HOME.off.width=HOME.off.height=N;HOME.oc=HOME.off.getContext("2d");HOME.img=HOME.oc.createImageData(N,N)}
+  // axis (far end), rings behind, planet, rings in front, axis (near end)
+  const axis=(sign)=>{ctx.save();ctx.setLineDash([4*d,6*d]);ctx.strokeStyle="rgba(255,255,255,.55)";ctx.lineWidth=1.3*d;ctx.beginPath();
+    ctx.moveTo(cx,cy);ctx.lineTo(cx+sign*AX[0]*R*2.1,cy-sign*AX[1]*R*2.1);ctx.stroke();ctx.restore()};
+  axis(-1);
+  homeRings(ctx,cx,cy,R,true);
+  homeRenderPlanet(-t*0.5,L);
+  ctx.imageSmoothingEnabled=true;ctx.drawImage(HOME.off,cx-R*1.02,cy-R*1.02,R*2.04,R*2.04);
+  homeRings(ctx,cx,cy,R,false);
+  axis(1);
+  // tiny label at the north pole end
+  ctx.fillStyle="rgba(255,255,255,.8)";ctx.font=`${Math.round(12*d)}px system-ui,sans-serif`;ctx.textAlign="center";
+  ctx.fillText("axis",cx+AX[0]*R*2.1,cy-AX[1]*R*2.1-8*d);
+}
+function homeLoop(now){HOME.raf=0;if($("home").hidden)return;drawHome(now);if(!HOME.still)HOME.raf=requestAnimationFrame(homeLoop)}
+function startHomeAnim(){
+  HOME.still=!!(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  if(HOME.raf)cancelAnimationFrame(HOME.raf);HOME.raf=requestAnimationFrame(homeLoop);
+}
+
+/* ----- the home page ----- */
+function homeCounts(){
+  let done=0,total=0;CHALLENGES.forEach((c,gi)=>{if(c.tier==="check")return;total++;if(chStatus(gi)==="done")done++});
+  return {done,total};
+}
+function libItems(){
+  const out={done:[],started:[]};
+  CHALLENGES.forEach((c,gi)=>{if(c.tier==="check")return;const s=chStatus(gi);if(s==="done")out.done.push(gi);else if(s==="started"||hasWork(gi))out.started.push(gi)});
+  return out;
+}
+function renderHome(){
+  const c=homeCounts(),started=Object.keys(STORE).length>0,L=libItems(),inv=invHasWork();
+  const g=$("home").querySelector('[data-home="guided"] em');if(g)g.textContent=started?`Continue · ${c.done} of ${c.total} challenges done →`:"Start →";
+  const w=$("home").querySelector('[data-home="lib"] span');if(w)w.textContent=`My completed worksheets (${L.done.length+(inv?1:0)})`;
+}
+function showHome(){
+  if(MEM&&S.mode==="guided"&&!S.intro&&!S.inSetup)captureModel();
+  closeNb(true);closeLib(true);hideVocab&&hideVocab();S.playing=false;
+  renderHome();$("home").hidden=false;syncInert();startHomeAnim();saveSoon();
+  const f=$("home").querySelector('[data-home="guided"]');if(f)setTimeout(()=>f.focus(),30);
+}
+function hideHome(){$("home").hidden=true;syncInert()}
+function goMode(m){
+  hideHome();
+  if(m==="guided"){if(S.mode!=="guided")setMode("guided")}
+  else{if(S.mode!=="explore")setMode("explore");else{syncUI();requestRender()}}
+}
+function wireHome(){
+  $("home").innerHTML=`<canvas id="homeCv" aria-hidden="true"></canvas>
+  <div class="homeUI">
+   <div class="homeTop"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span>
+    <button type="button" class="hbtn" data-home="teach">For teachers</button></div>
+   <div class="homeMain">
+    <div class="homeTitle"><h1>Tilt <span>Lab</span></h1><p>Why does a tilted planet have seasons? Choose how you want to find out.</p></div>
+    <div class="homeCards">
+     <button type="button" class="hcard guided" data-home="guided"><i aria-hidden="true">🧭</i><b>Guided challenges</b><small>Step-by-step challenges: Foundation, Extension and Investigation</small><em>Start →</em></button>
+     <button type="button" class="hcard explore" data-home="explore"><i aria-hidden="true">🔭</i><b>Exploration</b><small>Build your own dashboard with any views you like and test your own ideas</small><em>Open the dashboard →</em></button>
+     <button type="button" class="hcard inv" data-home="inv"><i aria-hidden="true">📓</i><b>My investigation</b><small>Ask your own question, collect readings and write it up</small><em>Open my notebook →</em></button>
+    </div>
+    <div class="homeLinks"><button type="button" class="hlink" data-home="lib">📄 <span>My completed worksheets (0)</span></button></div>
+   </div>
+   <p class="homeCap">Uranus is tilted 97.8°, so it rolls around the Sun on its side. Its poles get about 42 Earth years of daylight, then 42 years of night.</p>
+  </div>`;
+  $("home").addEventListener("click",e=>{
+    const b=e.target.closest("[data-home]");if(!b)return;const a=b.dataset.home;
+    if(a==="guided")goMode("guided");
+    else if(a==="explore")goMode("explore");
+    else if(a==="inv"){goMode("explore");nbOpen()}
+    else if(a==="lib")showLib();
+    else if(a==="teach")openTeach();
+  });
+  window.addEventListener("resize",()=>{if(!$("home").hidden&&HOME.still)drawHome(0)});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!$("home").hidden)startHomeAnim()});
+  // exploration dashboard: view buttons, and a remove button on each view
+  $("vbar").querySelector(".vchips").innerHTML=VIEW_LIST.map(v=>`<button type="button" data-v="${v[0]}" aria-pressed="false">${v[1]}</button>`).join("");
+  document.querySelectorAll("#grid .panel").forEach(p=>{const h=p.querySelector("h2");if(!h)return;
+    const x=document.createElement("button");x.type="button";x.className="pclose";x.title="Remove this view";x.setAttribute("aria-label","Remove this view");x.textContent="✕";
+    x.addEventListener("click",()=>{if(S.mode==="explore")toggleView(p.dataset.v)});h.appendChild(x)});
+  $("homeBtn").addEventListener("click",showHome);$("gHome").addEventListener("click",showHome);
+}
+
+/* ----- my completed worksheets ----- */
+function showLib(){
+  const L=libItems(),inv=invHasWork(),box=$("lib");
+  const row=(gi)=>{const c=CHALLENGES[gi],idx=c.steps.map((s,i)=>stepVisible(s)&&s.type!=="learn"?i:-1).filter(i=>i>=0),n=idx.filter(i=>isStepDone(gi,i)).length;
+    let ck=0,right=0;const M=STORE[gi];if(M)c.steps.forEach((s,i)=>{if(s.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}});
+    return `<div class="librow"><div><b>${TIERS[c.tier]} ${c.num}: ${esc(c.title)}</b><small>${n} of ${idx.length} steps finished${ck?` · ${right} of ${ck} check questions right`:""}</small></div><button type="button" class="mini" data-lopen="${gi}">Open worksheet</button></div>`};
+  const invRow=()=>{const rows=INV.list.reduce((a,v)=>a+v.rows.length,0);return `<div class="librow"><div><b>My own investigation</b><small>${INV.list.length} investigation${INV.list.length>1?"s":""} · ${rows} reading${rows===1?"":"s"}</small></div><button type="button" class="mini" data-lopen="inv">Open worksheet</button></div>`};
+  const doneRows=L.done.map(row).join("")+(inv?invRow():"");
+  const all=L.done.length+(inv?1:0);
+  box.innerHTML=`<div class="gbox libbox" role="dialog" aria-modal="true" aria-labelledby="libT">
+   <div class="libhead"><h2 id="libT">📄 My completed worksheets</h2><button type="button" class="mini" data-lclose="1">Close ✕</button></div>
+   ${all?`<p>Every challenge you finish gets its own worksheet. Open one to read it, print it or save it as a PDF.</p>
+     ${all>1?`<div class="librow all"><div><b>Everything I have completed</b><small>One worksheet with all of the work below</small></div><button type="button" class="primary" data-lopen="all">Open worksheet</button></div>`:""}
+     <h3>Finished</h3>${doneRows}`:`<p>Nothing is finished yet. Finish a challenge, or write up your own investigation, and a worksheet shows up here.</p>`}
+   ${L.started.length?`<h3>Still in progress</h3><p class="note">You can make a worksheet from unfinished work too.</p>${L.started.map(row).join("")}`:""}
+   <div class="grow"><button type="button" class="mini" data-lopen="custom">Make a custom worksheet</button></div>
+  </div>`;
+  box.hidden=false;syncInert();
+  const f=box.querySelector("button");if(f)f.focus();
+}
+function closeLib(silent){const b=$("lib");if(!b||b.hidden)return;b.hidden=true;b.innerHTML="";syncInert()}
+function wireLib(){
+  $("lib").addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+    if(d.lclose){closeLib();return}
+    if(d.lopen==="custom"){openWs({from:"lib"});return}
+    if(d.lopen==="all"){const L=libItems();openWs({sel:L.done.concat(invHasWork()?["inv"]:[]),from:"lib"});return}
+    if(d.lopen==="inv"){openWs({sel:["inv"],from:"lib"});return}
+    if(d.lopen!==undefined)openWs({sel:[+d.lopen],from:"lib"});
+  });
+}
+
 /* ---------- Boot ---------- */
 try{const cs=sessionStorage.getItem("tiltlab-coop");if(cs)S.coop=JSON.parse(cs)}catch(e){}
-Object.assign(S,{ck:{},returnTo:null,speedAuto:true,globeZoom:false,mode:"guided",gi:0,tab:"sky",tab2:"",more:false,guides:false,hoverCity:null});
-try{const m=localStorage.getItem("tiltlab-mode");if(m==="guided"||m==="focus"||m==="full")S.mode=m}catch(e){}
+Object.assign(S,{ck:{},returnTo:null,speedAuto:true,globeZoom:false,mode:"explore",gi:0,views:["sky","map"],more:false,guides:false,hoverCity:null});
+try{const v=JSON.parse(localStorage.getItem("tiltlab-views")||"null");if(Array.isArray(v))S.views=v.filter(x=>["sky","map","globe","graph","heat","read"].includes(x))}catch(e){}
 buildPlanets();buildCities();buildDots();wire();wireVocab();
 $("graphCv").addEventListener("click",graphPick);
 $("teachBtn").addEventListener("click",openTeach);$("teach").addEventListener("click",e=>{if(e.target.id==="teach")closeTeach()});document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("teach").hidden)closeTeach()});
 $("gStep").addEventListener("click",e=>{if(e.target.closest("#teachLink")){e.preventDefault();openTeach()}});
 $("gCoop").addEventListener("click",()=>{S.coopDraft=Object.assign({},S.coop||{});S.coop=null;try{sessionStorage.removeItem("tiltlab-coop")}catch(e){}showSetup(S.gi)});
 $("gStep").addEventListener("click",e=>{const b=e.target.closest("[data-tier]");if(!b)return;const k=b.dataset.tier,i=k==="foundation"?0:CHALLENGES.findIndex(c=>c.tier==="check"&&c.steps[0].cid===(k==="extension"?"ext":"inv"));goChallenge(i)});
+wireHome();
 wireNew();
 showGate();
 requestAnimationFrame(loop);
