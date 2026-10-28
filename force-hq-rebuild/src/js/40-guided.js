@@ -117,6 +117,7 @@ function renderRail() {
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();
+  { const st = CHDATA[CH.id].steps[GI]; if (st && st.predict && st.predict.kind === 'sketch' && !predSketch()) predSketchBind(st.predict); }
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
   $('#gPrev').addEventListener('click', () => setStep(GI - 1));
   $('#gNext').addEventListener('click', tryNext);
@@ -125,6 +126,7 @@ function renderRail() {
 const predOf = () => dbGet(stepKey(CH.id, GI) + '.pred', null);
 function predictBox(st) {
   const P = st.predict, v = predOf();
+  if (P.kind === 'sketch') return predSketchHTML(P, predSketch());
   return v == null ? `<div class="predict"><span class="lbl">Predict first</span><p class="gl">${P.q}</p><div class="popts">${P.opts.map((o, i) => `<button type="button" class="mini" data-pred="${i}">${o}</button>`).join('')}</div></div>`
     : `<div class="predict done"><span class="lbl">Your prediction</span><p class="gl"><b>${P.opts[v]}</b></p><p class="scaleNote">${P.then || 'Now test it in the arena and see if you were right!'}</p></div>`;
 }
@@ -171,7 +173,7 @@ function qChrome() {
     ft.innerHTML = `<button type="button" class="ghost" id="qBack">← Back to the arena</button><button type="button" class="go ${done ? 'ready' : ''}" id="qNext">${last ? (chd.challenge ? 'To the Challenge →' : 'To the Check →') : 'Next step →'}</button>`;
     $('#qBack').addEventListener('click', () => qPlace('dock')); $('#qNext').addEventListener('click', tryNext);
     const old = $('.qrunsbtn', qc); if (old) old.remove();
-    if (['run', 'shove', 'launch'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
+    if (['run', 'shove', 'launch', 'drop'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
     hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
     $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qrunsbtn', qc); if (old) old.remove();

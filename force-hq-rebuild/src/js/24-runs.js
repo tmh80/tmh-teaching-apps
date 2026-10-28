@@ -76,6 +76,7 @@ function spaceText(r) {
   return head + bits + end;
 }
 function runText(r) {
+  if (r.scene === 'drop') return dropText(r);
   if (r.scene === 'sled') return sledText(r);
   if (r.scene === 'space') return spaceText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
@@ -102,6 +103,7 @@ function runText(r) {
   return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
 function runChips(r) {
+  if (r.scene === 'drop') return dropChips(r);
   if (r.scene === 'space') {
     const mk = spaceMasked(r.pushF, r.mass, r.astro), c = [['Pod mass', r.mass + ' kg'], ['Astronaut mass', r.astro + ' kg']];
     if (r.kind === 'push') c.push(['Push', NN(r.pushF)]);
@@ -127,13 +129,13 @@ function runChips(r) {
   return c;
 }
 const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
-const KINDICON = { push: '👋', pull: '🪢', launch: '🚀', thrust: '🔥' };
+const KINDICON = { push: '👋', pull: '🪢', launch: '🚀', thrust: '🔥', drop: '🪂', snap: '📸' };
 /* one run: this step's runs are open; earlier runs fold to a one-line summary (the student can open any of them) */
 const RUNOPEN = {};
 function runItem(r, open) {
   const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), id = r.n + '-' + r.at;
   const isOpen = RUNOPEN[id] != null ? RUNOPEN[id] : open;
-  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
+  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} ${r.kind === 'snap' ? 'Snapshot' : 'Run'} ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
 }
 const sameStep = r => { const w = runWhere(); return r.sec === w.sec && r.step === w.step; };
 function runsTabHTML() {

@@ -769,6 +769,50 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 .fixline.right::after{content:'✓ the mistake';margin-left:auto;padding-left:8px;font-size:12.5px;font-weight:800;color:var(--okfg);white-space:nowrap}
 .fix2{display:flex;flex-direction:column;gap:6px} .fix2[hidden]{display:none}
 
+/* ===== Chapter 5: the Drop Zone ===== */
+.seg.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg button:disabled{opacity:.55;cursor:not-allowed}
+.dreads{display:flex;flex-direction:column;border-bottom:1px solid var(--line)} .dreads[hidden]{display:none}
+.dlane{border-bottom:1px solid var(--line)} .dlane:last-child{border-bottom:0}
+.dlh{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;text-transform:uppercase;font-size:13px;padding:7px 12px 0}
+.dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.dgrid .rd .v{color:var(--ink)}
+.scenebar #dzPause{min-width:130px;font-weight:800;font-size:17px;border-width:2.5px;border-color:var(--hazard);background:var(--hazard-soft)}
+.scenebar #dzPause[aria-pressed="true"]{background:var(--hazard);color:#1b1404}
+.scenebar #dzPause:disabled{opacity:.5;border-color:var(--line);background:var(--chip)}
+.scenebar #dzOpen:not(:disabled){border-color:var(--accent);background:var(--accent-soft);font-weight:800}
+.exsw{margin-bottom:6px} .exsw button{font-weight:800;font-size:14px;padding:7px 4px}
+.dzp .ctlh{flex-wrap:wrap} .dzp .numbox{margin-left:auto}
+#cvScene.dzscene{aspect-ratio:900/500}
+
+/* ===== freeze, spot and sketch questions (Chapter 5) ===== */
+.frz{display:flex;flex-direction:column;gap:10px}
+.frzrow{border:1.5px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.frzrow.has{border-color:var(--accent)}
+.frzhd{display:flex;align-items:center;gap:8px;font-size:15px}
+.frzn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:800;display:grid;place-items:center;font-family:var(--f-num);font-size:13px}
+.frzgrab{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.frzat{font-size:13px;color:var(--muted);font-family:var(--f-num)}
+.frzrow.has .frzat{color:var(--okfg);font-weight:700}
+.frzfields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px 10px}
+.frzf{display:flex;flex-direction:column;gap:2px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.frzf input,.frzf select{font:inherit;font-size:15px;font-weight:600;color:var(--ink);padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);min-width:0}
+.frzf input.right,.frzf select.right{border-color:var(--good);background:var(--okbg)} .frzf input.wrong,.frzf select.wrong{border-color:var(--bad);background:var(--nobg)}
+.frzf .corr{align-self:flex-start;margin:2px 0 0}
+.spots{display:flex;flex-direction:column;gap:6px}
+.spotb{display:flex;align-items:center;gap:8px;text-align:left;border:1.5px solid var(--line);border-radius:9px;background:var(--panel);padding:6px 9px;font-size:14.5px}
+.spotb .spn{flex:none;width:24px;height:24px;border-radius:50%;background:var(--c);color:#fff;font-weight:800;display:grid;place-items:center;font-size:13px}
+.spotb.on{border-color:var(--c);box-shadow:0 0 0 2px var(--c) inset}
+.spotask{font-weight:700;font-size:15px}
+.spotread{font-family:var(--f-num);font-size:14px;color:var(--muted);min-height:20px}
+.skhint{font-size:13px;color:var(--muted)}
+.sksr{position:absolute;left:-9999px}
+.skhost svg.skg:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.skchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.skchip{border-radius:999px;padding:3px 10px;font-size:13.5px;font-weight:700;border:1.5px solid}
+.skchip.ok{background:var(--okbg);color:var(--okfg);border-color:var(--good)} .skchip.no{background:var(--nobg);color:var(--badfg,#a2281a);border-color:var(--bad)}
+.predict .skhost{margin:6px 0}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -890,6 +934,17 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
           <div class="ctlh"><h3>Force pairs</h3><button type="button" class="info" data-info="pairs" aria-label="What are the force pair arrows?">ⓘ</button></div>
           <label class="tglrow"><input type="checkbox" id="tgPairs" checked> Show the force pairs</label>
         </div>
+        <div data-panel="dlanes">
+          <div class="ctlh"><h3>Compare two drops</h3><button type="button" class="info" data-info="dpause" aria-label="How do I use the pause tools?">ⓘ</button></div>
+          <label class="tglrow"><input type="checkbox" id="dzTwo"> Add lane B</label>
+          <div class="seg two" id="dzEdit" hidden></div><p class="palhint" id="dzEditNote"></p>
+        </div>
+        <div data-panel="dobj"><div class="ctlh"><h3>Object</h3></div><div class="seg two" id="dzObjs"></div></div>
+        <div data-panel="dworld"><div class="ctlh"><h3><button type="button" class="term tl" data-t="gfs">World</button></h3><button type="button" class="info" data-info="dworld" aria-label="How do I choose a world?">ⓘ</button></div><div class="seg three" id="dzWorlds"></div><p class="palhint" id="dzWorldInfo"></p></div>
+        <div class="dzp" data-panel="dair"><div class="ctlh"><h3><button type="button" class="term tl" data-t="airres">Air removed</button></h3><span class="numbox"><input type="number" id="dzAirNum" min="0" max="100" step="1" value="0" inputmode="numeric" aria-label="Percent of the air removed: type a number"><span>%</span></span><button type="button" class="info" data-info="dair" aria-label="What does the air removed slider do?">ⓘ</button></div><input type="range" id="dzAir" min="0" max="100" step="1" value="0" aria-label="Percent of the air removed"></div>
+        <div class="dzp" data-panel="dheight"><div class="ctlh"><h3>Drop height</h3><span class="numbox"><input type="number" id="dzHNum" min="10" max="3000" step="10" value="600" inputmode="numeric" aria-label="Drop height in metres: type a number"><span>m</span></span></div><input type="range" id="dzH" min="10" max="3000" step="10" value="600" aria-label="Drop height in metres"></div>
+        <div data-panel="dcanopy"><div class="ctlh"><h3><button type="button" class="term tl" data-t="canopy">Canopy</button></h3><button type="button" class="info" data-info="dcanopy" aria-label="How do I choose a canopy?">ⓘ</button></div><div class="seg two" id="dzCans"></div></div>
+        <div class="dzp" data-panel="dopenh"><div class="ctlh"><h3>Open automatically at</h3><span class="numbox"><input type="number" id="dzOpenNum" min="0" max="3000" step="10" placeholder="off" inputmode="numeric" aria-label="Open the canopy automatically at this height in metres: type a number, or leave empty for off"><span>m</span></span></div><p class="palhint">Leave the box empty to open the canopy yourself.</p></div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -898,8 +953,14 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
           <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
+          <button class="go" id="dzDrop" type="button" data-panel="drop">Drop!</button>
+          <button class="ghost dzpause" id="dzPause" type="button" data-panel="dpause" aria-pressed="false">⏸ Pause</button>
+          <button class="ghost" id="dzOpen" type="button" data-panel="dcanopy">Open canopy!</button>
+          <button class="ghost sm" id="dzBack" type="button" data-panel="dpause">◀ 0.5 s</button>
+          <button class="ghost sm" id="dzFwd" type="button" data-panel="dpause">0.5 s ▶</button>
+          <button class="ghost sm" id="dzSnap" type="button" data-panel="dpause">📸 Snapshot</button>
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch">Reset</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop">Reset</button>
         </div>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">
@@ -909,6 +970,7 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
             <div class="scaleNote" id="scaleNote"></div>
           </div>
           <div class="underside">
+            <div class="dreads" id="dreads" hidden></div>
             <div class="reads" id="reads"></div>
             <div class="toggles" data-panel="toggles">
               <div class="lbl">Show on the diagram</div>
@@ -920,6 +982,14 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
         <div class="vtrow" data-panel="vt">
           <div class="lbl"><button type="button" class="term tl" data-t="vtgraph">Velocity–time graph of the crate</button><button type="button" class="info" data-info="vt" aria-label="How do I read the velocity–time graph?">ⓘ</button></div>
           <canvas id="cvVT" role="img" aria-label="Velocity–time graph of the crate: velocity in metres per second up the side, time in seconds along the bottom"></canvas>
+        </div>
+        <div class="vtrow" data-panel="dvt">
+          <div class="lbl"><button type="button" class="term tl" data-t="vtgraph">Velocity–time graph</button><button type="button" class="info" data-info="dvt" aria-label="How do I read the velocity–time graph?">ⓘ</button></div>
+          <canvas id="cvDVT" role="img" aria-label="Velocity–time graph of the falling objects: velocity in metres per second up the side, time in seconds along the bottom"></canvas>
+        </div>
+        <div class="vtrow" data-panel="dft">
+          <div class="lbl"><span class="term">Force–time strip</span><button type="button" class="info" data-info="dft" aria-label="How do I read the force strip?">ⓘ</button></div>
+          <canvas id="cvDFT" role="img" aria-label="The weight and the air resistance of each falling object over time"></canvas>
         </div>
       </div>
     </div>
@@ -1048,6 +1118,7 @@ function spaceForces() {
   return { L: 0, R: 0, shove: push, thr, react: -push, app, fr: 0, brk: 0, net: app, W, N: W, m, a: app / m, fmax: 0, fk: 0, am: S.astro };
 }
 function forces() {
+  if (S.scene === 'drop') return dropForces();
   if (S.scene === 'space') return spaceForces();
   const u = S.running ? Math.min(1, S.pullT / PULL_RAMP) : 1, k = sstep(u), m = S.mass, fl = FLOORS[S.floor];
   const L = tot(S.left) * k, R = tot(S.right) * k, W = m * G, N = W, fs = fl.mus * W, fk = fl.mu * W;
@@ -1099,10 +1170,11 @@ function stepSim(dt) {
   if (S.scene === 'sled' ? S.x >= LIM : Math.abs(S.x) >= LIM) { S.x = Math.sign(S.x) * LIM; S.running = false; S.v = 0; S.msg = 'The crate reached the end of the arena. Press Reset to go again.'; syncRun(); }
 }
 function updateSim(dt) {
+  if (S.scene === 'drop') { dzUpdate(dt); return; }
   if (S.scene === 'space') { const n = Math.max(3, Math.ceil(dt * S.warp / 0.01)); for (let i = 0; i < n && S.running; i++) stepSim(dt * S.warp / n); return; }   // fixed small steps, so the speeds come out exact even when time is sped up
   for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3);
 }
-function resetSim() { if (RUN) runEnd('reset'); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false;
+function resetSim() { if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false;
   S.ax = AST_X0; S.av = 0; S.avPeak = 0; S.thrT = -1; S.thrDir = 0; S.pushEndT = null; S.pushDone = null; S.lastPush = 0; S.lastThr = 0; S.lastKind = null; S.dockV = null; S.bursts = []; S.flags.docked = false; S.flags.tether = false;
   syncRun(); }
 /* Space Dome: the astronaut pushes off the pod. One push per run: pressing the button again starts a fresh run. */
@@ -1111,7 +1183,7 @@ function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S
 function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.lastThr = dir * SP_THR_F; S.lastKind = 'thr'; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
 function shove() { if (S.scene === 'space') return spacePush(); if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
@@ -1342,9 +1414,9 @@ function drawTeam(c, side, s, col, edge, pulling, tt, ph, showMeter) {
 
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT'];
 /* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
-const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM'];
+const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -1353,7 +1425,8 @@ let DRAG = null, PSEL = null, PTOAST = null, ADDLOG = [];
 function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
-  const c = fit(cv, 900, 380); HITS = [];
+  const isDz = S.scene === 'drop' && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
+  if (S.scene === 'drop' && !cvo) { drawDropScene(c); return; }
   if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
   if (S.scene === 'space' && !cvo) { drawSpaceScene(c, f); return; }
   arenaShell(c, 'MAIN ARENA');
@@ -1698,6 +1771,7 @@ function renderControls() {
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
   const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
+  if (S.scene === 'drop') dzRenderControls();
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -1738,7 +1812,8 @@ function initControls() {
 function applyPanels() {
   $$('#lab [data-panel]').forEach(el => { const ks = el.dataset.panel.split(' '); el.hidden = !ks.some(k => LAB.show.has(k)); });
   const kit = $('#lab .kit'); $('#lab .stagerow').classList.toggle('nokit', ![...kit.querySelectorAll('[data-panel]')].some(e => !e.hidden));
-  const anyRead = [...$$('#reads .rd')].some(e => !e.hidden);
+  const dz = S.scene === 'drop'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)); $('#lab .scenebar').classList.toggle('dzbar', dz);
+  const anyRead = [...$$('#reads .rd')].some(e => !e.hidden) || !$('#dreads').hidden;
   $('#lab .underrow').hidden = !anyRead && !LAB.show.has('fbd');
   $('#lab .fbdcol').hidden = !LAB.show.has('fbd');
   renderPal(); renderControls();
@@ -2558,6 +2633,7 @@ function spaceText(r) {
   return head + bits + end;
 }
 function runText(r) {
+  if (r.scene === 'drop') return dropText(r);
   if (r.scene === 'sled') return sledText(r);
   if (r.scene === 'space') return spaceText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
@@ -2584,6 +2660,7 @@ function runText(r) {
   return head + ` The crate moved ${dirw}, reached ${ms(r.top)} and travelled ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
 function runChips(r) {
+  if (r.scene === 'drop') return dropChips(r);
   if (r.scene === 'space') {
     const mk = spaceMasked(r.pushF, r.mass, r.astro), c = [['Pod mass', r.mass + ' kg'], ['Astronaut mass', r.astro + ' kg']];
     if (r.kind === 'push') c.push(['Push', NN(r.pushF)]);
@@ -2609,13 +2686,13 @@ function runChips(r) {
   return c;
 }
 const FLOORPH = { air: 'on the air floor', ice: 'on ice', smooth: 'on the smooth floor', concrete: 'on rough concrete' };
-const KINDICON = { push: '👋', pull: '🪢', launch: '🚀', thrust: '🔥' };
+const KINDICON = { push: '👋', pull: '🪢', launch: '🚀', thrust: '🔥', drop: '🪂', snap: '📸' };
 /* one run: this step's runs are open; earlier runs fold to a one-line summary (the student can open any of them) */
 const RUNOPEN = {};
 function runItem(r, open) {
   const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), id = r.n + '-' + r.at;
   const isOpen = RUNOPEN[id] != null ? RUNOPEN[id] : open;
-  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} Run ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
+  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} ${r.kind === 'snap' ? 'Snapshot' : 'Run'} ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
 }
 const sameStep = r => { const w = runWhere(); return r.sec === w.sec && r.step === w.step; };
 function runsTabHTML() {
@@ -2849,7 +2926,7 @@ const art = g => (/^[aeiou]/i.test(g) ? 'an ' : 'a ') + g.toLowerCase();
 const qq = t => '“' + plain(t) + '”';
 function corr(after, text) { const c = document.createElement('span'); c.className = 'corr'; c.textContent = '→ ' + plain(text); after.after(c); }
 function lockInputs(el) { $$('input,select,textarea,button', el).forEach(x => { if (!x.classList.contains('qopen')) x.disabled = true; }); $$('.qchk', el).forEach(b => b.hidden = true); }
-function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; default: return 1; } }
+function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; } }
 /* "How sure are you?" (opt-in: sure:true on mcq, reason and pick). Three buttons; the student must choose one before checking.
    Not marked. Saved as st.sure ('guess' | 'fair' | 'cert') so the feedback page can show answers that were certain but wrong. */
 const SURE_LABEL = { guess: 'Guessing', fair: 'Fairly sure', cert: 'Certain' };
@@ -3212,6 +3289,229 @@ QT.fix = {
   model(q) { const f = q.fix; return `Mistake: line ${q.bad + 1}<br>Correction: ${f.kind === 'num' ? fmt(f.ans, 2) + ' ' + (f.unit || '') : f.opts[f.a]}`; }
 };
 
+/* ===== Observation question types for Chapter 5: freeze (freeze-frame table), spot (tap the moment on a graph), sketch (sketch the graph) =====
+   Same QT pattern as 36-qtypes.js. One go each; drafts (an attached moment, a marker, a dot) are saved in the question's state without `done`.
+   freeze reads the student's own paused moments (snapshots, see 46-dropzone.js). spot and sketch use fixed data, so the key is fixed. */
+Object.assign(QLABEL, { freeze: 'Freeze-frame table', spot: 'Tap the moment', sketch: 'Sketch the graph' });
+
+/* ---------- freeze ----------
+   {id, type:'freeze', p, obj:'crate', cols:[['W','Weight (N)'], ['D','Air resistance (N)'], ['R','Resultant (N)'], ['motion','Velocity']],
+    rows:[{label, when: snap => bool, whenMsg}], example:[[392, 25, 367, 'speeding up'], ...], after}
+   Column keys: W, D (numbers read from the free-body diagram), R (resultant, W − D, a number), big (which force is bigger: pick), motion (pick).
+   1 mark per box. The student pauses the drop, presses "Use this moment" on a row (which attaches the snapshot for that moment), then fills in the row. */
+const FRZ_STEADY = 0.2, FRZ_EQUAL = 0.03;                   // |a| below this is "steady"; |R| below this fraction of the weight is "equal"
+const FRZ_PICK = { big: ['weight', 'air resistance', 'neither, they\'re equal'], motion: ['speeding up', 'steady', 'slowing down'] };
+const frzIsNum = k => k === 'W' || k === 'D' || k === 'R';
+const frzTol = k => k === 'R' ? 1.5 : 1;                  // newtons (the labels on the diagram are rounded)
+function frzTruth(k, s) {                                   // the right reading for a snapshot: a number, or the index of the right choice
+  if (k === 'W') return s.W; if (k === 'D') return s.D; if (k === 'R') return s.W - s.D;
+  if (k === 'big') { const r = s.W - s.D; return Math.abs(r) < FRZ_EQUAL * s.W ? 2 : r > 0 ? 0 : 1; }
+  if (k === 'motion') return s.a > FRZ_STEADY ? 0 : s.a >= -FRZ_STEADY ? 1 : 2;
+}
+const frzFmt = (k, x) => frzIsNum(k) ? fmtN(x) : FRZ_PICK[k][x];
+const fmtN = x => { const a = Math.abs(x); return (a < 1 ? x.toFixed(3) : a < 10 ? x.toFixed(2) : String(Math.round(x))).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
+const frzState = (q, s) => (s && s.v && Array.isArray(s.v.rows)) ? s.v.rows : q.rows.map(() => ({ snap: null, vals: {} }));
+const frzAtTxt = sn => sn ? `Paused at ${fmt(sn.t, 1)} s · ${fmt(sn.y, 0)} m up · ${dz1(sn.v)} m/s` : 'No moment attached yet';
+function frzCell(q, k, head, ri, vals) {
+  const val = vals && vals[k] != null ? vals[k] : '';
+  return `<label class="frzf"><span>${head}</span>` + (frzIsNum(k)
+    ? `<input class="frzin" inputmode="decimal" autocomplete="off" data-ri="${ri}" data-k="${k}" value="${esc(val)}" aria-label="${esc(head)}, ${esc(plain(q.rows[ri].label))}">`
+    : `<select class="frzin" data-ri="${ri}" data-k="${k}" aria-label="${esc(head)}, ${esc(plain(q.rows[ri].label))}"><option value="">choose…</option>${FRZ_PICK[k].map((o, j) => `<option value="${j}"${String(val) === String(j) ? ' selected' : ''}>${o}</option>`).join('')}</select>`) + '</label>';
+}
+function frzMoment(q, ri) {                                  // the snapshot for the paused moment, if it is a fair choice for this row
+  const row = q.rows[ri];
+  if (!DZ.started || !DZ.paused) return { err: 'Pause the drop first, then press Use this moment.' };
+  const L = DZ.lanes[DZ.two ? DZ.edit : 0], sn = dzSnapHere(L);
+  if (q.obj && sn.obj !== q.obj) return { err: `This table is about the ${DZ_OBJ[q.obj].noun}. Drop the ${DZ_OBJ[q.obj].noun} and pause it.` };
+  if (row.when && !row.when(sn)) return { err: row.whenMsg || 'That moment does not fit this row. Try another.' };
+  return { snap: sn };
+}
+QT.freeze = {
+  html(q, s) {
+    const st = frzState(q, s);
+    return `<div class="frz">${q.rows.map((r, ri) => `<div class="frzrow" data-ri="${ri}"><div class="frzhd"><span class="frzn">${ri + 1}</span><b>${r.label}</b></div><div class="frzgrab"><button type="button" class="ghost sm frzbtn" data-ri="${ri}">Use this moment</button><span class="frzat">${frzAtTxt(st[ri].snap)}</span></div><div class="frzfields">${q.cols.map(([k, head]) => frzCell(q, k, head, ri, st[ri].vals)).join('')}</div></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check the table</button>`;
+  },
+  bind(el, q, api) {
+    const save = () => {
+      const rows = q.rows.map((_, ri) => { const cur = (frzState(q, api.state())[ri]) || { snap: null, vals: {} }, vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: cur.snap, vals }; });
+      const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur); if (typeof checkStep === 'function') checkStep();
+    };
+    el.addEventListener('input', e => { if (e.target.closest('.frzin') && !api.locked()) save(); });
+    el.addEventListener('change', e => { if (e.target.closest('.frzin') && !api.locked()) save(); });
+    el.addEventListener('click', e => {
+      const b = e.target.closest('.frzbtn'); if (!b || api.locked()) return;
+      const ri = +b.dataset.ri, m = frzMoment(q, ri); if (m.err) { api.say(m.err, 'no'); return; }
+      const rows = frzState(q, api.state()).map(r => ({ snap: r.snap, vals: r.vals })); rows[ri].snap = m.snap;
+      const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur);
+      $('.frzat', b.parentNode).textContent = frzAtTxt(m.snap); $('.frzrow[data-ri="' + ri + '"]', el).classList.add('has'); api.say(`Moment ${ri + 1} attached: ${frzAtTxt(m.snap).toLowerCase()}. Now fill in the row.`, 'ok');
+      if (typeof checkStep === 'function') checkStep();
+    });
+    $$('.frzrow', el).forEach((r, ri) => { if (frzState(q, api.state())[ri].snap) r.classList.add('has'); });
+    $('.qchk', el).addEventListener('click', () => {
+      if (api.locked()) return; const rows = frzState(q, api.state());
+      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. Pause the drop and press Use this moment.`, 'no'); return; }
+      let n = 0, good = 0, v = rows.map((r, ri) => { const vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: r.snap, vals }; });
+      for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
+      v.forEach(r => q.cols.forEach(([k]) => { n++; if (frzCellOk(k, r.vals[k], r.snap)) good++; }));
+      api.answer({ rows: v }, good === n, (good === n ? (q.ok || 'All correct! Your readings match your paused moments.') : `Whoops! ${n - good} of ${n} boxes weren't right. The right readings from your moments are shown in green.`) + afterTxt(q), { score: good });
+    });
+  },
+  lock(el, q, s) {
+    const rows = frzState(q, s);
+    $$('.frzin', el).forEach(i => {
+      const r = rows[+i.dataset.ri], k = i.dataset.k, ok = r && r.snap && frzCellOk(k, i.value, r.snap);
+      i.classList.add(ok ? 'right' : 'wrong'); if (!ok && r && r.snap) corr(i, frzFmt(k, frzTruth(k, r.snap)));
+    });
+    lockInputs(el);
+  },
+  show(q, v) {
+    if (!v || !Array.isArray(v.rows)) return '';
+    return v.rows.map((r, ri) => `${plain(q.rows[ri].label)}${r.snap ? ' (paused at ' + fmt(r.snap.t, 1) + ' s)' : ''}: ` + q.cols.map(([k, head]) => `${plain(head)} ${frzDisp(k, r.vals[k])}`).join(', ')).join('<br>');
+  },
+  model(q) { return 'Example values (students\' will differ):<br>' + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('<br>'); }
+};
+function frzCellOk(k, raw, snap) {
+  if (raw === '' || raw == null) return false;
+  if (!frzIsNum(k)) return +raw === frzTruth(k, snap);
+  const n = parseNum(raw); return !isNaN(n) && near(n, frzTruth(k, snap), frzTol(k));
+}
+const frzDisp = (k, x, ex) => x == null || x === '' ? '–' : frzIsNum(k) ? (ex ? x : esc(x)) : (typeof x === 'number' ? FRZ_PICK[k][x] : (FRZ_PICK[k][+x] || esc(x)));
+
+/* ---------- spot: tap the moment on a graph ----------
+   {id, type:'spot', p, graph: () => ({lines:[{pts:[[t,v],...]}], tMax, vMax, vStep, tStep}), targets:[{ask, t:[lo,hi], why}], ok}
+   Each target has its own numbered marker. Tap the graph (or use the arrow keys) to place or move the active marker; Check when every marker is down. 1 mark per target. */
+const SPOT_COL = ['#c94a34', '#7446b0', '#11806f'];
+const spotOpts = (q, extra) => Object.assign({ alt: 'A velocity–time graph. Tap it to place a marker.' }, q.graph(), extra || {});
+const spotSt = (q, s) => (s && Array.isArray(s.v) ? s.v : q.targets.map(() => null));
+function spotDraw(svg, q, v, locked) {                      // numbered markers (and the green bands once locked), drawn into the graph
+  const g = $('.tapg', svg), x0 = +svg.dataset.x0, x1 = +svg.dataset.x1, y0 = +svg.dataset.y0, y1 = +svg.dataset.y1, tMax = +svg.dataset.tmax, X = t => x0 + t / tMax * (x1 - x0);
+  let out = '';
+  if (locked) q.targets.forEach(t => { out += `<rect x="${X(t.t[0]).toFixed(1)}" y="${y0}" width="${(X(t.t[1]) - X(t.t[0])).toFixed(1)}" height="${y1 - y0}" fill="#1c9a5a" fill-opacity=".22" stroke="#1c9a5a" stroke-dasharray="4 3"/>`; });
+  v.forEach((t, i) => {
+    if (t == null) return; const ok = locked && t >= q.targets[i].t[0] - 1e-9 && t <= q.targets[i].t[1] + 1e-9, col = locked ? (ok ? '#1c9a5a' : '#c94a34') : SPOT_COL[i % 3], x = X(t).toFixed(1);
+    out += `<line x1="${x}" y1="${y0}" x2="${x}" y2="${y1}" stroke="${col}" stroke-width="2" stroke-dasharray="5 3"/><circle cx="${x}" cy="${y0 + 11}" r="9" fill="${col}"/><text x="${x}" y="${y0 + 15}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${i + 1}</text>`;
+  });
+  g.innerHTML = out;
+}
+QT.spot = {
+  html(q, s) {
+    const many = q.targets.length > 1, v = spotSt(q, s);
+    return `${many ? `<div class="spots" role="group" aria-label="Choose which moment to mark">${q.targets.map((t, i) => `<button type="button" class="spotb${i === 0 ? ' on' : ''}" data-ti="${i}" style="--c:${SPOT_COL[i % 3]}"><span class="spn">${i + 1}</span><span>${t.ask}</span></button>`).join('')}</div>` : (q.targets[0].ask ? `<div class="spotask">${q.targets[0].ask}</div>` : '')}${vtSVG(q.graph().lines, spotOpts(q, { tap: true }))}<div class="spotread" aria-live="polite">${spotRead(q, v)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`;
+  },
+  bind(el, q, api) {
+    const svg = $('svg', el), v = spotSt(q, api.state()); let act = 0;
+    const W = +svg.dataset.w, x0 = +svg.dataset.x0, x1 = +svg.dataset.x1, tMax = +svg.dataset.tmax;
+    const redraw = () => { spotDraw(svg, q, v, false); $('.spotread', el).textContent = spotRead(q, v); $$('.spotb', el).forEach(b => { b.classList.toggle('on', +b.dataset.ti === act); b.classList.toggle('set', v[+b.dataset.ti] != null); }); };
+    const put = t => { t = Math.max(0, Math.min(tMax, Math.round(t * 10) / 10)); v[act] = t; const cur = api.state() || {}; cur.v = v.slice(); api.setRaw(cur); redraw(); };
+    $$('.spotb', el).forEach(b => b.addEventListener('click', () => { if (api.locked()) return; act = +b.dataset.ti; redraw(); }));
+    $('.tapzone', svg).addEventListener('click', e => { if (api.locked()) return; const r = svg.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * W; put((x - x0) / (x1 - x0) * tMax); });
+    svg.setAttribute('tabindex', '0'); svg.setAttribute('role', 'slider'); svg.setAttribute('aria-label', 'Graph. Tap to place the marker, or press the left and right arrow keys to move it.');
+    svg.addEventListener('keydown', e => { if (api.locked() || !/^Arrow(Left|Right)$/.test(e.key)) return; e.preventDefault(); put((v[act] == null ? tMax / 2 : v[act]) + (e.key === 'ArrowLeft' ? -1 : 1) * tMax / 40); });
+    redraw();
+    $('.qchk', el).addEventListener('click', () => {
+      if (api.locked()) return; const miss = v.findIndex(t => t == null);
+      if (miss >= 0) { act = miss; redraw(); api.say(q.targets.length > 1 ? `Tap the graph to place marker ${miss + 1} first.` : 'Tap the graph to place your marker first.', 'no'); return; }
+      const oks = v.map((t, i) => t >= q.targets[i].t[0] - 1e-9 && t <= q.targets[i].t[1] + 1e-9), n = oks.filter(Boolean).length, bad = oks.map((o, i) => o ? -1 : i).filter(i => i >= 0);
+      api.answer(v.slice(), n === q.targets.length, (n === q.targets.length ? (q.ok || 'Spot on!') : `Whoops! ${bad.length === 1 && q.targets.length === 1 ? 'That' : bad.length === 1 ? 'Marker ' + (bad[0] + 1) : bad.length + ' markers'} wasn't in the right place. The green band${q.targets.length > 1 ? 's show' : ' shows'} where ${q.targets.length > 1 ? 'they were' : 'it was'}. ${bad.map(i => q.targets[i].why || '').join(' ')}`).replace(/\s+/g, ' ').trim() + afterTxt(q), { score: n });
+    });
+  },
+  lock(el, q, s) { const svg = $('svg', el); spotDraw(svg, q, spotSt(q, s), true); $$('.spotb', el).forEach(b => { b.disabled = true; }); svg.removeAttribute('tabindex'); lockInputs(el); },
+  show(q, v) { return Array.isArray(v) ? v.map((t, i) => `Marker ${i + 1}: ${t == null ? '–' : fmt(t, 1) + ' s'}`).join('<br>') : ''; },
+  model(q) { return q.targets.map((t, i) => `Marker ${i + 1}: between ${fmt(t.t[0], 1)} and ${fmt(t.t[1], 1)} s`).join('<br>'); }
+};
+const spotRead = (q, v) => v.every(t => t == null) ? '' : v.map((t, i) => t == null ? null : (q.targets.length > 1 ? `Marker ${i + 1}: ` : 'Your marker: ') + fmt(t, 1) + ' s').filter(Boolean).join(' · ');
+
+/* ---------- sketch: set a dot in every time column ----------
+   {id, type:'sketch', p, xLabel, yLabel, cols:10, levels:10, xTicks:['0','1',...] (one per column, optional), yMax: 16 (optional numbers on the y-axis),
+    marks:[{col, label}], model:[levels...], checks:[[label, p => bool]], real: () => levels[] or null, look}
+   Tap or drag across the grid to set the dots (a dot per column, whole levels). Arrow keys: left/right change column, up/down move the dot. 1 mark per check. */
+function sketchInner(q, o) {
+  o = o || {}; const W = 420, H = 270, x0 = 62, x1 = W - 12, y0 = 22, y1 = H - 56, n = q.cols, L = q.levels, cw = (x1 - x0) / n, cx = i => x0 + (i + .5) * cw, Y = l => y1 - l / L * (y1 - y0);
+  let g = '';
+  for (let l = 0; l <= L; l++) { g += `<line x1="${x0}" y1="${Y(l).toFixed(1)}" x2="${x1}" y2="${Y(l).toFixed(1)}" stroke="#d5dee2" stroke-width="1"/>`; if (q.yMax != null && (l % 2 === 0 || L <= 5)) g += `<text x="${x0 - 6}" y="${(Y(l) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#566a74">${+(q.yMax * l / L).toFixed(1)}</text>`; }
+  if (q.yMax == null) g += `<text x="${x0 - 6}" y="${(Y(0) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="#566a74">0</text>`;
+  for (let i = 0; i < n; i++) { g += `<line x1="${cx(i).toFixed(1)}" y1="${y0}" x2="${cx(i).toFixed(1)}" y2="${y1}" stroke="#e6edf0" stroke-width="1"/>`; if (q.xTicks) g += `<text x="${cx(i).toFixed(1)}" y="${y1 + 14}" text-anchor="middle" font-size="11" fill="#566a74">${q.xTicks[i]}</text>`; }
+  g += `<path d="M${x0} ${y0 - 4}V${y1}H${x1}" fill="none" stroke="#13212a" stroke-width="1.5"/>`;
+  g += `<text x="${(x0 + x1) / 2}" y="${H - 8}" text-anchor="middle" font-size="13" font-weight="800" fill="#13212a">${q.xLabel || 'Time'}</text><text transform="translate(14 ${(y0 + y1) / 2}) rotate(-90)" text-anchor="middle" font-size="13" font-weight="800" fill="#13212a">${q.yLabel || 'Velocity'}</text>`;
+  (q.marks || []).forEach(m => { g += `<line x1="${cx(m.col).toFixed(1)}" y1="${y0 - 2}" x2="${cx(m.col).toFixed(1)}" y2="${y1}" stroke="#c94a34" stroke-width="2" stroke-dasharray="6 4"/><text x="${cx(m.col).toFixed(1)}" y="${y0 - 8}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#c94a34">${m.label}</text>`; });
+  const line = (p, col, dash, r, lab) => { const pts = p.map((l, i) => l == null ? null : [cx(i), Y(l)]).filter(Boolean); if (!pts.length) return ''; return (pts.length > 1 ? `<polyline points="${pts.map(a => a[0].toFixed(1) + ',' + a[1].toFixed(1)).join(' ')}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"${dash ? ' stroke-dasharray="7 5"' : ''}/>` : '') + pts.map(a => `<circle cx="${a[0].toFixed(1)}" cy="${a[1].toFixed(1)}" r="${r}" fill="${col}" stroke="#fff" stroke-width="1.5"/>`).join(''); };
+  if (o.model) g += line(o.model, '#1c9a5a', true, 4.5);
+  if (o.real) g += line(o.real, '#e08a1e', true, 3.5);
+  const dots = o.dots || [];
+  g += line(dots, o.col || '#1f5f8b', false, 6);
+  if (o.cur != null) g += `<rect x="${(cx(o.cur) - cw / 2).toFixed(1)}" y="${y0}" width="${cw.toFixed(1)}" height="${y1 - y0}" fill="none" stroke="#1f5f8b" stroke-width="2" rx="4"/>`;
+  if (o.legend) g += `<g font-size="11.5" font-weight="800"><circle cx="${x0 + 12}" cy="${H - 26}" r="4.5" fill="#1f5f8b"/><text x="${x0 + 22}" y="${H - 22}" fill="#1f5f8b">Your sketch</text>${o.model ? `<line x1="${x0 + 108}" y1="${H - 26}" x2="${x0 + 128}" y2="${H - 26}" stroke="#1c9a5a" stroke-width="3" stroke-dasharray="7 5"/><text x="${x0 + 134}" y="${H - 22}" fill="#1c9a5a">What it should be</text>` : ''}${o.real ? `<line x1="${x0 + 250}" y1="${H - 26}" x2="${x0 + 270}" y2="${H - 26}" stroke="#e08a1e" stroke-width="3" stroke-dasharray="7 5"/><text x="${x0 + 276}" y="${H - 22}" fill="#e08a1e">Your run</text>` : ''}</g>`;
+  return g;
+}
+function sketchSVG(q, o) {
+  o = o || {}; const W = 420, H = 270, x0 = 62, x1 = W - 12, y0 = 22, y1 = H - 56;
+  return `<svg viewBox="0 0 ${W} ${H}" class="skg" role="img" aria-label="${esc(o.alt || 'A graph grid: put a dot in each time column')}" data-x0="${x0}" data-x1="${x1}" data-y0="${y0}" data-y1="${y1}" data-w="${W}" data-h="${H}" style="width:100%;max-width:440px;display:block;background:#fff;border-radius:8px;touch-action:none">${sketchInner(q, o)}</svg>`;
+}
+/* make a sketch grid live inside `host`: get()/set() read and save the dots (an array of levels, null where not set yet).
+   The svg is built once; drawing only swaps its contents, so a drag keeps working. */
+function sketchBind(host, q, get, set, locked) {
+  host.innerHTML = sketchSVG(q, { dots: get(), alt: 'Sketch grid. Tap a column, or drag across the grid, to set the dots.' }) + '<div class="sksr" aria-live="polite"></div>';
+  const svg = $('svg.skg', host), say = $('.sksr', host); let cur = 0, down = false, focus = false;
+  svg.setAttribute('tabindex', '0'); svg.setAttribute('role', 'application'); svg.setAttribute('aria-label', 'Sketch grid. Left and right arrow keys change column, up and down arrow keys move the dot.');
+  const draw = () => { svg.innerHTML = sketchInner(q, { dots: get(), cur: focus ? cur : null }); const v = get()[cur]; say.textContent = focus ? `Column ${cur + 1}: ${v == null ? 'no dot yet' : 'level ' + v}` : ''; };
+  const pos = e => { const r = svg.getBoundingClientRect(), W = +svg.dataset.w, H = +svg.dataset.h, x0 = +svg.dataset.x0, x1 = +svg.dataset.x1, y0 = +svg.dataset.y0, y1 = +svg.dataset.y1, x = (e.clientX - r.left) / r.width * W, y = (e.clientY - r.top) / r.height * H;
+    return { col: Math.max(0, Math.min(q.cols - 1, Math.floor((x - x0) / ((x1 - x0) / q.cols)))), lvl: Math.max(0, Math.min(q.levels, Math.round((y1 - y) / (y1 - y0) * q.levels))) }; };
+  const setDot = (c, l) => { const p = get().slice(); p[c] = l; set(p); cur = c; draw(); };
+  svg.addEventListener('pointerdown', e => { if (locked()) return; e.preventDefault(); down = true; try { svg.setPointerCapture(e.pointerId); } catch (x) { } svg.focus(); const a = pos(e); setDot(a.col, a.lvl); });
+  svg.addEventListener('pointermove', e => { if (!down || locked()) return; const a = pos(e); if (get()[a.col] !== a.lvl) setDot(a.col, a.lvl); });
+  svg.addEventListener('pointerup', () => { down = false; }); svg.addEventListener('pointercancel', () => { down = false; });
+  svg.addEventListener('focus', () => { focus = true; draw(); }); svg.addEventListener('blur', () => { focus = false; draw(); });
+  svg.addEventListener('keydown', e => {
+    if (locked()) return;
+    if (e.key === 'ArrowLeft') cur = Math.max(0, cur - 1); else if (e.key === 'ArrowRight') cur = Math.min(q.cols - 1, cur + 1);
+    else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { const l = get()[cur] == null ? (e.key === 'ArrowUp' ? 0 : 1) : get()[cur]; setDot(cur, Math.max(0, Math.min(q.levels, l + (e.key === 'ArrowUp' ? 1 : -1)))); e.preventDefault(); return; }
+    else return;
+    e.preventDefault(); draw();
+  });
+  draw();
+}
+const skDots = (q, s) => (s && Array.isArray(s.v) ? s.v : q.cols ? Array.from({ length: q.cols }, () => null) : []);
+const skChecks = (q, p) => q.checks.map(([label, f]) => { let ok = false; try { ok = !!f(p); } catch (e) { } return [label, ok]; });
+const skChips = (q, p) => `<div class="skchips">${skChecks(q, p).map(([l, ok]) => `<span class="skchip ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'} ${l}</span>`).join('')}</div>`;
+QT.sketch = {
+  html(q, s) { return `<div class="skhost"></div><div class="skhint">Tap a column to set its dot, or drag across the grid to draw. With a keyboard, use the arrow keys.</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check my sketch</button>`; },
+  bind(el, q, api) {
+    const host = $('.skhost', el), get = () => skDots(q, api.state()), set = p => { const cur = api.state() || {}; cur.v = p; api.setRaw(cur); };
+    if (api.locked()) { return; }
+    sketchBind(host, q, get, set, () => api.locked());
+    $('.qchk', el).addEventListener('click', () => {
+      if (api.locked()) return; const p = get();
+      if (p.some(x => x == null)) { api.say(`Set a dot in every column first (${p.filter(x => x == null).length} to go).`, 'no'); return; }
+      const res = skChecks(q, p), n = res.filter(r => r[1]).length;
+      api.answer(p.slice(), n === res.length, n === res.length ? (q.ok || 'Great sketch! Every check is right.') + afterTxt(q) : `Not quite: ${n} of ${res.length} checks are right. The green dashed line shows what the graph should look like.` + afterTxt(q), { score: n });
+    });
+  },
+  lock(el, q, s) {
+    const p = skDots(q, s), host = $('.skhost', el), real = q.real ? q.real() : null;
+    host.innerHTML = sketchSVG(q, { dots: p, model: q.model, real, legend: true, alt: 'Your sketch with the right graph drawn over it' }) + skChips(q, p);
+    lockInputs(el); $$('.skhint', el).forEach(x => x.hidden = true);
+  },
+  show(q, v) { return Array.isArray(v) ? sketchSVG(q, { dots: v, alt: 'Your sketch' }) : ''; },
+  model(q) { return sketchSVG(q, { dots: q.model, col: '#1c9a5a', alt: 'The right graph' }); }
+};
+
+/* ---------- the sketch prediction in a "Predict first" box ----------
+   predict: { kind:'sketch', q, cols, levels, xLabel, yLabel, marks, then, span:{t, v} } → saved as { sk:[levels] } under the step's .pred; predOf() is non-null once locked in. */
+const predSketch = () => { const p = predOf(); return p && Array.isArray(p.sk) ? p.sk : null; };
+function predSketchHTML(P, v) {
+  if (v) return `<div class="predict done"><span class="lbl">Your prediction</span>${sketchSVG(P, { dots: v, alt: 'Your predicted sketch' })}<p class="scaleNote">${P.then || 'Now test it in the arena and see how close you were!'}</p></div>`;
+  return `<div class="predict"><span class="lbl">Predict first</span><p class="gl">${P.q}</p><div class="skhost" data-psk></div><div class="skhint">Tap a column to set its dot, or drag across the grid to draw. With a keyboard, use the arrow keys.</div><button type="button" class="mini" id="predSkLock">Lock in my prediction</button><div class="fb" id="predSkFb"></div></div>`;
+}
+function predSketchBind(P) {
+  const host = $('#rail [data-psk]'); if (!host) return;
+  const key = stepKey(CH.id, GI) + '.predDraft', get = () => dbGet(key, null) || Array.from({ length: P.cols }, () => null), set = p => dbSet(key, p);
+  sketchBind(host, P, get, set, () => false);
+  $('#predSkLock').addEventListener('click', () => {
+    const p = get(); if (p.some(x => x == null)) { const f = $('#predSkFb'); f.className = 'fb no'; f.textContent = `Set a dot in every column first (${p.filter(x => x == null).length} to go).`; return; }
+    dbSet(stepKey(CH.id, GI) + '.pred', { sk: p.slice() }); renderRail(); checkStep();
+  });
+}
+
 /* ===== Guided (Learn) engine ===== */
 const CHDATA = {}; // filled by chapter modules: CHDATA.c1 = {steps, challenge, review, ...}
 let GI = 0, CARDS_SEEN = false, LASTSIG = '';
@@ -3331,6 +3631,7 @@ function renderRail() {
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();
+  { const st = CHDATA[CH.id].steps[GI]; if (st && st.predict && st.predict.kind === 'sketch' && !predSketch()) predSketchBind(st.predict); }
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
   $('#gPrev').addEventListener('click', () => setStep(GI - 1));
   $('#gNext').addEventListener('click', tryNext);
@@ -3339,6 +3640,7 @@ function renderRail() {
 const predOf = () => dbGet(stepKey(CH.id, GI) + '.pred', null);
 function predictBox(st) {
   const P = st.predict, v = predOf();
+  if (P.kind === 'sketch') return predSketchHTML(P, predSketch());
   return v == null ? `<div class="predict"><span class="lbl">Predict first</span><p class="gl">${P.q}</p><div class="popts">${P.opts.map((o, i) => `<button type="button" class="mini" data-pred="${i}">${o}</button>`).join('')}</div></div>`
     : `<div class="predict done"><span class="lbl">Your prediction</span><p class="gl"><b>${P.opts[v]}</b></p><p class="scaleNote">${P.then || 'Now test it in the arena and see if you were right!'}</p></div>`;
 }
@@ -3385,7 +3687,7 @@ function qChrome() {
     ft.innerHTML = `<button type="button" class="ghost" id="qBack">← Back to the arena</button><button type="button" class="go ${done ? 'ready' : ''}" id="qNext">${last ? (chd.challenge ? 'To the Challenge →' : 'To the Check →') : 'Next step →'}</button>`;
     $('#qBack').addEventListener('click', () => qPlace('dock')); $('#qNext').addEventListener('click', tryNext);
     const old = $('.qrunsbtn', qc); if (old) old.remove();
-    if (['run', 'shove', 'launch'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
+    if (['run', 'shove', 'launch', 'drop'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
     hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
     $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qrunsbtn', qc); if (old) old.remove();
@@ -3619,13 +3921,14 @@ CHDATA.c1 = {
 /* A small velocity–time graph as inline SVG, for Check questions and worksheets.
    lines: [{ pts: [[t, v], …], col, label }], opts: { tMax, vMax, vStep } */
 function vtSVG(lines, o = {}) {
-  const W = 420, H = 210, x0 = 46, x1 = W - 14, y0 = 12, y1 = H - 34, tMax = o.tMax || 8, vMax = o.vMax || 3, vStep = o.vStep || 0.5;
+  const W = 420, H = 210, x0 = 46, x1 = W - 14, y0 = 12, y1 = H - 34, tMax = o.tMax || 8, vMax = o.vMax || 3, vStep = o.vStep || 0.5, tStep = o.tStep || 1;
   const X = t => x0 + t / tMax * (x1 - x0), Y = v => y1 - v / vMax * (y1 - y0);
   let g = '';
   for (let v = 0; v <= vMax + 1e-9; v += vStep) g += `<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="#d5dee2" stroke-width="1"/><text x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="#566a74">${+v.toFixed(2)}</text>`;
-  for (let t = 0; t <= tMax; t += 1) g += `<line x1="${X(t)}" y1="${y0}" x2="${X(t)}" y2="${y1}" stroke="#d5dee2" stroke-width="1"/><text x="${X(t)}" y="${y1 + 14}" text-anchor="middle" font-size="11" fill="#566a74">${t}</text>`;
+  for (let t = 0; t <= tMax + 1e-9; t += tStep) g += `<line x1="${X(t)}" y1="${y0}" x2="${X(t)}" y2="${y1}" stroke="#d5dee2" stroke-width="1"/><text x="${X(t)}" y="${y1 + 14}" text-anchor="middle" font-size="11" fill="#566a74">${t}</text>`;
   g += `<path d="M${x0} ${y0}V${y1}H${x1}" fill="none" stroke="#13212a" stroke-width="1.5"/>`;
   g += `<text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" font-size="12" font-weight="700" fill="#13212a">Time (s)</text><text transform="translate(12 ${(y0 + y1) / 2}) rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#13212a">Velocity (m/s)</text>`;
+  (o.shade || []).forEach(([a, b]) => { g += `<rect class="vshade" x="${X(a).toFixed(1)}" y="${y0}" width="${(X(b) - X(a)).toFixed(1)}" height="${y1 - y0}" fill="#1c9a5a" fill-opacity=".22" stroke="#1c9a5a" stroke-dasharray="4 3"/>`; });
   lines.forEach(l => {
     g += `<polyline points="${l.pts.map(([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${l.col || '#1f5f8b'}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>`;
     if (l.label) { const [t, v] = l.pts[l.lab || 0]; g += `<text x="${X(t) + 6}" y="${Y(v) - 7}" font-size="12" font-weight="800" fill="${l.col || '#1f5f8b'}">${l.label}</text>`; }
@@ -3635,7 +3938,9 @@ function vtSVG(lines, o = {}) {
     g += `<polyline points="${P.map(pt).join(' ')}" fill="none" stroke="#13212a" stroke-width="2" stroke-dasharray="6 4"/>`;
     if (o.triLab !== false) g += `<text x="${(X(P[0][0]) + X(P[1][0])) / 2}" y="${Y(P[0][1]) + 16}" text-anchor="middle" font-size="12" font-weight="800" fill="#13212a">Δt = ${+(P[1][0] - P[0][0]).toFixed(2)} s</text><text x="${X(P[1][0]) - 6}" y="${(Y(P[1][1]) + Y(P[1][1] === P[0][1] ? P[2][1] : P[0][1])) / 2}" text-anchor="end" font-size="12" font-weight="800" fill="#13212a">Δv = ${+(P[2][1] - P[1][1]).toFixed(2)} m/s</text>`;
   }
-  return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" style="width:100%;max-width:440px;display:block;background:#fff;border-radius:8px">${g}</svg></div>`;
+  (o.marks || []).forEach((m, k) => { g += `<g class="vmark ${m.cls || ''}"><line x1="${X(m.t).toFixed(1)}" y1="${y0}" x2="${X(m.t).toFixed(1)}" y2="${y1}" stroke="${m.col || '#c94a34'}" stroke-width="2" stroke-dasharray="5 3"/><circle cx="${X(m.t).toFixed(1)}" cy="${y0 + 11}" r="9" fill="${m.col || '#c94a34'}"/><text x="${X(m.t).toFixed(1)}" y="${y0 + 15}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${m.n || k + 1}</text></g>`; });
+  if (o.tap) g += `<g class="tapg"></g><rect class="tapzone" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="transparent" style="cursor:crosshair"/>`;
+  return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" ${o.tap ? `data-x0="${x0}" data-x1="${x1}" data-y0="${y0}" data-y1="${y1}" data-w="${W}" data-h="${H}" data-tmax="${tMax}" ` : ''}style="width:100%;max-width:${o.maxW || 440}px;display:block;background:#fff;border-radius:8px${o.tap ? ';touch-action:manipulation' : ''}">${g}</svg></div>`;
 }
 /* record what the student measured, per crate mass, so questions can check their own runs */
 function ch2Record() {
@@ -4369,6 +4674,587 @@ function renderOrdersCourse(ch, om, host, save) {
   load(cur);
 }
 
+/* ===== Chapter 5: the Drop Zone (S.scene = 'drop') =====
+   Physics (must match tools/dropzone_model.py): air resistance D = c × airFactor × v², c set from each object's Earth terminal velocity,
+   a canopy adds its own constant over 3 s, fixed 0.01 s steps (semi-implicit Euler: v += a·dt, then y -= v·dt).
+   Fast-forward only runs more steps per frame, so the numbers never change.
+   Two lanes (A and B) share the drop height; each has its own world, object, canopy and air setting.
+   The run history is stored every 0.1 s (lane.hist) for the pause / step-back buttons, the snapshots and the v–t graph. */
+const DZ_DT = 0.01, DZ_OPEN = 3.0, DZ_SC = 3, DZ_H = 500, DZ_REFY = 250, DZ_GY = 450, DZ_WARP = 8;   // the Drop Zone canvas is 900 × 500: the camera keeps the falling object at y = 250 until the ground comes into view
+const DZ_WORLDS = {
+  earth: { name: 'Earth', on: 'on Earth', g: 9.8, air: 1, txt: 'Air: normal', short: 'all the air' },
+  moon: { name: 'Moon', on: 'on the Moon', g: 1.6, air: 0, txt: 'Air: none', short: 'no air' },
+  mars: { name: 'Mars', on: 'on Mars', g: 3.7, air: 0.016, txt: 'Air: very thin (about 1/60 of Earth\'s)', short: 'very thin air' },
+  venus: { name: 'Venus', on: 'on Venus', g: 8.9, air: 53, txt: 'Air: very thick (about 53 times Earth\'s)', short: 'very thick air' },
+  titan: { name: 'Titan', on: 'on Titan', g: 1.4, air: 4.4, txt: 'Air: thick (about 4 times Earth\'s)', short: 'thick air' },
+  jupiter: { name: 'Jupiter', on: 'on Jupiter', g: 24.8, air: 0.13, txt: 'Air: thin; no ground, so drops stop at a cloud-top platform', short: 'thin air' }
+};
+const DZ_OBJ = {
+  feather: { name: 'Feather', noun: 'feather', m: 0.002, vt: 0.6, can: false },
+  basketball: { name: 'Basketball', noun: 'basketball', m: 0.6, vt: 20, can: false },
+  crate: { name: 'Crate', noun: 'crate', m: 40, vt: 38, can: true },
+  para: { name: 'Skydiver', noun: 'skydiver', m: 75, vt: 54, can: true }
+};
+const DZ_CAN = { small: 9, medium: 6, large: 4.5 };   // the SKYDIVER's Earth terminal velocity with this canopy open (m/s)
+const DZ_CANW = { small: 66, medium: 104, large: 150 };   // drawn width of the open canopy (px)
+const dzMassTxt = o => `${fmt(DZ_OBJ[o].m, 3)} kg ${DZ_OBJ[o].noun}`;
+
+const DZ = { lanes: [], two: false, edit: 0, height: 600, started: false, paused: false, ended: false, viewT: 0, n: 0, acc: 0, snapSeq: 0 };
+function dzNewLane(id) {
+  return { id, obj: 'crate', world: 'earth', removed: 0, canopy: 'none', autoOpen: null, run: null, t: 0, n: 0, y: 600, v: 0, a: 0, W: 0, D: 0, R: 0, fr: 0, opened: null, openY: null, openV: null, hist: [], top: 0, vt1: null, vt2: null, peakDec: 0, peakD: 0, landed: false, landV: null, landT: null, landReal: 0, started: false };
+}
+DZ.lanes = [dzNewLane('A'), dzNewLane('B')];
+const dzActive = () => DZ.two ? DZ.lanes : [DZ.lanes[0]];
+const dzWorld = L => DZ_WORLDS[L.world];
+const dzFactor = L => dzWorld(L).air * (1 - L.removed / 100);
+function dzCoef(L) {
+  const o = DZ_OBJ[L.obj], c0 = o.m * G / (o.vt * o.vt), has = L.canopy !== 'none' && o.can;
+  return { c0, c1: has ? c0 + 75 * G / (DZ_CAN[L.canopy] * DZ_CAN[L.canopy]) - 75 * G / (54 * 54) : c0, has };
+}
+const dzFrac = L => L.opened == null ? 0 : Math.min(1, (L.t - L.opened) / DZ_OPEN);
+/* the forces at this moment (at the lane's t and v), stored on the lane */
+function dzCalc(L) {
+  const o = DZ_OBJ[L.obj], k = dzCoef(L), fr = dzFrac(L), c = k.c0 + (k.c1 - k.c0) * fr;
+  L.fr = fr; L.W = o.m * dzWorld(L).g; L.D = c * dzFactor(L) * L.v * Math.abs(L.v); L.R = L.W - L.D; L.a = L.R / o.m; return L;
+}
+/* one fixed step of 0.01 s */
+function dzStep(L) {
+  const k = dzCoef(L);
+  if (k.has && L.opened == null && L.autoOpen != null && L.y <= L.autoOpen) dzOpenNow(L);
+  dzCalc(L);
+  if (L.n % 10 === 0) L.hist.push({ n: L.n, t: L.t, y: L.y, v: L.v, a: L.a, W: L.W, D: L.D, R: L.R, fr: L.fr, op: L.opened });
+  L.peakDec = Math.max(L.peakDec, -L.a); L.peakD = Math.max(L.peakD, L.D);
+  if (L.t > 0.2 && Math.abs(L.R) <= 0.01 * L.W) { if (L.opened == null) L.vt1 = Math.max(L.vt1 || 0, L.v); else if (L.fr >= 1) L.vt2 = L.v; }   // balanced: terminal velocity
+  L.v += L.a * DZ_DT; L.y -= L.v * DZ_DT; L.t += DZ_DT; L.n++; if (L.v > L.top) L.top = L.v;
+  if (L.y <= 0) {
+    L.landed = true; L.landV = L.v; L.landT = L.t; L.landReal = performance.now(); dzCalc(L);
+    L.hist.push({ n: L.n, t: L.t, y: 0, v: L.v, a: L.a, W: L.W, D: L.D, R: L.R, fr: L.fr, op: L.opened, land: true });
+  }
+}
+function dzOpenNow(L) {
+  if (L.opened != null || L.landed) return false; const k = dzCoef(L); if (!k.has) return false;
+  L.opened = L.t; L.openY = Math.max(0, L.y); L.openV = L.v; return true;
+}
+function dzLaneReset(L, H) {
+  Object.assign(L, { t: 0, n: 0, y: H, v: 0, a: 0, W: 0, D: 0, R: 0, fr: 0, opened: null, openY: null, openV: null, hist: [], top: 0, vt1: null, vt2: null, peakDec: 0, peakD: 0, landed: false, landV: null, landT: null, landReal: 0, started: false, run: null });
+  dzCalc(L);
+}
+/* headless run to the ground, used by the tests and by the challenge checks: returns what tools/dropzone_model.py's run() / run_h() return */
+function dzSimulate(cfg) {
+  const L = dzNewLane('T'); Object.assign(L, { obj: cfg.obj, world: cfg.world || 'earth', removed: cfg.removed || 0, canopy: cfg.canopy || 'none', autoOpen: cfg.openH == null ? null : cfg.openH });
+  dzLaneReset(L, cfg.height); L.started = true; const snaps = [], pts = [], want = (cfg.snaps || []).slice(); let guard = 0, nextP = 0;
+  while (!L.landed && guard++ < 600000) {
+    if (cfg.openAt != null && L.opened == null && L.t >= cfg.openAt - 1e-9) dzOpenNow(L);
+    if (want.length && L.t >= want[0] - 1e-9) { dzCalc(L); snaps.push({ t: L.t, y: L.y, v: L.v, a: L.a, W: L.W, D: L.D, R: L.R }); want.shift(); }
+    if (cfg.every && L.t >= nextP - 1e-9) { pts.push([Math.round(L.t * 1000) / 1000, L.v]); nextP += cfg.every; }
+    dzStep(L);
+  }
+  return { pts, top: L.top, land: L.landV, time: L.landT, peakDec: L.peakDec, peakD: L.peakD, peakG: L.peakDec / G, vt1: L.vt1, vt2: L.vt2, snaps };
+}
+/* the terminal velocity the model predicts (same formula as tools/dropzone_model.py vterm()) */
+function dzVterm(obj, world, removed, canopy) {
+  const L = dzNewLane('T'); Object.assign(L, { obj, world, removed: removed || 0, canopy: canopy || 'none' }); const k = dzCoef(L), f = dzFactor(L); if (f === 0) return Infinity;
+  return Math.sqrt(DZ_OBJ[obj].m * dzWorld(L).g / (k.c1 * f));
+}
+
+/* the same shape as forces() in 10-engine.js, so the shared code (runs, step checks) has something to read in the Drop Zone */
+function dropForces() { const L = DZ.lanes[0]; return { L: 0, R: 0, shove: 0, app: 0, fr: 0, brk: 0, net: L.R, W: L.W, N: 0, m: DZ_OBJ[L.obj].m, a: L.a, fmax: 0, fk: 0 }; }
+
+/* ---- what is on screen: the live state, or the stored state at the paused time ---- */
+const dzLatest = () => Math.max(0, ...dzActive().map(L => L.t));
+function dzAt(L) {
+  if (!DZ.paused || DZ.viewT >= L.t - 1e-9) return dzCalc(Object.assign({}, L, { hist: L.hist }));
+  const e = L.hist[Math.round(DZ.viewT * 10)]; if (!e) return dzCalc(Object.assign({}, L));
+  return Object.assign({}, L, { t: e.t, y: e.y, v: e.v, a: e.a, W: e.W, D: e.D, R: e.R, fr: e.fr, opened: e.op, landed: !!e.land });
+}
+const dzViewT = () => DZ.paused ? Math.min(DZ.viewT, dzLatest()) : dzLatest();
+
+/* ---- start, pause, step, rewind ---- */
+function dzSyncRunBtn() { /* the shared Pull! button is not used in the Drop Zone */ }
+function dzReset() {
+  dzFinishRuns('reset');
+  DZ.started = false; DZ.paused = false; DZ.ended = false; DZ.viewT = 0; DZ.n = 0; DZ.acc = 0; S.running = false; S.t = 0; S.msg = '';
+  DZ.lanes.forEach(L => dzLaneReset(L, DZ.height));
+  S.flags.dropped = false; S.flags.landed = false; S.flags.paused = false; S.flags.stepped = false; S.flags.snapped = false; S.flags.opened = false;
+}
+function dzDrop() {
+  if (DZ.started && !DZ.ended) return false;
+  if (DZ.started) dzReset();
+  DZ.started = true; DZ.paused = false; DZ.ended = false; DZ.n = 0; DZ.acc = 0;
+  dzActive().forEach(L => { dzLaneReset(L, DZ.height); L.started = true; dzRunStart(L); });
+  DZ.lanes.filter(L => !dzActive().includes(L)).forEach(L => dzLaneReset(L, DZ.height));
+  S.running = true; S.flags.dropped = true; S.flags.ran = true; S.flags.compare = DZ.two; return true;
+}
+function dzPause() {
+  if (!DZ.started || DZ.ended) return false;
+  if (DZ.paused) return dzPlay();
+  DZ.paused = true; DZ.viewT = Math.round(dzLatest() * 10) / 10; S.running = false; S.flags.paused = true; return true;
+}
+/* go back to the stored state at time T (the run carries on from there) */
+function dzRewind(T) {
+  dzActive().forEach(L => {
+    if (T >= L.t - 1e-9) return;
+    const idx = Math.round(T * 10), e = L.hist[idx]; if (!e) return;
+    L.n = e.n; L.t = e.t; L.y = e.y; L.v = e.v; L.opened = e.op; L.hist.length = idx;
+    L.landed = false; L.landV = null; L.landT = null;
+    L.top = Math.max(e.v, ...L.hist.map(h => h.v)); L.peakDec = Math.max(0, ...L.hist.map(h => -h.a)); L.peakD = Math.max(0, ...L.hist.map(h => h.D));
+    L.vt1 = null; L.vt2 = null; L.hist.concat([e]).forEach(h => { if (h.t > 0.2 && Math.abs(h.R) <= 0.01 * h.W) { if (h.op == null) L.vt1 = Math.max(L.vt1 || 0, h.v); else if (h.fr >= 1) L.vt2 = h.v; } });
+    if (L.opened != null) { L.openY = L.openY; } else { L.openY = null; L.openV = null; }
+    if (L.run) { L.run.live = true; L.run.out = 'running'; L.run.landV = null; L.run.time = null; dzRunSync(L); }
+  });
+  DZ.n = Math.round(T * 100); DZ.ended = false;
+}
+function dzPlay() {
+  if (!DZ.started || DZ.ended || !DZ.paused) return false;
+  if (DZ.viewT < dzLatest() - 1e-9) dzRewind(DZ.viewT);
+  DZ.paused = false; DZ.acc = 0; S.running = true; return true;
+}
+function dzStepView(dir) {
+  if (!DZ.paused) return false;
+  DZ.viewT = clamp(Math.round((DZ.viewT + dir * 0.5) * 10) / 10, 0, Math.round(dzLatest() * 10) / 10); S.flags.stepped = true; return true;
+}
+/* Open canopy!: while paused the run first carries on from the stored time, then the canopy opens at that moment */
+function dzOpenAll() {
+  if (!DZ.started || DZ.ended) return false;
+  if (DZ.paused && DZ.viewT < dzLatest() - 1e-9) dzRewind(DZ.viewT);
+  let any = false; dzActive().forEach(L => { if (dzOpenNow(L)) { any = true; dzRunSync(L); } });
+  if (any) S.flags.opened = true; return any;
+}
+const dzCanOpen = () => DZ.started && !DZ.ended && dzActive().some(L => !L.landed && L.opened == null && dzCoef(L).has);
+/* advance the simulation: called every frame while a run is going */
+function dzUpdate(dt) {
+  DZ.acc += dt * S.warp; let guard = 0;
+  while (DZ.acc >= DZ_DT - 1e-12 && guard++ < 800) {
+    DZ.acc -= DZ_DT; DZ.n++;
+    const live = dzActive().filter(L => !L.landed); live.forEach(dzStep);
+    if (!dzActive().some(L => !L.landed)) { dzEnd(); break; }
+  }
+  dzActive().forEach(dzRunSync);
+  const sig = (dzCanOpen() ? 1 : 0) + '' + (DZ.ended ? 1 : 0); if (sig !== DZ.sig) { DZ.sig = sig; labChanged(); }   // keep the buttons in step (landing, canopy opened by itself)
+}
+function dzEnd() {
+  DZ.ended = true; S.running = false; S.t = dzLatest(); S.flags.landed = true;
+  dzActive().forEach(L => { dzRunSync(L); });
+  dzFinishRuns('landed');
+}
+
+/* ---- runs: one run per lane per drop, saved with the others in DB.runs ---- */
+function dzDownsample(L) { const n = L.hist.length, st = Math.max(1, Math.ceil(n / 150)); const out = []; for (let i = 0; i < n; i += st) out.push([Math.round(L.hist[i].t * 10) / 10, Math.round(L.hist[i].v * 100) / 100]); const l = L.hist[n - 1]; if (l && out.length && out[out.length - 1][0] !== Math.round(l.t * 10) / 10) out.push([Math.round(l.t * 10) / 10, Math.round(l.v * 100) / 100]); return out; }
+function dzRunStart(L) {
+  const R = runsAll(); RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
+  const r = Object.assign({ n: RUNSEQ, kind: 'drop', scene: 'drop', at: Date.now(), live: true, lane: L.id, two: DZ.two, obj: L.obj, world: L.world, air: L.removed, height: DZ.height, canopy: L.canopy, autoOpen: L.autoOpen, openT: null, openH: null, openV: null, top: 0, vt1: null, vt2: null, landV: null, time: null, out: 'running', peakG: 0, h: [] }, runWhere());
+  L.run = r; R.push(r); if (R.length > 200) R.splice(0, R.length - 200); dbSet('runs', R); RUNDIRTY = 1;
+}
+function dzRunSync(L) {
+  const r = L.run; if (!r) return;
+  r.top = L.top; r.vt1 = L.vt1; r.vt2 = L.vt2; r.openT = L.opened; r.openH = L.openY; r.openV = L.openV; r.peakG = L.peakDec / G; r.t = L.t;
+  if (L.landed) { r.landV = L.landV; r.time = L.landT; }
+  RUNDIRTY = 1;
+}
+function dzFinishRuns(why) {
+  DZ.lanes.forEach(L => {
+    const r = L.run; if (!r || !r.live) return;
+    dzRunSync(L); r.live = false; r.out = L.landed ? 'landed' : 'reset'; r.h = dzDownsample(L); L.run = null;
+  });
+  const R = runsAll(); dbSet('runs', R); RUNDIRTY = 1;
+}
+
+/* ---- snapshots: saved in DB.dz.snaps and shown in the Journal's Runs tab ---- */
+const dzCanopyState = v => v.opened == null ? 'closed' : v.fr >= 1 ? 'open' : 'opening';
+const dzMakeSnap = (L, T, R) => { const v = dzAt(L); return { id: ++DZ.snapSeq + '-' + Date.now(), run: L.run ? L.run.n : (R.length ? R[R.length - 1].n : 0), lane: L.id, obj: L.obj, world: L.world, air: L.removed, canopy: L.canopy, cstate: dzCanopyState(v), t: Math.round(T * 10) / 10, y: Math.max(0, v.y), v: v.v, a: v.a, W: v.W, D: v.D, R: v.R, height: DZ.height }; };
+/* save the paused moment as a snapshot (one per lane, or just the lanes in `only`); returns the snapshots made */
+function dzSnapNow(only) {
+  if (!DZ.started) return false;
+  const T = dzViewT(), snaps = dbGet('dz.snaps', []), R = runsAll(), made = [];
+  dzActive().filter(L => !only || only.includes(L)).forEach(L => {
+    const s = dzMakeSnap(L, T, R); made.push(s);
+    snaps.push(s); if (snaps.length > 50) snaps.splice(0, snaps.length - 50);
+    RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
+    R.push(Object.assign({ n: RUNSEQ, kind: 'snap', scene: 'drop', at: Date.now(), live: false, out: 'snap', lane: L.id, two: DZ.two, snap: s }, runWhere()));
+  });
+  if (R.length > 200) R.splice(0, R.length - 200);
+  dbSet('dz.snaps', snaps); dbSet('runs', R); RUNDIRTY = 1; S.flags.snapped = true; return made;
+}
+/* the snapshot of this lane at the paused time: the one already saved, or a new one (a question's "Use this moment" button) */
+function dzSnapHere(L) {
+  const T = Math.round(dzViewT() * 10) / 10, have = dbGet('dz.snaps', []).filter(s => s.lane === L.id && s.t === T && s.obj === L.obj && s.world === L.world && s.run === (L.run ? L.run.n : s.run));
+  return have.length ? have[have.length - 1] : dzSnapNow([L])[0];
+}
+
+/* ---- helpers for the steps and questions: the student's own saved runs and snapshots ---- */
+function dzMatch(r, f) { return Object.keys(f || {}).every(k => typeof f[k] === 'function' ? f[k](r[k], r) : r[k] === f[k]); }
+const dzRun = (f, live) => { const R = runsFor().filter(r => r.scene === 'drop' && r.kind === 'drop' && (live || r.out === 'landed') && dzMatch(r, f)); return R.length ? R[R.length - 1] : null; };
+const dzTop = f => { const r = dzRun(f); return r ? r.top : null; };
+const dzLand = f => { const r = dzRun(f); return r ? r.landV : null; };
+const dzTime = f => { const r = dzRun(f); return r ? r.time : null; };
+const dzSnap = (f, test) => { const S2 = dbGet('dz.snaps', []).filter(s => dzMatch(s, f) && (!test || test(s))); return S2.length ? S2[S2.length - 1] : null; };
+/* set up the Drop Zone from a step: dropSetup({ height, two, a:{obj,world,removed,canopy,autoOpen}, b:{...} }) */
+function dropSetup(o) {
+  o = o || {}; clearCh2(); S.scene = 'drop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1;
+  DZ.height = o.height || 600; DZ.two = !!o.two; DZ.edit = 0; DZ.lanes[1].touched = !!o.b;
+  [o.a || {}, o.b || o.a || {}].forEach((c, i) => Object.assign(DZ.lanes[i], { obj: 'crate', world: 'earth', removed: 0, canopy: 'none', autoOpen: null }, c));
+}
+/* Readouts the student has to work out stay hidden until the question that asks for them has been answered: a step lists mask: [{ q, keys, when(lane) }]. Keys: fbdR, fbdW, readV, readA. */
+function dzMasked() {
+  const out = new Set(); if (typeof CH === 'undefined' || !CH || LAB.mode !== 'guided') return out;
+  const st = CHDATA[CH.id] && CHDATA[CH.id].steps[GI]; if (!st || !st.mask) return out;
+  st.mask.forEach(M => { if (dzActive().some(L => M.when(L, DZ))) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
+  return out;
+}
+
+/* ---- the sentences and chips in the Journal ---- */
+const dzAirPhrase = r => { const w = DZ_WORLDS[r.world]; return w.air === 0 ? 'no air' : r.air >= 100 ? 'all the air removed' : r.air > 0 ? `${fmt(r.air, 0)}% of the air removed` : r.world === 'earth' ? 'all the air' : w.short; };
+const dz1 = v => (Math.round(v * 10) / 10).toFixed(1);
+const dzTimeTxt = t => fmt(t, t >= 100 ? 0 : 1) + ' s';
+function dropText(r) {
+  const mk = dzMasked(), noV = mk.has('readV');
+  if (r.kind === 'snap') {
+    const s = r.snap, o = DZ_OBJ[s.obj], f = [];
+    let t = `${r.two ? 'Lane ' + r.lane + ': ' : ''}At ${fmt(s.t, 1)} s the ${o.noun} was ${fmt(s.y, 0)} m up`;
+    t += noV ? '.' : ` and ${s.v >= 0 ? 'falling' : 'rising'} at ${dz1(Math.abs(s.v))} m/s.`;
+    if (!mk.has('fbdW')) f.push('weight ' + dzN(s.W)); f.push('air resistance ' + dzN(s.D));
+    const fs = f.join(', '); return t + ' ' + fs.charAt(0).toUpperCase() + fs.slice(1) + '.';
+  }
+  const o = DZ_OBJ[r.obj], w = DZ_WORLDS[r.world], live = r.live && r.out === 'running', lane = r.two ? `Lane ${r.lane}: ` : '';
+  const head = `${lane}You dropped the ${dzMassTxt(r.obj)} from ${fmt(r.height, 0)} m ${w.on} (${dzAirPhrase(r)}).`;
+  const open = r.openH != null ? ` You opened the ${r.canopy} canopy at ${fmt(r.openH, 0)} m.` : r.canopy !== 'none' && !live ? ' You did not open the canopy.' : '';
+  if (live) return head + open + ' It is falling…';
+  if (r.out !== 'landed') return head + open + ` The run was reset after ${fmt(r.t || 0, 1)} s.`;
+  const tm = dzTimeTxt(r.time);
+  if (noV) return head + open + ` It landed after ${tm}.`;
+  let mid;
+  if (r.openH != null) mid = r.vt2 != null ? ` The ${o.noun} slowed to ${dz1(r.vt2)} m/s and landed after ${tm}.` : ` The ${o.noun} landed at ${dz1(r.landV)} m/s after ${tm}.`;
+  else mid = r.vt1 != null ? ` It sped up to a terminal velocity of ${dz1(r.vt1)} m/s and landed after ${tm}.` : ` It sped up to ${dz1(r.top)} m/s and landed at ${dz1(r.landV)} m/s after ${tm}.`;
+  return head + open + mid;
+}
+function dropChips(r) {
+  const mk = dzMasked();
+  if (r.kind === 'snap') { const s = r.snap, c = [['Time', fmt(s.t, 1) + ' s'], ['Height', fmt(s.y, 0) + ' m']]; if (!mk.has('readV')) c.push(['Velocity', dz1(Math.abs(s.v)) + ' m/s']); if (!mk.has('fbdW')) c.push(['Weight', dzN(s.W)]); c.push(['Air resistance', dzN(s.D)]); if (!mk.has('fbdR')) c.push(['Resultant', dzN(Math.abs(s.R)) + (s.R >= 0 ? ' ↓' : ' ↑')]); return c; }
+  const c = [['World', DZ_WORLDS[r.world].name], ['Object', DZ_OBJ[r.obj].name], ['Height', fmt(r.height, 0) + ' m'], ['Air removed', fmt(r.air, 0) + '%']];
+  if (r.canopy !== 'none') c.push(['Canopy', r.canopy + (r.openH != null ? ', opened at ' + fmt(r.openH, 0) + ' m' : ', not opened')]);
+  if (!mk.has('readV')) { c.push(['Top velocity', dz1(r.top) + ' m/s']); if (r.out === 'landed') c.push(['Landing velocity', dz1(r.landV) + ' m/s']); }
+  if (r.out === 'landed') c.push(['Time', dzTimeTxt(r.time)]);
+  return c;
+}
+function dzN(v) { v = Math.abs(v); return (v < 1 ? v.toFixed(3) : v < 10 ? fmt(v, 2) : fmt(v, 0)) + ' N'; }
+
+/* ================= controls (the kit panels, the buttons under the arena) ================= */
+const dzLocked = () => DZ.started && !DZ.ended;
+const dzEditLane = () => DZ.lanes[DZ.two ? DZ.edit : 0];
+function dzCfg(fn) {
+  if (dzLocked()) { toast('Press Reset first to change the set-up.', ''); return false; }
+  if (DZ.two && DZ.edit === 1) DZ.lanes[1].touched = true;
+  fn(); dzReset(); labChanged(); return true;
+}
+function dzRenderControls() {
+  const E = dzEditLane(), lock = dzLocked(), o = DZ_OBJ[E.obj], w = dzWorld(E);
+  const seg = (id, items, cur, attr, dis) => { const el = $(id); if (!el) return; const html = items.map(([k, l, sm, d]) => `<button type="button" data-${attr}="${k}" aria-pressed="${cur === k}"${lock || d ? ' disabled' : ''}>${l}${sm ? `<small>${sm}</small>` : ''}</button>`).join(''); if (el.dataset.h !== html) { el.innerHTML = html; el.dataset.h = html; } };
+  seg('#dzObjs', Object.entries(DZ_OBJ).map(([k, v]) => [k, v.name, fmt(v.m, 3) + ' kg']), E.obj, 'dzobj');
+  seg('#dzWorlds', Object.entries(DZ_WORLDS).map(([k, v]) => [k, v.name, 'g ' + v.g]), E.world, 'dzworld');
+  seg('#dzCans', [['none', 'None'], ['small', 'Small'], ['medium', 'Medium'], ['large', 'Large']].map(([k, l]) => [k, l, '', k !== 'none' && !o.can]), E.canopy, 'dzcan');
+  const wi = $('#dzWorldInfo'); if (wi) wi.textContent = `g = ${w.g} N/kg · ${w.txt}`;
+  const set = (id, v) => { const e = $(id); if (e && document.activeElement !== e) e.value = v; if (e) e.disabled = lock; };
+  set('#dzAir', E.removed); set('#dzAirNum', E.removed); set('#dzH', DZ.height); set('#dzHNum', DZ.height); set('#dzOpenNum', E.autoOpen == null ? '' : E.autoOpen);
+  const on = $('#dzOpenNum'); if (on) on.disabled = lock || !o.can || E.canopy === 'none';
+  const two = $('#dzTwo'); if (two) { two.checked = DZ.two; two.disabled = lock; }
+  const ed = $('#dzEdit'); if (ed) { ed.hidden = !DZ.two; ed.innerHTML = DZ.lanes.map((L, i) => `<button type="button" data-dzedit="${i}" aria-pressed="${DZ.edit === i}">Lane ${L.id}</button>`).join(''); }
+  const el = $('#dzEditNote'); if (el) el.textContent = DZ.two ? `The controls change lane ${E.id}.` : '';
+  const b = (id, f) => { const e = $(id); if (e) f(e); };
+  b('#dzDrop', e => { e.disabled = lock; e.textContent = DZ.ended ? 'Drop again!' : 'Drop!'; });
+  b('#dzPause', e => { e.disabled = !lock; e.textContent = DZ.paused ? '▶ Play' : '⏸ Pause'; e.classList.toggle('pause', !DZ.paused && lock); e.setAttribute('aria-pressed', String(DZ.paused)); });
+  b('#dzBack', e => e.disabled = !DZ.paused || DZ.viewT <= 0); b('#dzFwd', e => e.disabled = !DZ.paused || DZ.viewT >= Math.round(dzLatest() * 10) / 10 - 1e-9);
+  b('#dzSnap', e => e.disabled = !DZ.started); b('#dzOpen', e => e.disabled = !dzCanOpen());
+}
+function initDrop() {
+  const on = (id, ev, fn) => { const e = $(id); if (e) e.addEventListener(ev, fn); };
+  on('#dzDrop', 'click', () => { if (dzDrop()) labChanged(); });
+  on('#dzPause', 'click', () => { dzPause(); labChanged(); });
+  on('#dzBack', 'click', () => { dzStepView(-1); labChanged(); }); on('#dzFwd', 'click', () => { dzStepView(1); labChanged(); });
+  on('#dzSnap', 'click', () => { if (dzSnapNow()) { toast('📸 Snapshot saved in your Journal (Runs tab).', 'good'); labChanged(); } });
+  on('#dzOpen', 'click', () => { dzOpenAll(); labChanged(); });
+  document.addEventListener('click', e => {
+    if (S.scene !== 'drop') return;
+    const ob = e.target.closest('[data-dzobj]'); if (ob) { dzCfg(() => { const E = dzEditLane(); E.obj = ob.dataset.dzobj; if (!DZ_OBJ[E.obj].can) { E.canopy = 'none'; E.autoOpen = null; } }); return; }
+    const wb = e.target.closest('[data-dzworld]'); if (wb) { dzCfg(() => { dzEditLane().world = wb.dataset.dzworld; }); return; }
+    const cb = e.target.closest('[data-dzcan]'); if (cb) { dzCfg(() => { const E = dzEditLane(); E.canopy = cb.dataset.dzcan; if (E.canopy === 'none') E.autoOpen = null; }); return; }
+    const eb = e.target.closest('[data-dzedit]'); if (eb) { DZ.edit = +eb.dataset.dzedit; labChanged(); return; }
+  });
+  on('#dzTwo', 'change', e => dzCfg(() => { DZ.two = e.target.checked; DZ.edit = 0; if (DZ.two && !DZ.lanes[1].touched) { const A = DZ.lanes[0]; Object.assign(DZ.lanes[1], { obj: A.obj, world: A.world, removed: A.removed, canopy: A.canopy, autoOpen: A.autoOpen }); } }));
+  const typed = (id, lo, hi, set) => { const inp = $(id); if (!inp) return; const go = () => { const v = parseNum(inp.value); if (isNaN(v)) { labChanged(); return; } dzCfg(() => set(clamp(Math.round(v), lo, hi))); }; inp.addEventListener('change', go); inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); inp.blur(); } }); };
+  on('#dzAir', 'input', e => dzCfg(() => { dzEditLane().removed = +e.target.value; })); typed('#dzAirNum', 0, 100, v => { dzEditLane().removed = v; });
+  on('#dzH', 'input', e => dzCfg(() => { DZ.height = +e.target.value; })); typed('#dzHNum', 10, 3000, v => { DZ.height = v; });
+  const oh = $('#dzOpenNum'); if (oh) { const go = () => { const raw = oh.value.trim(); dzCfg(() => { const E = dzEditLane(); if (raw === '') E.autoOpen = null; else { const v = parseNum(raw); E.autoOpen = isNaN(v) ? null : clamp(Math.round(v), 0, 3000); } }); }; oh.addEventListener('change', go); oh.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); oh.blur(); } }); }
+  document.addEventListener('keydown', e => {
+    if (e.code !== 'Space' || S.scene !== 'drop' || !$('#lab').offsetParent || !LAB.show.has('dpause')) return;
+    const t = e.target; if (t && t.closest && t.closest('input, select, textarea, button, [contenteditable], summary')) return;
+    e.preventDefault(); if (DZ.started && !DZ.ended) { dzPause(); labChanged(); }
+  });
+}
+
+/* ---- Explore: the Drop Zone with every control ---- */
+const DZ_EXPLORE_TRY = [
+  ['Drop the crate from 600 m on Earth and watch until the air resistance arrow is as long as the weight arrow.', () => DZ.lanes.some(L => L.obj === 'crate' && L.world === 'earth' && L.vt1 != null)],
+  ['Drop a feather on the Moon, then drop it on Earth. Compare the two velocity–time graphs.', () => dzRun({ obj: 'feather', world: 'moon' }) && dzRun({ obj: 'feather', world: 'earth' })],
+  ['Open a canopy on the skydiver and find out what the new terminal velocity is.', () => !!dzRun({ obj: 'para', canopy: c => c !== 'none', vt2: v => v != null })]
+];
+function openExploreDrop() {
+  show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Drop Zone', 'Drop Zone sandbox');
+  dropSetup({ height: 600, a: { obj: 'crate', world: 'earth' } }); S.flags = newFlags(); resetSim();
+  LAB.mode = 'explore'; LAB.show = new Set(['drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readV', 'readA', 'readT', 'warp']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.idle = null; LAB.showVert = true; LAB.showRes = true;
+  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  const done = new Set(dbGet('tryDoneDz', []));
+  const draw = () => { $('#rail').innerHTML = `${exploreSwitch('drop')}<span class="lbl">Explore · Drop Zone</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${DZ_EXPLORE_TRY.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
+  draw();
+  LAB.onChange = null; LAB.tick = () => { DZ_EXPLORE_TRY.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDoneDz', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
+}
+
+/* ===== Chapter 5: the Drop Zone scene, live free-body diagrams, readouts and graphs (drawing only; the physics is in 46-dropzone.js) ===== */
+const DZ_LANECOL = () => [C.left, C.right];
+const DZ_SKY = {
+  earth: { top: '#74bde9', bot: '#d6eefb', gnd: '#86bf72', gnd2: '#72ab60' },
+  moon: { top: '#04060b', bot: '#0c101a', gnd: '#a6abb1', gnd2: '#8d939a' },
+  mars: { top: '#c47a50', bot: '#eebd88', gnd: '#b4533a', gnd2: '#9b442e' },
+  venus: { top: '#d6a42a', bot: '#f1d886', gnd: '#8c5b2b', gnd2: '#744a22' },
+  titan: { top: '#c46f27', bot: '#e8b16c', gnd: '#c3d1d7', gnd2: '#aebec6' },
+  jupiter: { top: '#d2a47c', bot: '#efd6b4', gnd: '#8f9aa1', gnd2: '#79858c' }
+};
+const dzHash = (i, k) => { const x = Math.sin(i * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
+const dzStars = Array.from({ length: 60 }, (_, i) => [dzHash(i, 1), dzHash(i, 2), 0.7 + dzHash(i, 3) * 1.4]);
+
+/* ---------- the objects ---------- */
+function dzFeather(c, x, by, s) {
+  c.save(); c.translate(x, by - 8 * s); c.rotate(-0.28); c.scale(s, s); c.lineCap = 'round';
+  c.fillStyle = '#f6f1e6'; c.strokeStyle = '#bdb4a2'; c.lineWidth = 1.2;
+  c.beginPath(); c.moveTo(-30, 0); c.bezierCurveTo(-14, -15, 14, -15, 31, -1); c.bezierCurveTo(14, 11, -14, 11, -30, 0); c.closePath(); c.fill(); c.stroke();
+  c.strokeStyle = '#a49b88'; c.lineWidth = 2; c.beginPath(); c.moveTo(-36, 3); c.lineTo(31, -1); c.stroke();
+  c.strokeStyle = '#d9d0bd'; c.lineWidth = 1; for (let i = -22; i <= 20; i += 7) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i + 6, -7); c.moveTo(i, 0); c.lineTo(i + 6, 6); c.stroke(); }
+  c.restore(); return 16 * s;
+}
+function dzBall(c, x, by, s) {
+  const r = 17 * s, cy = by - r; c.save(); c.fillStyle = '#e4772c'; c.beginPath(); c.arc(x, cy, r, 0, 7); c.fill();
+  c.strokeStyle = '#5a2a10'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(x, cy - r); c.lineTo(x, cy + r); c.moveTo(x - r, cy); c.lineTo(x + r, cy);
+  c.moveTo(x - r * .7, cy - r * .7); c.quadraticCurveTo(x - r * .1, cy, x - r * .7, cy + r * .7); c.moveTo(x + r * .7, cy - r * .7); c.quadraticCurveTo(x + r * .1, cy, x + r * .7, cy + r * .7); c.stroke(); c.restore(); return r * 2;
+}
+function dzCrate(c, x, by, s) {
+  const w = 46 * s, hh = 38 * s; c.save(); c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.lineWidth = 3; c.lineJoin = 'round';
+  c.beginPath(); c.roundRect(x - w / 2, by - hh, w, hh, 4); c.fill(); c.stroke(); c.lineWidth = 2.2; c.beginPath(); c.moveTo(x - w / 2 + 4, by - hh + 4); c.lineTo(x + w / 2 - 4, by - 4); c.moveTo(x + w / 2 - 4, by - hh + 4); c.lineTo(x - w / 2 + 4, by - 4); c.stroke(); c.restore(); return hh;
+}
+function dzDiver(c, x, by, s, hang) {
+  c.save(); c.translate(x, by); c.scale(s, s); c.lineCap = 'round'; c.lineJoin = 'round';
+  const suit = '#c94a34', skin = '#e6b48a', helm = '#e3a51c';
+  c.strokeStyle = suit; c.lineWidth = 7;
+  if (hang) { c.beginPath(); c.moveTo(-5, -36); c.lineTo(-11, -58); c.moveTo(5, -36); c.lineTo(11, -58); c.stroke(); c.beginPath(); c.moveTo(-3, -22); c.lineTo(-6, -2); c.moveTo(3, -22); c.lineTo(6, -2); c.stroke(); }
+  else { c.beginPath(); c.moveTo(-5, -38); c.lineTo(-26, -46); c.moveTo(5, -38); c.lineTo(26, -46); c.stroke(); c.beginPath(); c.moveTo(-3, -22); c.lineTo(-14, -2); c.moveTo(3, -22); c.lineTo(14, -2); c.stroke(); }
+  c.fillStyle = suit; c.beginPath(); c.roundRect(-8, -42, 16, 24, 6); c.fill();
+  c.fillStyle = helm; c.beginPath(); c.arc(0, -50, 8, 0, 7); c.fill(); c.fillStyle = skin; c.beginPath(); c.arc(0, -49, 5, 0, 7); c.fill();
+  c.restore(); return 60 * s;
+}
+/* the canopy: a dome with stripes, lines down to the object's top (tx, ty). fr = how open it is (0 to 1) */
+function dzCanopy(c, tx, ty, name, fr) {
+  const k = sstep(clamp(fr, 0, 1)), w = DZ_CANW[name] * (0.14 + 0.86 * k), hgt = w * (0.34 + 0.1 * k), top = ty - 26 - 38 * (0.5 + 0.5 * k);
+  c.save(); c.lineJoin = 'round'; c.strokeStyle = 'rgba(40,50,60,.65)'; c.lineWidth = 1.2;
+  [-1, -0.5, 0, 0.5, 1].forEach(u => { c.beginPath(); c.moveTo(tx + u * w / 2, top); c.lineTo(tx, ty); c.stroke(); });
+  c.beginPath(); c.moveTo(tx - w / 2, top); c.quadraticCurveTo(tx, top - hgt * 2, tx + w / 2, top); c.quadraticCurveTo(tx, top + hgt * 0.35, tx - w / 2, top); c.closePath(); c.save(); c.clip();
+  c.fillStyle = '#e3a51c'; c.fillRect(tx - w, top - hgt * 2, w * 2, hgt * 3);
+  c.fillStyle = '#c94a34'; for (let i = -2; i <= 2; i += 2) c.fillRect(tx + (i - 0.5) * w / 5, top - hgt * 2, w / 5, hgt * 3); c.restore();
+  c.beginPath(); c.moveTo(tx - w / 2, top); c.quadraticCurveTo(tx, top - hgt * 2, tx + w / 2, top); c.stroke(); c.restore();
+}
+/* draw the object with its base at (x, by); returns its height. v = the lane's view of the moment (for the canopy) */
+function dzObject(c, L, v, x, by, s, packed) {
+  const k = dzCoef(L); let hgt;
+  if (L.obj === 'feather') hgt = dzFeather(c, x, by, s);
+  else if (L.obj === 'basketball') hgt = dzBall(c, x, by, s);
+  else if (L.obj === 'crate') hgt = dzCrate(c, x, by, s);
+  else hgt = dzDiver(c, x, by, s, k.has && v.opened != null);
+  if (k.has) {
+    if (v.opened != null) dzCanopy(c, x, by - hgt * (L.obj === 'para' ? 0.8 : 0.9), L.canopy, v.fr);
+    else if (packed !== false) { c.save(); c.fillStyle = '#7a5426'; c.beginPath(); c.roundRect(x - 9 * s, by - hgt - 7 * s, 18 * s, 8 * s, 2); c.fill(); c.restore(); }
+  }
+  return hgt;
+}
+function dzHeli(c, x, y, tt) {
+  c.save(); c.translate(x, y); c.lineCap = 'round'; c.lineJoin = 'round';
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.roundRect(-36, -16, 70, 32, 15); c.fill();
+  c.fillRect(30, -9, 52, 8); c.fillStyle = '#13212a'; c.fillRect(78, -22, 4, 22); c.fillStyle = '#9fd0ea'; c.beginPath(); c.roundRect(-30, -11, 26, 17, 7); c.fill();
+  c.strokeStyle = '#13212a'; c.lineWidth = 3; c.beginPath(); c.moveTo(-14, -16); c.lineTo(-14, -24); c.stroke();
+  const bl = RMOTION ? 58 : 58 * Math.abs(Math.cos(tt * 26)) + 8; c.lineWidth = 4; c.beginPath(); c.moveTo(-14 - bl, -25); c.lineTo(-14 + bl, -25); c.stroke();
+  c.lineWidth = 3; c.beginPath(); c.moveTo(-34, 24); c.lineTo(30, 24); c.moveTo(-20, 16); c.lineTo(-20, 24); c.moveTo(16, 16); c.lineTo(16, 24); c.stroke(); c.restore();
+}
+
+/* a small rounded note that wraps its text to fit (state and landing messages) */
+function dzNote(c, text, cx, y, col, maxW, size = 13) {
+  c.font = `700 ${size}px ${C.fn}`; const words = text.split(' '), lines = []; let cur = '';
+  words.forEach(w => { const t = cur ? cur + ' ' + w : w; if (cur && c.measureText(t).width > maxW - 16) { lines.push(cur); cur = w; } else cur = t; }); lines.push(cur);
+  const w = Math.min(maxW, Math.max(...lines.map(l => c.measureText(l).width)) + 18), hh = lines.length * (size + 4) + 8;
+  c.fillStyle = C.panel; c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.roundRect(cx - w / 2, y, w, hh, 8); c.fill(); c.stroke();
+  lines.forEach((l, i) => txt(c, l, cx, y + 8 + (size + 4) * i + (size + 4) / 2 - 1, C.ink, `700 ${size}px ${C.fn}`));
+}
+/* ---------- one lane ---------- */
+const DZ_STEPS = [20, 50, 100, 200, 500, 1000];
+function dzLane(c, L, idx, x0, w, tt) {
+  const v = dzAt(L), W = DZ.two ? 450 : 900, two = DZ.two, sky = DZ_SKY[L.world], hgtObj = L.obj === 'para' ? 60 : L.obj === 'crate' ? 38 : L.obj === 'basketball' ? 34 : 16;
+  const alt = Math.max(0, v.y), camMin = (DZ_GY - DZ_REFY) / DZ_SC, cam = Math.max(alt, camMin), scr = a => DZ_REFY + (cam - a) * DZ_SC;
+  c.save(); c.beginPath(); c.rect(x0, 0, w, DZ_H); c.clip();
+  /* sky */
+  const g = c.createLinearGradient(0, 0, 0, DZ_H); g.addColorStop(0, sky.top); g.addColorStop(1, sky.bot); c.fillStyle = g; c.fillRect(x0, 0, w, DZ_H);
+  if (L.world === 'moon' || (L.world === 'mars' && cam > 800)) { c.fillStyle = '#fff'; dzStars.forEach(([a, b, r], i) => { c.globalAlpha = L.world === 'moon' ? 0.85 : 0.5; c.beginPath(); c.arc(x0 + a * w, b * (DZ_H - 50), r * .8, 0, 7); c.fill(); }); c.globalAlpha = 1; }
+  const lo = cam - (DZ_H - DZ_REFY) / DZ_SC - 10, hi = cam + DZ_REFY / DZ_SC + 10;
+  if (L.world === 'jupiter') {   // banded clouds at fixed altitudes
+    const cols = ['#c9915f', '#ead5b6', '#b9784e', '#f1e3c8', '#d8ab7c']; const b0 = Math.floor(lo / 40) - 1, b1 = Math.ceil(hi / 40) + 1;
+    for (let i = b0; i <= b1; i++) { c.fillStyle = cols[((i % 5) + 5) % 5]; c.globalAlpha = .75; const y = scr(i * 40); c.fillRect(x0, y, w, 40 * DZ_SC); } c.globalAlpha = 1;
+  } else if (L.world !== 'moon') {   // cloud puffs, haze streaks or dust that slide past as you fall
+    const sp = L.world === 'earth' ? 45 : 60, i0 = Math.floor(lo / sp), i1 = Math.ceil(hi / sp);
+    for (let i = i0; i <= i1; i++) {
+      const cx = x0 + 40 + dzHash(i, 5) * (w - 80), cy = scr(i * sp + dzHash(i, 6) * sp), r = 16 + dzHash(i, 7) * 22;
+      if (L.world === 'earth') { c.fillStyle = 'rgba(255,255,255,.88)'; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.arc(cx + r * .9, cy + 4, r * .75, 0, 7); c.arc(cx - r * .9, cy + 5, r * .65, 0, 7); c.fill(); }
+      else { c.fillStyle = L.world === 'venus' ? 'rgba(255,238,170,.42)' : L.world === 'titan' ? 'rgba(255,214,150,.36)' : 'rgba(255,225,190,.3)'; c.beginPath(); c.roundRect(cx - r * 1.6, cy - 5, r * 3.2, 11, 6); c.fill(); }
+    }
+  }
+  /* ground, or the cloud-top platform */
+  const gy = scr(0);
+  if (gy < DZ_H) {
+    if (L.world === 'jupiter') {
+      c.fillStyle = '#b9784e'; c.fillRect(x0, gy + 14, w, DZ_H); c.fillStyle = '#ead5b6'; c.fillRect(x0, gy + 40, w, 18);
+      c.fillStyle = '#79858c'; c.fillRect(x0 + 40, gy, w - 80, 14); c.fillStyle = '#5d686f'; for (let q = 0; q < 6; q++) c.fillRect(x0 + 60 + q * (w - 120) / 5, gy + 14, 8, 26);
+    } else {
+      c.fillStyle = sky.gnd; c.fillRect(x0, gy, w, DZ_H - gy + 2); c.fillStyle = sky.gnd2; c.fillRect(x0, gy + 8, w, 5);
+      if (L.world === 'moon') { c.fillStyle = '#8d939a'; [[.12, 20, 9], [.55, 34, 12], [.82, 14, 7]].forEach(([a, d, r]) => { c.beginPath(); c.ellipse(x0 + a * w, gy + d, r * 1.6, r * .45, 0, 0, 7); c.fill(); }); }
+      c.fillStyle = '#5b6164'; c.beginPath(); c.roundRect(x0 + (two ? 70 : 280), gy - 3, two ? 150 : 150, 10, 4); c.fill(); c.fillStyle = '#f3d66a'; for (let q = 0; q < 6; q++) c.fillRect(x0 + (two ? 70 : 280) + 10 + q * 24, gy + 0.5, 12, 3);
+    }
+  }
+  /* altitude scale */
+  c.fillStyle = C.panel; c.globalAlpha = .86; c.fillRect(x0, 0, 46, DZ_H); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 + 46.5, 0); c.lineTo(x0 + 46.5, DZ_H); c.stroke();
+  const ds = DZ_STEPS.find(d => d * DZ_SC >= 44) || 1000, a0 = Math.max(0, Math.floor(lo / ds) * ds);
+  c.font = `600 11px ${C.fn}`; c.textAlign = 'right'; c.textBaseline = 'middle';
+  for (let a = a0; a <= hi + ds; a += ds) { const y = scr(a); if (y < 4 || y > DZ_H - 18) continue; c.strokeStyle = C.muted; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0 + 46, y); c.lineTo(x0 + 36, y); c.stroke(); c.fillStyle = C.ink; c.fillText(a >= 1000 ? Math.round(a).toLocaleString('en-GB') : String(a), x0 + 33, y); }
+  txt(c, 'metres', x0 + 23, DZ_H - 12, C.muted, `600 10px ${C.fn}`);
+  /* the helicopter hangs at the drop height (it scrolls away when the camera follows the object) */
+  const ox = x0 + (two ? 132 : 330), objY = scr(alt);
+  const hy = scr(DZ.height) - 62 - hgtObj; if (hy > -50) { dzHeli(c, ox + 6, hy, tt); if (!L.started) { c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(ox, hy + 24); c.lineTo(ox, objY - hgtObj - (dzCoef(L).has ? 8 : 0)); c.stroke(); } }
+  /* speed lines */
+  if (L.started && !L.landed && v.v > 10 && !(DZ.paused)) { c.save(); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 2; c.lineCap = 'round'; const ln = clamp(v.v * 0.7, 8, 46); for (let q = 0; q < 7; q++) { const px = ox - 44 + q * 15 + (dzHash(q, 9) - .5) * 6, ph = RMOTION ? q / 7 : (tt * (v.v / 20) + q / 7) % 1, py = objY - hgtObj - 20 - ph * 150; c.globalAlpha = 1 - ph; c.beginPath(); c.moveTo(px, py); c.lineTo(px, py + ln); c.stroke(); } c.restore(); }
+  /* the object (it bounces or rolls when it lands) */
+  let ay = objY, tilt = 0;
+  if (L.landed) {
+    const since = (performance.now() - L.landReal) / 1000, lv = L.landV || 0;
+    if (L.obj === 'crate' && lv > 7 && !RMOTION) ay -= Math.abs(Math.sin(since * 7)) * Math.max(0, 1 - since * 1.6) * Math.min(34, lv * 1.3);
+    if (L.obj === 'para' && lv > 7) tilt = Math.min(1.5, since * 6);
+    if (lv > 7 && since < 1.2 && !RMOTION) { c.save(); c.fillStyle = 'rgba(235,225,205,.8)'; for (let q = 0; q < 6; q++) { const u = since / 1.2, px = ox + (q - 2.5) * 16 * (0.6 + u), r = 6 + u * 14; c.globalAlpha = (1 - u) * .8; c.beginPath(); c.arc(px, objY - r * .4, r, 0, 7); c.fill(); } c.restore(); }
+  }
+  c.save(); if (tilt) { c.translate(ox, ay); c.rotate(tilt); c.translate(-ox, -ay); }
+  dzObject(c, L, v, ox, ay, 1);
+  c.restore();
+  if (v.opened == null || !dzCoef(L).has) pill(c, `${fmt(DZ_OBJ[L.obj].m, 3)} kg`, ox, ay - hgtObj - 16, C.ink, 12);
+  /* landing and state messages (they sit to the left of the diagram) */
+  const mk = dzMasked(), nx = x0 + 46 + (two ? 86 : 200), nw = two ? 164 : 380;
+  if (L.landed) { const lv = L.landV, msg = lv < 7 ? 'Soft landing!' : lv <= 15 ? 'Bump! A bit fast.' : 'Thud! Far too fast for a safe landing.', col = lv < 7 ? C.good : lv <= 15 ? C.hazard : C.bad; dzNote(c, msg + (mk.has('readV') ? '' : ` (${dz1(lv)} m/s)`), nx, 92, col, nw, 14); }
+  else if (L.started && v.opened != null && v.fr < 1) dzNote(c, 'Canopy opening…', nx, 92, C.hazard, nw);
+  else if (L.started && Math.abs(v.R) <= 0.01 * v.W && v.t > 0.2) dzNote(c, 'Terminal velocity!', nx, 92, C.good, nw, 14);
+  /* the live free-body diagram */
+  if (LAB.show.has('dfbd')) dzFBD(c, L, v, x0, w, mk);
+  /* headings */
+  hudBox(c, `${two ? L.id + ' · ' : ''}${fmt(Math.round(v.t * 10) / 10, 1)} s${S.warp > 1 && S.running ? ' (fast-forward)' : ''}`, x0 + 54, 22, DZ_LANECOL()[idx], 'left');
+  hudBox(c, `${DZ_WORLDS[L.world].name} · ${DZ_OBJ[L.obj].name}`, x0 + w - 8, 22, C.line, 'right');
+  c.restore();
+}
+
+/* the free-body diagram beside the object: weight down, air resistance up, dashed resultant. Arrows start at the centre of the object. */
+function dzFBD(c, L, v, x0, w, mk) {
+  const two = DZ.two, px = x0 + (two ? 216 : 440), pw = w - (two ? 224 : 450), fcx = px + pw / 2 - 6, fcy = 372, kw = 56 / v.W, CAP = 224;
+  c.save(); c.fillStyle = C.panel; c.globalAlpha = .93; c.beginPath(); c.roundRect(px, 86, pw, DZ_H - 96, 10); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.5; c.stroke();
+  txt(c, 'Free-body diagram', px + 10, 99, C.muted, `700 12px ${C.fb}`, 'left');
+  /* the real object, small, behind the arrows */
+  c.save(); c.globalAlpha = .9; const ic = Object.assign({}, v); dzObject(c, L, ic, fcx, fcy + 18, 0.7, false); c.restore();
+  const lab = (l1, l2, x, y, col) => { c.font = `700 11px ${C.fn}`; const ww = Math.max(c.measureText(l1).width, c.measureText(l2).width) + 8, xx = clamp(x, px + ww / 2 + 3, px + pw - ww / 2 - 3); c.fillStyle = C.panel; c.fillRect(xx - ww / 2, y - 14, ww, 28); txt(c, l1, xx, y - 6, col, `600 11px ${C.fn}`); txt(c, l2, xx, y + 6.5, col, `800 12px ${C.fn}`); };
+  const brk = (x, y) => { c.save(); c.fillStyle = C.panel; c.fillRect(x - 9, y - 5, 18, 10); c.strokeStyle = C.vert; c.lineWidth = 2; c.beginPath(); c.moveTo(x - 8, y - 1); c.lineTo(x + 8, y - 6); c.moveTo(x - 8, y + 6); c.lineTo(x + 8, y + 1); c.stroke(); c.restore(); };
+  const wx = fcx - 12, ax = fcx + 12, rx = fcx + 52;
+  arrow(c, wx, fcy, wx, fcy + 56, C.vert, 4);
+  lab('weight', mk.has('fbdW') ? '? N' : dzN(v.W), wx - 6, fcy + 56 + 22, C.vert);
+  const dl = v.D * kw;
+  if (dl > 3) { const L2 = Math.min(dl, CAP); arrow(c, ax, fcy, ax, fcy - L2, C.res, 4); if (dl > CAP) brk(ax, fcy - 30 - (L2 - 30) / 2); if (fcy - L2 - 22 < 112) lab('air resistance', dzN(v.D), ax + 56, fcy - L2 + 18, C.res); else lab('air resistance', dzN(v.D), ax + 8, fcy - L2 - 22, C.res); }
+  else lab('air resistance', '0 N', ax + 22, fcy - 30, C.res);
+  if (!mk.has('fbdR')) {
+    const bal = Math.abs(v.R) <= 0.01 * v.W, rl = Math.abs(v.R) * kw, down = v.R >= 0;
+    if (bal) lab('resultant', '0 N', rx, fcy + 22, C.fric);
+    else { const L2 = Math.min(rl, CAP); c.save(); c.strokeStyle = C.fric; arrow(c, rx, fcy, rx, down ? fcy + L2 : fcy - L2, C.fric, 4, true); c.restore(); if (rl > CAP) brk(rx, down ? fcy + 20 + (L2 - 20) / 2 : fcy - 20 - (L2 - 20) / 2); lab('resultant', dzN(v.R) + (down ? ' ↓' : ' ↑'), rx, down ? fcy + L2 + 22 : (fcy - L2 - 22 < 112 ? fcy - L2 + 18 : fcy - L2 - 22), C.fric); }
+  } else lab('resultant', '? N', rx, fcy + 22, C.fric);
+  
+  c.restore();
+}
+
+/* ---------- the whole scene ---------- */
+function drawDropScene(c) {
+  const tt = performance.now() / 1000, two = DZ.two, lanes = dzActive();
+  lanes.forEach((L, i) => dzLane(c, L, i, two ? i * 450 : 0, two ? 450 : 900, tt));
+  if (two) {   // the divider and the race track between the lanes
+    c.fillStyle = C.panel; c.fillRect(446, 0, 8, DZ_H); c.strokeStyle = C.line; c.lineWidth = 1.5; c.beginPath(); c.moveTo(446, 0); c.lineTo(446, DZ_H); c.moveTo(454, 0); c.lineTo(454, DZ_H); c.stroke();
+    c.fillStyle = C.chip; c.fillRect(442, 56, 16, DZ_H - 100); c.strokeStyle = C.line; c.strokeRect(442.5, 56.5, 15, DZ_H - 101);
+    lanes.forEach((L, i) => { const v = dzAt(L), f = clamp(1 - Math.max(0, v.y) / DZ.height, 0, 1), y = 62 + f * (DZ_H - 112); c.fillStyle = DZ_LANECOL()[i]; c.beginPath(); c.arc(450, y, 6, 0, 7); c.fill(); });
+    txt(c, 'RACE', 450, 46, C.muted, `800 10px ${C.fd}`);
+  }
+  if (DZ.paused) { const t = dzViewT(), m = `Paused at ${fmt(Math.round(t * 10) / 10, 1)} s`, late = t < dzLatest() - 1e-9 ? ` · the run reached ${fmt(Math.round(dzLatest() * 10) / 10, 1)} s` : ''; c.font = `800 17px ${C.fb}`; const ww = Math.min(880, c.measureText(m + late).width + 40); c.fillStyle = C.hazard; c.beginPath(); c.roundRect(450 - ww / 2, 48, ww, 34, 9); c.fill(); txt(c, m + late, 450, 65.5, '#1b1404', `800 17px ${C.fb}`); }
+  else if (!DZ.started) dzActive().forEach((L, i) => dzNote(c, LAB.idle || 'Choose the set-up, then press Drop!', (two ? i * 450 : 0) + 46 + (two ? 86 : 200), DZ_H - 78, C.line, two ? 164 : 360, 14));
+  dzGraphs(); dzReadouts();
+}
+
+/* ---------- readouts ---------- */
+function dzReadouts() {
+  const el = $('#dreads'); if (!el || el.hidden) return;
+  const keys = ['readH', 'readV', 'readA', 'readT'].filter(k => LAB.show.has(k)), sig = keys.join() + DZ.two + dzActive().map(L => L.id + L.obj + L.world).join();
+  if (el.dataset.sig !== sig) {
+    el.dataset.sig = sig; const lab = { readH: 'Height', readV: 'Velocity (downwards)', readA: 'Acceleration', readT: 'Time' }, tip = { readH: 'height', readV: 'velocity', readA: 'acceleration', readT: '' };
+    el.innerHTML = dzActive().map((L, i) => `<div class="dlane"><div class="dlh" style="color:${DZ_LANECOL()[i]}">${DZ.two ? 'Lane ' + L.id + ': ' : ''}${DZ_OBJ[L.obj].name} · ${DZ_WORLDS[L.world].name}</div><div class="dgrid">${keys.map(k => `<div class="rd" data-panel="${k}"><div class="lbl">${tip[k] ? `<button type="button" class="term tl" data-t="${tip[k]}">${lab[k]}</button>` : lab[k]}</div><div class="v" id="dz-${L.id}-${k}"></div></div>`).join('')}</div></div>`).join('');
+  }
+  const mk = dzMasked();
+  dzActive().forEach(L => {
+    const v = dzAt(L), up = v.a < -0.005, set = (k, s) => { const e = document.getElementById(`dz-${L.id}-${k}`); if (e && e.textContent !== s) e.textContent = s; };
+    set('readH', fmt(Math.max(0, v.y), 0) + ' m'); set('readT', fmt(Math.round(v.t * 10) / 10, 1) + ' s');
+    set('readV', mk.has('readV') ? '? (work it out first)' : dz1(v.v) + ' m/s ↓'); set('readA', mk.has('readA') ? '? (work it out first)' : (Math.abs(v.a) < 0.005 ? '0 m/s²' : fmt(Math.abs(v.a), 2) + ' m/s² ' + (up ? '↑' : '↓')));
+  });
+}
+
+/* ---------- velocity–time graph and force–time strip ---------- */
+function dzSeries(L) { const hs = L.hist.map(h => [h.t, h.v, h.W, h.D, h.R]); if (!L.landed) { const v = dzAt(L); if (!DZ.paused || DZ.viewT >= L.t) hs.push([L.t, L.v, L.W, L.D, L.R]); } return DZ.paused ? hs.filter(h => h[0] <= DZ.viewT + 1e-9) : hs; }
+function dzGraphs() {
+  const lanes = dzActive(), ser = lanes.map(dzSeries);
+  const cv = $('#cvDVT'); if (cv && cv.offsetParent) {
+    const W = 900, H = 240, c = fit(cv, W, H), x0 = 64, x1 = W - 18, y0 = 14, y1 = H - 40; c.fillStyle = C.panel; c.fillRect(0, 0, W, H);
+    let vmax = 1, tEnd = 0; ser.forEach(s => s.forEach(([t, v]) => { vmax = Math.max(vmax, v); tEnd = Math.max(tEnd, t); }));
+    const top = niceUp(vmax * 1.1), tMax = Math.max(10, Math.ceil(tEnd / 5) * 5 + (tEnd % 5 > 3.5 ? 5 : 0)), ts = tMax <= 12 ? 1 : tMax <= 30 ? 5 : tMax <= 80 ? 10 : tMax <= 200 ? 20 : 50, vs = top <= 2 ? .25 : top <= 5 ? 1 : top <= 12 ? 2 : top <= 30 ? 5 : top <= 60 ? 10 : top <= 120 ? 20 : top <= 300 ? 50 : 100;
+    const X = t => x0 + t / tMax * (x1 - x0), Y = v => y1 - v / top * (y1 - y0);
+    c.lineWidth = 1; c.strokeStyle = C.grid; for (let v = 0; v <= top + 1e-9; v += vs) { c.beginPath(); c.moveTo(x0, Y(v)); c.lineTo(x1, Y(v)); c.stroke(); txt(c, String(+v.toFixed(2)), x0 - 8, Y(v), C.muted, `600 12px ${C.fn}`, 'right'); }
+    for (let t = 0; t <= tMax + 1e-9; t += ts) { c.beginPath(); c.moveTo(X(t), y0); c.lineTo(X(t), y1); c.stroke(); txt(c, String(t), X(t), y1 + 13, C.muted, `600 12px ${C.fn}`); }
+    c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0, y1); c.lineTo(x1, y1); c.stroke();
+    txt(c, 'Time (s)', (x0 + x1) / 2, H - 9, C.ink, `700 13px ${C.fb}`); c.save(); c.translate(16, (y0 + y1) / 2); c.rotate(-Math.PI / 2); txt(c, 'Velocity (m/s)', 0, 0, C.ink, `700 13px ${C.fb}`); c.restore();
+    if (!ser.some(s => s.length > 1)) txt(c, 'The graph draws itself when you press Drop!', (x0 + x1) / 2, (y0 + y1) / 2, C.muted, `600 15px ${C.fb}`);
+    ser.forEach((s, i) => { if (s.length < 1) return; c.strokeStyle = DZ_LANECOL()[i]; c.lineWidth = 3.5; c.lineJoin = 'round'; c.beginPath(); const st = Math.max(1, Math.floor(s.length / 700)); s.forEach(([t, v], k) => { if (k % st && k < s.length - 1) return; k ? c.lineTo(X(t), Y(v)) : c.moveTo(X(t), Y(v)); }); c.stroke(); const l = s[s.length - 1]; c.fillStyle = DZ_LANECOL()[i]; c.beginPath(); c.arc(X(l[0]), Y(l[1]), 5, 0, 7); c.fill(); });
+    lanes.forEach((L, i) => { if (L.opened != null && (!DZ.paused || DZ.viewT >= L.opened)) { const bx = X(L.opened); c.save(); c.setLineDash([6, 4]); c.strokeStyle = DZ_LANECOL()[i]; c.lineWidth = 1.8; c.beginPath(); c.moveTo(bx, y0); c.lineTo(bx, y1); c.stroke(); c.restore(); pill(c, 'canopy opened', bx, y0 + 12 + i * 20, DZ_LANECOL()[i], 11); } });
+    if (DZ.two) lanes.forEach((L, i) => pill(c, `Lane ${L.id}`, x1 - 40, y0 + 14 + i * 22, DZ_LANECOL()[i], 12));
+  }
+  const cf = $('#cvDFT'); if (cf && cf.offsetParent) {
+    const W = 900, H = 200, c = fit(cf, W, H); c.fillStyle = C.panel; c.fillRect(0, 0, W, H);
+    lanes.forEach((L, i) => {
+      const s = ser[i], bx = DZ.two ? i * 450 : 0, bw = DZ.two ? 450 : 900, x0 = bx + 64, x1 = bx + bw - 18, y0 = 26, y1 = H - 36; let fmax = 0, tEnd = 0; s.forEach(([t, , Wt, D]) => { fmax = Math.max(fmax, Wt, D); tEnd = Math.max(tEnd, t); });
+      const tMax = Math.max(10, Math.ceil(tEnd / 5) * 5 + (tEnd % 5 > 3.5 ? 5 : 0)), top = Math.max(1e-6, fmax * 1.1), X = t => x0 + t / tMax * (x1 - x0), Y = f => y1 - f / top * (y1 - y0);
+      c.strokeStyle = C.grid; c.lineWidth = 1; [0, .5, 1].forEach(u => { c.beginPath(); c.moveTo(x0, y1 - u * (y1 - y0)); c.lineTo(x1, y1 - u * (y1 - y0)); c.stroke(); txt(c, dzN(top * u).replace(' N', ''), x0 - 6, y1 - u * (y1 - y0), C.muted, `600 11px ${C.fn}`, 'right'); });
+      c.strokeStyle = C.ink; c.lineWidth = 1.5; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x0, y1); c.lineTo(x1, y1); c.stroke(); txt(c, 'Time (s)', (x0 + x1) / 2, H - 9, C.ink, `700 12px ${C.fb}`);
+      txt(c, (DZ.two ? `Lane ${L.id}: ` : '') + 'forces (N)', x0 + 4, 12, DZ_LANECOL()[i], `800 12px ${C.fb}`, 'left');
+      [[2, C.vert, 'weight', false], [3, C.res, 'air resistance', false]].forEach(([k, col, nm], q) => { if (!s.length) return; c.strokeStyle = col; c.lineWidth = 3; c.beginPath(); const st = Math.max(1, Math.floor(s.length / 600)); s.forEach((h, j) => { if (j % st && j < s.length - 1) return; j ? c.lineTo(X(h[0]), Y(h[k])) : c.moveTo(X(h[0]), Y(h[k])); }); c.stroke(); pill(c, nm, x1 - 60, y0 + 8 + q * 20, col, 11); });
+    });
+  }
+}
+
+/* ---------- info cards for the new panels ---------- */
+Object.assign(INFO, {
+  dfbd: { title: 'How to read the free-body diagram', cards: [{ hi: '#cvScene', html: `<p>Next to each falling object is its <b>free-body diagram</b>. There are only two forces on it: <b>weight</b> pulls down, and <b>air resistance</b> pushes up.</p><p>Both arrows start at the middle of the object. The dashed arrow is the <b>resultant force</b>: weight minus air resistance. When it points down, the object speeds up. When it is 0 N, the forces are balanced.</p><div class="example">Weight 392 N down, air resistance 311 N up: 392 − 311 = <b>81 N</b> down.</div>` }] },
+  dpause: { title: 'How to use the pause tools', cards: [{ hi: '#dzPause', html: `<p>Press <b>⏸ Pause</b> (or the Spacebar) to freeze the drop. A yellow banner shows the time.</p><p>While it is paused, <b>◀ 0.5 s</b> and <b>0.5 s ▶</b> move back and forward through the drop. <b>▶ Play</b> carries on from the time you are looking at.</p><p><b>📸 Snapshot</b> saves the numbers at that moment in your Journal, in the Runs tab.</p>` }] },
+  dvt: { title: 'How to read the velocity–time graph', cards: [{ hi: '[data-panel="dvt"]', html: `<p>The graph draws the velocity of each falling object as it falls. <b>Steeper</b> means it is speeding up faster. <b>Flat</b> means the velocity is steady.</p><p>If two lanes are on, lane A is red and lane B is green.</p>` }] },
+  dft: { title: 'How to read the force strip', cards: [{ hi: '[data-panel="dft"]', html: `<p>This graph shows the two forces on the falling object over time. The <b>weight</b> line stays flat. The <b>air resistance</b> line starts at 0 N and grows as the object speeds up.</p><p>When the two lines meet, the forces are balanced.</p>` }] },
+  dworld: { title: 'Choosing a world', cards: [{ hi: '[data-panel="dworld"]', html: `<p>Each world has its own <b>gravitational field strength</b> (g) and its own air. g tells you the weight of each kilogram in newtons.</p><div class="example">The 40 kg crate has weight 40 × 9.8 = <b>392 N</b> on Earth, but only 40 × 1.6 = <b>64 N</b> on the Moon.</div>` }] },
+  dair: { title: 'The air removed slider', cards: [{ hi: '[data-panel="dair"]', html: `<p>This takes air away from the world you chose. <b>0%</b> is all the air. <b>100%</b> is a vacuum, with no air at all, so there is no air resistance.</p>` }] },
+  dcanopy: { title: 'Choosing a canopy', cards: [{ hi: '[data-panel="dcanopy"]', html: `<p>A bigger canopy pushes more air out of the way, so the air resistance is bigger. Only the crate and the skydiver can carry one.</p><p>Press <b>Open canopy!</b> during the fall. The canopy takes about 3 seconds to open fully.</p>` }] }
+});
+
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
 CHDATA.c1.review = [
   { id: 'r1', type: 'match', p: 'Match each force to what causes it.', rows: [['Weight', 'The Earth\'s gravity pulling on an object'], ['Normal force', 'A surface pushing back on an object resting on it'], ['Friction', 'Two surfaces rubbing or trying to slide past each other'], ['Tension', 'A stretched rope or string pulling'], ['Air resistance', 'Air pushing against something moving through it']] },
@@ -4521,7 +5407,7 @@ function wsHeader(ch, title, mode) {
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
-  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; default: return 1; }
+  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; }
 }
 /* a line under questions that ask "How sure are you?": blank on the template, the student's choice in blue, not marked */
 const sureLine = (q, mode, s) => !q.sure || mode === 'key' ? '' : mode === 'student' ? `<p class="note" style="margin:4px 0 0">How sure I was: ${s && s.done && s.sure ? `<span class="stu">${SURE_LABEL[s.sure]}</span>` : '–'}</p>` : '<p class="note" style="margin:4px 0 0">How sure were you? ☐ Guessing &nbsp; ☐ Fairly sure &nbsp; ☐ Certain</p>';
@@ -4555,6 +5441,20 @@ function wsQuestion(q, i, mode, s) {
       + (f.kind === 'num' ? `<p>The correct answer is: ${stu && dv ? W(esc(dv.fix == null ? '' : dv.fix) + ' ' + esc((s && s.u) || '')) : key ? W(fmt(f.ans, 2) + ' ' + (f.unit || '')) : '____________'} ${f.units && f.units.length && !stu && !key ? '<small>(write the unit)</small>' : ''}</p>` : `<p style="margin:4px 0 2px">The correct line is:</p>${fo.map((oi, k) => `<div class="opt">${(stu && dv && dv.fix === oi) || (key && f.a === oi) ? W('☑') : '☐'} ${LET[k]}. ${f.opts[oi]}</div>`).join('')}`)
       + (key && q.why ? `<div class="look">${q.why}</div>` : '');
   }
+  else if (q.type === 'freeze') {
+    const rows = dv && Array.isArray(dv.rows) ? dv.rows : [];
+    body = `<table><tr><th>Moment</th><th style="width:15%">Paused at</th>${q.cols.map(([k, hd]) => `<th>${hd}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><td>${r.label}</td><td style="text-align:center">${stu && rows[ri] && rows[ri].snap ? W(fmt(rows[ri].snap.t, 1) + ' s') : ''}</td>${q.cols.map(([k], ci) => `<td style="height:26px;text-align:center">${stu && rows[ri] ? W(frzDisp(k, rows[ri].vals[k])) : key ? W(frzDisp(k, q.example[ri][ci], true)) : ''}</td>`).join('')}</tr>`).join('')}</table>`
+      + (key ? `<div class="look"><b>Example values (students' will differ).</b> Mark for consistency: the weight is the same in every row (mass × g); resultant = weight − air resistance in each row; the velocity choice matches the resultant (downwards = speeding up, zero = steady, upwards = slowing down).</div>` : `<p class="note">Pause the drop at each moment, press Use this moment, then read the free-body diagram.</p>`);
+  }
+  else if (q.type === 'spot') {
+    const marks = (dv && Array.isArray(dv) ? dv : []).map((t, i) => t == null ? null : { t, n: 'X', col: BLUE }).filter(Boolean);
+    body = vtSVG(q.graph().lines, Object.assign({}, q.graph(), { alt: 'A velocity–time graph', marks: stu ? marks : [], shade: key ? q.targets.map(t => t.t) : [] }))
+      + `<table>${q.targets.map((t, i) => `<tr><td>${q.targets.length > 1 ? (i + 1) + '. ' : ''}${t.ask || 'Time of your X'}</td><td style="width:26%">${stu && dv && dv[i] != null ? W(fmt(dv[i], 1) + ' s') : key ? W(fmt(t.t[0], 1) + ' to ' + fmt(t.t[1], 1) + ' s') : 'time: ______ s'}</td></tr>`).join('')}</table><p class="note">Mark each moment with an X on the graph, then write its time.</p>`;
+  }
+  else if (q.type === 'sketch') {
+    body = `<div class="skp">${sketchSVG(q, { dots: stu && Array.isArray(dv) ? dv : [], model: key ? q.model : null, col: BLUE, legend: false, alt: 'A blank graph grid' })}</div><p class="note">Put one dot in each time column, then join the dots with straight lines.</p>`
+      + (key ? `<div class="look"><b>Look for:</b><br>${q.look ? q.look + '<br>' : ''}${q.checks.map(c => '• ' + c[0]).join('<br>')}</div>` : '');
+  }
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   const head = q.type === 'gap' ? 'Fill the gaps.' : q.type === 'pick' ? 'Choose the right words.' : q.type === 'fix' ? paperTap(qp) : qp;
   return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
@@ -4569,7 +5469,7 @@ function stepsSummary(chId, mode) {
 }
 function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
-  const partA = R.filter(q => !['fbd', 'explain'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain'].includes(q.type));
+  const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
   let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
@@ -4609,6 +5509,9 @@ function markItem(q, i) {
     case 'pick': return `Q${n} (${m} mark${m > 1 ? 's, 1 per choice' : ''}): ` + pickSentence(q, k => '[' + q.picks[k][0][q.picks[k][1]] + ']') + '. 1 mark for each right choice.';
     case 'reason': return `Q${n} (2 marks): 1 mark for the answer: ${plain(rOpts(q)[q.a])}. 1 mark for the reason: ${plain(q.reasons[q.r])}.${rWhyAll(q) ? ' ' + rWhyAll(q) : ''}${q.sure ? ' Confidence is not marked.' : ''}`;
     case 'fix': { const f = q.fix; return `Q${n} (2 marks): 1 mark for the line with the mistake: line ${q.bad + 1} (${plain(q.lines[q.bad])}). 1 mark for the correction: ` + (f.kind === 'num' ? `${fmt(f.ans, 2)} ${f.unit || ''} (accept ${fmt(f.ans - fixTol(f), 2)} to ${fmt(f.ans + fixTol(f), 2)}${f.units && f.units.length ? ', with the unit' : ''})` : plain(f.opts[f.a])) + '.' + (q.why ? ' ' + plain(q.why) : ''); }
+    case 'freeze': return `Q${n} (${m} marks, 1 per box): every student's moments are different, so mark for consistency. The weight is the same in every row (mass × g). Resultant = weight − air resistance in each row (accept 1.5 N either way). The velocity choice matches the resultant: downwards = speeding up, zero = steady, upwards = slowing down. Example values (students' will differ): ` + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('; ') + '.';
+    case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
+    case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
   }
   return '';
@@ -4820,22 +5723,26 @@ const TRYTHIS = [
   ['Give the crate a push on ice with nobody pulling, and watch until it stops by itself.', () => S.floor === 'ice' && S.flags.shoved && S.flags.moved && !S.running && !S.left.length && !S.right.length]
 ];
 function openExplore() {
-  show('vExplore'); placeLab($('#exploreHost'));
+  show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Main Arena', 'Tug-of-war sandbox');
   clearCh2(); S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
   clearCh2(); LAB.mode = 'explore'; LAB.show = new Set(PANELS.filter(k => !EXPLORE_HIDE.includes(k))); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
   applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDone', []));
-  const draw = () => { $('#rail').innerHTML = `<span class="lbl">Explore · Main Arena</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${TRYTHIS.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
+  const draw = () => { $('#rail').innerHTML = `${exploreSwitch('main')}<span class="lbl">Explore · Main Arena</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${TRYTHIS.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();
   LAB.onChange = null; LAB.tick = () => { TRYTHIS.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDone', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }
+/* Explore has two places to play: the Main Arena tug-of-war and the Drop Zone */
+const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
+const exploreSwitch = cur => `<div class="seg two exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button></div>`;
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
   document.addEventListener('click', e => {
     const t = e.target;
+    const exs = t.closest('[data-exscene]'); if (exs && VIEW === 'vExplore') { if (exs.dataset.exscene === 'drop') openExploreDrop(); else openExplore(); return; }
     if (t.closest('[data-journal]')) { if (journalOpen()) closeJournal(); else openJournal(); return; }
     const op = t.closest('[data-open]'); if (op) { if (op.closest('[data-close]') || op.closest('.modal')) closeModal(); openChapter(op.dataset.open); return; }
     const tab = t.closest('#chTabs [data-ctab]'); if (tab) { setCTab(tab.dataset.ctab); return; }

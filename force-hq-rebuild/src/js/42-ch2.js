@@ -2,13 +2,14 @@
 /* A small velocity–time graph as inline SVG, for Check questions and worksheets.
    lines: [{ pts: [[t, v], …], col, label }], opts: { tMax, vMax, vStep } */
 function vtSVG(lines, o = {}) {
-  const W = 420, H = 210, x0 = 46, x1 = W - 14, y0 = 12, y1 = H - 34, tMax = o.tMax || 8, vMax = o.vMax || 3, vStep = o.vStep || 0.5;
+  const W = 420, H = 210, x0 = 46, x1 = W - 14, y0 = 12, y1 = H - 34, tMax = o.tMax || 8, vMax = o.vMax || 3, vStep = o.vStep || 0.5, tStep = o.tStep || 1;
   const X = t => x0 + t / tMax * (x1 - x0), Y = v => y1 - v / vMax * (y1 - y0);
   let g = '';
   for (let v = 0; v <= vMax + 1e-9; v += vStep) g += `<line x1="${x0}" y1="${Y(v)}" x2="${x1}" y2="${Y(v)}" stroke="#d5dee2" stroke-width="1"/><text x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="#566a74">${+v.toFixed(2)}</text>`;
-  for (let t = 0; t <= tMax; t += 1) g += `<line x1="${X(t)}" y1="${y0}" x2="${X(t)}" y2="${y1}" stroke="#d5dee2" stroke-width="1"/><text x="${X(t)}" y="${y1 + 14}" text-anchor="middle" font-size="11" fill="#566a74">${t}</text>`;
+  for (let t = 0; t <= tMax + 1e-9; t += tStep) g += `<line x1="${X(t)}" y1="${y0}" x2="${X(t)}" y2="${y1}" stroke="#d5dee2" stroke-width="1"/><text x="${X(t)}" y="${y1 + 14}" text-anchor="middle" font-size="11" fill="#566a74">${t}</text>`;
   g += `<path d="M${x0} ${y0}V${y1}H${x1}" fill="none" stroke="#13212a" stroke-width="1.5"/>`;
   g += `<text x="${(x0 + x1) / 2}" y="${H - 4}" text-anchor="middle" font-size="12" font-weight="700" fill="#13212a">Time (s)</text><text transform="translate(12 ${(y0 + y1) / 2}) rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#13212a">Velocity (m/s)</text>`;
+  (o.shade || []).forEach(([a, b]) => { g += `<rect class="vshade" x="${X(a).toFixed(1)}" y="${y0}" width="${(X(b) - X(a)).toFixed(1)}" height="${y1 - y0}" fill="#1c9a5a" fill-opacity=".22" stroke="#1c9a5a" stroke-dasharray="4 3"/>`; });
   lines.forEach(l => {
     g += `<polyline points="${l.pts.map(([t, v]) => `${X(t).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}" fill="none" stroke="${l.col || '#1f5f8b'}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"/>`;
     if (l.label) { const [t, v] = l.pts[l.lab || 0]; g += `<text x="${X(t) + 6}" y="${Y(v) - 7}" font-size="12" font-weight="800" fill="${l.col || '#1f5f8b'}">${l.label}</text>`; }
@@ -18,7 +19,9 @@ function vtSVG(lines, o = {}) {
     g += `<polyline points="${P.map(pt).join(' ')}" fill="none" stroke="#13212a" stroke-width="2" stroke-dasharray="6 4"/>`;
     if (o.triLab !== false) g += `<text x="${(X(P[0][0]) + X(P[1][0])) / 2}" y="${Y(P[0][1]) + 16}" text-anchor="middle" font-size="12" font-weight="800" fill="#13212a">Δt = ${+(P[1][0] - P[0][0]).toFixed(2)} s</text><text x="${X(P[1][0]) - 6}" y="${(Y(P[1][1]) + Y(P[1][1] === P[0][1] ? P[2][1] : P[0][1])) / 2}" text-anchor="end" font-size="12" font-weight="800" fill="#13212a">Δv = ${+(P[2][1] - P[1][1]).toFixed(2)} m/s</text>`;
   }
-  return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" style="width:100%;max-width:440px;display:block;background:#fff;border-radius:8px">${g}</svg></div>`;
+  (o.marks || []).forEach((m, k) => { g += `<g class="vmark ${m.cls || ''}"><line x1="${X(m.t).toFixed(1)}" y1="${y0}" x2="${X(m.t).toFixed(1)}" y2="${y1}" stroke="${m.col || '#c94a34'}" stroke-width="2" stroke-dasharray="5 3"/><circle cx="${X(m.t).toFixed(1)}" cy="${y0 + 11}" r="9" fill="${m.col || '#c94a34'}"/><text x="${X(m.t).toFixed(1)}" y="${y0 + 15}" text-anchor="middle" font-size="12" font-weight="800" fill="#fff">${m.n || k + 1}</text></g>`; });
+  if (o.tap) g += `<g class="tapg"></g><rect class="tapzone" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="transparent" style="cursor:crosshair"/>`;
+  return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" ${o.tap ? `data-x0="${x0}" data-x1="${x1}" data-y0="${y0}" data-y1="${y1}" data-w="${W}" data-h="${H}" data-tmax="${tMax}" ` : ''}style="width:100%;max-width:${o.maxW || 440}px;display:block;background:#fff;border-radius:8px${o.tap ? ';touch-action:manipulation' : ''}">${g}</svg></div>`;
 }
 /* record what the student measured, per crate mass, so questions can check their own runs */
 function ch2Record() {

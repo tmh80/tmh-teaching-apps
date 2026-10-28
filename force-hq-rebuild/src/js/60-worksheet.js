@@ -44,7 +44,7 @@ function wsHeader(ch, title, mode) {
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
-  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; default: return 1; }
+  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; }
 }
 /* a line under questions that ask "How sure are you?": blank on the template, the student's choice in blue, not marked */
 const sureLine = (q, mode, s) => !q.sure || mode === 'key' ? '' : mode === 'student' ? `<p class="note" style="margin:4px 0 0">How sure I was: ${s && s.done && s.sure ? `<span class="stu">${SURE_LABEL[s.sure]}</span>` : '–'}</p>` : '<p class="note" style="margin:4px 0 0">How sure were you? ☐ Guessing &nbsp; ☐ Fairly sure &nbsp; ☐ Certain</p>';
@@ -78,6 +78,20 @@ function wsQuestion(q, i, mode, s) {
       + (f.kind === 'num' ? `<p>The correct answer is: ${stu && dv ? W(esc(dv.fix == null ? '' : dv.fix) + ' ' + esc((s && s.u) || '')) : key ? W(fmt(f.ans, 2) + ' ' + (f.unit || '')) : '____________'} ${f.units && f.units.length && !stu && !key ? '<small>(write the unit)</small>' : ''}</p>` : `<p style="margin:4px 0 2px">The correct line is:</p>${fo.map((oi, k) => `<div class="opt">${(stu && dv && dv.fix === oi) || (key && f.a === oi) ? W('☑') : '☐'} ${LET[k]}. ${f.opts[oi]}</div>`).join('')}`)
       + (key && q.why ? `<div class="look">${q.why}</div>` : '');
   }
+  else if (q.type === 'freeze') {
+    const rows = dv && Array.isArray(dv.rows) ? dv.rows : [];
+    body = `<table><tr><th>Moment</th><th style="width:15%">Paused at</th>${q.cols.map(([k, hd]) => `<th>${hd}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><td>${r.label}</td><td style="text-align:center">${stu && rows[ri] && rows[ri].snap ? W(fmt(rows[ri].snap.t, 1) + ' s') : ''}</td>${q.cols.map(([k], ci) => `<td style="height:26px;text-align:center">${stu && rows[ri] ? W(frzDisp(k, rows[ri].vals[k])) : key ? W(frzDisp(k, q.example[ri][ci], true)) : ''}</td>`).join('')}</tr>`).join('')}</table>`
+      + (key ? `<div class="look"><b>Example values (students' will differ).</b> Mark for consistency: the weight is the same in every row (mass × g); resultant = weight − air resistance in each row; the velocity choice matches the resultant (downwards = speeding up, zero = steady, upwards = slowing down).</div>` : `<p class="note">Pause the drop at each moment, press Use this moment, then read the free-body diagram.</p>`);
+  }
+  else if (q.type === 'spot') {
+    const marks = (dv && Array.isArray(dv) ? dv : []).map((t, i) => t == null ? null : { t, n: 'X', col: BLUE }).filter(Boolean);
+    body = vtSVG(q.graph().lines, Object.assign({}, q.graph(), { alt: 'A velocity–time graph', marks: stu ? marks : [], shade: key ? q.targets.map(t => t.t) : [] }))
+      + `<table>${q.targets.map((t, i) => `<tr><td>${q.targets.length > 1 ? (i + 1) + '. ' : ''}${t.ask || 'Time of your X'}</td><td style="width:26%">${stu && dv && dv[i] != null ? W(fmt(dv[i], 1) + ' s') : key ? W(fmt(t.t[0], 1) + ' to ' + fmt(t.t[1], 1) + ' s') : 'time: ______ s'}</td></tr>`).join('')}</table><p class="note">Mark each moment with an X on the graph, then write its time.</p>`;
+  }
+  else if (q.type === 'sketch') {
+    body = `<div class="skp">${sketchSVG(q, { dots: stu && Array.isArray(dv) ? dv : [], model: key ? q.model : null, col: BLUE, legend: false, alt: 'A blank graph grid' })}</div><p class="note">Put one dot in each time column, then join the dots with straight lines.</p>`
+      + (key ? `<div class="look"><b>Look for:</b><br>${q.look ? q.look + '<br>' : ''}${q.checks.map(c => '• ' + c[0]).join('<br>')}</div>` : '');
+  }
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   const head = q.type === 'gap' ? 'Fill the gaps.' : q.type === 'pick' ? 'Choose the right words.' : q.type === 'fix' ? paperTap(qp) : qp;
   return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
@@ -92,7 +106,7 @@ function stepsSummary(chId, mode) {
 }
 function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
-  const partA = R.filter(q => !['fbd', 'explain'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain'].includes(q.type));
+  const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
   let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
@@ -132,6 +146,9 @@ function markItem(q, i) {
     case 'pick': return `Q${n} (${m} mark${m > 1 ? 's, 1 per choice' : ''}): ` + pickSentence(q, k => '[' + q.picks[k][0][q.picks[k][1]] + ']') + '. 1 mark for each right choice.';
     case 'reason': return `Q${n} (2 marks): 1 mark for the answer: ${plain(rOpts(q)[q.a])}. 1 mark for the reason: ${plain(q.reasons[q.r])}.${rWhyAll(q) ? ' ' + rWhyAll(q) : ''}${q.sure ? ' Confidence is not marked.' : ''}`;
     case 'fix': { const f = q.fix; return `Q${n} (2 marks): 1 mark for the line with the mistake: line ${q.bad + 1} (${plain(q.lines[q.bad])}). 1 mark for the correction: ` + (f.kind === 'num' ? `${fmt(f.ans, 2)} ${f.unit || ''} (accept ${fmt(f.ans - fixTol(f), 2)} to ${fmt(f.ans + fixTol(f), 2)}${f.units && f.units.length ? ', with the unit' : ''})` : plain(f.opts[f.a])) + '.' + (q.why ? ' ' + plain(q.why) : ''); }
+    case 'freeze': return `Q${n} (${m} marks, 1 per box): every student's moments are different, so mark for consistency. The weight is the same in every row (mass × g). Resultant = weight − air resistance in each row (accept 1.5 N either way). The velocity choice matches the resultant: downwards = speeding up, zero = steady, upwards = slowing down. Example values (students' will differ): ` + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('; ') + '.';
+    case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
+    case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
   }
   return '';

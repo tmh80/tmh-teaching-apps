@@ -118,6 +118,17 @@
           <div class="ctlh"><h3>Force pairs</h3><button type="button" class="info" data-info="pairs" aria-label="What are the force pair arrows?">ⓘ</button></div>
           <label class="tglrow"><input type="checkbox" id="tgPairs" checked> Show the force pairs</label>
         </div>
+        <div data-panel="dlanes">
+          <div class="ctlh"><h3>Compare two drops</h3><button type="button" class="info" data-info="dpause" aria-label="How do I use the pause tools?">ⓘ</button></div>
+          <label class="tglrow"><input type="checkbox" id="dzTwo"> Add lane B</label>
+          <div class="seg two" id="dzEdit" hidden></div><p class="palhint" id="dzEditNote"></p>
+        </div>
+        <div data-panel="dobj"><div class="ctlh"><h3>Object</h3></div><div class="seg two" id="dzObjs"></div></div>
+        <div data-panel="dworld"><div class="ctlh"><h3><button type="button" class="term tl" data-t="gfs">World</button></h3><button type="button" class="info" data-info="dworld" aria-label="How do I choose a world?">ⓘ</button></div><div class="seg three" id="dzWorlds"></div><p class="palhint" id="dzWorldInfo"></p></div>
+        <div class="dzp" data-panel="dair"><div class="ctlh"><h3><button type="button" class="term tl" data-t="airres">Air removed</button></h3><span class="numbox"><input type="number" id="dzAirNum" min="0" max="100" step="1" value="0" inputmode="numeric" aria-label="Percent of the air removed: type a number"><span>%</span></span><button type="button" class="info" data-info="dair" aria-label="What does the air removed slider do?">ⓘ</button></div><input type="range" id="dzAir" min="0" max="100" step="1" value="0" aria-label="Percent of the air removed"></div>
+        <div class="dzp" data-panel="dheight"><div class="ctlh"><h3>Drop height</h3><span class="numbox"><input type="number" id="dzHNum" min="10" max="3000" step="10" value="600" inputmode="numeric" aria-label="Drop height in metres: type a number"><span>m</span></span></div><input type="range" id="dzH" min="10" max="3000" step="10" value="600" aria-label="Drop height in metres"></div>
+        <div data-panel="dcanopy"><div class="ctlh"><h3><button type="button" class="term tl" data-t="canopy">Canopy</button></h3><button type="button" class="info" data-info="dcanopy" aria-label="How do I choose a canopy?">ⓘ</button></div><div class="seg two" id="dzCans"></div></div>
+        <div class="dzp" data-panel="dopenh"><div class="ctlh"><h3>Open automatically at</h3><span class="numbox"><input type="number" id="dzOpenNum" min="0" max="3000" step="10" placeholder="off" inputmode="numeric" aria-label="Open the canopy automatically at this height in metres: type a number, or leave empty for off"><span>m</span></span></div><p class="palhint">Leave the box empty to open the canopy yourself.</p></div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -126,8 +137,14 @@
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
           <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
+          <button class="go" id="dzDrop" type="button" data-panel="drop">Drop!</button>
+          <button class="ghost dzpause" id="dzPause" type="button" data-panel="dpause" aria-pressed="false">⏸ Pause</button>
+          <button class="ghost" id="dzOpen" type="button" data-panel="dcanopy">Open canopy!</button>
+          <button class="ghost sm" id="dzBack" type="button" data-panel="dpause">◀ 0.5 s</button>
+          <button class="ghost sm" id="dzFwd" type="button" data-panel="dpause">0.5 s ▶</button>
+          <button class="ghost sm" id="dzSnap" type="button" data-panel="dpause">📸 Snapshot</button>
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch">Reset</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop">Reset</button>
         </div>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">
@@ -137,6 +154,7 @@
             <div class="scaleNote" id="scaleNote"></div>
           </div>
           <div class="underside">
+            <div class="dreads" id="dreads" hidden></div>
             <div class="reads" id="reads"></div>
             <div class="toggles" data-panel="toggles">
               <div class="lbl">Show on the diagram</div>
@@ -148,6 +166,14 @@
         <div class="vtrow" data-panel="vt">
           <div class="lbl"><button type="button" class="term tl" data-t="vtgraph">Velocity–time graph of the crate</button><button type="button" class="info" data-info="vt" aria-label="How do I read the velocity–time graph?">ⓘ</button></div>
           <canvas id="cvVT" role="img" aria-label="Velocity–time graph of the crate: velocity in metres per second up the side, time in seconds along the bottom"></canvas>
+        </div>
+        <div class="vtrow" data-panel="dvt">
+          <div class="lbl"><button type="button" class="term tl" data-t="vtgraph">Velocity–time graph</button><button type="button" class="info" data-info="dvt" aria-label="How do I read the velocity–time graph?">ⓘ</button></div>
+          <canvas id="cvDVT" role="img" aria-label="Velocity–time graph of the falling objects: velocity in metres per second up the side, time in seconds along the bottom"></canvas>
+        </div>
+        <div class="vtrow" data-panel="dft">
+          <div class="lbl"><span class="term">Force–time strip</span><button type="button" class="info" data-info="dft" aria-label="How do I read the force strip?">ⓘ</button></div>
+          <canvas id="cvDFT" role="img" aria-label="The weight and the air resistance of each falling object over time"></canvas>
         </div>
       </div>
     </div>

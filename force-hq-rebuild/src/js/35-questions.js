@@ -36,7 +36,7 @@ const art = g => (/^[aeiou]/i.test(g) ? 'an ' : 'a ') + g.toLowerCase();
 const qq = t => '“' + plain(t) + '”';
 function corr(after, text) { const c = document.createElement('span'); c.className = 'corr'; c.textContent = '→ ' + plain(text); after.after(c); }
 function lockInputs(el) { $$('input,select,textarea,button', el).forEach(x => { if (!x.classList.contains('qopen')) x.disabled = true; }); $$('.qchk', el).forEach(b => b.hidden = true); }
-function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; default: return 1; } }
+function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; } }
 /* "How sure are you?" (opt-in: sure:true on mcq, reason and pick). Three buttons; the student must choose one before checking.
    Not marked. Saved as st.sure ('guess' | 'fair' | 'cert') so the feedback page can show answers that were certain but wrong. */
 const SURE_LABEL = { guess: 'Guessing', fair: 'Fairly sure', cert: 'Certain' };
