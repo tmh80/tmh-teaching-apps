@@ -1,6 +1,6 @@
 # Force HQ rebuild: handoff for a new chat (updated 28 Oct 2026, evening)
 
-Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. For Chapter 5 also read `docs/Question_Types_Guide.md` (new question types, the pause/snapshot tools, and where each type fits). Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
+Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. For Chapter 5 also read `docs/Chapter5_Script.md` (the full script and engine spec) and `docs/Question_Types_Guide.md` (new question types and the pause/snapshot tools). Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
 ## 0. Where things stand
 - **Built, tested and pushed:** Chapters 1 to 4, each with a Foundation and an Extension section (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`, `c4f`, `c4x`), each section with Learn, Challenge and Check. Also progress save and load, Toddle worksheets (blank, key, marking scheme) and a preview artifact.
@@ -8,7 +8,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
   - Chapter 2: inertia, Newton's first law, velocity–time graph, brake challenge.
   - Chapter 3: F = ma in the Snow Arena (huskies and sled), friction, formula triangle, delivery challenge.
   - Chapter 4: action and reaction in the Space Dome (pod, astronaut, tether, thrusters, force pairs), docking-orders challenge.
-- **Next (not started):** Chapter 5 (balanced forces and the Drop Zone), then the Workshop, then Explore. See the Backlog. Tom is about to have a planning model write the plan for the next phases, then a coding model build it. Put the plan in `docs/` so later chats can read it.
+- **Next: build Chapter 5 from `docs/Chapter5_Script.md`** (written 28 Oct by Opus; the coding model builds it, following the script's section J build order). Physics reference: `tools/dropzone_model.py` (the JS engine must match it). New question types: `docs/Question_Types_Guide.md`. After Chapter 5: the Workshop, then Explore. See the Backlog.
 - **Tom's latest feedback has all been actioned** (28 Oct, last commit `31d4a46`). He has not yet replayed everything after those fixes, so expect another round of review comments.
 
 ## 1. Getting set up (GitHub is the source of truth)
@@ -79,7 +79,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
 ## 6. Open questions for Tom (ask at the start)
 Answered 28 Oct: Tom has played every section, but class testing has not happened yet. Chapter 4's Fast-forward, tether and shortcut are fine. Loaner devices and shared computers are not a worry for now ("Continue anyway" covers the rare cases). The drag model was explained to him. His Chapter 5 decisions are in the Backlog (item 5): a drop high enough to reach terminal velocity, opening the parachute mid-fall, gravity on other planets, and side-by-side lanes.
 1. Collect feedback from class testing when it happens.
-2. Chapter 5: which planets, any extra objects, and how many canopy sizes?
+2. Chapter 5 is decided (28 Oct): all six worlds, two lanes, three canopies, script by Opus in `docs/Chapter5_Script.md`, everything pitched at Grade 7/8.
 
 ## 7. Still missing (skill checklist)
 - **Chapter 5, Drop Zone** (new arena with an air slider; feather, ball, crate, parachutist; terminal velocity; helicopter hover extension; tall drop with a following camera, parachute opened mid-fall, planet picker, side-by-side lanes: see Backlog item 5). **Workshop** (pulleys, levers, wheel and axle, ramps, wedges and screws, compound machines, efficiency; machine builder with build tasks). **Explore** "draw what's happening now" FBD check.

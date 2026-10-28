@@ -36,7 +36,7 @@
 
 ## Open questions for Tom
 - Class testing of Chapters 1 to 4 has not happened yet (Tom has played every section himself, 28 Oct).
-- Drop Zone: which planets, any extra objects, and how many canopy sizes (suggested: 2 or 3)?
+- Drop Zone decided (28 Oct): all six worlds (Earth, Moon, Mars, Venus, Titan, Jupiter's cloud tops), two side-by-side lanes, three canopy sizes. Claude (Opus) writes `docs/Chapter5_Script.md`; Sonnet codes from it. Pitch everything at Grade 7/8 (language and question level).
 - Once Chapter 1 is approved, should the rebuild replace the old Force HQ artifact and project copy?
 
 
