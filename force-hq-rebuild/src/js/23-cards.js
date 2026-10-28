@@ -59,7 +59,7 @@ function journalAdd(key, where, title, html) {
   const J = dbGet('journal', { order: [], entries: {} }); if (!J.entries[key]) J.order.push(key);
   J.entries[key] = { where, title, html, at: Date.now() }; J.last = key; dbSet('journal', J); updateJCount();
 }
-function updateJCount() { const J = dbGet('journal', { order: [] }); $('#jCount').textContent = J.order.length; $$('.jbtn .jc').forEach(e => e.textContent = J.order.length); }
+function updateJCount() { const J = dbGet('journal', { order: [] }); $('#jCount').textContent = J.order.length; $$('.jbtn .jc, .jtab .jc').forEach(e => e.textContent = J.order.length); }
 function addEvidence(kind, text) {
   const E = dbGet('evidence', []); if (kind === 'challenge' && E.some(e => e.text === text)) return;
   E.push({ kind, text, at: new Date().toISOString() }); if (E.length > 300) E.splice(0, E.length - 300); dbSet('evidence', E);
@@ -78,12 +78,37 @@ function vocabHTML() {
 let JTAB = 'runs', JRUNS_SEEN = false;
 function openJournal(tab) {
   if (tab) JTAB = tab; const p = $('#journal'); if (!p) return;
-  p.hidden = false; document.body.classList.add('jopen'); renderJournal();
+  p.hidden = false; document.body.classList.add('jopen'); jTabAria(true); renderJournal();
   JOURNAL_OPENED = true; if (JTAB === 'runs') JRUNS_SEEN = true; if (LAB.onChange) LAB.onChange();
   setTimeout(() => { const c = $('#jClose'); if (c) c.focus({ preventScroll: true }); }, 20);
 }
-function closeJournal() { const p = $('#journal'); if (!p || p.hidden) return; p.hidden = true; document.body.classList.remove('jopen'); }
+function closeJournal() { const p = $('#journal'); if (!p || p.hidden) return; p.hidden = true; document.body.classList.remove('jopen'); jTabAria(false); }
+function jTabAria(on) { $$('[data-journal]').forEach(b => b.setAttribute('aria-expanded', on ? 'true' : 'false')); }
 const journalOpen = () => { const p = $('#journal'); return !!(p && !p.hidden); };
+/* The Working tab: free space for a student to show their working, plus the calculations saved from the calculator.
+   DB.jwork = { pads: { 'c4f:f5': { text, where, title, at } }, calcs: [{ id, expr, res, note, where, title, at }] } */
+function workCtx() {
+  if (typeof CH !== 'undefined' && CH && VIEW === 'vChapter') {
+    const chd = CHDATA[CH.id], where = `Chapter ${CH.n}: ${CH.title}`;
+    if (CTAB === 'learn' && chd.steps[GI]) return { key: CH.id + ':' + chd.steps[GI].id, where, title: chd.steps[GI].title };
+    return { key: CH.id + ':' + CTAB, where, title: CTAB === 'challenge' ? 'The Challenge' : CTAB === 'review' ? 'The Check' : 'Chapter ' + CH.n };
+  }
+  return { key: 'general', where: 'Anywhere in Force HQ', title: 'Free space' };
+}
+const workGet = () => { const w = dbGet('jwork', null) || {}; w.pads = w.pads || {}; w.calcs = w.calcs || []; return w; };
+function saveCalc(expr, res, note) {
+  const w = workGet(), c = workCtx(); w.calcs.push({ id: Date.now() + '' + w.calcs.length, expr, res, note: note || '', where: c.where, title: c.title, at: Date.now() }); dbSet('jwork', w);
+  updateWorkCount(); if (journalOpen()) renderJournal();
+}
+const workCount = () => { const w = workGet(); return w.calcs.length + Object.keys(w.pads).filter(k => (w.pads[k].text || '').trim()).length; };
+function updateWorkCount() { const n = $('#journal [data-jtab="work"] span'); if (n) n.textContent = workCount(); }
+function workTabHTML() {
+  const w = workGet(), c = workCtx(), pad = w.pads[c.key], others = Object.keys(w.pads).filter(k => k !== c.key && (w.pads[k].text || '').trim());
+  return `<p class="scaleNote">Show your working here. Write the formula, put in the numbers, work out the answer, then write the unit. Writing it down helps you spot mistakes.</p>
+    <section><h3 class="jh3">My working: ${esc(c.title)}</h3><textarea class="workpad" id="workPad" rows="8" aria-label="My working for ${esc(c.title)}" placeholder="For example:&#10;speed = force ÷ mass&#10;speed = 150 ÷ 250&#10;speed = 0.6 m/s">${esc(pad ? pad.text : '')}</textarea><p class="scaleNote">Saved as you type. ${esc(c.where)}.</p></section>
+    <section><h3 class="jh3">Calculations I saved</h3>${w.calcs.length ? `<ul class="calcl">${w.calcs.slice().reverse().map(k => `<li><code>${esc(k.expr)} = ${esc(k.res)}</code>${k.note ? `<div>${esc(k.note)}</div>` : ''}<small>${esc(k.where)} · ${esc(k.title)}</small><button type="button" class="mini" data-workdel="${esc(k.id)}" aria-label="Remove this calculation">✕</button></li>`).join('')}</ul>` : '<p class="scaleNote">Open the calculator 🧮, work something out, then press <b>Save to Journal</b>. It is kept here with your working.</p>'}</section>
+    ${others.length ? `<section><h3 class="jh3">Working from other steps</h3>${others.map(k => `<details class="jent"><summary>${esc(w.pads[k].title)} <small>${esc(w.pads[k].where)}</small></summary><textarea class="workpad" data-workkey="${esc(k)}" rows="5" aria-label="My working for ${esc(w.pads[k].title)}">${esc(w.pads[k].text)}</textarea></details>`).join('')}</section>` : ''}`;
+}
 function journalNotesHTML() {
   const J = dbGet('journal', { order: [], entries: {} }), notes = dbGet('jnotes', {}), E = dbGet('evidence', []);
   const groups = {}; J.order.forEach(k => { const e = J.entries[k]; (groups[e.where] = groups[e.where] || []).push(k); });
@@ -97,19 +122,22 @@ function renderJournal() {
   const nR = runsAll().length, nV = Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length, nN = dbGet('journal', { order: [] }).order.length;
   const sc = $('.jbody', p) ? $('.jbody', p).scrollTop : 0, same = p.dataset.tab === JTAB;
   p.innerHTML = `<div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
-    <div class="jtabs" role="tablist" aria-label="Journal sections">${[['runs', '📋 Runs', nR], ['notes', '📝 Notes', nN], ['vocab', '🔤 Vocab', nV]].map(([k, t, n]) => `<button type="button" role="tab" data-jtab="${k}" aria-selected="${JTAB === k}">${t}<span>${n}</span></button>`).join('')}</div>
-    <div class="jbody">${JTAB === 'runs' ? runsTabHTML() : JTAB === 'notes' ? journalNotesHTML() : `<h3 class="jh3">Key vocabulary</h3>${vocabHTML()}`}</div>`;
+    <div class="jtabs" role="tablist" aria-label="Journal sections">${[['runs', '📋 Runs', nR], ['work', '✍️ Working', workCount()], ['notes', '📝 Notes', nN], ['vocab', '🔤 Vocab', nV]].map(([k, t, n]) => `<button type="button" role="tab" data-jtab="${k}" aria-selected="${JTAB === k}">${t}<span>${n}</span></button>`).join('')}</div>
+    <div class="jbody">${JTAB === 'runs' ? runsTabHTML() : JTAB === 'work' ? workTabHTML() : JTAB === 'notes' ? journalNotesHTML() : `<h3 class="jh3">Key vocabulary</h3>${vocabHTML()}`}</div>`;
   p.dataset.tab = JTAB; if (same) $('.jbody', p).scrollTop = sc;
   $$('[data-jnote]', p).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
+  $$('.workpad', p).forEach(t => t.addEventListener('input', () => { const w = workGet(), c = workCtx(), k = t.dataset.workkey || c.key, prev = w.pads[k] || {}; if (t.value.trim()) w.pads[k] = { text: t.value, where: prev.where || c.where, title: prev.title || c.title, at: Date.now() }; else delete w.pads[k]; dbSet('jwork', w); updateWorkCount(); }));
   const vs = $('#vSearch', p); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', p).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
   const ea = $('#evAdd', p); if (ea) ea.addEventListener('click', () => { const v = $('#evOwn', p).value.trim(); if (!v) return; addEvidence('own', v); renderJournal(); });
   $$('details.run', p).forEach(d => d.addEventListener('toggle', () => { RUNOPEN[d.dataset.run] = d.open; }));
 }
 function initJournal() {
   const p = h('aside', { class: 'journal', id: 'journal', hidden: '', 'aria-label': 'My Journal' }); document.body.appendChild(p);
+  document.body.appendChild(h('button', { type: 'button', class: 'jtab', 'data-journal': '', 'aria-controls': 'journal', 'aria-expanded': 'false', title: 'Open or close your Journal' }, `<span class="jtl">📓 Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span>`));
   document.addEventListener('click', e => {
     if (e.target.closest('#jClose')) { closeJournal(); return; }
     const t = e.target.closest('[data-jtab]'); if (t) { JTAB = t.dataset.jtab; if (JTAB === 'runs') JRUNS_SEEN = true; renderJournal(); if (LAB.onChange) LAB.onChange(); return; }
+    const wd = e.target.closest('[data-workdel]'); if (wd) { const w = workGet(); w.calcs = w.calcs.filter(k => k.id !== wd.dataset.workdel); dbSet('jwork', w); renderJournal(); return; }
     if (e.target.closest('[data-runs]')) { openJournal('runs'); return; }
   });
 }

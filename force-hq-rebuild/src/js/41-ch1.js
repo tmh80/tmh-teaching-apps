@@ -72,7 +72,7 @@ CHDATA.c1 = {
         { html: `<p>${T('gravity', 'Gravity')} pulls everything towards the centre of the Earth. The pull of gravity on an object is called its ${T('weight')}.</p><p>Weight is a force, so it is measured in newtons. ${T('mass', 'Mass')} is how much stuff is in the object, and it is measured in kilograms (kg).</p>` },
         { html: `<p>On Earth, gravity pulls on every kilogram with 9.8 newtons. So to find an object's weight:</p><div class="law"><b>weight (N) = mass (kg) × 9.8</b></div><div class="example">A 50 kg crate: 50 × 9.8 = <b>490 N</b></div><p>Open the calculator if you need it. Its <b>g</b> key is 9.8.</p>` }],
       setup() { S.mass = 50; S.floor = 'smooth'; }, adds: ['mass', 'readM'], sides: [], pullers: [],
-      tasks: [['Use the Crate mass slider to set the crate to 47 kg.', () => S.mass === 47]],
+      tasks: [['Use the Crate mass slider to set the crate to 47 kg.', () => S.mass === 47], ['Work out the weight and type your answer.', () => hasAns('q1'), { q: 'q1' }], ['Work out the weight and type your answer.', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'num', p: 'Work out the weight of the 47 kg crate.', ans: 460.6, unit: 'N', ok: 'Brilliant! 47 × 9.8 = 460.6 N.', hints: ['Multiply the mass by 9.8.', 'Type 47 × 9.8 into the calculator.'] },
         { id: 'q2', type: 'num', p: 'A crate has a mass of 120 kg. What is its weight?', ans: 1176, unit: 'N', ok: 'Correct! 120 × 9.8 = 1176 N.', hints: ['Weight = mass × 9.8.', 'Type 120 × 9.8 into the calculator.'] },

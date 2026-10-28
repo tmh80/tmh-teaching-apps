@@ -1,6 +1,13 @@
 /* ===== Question engine shared by Learn steps and Reviews =====
    Every question: {id, type, p, ...}. Saved state: {v, ok, tries, done}.
    Types: mcq, tap, num, reading, gap, sort, match, table, tick, fbd, explain */
+/* ---- answer drafts: a number and unit typed under a Do-this task are copied into the matching question's answer box (and the other way round) ---- */
+const draftOf = (store, id) => (dbGet(store + '.draft', {}) || {})[id] || null;
+function draftSave(store, id, part, val, src) {
+  const d = dbGet(store + '.draft', {}), cur = d[id] || {}; cur[part] = val; d[id] = cur; dbSet(store + '.draft', d);
+  $$('[data-draft="' + store + '|' + id + '"]').forEach(el => { if (el === src || el.disabled || el.dataset.dk !== part) return; if (el.value !== val) el.value = val; });
+  if (typeof checkStep === 'function') checkStep();
+}
 const QLABEL = { mcq: 'Choose one', tap: 'Tap the sentence', num: 'Calculate', reading: 'Read the arena', gap: 'Fill the gaps', sort: 'Sort it', match: 'Match it up', table: 'Complete the table', tick: 'Tick all that apply', fbd: 'Draw it: free-body diagram', explain: 'Explain it' };
 const normWord = s => String(s || '').toLowerCase().replace(/[^a-z0-9.]+/g, ' ').trim();
 /* Gap answers accept sensible synonyms: if any accepted answer is in a group, every word in that group counts.
@@ -46,9 +53,10 @@ const QT = {
   num: {
     /* q.units: a unit picker (the student chooses the unit as well as typing the number).
        q.ladder + q.hints: a "Need a clue?" fold-out that shows one hint at a time, never the final answer. */
-    html(q, s) {
-      const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length;
-      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${s && s.v != null ? esc(s.v) : ''}">${U ? `<select class="unitsel" aria-label="Unit"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${s && s.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+    html(q, s, api) {
+      const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length, D = api && api.draft ? api.draft.get() || {} : {}, dk = api && api.draft ? ` data-draft="${api.draft.key}"` : '';
+      const v0 = s && s.v != null ? s.v : D.v || '', u0 = s && s.u ? s.u : D.u || '';
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
     },
     bind(el, q, api) {
       const U = q.units && q.units.length;
@@ -60,6 +68,7 @@ const QT = {
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
     },
     lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); const sel = $('.unitsel', el); if (sel) { sel.value = s.u || ''; sel.classList.add(s.u === q.unit ? 'right' : 'wrong'); }
       if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
@@ -157,6 +166,7 @@ function renderQuestion(host, q, ctx) {
   const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
   const api = {
     storePath: ctx.store,
+    draft: ctx.mode === 'learn' ? { key: ctx.store + '|' + q.id, get: () => draftOf(ctx.store, q.id), set: (part, val, src) => draftSave(ctx.store, q.id, part, val, src) } : null,
     state: () => dbGet(path, null),
     setRaw: v => dbSet(path, v),
     persist: () => dbSet(path, dbGet(path, null)),
@@ -178,7 +188,7 @@ function renderQuestion(host, q, ctx) {
       if (ctx.onDone) ctx.onDone(q, st);
     }
   };
-  body.innerHTML = QT[q.type].html(q, s);
+  body.innerHTML = QT[q.type].html(q, s, api);
   QT[q.type].bind(body, q, api);
   if (s && s.done) {
     if (QT[q.type].lock) QT[q.type].lock(body, q, s);

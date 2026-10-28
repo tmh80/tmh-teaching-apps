@@ -686,6 +686,41 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
 .calc .trisum small{font-size:12.5px;color:var(--ink)}
 .calcFab.hasnew::after,.calc .ctabs button.hasnew::after{content:"";position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:var(--bad);border:2px solid var(--panel)}
 
+/* ---- task questions, inline answer boxes, Journal tab and Working area ---- */
+.tasks .tkbody{display:grid;gap:6px;min-width:0}
+.tasks .tkq{display:block;font-weight:700;color:var(--ink)}
+.tasks .tkdo{display:block}
+.tkans{display:grid;gap:5px;background:var(--chip);border:1.5px solid var(--line);border-radius:10px;padding:8px 10px}
+.tkans label{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.tkans .tkrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.tkans .tkin{width:104px;padding:7px 9px;border:2px solid var(--line);border-radius:8px;font:inherit;font-family:var(--f-num);font-size:17px;background:var(--panel);color:var(--ink)}
+.tkans .tksel{padding:7px 6px;border:2px solid var(--line);border-radius:8px;font:inherit;background:var(--panel);color:var(--ink)}
+.tkans .tkin:focus,.tkans .tksel:focus{outline:3px solid var(--accent);outline-offset:1px}
+.tkans small{font-size:12.5px;color:var(--muted);font-weight:600}
+.tkans .mini{justify-self:start}
+.tkans.locked.ok{border-color:var(--good)}.tkans.locked.no{border-color:var(--bad)}
+.tkans.locked .tkin,.tkans.locked .tksel{opacity:.85}
+.jtab{position:fixed;right:0;top:42%;z-index:63;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 7px;border:2px solid var(--hazard);border-right:0;border-radius:12px 0 0 12px;background:var(--hazard-soft);color:var(--ink);font-weight:800;box-shadow:-4px 4px 12px rgba(0,0,0,.14);cursor:pointer}
+.jtab:hover{background:var(--hazard)}
+.jtab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.jtab .jtl{writing-mode:vertical-rl;font-size:15px;letter-spacing:.03em}
+.jtab .jc{min-width:20px;padding:0 4px}
+body.jopen .jtab{right:min(430px,100vw);z-index:65}
+@media (max-width:470px){body.jopen .jtab{display:none}}
+@media print{.jtab{display:none!important}}
+.workpad{width:100%;min-height:150px;resize:vertical;border:2px solid var(--line);border-radius:10px;padding:10px;font:inherit;font-family:var(--f-num);font-size:16px;line-height:1.5;background:var(--panel);color:var(--ink)}
+.workpad:focus{outline:3px solid var(--accent);outline-offset:1px}
+.calcl{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.calcl li{position:relative;display:grid;gap:3px;border:1.5px solid var(--line);border-radius:10px;padding:8px 36px 8px 10px;background:var(--panel)}
+.calcl code{font-family:var(--f-num);font-size:17px;font-weight:800}
+.calcl small{font-size:12.5px;color:var(--muted)}
+.calcl .mini{position:absolute;top:6px;right:6px}
+.calc .csave{display:grid;gap:6px;margin:6px 0}
+.calc .calcnote{width:100%;border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink)}
+.calc .csrow{display:flex;gap:6px}.calc .csrow .ghost{flex:1;padding:6px 4px;font-size:13px}
+@media (min-width:471px){.calc{right:58px}}   /* leave the Journal tab on the right edge clear */
+@media (min-width:1180px){body.jopen .calc{right:446px}}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -2064,14 +2099,23 @@ function initCalc() {
     <div class="disp"><div class="last" id="calcLast"></div><input id="calcIn" inputmode="decimal" aria-label="Calculator display" autocomplete="off"></div>
     <div class="cmsg" id="calcMsg"></div>
     <div class="keys">${['C', '(', ')', '⌫', '7', '8', '9', '÷', '4', '5', '6', '×', '1', '2', '3', '−', '0', '.', 'g', '+'].map(k => `<button type="button" data-k="${k}" class="${'÷×−+'.includes(k) ? 'op' : k === 'g' ? 'g' : ''}" ${k === 'g' ? 'title="g = 9.8 N/kg"' : ''}>${k}</button>`).join('')}<button type="button" data-k="=" class="eq" style="grid-column:1/-1">=</button></div>
+    <div class="csave"><input id="calcNote" class="calcnote" autocomplete="off" aria-label="Your working (optional)" placeholder="Your working (optional)"><div class="csrow"><button type="button" class="ghost sm" id="calcSave">📓 Save to Journal</button><button type="button" class="ghost sm" id="calcWork">Open my working</button></div></div>
     <div class="scaleNote">The <b>g</b> key is 9.8 N/kg. Weight = mass × g. You can type <b>x</b> or <b>*</b> to multiply and <b>/</b> to divide.</div></div>
     <div id="calcForm" class="cform" hidden></div>`;
   const inp = $('#calcIn');
-  const run = () => { try { const v = calcEval(inp.value); if (v === '') return; $('#calcLast').textContent = inp.value + ' ='; inp.value = String(v); $('#calcMsg').textContent = ''; } catch (e) { $('#calcMsg').textContent = e.message; } };
+  let lastCalc = null;   // the last finished calculation, kept so it can be saved in the Journal with the student's working
+  const run = () => { try { const expr = inp.value, v = calcEval(expr); if (v === '') return; $('#calcLast').textContent = expr + ' ='; inp.value = String(v); lastCalc = { expr, res: String(v) }; $('#calcMsg').textContent = ''; } catch (e) { $('#calcMsg').textContent = e.message; } };
   el.addEventListener('click', e => { const t = e.target.closest('[data-ctk]'); if (t) { calcTab(t.dataset.ctk); return; } const b = e.target.closest('[data-k]'); if (!b) return; const k = b.dataset.k;
-    if (k === 'C') { inp.value = ''; $('#calcLast').textContent = ''; $('#calcMsg').textContent = ''; } else if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '=') run(); else inp.value += k; });
+    if (k === 'C') { inp.value = ''; $('#calcLast').textContent = ''; $('#calcMsg').textContent = ''; lastCalc = null; } else if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '=') run(); else inp.value += k; });
   inp.addEventListener('input', () => { const v = inp.value, w = v.replace(/[xX*]/g, '×').replace(/\//g, '÷'); if (w !== v) { const p = inp.selectionStart; inp.value = w; inp.setSelectionRange(p, p); } });   // typing x or * shows ×, / shows ÷
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); run(); } if (e.key === 'Escape') toggleCalc(false); });
+  $('#calcSave').addEventListener('click', () => {
+    if (!lastCalc || (inp.value.trim() && inp.value !== lastCalc.res)) run();   // a sum typed but not yet worked out: work it out first
+    if (!lastCalc) { $('#calcMsg').textContent = 'Work something out first, then save it.'; return; }
+    saveCalc(lastCalc.expr, lastCalc.res, $('#calcNote').value.trim()); $('#calcNote').value = '';
+    const b = $('#calcSave'); b.textContent = '✓ Saved'; setTimeout(() => { b.textContent = '📓 Save to Journal'; }, 1600);
+  });
+  $('#calcWork').addEventListener('click', () => { openJournal('work'); if (innerWidth < 1180) toggleCalc(false); });   // on a small screen the Journal fills the width, so the calculator steps aside
   $('#calcX').addEventListener('click', () => toggleCalc(false));
   $('#calcFab').addEventListener('click', () => toggleCalc());
   calcBadge();
@@ -2317,7 +2361,7 @@ function journalAdd(key, where, title, html) {
   const J = dbGet('journal', { order: [], entries: {} }); if (!J.entries[key]) J.order.push(key);
   J.entries[key] = { where, title, html, at: Date.now() }; J.last = key; dbSet('journal', J); updateJCount();
 }
-function updateJCount() { const J = dbGet('journal', { order: [] }); $('#jCount').textContent = J.order.length; $$('.jbtn .jc').forEach(e => e.textContent = J.order.length); }
+function updateJCount() { const J = dbGet('journal', { order: [] }); $('#jCount').textContent = J.order.length; $$('.jbtn .jc, .jtab .jc').forEach(e => e.textContent = J.order.length); }
 function addEvidence(kind, text) {
   const E = dbGet('evidence', []); if (kind === 'challenge' && E.some(e => e.text === text)) return;
   E.push({ kind, text, at: new Date().toISOString() }); if (E.length > 300) E.splice(0, E.length - 300); dbSet('evidence', E);
@@ -2336,12 +2380,37 @@ function vocabHTML() {
 let JTAB = 'runs', JRUNS_SEEN = false;
 function openJournal(tab) {
   if (tab) JTAB = tab; const p = $('#journal'); if (!p) return;
-  p.hidden = false; document.body.classList.add('jopen'); renderJournal();
+  p.hidden = false; document.body.classList.add('jopen'); jTabAria(true); renderJournal();
   JOURNAL_OPENED = true; if (JTAB === 'runs') JRUNS_SEEN = true; if (LAB.onChange) LAB.onChange();
   setTimeout(() => { const c = $('#jClose'); if (c) c.focus({ preventScroll: true }); }, 20);
 }
-function closeJournal() { const p = $('#journal'); if (!p || p.hidden) return; p.hidden = true; document.body.classList.remove('jopen'); }
+function closeJournal() { const p = $('#journal'); if (!p || p.hidden) return; p.hidden = true; document.body.classList.remove('jopen'); jTabAria(false); }
+function jTabAria(on) { $$('[data-journal]').forEach(b => b.setAttribute('aria-expanded', on ? 'true' : 'false')); }
 const journalOpen = () => { const p = $('#journal'); return !!(p && !p.hidden); };
+/* The Working tab: free space for a student to show their working, plus the calculations saved from the calculator.
+   DB.jwork = { pads: { 'c4f:f5': { text, where, title, at } }, calcs: [{ id, expr, res, note, where, title, at }] } */
+function workCtx() {
+  if (typeof CH !== 'undefined' && CH && VIEW === 'vChapter') {
+    const chd = CHDATA[CH.id], where = `Chapter ${CH.n}: ${CH.title}`;
+    if (CTAB === 'learn' && chd.steps[GI]) return { key: CH.id + ':' + chd.steps[GI].id, where, title: chd.steps[GI].title };
+    return { key: CH.id + ':' + CTAB, where, title: CTAB === 'challenge' ? 'The Challenge' : CTAB === 'review' ? 'The Check' : 'Chapter ' + CH.n };
+  }
+  return { key: 'general', where: 'Anywhere in Force HQ', title: 'Free space' };
+}
+const workGet = () => { const w = dbGet('jwork', null) || {}; w.pads = w.pads || {}; w.calcs = w.calcs || []; return w; };
+function saveCalc(expr, res, note) {
+  const w = workGet(), c = workCtx(); w.calcs.push({ id: Date.now() + '' + w.calcs.length, expr, res, note: note || '', where: c.where, title: c.title, at: Date.now() }); dbSet('jwork', w);
+  updateWorkCount(); if (journalOpen()) renderJournal();
+}
+const workCount = () => { const w = workGet(); return w.calcs.length + Object.keys(w.pads).filter(k => (w.pads[k].text || '').trim()).length; };
+function updateWorkCount() { const n = $('#journal [data-jtab="work"] span'); if (n) n.textContent = workCount(); }
+function workTabHTML() {
+  const w = workGet(), c = workCtx(), pad = w.pads[c.key], others = Object.keys(w.pads).filter(k => k !== c.key && (w.pads[k].text || '').trim());
+  return `<p class="scaleNote">Show your working here. Write the formula, put in the numbers, work out the answer, then write the unit. Writing it down helps you spot mistakes.</p>
+    <section><h3 class="jh3">My working: ${esc(c.title)}</h3><textarea class="workpad" id="workPad" rows="8" aria-label="My working for ${esc(c.title)}" placeholder="For example:&#10;speed = force ÷ mass&#10;speed = 150 ÷ 250&#10;speed = 0.6 m/s">${esc(pad ? pad.text : '')}</textarea><p class="scaleNote">Saved as you type. ${esc(c.where)}.</p></section>
+    <section><h3 class="jh3">Calculations I saved</h3>${w.calcs.length ? `<ul class="calcl">${w.calcs.slice().reverse().map(k => `<li><code>${esc(k.expr)} = ${esc(k.res)}</code>${k.note ? `<div>${esc(k.note)}</div>` : ''}<small>${esc(k.where)} · ${esc(k.title)}</small><button type="button" class="mini" data-workdel="${esc(k.id)}" aria-label="Remove this calculation">✕</button></li>`).join('')}</ul>` : '<p class="scaleNote">Open the calculator 🧮, work something out, then press <b>Save to Journal</b>. It is kept here with your working.</p>'}</section>
+    ${others.length ? `<section><h3 class="jh3">Working from other steps</h3>${others.map(k => `<details class="jent"><summary>${esc(w.pads[k].title)} <small>${esc(w.pads[k].where)}</small></summary><textarea class="workpad" data-workkey="${esc(k)}" rows="5" aria-label="My working for ${esc(w.pads[k].title)}">${esc(w.pads[k].text)}</textarea></details>`).join('')}</section>` : ''}`;
+}
 function journalNotesHTML() {
   const J = dbGet('journal', { order: [], entries: {} }), notes = dbGet('jnotes', {}), E = dbGet('evidence', []);
   const groups = {}; J.order.forEach(k => { const e = J.entries[k]; (groups[e.where] = groups[e.where] || []).push(k); });
@@ -2355,19 +2424,22 @@ function renderJournal() {
   const nR = runsAll().length, nV = Object.keys(dbGet('vocab', {})).filter(k => TERMS[k]).length, nN = dbGet('journal', { order: [] }).order.length;
   const sc = $('.jbody', p) ? $('.jbody', p).scrollTop : 0, same = p.dataset.tab === JTAB;
   p.innerHTML = `<div class="jtop"><h2 id="jT">📓 My Journal</h2><button type="button" class="go sm" id="jClose">Close</button></div>
-    <div class="jtabs" role="tablist" aria-label="Journal sections">${[['runs', '📋 Runs', nR], ['notes', '📝 Notes', nN], ['vocab', '🔤 Vocab', nV]].map(([k, t, n]) => `<button type="button" role="tab" data-jtab="${k}" aria-selected="${JTAB === k}">${t}<span>${n}</span></button>`).join('')}</div>
-    <div class="jbody">${JTAB === 'runs' ? runsTabHTML() : JTAB === 'notes' ? journalNotesHTML() : `<h3 class="jh3">Key vocabulary</h3>${vocabHTML()}`}</div>`;
+    <div class="jtabs" role="tablist" aria-label="Journal sections">${[['runs', '📋 Runs', nR], ['work', '✍️ Working', workCount()], ['notes', '📝 Notes', nN], ['vocab', '🔤 Vocab', nV]].map(([k, t, n]) => `<button type="button" role="tab" data-jtab="${k}" aria-selected="${JTAB === k}">${t}<span>${n}</span></button>`).join('')}</div>
+    <div class="jbody">${JTAB === 'runs' ? runsTabHTML() : JTAB === 'work' ? workTabHTML() : JTAB === 'notes' ? journalNotesHTML() : `<h3 class="jh3">Key vocabulary</h3>${vocabHTML()}`}</div>`;
   p.dataset.tab = JTAB; if (same) $('.jbody', p).scrollTop = sc;
   $$('[data-jnote]', p).forEach(t => t.addEventListener('input', () => { const n = dbGet('jnotes', {}); if (t.value.trim()) n[t.dataset.jnote] = t.value; else delete n[t.dataset.jnote]; dbSet('jnotes', n); }));
+  $$('.workpad', p).forEach(t => t.addEventListener('input', () => { const w = workGet(), c = workCtx(), k = t.dataset.workkey || c.key, prev = w.pads[k] || {}; if (t.value.trim()) w.pads[k] = { text: t.value, where: prev.where || c.where, title: prev.title || c.title, at: Date.now() }; else delete w.pads[k]; dbSet('jwork', w); updateWorkCount(); }));
   const vs = $('#vSearch', p); if (vs) vs.addEventListener('input', () => { const q = vs.value.trim().toLowerCase(); $$('.vitem', p).forEach(it => it.hidden = q && !it.dataset.v.includes(q) && !it.textContent.toLowerCase().includes(q)); });
   const ea = $('#evAdd', p); if (ea) ea.addEventListener('click', () => { const v = $('#evOwn', p).value.trim(); if (!v) return; addEvidence('own', v); renderJournal(); });
   $$('details.run', p).forEach(d => d.addEventListener('toggle', () => { RUNOPEN[d.dataset.run] = d.open; }));
 }
 function initJournal() {
   const p = h('aside', { class: 'journal', id: 'journal', hidden: '', 'aria-label': 'My Journal' }); document.body.appendChild(p);
+  document.body.appendChild(h('button', { type: 'button', class: 'jtab', 'data-journal': '', 'aria-controls': 'journal', 'aria-expanded': 'false', title: 'Open or close your Journal' }, `<span class="jtl">📓 Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span>`));
   document.addEventListener('click', e => {
     if (e.target.closest('#jClose')) { closeJournal(); return; }
     const t = e.target.closest('[data-jtab]'); if (t) { JTAB = t.dataset.jtab; if (JTAB === 'runs') JRUNS_SEEN = true; renderJournal(); if (LAB.onChange) LAB.onChange(); return; }
+    const wd = e.target.closest('[data-workdel]'); if (wd) { const w = workGet(); w.calcs = w.calcs.filter(k => k.id !== wd.dataset.workdel); dbSet('jwork', w); renderJournal(); return; }
     if (e.target.closest('[data-runs]')) { openJournal('runs'); return; }
   });
 }
@@ -2707,6 +2779,13 @@ const FBDB = {
 /* ===== Question engine shared by Learn steps and Reviews =====
    Every question: {id, type, p, ...}. Saved state: {v, ok, tries, done}.
    Types: mcq, tap, num, reading, gap, sort, match, table, tick, fbd, explain */
+/* ---- answer drafts: a number and unit typed under a Do-this task are copied into the matching question's answer box (and the other way round) ---- */
+const draftOf = (store, id) => (dbGet(store + '.draft', {}) || {})[id] || null;
+function draftSave(store, id, part, val, src) {
+  const d = dbGet(store + '.draft', {}), cur = d[id] || {}; cur[part] = val; d[id] = cur; dbSet(store + '.draft', d);
+  $$('[data-draft="' + store + '|' + id + '"]').forEach(el => { if (el === src || el.disabled || el.dataset.dk !== part) return; if (el.value !== val) el.value = val; });
+  if (typeof checkStep === 'function') checkStep();
+}
 const QLABEL = { mcq: 'Choose one', tap: 'Tap the sentence', num: 'Calculate', reading: 'Read the arena', gap: 'Fill the gaps', sort: 'Sort it', match: 'Match it up', table: 'Complete the table', tick: 'Tick all that apply', fbd: 'Draw it: free-body diagram', explain: 'Explain it' };
 const normWord = s => String(s || '').toLowerCase().replace(/[^a-z0-9.]+/g, ' ').trim();
 /* Gap answers accept sensible synonyms: if any accepted answer is in a group, every word in that group counts.
@@ -2752,9 +2831,10 @@ const QT = {
   num: {
     /* q.units: a unit picker (the student chooses the unit as well as typing the number).
        q.ladder + q.hints: a "Need a clue?" fold-out that shows one hint at a time, never the final answer. */
-    html(q, s) {
-      const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length;
-      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${s && s.v != null ? esc(s.v) : ''}">${U ? `<select class="unitsel" aria-label="Unit"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${s && s.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+    html(q, s, api) {
+      const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length, D = api && api.draft ? api.draft.get() || {} : {}, dk = api && api.draft ? ` data-draft="${api.draft.key}"` : '';
+      const v0 = s && s.v != null ? s.v : D.v || '', u0 = s && s.u ? s.u : D.u || '';
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
     },
     bind(el, q, api) {
       const U = q.units && q.units.length;
@@ -2766,6 +2846,7 @@ const QT = {
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+      if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
     },
     lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); const sel = $('.unitsel', el); if (sel) { sel.value = s.u || ''; sel.classList.add(s.u === q.unit ? 'right' : 'wrong'); }
       if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
@@ -2863,6 +2944,7 @@ function renderQuestion(host, q, ctx) {
   const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
   const api = {
     storePath: ctx.store,
+    draft: ctx.mode === 'learn' ? { key: ctx.store + '|' + q.id, get: () => draftOf(ctx.store, q.id), set: (part, val, src) => draftSave(ctx.store, q.id, part, val, src) } : null,
     state: () => dbGet(path, null),
     setRaw: v => dbSet(path, v),
     persist: () => dbSet(path, dbGet(path, null)),
@@ -2884,7 +2966,7 @@ function renderQuestion(host, q, ctx) {
       if (ctx.onDone) ctx.onDone(q, st);
     }
   };
-  body.innerHTML = QT[q.type].html(q, s);
+  body.innerHTML = QT[q.type].html(q, s, api);
   QT[q.type].bind(body, q, api);
   if (s && s.done) {
     if (QT[q.type].lock) QT[q.type].lock(body, q, s);
@@ -2967,17 +3049,49 @@ function cardsDone() {
   checkStep(true);
   if (st.tour && !dbGet('tourDone')) setTimeout(startTour, 200);
 }
+/* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)
+   and a number-and-unit box sits under it. What is typed there is copied into the matching "Your turn" question (draftSave in 35-questions.js). */
+const taskQ = t => (t[2] && t[2].q) ? ((CHDATA[CH.id].steps[GI].qs || []).find(q => q.id === t[2].q) || null) : null;
+const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<span class="tkq">${q.p}</span>` : '') + `<span class="tkdo">${t[0]}</span>`; };
+const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
+function hasAns(id) {
+  const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === id), store = stepKey(CH.id, GI), s = dbGet(store + '.' + id, null);
+  if (s && s.done) return true; const d = draftOf(store, id);
+  return !!(q && d && String(d.v == null ? '' : d.v).trim() && (!(q.units && q.units.length) || d.u));
+}
+function tkAnsHTML(q) {
+  const store = stepKey(CH.id, GI), s = dbGet(store + '.' + q.id, null), d = draftOf(store, q.id) || {}, U = q.units && q.units.length, done = !!(s && s.done);
+  const v = done ? s.v : (d.v || ''), u = done ? (s.u || '') : (d.u || ''), dk = ` data-draft="${store}|${q.id}"`, dis = done ? ' disabled' : '';
+  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${done ? `<small>${s.ok ? '✓ Checked: correct.' : 'Checked in Your turn.'}</small>` : '<small>This is copied into your <b>Your turn</b> questions for you.</small><button type="button" class="mini" data-openq="' + q.id + '">Check it in Your turn →</button>'}</span>`;
+}
+function bindTkAns() {
+  const st = CHDATA[CH.id].steps[GI], store = stepKey(CH.id, GI);
+  $$('#rail .tkans').forEach(box => {
+    const q = (st.qs || []).find(x => x.id === box.dataset.qid); if (!q) return;
+    const inp = $('.tkin', box), sel = $('.tksel', box), ob = $('[data-openq]', box);
+    if (inp) inp.addEventListener('input', e => draftSave(store, q.id, 'v', e.target.value, e.target));
+    if (sel) sel.addEventListener('change', e => draftSave(store, q.id, 'u', e.target.value, e.target));
+    if (ob) ob.addEventListener('click', () => { qPlace('pop'); setTimeout(() => { const i = $(`#qCard .qitem[data-q="${q.id}"] .ansin`); if (i) i.focus({ preventScroll: true }); }, 80); });
+  });
+}
+/* after a question is checked, re-draw the answer boxes in the task list (they lock and show the result) */
+function refreshTkAns() {
+  const st = CHDATA[CH.id].steps[GI];
+  (st.tasks || []).forEach((t, i) => { const q = taskQ(t); const li = $('#tk' + i); if (!q || !li || t[2].box === false) return; const old = $('.tkans', li); if (old) old.outerHTML = tkAnsHTML(q); });
+  bindTkAns();
+}
 function renderRail() {
   const chd = CHDATA[CH.id], st = chd.steps[GI];
   $('#rail').innerHTML = `<div class="row" style="justify-content:space-between"><span class="lbl">Step ${GI + 1} of ${chd.steps.length}</span><div class="dots">${chd.steps.map((s, i) => `<button type="button" aria-label="Step ${i + 1}: ${esc(s.title)}" class="${stepDone(CH.id, i) ? 'done' : ''} ${i === GI ? 'cur' : ''}" data-goto="${i}"></button>`).join('')}</div></div>
     <h2>${st.title}</h2>
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
-    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => `<li id="tk${i}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul>` : ''}
+    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
+  bindTkAns();
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
   $('#gPrev').addEventListener('click', () => setStep(GI - 1));
   $('#gNext').addEventListener('click', tryNext);
@@ -2993,7 +3107,7 @@ function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
-  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
+  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
     wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });
@@ -3061,13 +3175,13 @@ function tryNext() {
   const go = () => { if (last) setCTab(chd.challenge ? 'challenge' : 'review'); else setStep(GI + 1); };
   if (stepDone(CH.id, GI)) { go(); return; }
   if (hasQs() && !qsDone() && QSTATE !== 'pop') {
-    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) left.push(plain(chd.steps[GI].tasks[i][0])); });
+    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) left.push(taskPlain(chd.steps[GI].tasks[i])); });
     if (!left.length) { qPlace('pop'); return; }
     openModal(`<div class="modal"><h2>Have you finished the Do this list?</h2><p>The questions are about what you see in the arena, so it helps to finish these first:</p><ul>${left.map(t => `<li>${esc(t)}</li>`).join('')}</ul><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Go back to the arena</button><button type="button" class="go" id="contAnyway">Continue anyway →</button></div></div>`);
     $('#contAnyway').addEventListener('click', () => { closeModal(); qPlace('pop'); });
     return;
   }
-  const todo = []; if (!CARDS_SEEN) todo.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) todo.push(plain(chd.steps[GI].tasks[i][0])); });
+  const todo = []; if (!CARDS_SEEN) todo.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) todo.push(taskPlain(chd.steps[GI].tasks[i])); });
   (chd.steps[GI].qs || []).forEach(q => { const s = dbGet(stepKey(CH.id, GI) + '.' + q.id, null); if (!(s && s.done)) todo.push('answer: ' + plain(q.p).slice(0, 80)); });
   openModal(`<div class="modal"><h2>This step isn't finished yet</h2><p>You still need to:</p><ul>${todo.map(t => `<li>${esc(t)}</li>`).join('')}</ul><p>You can carry on anyway and come back later.</p><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Stay here</button><button type="button" class="go" id="contAnyway">Continue anyway →</button></div></div>`);
   $('#contAnyway').addEventListener('click', () => { closeModal(); qUnpop(); go(); });
@@ -3188,7 +3302,7 @@ CHDATA.c1 = {
         { html: `<p>${T('gravity', 'Gravity')} pulls everything towards the centre of the Earth. The pull of gravity on an object is called its ${T('weight')}.</p><p>Weight is a force, so it is measured in newtons. ${T('mass', 'Mass')} is how much stuff is in the object, and it is measured in kilograms (kg).</p>` },
         { html: `<p>On Earth, gravity pulls on every kilogram with 9.8 newtons. So to find an object's weight:</p><div class="law"><b>weight (N) = mass (kg) × 9.8</b></div><div class="example">A 50 kg crate: 50 × 9.8 = <b>490 N</b></div><p>Open the calculator if you need it. Its <b>g</b> key is 9.8.</p>` }],
       setup() { S.mass = 50; S.floor = 'smooth'; }, adds: ['mass', 'readM'], sides: [], pullers: [],
-      tasks: [['Use the Crate mass slider to set the crate to 47 kg.', () => S.mass === 47]],
+      tasks: [['Use the Crate mass slider to set the crate to 47 kg.', () => S.mass === 47], ['Work out the weight and type your answer.', () => hasAns('q1'), { q: 'q1' }], ['Work out the weight and type your answer.', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'num', p: 'Work out the weight of the 47 kg crate.', ans: 460.6, unit: 'N', ok: 'Brilliant! 47 × 9.8 = 460.6 N.', hints: ['Multiply the mass by 9.8.', 'Type 47 × 9.8 into the calculator.'] },
         { id: 'q2', type: 'num', p: 'A crate has a mass of 120 kg. What is its weight?', ans: 1176, unit: 'N', ok: 'Correct! 120 × 9.8 = 1176 N.', hints: ['Weight = mass × 9.8.', 'Type 120 × 9.8 into the calculator.'] },
@@ -3533,7 +3647,7 @@ CHDATA.c3 = {
         { html: `<p>The triangle works for any letter. Cover the one you want to find.</p><div class="example"><b>Finding F.</b> A 90 kg sled must accelerate at 2 m/s². Cover F, then multiply: F = 90 × 2 = <b>180 N</b>. That is 2 huskies.</div><div class="example"><b>Finding m.</b> Three huskies (270 N) make a sled accelerate at 2.7 m/s². Cover m, then divide: m = 270 ÷ 2.7 = <b>100 kg</b>.</div>` },
         { html: `<p>Two jobs. In each one, <b>work out your answer first</b>, then set up the sled and pull to check it.</p>` }],
       setup() { snow(108, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work it out first, then set up the sled and pull',
-      tasks: [['<b>Job 1.</b> A 108 kg sled has to accelerate at 2.5 m/s². Work out the force it needs, add that many huskies (90 N each) and pull.', () => rHas(3, 108, 'snow0')], ['<b>Job 2.</b> Two huskies make a sled accelerate at 2.25 m/s². Work out its mass, set the slider to that mass and pull.', () => rHas(2, 80, 'snow0')]],
+      tasks: [['Work it out first. Then check it: set the mass to <b>108 kg</b>, add that many huskies (90 N each) and pull.', () => rHas(3, 108, 'snow0'), { q: 'q1' }], ['Work it out and type your answer.', () => hasAns('q2'), { q: 'q2' }], ['Work it out first. Then check it: set the slider to the mass you worked out and pull.', () => rHas(2, 80, 'snow0'), { q: 'q3' }]],
       mask: [{ q: 'q1', keys: ['readA'], when: (n, m) => m === 108 }, { q: 'q3', keys: ['readA'], when: n => n === 2 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Job 1.</b> What resultant force does a 108 kg sled need to accelerate at 2.5 m/s²?', unit: 'N', units: UNITS, ans: 270, tol: 0.6, ladder: true, work: 'F = m × a = 108 × 2.5 = 270 N', ok: 'Yes: 270 N.', hints: ['Cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 108 × 2.5.', 'Type 108 × 2.5 into the calculator.'] },
@@ -3561,7 +3675,7 @@ CHDATA.c3 = {
         { html: `<p>Time to put F = ma to work on <b>five different sleds</b>. Each one has a <b>?</b> that you have to find.</p><ol><li>Cover the unknown letter on the ${T('triangle', 'formula triangle')} and work out the answer with the calculator.</li><li>Type your answer and choose its unit.</li><li>Set up the sled in the arena and press <b>Pull!</b> The readouts show whether you were right.</li></ol><p>Every question has a <b>Need a clue?</b> box. It gives you one hint at a time, and never the answer.</p>` },
         { html: `<div class="notebox"><b>Which floor?</b><p>Sleds 1 to 3 use the <b>Friction off</b> floor, so the huskies' pull is the whole resultant force. Sleds 4 and 5 use <b>packed snow</b>, where friction is on. Choose the floor with the floor buttons.</p></div>` }],
       setup() { snow(85, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work out the answer first, then set up the sled and press Pull!',
-      tasks: [['<b>Sled 1.</b> Set <b>85 kg</b>, add <b>3 huskies</b> (friction off) and pull to check your answer.', () => rHas(3, 85, 'snow0')], ['<b>Sled 2.</b> Set <b>72 kg</b>, add the huskies your force needs (friction off) and pull.', () => rHas(2, 72, 'snow0')], ['<b>Sled 3.</b> Set the mass you worked out, add <b>3 huskies</b> (friction off) and pull.', () => rHas(3, 120, 'snow0')], ['<b>Sled 4.</b> Choose <b>packed snow</b>, set <b>64 kg</b>, add <b>2 huskies</b>, pull and read the friction.', () => rHas(2, 64, 'snow')], ['<b>Sled 5.</b> Choose <b>packed snow</b>, set the mass you worked out, add <b>3 huskies</b> and pull.', () => rHas(3, 70, 'snow')]],
+      tasks: [['Work it out first. Then check it: set <b>85 kg</b>, add <b>3 huskies</b> (friction off) and pull.', () => rHas(3, 85, 'snow0'), { q: 'q1' }], ['Work it out first. Then check it: set <b>72 kg</b>, add the huskies your force needs (friction off) and pull.', () => rHas(2, 72, 'snow0'), { q: 'q2' }], ['Work it out first. Then check it: set the mass you worked out, add <b>3 huskies</b> (friction off) and pull.', () => rHas(3, 120, 'snow0'), { q: 'q3' }], ['Choose <b>packed snow</b>, set <b>64 kg</b>, add <b>2 huskies</b> and pull. Read the friction, then work out the acceleration.', () => rHas(2, 64, 'snow'), { q: 'q4' }], ['Work it out first. Then check it: choose <b>packed snow</b>, set the mass you worked out, add <b>3 huskies</b> and pull.', () => rHas(3, 70, 'snow'), { q: 'q5' }]],
       more: [1, 2, 3],
       mask: [{ q: 'q1', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 85 }, { q: 'q2', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 72 }, { q: 'q3', keys: ['readA'], when: (n, m, f) => f === 'snow0' && n === 3 },
         { q: 'q4', keys: ['readA', 'readRes'], when: (n, m, f) => f === 'snow' && m === 64 }, { q: 'q5', keys: ['readA', 'readRes'], when: (n, m, f) => f === 'snow' && m === 70 }],
@@ -3591,7 +3705,7 @@ CHDATA.c3 = {
         { html: `<p>Friction is bigger on <b>fresh powder</b> than on packed snow. Soft snow grips the sled more. So the same huskies leave a smaller resultant force.</p><p>For any problem with friction, use <b>two steps</b>: find the resultant (pull − friction), then use F = m × a.</p>` }],
       predict: { q: 'Four huskies pull a 120 kg sled. On packed snow, the acceleration would be about 2.5 m/s². On fresh powder, the sled\'s acceleration will be…', opts: ['smaller, because the friction is bigger', 'bigger, because the snow is softer', 'the same, because the huskies pull just as hard', 'the same, because the mass has not changed'] },
       setup() { snow(120, 'powder', 0); }, adds: ['mass'], sides: ['right'], pullers: ['husky'], idle: 'Choose Fresh powder, set 120 kg, add 4 huskies, then Pull!',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose <b>Fresh powder</b> and set the mass to <b>120 kg</b>. Add <b>4 huskies</b> and pull.', () => rHas(4, 120, 'powder')]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose <b>Fresh powder</b> and set the mass to <b>120 kg</b>. Add <b>4 huskies</b> and pull.', () => rHas(4, 120, 'powder')], ['Work out the resultant force and type your answer.', () => hasAns('q2'), { q: 'q2' }], ['Work out the acceleration and type your answer.', () => hasAns('q3'), { q: 'q3' }]],
       mask: [{ q: 'q2', keys: ['readRes'], when: ALL }, { q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What friction did the Friction readout show on the fresh powder?', unit: 'N', tol: 0.5, live: () => rFr(4, 120, 'powder'), need: () => rFr(4, 120, 'powder') != null, needMsg: 'Pull the 120 kg sled with 4 huskies on fresh powder first.', ok: 'Correct: 176.4 N. That is a lot more than on packed snow.' },
@@ -3603,7 +3717,7 @@ CHDATA.c3 = {
       cards: [
         { html: `<p>Be careful: <b>weight</b> and <b>mass</b> are different. Mass is in kg. Weight is a force in newtons.</p><div class="law">weight = mass × 9.8, so mass = weight ÷ 9.8</div><p>F = m × a needs the <b>mass</b>. If a question gives you the weight, turn it into a mass first.</p><div class="example">A sled weighs 882 N. Its mass is 882 ÷ 9.8 = <b>90 kg</b>.</div>` }],
       setup() { snow(85, 'snow', 0); }, adds: ['readW', 'readN'], sides: ['right'], pullers: ['husky'], idle: 'Set 85 kg, add 3 huskies, then Pull!',
-      tasks: [['Set the mass to <b>85 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 85, 'snow')]],
+      tasks: [['Set the mass to <b>85 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 85, 'snow')], ['Work out the acceleration and type your answer.', () => hasAns('q2'), { q: 'q2' }]],
       mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [
         { id: 'q1', type: 'reading', p: 'What does the Weight readout show for the 85 kg sled?', unit: 'N', tol: 0.5, live: () => 85 * G, need: () => S.mass === 85, needMsg: 'Set the mass to 85 kg first.', ok: 'Correct: 85 × 9.8 = 833 N.' },
@@ -3708,7 +3822,7 @@ CHDATA.c4 = {
         { html: `<div class="example"><b>Worked example.</b> A 100 N push on a 50 kg pod gives it an acceleration of 100 ÷ 50 = 2 m/s². The push lasts 1 second, so the pod is going <b>2 m/s</b> by the end of it.</div><p>In this chapter every push lasts <b>1 s</b>, so the number for the speed gained is the same as the number for the acceleration: <b>speed = force ÷ mass</b>.</p><p>Now use the same idea for the astronaut and the pod. <b>Work out both speeds first, then push to check.</b></p>` }],
       predict: { q: 'A 100 N push is used on a 200 kg pod and an 80 kg astronaut. Both feel a force of 100 N. Who will end up going faster?', opts: ['The astronaut, because they have less mass', 'The pod, because it is heavier', 'Both the same, because the forces are equal', 'Neither will move'], then: 'Work out both speeds with the calculator, then push to check.' },
       setup() { space(200, 80, 100); }, adds: ['astro', 'mass'], sides: [], pullers: [], idle: 'Set the masses and the push force, then press Push off!',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Set the pod to <b>200 kg</b>, the astronaut to <b>80 kg</b> and the push to <b>100 N</b>. Then press <b>Push off!</b>', () => sHas(100, 200, 80)]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Set the pod to <b>200 kg</b>, the astronaut to <b>80 kg</b> and the push to <b>100 N</b>. Then press <b>Push off!</b>', () => sHas(100, 200, 80)], ['Work out the speed of the pod and type your answer.', () => hasAns('q2'), { q: 'q2' }], ['Work out the speed of the astronaut and type your answer.', () => hasAns('q3'), { q: 'q3' }]],
       mask: [{ q: 'q2', keys: ['readV'], when: (F, mp, ma) => F === 100 && mp === 200 && ma === 80 }, { q: 'q3', keys: ['readAV'], when: (F, mp, ma) => F === 100 && mp === 200 && ma === 80 }],
       qs: [
         { id: 'q1', type: 'mcq', p: 'The pod and the astronaut feel forces of the same size. Why does the astronaut go faster?', opts: ['The astronaut has less mass, so the same force gives a bigger acceleration', 'The astronaut feels a bigger force than the pod does', 'The pod pushes back harder on the astronaut than the astronaut pushes on the pod', 'The astronaut is closer to the docking station'], a: 0, ok: 'Yes: F = m × a, so with the same force, less mass means more acceleration.', why: { 1: 'The two forces in a force pair are always exactly the same size.', 2: 'Newton\'s third law says the forces are equal.', 3: 'It is not about where they are. It is about their mass.' } },
@@ -3730,9 +3844,13 @@ CHDATA.c4 = {
 
     { id: 'f5', title: 'Mystery push-offs', info: [], floors: ['air'],
       cards: [
-        { html: `<p>Time to use everything. In each puzzle, <b>work out the answer first</b>, then set up the Space Dome to check it. The speed readout you are working out stays hidden until you have answered.</p><div class="law">speed = force ÷ mass, and force = mass × speed, and mass = force ÷ speed. Remember that each push lasts 1 s.</div>` }],
+        { html: `<p>Time to use everything. There are <b>four puzzles</b>. For each one:</p><ol class="steps"><li><b>Read the question</b> in the Do this list.</li><li><b>Work it out</b> with the calculator (speed = force ÷ mass). Show your working in your Journal.</li><li><b>Type your answer</b> and its unit in the box under the puzzle. It is copied into Your turn for you.</li><li><b>Check it</b> in the Space Dome. The speed you are working out stays hidden until you have answered.</li></ol>` }],
       setup() { space(250, 75, 150); }, adds: ['pushf', 'astro', 'mass'], hide: SPACE_HIDE_MAIN.concat(['thrust']), sides: [], pullers: [], idle: 'Set up the puzzle, then press Push off!',
-      tasks: [['<b>Puzzle 1.</b> Set the pod to <b>250 kg</b>, the astronaut to <b>75 kg</b> and the push to <b>150 N</b>, then push off.', () => sHas(150, 250, 75)], ['<b>Puzzle 2.</b> Set the pod to <b>300 kg</b>, the astronaut to <b>80 kg</b> and the push to <b>120 N</b>, then push off.', () => sHas(120, 300, 80)], ['<b>Puzzle 3.</b> Set the astronaut to <b>100 kg</b>, the push to <b>90 N</b> and the pod to the mass you worked out, then push off.', () => sHas(90, 300, 100)], ['<b>Puzzle 4.</b> Set the pod to <b>400 kg</b>, the astronaut to <b>50 kg</b> and the push to <b>200 N</b>, then push off.', () => sHas(200, 400, 50)]],
+      tasks: [
+        ['Work it out first. Then check it: set the pod to <b>250 kg</b>, the astronaut to <b>75 kg</b> and the push to <b>150 N</b>, and push off.', () => sHas(150, 250, 75), { q: 'q1' }],
+        ['Work it out first. Then check it: set the pod to <b>300 kg</b>, the astronaut to <b>80 kg</b> and the push to <b>120 N</b>, and push off.', () => sHas(120, 300, 80), { q: 'q2' }],
+        ['Work it out first. Then check it: set the astronaut to <b>100 kg</b>, the push to <b>90 N</b> and the pod to the mass you worked out, and push off.', () => sHas(90, 300, 100), { q: 'q3' }],
+        ['Work it out first. Then check it: set the pod to <b>400 kg</b>, the astronaut to <b>50 kg</b> and the push to <b>200 N</b>, and push off.', () => sHas(200, 400, 50), { q: 'q5' }]],
       mask: [{ q: 'q1', keys: ['readV'], when: (F, mp, ma) => F === 150 && mp === 250 && ma === 75 }, { q: 'q2', keys: ['readAV'], when: (F, mp, ma) => F === 120 && mp === 300 && ma === 80 }, { q: 'q5', keys: ['readAV'], when: (F, mp, ma) => F === 200 && mp === 400 && ma === 50 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Puzzle 1: the rescue pod.</b> A 75 kg astronaut pushes a 250 kg pod with 150 N. What speed does the pod reach?', unit: 'm/s', units: UNITS, ans: 0.6, tol: 0.02, ladder: true, work: 'speed = F ÷ m = 150 ÷ 250 = 0.6 m/s', ok: 'Yes: 0.6 m/s.', hints: ['You want the speed of the pod, so use its mass, not the astronaut\'s.', 'speed = F ÷ m. The force is 150 N and the pod\'s mass is 250 kg.', 'Type 150 ÷ 250 into the calculator.'] },
@@ -3760,7 +3878,10 @@ CHDATA.c4 = {
       cards: [
         { html: `<p>Mission control sends <b>docking orders</b>. They tell you the speed the pod must have when it reaches the station. If the pod is too fast, it will crash into the dock. If it is too slow, it will take far too long.</p><p>You know that <b>speed = force ÷ mass</b>. So the push you need is <b>force = mass × speed</b>.</p><div class="example"><b>Worked example.</b> The order is for a 200 kg pod to dock at 0.5 m/s. The push is 200 × 0.5 = <b>100 N</b>.</div>` }],
       setup() { space(250, 100, 100); }, adds: [], hide: SPACE_HIDE_MAIN.concat(['thrust', 'astro', 'readAV', 'readAM']), sides: [], pullers: [], idle: 'Set the push force, then press Push off!',
-      tasks: [['Work out the push for <b>order 1</b> (question 1). Then set it and push off. Let the pod reach the dock.', () => sDock(150, 250, 100) != null]],
+      tasks: [
+        ['Work it out first. Then set that push and push off. Let the pod reach the dock (the ×8 button helps).', () => sDock(150, 250, 100) != null, { q: 'q1' }],
+        ['Work it out and type your answer.', () => hasAns('q3'), { q: 'q3' }],
+        ['Work it out and type your answer.', () => hasAns('q4'), { q: 'q4' }]],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Order 1.</b> The 250 kg pod must dock at <b>0.6 m/s</b>. What push does the astronaut need?', unit: 'N', units: UNITS, ans: 150, tol: 1, ladder: true, work: 'force = mass × speed = 250 × 0.6 = 150 N', ok: 'Yes: 150 N.', hints: ['You want the force, so cover F in the formula triangle. The letters left are side by side, so multiply.', 'force = mass × speed. The mass is 250 kg and the speed is 0.6 m/s.', 'Type 250 × 0.6 into the calculator.'] },
         { id: 'q2', type: 'reading', p: 'Check it. What was the pod\'s docking speed?', unit: 'm/s', tol: 0.03, live: () => sDock(150, 250, 100), need: () => sDock(150, 250, 100) != null, needMsg: 'Push with 150 N and let the pod reach the dock. The ×8 time button helps.', ok: 'Right on the order!' },

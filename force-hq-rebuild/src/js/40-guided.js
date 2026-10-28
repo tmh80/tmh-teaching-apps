@@ -68,17 +68,49 @@ function cardsDone() {
   checkStep(true);
   if (st.tour && !dbGet('tourDone')) setTimeout(startTour, 200);
 }
+/* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)
+   and a number-and-unit box sits under it. What is typed there is copied into the matching "Your turn" question (draftSave in 35-questions.js). */
+const taskQ = t => (t[2] && t[2].q) ? ((CHDATA[CH.id].steps[GI].qs || []).find(q => q.id === t[2].q) || null) : null;
+const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<span class="tkq">${q.p}</span>` : '') + `<span class="tkdo">${t[0]}</span>`; };
+const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
+function hasAns(id) {
+  const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === id), store = stepKey(CH.id, GI), s = dbGet(store + '.' + id, null);
+  if (s && s.done) return true; const d = draftOf(store, id);
+  return !!(q && d && String(d.v == null ? '' : d.v).trim() && (!(q.units && q.units.length) || d.u));
+}
+function tkAnsHTML(q) {
+  const store = stepKey(CH.id, GI), s = dbGet(store + '.' + q.id, null), d = draftOf(store, q.id) || {}, U = q.units && q.units.length, done = !!(s && s.done);
+  const v = done ? s.v : (d.v || ''), u = done ? (s.u || '') : (d.u || ''), dk = ` data-draft="${store}|${q.id}"`, dis = done ? ' disabled' : '';
+  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${done ? `<small>${s.ok ? '✓ Checked: correct.' : 'Checked in Your turn.'}</small>` : '<small>This is copied into your <b>Your turn</b> questions for you.</small><button type="button" class="mini" data-openq="' + q.id + '">Check it in Your turn →</button>'}</span>`;
+}
+function bindTkAns() {
+  const st = CHDATA[CH.id].steps[GI], store = stepKey(CH.id, GI);
+  $$('#rail .tkans').forEach(box => {
+    const q = (st.qs || []).find(x => x.id === box.dataset.qid); if (!q) return;
+    const inp = $('.tkin', box), sel = $('.tksel', box), ob = $('[data-openq]', box);
+    if (inp) inp.addEventListener('input', e => draftSave(store, q.id, 'v', e.target.value, e.target));
+    if (sel) sel.addEventListener('change', e => draftSave(store, q.id, 'u', e.target.value, e.target));
+    if (ob) ob.addEventListener('click', () => { qPlace('pop'); setTimeout(() => { const i = $(`#qCard .qitem[data-q="${q.id}"] .ansin`); if (i) i.focus({ preventScroll: true }); }, 80); });
+  });
+}
+/* after a question is checked, re-draw the answer boxes in the task list (they lock and show the result) */
+function refreshTkAns() {
+  const st = CHDATA[CH.id].steps[GI];
+  (st.tasks || []).forEach((t, i) => { const q = taskQ(t); const li = $('#tk' + i); if (!q || !li || t[2].box === false) return; const old = $('.tkans', li); if (old) old.outerHTML = tkAnsHTML(q); });
+  bindTkAns();
+}
 function renderRail() {
   const chd = CHDATA[CH.id], st = chd.steps[GI];
   $('#rail').innerHTML = `<div class="row" style="justify-content:space-between"><span class="lbl">Step ${GI + 1} of ${chd.steps.length}</span><div class="dots">${chd.steps.map((s, i) => `<button type="button" aria-label="Step ${i + 1}: ${esc(s.title)}" class="${stepDone(CH.id, i) ? 'done' : ''} ${i === GI ? 'cur' : ''}" data-goto="${i}"></button>`).join('')}</div></div>
     <h2>${st.title}</h2>
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
-    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => `<li id="tk${i}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul>` : ''}
+    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span><span class="jc">${dbGet('journal', { order: [] }).order.length}</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
+  bindTkAns();
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
   $('#gPrev').addEventListener('click', () => setStep(GI - 1));
   $('#gNext').addEventListener('click', tryNext);
@@ -94,7 +126,7 @@ function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
-  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
+  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
     wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });
@@ -162,13 +194,13 @@ function tryNext() {
   const go = () => { if (last) setCTab(chd.challenge ? 'challenge' : 'review'); else setStep(GI + 1); };
   if (stepDone(CH.id, GI)) { go(); return; }
   if (hasQs() && !qsDone() && QSTATE !== 'pop') {
-    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) left.push(plain(chd.steps[GI].tasks[i][0])); });
+    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) left.push(taskPlain(chd.steps[GI].tasks[i])); });
     if (!left.length) { qPlace('pop'); return; }
     openModal(`<div class="modal"><h2>Have you finished the Do this list?</h2><p>The questions are about what you see in the arena, so it helps to finish these first:</p><ul>${left.map(t => `<li>${esc(t)}</li>`).join('')}</ul><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Go back to the arena</button><button type="button" class="go" id="contAnyway">Continue anyway →</button></div></div>`);
     $('#contAnyway').addEventListener('click', () => { closeModal(); qPlace('pop'); });
     return;
   }
-  const todo = []; if (!CARDS_SEEN) todo.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) todo.push(plain(chd.steps[GI].tasks[i][0])); });
+  const todo = []; if (!CARDS_SEEN) todo.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) todo.push(taskPlain(chd.steps[GI].tasks[i])); });
   (chd.steps[GI].qs || []).forEach(q => { const s = dbGet(stepKey(CH.id, GI) + '.' + q.id, null); if (!(s && s.done)) todo.push('answer: ' + plain(q.p).slice(0, 80)); });
   openModal(`<div class="modal"><h2>This step isn't finished yet</h2><p>You still need to:</p><ul>${todo.map(t => `<li>${esc(t)}</li>`).join('')}</ul><p>You can carry on anyway and come back later.</p><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Stay here</button><button type="button" class="go" id="contAnyway">Continue anyway →</button></div></div>`);
   $('#contAnyway').addEventListener('click', () => { closeModal(); qUnpop(); go(); });

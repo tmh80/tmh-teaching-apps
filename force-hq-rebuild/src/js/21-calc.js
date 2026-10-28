@@ -19,14 +19,23 @@ function initCalc() {
     <div class="disp"><div class="last" id="calcLast"></div><input id="calcIn" inputmode="decimal" aria-label="Calculator display" autocomplete="off"></div>
     <div class="cmsg" id="calcMsg"></div>
     <div class="keys">${['C', '(', ')', '⌫', '7', '8', '9', '÷', '4', '5', '6', '×', '1', '2', '3', '−', '0', '.', 'g', '+'].map(k => `<button type="button" data-k="${k}" class="${'÷×−+'.includes(k) ? 'op' : k === 'g' ? 'g' : ''}" ${k === 'g' ? 'title="g = 9.8 N/kg"' : ''}>${k}</button>`).join('')}<button type="button" data-k="=" class="eq" style="grid-column:1/-1">=</button></div>
+    <div class="csave"><input id="calcNote" class="calcnote" autocomplete="off" aria-label="Your working (optional)" placeholder="Your working (optional)"><div class="csrow"><button type="button" class="ghost sm" id="calcSave">📓 Save to Journal</button><button type="button" class="ghost sm" id="calcWork">Open my working</button></div></div>
     <div class="scaleNote">The <b>g</b> key is 9.8 N/kg. Weight = mass × g. You can type <b>x</b> or <b>*</b> to multiply and <b>/</b> to divide.</div></div>
     <div id="calcForm" class="cform" hidden></div>`;
   const inp = $('#calcIn');
-  const run = () => { try { const v = calcEval(inp.value); if (v === '') return; $('#calcLast').textContent = inp.value + ' ='; inp.value = String(v); $('#calcMsg').textContent = ''; } catch (e) { $('#calcMsg').textContent = e.message; } };
+  let lastCalc = null;   // the last finished calculation, kept so it can be saved in the Journal with the student's working
+  const run = () => { try { const expr = inp.value, v = calcEval(expr); if (v === '') return; $('#calcLast').textContent = expr + ' ='; inp.value = String(v); lastCalc = { expr, res: String(v) }; $('#calcMsg').textContent = ''; } catch (e) { $('#calcMsg').textContent = e.message; } };
   el.addEventListener('click', e => { const t = e.target.closest('[data-ctk]'); if (t) { calcTab(t.dataset.ctk); return; } const b = e.target.closest('[data-k]'); if (!b) return; const k = b.dataset.k;
-    if (k === 'C') { inp.value = ''; $('#calcLast').textContent = ''; $('#calcMsg').textContent = ''; } else if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '=') run(); else inp.value += k; });
+    if (k === 'C') { inp.value = ''; $('#calcLast').textContent = ''; $('#calcMsg').textContent = ''; lastCalc = null; } else if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '=') run(); else inp.value += k; });
   inp.addEventListener('input', () => { const v = inp.value, w = v.replace(/[xX*]/g, '×').replace(/\//g, '÷'); if (w !== v) { const p = inp.selectionStart; inp.value = w; inp.setSelectionRange(p, p); } });   // typing x or * shows ×, / shows ÷
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); run(); } if (e.key === 'Escape') toggleCalc(false); });
+  $('#calcSave').addEventListener('click', () => {
+    if (!lastCalc || (inp.value.trim() && inp.value !== lastCalc.res)) run();   // a sum typed but not yet worked out: work it out first
+    if (!lastCalc) { $('#calcMsg').textContent = 'Work something out first, then save it.'; return; }
+    saveCalc(lastCalc.expr, lastCalc.res, $('#calcNote').value.trim()); $('#calcNote').value = '';
+    const b = $('#calcSave'); b.textContent = '✓ Saved'; setTimeout(() => { b.textContent = '📓 Save to Journal'; }, 1600);
+  });
+  $('#calcWork').addEventListener('click', () => { openJournal('work'); if (innerWidth < 1180) toggleCalc(false); });   // on a small screen the Journal fills the width, so the calculator steps aside
   $('#calcX').addEventListener('click', () => toggleCalc(false));
   $('#calcFab').addEventListener('click', () => toggleCalc());
   calcBadge();

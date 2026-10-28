@@ -40,3 +40,6 @@
 
 - Chapter 4: ask Tom to play it and say whether the ×8 time button, the tether and the "push lasts 1 s so speed = F ÷ m" shortcut feel right. Later idea: collisions (a second pod) and a momentum extension.
 - Chapter 4: both sections come out at about 29 min (Foundation) and 24 min (Extension) in `secMins`.
+
+## Done: working out calculations (28 Oct)
+- Calculation tasks show the question; answer boxes under tasks sync with Your turn; Journal tab on the right edge; Journal Working tab; calculator "Save to Journal". Not yet done: other tasks that only say "work out" in Chapter 2 (x2) could get answer boxes too.
