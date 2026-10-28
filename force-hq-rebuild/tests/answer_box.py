@@ -24,22 +24,26 @@ with sync_playwright() as p:
   check('task 3 states the question', "What is the pod's mass?" in tasks.nth(2).inner_text())
   check('each task has an answer box', pg.locator('#rail .tkans').count() == 4)
   check('mass puzzle box has a kg unit', 'kg' in pg.locator('#rail .tkans').nth(2).locator('.tksel').inner_text())
-  # 2. typing in the task copies into Your turn
+  # 2. typing in the task copies into Your turn (the Your turn box stays hidden until Next)
   box = pg.locator('#rail .tkans').first
-  box.locator('.tkin').fill('0.6'); box.locator('.tksel').select_option('m/s'); pg.wait_for_timeout(100)
-  box.locator('[data-openq]').click(); pg.wait_for_timeout(250)
+  box.locator('[data-chkq]').click(); pg.wait_for_timeout(150)
+  check('Check with nothing typed gives a message in the task box', 'number' in box.locator('.tkmsg').inner_text().lower())
+  box.locator('.tkin').fill('0.65'); box.locator('.tksel').select_option('m/s'); pg.wait_for_timeout(100)
   q1 = pg.locator('#qCard [data-q=q1]')
-  check('number copied to the question', q1.locator('.ansin').input_value() == '0.6')
+  check('number copied to the question', q1.locator('.ansin').input_value() == '0.65')
   check('unit copied to the question', q1.locator('.unitsel').input_value() == 'm/s')
   # 3. and typing in the question copies back
-  q1.locator('.ansin').fill('0.65')
-  check('question edit copied back to the task box', box.locator('.tkin').input_value() == '0.65')
-  q1.locator('.ansin').fill('0.6')
-  # 4. checking the question locks the task box
-  q1.locator('.qchk').click(); pg.wait_for_timeout(300)
-  check('answer was marked right', ev("!!(dbGet(stepKey(CH.id, GI) + '.q1', null) || {}).ok"))
+  ev("qPlace('pop')"); pg.wait_for_timeout(200)
+  q1.locator('.ansin').fill('0.7')
+  check('question edit copied back to the task box', box.locator('.tkin').input_value() == '0.7')
+  ev("qPlace('dock')"); pg.wait_for_timeout(100)
+  # 4. Check in the task box marks the Your turn question
+  box.locator('.tkin').fill('0.6'); box.locator('[data-chkq]').click(); pg.wait_for_timeout(300)
+  check('answer was marked right in Your turn', ev("!!(dbGet(stepKey(CH.id, GI) + '.q1', null) || {}).ok"))
+  check('Your turn question shows as locked', pg.locator('#qCard [data-q=q1].locked').count() == 1)
   check('task box locked after checking', pg.locator('#rail .tkans').first.locator('.tkin').is_disabled())
-  check('task box shows the answer', pg.locator('#rail .tkans').first.locator('.tkin').input_value() == '0.6')
+  check('task box shows the answer and a tick', pg.locator('#rail .tkans').first.locator('.tkin').input_value() == '0.6' and '✓' in pg.locator('#rail .tkans').first.locator('.tkmsg').inner_text())
+  check('f5 tasks no longer repeat the set-up text', 'set the pod to' not in pg.locator('#rail .tasks').inner_text())
   # 5. the unfinished-tasks modal names the question
   ev("qPlace('dock')"); pg.wait_for_timeout(100); pg.click('#gNext'); pg.wait_for_timeout(300)
   m = pg.locator('.modal').inner_text()

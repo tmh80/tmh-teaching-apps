@@ -90,7 +90,7 @@ CHDATA.c3 = {
         { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that sums up what you found.', opts: ['A bigger resultant force gives a bigger acceleration. A bigger mass gives a smaller acceleration.', 'A bigger resultant force gives a smaller acceleration. A bigger mass gives a bigger acceleration.', 'A bigger resultant force gives a bigger acceleration. The mass makes no difference to it.', 'A bigger mass gives a bigger resultant force. The acceleration stays the same either way.'], a: 0, ok: 'Yes! That is the idea behind Newton\'s second law.', why: { 1: 'Check your readings. Two huskies gave a bigger acceleration than one.', 2: 'Your 60 kg and 120 kg readings were different, so the mass does matter.', 3: 'With the same two huskies, the acceleration changed when the mass changed.' } },
         { id: 'q4', type: 'gap', p: 'More ___ gives a bigger acceleration, and more ___ gives a smaller acceleration.', ans: [['force', 'resultant force', 'pull'], ['mass']], ok: 'Perfect.' }] },
 
-    { id: 'a3', unlocks: ['fma'], title: 'The formula triangle', floors: ['snow0'],
+    { id: 'a3', title: 'The formula triangle', floors: ['snow0'],
       cards: [
         { html: `<p>Newton worked out the exact rule. It is called ${T('newton2', 'Newton\'s second law')}:</p><div class="law"><b>Resultant force = mass × acceleration</b><br>F = m × a</div><p>F is in newtons (N), m is in kilograms (kg) and a is in m/s².</p>` },
         { html: `<p>The ${T('triangle', 'formula triangle')} helps you remember it. <b>Cover the letter you want to find.</b> What is left is the sum.</p>${triHTML()}<p>Try each letter now.</p>` },
@@ -117,7 +117,7 @@ CHDATA.c3 = {
         { id: 'q3', type: 'num', p: '<b>Job 2.</b> Two huskies (180 N) make a sled accelerate at 2.25 m/s². What is the sled\'s mass?', unit: 'kg', units: UNITS, ans: 80, tol: 0.3, ladder: true, work: 'm = F ÷ a = 180 ÷ 2.25 = 80 kg', ok: 'Yes: 80 kg.', hints: ['Cover m in the triangle. F is above a, so divide.', 'm = F ÷ a = 180 ÷ 2.25.', 'Type 180 ÷ 2.25 into the calculator.'] },
         { id: 'q4', type: 'reading', p: 'Check Job 2. What acceleration did the 80 kg sled have with 2 huskies?', unit: 'm/s²', tol: 0.03, live: () => rA(2, 80, 'snow0'), need: () => rA(2, 80, 'snow0') != null, needMsg: 'Set the mass to 80 kg, add 2 huskies and pull first.', ok: 'It was 2.25 m/s², just as your sum said.' }] },
 
-    { id: 'a5', unlocks: ['friction'], title: 'Friction is back', info: ['readF', 'fbd'], floors: ['snow'],
+    { id: 'a5', title: 'Friction is back', info: ['readF', 'fbd'], floors: ['snow'],
       cards: [
         { html: `<div class="notebox"><b>Friction is back on</b><p>The snow now has its normal friction. The label in the corner says <b>Friction: on</b>. Friction pushes against the sled, so the huskies' pull is <b>no longer the resultant force</b>.</p></div>` },
         { html: `<p>Now there are <b>two steps</b>.</p><ol><li>Find the ${T('resultant', 'resultant force')}: <b>pull − friction</b>.</li><li>Use F = m × a with that resultant: <b>a = resultant ÷ m</b>.</li></ol><div class="example"><b>Worked example.</b> Three huskies (270 N) pull a 60 kg sled. The Friction readout shows 29.4 N. Resultant = 270 − 29.4 = 240.6 N. Then a = 240.6 ÷ 60 = <b>4.01 m/s²</b>.</div>` }],
@@ -149,7 +149,7 @@ CHDATA.c3 = {
         { id: 'q5', type: 'num', p: '<b>Sled 5: the firewood sled.</b> This sled has a weight of 686 N. Three huskies pull it on packed snow, and the friction is 34.3 N. What is its acceleration? (g = 9.8 N/kg)', unit: 'm/s²', units: UNITS, ans: 3.37, tol: 0.03, ladder: true, work: 'Mass = 686 ÷ 9.8 = 70 kg. Resultant = 270 − 34.3 = 235.7 N. a = 235.7 ÷ 70 = 3.37 m/s²', ok: 'Yes: 3.37 m/s². Set 70 kg, add 3 huskies on packed snow and pull to check.', hints: ['There are two jobs before F = ma. Turn the weight into a mass, and find the resultant force.', 'Mass = 686 ÷ 9.8. Resultant = 270 − 34.3. Then a = resultant ÷ mass.', 'Type 686 ÷ 9.8 for the mass, then (270 − 34.3) ÷ that mass.'] }] },
 
     /* ---------- Extension ---------- */
-    { id: 'e1', unlocks: ['accel'], title: 'Acceleration on a graph', floors: ['snow'], info: ['vt'],
+    { id: 'e1', title: 'Acceleration on a graph', floors: ['snow'], info: ['vt'],
       cards: [
         { html: `<p>Welcome to the Chapter 3 Extension! A ${T('vtgraph', 'velocity–time graph')} shows acceleration as a <b>straight sloping line</b>. The steeper the ${T('slope', 'slope')}, the bigger the acceleration.</p><p>To work out the acceleration, take two points on the line: <b>acceleration = change in speed ÷ time taken</b>.</p>` },
         { html: `<p>Here is a sled that speeds up steadily.</p>${vtSVG([{ pts: [[0, 0], [5, 8]], col: '#1f5f8b' }], { tMax: 6, vMax: 9, vStep: 1, tri: [[1, 1.6], [4, 6.4]], alt: 'A straight line from 0 at 0 s up to 8 m/s at 5 s. A dashed triangle marks the speed rising from 1.6 to 6.4 m/s between 1 s and 4 s.' })}<div class="example">From 1 s to 4 s, the speed goes from 1.6 to 6.4 m/s. Change in speed = 4.8 m/s. Time taken = 3 s. Acceleration = 4.8 ÷ 3 = <b>1.6 m/s²</b>.</div>` }],

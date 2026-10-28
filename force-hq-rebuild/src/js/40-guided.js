@@ -37,7 +37,7 @@ function renderOnPage() {
 
 function setStep(i) {
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
-  const st = chd.steps[GI]; LASTSIG = ''; if (st.unlocks) unlockFormulas(st.unlocks);
+  const st = chd.steps[GI]; LASTSIG = ''; if (typeof renderFormulas === 'function' && $('#calcForm') && !$('#calcForm').hidden) renderFormulas();   // keep the glowing formulas in step with the chapter
   // arena state
   clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false; JRUNS_SEEN = journalOpen() && JTAB === 'runs';
   LAB.sides = st.sides || ['left', 'right']; LAB.pullers = st.pullers || ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = st.floors || null; LAB.showVert = true; LAB.showRes = true; LAB.idle = st.idle || null;
@@ -71,7 +71,7 @@ function cardsDone() {
 /* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)
    and a number-and-unit box sits under it. What is typed there is copied into the matching "Your turn" question (draftSave in 35-questions.js). */
 const taskQ = t => (t[2] && t[2].q) ? ((CHDATA[CH.id].steps[GI].qs || []).find(q => q.id === t[2].q) || null) : null;
-const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<span class="tkq">${q.p}</span>` : '') + `<span class="tkdo">${t[0]}</span>`; };
+const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<span class="tkq">${q.p}</span>` : '') + (t[0] ? `<span class="tkdo">${t[0]}</span>` : ''); };
 const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
 function hasAns(id) {
   const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === id), store = stepKey(CH.id, GI), s = dbGet(store + '.' + id, null);
@@ -81,16 +81,23 @@ function hasAns(id) {
 function tkAnsHTML(q) {
   const store = stepKey(CH.id, GI), s = dbGet(store + '.' + q.id, null), d = draftOf(store, q.id) || {}, U = q.units && q.units.length, done = !!(s && s.done);
   const v = done ? s.v : (d.v || ''), u = done ? (s.u || '') : (d.u || ''), dk = ` data-draft="${store}|${q.id}"`, dis = done ? ' disabled' : '';
-  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${done ? `<small>${s.ok ? '✓ Checked: correct.' : 'Checked in Your turn.'}</small>` : '<small>This is copied into your <b>Your turn</b> questions for you.</small><button type="button" class="mini" data-openq="' + q.id + '">Check it in Your turn →</button>'}</span>`;
+  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${done ? `<small class="tkmsg ${s.ok ? 'ok' : 'no'}">${s.ok ? '✓ ' : ''}${esc(s.msg || (s.ok ? 'Correct!' : 'Checked.'))}</small>` : `<button type="button" class="mini tkchk" data-chkq="${q.id}">Check</button><small class="tkmsg" aria-live="polite"></small>`}</span>`;
 }
 function bindTkAns() {
   const st = CHDATA[CH.id].steps[GI], store = stepKey(CH.id, GI);
   $$('#rail .tkans').forEach(box => {
     const q = (st.qs || []).find(x => x.id === box.dataset.qid); if (!q) return;
-    const inp = $('.tkin', box), sel = $('.tksel', box), ob = $('[data-openq]', box);
+    const inp = $('.tkin', box), sel = $('.tksel', box), cb = $('[data-chkq]', box);
     if (inp) inp.addEventListener('input', e => draftSave(store, q.id, 'v', e.target.value, e.target));
     if (sel) sel.addEventListener('change', e => draftSave(store, q.id, 'u', e.target.value, e.target));
-    if (ob) ob.addEventListener('click', () => { qPlace('pop'); setTimeout(() => { const i = $(`#qCard .qitem[data-q="${q.id}"] .ansin`); if (i) i.focus({ preventScroll: true }); }, 80); });
+    if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter' && cb) { e.preventDefault(); cb.click(); } });
+    /* Check here: press the matching question's own Check button (its answer is already copied in), so Your turn shows it done. Any problem message comes back to this box. */
+    if (cb) cb.addEventListener('click', () => {
+      const qi = $(`#qCard .qitem[data-q="${q.id}"]`), chk = qi && $('.qchk', qi); if (!chk) return;
+      if (qi.querySelector('.ansin') && qi.querySelector('.ansin').value !== (inp ? inp.value : '')) qi.querySelector('.ansin').value = inp ? inp.value : '';
+      chk.click();
+      const m = $('.tkmsg', box), fb = $('.fb', qi); if (m && !qi.classList.contains('locked') && fb) { m.textContent = fb.textContent; m.className = 'tkmsg no'; }
+    });
   });
 }
 /* after a question is checked, re-draw the answer boxes in the task list (they lock and show the result) */

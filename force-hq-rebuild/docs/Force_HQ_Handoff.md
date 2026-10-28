@@ -2,7 +2,7 @@
 
 Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
-**Latest (28 Oct 2026):** calculation steps now state the question inside each Do this task, with an answer box that copies into the Your turn question; the Journal has a right-edge tab and a Working tab; the calculator can save calculations to the Journal (see "Working out calculations" in the Brief, test `tests/answer_box.py`).
+**Latest (28 Oct 2026):** formulas are no longer locked (the ones for the current chapter glow); calculation steps now state the question inside each Do this task, with an answer box that copies into the Your turn question; the Journal has a right-edge tab and a Working tab; the calculator can save calculations to the Journal (see "Working out calculations" in the Brief, test `tests/answer_box.py`).
 
 **Status:** Chapters 1, 2, 3 and 4 are built, tested and pushed (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`, `c4f`, `c4x`; Chapter 4 added 27 Oct 2026, see the Chapter 4 notes in the Brief), plus progress save and load. **Next job (was Chapter 4, now done; next is Chapter 5, balanced forces and the Drop Zone, or Tom's feedback on Chapter 4). Original Chapter 4 job: Action and reaction (Newton's third law)** in the Space Dome, with the docking orders as its challenge. Give Tom a plan before building (he asked for this on Chapter 3 and liked it).
 

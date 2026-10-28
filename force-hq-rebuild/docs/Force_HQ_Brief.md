@@ -103,16 +103,14 @@ Flat, rounded, outline-free shapes in team colours. Animals have dot eyes and do
 - Tests: `tests/play_c4.py` plays both sections, the challenge and the Check.
 
 ## Calculator formulas (28 Oct 2026)
-- The calculator has two tabs: Calculator and Formulas. `FORMULAS` in `21-calc.js` lists each formula with where it unlocks. A step unlocks formulas with `unlocks: ['id']` (read in `setStep`), stored in `DB.fu` (so it travels with the save file) and `DB.fseen`. Teacher mode shows them all. Locked ones show "Unlocks in Chapter n".
+- The calculator has two tabs: Calculator and Formulas. `FORMULAS` in `21-calc.js` lists every formula with the chapters that use it (`ch: [..]`). All formulas are always visible (no unlocking). The ones for the chapter the student is in glow gold (`.fcard.rel`, "This chapter" tag) and are listed first. Outside a chapter nothing glows. `setStep` re-renders the tab if it is open.
 - Triangles are generalised: `triHTML('fma')` (F, m, a) and `triHTML('w')` (W, m, g). Only the F, m, a one sets `S.flags.tri` for the Chapter 3 task.
-- Unlock points: weight at `s5`, resultant at `s3r`, F = ma at `a3` (and Chapter 4 `f3`), friction at `a5`, acceleration from speeds at `e1`, third law at `f2`, 1 s push at `f3`/`g2`.
-- A toast says "New formula in your calculator", and a red dot shows on the calculator button until the Formulas tab is opened.
 - Test: `tests/calc_formulas.py`. Pair-arrow labels in the Main Arena (`drawRopePairs`) are anchored at their inner end and run outwards, so the two teams' labels cannot overlap.
 
 ## Working out calculations (28 Oct 2026)
 Added after a review of the Chapter 4 "Mystery push-offs" step, where students could not tell what question they were answering.
 - A step task can carry a third item `{ q: 'q1' }`: the id of the question it is about. The rail then shows that question's text inside the task (so the question is always visible in the Do this list, and in the "Have you finished the Do this list?" warning, via `taskPlain`) and puts a number-and-unit box under it. `{ q, ask: false }` hides the question text; `{ q, box: false }` hides the box.
-- The box and the "Your turn" question share a draft (`draftSave`/`draftOf` in `35-questions.js`, stored at `learn.<chapter>.<step>.draft`). Typing in either one copies into the other. The student still presses Check in Your turn. Once the question is checked, the task box locks and shows the answer.
+- The box and the "Your turn" question share a draft (`draftSave`/`draftOf` in `35-questions.js`, stored at `learn.<chapter>.<step>.draft`). Typing in either one copies into the other. The box has its own Check button, which presses the matching question's Check (so Your turn shows it done), then the box locks and shows the result. An empty task text (`''`) hides the extra instruction line; f5 uses this because the question already holds the numbers.
 - Answer-only tasks use `() => hasAns('q2')`, which is true once a number (and unit, if the question has a unit picker) is typed or the question is done. Used in c1 s5, c3 a4/a6/e2/e3 and c4 f3/f5/g2.
 - The Journal has a fixed tab on the right edge (`.jtab`, also `data-journal`). When the Journal is open the tab sits on its left edge (hidden on phones narrower than 470 px).
 - The Journal has a fourth tab, Working: a free-typing pad for the current step (`DB.jwork.pads['<chapter>:<step>']`), the calculations saved from the calculator (`DB.jwork.calcs`) and pads from other steps. The calculator has a "Save to Journal" button (with an optional working note) and "Open my working". `DB.jwork` travels in the save file like the other Journal data.

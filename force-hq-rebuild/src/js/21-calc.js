@@ -38,40 +38,27 @@ function initCalc() {
   $('#calcWork').addEventListener('click', () => { openJournal('work'); if (innerWidth < 1180) toggleCalc(false); });   // on a small screen the Journal fills the width, so the calculator steps aside
   $('#calcX').addEventListener('click', () => toggleCalc(false));
   $('#calcFab').addEventListener('click', () => toggleCalc());
-  calcBadge();
   // drag by the header
   let dg = null; $('#calcDrag').addEventListener('pointerdown', e => { if (e.target.closest('button')) return; const r = el.getBoundingClientRect(); dg = { dx: e.clientX - r.left, dy: e.clientY - r.top }; $('#calcDrag').setPointerCapture(e.pointerId); });
   $('#calcDrag').addEventListener('pointermove', e => { if (!dg) return; el.style.left = clamp(e.clientX - dg.dx, 0, innerWidth - 80) + 'px'; el.style.top = clamp(e.clientY - dg.dy, 0, innerHeight - 60) + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; });
   $('#calcDrag').addEventListener('pointerup', () => dg = null);
 }
-/* ---- the calculator's Formulas tab: each formula unlocks when the student reaches the step that teaches it (a step lists `unlocks: [ids]`) ---- */
+/* ---- the calculator's Formulas tab: every formula is always there, and the ones used in the chapter the student is working on glow and come first (`ch` lists the chapters) ---- */
 const FORMULAS = [
-  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', at: 'Chapter 1' },
-  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', at: 'Chapter 1' },
-  { id: 'friction', name: 'Resultant with friction', eq: 'resultant = pull − friction', note: 'Friction pushes against the pull, so take it away from the pull first. Then use F = m × a.', at: 'Chapter 3' },
-  { id: 'fma', name: 'Newton\'s second law', eq: 'F = m × a', note: 'F is the resultant force in N, m is the mass in kg and a is the acceleration in m/s².', tri: 'fma', at: 'Chapter 3' },
-  { id: 'accel', name: 'Acceleration from speeds', eq: 'a = (v − u) ÷ t', note: 'u is the starting speed, v is the final speed and t is the time in seconds. On a velocity–time graph, this is the slope.', at: 'Chapter 3 Extension' },
-  { id: 'third', name: 'Newton\'s third law', eq: 'force of A on B = force of B on A', note: 'Always the same size, always in opposite directions, and on two different objects.', at: 'Chapter 4' },
-  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'speed = F ÷ m, so F = m × speed', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', at: 'Chapter 4' }
+  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', ch: [1, 3] },
+  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', ch: [1, 3] },
+  { id: 'friction', name: 'Resultant with friction', eq: 'resultant = pull − friction', note: 'Friction pushes against the pull, so take it away from the pull first. Then use F = m × a.', ch: [3] },
+  { id: 'fma', name: 'Newton\'s second law', eq: 'F = m × a', note: 'F is the resultant force in N, m is the mass in kg and a is the acceleration in m/s².', tri: 'fma', ch: [3, 4] },
+  { id: 'accel', name: 'Acceleration from speeds', eq: 'a = (v − u) ÷ t', note: 'u is the starting speed, v is the final speed and t is the time in seconds. On a velocity–time graph, this is the slope.', ch: [3] },
+  { id: 'third', name: 'Newton\'s third law', eq: 'force of A on B = force of B on A', note: 'Always the same size, always in opposite directions, and on two different objects.', ch: [4] },
+  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'speed = F ÷ m, so F = m × speed', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] }
 ];
-const fUnlocked = id => isTeacher() || !!dbGet('fu.' + id, false);
-function unlockFormulas(ids) {
-  const fresh = (ids || []).filter(id => !dbGet('fu.' + id, false) && FORMULAS.some(f => f.id === id));
-  if (!fresh.length) return;
-  fresh.forEach(id => dbSet('fu.' + id, true)); saveDB();
-  const names = fresh.map(id => FORMULAS.find(f => f.id === id).name);
-  if (typeof toast === 'function') toast(`New formula in your calculator: ${names.join(', ')}`);
-  calcBadge();
-}
-const fNew = () => FORMULAS.some(f => dbGet('fu.' + f.id, false) && !dbGet('fseen.' + f.id, false));
-function calcBadge() { const on = !isTeacher() && fNew(), fab = $('#calcFab'), tab = $('#calcTabF'); if (fab) fab.classList.toggle('hasnew', on); if (tab) tab.classList.toggle('hasnew', on); if (!$('#calcForm').hidden) renderFormulas(); }
+const calcChapter = () => (typeof CH !== 'undefined' && CH && VIEW === 'vChapter') ? CH.n : null;
 function renderFormulas() {
   const host = $('#calcForm'); if (!host) return;
-  host.innerHTML = `<p class="scaleNote">Formulas appear here as you meet them in the chapters.</p>` + FORMULAS.map(f => fUnlocked(f.id)
-    ? `<div class="fcard"><b>${f.name}</b><div class="feq">${f.eq}</div><small>${f.note}</small>${f.tri ? triHTML(f.tri) : ''}</div>`
-    : `<div class="fcard locked"><b>🔒 ${f.name}</b><small>Unlocks in ${f.at}</small></div>`).join('');
-  FORMULAS.forEach(f => { if (fUnlocked(f.id)) dbSet('fseen.' + f.id, true); }); saveDB();
-  const fab = $('#calcFab'), tab = $('#calcTabF'); if (fab) fab.classList.remove('hasnew'); if (tab) tab.classList.remove('hasnew');
+  const n = calcChapter(), rel = f => n != null && f.ch.includes(n), list = FORMULAS.filter(rel).concat(FORMULAS.filter(f => !rel(f)));
+  host.innerHTML = `<p class="scaleNote">${n != null ? `The formulas glowing gold are the ones for Chapter ${n}.` : 'Open a chapter and the formulas for it will glow gold.'}</p>` + list.map(f =>
+    `<div class="fcard${rel(f) ? ' rel' : ''}"><b>${f.name}${rel(f) ? ' <span class="ftag">This chapter</span>' : ''}</b><div class="feq">${f.eq}</div><small>${f.note}</small>${f.tri ? triHTML(f.tri) : ''}</div>`).join('');
 }
 function calcTab(k) {
   const f = k === 'formulas'; $('#calcKeysPane').hidden = f; $('#calcForm').hidden = !f; $('#calc').classList.toggle('wide', f);
