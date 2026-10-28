@@ -43,7 +43,7 @@ with sync_playwright() as p:
                 if k in ('big', 'motion'): loc.select_option(str(tr[k]))
                 else: loc.fill(str(round(tr[k], 1)))
     pg.evaluate("__fhq.openChapter('c5f','learn')"); pg.wait_for_timeout(500)
-    chk('Chapter 5 Foundation opens, 4 steps', ev("CH.id") == 'c5f' and ev("CHDATA.c5.steps.length") == 4)
+    chk('Chapter 5 Foundation opens, 4 steps', ev("CH.id") == 'c5f' and ev("CHDATA.c5f.steps.length") == 4)
 
     # ================= d1 =================
     cards(); dock(); pg.screenshot(path=OUT + 'd1_start.png')

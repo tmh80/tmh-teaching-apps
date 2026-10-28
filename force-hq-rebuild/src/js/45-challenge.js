@@ -32,7 +32,8 @@ function renderChallenge(ch) {
   const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
   const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);
   const om = C1.missions.filter(m => m.kind === 'orders'); if (om.length) renderOrdersCourse(ch, om, host, save);
-  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders').forEach(m => {
+  const zm = C1.missions.filter(m => m.kind === 'drop'); if (zm.length) renderDropCourse(ch, zm, host, save);
+  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders' && m.kind !== 'drop').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -187,6 +188,51 @@ function renderOrdersCourse(ch, om, host, save) {
     const best = hit ? Math.max(1, 5 - n) : 0;
     const why = !okP ? (P.vp < m.lo ? `A push of ${fmt(P.F, 0)} N gave the pod ${fmt(P.vp, 2)} m/s. That is too slow, so the pod would take too long to arrive. Try a bigger push.` : `A push of ${fmt(P.F, 0)} N gave the pod ${fmt(P.vp, 2)} m/s. That is too fast, so the pod would crash into the dock. Try a smaller push.`) : `The pod's velocity was fine, but the ${P.ma} kg astronaut reached ${fmt(P.va, 2)} m/s. The tether snaps! The astronaut feels the same force, so a heavier astronaut goes slower.`;
     save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! On target after ${n} push${n > 1 ? 'es' : ''}! The pod docks at ${fmt(P.vp, 2)} m/s. You scored ${best} of 4 points.` : `Not quite. ${why}` });
+    paint();
+  };
+  load(cur);
+}
+
+/* Chapter 5 Challenge: Drop Zone deliveries (one shared Drop Zone, a tab per mission).
+   The mission fixes the object, world and height; the student chooses the canopy and the height to open it at. Every drop counts: all objectives met
+   on the 1st drop = 4 points, 2nd = 3, 3rd = 2, later = 1. "Move on" after 3 misses scores 1. */
+function renderDropCourse(ch, zm, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, zm.findIndex(m => !get(m.id).done)), judged = false;
+  const card = h('section', { class: 'panel mission', id: 'mi-drop' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a delivery"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="zClues"></div><div class="row"><button type="button" class="ghost sm" id="zNext">Show a clue</button></div></details>
+    <div class="labhost"></div><div class="fb" id="zFb" hidden></div><ol class="blog" id="zLog"></ol><ul class="objs" data-o></ul><div class="row" id="zMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
+  const paint = () => {
+    const m = zm[cur], s = get(m.id), nc = Math.min(s.clues || 0, m.clues.length);
+    $('.mtabs', card).innerHTML = zm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-zr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal} Choose the canopy size and the height to open it at, then press Drop!</p>`;
+    $('#zClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
+    const nx = $('#zNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
+    $('#zLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Drop ${i + 1}: ${r.canopy === 'none' ? 'no canopy' : r.canopy + ' canopy, ' + (r.openH == null ? 'never opened' : 'opened at ' + fmt(r.openH, 0) + ' m')}, landed at ${dz1(r.landV)} m/s after ${fmt(r.time, 0)} s${r.hit ? ' ✓ on target!' : ''}</li>`).join('');
+    const fb = $('#zFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.hit ? 'ok' : 'hint') : 'no'); fb.innerHTML = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Drop the load (every drop counts)', s.tried]].concat(m.objs.map(o => [o.label, s.done && s.hit]), [['Do it on your first drop', s.best === 4]]).map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#zMore', card).innerHTML = s.done ? (cur < zm.length - 1 ? `<button type="button" class="go" data-zr="${cur + 1}">Next delivery →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="zGive">Move on (1 point)</button>` : '');
+    const gv = $('#zGive', card); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} drops. ${m.give} You scored 1 of 4 points.${m.after ? ' ' + m.after : ''}` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = zm[cur];
+    dropSetup({ height: m.setup.height, a: { obj: m.setup.obj, world: m.setup.world, removed: 0, canopy: 'none' } }); S.flags = newFlags(); resetSim(); judged = false;
+    LAB.show = new Set(['drop', 'dcanopy', 'dopenh', 'dfbd', 'readH', 'readV', 'readT', 'dvt', 'warp']); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Choose a canopy, then press Drop!';
+    applyPanels(); labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-zr]'); if (b) load(+b.dataset.zr); });
+  $('#zNext', card).addEventListener('click', () => { const m = zm[cur], s = get(m.id); save(m, { clues: Math.min(m.clues.length, (s.clues || 0) + 1) }); paint(); });
+  LAB.tick = () => {
+    if (!DZ.ended || !DZ.started) { judged = false; return; }
+    if (judged) return; judged = true;
+    const m = zm[cur], s = get(m.id), L = DZ.lanes[0]; if (s.done || !L.landed) { paint(); return; }
+    const r = { landV: L.landV, time: L.landT, openH: L.openY, canopy: L.canopy }, n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
+    const log = (s.log || []).concat([{ canopy: r.canopy, openH: r.openH, landV: r.landV, time: r.time, hit }]);
+    const sayAll = m.objs.map(o => o.say(r)).join(' ');
+    save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! On target after ${n} drop${n > 1 ? 's' : ''}! ${sayAll} You scored ${best} of 4 points.${m.after ? ' ' + m.after : ''}` : `Not quite. ${sayAll} Change the canopy or the opening height, then drop again.` });
     paint();
   };
   load(cur);

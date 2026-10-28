@@ -129,6 +129,11 @@
         <div class="dzp" data-panel="dheight"><div class="ctlh"><h3>Drop height</h3><span class="numbox"><input type="number" id="dzHNum" min="10" max="3000" step="10" value="600" inputmode="numeric" aria-label="Drop height in metres: type a number"><span>m</span></span></div><input type="range" id="dzH" min="10" max="3000" step="10" value="600" aria-label="Drop height in metres"></div>
         <div data-panel="dcanopy"><div class="ctlh"><h3><button type="button" class="term tl" data-t="canopy">Canopy</button></h3><button type="button" class="info" data-info="dcanopy" aria-label="How do I choose a canopy?">ⓘ</button></div><div class="seg two" id="dzCans"></div></div>
         <div class="dzp" data-panel="dopenh"><div class="ctlh"><h3>Open automatically at</h3><span class="numbox"><input type="number" id="dzOpenNum" min="0" max="3000" step="10" placeholder="off" inputmode="numeric" aria-label="Open the canopy automatically at this height in metres: type a number, or leave empty for off"><span>m</span></span></div><p class="palhint">Leave the box empty to open the canopy yourself.</p></div>
+        <div class="dzp" data-panel="lift"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lift">Lift</button></h3><span class="numbox"><input type="number" id="liftNum" min="3000" max="16000" step="1" value="3000" inputmode="numeric" aria-label="Lift in newtons: type a number"><span>N</span></span></div>
+          <div class="slidewrap"><input type="range" id="liftR" min="3000" max="16000" step="1" value="3000" aria-label="Lift in newtons"><div class="bmarks" id="liftMarks" aria-hidden="true"></div></div>
+          <p class="bmnote" id="liftNote" hidden></p>
+          <div class="nudge lf"><button type="button" class="mini" data-lf="-100">−100</button><button type="button" class="mini" data-lf="-10">−10</button><button type="button" class="mini" data-lf="-1">−1</button><button type="button" class="mini" data-lf="1">+1</button><button type="button" class="mini" data-lf="10">+10</button><button type="button" class="mini" data-lf="100">+100</button></div>
+          <p class="palhint">Too fast? Lower the lift a little to slow down, then match it to the weight.</p></div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -144,7 +149,7 @@
           <button class="ghost sm" id="dzFwd" type="button" data-panel="dpause">0.5 s ▶</button>
           <button class="ghost sm" id="dzSnap" type="button" data-panel="dpause">📸 Snapshot</button>
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop">Reset</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift">Reset</button>
         </div>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">

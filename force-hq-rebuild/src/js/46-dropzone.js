@@ -219,10 +219,10 @@ function dropSetup(o) {
   [o.a || {}, o.b || o.a || {}].forEach((c, i) => Object.assign(DZ.lanes[i], { obj: 'crate', world: 'earth', removed: 0, canopy: 'none', autoOpen: null }, c));
 }
 /* Readouts the student has to work out stay hidden until the question that asks for them has been answered: a step lists mask: [{ q, keys, when(lane) }]. Keys: fbdR, fbdW, readV, readA. */
-function dzMasked() {
+function dzMasked(L) {
   const out = new Set(); if (typeof CH === 'undefined' || !CH || LAB.mode !== 'guided') return out;
   const st = CHDATA[CH.id] && CHDATA[CH.id].steps[GI]; if (!st || !st.mask) return out;
-  st.mask.forEach(M => { if (dzActive().some(L => M.when(L, DZ))) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
+  st.mask.forEach(M => { if ((L ? [L] : dzActive()).some(l => M.when(l, DZ))) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
   return out;
 }
 

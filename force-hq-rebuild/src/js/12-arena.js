@@ -1,8 +1,8 @@
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
 /* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
-const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT'];
+const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -11,8 +11,9 @@ let DRAG = null, PSEL = null, PTOAST = null, ADDLOG = [];
 function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
-  const isDz = S.scene === 'drop' && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
+  const isDz = (S.scene === 'drop' || S.scene === 'heli') && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
   if (S.scene === 'drop' && !cvo) { drawDropScene(c); return; }
+  if (S.scene === 'heli' && !cvo) { drawHeliScene(c); return; }
   if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
   if (S.scene === 'space' && !cvo) { drawSpaceScene(c, f); return; }
   arenaShell(c, 'MAIN ARENA');
@@ -358,6 +359,7 @@ function renderControls() {
   const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
   const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   if (S.scene === 'drop') dzRenderControls();
+  if (S.scene === 'heli') heliRenderControls();
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -398,7 +400,7 @@ function initControls() {
 function applyPanels() {
   $$('#lab [data-panel]').forEach(el => { const ks = el.dataset.panel.split(' '); el.hidden = !ks.some(k => LAB.show.has(k)); });
   const kit = $('#lab .kit'); $('#lab .stagerow').classList.toggle('nokit', ![...kit.querySelectorAll('[data-panel]')].some(e => !e.hidden));
-  const dz = S.scene === 'drop'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)); $('#lab .scenebar').classList.toggle('dzbar', dz);
+  const dz = S.scene === 'drop' || S.scene === 'heli'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)); $('#lab .scenebar').classList.toggle('dzbar', dz);
   const anyRead = [...$$('#reads .rd')].some(e => !e.hidden) || !$('#dreads').hidden;
   $('#lab .underrow').hidden = !anyRead && !LAB.show.has('fbd');
   $('#lab .fbdcol').hidden = !LAB.show.has('fbd');

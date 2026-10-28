@@ -18,7 +18,7 @@ function openExplore() {
 const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
 const exploreSwitch = cur => `<div class="seg two exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button></div>`;
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initDrop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);

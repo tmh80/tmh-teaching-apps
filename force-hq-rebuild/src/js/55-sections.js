@@ -46,7 +46,12 @@ const SECTIONS = [
     blurb: 'Drop a crate and a skydiver, pause the fall to read the forces, and find out why the velocity stops going up and what a parachute does.',
     steps: ['d1', 'd2', 'd3', 'd4'], challenge: null, review: ['c5r1', 'c5r2', 'c5r3', 'c5r4', 'c5r5', 'c5r6', 'c5r7'],
     goal: 'Describe how weight and air resistance change during a fall; use balanced forces to explain terminal velocity; say what happens to the forces and the velocity when a parachute opens.',
-    vocab: ['air resistance', 'weight', 'terminal velocity', 'balanced forces', 'resultant force', 'parachute', 'canopy'] }
+    vocab: ['air resistance', 'weight', 'terminal velocity', 'balanced forces', 'resultant force', 'parachute', 'canopy'] },
+  { id: 'c5x', ch: 'c5', n: 5, title: 'Falling and terminal velocity', part: 'Extension', stamp: 'Planet Hopper',
+    blurb: 'Race a feather and a crate with and without air, drop on other worlds, make the helicopter hover, then deliver three loads on Earth, Mars and Venus.',
+    steps: ['p1', 'p2', 'p3'], challenge: ['z1', 'z2', 'z3'], review: ['c5r8', 'c5r9', 'c5r10', 'c5r11', 'c5r12'], needs: 'c5f',
+    goal: 'Explain why heavy and light objects fall differently in air but not in a vacuum; use W = m × g to find weight on different worlds; explain how the lift of a hovering helicopter equals its weight; choose a canopy and an opening height for a safe landing.',
+    vocab: ['air resistance', 'weight', 'terminal velocity', 'gravitational field strength', 'vacuum', 'lift', 'hover', 'parachute'] }
 ];
 const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });

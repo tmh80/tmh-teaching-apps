@@ -40,6 +40,7 @@ function spaceForces() {
 }
 function forces() {
   if (S.scene === 'drop') return dropForces();
+  if (S.scene === 'heli') return heliForces();
   if (S.scene === 'space') return spaceForces();
   const u = S.running ? Math.min(1, S.pullT / PULL_RAMP) : 1, k = sstep(u), m = S.mass, fl = FLOORS[S.floor];
   const L = tot(S.left) * k, R = tot(S.right) * k, W = m * G, N = W, fs = fl.mus * W, fk = fl.mu * W;
@@ -92,10 +93,11 @@ function stepSim(dt) {
 }
 function updateSim(dt) {
   if (S.scene === 'drop') { dzUpdate(dt); return; }
+  if (S.scene === 'heli') { heliUpdate(dt); return; }
   if (S.scene === 'space') { const n = Math.max(3, Math.ceil(dt * S.warp / 0.01)); for (let i = 0; i < n && S.running; i++) stepSim(dt * S.warp / n); return; }   // fixed small steps, so the speeds come out exact even when time is sped up
   for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3);
 }
-function resetSim() { if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false;
+function resetSim() { if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); if (S.scene === 'heli') heliReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = S.scene === 'heli';
   S.ax = AST_X0; S.av = 0; S.avPeak = 0; S.thrT = -1; S.thrDir = 0; S.pushEndT = null; S.pushDone = null; S.lastPush = 0; S.lastThr = 0; S.lastKind = null; S.dockV = null; S.bursts = []; S.flags.docked = false; S.flags.tether = false;
   syncRun(); }
 /* Space Dome: the astronaut pushes off the pod. One push per run: pressing the button again starts a fresh run. */
@@ -104,6 +106,6 @@ function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S
 function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.lastThr = dir * SP_THR_F; S.lastKind = 'thr'; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
 function shove() { if (S.scene === 'space') return spacePush(); if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } if (S.scene === 'heli') S.running = false; S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
