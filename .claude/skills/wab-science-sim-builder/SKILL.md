@@ -40,7 +40,7 @@ Students open the sim at home or in class with no teacher beside them. Every des
 - **Active, never passive.** Students predict, reason, build and test. Avoid "read this, click next" sequences anywhere in the sim.
 - **Challenges use the sim itself.** Build, draw or design something and compare it to an exemplar or a target. Avoid plain quizzes as the main challenge.
 - **Open builders in every sim** (section 4e): free, drag-and-drop building of the unit's key things (a circuit, an atom, a power grid on a map, a food web, a machine), each with template build tasks that can be set as classwork or homework.
-- **Questions are varied, plentiful and not obvious** (section 4a-2): every section ends with a Check (Review) of about 5–10 questions in mixed formats, sized to fit the section's 20–30 minutes, never a run of easy multiple choice.
+- **Questions are varied, plentiful and not obvious** (sections 4a-2 and 4a-3): every section ends with a Check (Review) of about 5–10 questions in mixed formats, sized to fit the section's 20–30 minutes, never a run of easy multiple choice.
 - **Free-form builders.** Where students build something, make it free-form and drag-and-drop like PhET (parts bin, stretchy wires, snapping ends, drag onto a map) rather than fixed grid slots.
 - **Teacher "set classwork or homework" page in every sim** (section 4c), reached from a button at the top of the home screen, with Toddle AI marking support (section 4d).
 - **Voice.** Enthusiastic, warm and encouraging, in natural sentences. Avoid clipped, punchy, AI-sounding lines. Read every block of student text aloud in your head before shipping.
@@ -56,7 +56,7 @@ Students open the sim at home or in class with no teacher beside them. Every des
 1. **Ground it.** Ask for (or read from the project) the unit overview and lesson sequence. Pull out the key concepts, vocabulary and likely misconceptions.
 2. **Concept options.** Propose 3–4 distinct concepts in a few lines each. Wait for Tom's choice.
 3. **Science first for big features.** For any new model or engine, explain the science and how it will be modelled before writing code. Wait for a go-ahead.
-4. **Plan the stops/labs.** For each: the key ideas tied to the learning outcomes and how each one is made prominent and checked (section 1), what students predict, what they explore, the challenge, the misconception targeted, the Review questions, the worksheet, and the key vocabulary and goal used on the teacher page. Plan the open builders and their build tasks too.
+4. **Plan the stops/labs.** For each: the key ideas tied to the learning outcomes and how each one is made prominent and checked (section 1), what students predict, what they explore, the challenge, the misconceptions targeted, the question plan (section 4a-3: purpose → type → Learn or Check), the worksheet, and the key vocabulary and goal used on the teacher page. Plan the open builders and their build tasks too.
 5. **Build in stages** using the shared shell (section 4) and the file layout (section 5).
 6. **Test** (section 6) before every delivery, including feasibility checks for every build task.
 7. **Deliver** (section 7), including the Toddle files (blank template, answer key and marking scheme for every sheet).
@@ -116,17 +116,7 @@ Reuse these components across sims instead of rebuilding them. If a `shell/` fol
 
 Each section/stop ends with a **Check** tab (the Review; unlocked after the Challenge, or after Learn if there is no Challenge) holding **about 5–10 questions**, sized to fit the section's 20–30 minutes, defined as data in one content module so the same items drive the sim, the final mixed review, the worksheets, the answer keys and the marking schemes.
 
-- **Mix the formats in every section.** Use at least five of these types per section:
-  - *Match it up* — grid of rows with a select per column; supports three-way matches (e.g. model ↔ scientist ↔ year) and picture rows (symbols, model drawings).
-  - *Complete the table* — compare/contrast tables (similarities and differences between two things, e.g. series vs parallel, Thomson vs Rutherford, AC vs DC) and property tables (particle → charge → location → mass).
-  - *Sort it* — items into 2–3 groups.
-  - *Put in order* — sequences, timelines and energy chains (move up/down).
-  - *Tick all that apply* — several right answers, scored all-or-nothing, showing right/wrong/missed.
-  - *Calculate* — numeric answer with tolerance and unit, worked explanation; use non-round values.
-  - *Fill the gaps* — typed blanks with accepted spellings. Word bank only when Tom asks for a cloze activity.
-  - *Choose one* — only where the distractors are genuinely tempting, ideally built from misconceptions or a diagram/data to interpret.
-  - *Draw it* — drawing pad, then reveal an exemplar and a "Did you include…?" checklist the student ticks (self-assessed).
-  - *Explain it* — written answer, then a model answer and checklist (self-assessed).
+- **Mix the formats in every section.** Pick types from the question bank and write the section's question plan first (section 4a-3): at least five different types per Check, chosen by what each question is for.
 - **Every question has a model answer** (draw: an exemplar drawing; explain: a written model answer; calculate: a worked explanation) and every draw/explain item has a checklist of 2–4 points: these feed the answer key and become the marks in the marking scheme (section 4d). Check this with a script before shipping.
 - **Make them think.** Prefer application, data interpretation, diagrams, prediction and misconception items over recall. Never make the first option always the right one (shuffle in the sim, seeded shuffle on paper).
 - **No specificity pattern in choice questions.** Students must not be able to pick the answer because it is the longest or most specific option. Every option in a choose-one, tap-the-sentence or tick question is about as long and as detailed as the right one, and distractors reuse the same numbers and words (for a flat line at 1.8 m/s: "Moving at a steady 1.8 m/s", "Speeding up to 1.8 m/s", "Slowing down to 1.8 m/s", "Standing still, 1.8 m from the start"). Check every choice question before shipping.
@@ -138,6 +128,55 @@ Each section/stop ends with a **Check** tab (the Review; unlocked after the Chal
 - **Every Check question is taught first.** Before shipping, check each Check question against the Learn steps (and Challenge) of its own section. If a skill (e.g. drawing to scale) isn't taught, add a card and a practice question to Learn, or change the question.
 - **Card states:** each question is a card with type label, To do/Done pill (showing its points once done), its own Check button and explained feedback. A sticky bar shows "x of N done", the points so far and chips that jump to each card.
 - **Final mixed review** (e.g. Sparks' Time Test) draws auto-marked items from every section's Review rather than a separate easy MCQ bank.
+
+## 4a-3. Question bank (pick types by what each question is for)
+
+Plan questions from their purpose, then pick a type from this bank. The aim is that every section tests understanding from several angles (recall, organising ideas, misconceptions, observation, maths, producing), so students can't get through on recognition alone.
+
+**Design rules from the research (apply to every type)**
+- **Every wrong option means something.** Each distractor matches one named misconception, a question tests one idea, and a student who holds the misconception can't get it right by luck (Craig Barton's diagnostic-question rules; hinge questions).
+- **Ask for the reason too.** Two-tier questions (answer, then reason) separate understanding from a lucky guess; students often pick the right answer for the wrong reason.
+- **Predict, observe, explain.** Simulation-supported POE beats plain POE, so a run in the sim is usually followed by an observation question and then a reason or explain question.
+- **Mistakes need an explanation.** Spotting errors in worked examples helps a little, and more when an explanation follows, so "spot the mistake" always shows why after it locks.
+- **Produce more than you recognise.** Typed recall gave a lasting testing effect where easy multiple choice gave none, so most items ask students to type, build, sketch or order; choice questions are kept for misconception targets and data to interpret.
+- **Challenge each misconception more than once, in different contexts**, and pair motion or data graphs with diagrams (IOP Spark advice).
+- **Plan the misconceptions first.** In workflow step 4, list 5–8 misconceptions for the unit (IOP Spark, BEST diagnostic questions and physics/biology education research are good sources) and give each at least one item in Learn and one in the Check.
+
+**The bank.** Marks are per part (section 4a-2). "Paper" says how it prints on the worksheet (student answers in blue; blank and key in the same layout).
+
+| Purpose | Type | Student does | Marks | Paper |
+|---|---|---|---|---|
+| Recall | **Fill the gaps** (`gap`) | types key words into blanks; synonyms accepted | 1 per gap | blank lines; no word bank unless Tom asks for a cloze |
+| Recall | **Match it up** (`match`) | pairs or three-way matches (word ↔ meaning ↔ example), picture rows allowed | 1 per row | lettered columns |
+| Recall | **Choose the words** (`pick`) | small drop-downs inside sentences ("air resistance gets bigger / stays the same / gets smaller"); fast checks of relationships and trends | 1 per drop-down | "(a / b / c)" circle one |
+| Organise | **Sort it** (`sort`) | puts items into 2–3 groups | 1 per item | table of ticks |
+| Organise | **Always, sometimes or never?** (`sort` with those three groups) | judges general statements ("A circuit with a switch has current", "A falling object speeds up") | 1 per item | as sort |
+| Organise | **Put in order** (`order`) | orders 4–7 cards with ▲/▼ buttons (dragging is a bonus): stages, timelines, energy chains, ranking by size | 2 (1 if one neighbouring swap) | lettered items, numbered boxes |
+| Organise | **Complete the table** (`table`) | compare/contrast, property tables, **trend grids** (rows = quantities, columns = moments, cells = gets bigger / same / smaller) | 1 per cell | empty table with choices list |
+| Misconception | **Choose one** (`mcq`) | one answer; every distractor a named misconception, same length and numbers as the right one | 1 | lettered options |
+| Misconception | **Answer and reason** (`reason`) | picks an answer, then the reason; feedback names "right answer, wrong reason" | 2 | "Answer ___ Reason ___" |
+| Misconception | **Who's right?** (`reason` with `voices`) | 3–4 characters in speech bubbles (concept cartoon), one holds the misconception; pick who is right, then why | 2 | speech bubbles, then as reason |
+| Misconception | **Spot the mistake** (`fix`) | taps the wrong line in a made-up student's working, calculation, diagram description or explanation, then corrects it; always shows why afterwards | 2 (line 1, fix 1) | numbered lines, "mistake in line ___, correct line ___" |
+| Misconception | **Tick all that apply** (`tick`) | ticks every true statement | 2 (−1 per mistake) | tick boxes |
+| Observe | **Read it** (`reading`) | types a value from a meter, readout or the Journal's runs; checked against their own run | 1 | answer line |
+| Observe | **Reading table / Freeze-frame table** (`freeze`) | one row per set-up or moment; pauses the sim at that moment ("Use this moment"), types the readings and the state (e.g. speeding up / steady / slowing down) | 1 per cell | table; key shows example values "students' will differ" and the scheme marks for consistency |
+| Observe | **Tap the moment** (`spot`) | taps a point on a graph ("where were the forces first balanced?") or a part of a picture ("tap the bulb that goes out", "tap the feature that helps it keep warm") | 1 per target | "mark an X"; key shades the region |
+| Observe | **Sketch the graph** (`sketch`) | sets a dot per time column to sketch a graph, usually as a prediction before a run; checked by shape features ("starts at zero", "levels off") | 1 per feature check | blank grid; key draws the model and lists the checks |
+| Maths | **Calculate** (`num`) | number + unit picker, "Need a clue?" hint ladder, worked answer | 1 in the sim, 2 on paper | working box + answer |
+| Produce | **Draw it / build it** (`fbd`, drawing pad, builders) | builds a diagram, model or circuit; checks as chips; exemplar shown after | 1 per check | dashed drawing box |
+| Produce | **Explain it** (`explain`) | writes an answer with "Words to use"; self-ticks a checklist against the model answer | 1 per point | ruled lines |
+| Add-on | **How sure are you?** (`sure: true` on choose one, answer and reason, choose the words) | picks Guessing / Fairly sure / Certain before Check; not marked; the feedback page lists "certain but wrong" answers for Tom | 0 | small three-box line |
+
+**The question plan (do this before writing any questions).** For each section, write a short table in the brief or the chapter script: key idea or misconception → type → Learn step or Check. It passes when:
+- the Check uses **at least five different types**, with at least one from each of *misconception*, *observe* and *produce*, no more than two *choose one*, and never two of the same type in a row;
+- every key idea has at least one typed, ordered, sketched, built or written answer (not only choice questions);
+- every listed misconception is targeted at least twice, in different contexts;
+- every Learn step that runs the sim asks an *observe* question about that run before any *explain* question;
+- one item per section on the main misconception carries the *How sure are you?* add-on.
+
+**Adding a type the sim doesn't have yet.** Build each new type once as a reusable module in the question engine, then reuse it across sims. A type is finished only when it has, in one place each: the engine entry (render, check with one go, lock showing the right answer, saved state, student and model text for print), its label, its sim points, its paper marks, its print layout in student, blank and key modes (and part A or part B), its marking-scheme line with accepted answers, its minutes for the time estimates, and a test that answers it right and wrong. Every type works with touch, mouse and keyboard (buttons as well as dragging), uses seeded shuffles so the sim and paper match, and keeps the no-specificity rule. Force HQ's engine (`force-hq-rebuild/src/js/35-questions.js`) is the reference implementation, and `force-hq-rebuild/docs/Question_Types_Guide.md` has full data shapes for `order`, `pick`, `reason`, `fix`, `freeze`, `spot`, `sketch` and the confidence add-on.
+
+**Observation tools for sims that run over time** (falling, moving, charging, populations changing): a big ⏸ Pause button next to the start button, step buttons ("◀ 0.5 s", "0.5 s ▶") from a stored run history, and a 📸 Snapshot button that saves the paused moment to the Journal's Runs tab with a sentence and chips. Freeze-frame and tap-the-moment questions check against these snapshots, so no question forces a re-run. Mask any readout that would hand over a value the student must work out until they have answered.
 
 ## 4b. Worksheets (printable, PDF, Toddle-ready)
 
@@ -169,7 +208,7 @@ Every sim has a **"For teachers: set classwork or homework"** page, reached from
 
 Every sheet the teacher page can set must be markable by Toddle AI, and comes with **three files**: blank template, answer key (model answers for every question) and marking scheme.
 
-- **Marking scheme generator** built from the same question data (`markItem`, `schemeForSection`, `schemeForTask`, `markingInstructions`). Marks per type: choose one 1; tick all 2 (1 if one missing or extra); match/table/sort 1 per cell; order 2 (1 if one neighbouring swap); calculate 2 (answer with tolerance range + working/method); fill the gaps 1 per gap with accepted spellings; draw/explain 1 per checklist point, plus the model answer and "accept any correct scientific wording". Picture-only rows are named "Row N (picture)" in the order the template shows them. Build tasks use their own rubric (section 4e).
+- **Marking scheme generator** built from the same question data (`markItem`, `schemeForSection`, `schemeForTask`, `markingInstructions`). Marks per type: choose one 1; tick all 2 (1 if one missing or extra); match/table/sort 1 per cell; order 2 (1 if one neighbouring swap); calculate 2 (answer with tolerance range + working/method); fill the gaps 1 per gap with accepted spellings; choose the words 1 per drop-down; answer and reason 2 (answer 1, reason 1); spot the mistake 2 (line 1, correction 1); freeze-frame table 1 per cell, marked for consistency with the student's own snapshot (the key's values are examples); tap the moment 1 per target; sketch the graph 1 per feature check; How sure are you? not marked; draw/explain 1 per checklist point, plus the model answer and "accept any correct scientific wording". Picture-only rows are named "Row N (picture)" in the order the template shows them. Build tasks use their own rubric (section 4e).
 - **Each marking scheme page opens with the marking instructions**, so it works when attached on its own: the blank template and answer key are attached too; compare the upload with the template and **mark only what the student added** (printed in blue); the template's own text, choices and word banks are not student work; the answer key is the standard (students needn't match it word for word); use the sim's feedback page to confirm, and if it disagrees with the visible answer, trust the visible answer and say so; students are expected to complete the steps listed under "Steps completed in the sim" before answering, and a blue tick means the sim recorded that step as done (not marked, but mention skipped steps in the feedback); blank questions or an empty template score 0 with a kind note of what is missing; feedback for Grade 6–8: score per sheet with a per-question breakdown, one or two specific strengths quoting the student, one next step with a hint rather than the answer; no marks off for spelling unless meaning is unclear. End with the total marks.
 - **Teacher code:** answer keys and marking schemes on the teacher page, and the "I'm a teacher" mode, are **locked behind a code that is the first word of the sim's name in capitals** (Sparks Through Time → SPARKS; Force HQ → FORCE; Adapt Lab → ADAPT), case-insensitive. Remember the unlock in localStorage with a "Lock again" button. Locked buttons show 🔒 and scroll to the code box. Blank templates are never locked.
 - Below the files, an optional "All marking schemes in one" text box with a copy button, for when Toddle asks for AI marking instructions as text.
@@ -217,6 +256,7 @@ Code-drawn SVG/canvas is the default. When richer art is needed:
 - Verify physics and maths with a script (expected values at g = 9.8 N/kg, formula results, edge cases), check every Review calculation's stated answer, check every question has a model answer, and check every build task is achievable (section 4e).
 - Answer each Review type at least once (right and wrong), including drawing on the pad with real mouse moves. Check that one go locks each question and shows the right answer, that synonyms are accepted, and that the points add up. Complete each build task and confirm every check turns green, and that a wrong build (e.g. series instead of parallel) leaves the right check grey.
 - Drag every pop-up by its header with real mouse moves and with touch (`has_touch`) at desktop and phone widths: it follows the pointer, its header stays on screen, its spot is kept, buttons in the header still work, and the sim behind it can still be clicked.
+- Check each section's question plan against section 4a-3 with a script: types per Check (at least five, at most two choose one, no two of the same type in a row), and every listed misconception targeted at least twice.
 - Check every choice question for a specificity pattern, every explain question for its words-to-use list, every slider's number box (typing a value, out-of-range values clamped), and the too-high/too-low markers on target tasks.
 - Check the run history: each kind of run (still, moving, stopped by friction, reaching the end, braked, paused or reset) gives the right sentence and numbers, appears in the Journal's Runs tab (this step open, earlier runs folded), the Your turn box's See my runs button opens it, and the Journal opens beside the sim and closes at desktop and phone widths with the calculator button still visible.
 - Check the name gate: Cancel, Escape and clicking outside return to the name box, and the teacher code gets in.
