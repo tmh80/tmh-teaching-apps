@@ -11,7 +11,7 @@ Interactive science sims and labs for WAB MS Science (Grade 6–8). Each app is 
 | `sparks-through-time/` | Sparks Through Time | G6 Electricity | `Sparks-Through-Time.html` | Ready |
 | `adapt-lab/` | Adapt Lab | G7/8 Adaptations & evolution | `Adapt-Lab-offline.html` | Ready |
 | `paper-plane-lab/` | Paper Plane Lab | G6 Scientific method | `Paper-Plane-Lab-offline.html` | Ready (source in `src/`, rebuild with `node build.js`) |
-| `tilt-lab/` | Tilt Lab | G7/8 Earth in Space (seasons) | `Tilt-Lab-offline.html` | Ready |
+| `tilt-lab/` | Tilt Lab | G7/8 Earth in Space (seasons) | `Tilt-Lab-offline.html` | Ready. Name and class screen (teacher code `TILT`), answers saved per student, every stage and step open, My investigation notebook with checked readings, generated worksheet (print or save as PDF), and an exploration section with group tables on the teacher page |
 
 `Force-HQ.html` and `Adapt-Lab.html` are the sources used for the online Claude previews; each `-offline` copy is the same app wrapped as a full web page, with its fonts (and, for Adapt Lab, the jsPDF library used for PDF exports) embedded so it makes no internet requests.
 
@@ -35,3 +35,4 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
 - **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.
+- **Tilt Lab (still to do):** the Toddle AI-marking pack, the "set classwork or homework" prompt generator, the calculator, the guided tour, draggable pop-ups, and one-go answers on the typed explore steps (the multiple-choice check questions are one go already).

@@ -466,6 +466,207 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
 .tlinkrow{margin-top:4px}.tlinkrow a{color:var(--ice);font-weight:600}
 @media (max-width:800px){.tgrid,.tlo{grid-template-columns:minmax(0,1fr)}}
 </style>
+<style>
+/* ---- Oct 2026: names, saved work, free navigation, investigation notebook, worksheet ---- */
+[hidden]{display:none !important}
+.hdrSpace{gap:8px;flex-wrap:wrap}
+.uchip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ice);background:var(--ice-soft);color:var(--ink);border-radius:999px;padding:2px 4px 2px 12px;font-size:13px}
+.uchip b{font-weight:700}.uchip small{color:var(--muted);font-size:12px}
+.uchip .mini{border-radius:999px;padding:2px 8px}
+.gextra{flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.gextra .mini,.hdrSpace .mini{font-size:12.5px;padding:4px 10px;color:var(--ink);background:var(--chip)}
+.gextra .mini[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.guide.intro #gOpen{display:none}
+.app[data-free="1"] .gextra{display:flex}
+/* name gate */
+.gate{position:fixed;inset:0;z-index:200;background:rgba(7,11,19,.92);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.gate .gbox{background:var(--panel);color:var(--ink);border-radius:16px;max-width:480px;width:100%;padding:24px 26px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.gate h2{margin:0;font-size:26px}.gate p{margin:0;font-size:15px;line-height:1.5}
+.gate label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:700}
+.gate input[type=text]{font:inherit;font-weight:400;font-size:16px;padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink)}
+.gate .gerr{color:var(--warn);font-weight:600;font-size:14px}
+.gate .grow{display:flex;gap:10px;align-items:center}
+.gate .gfoot{font-size:13px;color:var(--muted)}.gate .gfoot a{color:var(--ice);font-weight:600}
+.gate .primary{margin-left:0;font-size:16px;padding:10px 20px}
+.gate .tbox2{display:flex;gap:8px;align-items:flex-end}.gate .tbox2 label{flex:1}
+/* toast */
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:250;background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;box-shadow:0 8px 30px rgba(0,0,0,.4);max-width:min(560px,92vw)}
+/* guided: status pill, jump note, warning, step chips */
+.gbrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.gstat{font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px}
+.gstat.ok{background:color-mix(in srgb,var(--good) 18%,var(--panel));color:var(--good);border:1px solid var(--good)}
+.gstat.todo{background:color-mix(in srgb,var(--sun) 14%,var(--panel));color:var(--warn);border:1px solid var(--sun)}
+.gjump{background:var(--ice-soft);border:1px solid var(--ice);border-radius:10px;padding:8px 12px;font-size:13.5px;line-height:1.45}
+.gwarnbox{border:2px solid var(--sun);background:var(--sun-soft);border-radius:10px;padding:10px 12px;font-size:14.5px;line-height:1.45;display:flex;flex-direction:column;gap:8px}
+.gwarnbox .gwbtns{display:flex;gap:8px;flex-wrap:wrap}
+.gwarnbox .mini{font-size:13px;padding:5px 12px;color:var(--ink);background:var(--panel)}
+.gwarnbox .gwgo{border-color:var(--sun);color:var(--warn);font-weight:700}
+.gsteps button{flex:1;height:10px;border-radius:5px;background:var(--line);border:0;padding:0;cursor:pointer;min-width:10px}
+.gsteps button.dn{background:var(--good)}
+.gsteps button.now{background:var(--sun);outline:2px solid var(--sun);outline-offset:2px}
+.gsteps button:hover{filter:brightness(.9)}
+.gsteps{padding-block:3px}
+.gnav .primary.ready{box-shadow:0 0 0 3px color-mix(in srgb,var(--good) 55%,transparent);background:var(--good)}
+.gopts.locked button{cursor:default}
+.gopts.locked button:hover{border-color:var(--line)}
+.gdots button.dn{background:var(--good);border-color:var(--good);color:#fff}
+.gdots button.st{border-color:var(--sun);color:var(--sun);background:var(--sun-soft)}
+.gdots button[aria-current="true"]{background:var(--sun);border-color:var(--sun);color:#fff}
+.gans{display:flex;flex-direction:column;gap:6px;border:2px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)}
+.gans.ok{border-color:var(--good)}
+.gans textarea,.nb textarea{font:inherit;font-size:15px;line-height:1.5;width:100%;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical;min-height:5em}
+/* stage map in the introduction */
+.chlist{display:flex;flex-direction:column;gap:5px;margin-top:4px}
+.chbtn{font:inherit;font-size:13.5px;text-align:left;display:flex;gap:8px;align-items:flex-start;border:1.5px solid var(--line);background:var(--panel);color:var(--ink);border-radius:9px;padding:6px 10px;cursor:pointer;line-height:1.35}
+.chbtn:hover{border-color:var(--muted)}
+.chbtn .chm{font-weight:700;color:var(--muted);flex:none;width:1.1em;text-align:center}
+.chbtn.done{border-color:var(--good);background:color-mix(in srgb,var(--good) 10%,var(--panel))}.chbtn.done .chm{color:var(--good)}
+.chbtn.started{border-color:var(--sun)}.chbtn.started .chm{color:var(--sun)}
+.introact{display:flex;flex-wrap:wrap;gap:8px}
+.introact .gaction{padding:7px 12px}
+.fin{display:flex;flex-direction:column;gap:12px}
+.fin .sumrow{display:flex;flex-wrap:wrap;gap:8px}
+.fin .sumrow span{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--bg);font-size:14px}
+.fin .sumrow b{font-size:20px;display:block}
+/* investigation notebook (drawer) */
+.app[data-nb="1"]{padding-right:calc(min(420px,38vw) + 22px)}
+.nb{position:fixed;top:10px;right:10px;bottom:10px;width:min(420px,38vw);z-index:60;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.35);display:flex;flex-direction:column;overflow:hidden}
+.nb .nbh{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--bg)}
+.nb .nbh b{font-size:16px}
+.nb .nbbody{overflow-y:auto;padding:12px 14px 18px;display:flex;flex-direction:column;gap:12px}
+.nb .nbtabs{display:flex;gap:5px;flex-wrap:wrap}
+.nb .nbtabs button{font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--chip);color:var(--ink);border-radius:999px;padding:3px 11px;cursor:pointer}
+.nb .nbtabs button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.nb details summary{cursor:pointer;color:var(--sun);font-weight:700;font-size:14px}
+.nb .trylist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.nb .tryb{font:inherit;text-align:left;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer;display:flex;flex-direction:column;gap:2px}
+.nb .tryb:hover{border-color:var(--sun)}
+.nb .tryb b{font-size:14px}.nb .tryb span{font-size:12.5px;color:var(--muted);line-height:1.4}
+.nb .nbhint{background:var(--sun-soft);border:1px solid var(--sun);border-radius:10px;padding:8px 10px;font-size:13.5px;line-height:1.45}
+.nb .nbfields{display:flex;flex-wrap:wrap;gap:6px}
+.nb .nbfields button{font:inherit;font-size:12.5px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:3px 10px;cursor:pointer}
+.nb .nbfields button[aria-pressed="true"]{border-color:var(--good);background:color-mix(in srgb,var(--good) 14%,var(--panel));font-weight:700}
+.nb .nbadd{display:flex;flex-wrap:wrap;gap:8px}
+.nb .nbadd .primary{margin-left:0}
+.nb .nbrow{border:2px solid var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.nb .nbrow.done{border-color:var(--good)}
+.nb .nbrh{display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.nb .nbrh b{font-size:13.5px;line-height:1.35}
+.nb .pill{font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
+.nb .pill.ok{background:color-mix(in srgb,var(--good) 18%,var(--panel));color:var(--good);border:1px solid var(--good)}
+.nb .pill.todo{background:color-mix(in srgb,var(--sun) 14%,var(--panel));color:var(--warn);border:1px solid var(--sun)}
+.nb .nbflds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.nb .nbflds label{display:flex;flex-direction:column;gap:3px;font-size:12px;font-weight:700;color:var(--muted)}
+.nb .nbflds label span{display:flex;align-items:center;gap:4px;color:var(--ink);font-weight:600}
+.nb .nbflds input{font:600 15px var(--font-num);width:100%;min-width:0;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.nb .nbflds input.ok{border-color:var(--good)}.nb .nbflds input.no{border-color:var(--warn)}
+.nb .nbflds small{font-weight:500;font-size:12px;line-height:1.35}
+.nb .nbflds small.ok{color:var(--good)}.nb .nbflds small.no{color:var(--warn)}
+.nb .nbrf{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.nb .nbrf .gcheckbtn{font-size:13.5px;padding:6px 12px}
+.nb .nbprompts ol{margin:6px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:6px;font-size:13.5px;line-height:1.45}
+.nb .nbprompts ol b{color:var(--ice)}
+.nb label.lbl{display:block}
+@media (max-width:900px){
+  .app[data-nb="1"]{padding-right:0;padding-bottom:56vh}
+  .nb{top:auto;left:0;right:0;bottom:0;width:auto;height:54vh;border-radius:14px 14px 0 0}
+}
+/* teacher page: exploration ideas */
+.xgroup{display:flex;flex-direction:column;gap:14px}
+.xcard{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.xcard h4{margin:0;font-size:16px}
+.xcard .xq{font-style:italic}
+.xcard .xmeta{font-size:13px;color:var(--muted);line-height:1.45}
+.xcard table{border-collapse:collapse;width:100%;font-size:13px;background:var(--panel)}
+.xcard th,.xcard td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top;height:2em}
+.xcard thead th{background:var(--bg);font-size:12px;line-height:1.3}
+.xcard td.mv{color:var(--ice);font-family:var(--font-num);font-weight:600}
+.xcard .xbtns{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.xcard .xbtns .mini{color:var(--ink);background:var(--chip);font-size:12.5px;padding:4px 10px}
+.xcard .xbtns select{font-size:12.5px}
+.xlock{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:13px}
+.xlock input{font:inherit;font-size:13px;padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);width:9em}
+.xways{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.xways div{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);font-size:14px;line-height:1.45}
+@media (max-width:800px){.xways{grid-template-columns:minmax(0,1fr)}}
+/* worksheet preview + print */
+.wsv{position:fixed;inset:0;z-index:150;background:#0b1220;overflow-y:auto;padding:0 0 40px}
+.wsv .wstool{position:sticky;top:0;z-index:5;background:var(--panel);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.wsv .wstool .wsrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.wsv .wstool .primary{margin-left:0}
+.wsv .wstool details summary{cursor:pointer;font-weight:700;font-size:13.5px;color:var(--sun)}
+.wsv .wspick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 16px;margin-top:8px;font-size:13px}
+.wsv .wspick label{display:flex;gap:6px;align-items:flex-start;cursor:pointer}
+.wsv .wspick b{grid-column:1/-1;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-top:4px}
+@media (max-width:800px){.wsv .wspick{grid-template-columns:minmax(0,1fr)}}
+.wsv .wsnote{background:var(--sun-soft);border:1px solid var(--sun);border-radius:8px;padding:8px 12px;font-size:13.5px;max-width:794px;margin:12px auto 0}
+.wsdoc{--wsblue:#1448c8;background:#fff;color:#14202e;width:min(794px,100%);margin:16px auto;padding:22px 26px 30px;font:12.5px/1.5 "Avenir Next","Segoe UI","PingFang SC","Microsoft YaHei",system-ui,sans-serif;border-radius:4px;color-scheme:light;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.wsdoc *{box-sizing:border-box}
+.wsdoc .wshead{background:#1b4f72;color:#fff;border-radius:8px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.wsdoc .wshead h1{margin:0;font-size:22px;letter-spacing:.01em}.wsdoc .wshead h1 span{color:#ffd98a}
+.wsdoc .wshead small{opacity:.9;font-size:12px}
+.wsdoc .wsbar{display:grid;grid-template-columns:2fr 1.2fr 1fr;gap:10px;margin:10px 0 4px}
+.wsdoc .wsbar div{border-bottom:1.5px solid #14202e;padding:3px 2px;font-size:12px;min-height:26px}
+.wsdoc .wsbar b{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#5a6878;display:block}
+.wsdoc .wsbar span{color:var(--wsblue);font-weight:700;font-size:14px}
+.wsdoc .wskey{font-size:11.5px;color:#5a6878;margin:4px 0 10px}
+.wsdoc .wskey i{color:var(--wsblue);font-style:normal;font-weight:700}
+.wsdoc h2{font-size:16px;margin:16px 0 6px;color:#1b4f72;break-after:avoid;border-bottom:2px solid #1b4f72;padding-bottom:3px}
+.wsdoc h3{font-size:14px;margin:14px 0 4px;break-after:avoid}
+.wsdoc h3 small{font-weight:600;color:#5a6878;font-size:11px;text-transform:uppercase;letter-spacing:.06em;margin-left:6px}
+.wsdoc .wsq{break-inside:avoid;margin:6px 0 10px;padding:6px 10px;border:1px solid #c9d2dc;border-radius:8px}
+.wsdoc .wsq .wsl{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#fff;background:#6b7c8f;border-radius:999px;padding:1px 8px;margin-bottom:3px}
+.wsdoc .wsq.wr .wsl{background:#c2700c}.wsdoc .wsq.ck .wsl{background:#1b7ea6}.wsdoc .wsq.pr .wsl{background:#5b6abf}.wsdoc .wsq.ex .wsl{background:#2e7d4f}
+.wsdoc .wsq p{margin:2px 0}
+.wsdoc .wsopts{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:3px}
+.wsdoc .wsopts li{display:flex;gap:8px;align-items:flex-start}
+.wsdoc .wsbox{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border:1.5px solid #14202e;border-radius:3px;flex:none;margin-top:2px;font-size:12px;font-weight:800;color:var(--wsblue);line-height:1}
+.wsdoc .wsbox.on{border-color:var(--wsblue)}
+.wsdoc .blue{color:var(--wsblue);font-weight:600}
+.wsdoc .wsblue{color:var(--wsblue);font-weight:600;white-space:pre-wrap}
+.wsdoc .wsfill{display:flex;gap:6px;align-items:flex-end}.wsdoc .wsline{flex:1;border-bottom:1.5px solid #14202e;min-height:18px}
+.wsdoc .wslines i{display:block;height:24px;border-bottom:1px solid #8a97a6}
+.wsdoc .wsans{white-space:pre-wrap;color:var(--wsblue);font-weight:600;border-left:3px solid var(--wsblue);padding:2px 10px;margin:4px 0;font-size:13px}
+.wsdoc .wsstart{font-size:11.5px;color:#5a6878;font-style:italic;margin:2px 0}
+.wsdoc .wskeys{background:#eaf3f8;border-radius:6px;padding:4px 10px;font-size:11.5px;margin:4px 0}
+.wsdoc .wskeys ul{margin:2px 0 0;padding-left:16px}
+.wsdoc table.wst{border-collapse:collapse;width:100%;font-size:11.5px;margin:4px 0}
+.wsdoc table.wst th,.wsdoc table.wst td{border:1px solid #8a97a6;padding:4px 6px;text-align:left;vertical-align:top;height:24px}
+.wsdoc table.wst thead th{background:#eef2f6;font-size:10.5px;line-height:1.3}
+.wsdoc table.wst td.b{color:var(--wsblue);font-weight:700}
+.wsdoc .wssteps{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;margin:0 0 6px}
+.wsdoc .wssteps span{display:inline-flex;gap:4px;align-items:center}
+.wsdoc .wsstep-row{break-inside:avoid;margin:3px 0 7px;font-size:12px}
+.wsdoc .wsfb{break-before:page}
+.wsdoc .wsfb .ok{color:#2e7d4f;font-weight:700}.wsdoc .wsfb .no{color:#b3541e;font-weight:700}
+.wsdoc .wsfb .row{break-inside:avoid;border-bottom:1px solid #d8dfe6;padding:4px 0;font-size:12px}
+.wsdoc .score{font-size:15px;font-weight:800;color:#1b4f72}
+.wsdoc .keytag{background:#2e7d4f;color:#fff;border-radius:999px;font-size:10.5px;padding:1px 8px;margin-left:6px}
+.wsdoc .keyline{color:#2e7d4f;font-weight:700}
+@page{size:A4;margin:12mm}
+@media print{
+  html,body{background:#fff!important}
+  body[data-ws] .app,body[data-ws] .gate,body[data-ws] .nb,body[data-ws] .toast,body[data-ws] .teach{display:none!important}
+  body[data-ws] .wsv{position:static!important;inset:auto!important;background:#fff!important;overflow:visible!important;padding:0!important}
+  body[data-ws] .wsv .wstool,body[data-ws] .wsv .wsnote{display:none!important}
+  body[data-ws] .wsdoc{width:100%!important;margin:0!important;padding:0!important;border-radius:0!important}
+}
+/* additions */
+.chgrp{display:block;margin-top:8px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.chgrp.t-foundation{color:var(--good)}.chgrp.t-extension{color:var(--ice)}.chgrp.t-investigation{color:var(--sun)}
+.app[data-free="1"][data-nb="1"]{padding-right:calc(min(420px,38vw) + 22px)}
+.app[data-free="1"][data-nb="1"] .guide{display:none}
+@media (max-width:900px){.app[data-free="1"][data-nb="1"]{padding-right:0;padding-bottom:56vh}}
+.nb .nbprompts label.lbl{font-weight:600;font-size:13.5px;line-height:1.4;color:var(--ink);text-transform:none;letter-spacing:0}
+.nb .nbfoot{display:flex;gap:8px;flex-wrap:wrap}
+.wsdoc .wsline{display:block;border-bottom:1.5px solid #14202e;min-height:20px;margin:4px 0}
+.wsdoc table.wst th{font-weight:600}
+.wsdoc ul,.wsdoc ol{margin:3px 0 3px 18px;padding:0}
+.guide.intro #gMap{display:none}
+@media (min-width:1101px){header.top{grid-template-columns:auto auto minmax(0,1fr);justify-content:space-between}.hdrSpace{flex-wrap:wrap;justify-content:flex-end}}
+.app[data-free="1"] .hdrSpace .uchip,.app[data-free="1"] .hdrSpace .nbbtn,.app[data-free="1"] .hdrSpace .wsbtn{display:none}
+
+</style>
 
 <div class="app" id="app" data-mode="guided">
   <header class="top">
@@ -473,7 +674,7 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
     <div class="modes" role="group" aria-label="View mode" id="modes">
       <button type="button" data-m="guided"><b>Guided</b><small>Step-by-step challenges</small></button><button type="button" data-m="focus"><b>Focus</b><small>Explore one view at a time</small></button><button type="button" data-m="full"><b>Full</b><small>Everything at once</small></button>
     </div>
-    <div class="hdrSpace"><button type="button" class="mini teachbtn" id="teachBtn">For teachers</button></div>
+    <div class="hdrSpace"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini nbbtn" id="nbBtn">📓 My investigation</button><button type="button" class="mini wsbtn" id="wsBtn">📄 My worksheet</button><button type="button" class="mini teachbtn" id="teachBtn">For teachers</button></div>
   </header>
 
   <section class="strip" aria-label="Main controls">
@@ -544,12 +745,14 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
       <div class="ghead">
         <div class="gtop"><span class="lbl" id="gCount">Challenge 1 of 8</span><button type="button" class="coopchip" id="gCoop" hidden></button><div class="gdots"><button type="button" id="gIntroBtn" class="gintro" aria-label="Introduction">i</button><span id="gDots" class="gdots"></span></div></div>
         <div class="gexit"><span class="lbl">Leave guided mode:</span><button type="button" class="mini" id="gToFocus">Focus</button><button type="button" class="mini" id="gToFull">Full</button></div>
+        <div class="gextra"><span class="uchip" hidden><b class="uName"></b><small class="uClass"></small><button type="button" class="mini uChange">Change</button></span><button type="button" class="mini" id="gMap">☰ All stages</button><button type="button" class="mini" id="gOpen" aria-pressed="false">🔓 Open all the tools</button><button type="button" class="mini" id="gNb">📓 My investigation</button><button type="button" class="mini" id="gWs">📄 My worksheet</button></div>
       </div>
       <div class="gbody" id="gBody">
         <div class="gleft">
           <h2 id="gTitle">–</h2>
-          <div class="gsteps" id="gSteps" aria-hidden="true"></div>
+          <div class="gsteps" id="gSteps" role="group" aria-label="Steps in this challenge. Tap one to jump to it."></div>
           <div class="gstep" id="gStep" aria-live="polite"></div>
+          <div class="gwarnbox" id="gWarn" hidden></div>
           <div class="gnav"><button type="button" class="mini" id="gPrev">&larr; Back</button><button type="button" class="mini" id="gSkip" hidden>Skip this step</button><button type="button" class="primary" id="gNext">Next step &rarr;</button></div>
           <button type="button" class="linkish" id="gReset">Start this challenge again</button>
         </div>
@@ -628,6 +831,10 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
     </details>
   </footer>
 </div>
+<div class="gate" id="gate" hidden></div>
+<aside class="nb" id="nb" hidden aria-label="My investigation"></aside>
+<div class="wsv" id="wsv" hidden></div>
+<div class="toast" id="toast" hidden role="status"></div>
 <script>
 (function(){
 "use strict";
@@ -1447,7 +1654,8 @@ function wire(){
   $("gPrev").addEventListener("click",prevStep);
   $("gNext").addEventListener("click",nextStep);
   $("gSkip").addEventListener("click",skipStep);
-  $("gReset").addEventListener("click",()=>goChallenge(S.gi));
+  $("gReset").addEventListener("click",resetChallenge);
+  $("gSteps").addEventListener("click",e=>{const b=e.target.closest("button[data-si]");if(b)jumpStep(+b.dataset.si)});
   $("gPlay").addEventListener("click",playClick);
   $("gIntroBtn").addEventListener("click",goIntro);
   $("gToFocus").addEventListener("click",()=>setMode("focus"));
@@ -2021,23 +2229,40 @@ CHALLENGES.forEach((c,i)=>c.steps.unshift(...(LEARN[i]||[])));
 CHALLENGES.forEach(c=>c.steps.forEach(st=>{if(st.spot&&st.spot.includes("scrub")&&!st.spot.includes("date"))st.spot.push("date")}));
 const TYPE_LABEL={learn:"Learn",predict:"Predict",do:"Explore",check:"Check",write:"Write"};
 const SPOTS={scrub:".scrubwrap",play:"#play",tilt:".strip .ctl:has(#tilt)",lat:"#lat",city:"#city",map:".p-map",sky:".p-sky",globe:".p-globe",graph:".p-graph",status:".t-day",date:".whenwrap",tNoon:".t-noon",tDay:".t-day",tOver:".t-sun"};
-let MEM=null;
+let MEM=null;const STORE={};
+function newMem(){return {found:{},pred:null,done:{},correct:{},tries:{},seen:{},text:{}}}
 function curStep(){const st=CHALLENGES[S.gi].steps;return st[Math.min(S.gs,st.length-1)]}
+function captureModel(){if(!MEM||STORE[S.gi]!==MEM)return;MEM.model={planet:S.planet,tilt:S.tilt,lat:S.lat,lon:S.lon,city:S.city,t:S.t,span:S.span,tod:S.tod,layer:S.layer}}
+function restoreModel(m){if(!m)return;if(m.planet&&m.planet!==S.planet)setPlanet(m.planet,true);Object.assign(S,{tilt:m.tilt,lat:m.lat,lon:m.lon,city:m.city,t:m.t,span:m.span,tod:m.tod,layer:m.layer});S.playing=false;syncUI();requestRender()}
 function goChallenge(i){
   if(!S.coop){showSetup(clamp(i,0,CHALLENGES.length-1));return}
-  S.inSetup=false;S.gi=clamp(i,0,CHALLENGES.length-1);const c=CHALLENGES[S.gi];
-  S.intro=false;$("gIntroBtn").setAttribute("aria-current","false");S.gs=0;MEM={found:{},pred:null,done:{},correct:{},tries:{}};if(c.set)setup(c.set);
+  if(MEM&&!S.intro&&!S.inSetup)captureModel();
+  S.inSetup=false;S.finish=false;S.gi=clamp(i,0,CHALLENGES.length-1);const c=CHALLENGES[S.gi];
+  S.intro=false;$("gIntroBtn").setAttribute("aria-current","false");S.gs=0;
+  const fresh=!STORE[S.gi];MEM=STORE[S.gi]||(STORE[S.gi]=newMem());
+  if(c.set)setup(c.set);if(!fresh&&MEM.model)restoreModel(MEM.model);
   $("gCount").textContent=tierLabel(c);$("gTitle").textContent=c.title;
   document.querySelectorAll("#gDots button").forEach(b=>b.setAttribute("aria-current",String(+b.dataset.i===S.gi)));
-  coopChip();let k=0;while(k<c.steps.length-1&&!stepVisible(c.steps[k]))k++;enterStep(k);syncUI();
+  coopChip();let k=(!fresh&&MEM.pos!=null)?clamp(MEM.pos,0,c.steps.length-1):0;while(k<c.steps.length-1&&!stepVisible(c.steps[k]))k++;enterStep(k);syncUI();
 }
 function enterStep(k){
   const c=CHALLENGES[S.gi];S.gs=clamp(k,0,c.steps.length-1);const st=curStep();
   if(st.enter&&!MEM.done[S.gs])st.enter(MEM);
-  S.intro=false;$("guide").classList.remove("intro");S.playing=false;MEM.playMsg="";mountTools(st.free?[]:stepTools(st));
-  renderStep();applyLayout();requestRender();
+  S.intro=false;S.finish=false;$("guide").classList.remove("intro");S.playing=false;MEM.playMsg="";MEM.pos=S.gs;MEM.seen=MEM.seen||{};MEM.seen[S.gs]=1;MEM.text=MEM.text||{};
+  mountTools((st.free||S.openTools)?[]:stepTools(st));
+  renderStep();applyLayout();
+  if(S.openTools&&st.play){$("gTools").hidden=false;$("gBody").classList.remove("notools");$("gSlots").classList.add("nobig","nosmall")}
+  requestRender();saveSoon();
 }
-function stepComplete(){const st=curStep();return coopComplete(st)&&(extraComplete(st)||st.type==="write"||st.type==="learn"||(st.type==="predict"&&MEM.pred!==null)||(st.type==="do"&&MEM.done[S.gs])||(st.type==="check"&&MEM.correct[S.gs]))}
+const answered=gs=>!!(MEM.tries[gs]&&MEM.tries[gs].n>=1);
+const hasText=gs=>((MEM.text&&MEM.text[gs])||"").trim().length>0;
+function stepComplete(){const st=curStep();return coopComplete(st)&&(extraComplete(st)||(st.type==="write"&&hasText(S.gs))||st.type==="learn"||(st.type==="predict"&&MEM.pred!==null&&MEM.pred!==undefined)||(st.type==="do"&&MEM.done[S.gs])||(st.type==="check"&&answered(S.gs)))}
+const WHAT_TO_DO={predict:"choose a hypothesis",do:"find it in the model",check:"answer the question",write:"type your answer",sort:"sort every card",choose:"choose a claim",collect:"collect your evidence",table:"fill in the table",checklist:"rate every statement",pair:"answer both partner questions"};
+function missingMsg(st){
+  if(st.type==="collect"){const n=collectNeeds(curClaim());if(n.length)return n.join(" ")}
+  if(st.type==="table"){const n=tableNeeds();if(n.length)return n.join(" ")}
+  const m={predict:"You have not chosen a hypothesis yet.",do:"The model has not seen you find this yet.",check:"You have not answered the question yet.",write:"You have not typed anything in the answer box yet.",sort:"Some cards are not sorted yet.",choose:"You have not chosen a claim yet.",checklist:"Some statements are not rated yet.",pair:"The partner questions are not finished yet."}[st.type];
+  return m||"Some parts of this step are not finished."}
 function findingsHTML(){
   const c=CHALLENGES[S.gi];const rows=[];
   if(MEM.pred!==null){const p=c.steps.find(s=>s.type==="predict");if(coopMode()==="pair1"){const nm=coopNames();rows.push(`<li>${nm.A} predicted: <b>${p.options[MEM.pred]}</b></li>`);if(MEM.predB!=null)rows.push(`<li>${nm.B} predicted: <b>${p.options[MEM.predB]}</b></li>`)}else rows.push(`<li>You predicted: <b>${p.options[MEM.pred]}</b></li>`)}
@@ -2046,13 +2271,18 @@ function findingsHTML(){
 }
 function renderStep(){
   const c=CHALLENGES[S.gi],st=curStep(),visIdx=c.steps.map((s,i)=>stepVisible(s)?i:-1).filter(i=>i>=0),n=visIdx.length,pos=Math.max(0,visIdx.indexOf(S.gs));GLOSS_USED=new Set();hideVocab();
-  $("gSteps").innerHTML=visIdx.map(i=>`<span class="${i<S.gs?"past":i===S.gs?"now":""}" title="${TYPE_LABEL[c.steps[i].type]}"></span>`).join("");
-  let h=(S.returnTo&&!(S.returnTo.gi===S.gi&&S.returnTo.gs===S.gs)?`<div class="greturn">You are revisiting this step. <button type="button" class="mini" id="gReturn">← Back to the check-in</button></div>`:"")+`<div class="gbadge b-${st.type}">Step ${pos+1} of ${n} · ${TYPE_LABEL[st.type]}</div>`+coopBanner(st);
+  $("gSteps").innerHTML=visIdx.map((i,k)=>`<button type="button" class="${isStepDone(S.gi,i)?"dn":""} ${i===S.gs?"now":""}" data-si="${i}" title="Step ${k+1}: ${TYPE_LABEL[c.steps[i].type]}${isStepDone(S.gi,i)?" (done)":""}" aria-label="Go to step ${k+1}, ${TYPE_LABEL[c.steps[i].type]}${isStepDone(S.gi,i)?", done":""}"${i===S.gs?' aria-current="step"':""}></button>`).join("");
+  const isDone=stepComplete(),needTxt=WHAT_TO_DO[st.type];
+  const openBefore=visIdx.find(i=>i<S.gs&&!isStepDone(S.gi,i)&&c.steps[i].type!=="learn");
+  let h=(S.returnTo&&!(S.returnTo.gi===S.gi&&S.returnTo.gs===S.gs)?`<div class="greturn">You are revisiting this step. <button type="button" class="mini" id="gReturn">← Back to the check-in</button></div>`:"")
+   +`<div class="gbrow"><div class="gbadge b-${st.type}">Step ${pos+1} of ${n} · ${TYPE_LABEL[st.type]}</div>${st.type==="learn"?"":`<span class="gstat ${isDone?"ok":"todo"}">${isDone?"✓ Done":"To do · "+needTxt}</span>`}</div>`
+   +(openBefore!==undefined&&!isDone?`<div class="gjump">You jumped ahead. Some steps build on the ones before them, so the model may look different from this step's text. You can go back to any step with the bars above.</div>`:"")+coopBanner(st);
   if(st.type==="write"){
     h+=`<div class="gwrite"><span class="lbl">In your notebook</span><p>${linkTerms(typeof st.prompt==="function"?st.prompt(MEM):st.prompt)}</p>${st.cmd?`<small class="gcmd">${CMD_TIP[st.cmd]}</small>`:""}</div>`;
     if(st.keys)h+=`<div class="gkeys"><span class="lbl">What you have learned</span><ul>${st.keys.map(x=>`<li>${linkTerms(x)}</li>`).join("")}</ul></div>`;
     h+=st.evidence?evidenceHTML():findingsHTML();
     h+=`<div class="gstart"><span class="lbl">Sentence starters</span><ul>${st.starters.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
+    h+=`<div class="gans ${hasText(S.gs)?"ok":""}"><label class="lbl" for="gTxt">Write your answer here (or in your notebook)</label><textarea id="gTxt" rows="7" maxlength="2500" placeholder="Start with one of the sentence starters. Any answer counts, even a short one!">${esc(MEM.text[S.gs]||"")}</textarea><small class="note">Your answer is saved on this computer and printed on your worksheet.</small></div>`;
     if(st.checklist&&coopMode()!=="solo")h+=peerHTML(st);
     else if(st.checklist){MEM.ticks=MEM.ticks||{};h+=`<div class="gcheck"><span class="lbl">Before you finish, check your answer:</span>${st.checklist.map((x,i)=>`<label><input type="checkbox" data-k="${i}" ${MEM.ticks[i]?"checked":""}> ${x}</label>`).join("")}</div>`}
   }else if(st.type==="learn"){
@@ -2066,10 +2296,11 @@ function renderStep(){
     h+=`<p class="gtext">${linkTerms(st.text)}</p>`;if(st.widget)h+=`<div class="gdiagwrap">${st.widget()}</div>`;
     if(st.type==="predict"&&coopMode()==="pair1"){h+=predictPairHTML(st)}
     else if(st.type==="predict"||st.type==="check"){
-      const chosen=st.type==="predict"?MEM.pred:MEM.tries[S.gs]?.last;
-      h+=`<div class="gopts">${st.options.map((o,i)=>`<button type="button" data-o="${i}" class="${chosen===i?(st.type==="predict"?"picked":(i===st.answer?"right":"wrong")):""}">${o}</button>`).join("")}</div>`;
+      const chosen=st.type==="predict"?MEM.pred:MEM.tries[S.gs]?.last,locked=st.type==="check"&&answered(S.gs);
+      h+=`<div class="gopts${locked?" locked":""}">${st.options.map((o,i)=>`<button type="button" data-o="${i}" ${locked?'aria-disabled="true"':""} class="${st.type==="predict"?(chosen===i?"picked":""):(locked&&i===st.answer?"right":locked&&chosen===i?"wrong":"")}">${o}</button>`).join("")}</div>`;
       if(st.type==="predict")h+=`<p class="note">You are not expected to know the answer yet. This is your hypothesis.</p>`;
-      else if(MEM.tries[S.gs]){const ok=MEM.correct[S.gs];const t=MEM.tries[S.gs].n;h+=`<div class="gfb ${ok?"ok":"no"}">${ok?"✓ "+st.right:st.wrong+(t>=2?` The answer is: <b>${st.options[st.answer]}</b>.`:"")}</div>`}
+      else if(locked){const ok=MEM.correct[S.gs];h+=`<div class="gfb ${ok?"ok":"no"}">${ok?"✓ "+st.right:`Whoops! The answer is: <b>${st.options[st.answer]}</b>. ${checkReason(st)}`}</div>`}
+      else h+=`<p class="note">You get one go at each question, so think carefully before you choose.</p>`;
       if(st.type==="check")h+=findingsHTML();
     }
     if(st.type==="do"&&st.ask){
@@ -2098,9 +2329,11 @@ function renderStep(){
   $("gStep").innerHTML=h;renderPlay();initWidgets();
   const last=pos===n-1, lastC=S.gi===CHALLENGES.length-1;
   const nxt=CHALLENGES[S.gi+1];
-  $("gNext").textContent=!last?"Next step →":!nxt?"Explore freely →":nxt.tier==="check"?"Go to the check-in →":nxt.tier!==c.tier?`Start the ${TIERS[nxt.tier]} →`:"Next challenge →";
-  $("gNext").disabled=!stepComplete();
-  $("gPrev").disabled=false;
+  $("gNext").textContent=!last?"Next step →":!nxt?"Finish: make my worksheet →":nxt.tier==="check"?"Go to the check-in →":nxt.tier!==c.tier?`Start the ${TIERS[nxt.tier]} →`:"Next challenge →";
+  $("gNext").disabled=false;$("gNext").classList.toggle("ready",isDone);hideWarn();
+  $("gPrev").disabled=false;refreshDots();syncOpenBtn();
+  const tx=$("gTxt");if(tx)tx.addEventListener("input",()=>{MEM.text[S.gs]=tx.value;tx.closest(".gans").classList.toggle("ok",tx.value.trim().length>0);$("gNext").classList.toggle("ready",stepComplete());const sp=document.querySelector(".gstat");if(sp){const d=stepComplete();sp.className="gstat "+(d?"ok":"todo");sp.textContent=d?"✓ Done":"To do · "+WHAT_TO_DO.write}const jn=document.querySelector(".gjump");if(jn&&stepComplete())jn.remove();refreshDots();saveSoon()});
+  saveSoon();
   $("gSkip").hidden=!(st.type==="do"&&!MEM.done[S.gs]&&(!st.ask||((MEM.tries[S.gs]||{}).n||0)>=3));
   const gb=$("gaBtn");if(gb)gb.addEventListener("click",checkAsk);
   $("gStep").querySelectorAll(".gplaces button").forEach(b=>b.addEventListener("click",()=>{const pl=st.places[+b.dataset.pl];MEM.pl=MEM.pl||{};const q=MEM.pl[pl.label]||(MEM.pl[pl.label]={});
@@ -2116,7 +2349,7 @@ function renderStep(){
 function answer(i){
   const st=curStep();
   if(st.type==="predict"){MEM.pred=i}
-  else{const tr=MEM.tries[S.gs]||(MEM.tries[S.gs]={n:0});if(!MEM.correct[S.gs]){tr.n++;tr.last=i;if(i===st.answer)MEM.correct[S.gs]=true}}
+  else{const tr=MEM.tries[S.gs]||(MEM.tries[S.gs]={n:0});if(tr.n>=1)return;tr.n=1;tr.last=i;if(i===st.answer)MEM.correct[S.gs]=true}
   renderStep();
 }
 function applySpots(){
@@ -2144,20 +2377,25 @@ function guideTick(g,t){
     state:df>=1?"day":df<=0?"night":"normal",date:earth?`${d.day} ${d.mon}`:fmtDur(t),doy:frac((t+(earth?EARTH_JAN1:0))/g.p.porb)*365.24};
   if(st.watch(ctx,MEM)){MEM.done[S.gs]=true;renderStep()}
 }
-function nextStep(){
+function hideWarn(){const w=$("gWarn");if(w){w.hidden=true;w.innerHTML=""}}
+function nextStep(force){
   if(S.inSetup)return;
-  if(S.intro){goChallenge(S.gi);return}
-  if(!stepComplete())return;const c=CHALLENGES[S.gi];
+  if(S.intro){if(S.finish){openWs();return}goChallenge(S.gi);return}
+  if(force!==true&&!stepComplete()){const w=$("gWarn");w.hidden=false;w.innerHTML=`<b>You have not finished this step.</b> ${missingMsg(curStep())} <span class="gwbtns"><button type="button" class="mini" id="gStay">Stay and finish it</button><button type="button" class="mini gwgo" id="gGoOn">Continue anyway</button></span>`;
+    $("gStay").addEventListener("click",hideWarn);$("gGoOn").addEventListener("click",()=>nextStep(true));w.scrollIntoView({block:"nearest"});return}
+  hideWarn();const c=CHALLENGES[S.gi];
   let k=S.gs+1;while(k<c.steps.length&&!stepVisible(c.steps[k]))k++;
   if(k<c.steps.length)enterStep(k);
   else if(S.gi<CHALLENGES.length-1)goChallenge(S.gi+1);
-  else setMode("focus");
+  else showFinish();
 }
 function prevStep(){if(S.intro||S.inSetup)return;let k=S.gs-1;const c=CHALLENGES[S.gi];while(k>=0&&!stepVisible(c.steps[k]))k--;if(k>=0)enterStep(k);else if(S.gi>0)goChallenge(S.gi-1);else goIntro()}
 function skipStep(){MEM.done[S.gs]="skip";renderStep()}
+function jumpStep(i){if(S.intro||S.inSetup)return;const c=CHALLENGES[S.gi];if(!c.steps[i]||!stepVisible(c.steps[i]))return;enterStep(i)}
+const checkReason=st=>{const t=String(st.right||"").replace(/^(Yes|Correct|Right|Exactly|Both)[.,:!]\s*/i,"");return t.charAt(0).toUpperCase()+t.slice(1)};
 
 function setMode(m){
-  const was=S.mode;S.mode=m;try{localStorage.setItem("tiltlab-mode",m)}catch(e){}
+  const was=S.mode;if(was==="guided"&&MEM&&!S.intro)captureModel();S.mode=m;try{localStorage.setItem("tiltlab-mode",m)}catch(e){}
   if(was==="guided"&&m!=="guided"){unmountTools();S.playing=false;S.intro=false}
   if(m==="guided"&&was!=="guided")goIntro();
   syncUI();requestRender();
@@ -2165,7 +2403,7 @@ function setMode(m){
 function applyLayout(){
   $("app").dataset.mode=S.mode;setPressed("modes","m",S.mode);setPressed("tabMain","v",S.tab);$("tabSecond").value=S.tab2||"";
   let show;
-  const free=S.mode==="guided"&&!S.intro&&MEM&&curStep().free;$("app").dataset.mode=free?"full":S.mode;$("app").dataset.free=free?"1":"0";
+  const free=S.mode==="guided"&&!S.intro&&MEM&&(curStep().free||S.openTools);$("app").dataset.mode=free?"full":S.mode;$("app").dataset.free=free?"1":"0";
   document.querySelector(".p-graph").classList.toggle("pickable",!!(free&&curStep().type==="table"));
   if(S.mode==="full"||free)show=null;
   else if(S.mode==="guided")show=CHALLENGES[S.gi].show;
@@ -2219,7 +2457,7 @@ function renderPlay(){
   $("gPlayMsg").classList.toggle("hit",!!MEM.playMsg);
 }
 /* Introduction screen */
-const INTRO_HTML=`<div class="gbadge b-learn">Introduction</div>
+const INTRO_TOP=`<div class="gbadge b-learn">Introduction</div>
 <h3 class="glearn">What are we investigating?</h3>
 <p class="gtext">How much energy from the Sun a place gets depends on three things. In these challenges, you will find out how each one works.</p>
 <div class="introcards">
@@ -2231,17 +2469,11 @@ const INTRO_HTML=`<div class="gbadge b-learn">Introduction</div>
   <b>Distance</b><span>How far the planet is from the Sun. Planets far away get much weaker sunlight.</span></div>
 </div>
 <p class="gtext">You will mostly change the <b>orbit</b> and the <b>tilt</b>, and compare planets for <b>distance</b>. Each challenge has short steps: learn, make a hypothesis, explore, check, then write.</p>
-<h3 class="glearn">Three levels</h3>
-<div class="ladder">
- <div class="lcard t-foundation"><b>1 · Foundation</b><span>Why do we have seasons? Find out how the angle of sunlight changes the energy a place gets.</span><button type="button" class="mini" data-tier="foundation">Start</button></div>
- <div class="lcard t-extension"><b>2 · Extension</b><span>The tropics and the polar circles: where the Sun can be overhead, and where it stays up all day.</span><button type="button" class="mini" data-tier="extension">Start</button></div>
- <div class="lcard t-investigation"><b>3 · Investigation</b><span>Use the tools freely. Sort evidence, test a claim, and write a claim, evidence and reasoning paragraph.</span><button type="button" class="mini" data-tier="investigation">Start</button></div>
-</div>
-<p class="note tlinkrow">Teacher? <a href="#" id="teachLink">How to use this model (for teachers)</a></p>`;
+`;
 function goIntro(){
   S.intro=true;S.playing=false;unmountTools();$("guide").classList.add("intro");$("gTools").hidden=true;$("gBody").classList.add("notools");
   $("gCount").textContent="Introduction";$("gTitle").textContent="Tilt Lab challenges";$("gSteps").innerHTML="";
-  S.returnTo=null;S.inSetup=false;coopChip();$("gStep").innerHTML=INTRO_HTML;$("gNext").textContent=S.gi>0?"Continue →":"Start the Foundation →";$("gNext").disabled=false;$("gPrev").disabled=true;$("gSkip").hidden=true;
+  S.returnTo=null;S.inSetup=false;S.finish=false;coopChip();$("gStep").innerHTML=introHTML();$("gNext").textContent=Object.keys(STORE).length?"Continue →":"Start the Foundation →";$("gNext").disabled=false;$("gNext").classList.remove("ready");$("gPrev").disabled=true;$("gSkip").hidden=true;hideWarn();refreshDots();syncOpenBtn();
   document.querySelectorAll("#gDots button").forEach(b=>b.setAttribute("aria-current","false"));$("gIntroBtn").setAttribute("aria-current","true");
   syncUI();
 }
@@ -2816,7 +3048,7 @@ function coopBanner(st){
 }
 function talkHTML(st){
   const m=coopMode();if(m==="solo")return "";
-  const done=(st.type==="do"&&MEM.done[S.gs]===true)||(st.type==="check"&&MEM.correct[S.gs]);if(!done)return "";
+  const done=(st.type==="do"&&MEM.done[S.gs]===true)||(st.type==="check"&&answered(S.gs));if(!done)return "";
   let txt;
   if(st.type==="do")txt=m==="pair1"?(r=>`<b>${r.rec}</b>: explain to <b>${r.drv}</b> what this result means, in your own words. <b>${r.drv}</b>: agree, or add one thing.`)(roles()):"Turn to your partner. Take turns to explain what your result means, in your own words.";
   else txt=m==="pair1"?"The partner who did not choose the answer explains why it is right.":"Explain to your partner why this answer is right.";
@@ -2840,7 +3072,7 @@ function peerHTML(st){
 function coopComplete(st){
   const m=coopMode();if(m==="solo")return true;
   if(st.type==="predict"&&m==="pair1")return MEM.pred!==null&&MEM.predB!=null;
-  if((st.type==="do"&&MEM.done[S.gs]===true)||(st.type==="check"&&MEM.correct[S.gs]))return !!(MEM.talk||{})[S.gs];
+  if((st.type==="do"&&MEM.done[S.gs]===true)||(st.type==="check"&&answered(S.gs)))return !!(MEM.talk||{})[S.gs];
   if(st.type==="write"&&st.checklist)return !!MEM.peer;
   return true;
 }
@@ -3018,6 +3250,173 @@ function showSetup(gi){
 })();
 
 
+/* ---------- Exploration: "Try this" ideas, group tables and model values (Oct 2026) ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+const TRY=[
+ {id:"planets",icon:"🪐",title:"Planet detectives",kind:"year",
+  q:"How do the seasons on other planets compare with Earth at 45°N?",
+  how:"Stay at 45°N and change only the planet. Press each Planet button in turn and add a whole-year reading for it. Try Earth, Mars, Jupiter and Uranus first.",
+  set:{planet:"earth",lat:45,lon:0,span:"year",yearFrac:0.25}},
+ {id:"seasons",icon:"🍂",title:"Four seasons in one place",kind:"day",
+  q:"How do the midday Sun, the daylight and the temperature change through the year in one place?",
+  how:"Choose a place. Use the Month and Day buttons to visit 20 March, 21 June, 22 September and 21 December. Add a reading on each date.",
+  set:{planet:"earth",city:"beijing",span:"year",yearFrac:0}},
+ {id:"hemi",icon:"🌏",title:"Opposite seasons",kind:"day",
+  q:"Why is it summer in Beijing when it is winter in Sydney?",
+  how:"Go to 21 June and add a reading in Beijing. Choose Sydney from the Place list and add another. Then repeat both on 21 December.",
+  set:{planet:"earth",city:"beijing",span:"year",yearFrac:0.25}},
+ {id:"lat",icon:"📏",title:"Latitude ladder",kind:"day",
+  q:"How does the midday Sun on 21 June change as you travel from the equator to the North Pole?",
+  how:"The model starts on 21 June. Type a latitude (or drag the pink marker on the map) and add a reading at 0°, 23°, 40°, 60°, 67° and 90°N.",
+  set:{planet:"earth",lat:0,lon:0,span:"year",yearFrac:0.25}},
+ {id:"tilt",icon:"🌀",title:"Tilt tester",kind:"year",
+  q:"What happens to the seasons at 45°N when the tilt changes?",
+  how:"Stay on Earth at 45°N and change only the Tilt. Try 0°, 23.4°, 45°, 60° and 90°, and add a whole-year reading each time.",
+  set:{planet:"earth",lat:45,lon:0,span:"year",yearFrac:0.25}},
+ {id:"orbit",icon:"☄️",title:"Does distance ever matter?",kind:"day",fields:["noon","hi","dist"],
+  q:"Which planets are much closer to the Sun at some times of year than at others, and does it change their temperature?",
+  how:"Choose Mercury, then Mars, then Earth. Zoom out the Planet from space view and press play. Add a reading when each planet is closest to the Sun, and another when it is furthest.",
+  set:{planet:"mars",lat:0,lon:0,span:"year",yearFrac:0}}
+];
+
+/* Group tables for the teacher page. Each row can be filled in with model values (teacher code). */
+const XCITY_PICK=["beijing","sydney","singapore","london","tromso","quito","capetown","havana"];
+const XTABLES=[
+ {id:"planets",icon:"🪐",title:"Planet detectives",focus:"Each group takes two planets (a class of eight groups covers all of them).",
+  q:"How do the seasons on other planets compare with Earth at 45°N?",
+  setup:"Everyone stays at 45°N and changes only the planet. Students add a “whole-year reading” for their planets in My investigation.",
+  yearly:true,labelCols:["Planet"],
+  valCols:[["Tilt (°)","tilt"],["Highest midday Sun","top"],["Shortest day","dmin"],["Longest day","dmax"],["Coldest","lo"],["Warmest","hi"]],
+  rows:["earth","mars","jupiter","uranus","venus","neptune","saturn","mercury"].map(p=>({labels:[PLANETS[p].name],spec:{planet:p,lat:45,lon:0}})),
+  tip:"Ask which planet does not fit the pattern “bigger tilt, more extreme seasons”. Mars (stretched orbit) and Venus or Neptune (thick air or inner heat) are good ones to argue about."},
+ {id:"seasons",icon:"🍂",title:"Four seasons in one place",focus:"Each group takes a different place (Beijing, Sydney, Singapore, London, Tromsø, Quito…). Groups then swap results.",
+  q:"How do the midday Sun, daylight and temperature change through the year in one place?",
+  setup:"Each group chooses one place from the Place list and visits the four dates with the Month and Day buttons.",
+  cityPick:true,labelCols:["Date","Season in the north"],
+  valCols:[["Midday Sun height","noon"],["Daylight","day"],["Daytime high","hi"],["Night-time low","lo"]],
+  rows:[[2,20,"20 March","Spring equinox"],[5,21,"21 June","Summer solstice"],[8,22,"22 September","Autumn equinox"],[11,21,"21 December","Winter solstice"]].map(r=>({labels:[r[2],r[3]],spec:{m:r[0],d:r[1]}})),
+  tip:"Compare a northern place with a southern one, and a place near the equator with one near a pole. Which place has the smallest change through the year?"},
+ {id:"hemi",icon:"🌏",title:"Opposite seasons",focus:"Pairs or groups of three, each pair with the same two places.",
+  q:"Why is it summer in Beijing when it is winter in Sydney?",
+  setup:"Students go to each date and then switch between Beijing and Sydney with the Place list. They keep everything else the same.",
+  labelCols:["Place","Date"],
+  valCols:[["Midday Sun height","noon"],["Daylight","day"],["Daytime high","hi"]],
+  rows:[["beijing",5,21,"Beijing","21 June"],["sydney",5,21,"Sydney","21 June"],["beijing",11,21,"Beijing","21 December"],["sydney",11,21,"Sydney","21 December"]].map(r=>({labels:[r[3],r[4]],spec:{city:r[0],m:r[1],d:r[2]}})),
+  tip:"Ask for a sentence that uses the words “leans towards the Sun”. Both cities are the same distance from the Sun, so what has changed?"},
+ {id:"lat",icon:"📏",title:"Latitude ladder",focus:"Each group takes two or three rungs of the ladder, then the class joins them into one table.",
+  q:"How does the midday Sun on 21 June change as you travel from the equator to the North Pole?",
+  setup:"Everyone uses Earth on 21 June. Students type each latitude into the Latitude box (or drag the pink marker on the map).",
+  labelCols:["Latitude"],
+  valCols:[["Midday Sun height","noon"],["Daylight","day"],["Daytime high","hi"],["Does the Sun set?","sets"]],
+  rows:[0,23,40,60,67,75,90].map(l=>({labels:[l+"°N"],spec:{lat:l,lon:0,m:5,d:21}})),
+  tip:"Look for the latitude where the Sun stops setting. How does that match the Arctic Circle (66.6°N)? Why does the midday Sun keep falling as you go north?"},
+ {id:"tilt",icon:"🌀",title:"Tilt tester",focus:"Each group takes two tilts. Pool the class results to see the full pattern.",
+  q:"What happens to the seasons at 45°N when the tilt changes?",
+  setup:"Everyone stays on Earth at 45°N and changes only the Tilt (type it into the box for exact values). They add a whole-year reading for each tilt.",
+  yearly:true,labelCols:["Tilt"],
+  valCols:[["Highest midday Sun","top"],["Shortest day","dmin"],["Longest day","dmax"],["Coldest","lo"],["Warmest","hi"]],
+  rows:[0,15,23.44,45,60,90].map(t=>({labels:[t===23.44?"23.4° (real Earth)":t+"°"],spec:{planet:"earth",lat:45,lon:0,tilt:t}})),
+  tip:"This is a fair test: one thing changes, everything else stays the same. Ask students to predict the 90° row before they test it."},
+ {id:"orbit",icon:"☄️",title:"Does distance ever matter?",focus:"Three groups: Mercury, Earth and Mars. Advanced.",
+  q:"Which planets are much closer to the Sun at some times of year than at others?",
+  setup:"Students zoom out the Planet from space view, press play, and read the Distance from the Sun box at the two marked points (closest and furthest).",
+  orbit:true,labelCols:["Planet"],
+  valCols:[["Closest to the Sun (million km)","near"],["Furthest from the Sun (million km)","far"],["Difference (%)","diff"]],
+  rows:["mercury","earth","mars"].map(p=>({labels:[PLANETS[p].name],spec:{planet:p}})),
+  tip:"Connect this to “It is hotter in summer because Earth is closer”. For Earth the difference is only about 3%, but for Mercury it is about a third."},
+ {id:"pool",icon:"🧩",title:"Class pooling table (jigsaw)",focus:"One row for each group. Use it at the end to find patterns across the whole class.",
+  q:"What do all our investigations tell us about how tilt, place, planet and time of year change the seasons?",
+  setup:"Each group fills in one row from their worksheet. Then the class looks down the last column for a pattern.",
+  blank:true,labelCols:["Group"],valCols:[["Our question",""],["What we changed",""],["What we kept the same",""],["Our key numbers",""],["Our pattern",""]],
+  rows:[1,2,3,4,5,6].map(i=>({labels:[String(i)]})),
+  tip:"Ask each group to read out their pattern. Then ask: which result surprised you, and which two groups’ results fit together?"}
+];
+const XSTU={
+ planets:"Stay at 45°N. Change only the planet, then add a whole-year reading for each planet your group is studying. Read the numbers from the Graphs view.",
+ seasons:"Choose a place from the Place list. Use the Month and Day buttons to visit each date, then read the numbers from the screen.",
+ hemi:"Go to each date. Switch between Beijing and Sydney with the Place list and keep everything else the same. Read the numbers from the screen.",
+ lat:"Use Earth on 21 June. Type each latitude into the Latitude box (or drag the pink marker on the map), then read the numbers from the screen.",
+ tilt:"Stay on Earth at 45°N and change only the Tilt. Add a whole-year reading for each tilt and read the numbers from the Graphs view.",
+ orbit:"Zoom out the Planet from space view and press play. Read the Distance from the Sun box when the planet is closest to the Sun and when it is furthest.",
+ pool:"Fill in one row for your group, then read it out to the class."
+};
+XTABLES.forEach(t=>{t.stu=XSTU[t.id]||t.setup});
+const XWAYS=[
+ "<b>Jigsaw by planet.</b> Each group becomes expert on two planets. Regroup so every new group has one expert per planet, then fill in the Planet detectives table together.",
+ "<b>Seasons relay.</b> Each group is an expert on one date (equinox or solstice) at one place. Groups line up their dates to rebuild the whole year.",
+ "<b>Predict first.</b> Before pressing Add a reading, students write a prediction on a whiteboard (midday Sun higher, lower or the same?). They check it against the model.",
+ "<b>Fair test focus.</b> Every group must say what they changed and what they kept the same. The worksheet asks them this automatically.",
+ "<b>Odd one out.</b> Challenge groups to find a place, tilt or planet that breaks the class pattern, then explain why.",
+ "<b>Gallery walk.</b> Print the group tables (below), post them on the wall, and let students add a sticky note with one question or one connection."
+];
+function xModelRow(tbl,row,cityId){
+  const sp=row.spec||{},planet=sp.planet||"earth",P=PLANETS[planet];
+  if(tbl.orbit){return withS({planet,tilt:P.tilt,span:"year"},g=>{let mn=1e9,mx=0;for(let i=0;i<720;i++){const d=distAU(i/720*P.porb,g)*149.6;mn=Math.min(mn,d);mx=Math.max(mx,d)}
+    return {near:Math.round(mn),far:Math.round(mx),diff:Math.round((mx-mn)/mx*100)}})}
+  const c=CITIES.find(x=>x[0]===(sp.city||(tbl.cityPick?cityId:null)));
+  const o={planet,tilt:sp.tilt!==undefined?sp.tilt:P.tilt,lat:c?c[2]:sp.lat,lon:c?c[3]:(sp.lon||0),city:c?c[0]:"custom",span:"year",tod:0.5,t:0};
+  const yearly=!!tbl.yearly;
+  return withS(o,g=>{
+    if(!yearly){if(sp.m!==undefined)S.t=dateInfo(sp.m,sp.d).t;else S.t=snapT((sp.f||0)*g.p.porb,g)}
+    const s=snapNow(yearly),y=s.year||{};
+    const sets=s.day==="24 h"?"No: the Sun stays up":s.day==="0 h"?"No: the Sun does not rise":"Yes";
+    return {tilt:s.tilt,top:y.top,dmin:y.dmin,dmax:y.dmax,lo:yearly?y.lo+" °C":s.lo+" °C",hi:yearly?y.hi+" °C":s.hi+" °C",noon:s.noon,day:s.day,sets,dist:s.dist}})
+}
+function xTableHTML(tbl,model,cityId){
+  const head=tbl.labelCols.concat(tbl.valCols.map(v=>v[0]));
+  const body=tbl.rows.map(r=>{const m=model&&!tbl.blank?xModelRow(tbl,r,cityId):null;
+    return `<tr>${r.labels.map(l=>`<th>${esc(l)}</th>`).join("")}${tbl.valCols.map(v=>m&&v[1]&&m[v[1]]!==undefined?`<td class="mv">${esc(m[v[1]])}</td>`:`<td></td>`).join("")}</tr>`}).join("");
+  return `<table><thead><tr>${head.map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${body}</tbody></table>`;
+}
+function xCard(t){
+  return `<div class="xcard" data-x="${t.id}"><h4>${t.icon} ${esc(t.title)}</h4>
+   <p class="xq">“${esc(t.q)}”</p>
+   <p class="xmeta"><b>Group focus:</b> ${esc(t.focus)}<br><b>Set-up:</b> ${esc(t.setup)}</p>
+   <div class="xtab" data-xt="${t.id}">${xTableHTML(t,false)}</div>
+   <p class="xmeta"><b>Discussion:</b> ${esc(t.tip)}</p>
+   <div class="xbtns"><button type="button" class="mini" data-xprint="${t.id}">🖨 Print this group sheet</button>
+    ${t.blank?"":`<button type="button" class="mini" data-xmodel="${t.id}">🔒 Show model values</button>`}
+    ${t.cityPick?`<label class="xmeta">Place for model values <select data-xcity="${t.id}">${XCITY_PICK.map(id=>`<option value="${id}">${CITIES.find(c=>c[0]===id)[1]}</option>`).join("")}</select></label>`:""}</div></div>`;
+}
+function EXPLORE_HTML(){
+  return `<h3 id="t-explore">Exploration mode: ideas and group tables</h3>
+  <p>Use this when students choose their own path, for example in a student-choice workshop or as an extension. Everything in Tilt Lab is open: students can jump to any challenge, open every tool, and use Focus or Full mode whenever they like. The button <b>📓 My investigation</b> (top bar, and in the Guided panel) is their notebook.</p>
+  <ol class="ttips">
+   <li>Students open <b>My investigation</b>, then write their own question or pick a <b>Try this</b> idea. Picking an idea sets up the model for them.</li>
+   <li>They set up the model (planet, place, date, tilt) and press <b>Add a reading</b>. The notebook records the set-up. <b>They read the numbers from the screen and type them in.</b> The model checks each number and shows where to look if one is off.</li>
+   <li>They write what they noticed and a conclusion. Each question can have its own readings, and one student can run several investigations.</li>
+   <li>They press <b>📄 My worksheet</b>. It prints their question, their readings table, their notes, and a set of writing prompts that depend on what they varied: planets, dates, places or tilts. Students choose “Save as PDF” to upload it to Toddle. Approx. 25 to 35 minutes for a first investigation.</li>
+  </ol>
+  <h4 class="xh4">Ways to run it</h4>
+  <div class="xways">${XWAYS.map(w=>`<div>${w}</div>`).join("")}</div>
+  <h4 class="xh4">Group tables to print or project</h4>
+  <p class="tsmall">Each table is blank for students to fill in by hand or on screen. The teacher code (the first word of the model name, in capitals) unlocks <b>Show model values</b>, which fills a table in from the model so you can check it. Values for other planets come from the model’s simplified temperatures, so treat them as trends.</p>
+  <div class="xgroup">${XTABLES.map(xCard).join("")}</div>`;
+}
+function wireExplore(root){
+  const unlocked=()=>USER.teacher||(()=>{try{return localStorage.getItem("tiltlab-tcode")==="1"}catch(e){return false}})();
+  const show=(id)=>{const t=XTABLES.find(x=>x.id===id),host=root.querySelector(`[data-xt="${id}"]`);const sel=root.querySelector(`[data-xcity="${id}"]`);host.innerHTML=xTableHTML(t,true,sel?sel.value:null)};
+  root.querySelectorAll("[data-xmodel]").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.xmodel;
+    if(unlocked()){show(id);b.textContent="Model values shown";return}
+    const bar=b.closest(".xbtns");let box=bar.querySelector(".xlock");
+    if(!box){box=document.createElement("span");box.className="xlock";box.innerHTML=`<label>Teacher code <input type="text" autocomplete="off" aria-label="Teacher code"></label><button type="button" class="mini">Unlock</button><span class="note"></span>`;bar.appendChild(box);
+      const go=()=>{const v=box.querySelector("input").value.trim().toUpperCase();if(v===TCODE){try{localStorage.setItem("tiltlab-tcode","1")}catch(e){}root.querySelectorAll("[data-xmodel]").forEach(x=>{x.textContent="Show model values"});box.remove();show(id)}else box.querySelector(".note").textContent="That is not the teacher code."};
+      box.querySelector("button").addEventListener("click",go);box.querySelector("input").addEventListener("keydown",e=>{if(e.key==="Enter")go()})}
+    box.querySelector("input").focus()}));
+  root.querySelectorAll("[data-xcity]").forEach(s=>s.addEventListener("change",()=>{const id=s.dataset.xcity,host=root.querySelector(`[data-xt="${id}"]`);if(host.querySelector("td.mv"))show(id)}));
+  root.querySelectorAll("[data-xprint]").forEach(b=>b.addEventListener("click",()=>{
+    const id=b.dataset.xprint,t=XTABLES.find(x=>x.id===id),sel=root.querySelector(`[data-xcity="${id}"]`);const withModel=!!root.querySelector(`[data-xt="${id}"] td.mv`);
+    closeTeach();printDoc(`Group sheet: ${t.title}`,
+      `<div class="wshead"><h1>Tilt <span>Lab</span> · Group sheet</h1><small>${esc(t.title)}</small></div>
+       <div class="wsbar"><div><b>Group members</b>${withModel?"":""}</div><div><b>Class</b></div><div><b>Date</b></div></div>
+       <h2>${t.icon} ${esc(t.title)}</h2><p><b>Our question:</b> ${esc(t.q)}</p><p>${esc(t.stu)}</p>
+       ${t.cityPick?`<p><b>Our place:</b> ${withModel&&sel?esc(CITIES.find(c=>c[0]===sel.value)[1]):"______________________"}</p>`:""}
+       <div class="wsq"><table class="wst"><thead><tr>${t.labelCols.concat(t.valCols.map(v=>v[0])).map(h=>`<th>${esc(h)}</th>`).join("")}</tr></thead><tbody>${t.rows.map(r=>{const m=withModel&&!t.blank?xModelRow(t,r,sel?sel.value:null):null;return `<tr>${r.labels.map(l=>`<th>${esc(l)}</th>`).join("")}${t.valCols.map(v=>m&&v[1]&&m[v[1]]!==undefined?`<td class="b">${esc(m[v[1]])}</td>`:"<td></td>").join("")}</tr>`}).join("")}</tbody></table></div>
+       <h3>What we noticed</h3><div class="wslines">${"<i></i>".repeat(5)}</div>
+       <h3>What I think is the reason (use the words tilt, orbit, Sun height or daylight)</h3><div class="wslines">${"<i></i>".repeat(5)}</div>`)}));
+}
+
 /* ---------- How to use this model (for teachers) ---------- */
 const STD=[
  ["AC9S7U03","Year 7 · Earth and space","model cyclic changes in the relative positions of the Earth, sun and moon and explain how these cycles cause eclipses and influence predictable phenomena on Earth, including seasons and tides","Core standard. Matches the elaboration “using physical models or virtual simulations to explain how Earth’s tilt and position relative to the sun causes differences in light intensity on Earth’s surface, resulting in seasons”. Foundation 1–5 and Extension 1–8."],
@@ -3035,14 +3434,14 @@ const STD=[
 const TEACH_HTML=`<div class="tbox" role="dialog" aria-modal="true" aria-labelledby="teachTitle"><button type="button" class="mini tclose" id="teachClose">Close ✕</button>
 <h2 id="teachTitle">How to use this model (for teachers)</h2>
 <p class="tlead">Tilt Lab is a seasons simulator for Grades 6–8. Students change the planet, its tilt, the place and the date, and see the effect on the Sun’s height, daylight and temperature. This page is for teachers only. Keep the standards off student materials.</p>
-<nav class="tnav"><a href="#t-glance">At a glance</a><a href="#t-lo">Learning objectives</a><a href="#t-std">ACARA standards</a><a href="#t-tips">Beyond guided mode</a><a href="#t-lim">Model limitations</a></nav>
+<nav class="tnav"><a href="#t-glance">At a glance</a><a href="#t-lo">Learning objectives</a><a href="#t-std">ACARA standards</a><a href="#t-tips">Beyond guided mode</a><a href="#t-explore">Exploration ideas and tables</a><a href="#t-lim">Model limitations</a></nav>
 <h3 id="t-glance">At a glance</h3>
 <div class="tgrid">
  <div><b>Foundation</b><span>5 challenges · about one lesson</span><small>Why seasons happen: angle of sunlight, distance, the equator, tilt and orbit, day length.</small></div>
  <div><b>Extension</b><span>8 challenges · about two lessons</span><small>Tropics and polar circles, the overhead Sun, midnight Sun, other tilts and Uranus.</small></div>
  <div><b>Investigation</b><span>3 investigations · one to two lessons</span><small>Evidence sorts, testing claims, a design brief, claim–evidence–reasoning writing.</small></div>
 </div>
-<p>Each challenge runs Learn → Predict → Explore → Check → Write. Check-ins before the Extension and the Investigation let students rate what they know and revisit steps. Students can work on their own, in pairs on one computer (roles swap), or in pairs on two computers (A/B questions they check for each other). The answer key and worksheet notes are in the project doc <i>Tilt_Lab_Day9_Worksheet_Notes</i>. For classrooms without claude.ai access, use the offline copy (<i>Tilt-Lab-offline.html</i>), which opens in any browser. Progress is not saved when the page is closed.</p>
+<p>Each challenge runs Learn → Predict → Explore → Check → Write. Check-ins before the Extension and the Investigation let students rate what they know and revisit steps. Students can work on their own, in pairs on one computer (roles swap), or in pairs on two computers (A/B questions they check for each other). The answer key and worksheet notes are in the project doc <i>Tilt_Lab_Day9_Worksheet_Notes</i>. For classrooms without claude.ai access, use the offline copy (<i>Tilt-Lab-offline.html</i>), which opens in any browser. Students type their name and class when they open Tilt Lab. Their work is saved on that computer, under that name, so they can close the page and carry on later. Every stage is open: students can jump to any challenge or step, open every tool, and press “My worksheet” at any time to print what they have done.</p>
 <h3 id="t-lo">Learning objectives</h3>
 <div class="tlo"><div><b>Foundation</b><ul>
  <li>Explain how the angle of sunlight changes the energy each area of ground receives (the same amount of sunlight spread over more ground).</li>
@@ -3076,8 +3475,10 @@ ${STD.map(r=>`<tr><th>${r[0]}<small>${r[1]}</small></th><td>${r[2]}</td><td>${r[
  <li><b>Planet tour.</b> Compare other planets: Mercury and Mars are modelled (stretched orbits matter), Venus and the giant planets use measured values (thick air and winds spread heat). Ask what besides tilt affects temperature.</li>
  <li><b>Type exact values.</b> Students can type a tilt, latitude or Sun height instead of dragging, which helps when testing precise cases such as tilt 45°.</li>
  <li><b>Exit tickets.</b> Use one Write-step prompt with its command term (Explain, Outline, Predict, Justify, Compare, Evaluate) as a quick check.</li>
+ <li><b>Worksheet at the end.</b> “My worksheet” builds a printable sheet from the challenges each student worked on and their own investigation. Students choose “Save as PDF” to upload it to Toddle. Sentence starters and prompts change with what they explored.</li>
  <li><b>Pairs.</b> For one shared computer, the model swaps who drives and who records. For two computers, the partner tasks give A and B different questions that each checks for the other.</li>
 </ul>
+${EXPLORE_HTML()}
 <h3 id="t-lim">Model limitations (worth discussing with students)</h3>
 <ul class="ttips">
  <li>No atmospheric refraction, so day lengths are a few minutes short and the North Pole gets exactly half a year of light (real: about 186 days).</li>
@@ -3085,8 +3486,471 @@ ${STD.map(r=>`<tr><th>${r[0]}<small>${r[1]}</small></th><td>${r[2]}</td><td>${r[
  <li>Planets move round their orbits at a steady speed, so solstice dates can be a day or two early.</li>
  <li>No land is drawn on the map, because latitude, not land shape, sets the sunlight in this model.</li>
 </ul></div>`;
-function openTeach(){const m=$("teach");m.innerHTML=TEACH_HTML;m.hidden=false;$("teachClose").addEventListener("click",closeTeach);m.querySelectorAll(".tnav a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();const t=m.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView({behavior:"smooth",block:"start"})}));$("teachClose").focus()}
+function openTeach(){const m=$("teach");m.innerHTML=TEACH_HTML;m.hidden=false;wireExplore(m);$("teachClose").addEventListener("click",closeTeach);m.querySelectorAll(".tnav a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();const t=m.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView({behavior:"smooth",block:"start"})}));$("teachClose").focus()}
 function closeTeach(){$("teach").hidden=true}
+
+/* ---------- Names, saved work, stage map, investigation notebook, worksheet (Oct 2026) ---------- */
+const TCODE="TILT";
+let USER={name:"",cls:"",teacher:false};
+const plain=h=>{const d=document.createElement("div");d.innerHTML=String(h==null?"":h);return d.textContent.replace(/\s+/g," ").trim()};
+const joinAnd=a=>a.length<2?a.join(""):a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>{t.hidden=true},4200)}
+
+/* ----- the student's own investigations ----- */
+function newInv(){return {id:"i"+Math.random().toString(36).slice(2,8),q:"",tryId:"",fields:["noon","day","hi","lo"],rows:[],ans:{}}}
+const INV={cur:0,list:[newInv()]};
+const curInv=()=>INV.list[INV.cur]||(INV.list[INV.cur]=newInv());
+
+/* ----- saving ----- */
+const ukey=()=>"tiltlab-v2:"+(USER.cls+"|"+USER.name).toLowerCase().replace(/\s+/g," ").trim();
+let saveT=null;
+function saveProgress(){clearTimeout(saveT);saveT=null;if(USER.teacher||!USER.name)return;
+  try{if(MEM&&!S.intro&&!S.inSetup&&STORE[S.gi]===MEM)captureModel();
+    localStorage.setItem(ukey(),JSON.stringify({v:2,at:Date.now(),user:{name:USER.name,cls:USER.cls},gi:S.gi,store:STORE,ck:S.ck,coop:S.coop||null,inv:INV}))}catch(e){}}
+function saveSoon(){if(saveT||USER.teacher||!USER.name)return;saveT=setTimeout(saveProgress,600)}
+function loadProgress(){
+  Object.keys(STORE).forEach(k=>delete STORE[k]);S.ck={};MEM=null;S.openTools=false;S.finish=false;S.gi=0;S.returnTo=null;
+  INV.list=[newInv()];INV.cur=0;
+  if(USER.teacher||!USER.name)return false;
+  let d=null;try{d=JSON.parse(localStorage.getItem(ukey())||"null")}catch(e){}
+  if(!d||d.v!==2)return false;
+  Object.assign(STORE,d.store||{});S.ck=d.ck||{};
+  if(d.inv&&Array.isArray(d.inv.list)&&d.inv.list.length){INV.list=d.inv.list;INV.cur=clamp(d.inv.cur||0,0,INV.list.length-1)}
+  if(d.coop&&!S.coop){S.coop=d.coop;try{sessionStorage.setItem("tiltlab-coop",JSON.stringify(S.coop))}catch(e){}}
+  S.gi=clamp(d.gi||0,0,CHALLENGES.length-1);
+  return Object.keys(STORE).length>0||INV.list.some(v=>v.q||v.rows.length);
+}
+
+/* ----- progress helpers ----- */
+function withCtx(gi,gs,fn){const sg=S.gi,ss=S.gs,sm=MEM;S.gi=gi;S.gs=gs;MEM=STORE[gi]||newMem();try{return fn()}finally{S.gi=sg;S.gs=ss;MEM=sm}}
+function isStepDone(gi,gs){
+  const st=CHALLENGES[gi].steps[gs];if(!st||!stepVisible(st))return true;
+  if(st.type==="learn"){const M=STORE[gi];return !!(M&&M.seen&&M.seen[gs])}
+  return !!withCtx(gi,gs,stepComplete);
+}
+function chStatus(gi){
+  const c=CHALLENGES[gi],idx=c.steps.map((s,i)=>stepVisible(s)&&s.type!=="learn"?i:-1).filter(i=>i>=0);
+  const n=idx.filter(i=>isStepDone(gi,i)).length,M=STORE[gi];
+  if(idx.length&&n===idx.length)return "done";
+  if(M&&(n>0||Object.keys(M.seen||{}).length>1))return "started";
+  return "";
+}
+function refreshDots(){document.querySelectorAll("#gDots button[data-i]").forEach(b=>{const s=chStatus(+b.dataset.i);b.classList.toggle("dn",s==="done");b.classList.toggle("st",s==="started")})}
+function syncOpenBtn(){const b=$("gOpen");if(!b)return;b.setAttribute("aria-pressed",String(!!S.openTools));b.textContent=S.openTools?"🔓 All the tools are open (tap to go back)":"🔓 Open all the tools"}
+
+/* ----- introduction: stage map ----- */
+function mapHTML(){
+  let last="",rows="";
+  CHALLENGES.forEach((c,i)=>{
+    if(c.tier!==last){rows+=`<b class="chgrp t-${c.tier}">${c.tier==="check"?"Check-in":TIERS[c.tier]}</b>`;last=c.tier}
+    const s=chStatus(i);
+    rows+=`<button type="button" class="chbtn ${s}" data-gch="${i}"><span class="chm" aria-hidden="true">${s==="done"?"✓":s==="started"?"●":"○"}</span><span>${c.tier==="check"?esc(c.title):`${c.num}. ${esc(c.title)}`}${s==="done"?" <small>(done)</small>":s==="started"?" <small>(started)</small>":""}</span></button>`;
+  });
+  return `<h3 class="glearn">Go to any stage</h3><p class="gtext">Start wherever you like. Every stage is open, and inside a challenge you can jump to any step with the bars at the top. Your answers are saved under your name.</p><div class="chlist">${rows}</div>`;
+}
+const actionsHTML=()=>`<div class="introact"><button type="button" class="gaction" data-act="nb">📓 Start my own investigation</button><button type="button" class="gaction" data-act="ws">📄 Make my worksheet</button></div>`;
+function introHTML(){return INTRO_TOP+mapHTML()+actionsHTML()+`<p class="note tlinkrow">Teacher? <a href="#" id="teachLink">How to use this model (for teachers)</a></p>`}
+function finishHTML(){
+  let done=0,ck=0,right=0;
+  CHALLENGES.forEach((c,gi)=>{if(c.tier!=="check"&&chStatus(gi)==="done")done++;const M=STORE[gi];if(!M)return;c.steps.forEach((s,i)=>{if(s.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}})});
+  return `<div class="fin"><div class="gbadge b-write">All done</div><h3 class="glearn">You reached the end! 🎉</h3>
+  <div class="sumrow"><span><b>${done}</b>challenges finished</span><span><b>${right} / ${ck}</b>check questions right</span></div>
+  <p class="gtext">Make your worksheet now. It has your answers and your own investigation, and you can save it as a PDF to upload to Toddle. You can also go back to any stage below.</p>
+  <div class="introact"><button type="button" class="primary" data-act="ws">📄 Make my worksheet</button><button type="button" class="gaction" data-act="nb">📓 My own investigation</button></div></div>`;
+}
+function showFinish(){goIntro();S.finish=true;$("gStep").innerHTML=finishHTML()+mapHTML();$("gNext").textContent="Make my worksheet →";$("gCount").textContent="Finished";$("gTitle").textContent="Well done!"}
+function resetChallenge(){
+  const w=$("gWarn");w.hidden=false;
+  w.innerHTML=`<b>Start this challenge again?</b> This clears your answers for this challenge only. <span class="gwbtns"><button type="button" class="mini" id="gKeep">Keep my answers</button><button type="button" class="mini gwgo" id="gClear">Yes, clear them</button></span>`;
+  $("gKeep").addEventListener("click",hideWarn);
+  $("gClear").addEventListener("click",()=>{delete STORE[S.gi];hideWarn();goChallenge(S.gi);saveSoon()});
+}
+
+/* ----- name and class gate ----- */
+function renderUser(){document.querySelectorAll(".uchip").forEach(c=>{c.hidden=!USER.name;c.querySelector(".uName").textContent=USER.name;c.querySelector(".uClass").textContent=USER.cls?" · "+USER.cls:(USER.teacher?" · teacher":"")})}
+function applyUser(u,keepCoop){
+  if(USER.name&&!USER.teacher)saveProgress();
+  USER=u;try{sessionStorage.setItem("tiltlab-user",JSON.stringify(u))}catch(e){}
+  if(!keepCoop){S.coop=null;try{sessionStorage.removeItem("tiltlab-coop")}catch(e){}}
+  closeNb(true);closeWs();
+  $("gate").hidden=true;$("gate").innerHTML="";$("app").inert=false;
+  const had=loadProgress();renderUser();
+  unmountTools();S.intro=false;S.inSetup=false;S.playing=false;
+  if(S.mode==="guided")goIntro();else{syncUI();requestRender()}
+  if(had)toast(`Welcome back, ${u.name}! Your saved work is loaded.`);
+}
+function showGate(change){
+  let u=null;
+  if(!change){try{u=JSON.parse(sessionStorage.getItem("tiltlab-user")||"null")}catch(e){}}
+  if(u&&(u.teacher||(u.name&&u.cls))){applyUser(u,true);return}
+  const g=$("gate");g.hidden=false;$("app").inert=true;
+  g.innerHTML=`<div class="gbox" role="dialog" aria-modal="true" aria-labelledby="gateT">
+    <h2 id="gateT">Welcome to Tilt Lab 🌍</h2>
+    <p>Type your name and your class. Your answers are saved on this computer under your name, and they go on your worksheet.</p>
+    <label>Your name<input type="text" id="gName" autocomplete="off" maxlength="40"></label>
+    <label>Your class<input type="text" id="gCls" autocomplete="off" maxlength="20" placeholder="for example 7B"></label>
+    <div class="gerr" id="gErr" role="alert"></div>
+    <div class="grow"><button type="button" class="primary" id="gGo">Start →</button></div>
+    <p class="gfoot">Teacher? <a href="#" id="gTeachL">Enter the teacher code</a></p>
+    <div class="tbox2" id="gTBox" hidden><label>Teacher code<input type="text" id="gCode" autocomplete="off" maxlength="20"></label><button type="button" class="mini" id="gCodeGo">Enter</button></div>
+  </div>`;
+  const err=m=>{$("gErr").textContent=m};
+  const go=()=>{const name=$("gName").value.trim().replace(/\s+/g," "),cls=$("gCls").value.trim();
+    if(!name){err("Type your name first.");$("gName").focus();return}
+    if(!cls){err("Type your class, for example 7B.");$("gCls").focus();return}
+    applyUser({name,cls,teacher:false},false)};
+  const tgo=()=>{if($("gCode").value.trim().toUpperCase()===TCODE){try{localStorage.setItem("tiltlab-tcode","1")}catch(e){}applyUser({name:"Teacher",cls:"",teacher:true},false)}else{err("That is not the teacher code.");$("gCode").select()}};
+  $("gGo").addEventListener("click",go);
+  [$("gName"),$("gCls")].forEach(i=>i.addEventListener("keydown",e=>{if(e.key==="Enter")go()}));
+  $("gTeachL").addEventListener("click",e=>{e.preventDefault();$("gTBox").hidden=false;$("gCode").focus()});
+  $("gCodeGo").addEventListener("click",tgo);$("gCode").addEventListener("keydown",e=>{if(e.key==="Enter")tgo()});
+  setTimeout(()=>$("gName").focus(),30);
+}
+
+/* ----- readings: what the notebook can check ----- */
+const earthRow=r=>r.set.planet==="earth";
+const FLD={
+  noon:{lab:"Midday Sun height",u:()=>"°",where:"Look at the Midday Sun height box at the top of the page."},
+  day:{lab:"Daylight",u:r=>earthRow(r)?"hours":"% of the day",where:"Look at the Daylight today box at the top of the page."},
+  hi:{lab:"Daytime high",u:()=>"°C",where:"Open the Heat view or the Numbers view and read the daytime high."},
+  lo:{lab:"Night-time low",u:()=>"°C",where:"Open the Heat view or the Numbers view and read the night-time low."},
+  dist:{lab:"Distance from the Sun",u:()=>"million km",where:"Look at the Distance from the Sun box at the top of the page."},
+  top:{lab:"Highest midday Sun in the year",u:()=>"°",where:"Open the Graphs view and find the highest point of the Midday Sun height graph."},
+  dmin:{lab:"Shortest daylight in the year",u:r=>earthRow(r)?"hours":"% of the day",where:"Open the Graphs view and find the lowest point of the daylight graph."},
+  dmax:{lab:"Longest daylight in the year",u:r=>earthRow(r)?"hours":"% of the day",where:"Open the Graphs view and find the highest point of the daylight graph."},
+  ylo:{lab:"Coldest night in the year",u:()=>"°C",where:"Open the Graphs view and find the lowest point of the temperature graph."},
+  yhi:{lab:"Warmest day in the year",u:()=>"°C",where:"Open the Graphs view and find the highest point of the temperature graph."}
+};
+const DAY_F=["noon","day","hi","lo","dist"],YEAR_F=["top","dmin","dmax","ylo","yhi"];
+const NUMBER_VAL=s=>{const n=parseFloat(String(s).replace(/−/g,"-").replace(/[^0-9.\-]/g,""));return isNaN(n)?null:n};
+function rowTruth(r){
+  const o=r.set;
+  return withS({planet:o.planet,tilt:o.tilt,lat:o.lat,lon:o.lon,city:o.city,span:o.span,t:o.t,tod:o.tod},()=>{
+    const s=snapNow(r.kind==="year"),y=s.year||{},earth=S.planet==="earth";
+    const dayV=v=>{v=String(v);if(/^24 h/.test(v))return earth?24:100;if(/^0 h/.test(v))return 0;let m=v.match(/^(\d+) h(?: (\d+) min)?/);if(earth&&m)return +m[1]+(m[2]?+m[2]/60:0);m=v.match(/(\d+)%/);return m?+m[1]:null};
+    const km=v=>{const n=NUMBER_VAL(v);return n===null?null:(/billion/.test(v)?n*1000:n)};
+    const noonV=v=>/does not rise|never/.test(v)?null:NUMBER_VAL(v);
+    return {noon:noonV(s.noon),day:dayV(s.day),hi:NUMBER_VAL(s.hi),lo:NUMBER_VAL(s.lo),dist:km(s.dist),
+      top:y.top?noonV(y.top):null,dmin:y.dmin?dayV(y.dmin):null,dmax:y.dmax?dayV(y.dmax):null,ylo:y.lo!==undefined?NUMBER_VAL(y.lo):null,yhi:y.hi!==undefined?NUMBER_VAL(y.hi):null};
+  });
+}
+function parseField(k,raw,r){
+  const s=String(raw).replace(/[−–—]/g,"-").replace(/,/g,"").trim();
+  if(["day","dmin","dmax"].includes(k)&&earthRow(r)){
+    const m=s.match(/^(\d+(?:\.\d+)?)\s*(?:h|hr|hrs|hours?|:)\s*(\d+)?\s*(?:m|min|mins|minutes?)?$/i);
+    if(m)return +m[1]+(m[2]?+m[2]/60:0);
+  }
+  const n=parseFloat(s.replace(/[^0-9.\-]+/g," ").trim().split(/\s+/)[0]);return isNaN(n)?null:n;
+}
+function tolFor(k,r,t){const e=earthRow(r);return ({noon:0.7,day:e?0.17:2,hi:1.2,lo:1.2,dist:Math.max(1.5,Math.abs(t||0)*0.012),top:1,dmin:e?0.25:3,dmax:e?0.25:3,ylo:3,yhi:3})[k]}
+function showTruth(k,t,r){
+  if(t===null||t===undefined)return k==="noon"||k==="top"?"the Sun does not rise":"no value";
+  if(k==="noon"||k==="top")return t.toFixed(1)+"°";
+  if(k==="day"||k==="dmin"||k==="dmax")return earthRow(r)?fmtHM(t/24):Math.round(t)+"% of the day";
+  if(k==="dist")return Math.round(t)+" million km";
+  return minus(Math.round(t))+" °C";
+}
+function checkRow(r){
+  const tr=rowTruth(r);r.ok=r.ok||{};r.tr=r.tr||{};
+  r.fields.forEach(k=>{
+    const raw=(r.vals[k]||"").trim();if(!raw)return;
+    const t=tr[k],v=parseField(k,raw,r);let ok;
+    if(t===null||t===undefined)ok=/\b(no|not|never|none|zero)\b/i.test(raw)||v===0;
+    else ok=v!==null&&isFinite(v)&&Math.abs(v-t)<=tolFor(k,r,t);
+    r.tr[k]=(r.tr[k]||0)+1;r.ok[k]=ok;
+  });
+}
+const rowDone=r=>r.fields.every(k=>r.ok&&r.ok[k]===true);
+const rowTitle=r=>`${r.lab.planet} · ${r.lab.place} · ${r.lab.when} · tilt ${r.lab.tilt}°`;
+
+/* ----- tailored writing prompts ----- */
+function invPrompts(inv){
+  const R=inv.rows,P=[],uniq=f=>[...new Set(R.map(f))];
+  P.push({k:"fair",t:"What did you want to find out? What did you change, and what did you keep the same so that your test was fair?"});
+  if(R.length){
+    const planets=uniq(r=>r.lab.planet),tilts=uniq(r=>(+r.lab.tilt).toFixed(1)),places=uniq(r=>r.lab.place),whens=uniq(r=>r.lab.when).filter(w=>w!=="whole year");
+    const used=new Set();R.forEach(r=>r.fields.forEach(k=>used.add(k)));
+    if(planets.length>1)P.push({k:"planets",t:`You looked at ${joinAnd(planets)}. Which one has the most extreme seasons or temperatures? Use at least two numbers from your readings to explain.`});
+    if(tilts.length>1&&planets.length===1)P.push({k:"tilt",t:`You tested tilts of ${joinAnd(tilts.map(x=>x+"°"))}. What happened to the midday Sun, the daylight or the temperatures as the tilt got bigger? Use two numbers from your readings.`});
+    if(places.length>1&&planets.length===1&&tilts.length===1)P.push({k:"places",t:`You visited ${joinAnd(places)}. How did the midday Sun height change from place to place, and why does latitude matter?`});
+    if(whens.length>1)P.push({k:"dates",t:`You looked at ${joinAnd(whens.slice(0,4))}. How did the midday Sun and the daylight change between these times? Use the tilt to explain.`});
+    const lats=R.map(r=>r.set.lat);
+    if(lats.some(l=>l>1)&&lats.some(l=>l<-1))P.push({k:"hemi",t:"You have places in the north and in the south. Compare them at the same time of year. What is the same, what is different, and why?"});
+    if(used.has("dist"))P.push({k:"dist",t:"Does the distance from the Sun explain your temperatures? Use your numbers to decide."});
+    if(R.some(r=>r.kind==="year"))P.push({k:"range",t:"Pick the whole-year reading with the biggest gap between the warmest day and the coldest night. What is the gap, and what do you think causes it?"});
+  }
+  P.push({k:"surprise",t:"Did anything surprise you? What would you like to test next, and what do you predict will happen?"});
+  P.push({k:"concl",t:"Now answer your question in your own words. Start with “I found that…” and use at least two numbers as evidence."});
+  return P;
+}
+
+/* ----- notebook drawer ----- */
+let NB=false,NBDEL=false;
+function ensureModel(){
+  if(S.mode!=="guided")return;
+  if(S.intro||S.inSetup||!MEM){S.inSetup=false;setMode("full");toast("The full model is open so you can read numbers. Guided mode is one tap away at the top.");return}
+  if(!(curStep().free||S.openTools)){S.openTools=true;enterStep(S.gs);syncOpenBtn()}
+}
+function nbToggle(forceOpen){if(NB&&forceOpen!==true){closeNb();return}if(!NB)nbOpen()}
+function nbOpen(){
+  ensureModel();NB=true;NBDEL=false;$("nb").hidden=false;$("app").dataset.nb="1";
+  [$("nbBtn"),$("gNb")].forEach(b=>b&&b.setAttribute("aria-pressed","true"));renderNb();
+  const q=$("nbQ");if(q&&!q.value)q.focus();
+}
+function closeNb(silent){NB=false;$("nb").hidden=true;delete $("app").dataset.nb;[$("nbBtn"),$("gNb")].forEach(b=>b&&b.setAttribute("aria-pressed","false"));if(!silent)saveSoon()}
+function rowHTML(r,i){
+  const done=rowDone(r);
+  const fl=r.fields.map(k=>{
+    const f=FLD[k],ok=r.ok&&r.ok[k],n=(r.tr&&r.tr[k])||0;let msg="",cls="";
+    if(ok===true){msg="✓ Matches the model.";cls="ok"}
+    else if(ok===false){cls="no";msg="Not quite. "+f.where+(n>=2?` The model shows about ${showTruth(k,rowTruth(r)[k],r)}.`:"")+" Check that the model is still set up for this reading."}
+    return `<label>${f.lab}<span><input type="text" inputmode="decimal" autocomplete="off" data-rf="${k}" data-ri="${i}" value="${esc(r.vals[k]||"")}" class="${cls}" aria-label="${f.lab}"><em>${f.u(r)}</em></span><small class="${cls}">${esc(msg)}</small></label>`;
+  }).join("");
+  return `<div class="nbrow ${done?"done":""}"><div class="nbrh"><b>${i+1}. ${esc(rowTitle(r))}</b><span class="pill ${done?"ok":"todo"}">${done?"✓ Checked":"To do"}</span></div>
+   <div class="nbflds">${fl}</div>
+   <div class="nbrf"><button type="button" class="gcheckbtn" data-rchk="${i}">Check my numbers</button><button type="button" class="mini" data-rgo="${i}">Show this set-up in the model</button><button type="button" class="mini" data-rdel="${i}">Remove</button></div></div>`;
+}
+function renderNb(){
+  const nb=$("nb"),inv=curInv(),old=nb.querySelector(".nbbody"),sc=old?old.scrollTop:0;
+  const tabs=INV.list.map((v,i)=>`<button type="button" data-nbt="${i}" aria-pressed="${i===INV.cur}">Investigation ${i+1}</button>`).join("")+`<button type="button" data-nbnew="1">＋ New</button>`;
+  const tr=TRY.find(x=>x.id===inv.tryId);
+  const tryList=TRY.map(t=>`<button type="button" class="tryb" data-try="${t.id}"><b>${t.icon} ${esc(t.title)}</b><span>${esc(t.q)}</span></button>`).join("");
+  const chips=DAY_F.map(k=>`<button type="button" data-fld="${k}" aria-pressed="${inv.fields.includes(k)}">${FLD[k].lab}</button>`).join("");
+  const prompts=invPrompts(inv).map((p,i)=>`<div><label class="lbl" for="nbA${i}"><b>${i+1}.</b> ${esc(p.t)}</label><textarea id="nbA${i}" rows="3" maxlength="1500" data-ans="${p.k}" placeholder="Write your answer here">${esc(inv.ans[p.k]||"")}</textarea></div>`).join("");
+  nb.innerHTML=`<div class="nbh"><b>📓 My investigation</b><button type="button" class="mini" data-nbclose="1">Close ✕</button></div>
+  <div class="nbbody">
+   <div class="nbtabs">${tabs}</div>
+   <div><label class="lbl" for="nbQ">My question</label><textarea id="nbQ" rows="2" maxlength="300" placeholder="What do you want to find out? For example: does a bigger tilt make hotter summers?">${esc(inv.q)}</textarea></div>
+   <details ${inv.q||inv.rows.length?"":"open"}><summary>Need an idea? Try this</summary><div class="trylist">${tryList}</div></details>
+   ${tr?`<div class="nbhint"><b>${tr.icon} ${esc(tr.title)}</b><br>${esc(tr.how)}${tr.kind==="year"?" Use “Add a whole-year reading”.":""}</div>`:""}
+   <div><span class="lbl">Numbers I will read (for readings at one moment)</span><div class="nbfields">${chips}</div></div>
+   <p class="note">Set up the model, then read the numbers from the screen and type them in yourself. The model checks them for you.</p>
+   <div class="nbadd"><button type="button" class="primary" data-add="day">＋ Add a reading</button><button type="button" class="mini" data-add="year">＋ Add a whole-year reading</button></div>
+   ${inv.rows.length?inv.rows.map(rowHTML).join(""):`<p class="note">No readings yet. Set the planet, tilt, place and time you want, then press Add a reading.</p>`}
+   <div class="nbprompts"><span class="lbl">Think and write</span><p class="note">These questions change depending on what you tested.</p><div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">${prompts}</div></div>
+   <div class="nbadd"><button type="button" class="primary" data-mkws="1">📄 Make my worksheet</button><button type="button" class="mini" data-nbdel="1">${NBDEL?"Tap again to delete this investigation":"Delete this investigation"}</button></div>
+  </div>`;
+  const nb2=nb.querySelector(".nbbody");if(nb2)nb2.scrollTop=sc;
+}
+function addRow(kind){
+  const inv=curInv(),s=snapNow(false);
+  const r={id:"r"+Math.random().toString(36).slice(2,8),kind,fields:kind==="year"?YEAR_F.slice():inv.fields.slice(),
+    lab:{planet:s.planet,place:s.place,when:kind==="year"?"whole year":s.when,tilt:s.tilt},
+    set:{planet:S.planet,tilt:S.tilt,lat:S.lat,lon:S.lon,city:S.city,span:S.span,t:S.t,tod:S.tod},vals:{},ok:{},tr:{}};
+  inv.rows.push(r);renderNb();saveSoon();
+  const body=$("nb").querySelector(".nbbody");if(body)body.scrollTop=body.scrollHeight*0.45;
+}
+function applyTry(id){
+  const t=TRY.find(x=>x.id===id);if(!t)return;const inv=curInv();
+  setup(t.set);inv.tryId=id;inv.fields=(t.fields||["noon","day","hi","lo"]).slice();
+  if(!inv.q.trim()||TRY.some(x=>x.q===inv.q))inv.q=t.q;
+  renderNb();saveSoon();toast("The model is set up for this idea. Now add your first reading.");
+}
+function wireNb(){
+  const nb=$("nb");
+  nb.addEventListener("click",e=>{
+    const t=e.target.closest("button");if(!t)return;const inv=curInv(),d=t.dataset;
+    if(d.nbclose)return closeNb();
+    if(d.nbt!==undefined){INV.cur=+d.nbt;NBDEL=false;return renderNb()}
+    if(d.nbnew){INV.list.push(newInv());INV.cur=INV.list.length-1;NBDEL=false;renderNb();saveSoon();return}
+    if(d.nbdel){if(!NBDEL){NBDEL=true;return renderNb()}INV.list.splice(INV.cur,1);if(!INV.list.length)INV.list.push(newInv());INV.cur=clamp(INV.cur,0,INV.list.length-1);NBDEL=false;renderNb();saveSoon();return}
+    if(d.try)return applyTry(d.try);
+    if(d.fld){const k=d.fld,i=inv.fields.indexOf(k);if(i>=0){if(inv.fields.length>1)inv.fields.splice(i,1)}else{inv.fields.push(k);inv.fields.sort((a,b)=>DAY_F.indexOf(a)-DAY_F.indexOf(b))}renderNb();saveSoon();return}
+    if(d.add)return addRow(d.add);
+    if(d.rchk!==undefined){checkRow(inv.rows[+d.rchk]);renderNb();saveSoon();return}
+    if(d.rgo!==undefined){restoreModel(inv.rows[+d.rgo].set);toast("The model is set up for this reading.");return}
+    if(d.rdel!==undefined){inv.rows.splice(+d.rdel,1);renderNb();saveSoon();return}
+    if(d.mkws)return openWs({inv:true});
+  });
+  nb.addEventListener("input",e=>{
+    const t=e.target,inv=curInv();
+    if(t.id==="nbQ"){inv.q=t.value}
+    else if(t.dataset.ans){inv.ans[t.dataset.ans]=t.value}
+    else if(t.dataset.rf){
+      const r=inv.rows[+t.dataset.ri],k=t.dataset.rf;r.vals[k]=t.value;if(r.ok)delete r.ok[k];
+      t.className="";const sm=t.closest("label").querySelector("small");if(sm){sm.textContent="";sm.className=""}
+      const row=t.closest(".nbrow");row.classList.remove("done");const pill=row.querySelector(".pill");pill.className="pill todo";pill.textContent="To do";
+    }
+    saveSoon();
+  });
+}
+
+/* ----- worksheet ----- */
+const WS={sel:new Set(),blank:false,key:false};
+function hasWork(gi){
+  const c=CHALLENGES[gi],M=STORE[gi];
+  if(c.tier==="check"){const st=c.steps[0];return !!(st&&st.cid&&S.ck[st.cid]&&Object.keys(S.ck[st.cid]).length)}
+  if(!M)return false;
+  if(chStatus(gi)==="done")return true;
+  return M.pred!=null||Object.keys(M.tries||{}).length>0||Object.values(M.text||{}).some(t=>String(t).trim())||Object.keys(M.done||{}).length>0||
+    !!(M.ev&&M.ev.length)||!!(M.tab&&Object.keys(M.tab).length)||M.claim!==undefined||!!(M.pair&&Object.keys(M.pair).length)||
+    !!(M.sort&&Object.keys(M.sort).some(k=>Object.keys((M.sort[k]||{}).place||{}).length));
+}
+function invHasWork(){return INV.list.some(v=>v.q.trim()||v.rows.length||Object.values(v.ans).some(a=>String(a).trim()))}
+function wsStep(c,i,o,num){
+  const st=c.steps[i],M=MEM,blank=o.blank,key=o.key,done=stepComplete();
+  const head=(cls,lab)=>`<div class="wsq ${cls}"><span class="wsl">${lab}</span> <small>Step ${num}${done||blank?"":" · not finished"}</small>`;
+  const box=(on,txt,extra)=>`<li><i class="wsbox ${on?"on":""}">${on?"✓":""}</i><span class="${on?"blue":""} ${extra||""}">${txt}</span></li>`;
+  try{
+    if(st.type==="predict"){
+      return head("pr","Predict")+`<p>${plain(st.text)}</p><ul class="wsopts">${st.options.map((t,k)=>box(!blank&&M.pred===k,t)).join("")}</ul></div>`;
+    }
+    if(st.type==="check"){
+      const tr=M.tries&&M.tries[i],last=tr?tr.last:undefined;
+      return head("ck","Check")+`<p>${plain(st.text)}</p><ul class="wsopts">${st.options.map((t,k)=>box(!blank&&last===k,t,key&&k===st.answer?"keyline":"")).join("")}</ul>`+
+        (!blank&&tr&&tr.n>=1?`<p>${M.correct&&M.correct[i]?"✓ Right.":`The model's answer: <b>${st.options[st.answer]}</b>`}</p>`:"")+(key?`<p class="keyline">Answer: ${st.options[st.answer]}</p>`:"")+`</div>`;
+    }
+    if(st.type==="do"){
+      let body="";
+      if(st.ask){const v=(M.askVal||{})[i]||{};let val="";
+        if(st.ask.kind==="date")val=(v.d&&v.m!==undefined)?`${v.d} ${MONTHS[v.m]}`:"";else val=(v.n!==undefined&&v.n!=="")?`${v.n} ${st.ask.unit||""}`:"";
+        body=`<p>${plain(st.ask.label)} <span class="blue">${blank?"______________":(esc(val)||"…")}</span> ${!blank&&M.done[i]===true?"✓ matches the model":!blank&&M.done[i]==="skip"?"(skipped)":""}</p>`}
+      else if(st.places){const P=M.pl||{};body=`<ul>${st.places.map(p=>{const q=P[p.label]||{};return `<li>${esc(p.label)}: <span class="blue">${blank?"__________":q.ok?(q.truth?"The Sun stays up":"The Sun sets"):"…"}</span></li>`}).join("")}</ul>`}
+      else body=!blank&&M.done[i]===true&&st.done?`<div class="wsans">${plain(st.done(M))}</div>`:(!blank&&M.done[i]==="skip"?"<p>(skipped)</p>":`<p class="wsline"></p>`);
+      return head("ex","Explore")+`<p>${plain(st.text)}</p>${body}</div>`;
+    }
+    if(st.type==="write"){
+      const t=((M.text||{})[i]||"").trim(),pr=typeof st.prompt==="function"?st.prompt(M):st.prompt;
+      let h=head("wr","Write")+`<p>${plain(pr)}</p>`;
+      if(!blank&&t)h+=`<div class="wsans">${esc(t)}</div>`;
+      else h+=`<p class="wsstart">Sentence starters: ${st.starters.map(plain).join(" · ")}</p><div class="wslines">${"<i></i>".repeat(4)}</div>`;
+      if(key&&st.keys)h+=`<div class="wskeys"><b>Key ideas</b><ul>${st.keys.map(k=>`<li>${plain(k)}</li>`).join("")}</ul></div>`;
+      return h+`</div>`;
+    }
+    if(st.type==="pair"){
+      const P=M.pair||{};
+      const one=who=>{const part=st[who],r=P[who]||{};let v="";if(part.kind==="date")v=(r.d&&r.m!==undefined&&r.m!=="")?`${r.d} ${MONTHS[r.m]}`:"";else v=(r.v!==undefined&&r.v!=="")?`${r.v} ${part.unit||""}`:"";
+        return `<p><b>Partner question ${who}:</b> ${plain(part.q)} <span class="blue">${blank?"__________":(esc(v)||"…")}</span> ${!blank&&r.ok?"✓":""}</p>`};
+      return head("pr","Partners")+one("A")+one("B")+`</div>`;
+    }
+    if(st.type==="sort"){
+      const sm=sortMem(st.sid),cards=sortCards(st);if(!cards.length)return "";
+      const colOf=c=>key&&st.key&&c.col!==undefined?c.col:sm.place[c.id];
+      const cols=st.cols.map((cn,k)=>{const L=cards.filter(c=>colOf(c)===k);return `<p><b>${esc(plain(cn))}</b></p>${L.length?`<ul>${L.map(c=>`<li class="${blank?"":"blue"}">${plain(c.text)}</li>`).join("")}</ul>`:"<p>…</p>"}`}).join("");
+      const un=cards.filter(c=>colOf(c)===undefined);
+      return head("ex","Sort")+`<p>${plain(st.text)}</p>${blank?`<ul>${cards.map(c=>`<li>${plain(c.text)}</li>`).join("")}</ul>`:cols+(un.length?`<p><b>Not sorted</b></p><ul>${un.map(c=>`<li>${plain(c.text)}</li>`).join("")}</ul>`:"")}</div>`;
+    }
+    if(st.type==="choose"){
+      const o2=st.options[M.claim];
+      return head("pr","Choose")+`<p>${plain(st.text)}</p>${!blank&&o2?`<p class="blue">${plain(o2.title)}: “${plain(o2.short)}”</p>`:`<p class="wsline"></p>`}</div>`;
+    }
+    if(st.type==="collect"){
+      const ev=M.ev||[];
+      return head("ex","Collect")+`<p>${plain(st.text)}</p>${!blank&&ev.length?`<ol>${ev.map(e=>`<li class="blue">${plain(snapText(e))}</li>`).join("")}</ol>`:`<div class="wslines">${"<i></i>".repeat(4)}</div>`}</div>`;
+    }
+    if(st.type==="table"){
+      const rows=blank?[]:tableRows();
+      const head2=`<tr><th>Tilt</th>${RULES.map(x=>`<th>${x.name}<br><small>${x.need}</small></th>`).join("")}<th>All three?</th></tr>`;
+      const body=rows.length?rows.map(r=>{const all=RULES.every(x=>r[x.key]&&r[x.key].ok);return `<tr><th>${r.tilt.toFixed(1)}°</th>${RULES.map(x=>`<td class="b">${r[x.key]?plain(r[x.key].txt)+(r[x.key].ok?" ✓":" ✗"):""}</td>`).join("")}<td class="b">${all?"Yes":"No"}</td></tr>`}).join(""):`<tr><td></td><td></td><td></td><td></td><td></td></tr>`.repeat(4);
+      return head("ex","Results table")+`<p>${plain(st.text)}</p><table class="wst"><thead>${head2}</thead><tbody>${body}</tbody></table></div>`;
+    }
+    if(st.type==="checklist"){
+      const ck=S.ck[st.cid]||{};
+      return head("ck","Check-in")+`<p>${plain(st.text)}</p><ul class="wsopts">${st.items.map((it,k)=>`<li><i class="wsbox ${!blank&&ck[k]?"on":""}">${!blank&&ck[k]==="y"?"✓":""}</i><span>${plain(it.text)} <span class="blue">${!blank&&ck[k]==="y"?"I know this":!blank&&ck[k]==="n"?"Not sure yet":""}</span></span></li>`).join("")}</ul></div>`;
+    }
+  }catch(err){return `<div class="wsq"><p>Step ${num}: this part could not be printed.</p></div>`}
+  return "";
+}
+function wsChallenge(gi,o){
+  const c=CHALLENGES[gi];
+  return withCtx(gi,0,()=>{
+    const vis=c.steps.map((s,i)=>stepVisible(s)?i:-1).filter(i=>i>=0);
+    const act=vis.filter(i=>c.steps[i].type!=="learn");
+    const marks=act.map(i=>{S.gs=i;return `<span><i class="wsbox ${!o.blank&&stepComplete()?"on":""}">${!o.blank&&stepComplete()?"✓":""}</i> Step ${vis.indexOf(i)+1}</span>`}).join("");
+    let h=`<h2>${c.tier==="check"?esc(c.title):`${TIERS[c.tier]} ${c.num}: ${esc(c.title)}`}</h2><div class="wssteps">${marks}</div>`;
+    act.forEach(i=>{S.gs=i;h+=wsStep(c,i,o,vis.indexOf(i)+1)});
+    return h;
+  });
+}
+function wsInv(o){
+  let h=`<h2>My own investigation</h2>`;
+  const list=INV.list.filter(v=>o.blank||v.q.trim()||v.rows.length||Object.values(v.ans).some(a=>String(a).trim()));
+  if(!list.length&&!o.blank)return "";
+  (o.blank?[newInv()]:list).forEach((inv,n)=>{
+    if(!o.blank&&list.length>1)h+=`<h3>Investigation ${n+1}</h3>`;
+    h+=`<div class="wsq ex"><span class="wsl">My question</span>${!o.blank&&inv.q.trim()?`<div class="wsans">${esc(inv.q)}</div>`:`<div class="wslines">${"<i></i>".repeat(2)}</div>`}</div>`;
+    const grp=(kind,title,keys)=>{
+      const R=inv.rows.filter(r=>r.kind===kind);if(!R.length&&!o.blank)return "";
+      const cols=o.blank?keys:keys.filter(k=>R.some(r=>r.fields.includes(k)));
+      const body=o.blank?`<tr><td></td>${cols.map(()=>"<td></td>").join("")}</tr>`.repeat(5):R.map(r=>{
+        const tr=o.key?rowTruth(r):null;
+        return `<tr><th>${esc(rowTitle(r))}</th>${cols.map(k=>{if(!r.fields.includes(k))return "<td></td>";const v=(r.vals[k]||"").trim();
+          const mark=r.ok&&r.ok[k]===true?" ✓":r.ok&&r.ok[k]===false?" ✗":"";
+          return `<td class="b">${esc(v)}${v?mark:""}${tr?`<br><span class="keyline">${esc(showTruth(k,tr[k],r))}</span>`:""}</td>`}).join("")}</tr>`}).join("");
+      return `<h3>${title}</h3><table class="wst"><thead><tr><th>Set-up</th>${cols.map(k=>`<th>${FLD[k].lab}<br><small>${FLD[k].u(R[0]||{set:{planet:"earth"}})}</small></th>`).join("")}</tr></thead><tbody>${body}</tbody></table>`;
+    };
+    h+=grp("day","Readings at one moment",DAY_F)+grp("year","Whole-year readings",YEAR_F);
+    h+=`<h3>Think and write</h3>`+invPrompts(inv).map(p=>{const a=(inv.ans[p.k]||"").trim();
+      return `<div class="wsq wr"><span class="wsl">Write</span><p>${esc(p.t)}</p>${!o.blank&&a?`<div class="wsans">${esc(a)}</div>`:`<div class="wslines">${"<i></i>".repeat(3)}</div>`}</div>`}).join("");
+  });
+  return h;
+}
+function buildWorksheet(){
+  const o={blank:WS.blank&&USER.teacher,key:WS.key&&USER.teacher};
+  const sel=[...WS.sel].filter(x=>x!=="inv").map(Number).sort((a,b)=>a-b);
+  let h=`<div class="wshead"><h1>Tilt <span>Lab</span> · Worksheet</h1><small>Why do we have seasons?${o.key?" · ANSWER KEY":""}${o.blank?" · BLANK COPY":""}</small></div>
+  <div class="wsbar"><div><b>Name</b><span>${o.blank?"":esc(USER.name)}</span></div><div><b>Class</b><span>${o.blank?"":esc(USER.cls)}</span></div><div><b>Date</b><span>${o.blank?"":new Date().toLocaleDateString("en-GB")}</span></div></div>
+  <p class="wskey"><i>Blue</i> writing is my own work.</p>`;
+  if(!o.blank&&sel.length){
+    const rows=sel.filter(gi=>CHALLENGES[gi].tier!=="check").map(gi=>{
+      const c=CHALLENGES[gi],idx=c.steps.map((s,i)=>stepVisible(s)&&s.type!=="learn"?i:-1).filter(i=>i>=0),n=idx.filter(i=>isStepDone(gi,i)).length;
+      let ck=0,right=0;const M=STORE[gi];if(M)c.steps.forEach((s,i)=>{if(s.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}});
+      return `<tr><th>${TIERS[c.tier]} ${c.num}: ${esc(c.title)}</th><td class="b">${n} of ${idx.length}</td><td class="b">${ck?`${right} of ${ck}`:"–"}</td></tr>`}).join("");
+    if(rows)h+=`<h2>Summary</h2><table class="wst"><thead><tr><th>Challenge</th><th>Steps finished</th><th>Check questions right</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  sel.forEach(gi=>{h+=wsChallenge(gi,o)});
+  if(WS.sel.has("inv")||o.blank)h+=wsInv(o);
+  if(!sel.length&&!WS.sel.has("inv"))h+=`<p>Nothing is chosen yet. Open “Choose what goes on my worksheet” above and tick the parts you want.</p>`;
+  return h;
+}
+function showDoc(title,docHTML,toolHTML){
+  const v=$("wsv");v.innerHTML=`<div class="wstool"><div class="wsrow"><b>${esc(title)}</b><button type="button" class="primary" data-wsprint="1">🖨 Print or save as PDF</button><button type="button" class="mini" data-wsclose="1">Close ✕</button></div>${toolHTML||""}</div>
+  <div class="wsnote">Press “Print or save as PDF”, then choose “Save as PDF” as the printer if you want a file to upload to Toddle.</div><div class="wsdoc" id="wsdoc">${docHTML}</div>`;
+  v.hidden=false;v.scrollTop=0;document.body.dataset.ws="1";$("app").inert=true;
+  WS.title=document.title;document.title=`Tilt Lab worksheet${USER.name?" - "+USER.name:""}${USER.cls?" "+USER.cls:""}`;
+}
+function printDoc(title,html){showDoc(title,html,"")}
+function closeWs(){const v=$("wsv");if(!v||v.hidden)return;v.hidden=true;v.innerHTML="";delete document.body.dataset.ws;if(WS.title)document.title=WS.title;if($("gate").hidden)$("app").inert=false}
+function openWs(opt){
+  if(!$("wsv").hidden)return;
+  WS.sel=new Set();CHALLENGES.forEach((c,gi)=>{if(hasWork(gi))WS.sel.add(gi)});if(invHasWork()||(opt&&opt.inv))WS.sel.add("inv");
+  WS.blank=false;WS.key=false;
+  let pick="",last="";
+  CHALLENGES.forEach((c,gi)=>{if(c.tier!==last){pick+=`<b>${c.tier==="check"?"Check-in":TIERS[c.tier]}</b>`;last=c.tier}
+    pick+=`<label><input type="checkbox" data-wsp="${gi}" ${WS.sel.has(gi)?"checked":""}> ${c.tier==="check"?esc(c.title):`${c.num}. ${esc(c.title)}`}${hasWork(gi)?"":" <small>(no answers yet)</small>"}</label>`});
+  pick+=`<b>My own work</b><label><input type="checkbox" data-wsp="inv" ${WS.sel.has("inv")?"checked":""}> My own investigation</label>`;
+  const tool=`<details><summary>Choose what goes on my worksheet</summary><div class="wspick">${pick}</div></details>`+
+    (USER.teacher?`<div class="wsrow"><label><input type="checkbox" data-wsb="blank"> Blank copy (no answers)</label><label><input type="checkbox" data-wsb="key"> Answer key</label></div>`:"");
+  showDoc("📄 My worksheet",buildWorksheet(),tool);
+}
+function wireWs(){
+  const v=$("wsv");
+  v.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.wsclose)closeWs();else if(b.dataset.wsprint)window.print()});
+  v.addEventListener("change",e=>{const t=e.target;
+    if(t.dataset.wsp!==undefined){const k=t.dataset.wsp==="inv"?"inv":+t.dataset.wsp;t.checked?WS.sel.add(k):WS.sel.delete(k)}
+    else if(t.dataset.wsb){WS[t.dataset.wsb]=t.checked}
+    else return;
+    $("wsdoc").innerHTML=buildWorksheet();
+  });
+}
+
+/* ----- wiring ----- */
+function wireNew(){
+  document.querySelectorAll(".uChange").forEach(b=>b.addEventListener("click",()=>{saveProgress();showGate(true)}));
+  [$("nbBtn"),$("gNb")].forEach(b=>b.addEventListener("click",()=>nbToggle()));
+  [$("wsBtn"),$("gWs")].forEach(b=>b.addEventListener("click",()=>openWs()));
+  $("gMap").addEventListener("click",()=>{if(MEM&&!S.intro&&!S.inSetup)captureModel();goIntro()});
+  $("gOpen").addEventListener("click",()=>{S.openTools=!S.openTools;syncOpenBtn();if(S.intro||S.inSetup||!MEM)return;unmountTools();enterStep(S.gs)});
+  $("gStep").addEventListener("click",e=>{
+    const g=e.target.closest("[data-gch]");if(g){goChallenge(+g.dataset.gch);return}
+    const a=e.target.closest("[data-act]");if(a){if(a.dataset.act==="ws")openWs();else nbToggle(true)}
+  });
+  wireNb();wireWs();
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(!$("wsv").hidden)closeWs();else if(NB&&$("teach").hidden)closeNb()}});
+  window.addEventListener("pagehide",saveProgress);
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)saveProgress()});
+  window.addEventListener("afterprint",()=>{});
+}
 
 /* ---------- Boot ---------- */
 try{const cs=sessionStorage.getItem("tiltlab-coop");if(cs)S.coop=JSON.parse(cs)}catch(e){}
@@ -3098,7 +3962,8 @@ $("teachBtn").addEventListener("click",openTeach);$("teach").addEventListener("c
 $("gStep").addEventListener("click",e=>{if(e.target.closest("#teachLink")){e.preventDefault();openTeach()}});
 $("gCoop").addEventListener("click",()=>{S.coopDraft=Object.assign({},S.coop||{});S.coop=null;try{sessionStorage.removeItem("tiltlab-coop")}catch(e){}showSetup(S.gi)});
 $("gStep").addEventListener("click",e=>{const b=e.target.closest("[data-tier]");if(!b)return;const k=b.dataset.tier,i=k==="foundation"?0:CHALLENGES.findIndex(c=>c.tier==="check"&&c.steps[0].cid===(k==="extension"?"ext":"inv"));goChallenge(i)});
-if(S.mode==="guided")goIntro();else syncUI();
+wireNew();
+showGate();
 requestAnimationFrame(loop);
 })();
 </script>
