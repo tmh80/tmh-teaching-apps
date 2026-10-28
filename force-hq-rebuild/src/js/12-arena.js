@@ -49,23 +49,20 @@ function drawScene(f, cvo) {
 
 /* ---- Chapter 4: force pairs on the rope in the Main Arena. At each end of a rope, one pull on the rope and the matching pull back. ---- */
 function drawRopePairs(c, cx) {
+  /* Eight labelled arrows (four per team). Each label starts at its arrow's inner end and runs outwards, so the two teams' labels face away from each other.
+     When the crate is near the edge of the arena there is no room on that side, so the squeezed team's labels move up a level and stay clear of the other team's. */
+  c.font = `700 12px ${C.fn}`;
   [['left', -1, C.left], ['right', 1, C.right]].forEach(([side, s, col]) => {
     const N = tot(S[side]); if (N < 1) return;
-    const edge = cx + s * CW / 2, L = clamp(18 + N / 6, 24, 78);
-    /* each label sits on its arrow with its inner end fixed (at ax) and runs outwards, so the labels of the two teams can never run into each other */
-    const arr = (x, y, dir, col2, lab, ax) => {
-      arrow(c, x, y, x + dir * L, y, col2, 5);
-      c.font = `700 12px ${C.fn}`; const w = c.measureText(lab).width + 12, mid = clamp(ax + s * w / 2, w / 2 + 4, 896 - w / 2);
-      pill(c, lab, mid, y - 15, col2, 12);
-    };
-    /* team end: the team pulls the rope (away from the crate); the rope pulls the team (towards the crate) */
-    const tx = edge + s * 118;
-    arr(tx, ROPEY - 112, s, col, `team pulls rope ${N} N`, tx);
-    arr(tx + s * L, ROPEY - 142, -s, C.ink, `rope pulls team ${N} N`, tx);
-    /* crate end: the rope pulls the crate (towards the team); the crate pulls the rope (towards the crate) */
-    const kx = edge + s * 4;
-    arr(kx, ROPEY - 48, s, C.ink, `rope pulls crate ${N} N`, kx + s * 6);
-    arr(kx + s * L, ROPEY - 78, -s, col, `crate pulls rope ${N} N`, kx + s * 6);
+    const edge = cx + s * CW / 2, L = clamp(18 + N / 6, 24, 78), kx = edge + s * 4, tx = edge + s * 118;
+    const rows = [
+      { x: kx, y: ROPEY - 48, dir: s, col: C.ink, lab: `rope pulls crate ${N} N`, ax: kx + s * 6 },
+      { x: kx + s * L, y: ROPEY - 78, dir: -s, col, lab: `crate pulls rope ${N} N`, ax: kx + s * 6 },
+      { x: tx, y: ROPEY - 112, dir: s, col, lab: `team pulls rope ${N} N`, ax: tx },
+      { x: tx + s * L, y: ROPEY - 142, dir: -s, col: C.ink, lab: `rope pulls team ${N} N`, ax: tx }];
+    rows.forEach(r => { r.w = c.measureText(r.lab).width + 12; r.mid = clamp(r.ax + s * r.w / 2, r.w / 2 + 4, 896 - r.w / 2); r.sq = Math.abs(r.mid - (r.ax + s * r.w / 2)) > 1; });
+    const up = rows.some(r => r.sq) ? 52 : 0;
+    rows.forEach(r => { const y = r.y - up; arrow(c, r.x, y, r.x + r.dir * L, y, r.col, 5); pill(c, r.lab, r.mid, y - 15, r.col, 12); });
   });
 }
 
