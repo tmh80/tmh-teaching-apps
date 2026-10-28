@@ -49,9 +49,9 @@ const FORMULAS = [
   { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', ch: [1, 3] },
   { id: 'friction', name: 'Resultant with friction', eq: 'resultant = pull − friction', note: 'Friction pushes against the pull, so take it away from the pull first. Then use F = m × a.', ch: [3] },
   { id: 'fma', name: 'Newton\'s second law', eq: 'F = m × a', note: 'F is the resultant force in N, m is the mass in kg and a is the acceleration in m/s².', tri: 'fma', ch: [3, 4] },
-  { id: 'accel', name: 'Acceleration from speeds', eq: 'a = (v − u) ÷ t', note: 'u is the starting speed, v is the final speed and t is the time in seconds. On a velocity–time graph, this is the slope.', ch: [3] },
+  { id: 'accel', name: 'Acceleration from velocities', eq: 'a = (v − u) ÷ t', note: 'u is the starting velocity, v is the final velocity and t is the time in seconds. On a velocity–time graph, this is the slope.', ch: [3] },
   { id: 'third', name: 'Newton\'s third law', eq: 'force of A on B = force of B on A', note: 'Always the same size, always in opposite directions, and on two different objects.', ch: [4] },
-  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'speed = F ÷ m, so F = m × speed', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] }
+  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'velocity = F ÷ m, so F = m × velocity', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] }
 ];
 const calcChapter = () => (typeof CH !== 'undefined' && CH && VIEW === 'vChapter') ? CH.n : null;
 function renderFormulas() {

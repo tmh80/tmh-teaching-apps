@@ -27,6 +27,7 @@ with sync_playwright() as p:
     while time.time() - t0 < 25 and ev("S.running"): pg.wait_for_timeout(150)
   def answer(q):
     sel = f'#qCard [data-q="{q["id"]}"]'; popq(); bx = pg.locator(sel)
+    if bx.evaluate("e=>e.classList.contains('locked')"): print('  auto-completed by the simulation:', q['id']); return bx.locator('.fb').inner_text()   # a Check it reading completes itself once the run is made
     t = q['type']
     if t in ('num', 'reading'):
       v = q['val']

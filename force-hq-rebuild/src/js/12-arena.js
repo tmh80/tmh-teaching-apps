@@ -146,22 +146,23 @@ function drawSpaceFBD(f) {
   const cv = $('#cvFBD'); if (!cv || !cv.offsetParent) return;
   const c = fit(cv, 340, 300), ay = 128, ax0 = 112, px0 = 232;
   c.fillStyle = C.panel; c.fillRect(0, 0, 340, 300);
-  const since = S.pushEndT == null ? 0 : S.t - S.pushEndT, linger = f.shove <= 0.5 && S.lastPush && S.pushEndT != null && since < 4;
-  const F = f.shove > 0.5 ? f.shove : linger ? S.lastPush : 0, Tn = Math.abs(f.thr), step = niceStep(Math.max(60, F, Tn)), k = 30 / step;
+  /* the diagram always shows the latest force the student made (a push or a thruster burst), so it is still there after everything has stopped */
+  const pushingNow = f.shove > 0.5, thrNow = Math.abs(f.thr) > 0.5, kind = pushingNow ? 'push' : thrNow ? 'thr' : S.lastKind, live = pushingNow || thrNow;
+  const F = pushingNow ? f.shove : kind === 'push' ? S.lastPush : 0, thrF = thrNow ? f.thr : kind === 'thr' ? S.lastThr : 0, Tn = Math.abs(thrF), step = niceStep(Math.max(60, F, Tn)), k = 30 / step;
   c.strokeStyle = C.grid; c.lineWidth = 1; for (let x = 10; x <= 340; x += 30) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, 262); c.stroke(); } for (let y = ay % 30; y <= 262; y += 30) { c.beginPath(); c.moveTo(0, y); c.lineTo(340, y); c.stroke(); }
   c.fillStyle = C.hull; c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.roundRect(ax0 - 14, ay - 22, 28, 44, 9); c.fill(); c.stroke(); c.beginPath(); c.arc(ax0, ay - 32, 11, 0, 7); c.fill(); c.stroke();
   const pw = 54, ph = 36; c.beginPath(); c.roundRect(px0 - pw / 2, ay - ph / 2, pw, ph, 9); c.fill(); c.stroke(); c.fillStyle = C.hazard; c.fillRect(px0 - pw / 2, ay - 4, pw, 8); c.strokeRect(px0 - pw / 2, ay - 4, pw, 8);
   const lab = (s, x, y, col) => { c.font = `700 12px ${C.fn}`; const w = c.measureText(s).width + 8; x = Math.max(w / 2 + 2, Math.min(338 - w / 2, x)); c.fillStyle = C.panel; c.fillRect(x - w / 2, y - 8, w, 16); txt(c, s, x, y, col, `700 12px ${C.fn}`); };
   if (F > 0.5) {
-    c.save(); if (linger) c.globalAlpha = Math.max(0.35, 1 - since / 4); const L = Math.min(F * k, 86);
+    c.save(); const L = Math.min(F * k, 86);
     arrow(c, px0, ay - 5, px0 + L, ay - 5, C.right, 4); lab(Math.round(F) + ' N', px0 + L / 2 + 6, ay - 22, C.right);
     arrow(c, ax0, ay - 5, ax0 - L, ay - 5, C.left, 4); lab(Math.round(F) + ' N', ax0 - L / 2 - 6, ay - 22, C.left); c.restore();
   }
-  if (Tn > 0.5) { const sd = Math.sign(f.thr), L = Math.min(Tn * k, 86); arrow(c, px0, ay + 14, px0 + sd * L, ay + 14, C.hazard, 4); lab('thrusters ' + Math.round(Tn) + ' N', px0 + sd * (L / 2 + 6), ay + 30, C.hazard); }
+  if (Tn > 0.5) { const sd = Math.sign(thrF), L = Math.min(Tn * k, 86); arrow(c, px0, ay + 14, px0 + sd * L, ay + 14, C.hazard, 4); lab('thrusters ' + Math.round(Tn) + ' N', px0 + sd * (L / 2 + 6), ay + 30, C.hazard); }
   txt(c, 'Astronaut', ax0, 196, C.ink, `800 14px ${C.fd}`); txt(c, S.astro + ' kg', ax0, 214, C.muted, `700 12px ${C.fn}`);
   txt(c, 'Pod', px0, 196, C.ink, `800 14px ${C.fd}`); txt(c, S.mass + ' kg', px0, 214, C.muted, `700 12px ${C.fn}`);
   c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(0, 262.5); c.lineTo(340, 262.5); c.stroke(); c.setLineDash([4, 4]); c.beginPath(); c.moveTo(172, 40); c.lineTo(172, 240); c.stroke(); c.setLineDash([]);
-  txt(c, F > 0.5 || Tn > 0.5 ? 'Two objects, two forces. One force on each.' : 'Push off to see the two forces.', 170, 282, C.muted, `600 13px ${C.fb}`);
+  txt(c, live ? 'Two objects, two forces. One force on each.' : F > 0.5 || Tn > 0.5 ? 'The forces from your latest push or burst.' : 'Push off to see the two forces.', 170, 282, C.muted, `600 13px ${C.fb}`);
   $('#scaleNote').textContent = `Scale: 1 grid square = ${step} N. Each object has its own diagram.`;
   const lg = [['right', 'Push on the pod'], ['left', 'Push on the astronaut']].concat(LAB.show.has('thrust') ? [['hazard', 'Thrusters on the pod']] : []);
   const lh = lg.map(([k2, n]) => `<span><i style="background:var(--${k2})"></i>${n}</span>`).join(''); const le = $('#legend'); if (le.dataset.h !== lh) { le.innerHTML = lh; le.dataset.h = lh; }
@@ -354,7 +355,7 @@ function renderControls() {
   const lo = sp ? 50 : 10, hi = sp ? 500 : 150, mst = sp ? 10 : 1; [$('#mass'), $('#massNum')].forEach(e => { e.min = lo; e.max = hi; }); $('#mass').step = mst;
   const m = $('#mass'); m.value = S.mass; const mn = $('#massNum'); if (document.activeElement !== mn) mn.value = S.mass;
   const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
-  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal speed' : `Speed up time ×${SP_WARP}`; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
+  const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : `Fast-forward ×${SP_WARP}`; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }

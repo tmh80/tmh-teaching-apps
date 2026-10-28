@@ -75,8 +75,7 @@ const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<
 const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
 function hasAns(id) {
   const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === id), store = stepKey(CH.id, GI), s = dbGet(store + '.' + id, null);
-  if (s && s.done) return true; const d = draftOf(store, id);
-  return !!(q && d && String(d.v == null ? '' : d.v).trim() && (!(q.units && q.units.length) || d.u));
+  return !!(q && s && s.done);   // a calculation task is finished once its answer has been checked
 }
 function tkAnsHTML(q) {
   const store = stepKey(CH.id, GI), s = dbGet(store + '.' + q.id, null), d = draftOf(store, q.id) || {}, U = q.units && q.units.length, done = !!(s && s.done);
@@ -182,8 +181,19 @@ function qChrome() {
 }
 function taskState() { const st = CHDATA[CH.id].steps[GI]; const done = stepDone(CH.id, GI); return (st.tasks || []).map(t => done || !!t[1]()); }
 function qsDone() { const st = CHDATA[CH.id].steps[GI]; return (st.qs || []).every(q => { const s = dbGet(stepKey(CH.id, GI) + '.' + q.id, null); return s && s.done; }); }
+/* "Check it" reading questions (q.auto) complete themselves once the student has made the run happen in the simulation, so nobody has to type a number they have just worked out */
+function autoQs() {
+  const st = CHDATA[CH.id].steps[GI], store = stepKey(CH.id, GI); let n = 0;
+  (st.qs || []).forEach(q => {
+    if (!q.auto || !q.need || !q.live) return; const old = dbGet(store + '.' + q.id, null); if (old && old.done) return;
+    if (!q.need()) return; const v = q.live(); if (v == null || isNaN(v)) return;
+    dbSet(store + '.' + q.id, { tries: 1, first: true, ok: true, v: String(fmt(v, 2)), ans: v, max: simMax(q), score: simMax(q), msg: q.ok || 'Checked in the simulation.', done: true, auto: true }); n++;
+  });
+  if (n) { renderStepQs(); refreshTkAns(); }
+}
 function checkStep(force) {
   if (VIEW !== 'vChapter' || CTAB !== 'learn' || !CH) return;
+  autoQs();
   const ts = taskState(), qd = qsDone(), all = ts.every(Boolean) && qd && CARDS_SEEN, sig = ts.join() + qd + all + CARDS_SEEN;
   if (sig === LASTSIG && !force) return; LASTSIG = sig;
   ts.forEach((ok, i) => { const li = $('#tk' + i); if (li) li.classList.toggle('ok', ok); });

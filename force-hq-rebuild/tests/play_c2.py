@@ -52,7 +52,7 @@ with sync_playwright() as p:
   print(num('q1', f"{S1['24']:.2f}"), '|', num('q2', f"{S1['61']:.2f}"), '|', num('q3', f"{S1['147']:.2f}"), '|', opt('q4', '6 times more slowly')); state('i1'); nxt()
   cards(); push(48); v48 = ev('S.flags.sp[48]'); print(opt('q1', 'how hard it is to change')); print(gap('q2', ['mass', 'more difficult'])); print(num('q3', f'{v48:.2f}'), '|', num('q4', '0.78')); state('i2'); nxt()
   cards(); push(61); pg.wait_for_timeout(1200); pg.locator('#cvVT').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'i3_graph.png')
-  v = ev("S.flags.sp[61]"); print(num('q1', f"{v:.1f}"), '|', opt('q2', 'steady speed')); state('i3'); nxt()
+  v = ev("S.flags.sp[61]"); print(num('q1', f"{v:.1f}"), '|', opt('q2', 'steady velocity')); state('i3'); nxt()
   cards(); pg.click('#rail [data-pred="1"]'); launch(24); pg.screenshot(path=OUT + 'i4_24.png'); launch(61); pg.screenshot(path=OUT + 'i4_61.png')
   d = json.loads(ev("JSON.stringify(S.flags.sd)")); print('distances', d)
   print(num('q1', f"{d['24']:.2f}"), '|', num('q2', f"{d['61']:.2f}"), '|', opt('q3', 'more inertia')); state('i4'); nxt()

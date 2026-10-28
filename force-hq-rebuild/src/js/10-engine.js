@@ -27,7 +27,7 @@ const S = {
   /* Chapter 3: scene = 'sled' swaps the crate and the two teams for the husky sled in the Snow Arena */
   scene: null,
   /* Chapter 4: scene = 'space'. The pod is the "crate" (S.x, S.v, S.mass); the astronaut has a mass, a position and a speed of their own. */
-  astro: 100, pushF: 100, ax: AST_X0, av: 0, avPeak: 0, thrT: -1, thrDir: 0, warp: 1, pushEndT: null, pushDone: null, lastPush: 0, dockV: null, bursts: []
+  astro: 100, pushF: 100, ax: AST_X0, av: 0, avPeak: 0, thrT: -1, thrDir: 0, warp: 1, pushEndT: null, pushDone: null, lastPush: 0, lastThr: 0, lastKind: null, dockV: null, bursts: []
 };
 const newFlags = () => ({ ran: false, shoved: false, moved: false, stuck: false, pulled: false, launched: false, stopped: false });
 S.flags = newFlags();
@@ -94,12 +94,12 @@ function updateSim(dt) {
   for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3);
 }
 function resetSim() { if (RUN) runEnd('reset'); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false;
-  S.ax = AST_X0; S.av = 0; S.avPeak = 0; S.thrT = -1; S.thrDir = 0; S.pushEndT = null; S.pushDone = null; S.lastPush = 0; S.dockV = null; S.bursts = []; S.flags.docked = false; S.flags.tether = false;
+  S.ax = AST_X0; S.av = 0; S.avPeak = 0; S.thrT = -1; S.thrDir = 0; S.pushEndT = null; S.pushDone = null; S.lastPush = 0; S.lastThr = 0; S.lastKind = null; S.dockV = null; S.bursts = []; S.flags.docked = false; S.flags.tether = false;
   syncRun(); }
 /* Space Dome: the astronaut pushes off the pod. One push per run: pressing the button again starts a fresh run. */
-function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S.shoveT >= 0) return false; resetSim(); } S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); return true; }
+function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S.shoveT >= 0) return false; resetSim(); } S.shoveT = 0; S.lastKind = 'push'; S.flags.shoved = true; S.running = true; syncRun(); return true; }
 /* thrusters: dir +1 pushes the pod to the right (speeds it up), -1 to the left. A burst lasts as long as a push. */
-function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
+function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.lastThr = dir * SP_THR_F; S.lastKind = 'thr'; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
 function shove() { if (S.scene === 'space') return spacePush(); if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
 function clearCh2() { S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }

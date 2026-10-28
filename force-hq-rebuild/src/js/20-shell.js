@@ -4,7 +4,7 @@ const CHAPTERS = [
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
   { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: true, arena: 'Space Dome', icon: 'pair' },
-  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady speeds and the new Drop Zone.', stamp: 'Balance Master', ready: false, arena: 'Drop Zone', icon: 'chute' }
+  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady velocities and the new Drop Zone.', stamp: 'Balance Master', ready: false, arena: 'Drop Zone', icon: 'chute' }
 ];
 const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';

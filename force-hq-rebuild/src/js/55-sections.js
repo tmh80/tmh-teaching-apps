@@ -15,12 +15,12 @@ const SECTIONS = [
   { id: 'c2f', ch: 'c2', n: 2, title: 'Inertia', part: 'Foundation', stamp: 'Inertia Expert',
     blurb: 'The same push on light and heavy crates, stopping with a brake, the velocity–time graph and Newton\'s first law.',
     steps: ['i1', 'i2', 'i3', 'i4', 'i5', 'i6'], challenge: null, review: ['c2r1', 'c2r2', 'c2r3', 'c2r4', 'c2r5', 'c2r6'],
-    goal: 'Explain that objects with more mass have more inertia, so they are harder to start moving and harder to stop; read a speed from a velocity–time graph; state Newton\'s first law and use it to explain everyday examples.',
+    goal: 'Explain that objects with more mass have more inertia, so they are harder to start moving and harder to stop; read a velocity from a velocity–time graph; state Newton\'s first law and use it to explain everyday examples.',
     vocab: ['inertia', 'mass', 'velocity', 'velocity–time graph', 'brake', 'braking distance', 'Newton\'s first law', 'unbalanced force'] },
   { id: 'c2x', ch: 'c2', n: 2, title: 'Inertia', part: 'Extension', stamp: 'Brake Master',
     blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
     steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
-    goal: 'Describe motion from the shape of a velocity–time graph; explain why more mass needs a bigger force to stop in the same distance; draw the free-body diagram of an object gliding at a steady speed.',
+    goal: 'Describe motion from the shape of a velocity–time graph; explain why more mass needs a bigger force to stop in the same distance; draw the free-body diagram of an object gliding at a steady velocity.',
     vocab: ['velocity–time graph', 'inertia', 'braking distance', 'brake', 'free-body diagram', 'Newton\'s first law'] },
   { id: 'c3f', ch: 'c3', n: 3, title: 'F = ma', part: 'Foundation', stamp: 'Formula Pro',
     blurb: 'Husky sleds in the Snow Arena: acceleration, the formula triangle, finding F, m and a, friction, and lots of maths practice.',
@@ -38,9 +38,9 @@ const SECTIONS = [
     goal: 'State Newton\'s third law; describe a force pair (the same size, opposite directions, on different objects); use F = ma to explain why the lighter object in a pair speeds up more; explain why force pairs do not cancel.',
     vocab: ['Newton\'s third law', 'force pair', 'action', 'reaction', 'mass', 'velocity', 'force', 'acceleration'] },
   { id: 'c4x', ch: 'c4', n: 4, title: 'Action and reaction', part: 'Extension', stamp: 'Docking Commander',
-    blurb: 'Thrusters and rockets, then mission control\'s docking orders: work out the push that gives the right docking speed.',
+    blurb: 'Thrusters and rockets, then mission control\'s docking orders: work out the push that gives the right docking velocity.',
     steps: ['g1', 'g2'], challenge: ['o1', 'o2', 'o3'], review: ['c4r9', 'c4r10', 'c4r11', 'c4r12', 'c4r13'], needs: 'c4f',
-    goal: 'Explain how thrusters and rockets use force pairs; work out the push needed for a target speed using force = mass × speed; keep the astronaut\'s speed within a limit by choosing their mass.',
+    goal: 'Explain how thrusters and rockets use force pairs; work out the push needed for a target velocity using force = mass × velocity; keep the astronaut\'s velocity within a limit by choosing their mass.',
     vocab: ['thruster', 'force pair', 'Newton\'s third law', 'Newton\'s first law', 'mass', 'force'] }
 ];
 const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3 };

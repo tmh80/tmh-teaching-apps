@@ -115,3 +115,9 @@ Added after a review of the Chapter 4 "Mystery push-offs" step, where students c
 - The Journal has a fixed tab on the right edge (`.jtab`, also `data-journal`). When the Journal is open the tab sits on its left edge (hidden on phones narrower than 470 px).
 - The Journal has a fourth tab, Working: a free-typing pad for the current step (`DB.jwork.pads['<chapter>:<step>']`), the calculations saved from the calculator (`DB.jwork.calcs`) and pads from other steps. The calculator has a "Save to Journal" button (with an optional working note) and "Open my working". `DB.jwork` travels in the save file like the other Journal data.
 - Test: `tests/answer_box.py`.
+
+## Review fixes (28 Oct 2026, later)
+- Wording: students say "velocity", so the app says velocity everywhere it used to say speed (the verb "speed up" stays). The thruster buttons are "Thrust forward ▶" and "◀ Thrust backward" (a backward burst can speed the pod up the other way). The time-warp button is "Fast-forward ×8".
+- Calculation tasks are two tasks: a calculate task (`{ q }` with an answer box, ticked once the answer is checked, `hasAns`) and a short "Check it" task ticked by making it happen in the simulation. Reading questions marked `auto: true` ("Check it. What does the readout show?") complete themselves when the run is made (`autoQs` in `40-guided.js`), so nobody retypes a number. Tests skip questions that are already locked.
+- The Space Dome free-body diagram keeps the latest force the student made (push or thruster burst, `S.lastPush`, `S.lastThr`, `S.lastKind`) until Reset.
+- Docking orders: the edges of the window count as on target (`DOCK_EPS`, because the simulation reads 0.4999 for an exact 0.5). A pass is shown green and starts "Congratulations!" in all the Challenge courses.

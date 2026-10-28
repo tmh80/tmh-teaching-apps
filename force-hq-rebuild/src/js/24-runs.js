@@ -35,11 +35,11 @@ function runTick(f, dt) {
   RUN.L = Math.max(RUN.L, f.L); RUN.R = Math.max(RUN.R, f.R);
   if (S.brakeFrom != null) { RUN.bd = S.x - S.brakeFrom; RUN.bt = S.t - S.brakeT; }
   RUN.t = S.t - RUN.t0;
-  /* Chapter 3: the steady acceleration, resultant and friction once the huskies are pulling at full strength, and the speed at 2 s and 4 s */
+  /* Chapter 3: the steady acceleration, resultant and friction once the huskies are pulling at full strength, and the velocity at 2 s and 4 s */
   if (S.running && S.pullT > PULL_RAMP + 0.05 && f.R > 0) { RUN.a = f.a; RUN.net = f.net; RUN.Rst = f.R; RUN.frS = Math.abs(f.fr); }
   [1, 2, 3, 4].forEach(k => { if (RUN['v' + k] == null && RUN.t >= k) RUN['v' + k] = S.v; });
   if (S.flags.finished) { RUN.finT = S.finT - RUN.t0; RUN.finV = S.finV; }
-  /* Chapter 4: the speeds the pod and the astronaut reached when the push ended, any thruster bursts, and the docking speed */
+  /* Chapter 4: the velocities the pod and the astronaut reached when the push ended, any thruster bursts, and the docking velocity */
   if (S.scene === 'space') { if (S.pushDone && RUN.vp == null) { RUN.vp = S.pushDone.vp; RUN.va = S.pushDone.va; } RUN.bursts = S.bursts.slice(); if (S.flags.docked) RUN.dockV = S.dockV; RUN.curV = S.v; }
   if (!S.running) runEnd(S.flags.docked ? 'dock' : S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.msg && /drifted/.test(S.msg) ? 'drift' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
   else if (S.scene !== 'space' && av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
@@ -60,14 +60,14 @@ function sledText(r) {
   const body = r.a == null ? '' : mk.has('readA') && mk.has('readRes') ? '' : mk.has('readA') ? ` The resultant force was ${NN(r.net)}.` : mk.has('readRes') ? ` The acceleration was ${fmt(r.a, 2)} m/s².` : ` The resultant force was ${NN(r.net)}, so the acceleration was ${fmt(r.a, 2)} m/s².`;
   if (live) return head + body + ` It is moving at ${ms(Math.abs(S.v))} and has gone ${m2(r.dist)} so far…`;
   if (r.out === 'finish') return head + body + ` It crossed the finish line after ${fmt(r.finT, 1)} s, moving at ${ms(r.finV)}.`;
-  return head + body + ` Its top speed was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
+  return head + body + ` Its top velocity was ${ms(r.top)} and it went ${m2(r.dist)} before you ${r.out === 'paused' ? 'paused' : 'stopped'} it.`;
 }
 function spaceText(r) {
   const live = r.live && r.out === 'running', mk = spaceMasked(r.pushF, r.mass, r.astro), hv = k => mk.has(k);
   if (r.kind === 'thrust') {
     const head = `You fired the thrusters on the ${r.mass} kg pod.`, n = r.bursts.length;
     if (!n) return head + (live ? ' The burst is happening…' : ' No burst finished.');
-    return head + ` After ${n === 1 ? 'one burst' : n + ' bursts'}, the pod's speed was ${r.bursts.map(ms).join(', then ')}.` + (r.dockV != null ? ` It docked at ${ms(r.dockV)}.` : '');
+    return head + ` After ${n === 1 ? 'one burst' : n + ' bursts'}, the pod's velocity was ${r.bursts.map(ms).join(', then ')}.` + (r.dockV != null ? ` It docked at ${ms(r.dockV)}.` : '');
   }
   const head = `The ${r.astro} kg astronaut pushed the ${r.mass} kg pod with ${NN(r.pushF)}.`;
   if (r.vp == null) return head + (live ? ' The push is happening…' : ' The run stopped before the push finished.');
@@ -91,9 +91,9 @@ function runText(r) {
     const head = `You pushed ${crate}.`;
     if (live) return head + ` It is moving at ${ms(Math.abs(S.v))} and has travelled ${m2(r.dist)} so far…`;
     if (!r.moved || r.out === 'still') return head + ` It didn't move: friction held it still${r.fs ? ` with up to ${NN(r.fs)}` : ''}.`;
-    if (r.out === 'end') return head + (Math.abs(r.lastV - r.top) < 0.02 ? ` It reached ${ms(r.top)} and kept that steady speed for ${m2(r.dist)}, all the way to the end of the arena.` : ` Its top speed was ${ms(r.top)}, and it travelled ${m2(r.dist)} to the end of the arena.`);
-    if (r.out === 'friction') return head + ` Its top speed was ${ms(r.top)}. Friction${r.fk ? ` (${NN(r.fk)})` : ''} slowed it down and it stopped after ${m2(r.dist)}, ${fmt(r.t, 1)} s after the push.`;
-    return head + (steady ? ` It glided at a steady ${ms(r.top)} and had travelled ${m2(r.dist)} when the run was stopped.` : ` Its top speed was ${ms(r.top)}, and it travelled ${m2(r.dist)} before the run was stopped.`);
+    if (r.out === 'end') return head + (Math.abs(r.lastV - r.top) < 0.02 ? ` It reached ${ms(r.top)} and kept that steady velocity for ${m2(r.dist)}, all the way to the end of the arena.` : ` Its top velocity was ${ms(r.top)}, and it travelled ${m2(r.dist)} to the end of the arena.`);
+    if (r.out === 'friction') return head + ` Its top velocity was ${ms(r.top)}. Friction${r.fk ? ` (${NN(r.fk)})` : ''} slowed it down and it stopped after ${m2(r.dist)}, ${fmt(r.t, 1)} s after the push.`;
+    return head + (steady ? ` It glided at a steady ${ms(r.top)} and had travelled ${m2(r.dist)} when the run was stopped.` : ` Its top velocity was ${ms(r.top)}, and it travelled ${m2(r.dist)} before the run was stopped.`);
   }
   const head = r.L < 0.5 ? `The right team pulled ${crate} with ${NN(r.R)}.` : r.R < 0.5 ? `The left team pulled ${crate} with ${NN(r.L)}.` : `Tug-of-war on ${crate}: left team ${NN(r.L)}, right team ${NN(r.R)}.`;
   if (!r.moved) return head + (Math.abs(r.L - r.R) < 0.5 ? ' The pulls were balanced, so the crate stayed still.' : ` Friction held the crate still with ${NN(r.fs || Math.abs(r.L - r.R))}.`) + (live ? '' : '');
@@ -105,8 +105,8 @@ function runChips(r) {
   if (r.scene === 'space') {
     const mk = spaceMasked(r.pushF, r.mass, r.astro), c = [['Pod mass', r.mass + ' kg'], ['Astronaut mass', r.astro + ' kg']];
     if (r.kind === 'push') c.push(['Push', NN(r.pushF)]);
-    if (r.vp != null && !mk.has('readV')) c.push(['Pod speed', ms(r.vp)]); if (r.va != null && !mk.has('readAV')) c.push(['Astronaut speed', ms(r.va)]);
-    r.bursts.forEach((v, i) => c.push(['Speed after burst ' + (i + 1), ms(v)])); if (r.dockV != null && !mk.has('readV')) c.push(['Docking speed', ms(r.dockV)]);
+    if (r.vp != null && !mk.has('readV')) c.push(['Pod velocity', ms(r.vp)]); if (r.va != null && !mk.has('readAV')) c.push(['Astronaut velocity', ms(r.va)]);
+    r.bursts.forEach((v, i) => c.push(['Velocity after burst ' + (i + 1), ms(v)])); if (r.dockV != null && !mk.has('readV')) c.push(['Docking velocity', ms(r.dockV)]);
     return c;
   }
   if (r.scene === 'sled') {
@@ -114,15 +114,15 @@ function runChips(r) {
     if (r.frS != null && r.frS > 0.5) c.push(['Friction', NN(r.frS)]); else if (r.fs) c.push(['Friction', NN(r.fs)]);
     const mk = sledMasked(r.nR, r.mass, r.floor);
     if (r.net != null && !mk.has('readRes')) c.push(['Resultant', NN(Math.abs(r.net))]); if (r.a != null && !mk.has('readA')) c.push(['Acceleration', fmt(r.a, 2) + ' m/s²']);
-    c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]); [1, 2, 3, 4].forEach(k => { if (r['v' + k] != null) c.push(['Speed at ' + k + ' s', ms(r['v' + k])]); });
+    c.push(['Top velocity', ms(r.top)], ['Distance', m2(r.dist)]); [1, 2, 3, 4].forEach(k => { if (r['v' + k] != null) c.push(['Velocity at ' + k + ' s', ms(r['v' + k])]); });
     if (r.finT != null) c.push(['Finish time', fmt(r.finT, 1) + ' s']);
     return c;
   }
   const c = [['Mass', r.mass + ' kg'], ['Floor', FLOORS[r.floor] ? FLOORS[r.floor].name : r.floor]];
   if (r.kind === 'pull') { c.push(['Left', NN(r.L)], ['Right', NN(r.R)]); }
-  if (r.kind === 'launch') { c.push(['Launch speed', ms(r.v0)]); if (r.brakeOn) c.push(['Brake', NN(r.brakeF)]); }
+  if (r.kind === 'launch') { c.push(['Launch velocity', ms(r.v0)]); if (r.brakeOn) c.push(['Brake', NN(r.brakeF)]); }
   if (r.fs && !r.moved) c.push(['Friction', NN(r.fs)]); else if (r.fk) c.push(['Friction', NN(r.fk)]);
-  c.push(['Top speed', ms(r.top)], ['Distance', m2(r.dist)]);
+  c.push(['Top velocity', ms(r.top)], ['Distance', m2(r.dist)]);
   if (r.bd != null) c.push(['After brake line', m2(r.bd)], ['Time to stop', fmt(r.bt, 1) + ' s']);
   return c;
 }
