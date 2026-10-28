@@ -37,7 +37,7 @@ function renderOnPage() {
 
 function setStep(i) {
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
-  const st = chd.steps[GI]; LASTSIG = '';
+  const st = chd.steps[GI]; LASTSIG = ''; if (st.unlocks) unlockFormulas(st.unlocks);
   // arena state
   clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false; JRUNS_SEEN = journalOpen() && JTAB === 'runs';
   LAB.sides = st.sides || ['left', 'right']; LAB.pullers = st.pullers || ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = st.floors || null; LAB.showVert = true; LAB.showRes = true; LAB.idle = st.idle || null;

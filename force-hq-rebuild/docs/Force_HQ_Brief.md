@@ -101,3 +101,10 @@ Flat, rounded, outline-free shapes in team colours. Animals have dot eyes and do
 - Docking orders (`renderOrdersCourse`): three orders, a run is judged when the push finishes (pod speed in the window; order 3 also needs the astronaut under 2.0 m/s, so the student picks the astronaut's mass). Scored 4/3/2/1 by push number, "Move on" after 3 misses.
 - Masks: `spaceMasked(F, podMass, astroMass)`, same idea as `sledMasked`. Used in f3 and f5.
 - Tests: `tests/play_c4.py` plays both sections, the challenge and the Check.
+
+## Calculator formulas (28 Oct 2026)
+- The calculator has two tabs: Calculator and Formulas. `FORMULAS` in `21-calc.js` lists each formula with where it unlocks. A step unlocks formulas with `unlocks: ['id']` (read in `setStep`), stored in `DB.fu` (so it travels with the save file) and `DB.fseen`. Teacher mode shows them all. Locked ones show "Unlocks in Chapter n".
+- Triangles are generalised: `triHTML('fma')` (F, m, a) and `triHTML('w')` (W, m, g). Only the F, m, a one sets `S.flags.tri` for the Chapter 3 task.
+- Unlock points: weight at `s5`, resultant at `s3r`, F = ma at `a3` (and Chapter 4 `f3`), friction at `a5`, acceleration from speeds at `e1`, third law at `f2`, 1 s push at `f3`/`g2`.
+- A toast says "New formula in your calculator", and a red dot shows on the calculator button until the Formulas tab is opened.
+- Test: `tests/calc_formulas.py`. Pair-arrow labels in the Main Arena (`drawRopePairs`) are anchored at their inner end and run outwards, so the two teams' labels cannot overlap.

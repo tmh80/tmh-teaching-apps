@@ -672,6 +672,20 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
 .tglrow{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
 .tglrow input{width:18px;height:18px}
 
+.calc .ctabs{display:flex;gap:4px}
+.calc .ctabs button{flex:1;border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:6px 4px;font-weight:700;font-size:14px;position:relative}
+.calc .ctabs button[aria-selected="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.calc.wide{width:310px}
+.calc .cform{display:grid;gap:8px;max-height:min(62vh,460px);overflow:auto;padding-right:2px}
+.calc .fcard{border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:4px;background:var(--panel)}
+.calc .fcard.locked{background:var(--chip);color:var(--muted)}
+.calc .fcard .feq{font-family:var(--f-num);font-size:18px;font-weight:800;background:var(--hazard-soft);border-radius:8px;padding:5px 8px}
+.calc .fcard small{font-size:12.5px;color:var(--muted);font-weight:600}
+.calc .tri{margin:4px 0}.calc .tri svg{width:170px}
+.calc .trisum{min-width:0;width:100%;box-sizing:border-box;font-size:18px;padding:6px 8px}
+.calc .trisum small{font-size:12.5px;color:var(--ink)}
+.calcFab.hasnew::after,.calc .ctabs button.hasnew::after{content:"";position:absolute;top:-4px;right:-4px;width:12px;height:12px;border-radius:50%;background:var(--bad);border:2px solid var(--panel)}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -1297,15 +1311,20 @@ function drawRopePairs(c, cx) {
   [['left', -1, C.left], ['right', 1, C.right]].forEach(([side, s, col]) => {
     const N = tot(S[side]); if (N < 1) return;
     const edge = cx + s * CW / 2, L = clamp(18 + N / 6, 24, 78);
-    const arr = (x, y, dir, col2, lab, out) => { arrow(c, x, y, x + dir * L, y, col2, 5); pill(c, lab, clamp(x + dir * L / 2 + s * (out || 0), 90, 810), y - 15, col2, 12); };
+    /* each label sits on its arrow with its inner end fixed (at ax) and runs outwards, so the labels of the two teams can never run into each other */
+    const arr = (x, y, dir, col2, lab, ax) => {
+      arrow(c, x, y, x + dir * L, y, col2, 5);
+      c.font = `700 12px ${C.fn}`; const w = c.measureText(lab).width + 12, mid = clamp(ax + s * w / 2, w / 2 + 4, 896 - w / 2);
+      pill(c, lab, mid, y - 15, col2, 12);
+    };
     /* team end: the team pulls the rope (away from the crate); the rope pulls the team (towards the crate) */
     const tx = edge + s * 118;
-    arr(tx, ROPEY - 112, s, col, `team pulls rope ${N} N`, 20);
-    arr(tx + s * L, ROPEY - 142, -s, C.ink, `rope pulls team ${N} N`, 20);
+    arr(tx, ROPEY - 112, s, col, `team pulls rope ${N} N`, tx);
+    arr(tx + s * L, ROPEY - 142, -s, C.ink, `rope pulls team ${N} N`, tx);
     /* crate end: the rope pulls the crate (towards the team); the crate pulls the rope (towards the crate) */
     const kx = edge + s * 4;
-    arr(kx, ROPEY - 48, s, C.ink, `rope pulls crate ${N} N`, 50);
-    arr(kx + s * L, ROPEY - 78, -s, col, `crate pulls rope ${N} N`, 50);
+    arr(kx, ROPEY - 48, s, C.ink, `rope pulls crate ${N} N`, kx + s * 6);
+    arr(kx + s * L, ROPEY - 78, -s, col, `crate pulls rope ${N} N`, kx + s * 6);
   });
 }
 
@@ -2043,41 +2062,84 @@ function calcEval(src) {
 function initCalc() {
   const el = $('#calc');
   el.innerHTML = `<div class="chd" id="calcDrag"><span>🧮 Calculator</span><button type="button" id="calcX" aria-label="Close the calculator">✕</button></div>
+    <div class="ctabs" role="tablist" aria-label="Calculator or formulas"><button type="button" role="tab" id="calcTabK" data-ctk="keys" aria-selected="true">Calculator</button><button type="button" role="tab" id="calcTabF" data-ctk="formulas" aria-selected="false">Formulas</button></div>
+    <div id="calcKeysPane">
     <div class="disp"><div class="last" id="calcLast"></div><input id="calcIn" inputmode="decimal" aria-label="Calculator display" autocomplete="off"></div>
     <div class="cmsg" id="calcMsg"></div>
     <div class="keys">${['C', '(', ')', '⌫', '7', '8', '9', '÷', '4', '5', '6', '×', '1', '2', '3', '−', '0', '.', 'g', '+'].map(k => `<button type="button" data-k="${k}" class="${'÷×−+'.includes(k) ? 'op' : k === 'g' ? 'g' : ''}" ${k === 'g' ? 'title="g = 9.8 N/kg"' : ''}>${k}</button>`).join('')}<button type="button" data-k="=" class="eq" style="grid-column:1/-1">=</button></div>
-    <div class="scaleNote">The <b>g</b> key is 9.8 N/kg. Weight = mass × g. You can type <b>x</b> or <b>*</b> to multiply and <b>/</b> to divide.</div>`;
+    <div class="scaleNote">The <b>g</b> key is 9.8 N/kg. Weight = mass × g. You can type <b>x</b> or <b>*</b> to multiply and <b>/</b> to divide.</div></div>
+    <div id="calcForm" class="cform" hidden></div>`;
   const inp = $('#calcIn');
   const run = () => { try { const v = calcEval(inp.value); if (v === '') return; $('#calcLast').textContent = inp.value + ' ='; inp.value = String(v); $('#calcMsg').textContent = ''; } catch (e) { $('#calcMsg').textContent = e.message; } };
-  el.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (!b) return; const k = b.dataset.k;
+  el.addEventListener('click', e => { const t = e.target.closest('[data-ctk]'); if (t) { calcTab(t.dataset.ctk); return; } const b = e.target.closest('[data-k]'); if (!b) return; const k = b.dataset.k;
     if (k === 'C') { inp.value = ''; $('#calcLast').textContent = ''; $('#calcMsg').textContent = ''; } else if (k === '⌫') inp.value = inp.value.slice(0, -1); else if (k === '=') run(); else inp.value += k; });
   inp.addEventListener('input', () => { const v = inp.value, w = v.replace(/[xX*]/g, '×').replace(/\//g, '÷'); if (w !== v) { const p = inp.selectionStart; inp.value = w; inp.setSelectionRange(p, p); } });   // typing x or * shows ×, / shows ÷
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); run(); } if (e.key === 'Escape') toggleCalc(false); });
   $('#calcX').addEventListener('click', () => toggleCalc(false));
   $('#calcFab').addEventListener('click', () => toggleCalc());
+  calcBadge();
   // drag by the header
   let dg = null; $('#calcDrag').addEventListener('pointerdown', e => { if (e.target.closest('button')) return; const r = el.getBoundingClientRect(); dg = { dx: e.clientX - r.left, dy: e.clientY - r.top }; $('#calcDrag').setPointerCapture(e.pointerId); });
   $('#calcDrag').addEventListener('pointermove', e => { if (!dg) return; el.style.left = clamp(e.clientX - dg.dx, 0, innerWidth - 80) + 'px'; el.style.top = clamp(e.clientY - dg.dy, 0, innerHeight - 60) + 'px'; el.style.right = 'auto'; el.style.bottom = 'auto'; });
   $('#calcDrag').addEventListener('pointerup', () => dg = null);
 }
+/* ---- the calculator's Formulas tab: each formula unlocks when the student reaches the step that teaches it (a step lists `unlocks: [ids]`) ---- */
+const FORMULAS = [
+  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', at: 'Chapter 1' },
+  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', at: 'Chapter 1' },
+  { id: 'friction', name: 'Resultant with friction', eq: 'resultant = pull − friction', note: 'Friction pushes against the pull, so take it away from the pull first. Then use F = m × a.', at: 'Chapter 3' },
+  { id: 'fma', name: 'Newton\'s second law', eq: 'F = m × a', note: 'F is the resultant force in N, m is the mass in kg and a is the acceleration in m/s².', tri: 'fma', at: 'Chapter 3' },
+  { id: 'accel', name: 'Acceleration from speeds', eq: 'a = (v − u) ÷ t', note: 'u is the starting speed, v is the final speed and t is the time in seconds. On a velocity–time graph, this is the slope.', at: 'Chapter 3 Extension' },
+  { id: 'third', name: 'Newton\'s third law', eq: 'force of A on B = force of B on A', note: 'Always the same size, always in opposite directions, and on two different objects.', at: 'Chapter 4' },
+  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'speed = F ÷ m, so F = m × speed', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', at: 'Chapter 4' }
+];
+const fUnlocked = id => isTeacher() || !!dbGet('fu.' + id, false);
+function unlockFormulas(ids) {
+  const fresh = (ids || []).filter(id => !dbGet('fu.' + id, false) && FORMULAS.some(f => f.id === id));
+  if (!fresh.length) return;
+  fresh.forEach(id => dbSet('fu.' + id, true)); saveDB();
+  const names = fresh.map(id => FORMULAS.find(f => f.id === id).name);
+  if (typeof toast === 'function') toast(`New formula in your calculator: ${names.join(', ')}`);
+  calcBadge();
+}
+const fNew = () => FORMULAS.some(f => dbGet('fu.' + f.id, false) && !dbGet('fseen.' + f.id, false));
+function calcBadge() { const on = !isTeacher() && fNew(), fab = $('#calcFab'), tab = $('#calcTabF'); if (fab) fab.classList.toggle('hasnew', on); if (tab) tab.classList.toggle('hasnew', on); if (!$('#calcForm').hidden) renderFormulas(); }
+function renderFormulas() {
+  const host = $('#calcForm'); if (!host) return;
+  host.innerHTML = `<p class="scaleNote">Formulas appear here as you meet them in the chapters.</p>` + FORMULAS.map(f => fUnlocked(f.id)
+    ? `<div class="fcard"><b>${f.name}</b><div class="feq">${f.eq}</div><small>${f.note}</small>${f.tri ? triHTML(f.tri) : ''}</div>`
+    : `<div class="fcard locked"><b>🔒 ${f.name}</b><small>Unlocks in ${f.at}</small></div>`).join('');
+  FORMULAS.forEach(f => { if (fUnlocked(f.id)) dbSet('fseen.' + f.id, true); }); saveDB();
+  const fab = $('#calcFab'), tab = $('#calcTabF'); if (fab) fab.classList.remove('hasnew'); if (tab) tab.classList.remove('hasnew');
+}
+function calcTab(k) {
+  const f = k === 'formulas'; $('#calcKeysPane').hidden = f; $('#calcForm').hidden = !f; $('#calc').classList.toggle('wide', f);
+  $$('#calc [data-ctk]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.ctk === k)));
+  if (f) renderFormulas();
+}
 function toggleCalc(on) { const el = $('#calc'); on = on == null ? el.hidden : on; el.hidden = !on; if (on) { CALC_USED = true; if (LAB.onChange) LAB.onChange(); setTimeout(() => $('#calcIn').focus({ preventScroll: true }), 20); } }
 let CALC_USED = false;
 
-/* ---- formula triangle: F = m × a. Tap a letter to cover it and see the sum that finds it. ---- */
-const TRI = { F: ['F = m × a', 'Multiply the two letters that are left (side by side).'], m: ['m = F ÷ a', 'F is above a, so divide: force ÷ acceleration.'], a: ['a = F ÷ m', 'F is above m, so divide: force ÷ mass.'] };
-function triInner(cov) {
+/* ---- formula triangles: F = m × a (kind 'fma') and W = m × g (kind 'w'). Tap a letter to cover it and see the sum that finds it. ---- */
+const TRIS = {
+  fma: { L: ['F', 'm', 'a'], lab: 'Formula triangle: F on top, m and a underneath', eq: { F: ['F = m × a', 'Multiply the two letters that are left (side by side).'], m: ['m = F ÷ a', 'F is above a, so divide: force ÷ acceleration.'], a: ['a = F ÷ m', 'F is above m, so divide: force ÷ mass.'] } },
+  w: { L: ['W', 'm', 'g'], lab: 'Weight triangle: W on top, m and g underneath', eq: { W: ['W = m × g', 'Multiply the two letters that are left (side by side).'], m: ['m = W ÷ g', 'W is above g, so divide: weight ÷ 9.8.'], g: ['g = W ÷ m', 'W is above m, so divide: weight ÷ mass.'] } }
+};
+const TRI = TRIS.fma.eq;
+function triInner(cov, kind) {
+  const T = TRIS[kind || 'fma'], TT = T.eq;
   const G = (k, x, y, inner) => `<g data-tri="${k}" class="trik" role="button" tabindex="0" aria-label="Cover ${k}" style="cursor:pointer"><rect x="${x - 30}" y="${y - 30}" width="60" height="60" fill="transparent"/>${inner}</g>`;
   const L = (k, x, y) => G(k, x, y, cov === k ? `<rect x="${x - 21}" y="${y - 21}" width="42" height="42" rx="9" fill="var(--hazard)" stroke="var(--ink)" stroke-width="2.5"/><text x="${x}" y="${y + 8}" text-anchor="middle" font-size="26" font-weight="800" fill="var(--ink)">?</text>` : `<text x="${x}" y="${y + 12}" text-anchor="middle" font-size="36" font-weight="800" font-family="var(--f-num)" fill="var(--ink)">${k}</text>`);
-  const sum = cov ? `<b>${TRI[cov][0]}</b><small>${TRI[cov][1]}</small>` : '<small>Tap a letter to cover it.</small>';
-  return `<svg viewBox="0 0 220 154" role="img" aria-label="Formula triangle: F on top, m and a underneath"><polygon points="110,8 18,146 202,146" fill="var(--panel)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><line x1="64" y1="77" x2="156" y2="77" stroke="var(--ink)" stroke-width="3"/><line x1="110" y1="77" x2="110" y2="146" stroke="var(--ink)" stroke-width="3"/>${L('F', 110, 50)}${L('m', 66, 112)}${L('a', 154, 112)}</svg>
-    <div class="trisum" aria-live="polite">${sum}</div><div class="trib">${['F', 'm', 'a'].map(k => `<button type="button" class="mini ${cov === k ? 'on' : ''}" data-tri="${k}" aria-pressed="${cov === k}">Cover ${k}</button>`).join('')}<button type="button" class="mini" data-tri="">Show all</button></div>`;
+  const sum = cov ? `<b>${TT[cov][0]}</b><small>${TT[cov][1]}</small>` : '<small>Tap a letter to cover it.</small>';
+  return `<svg viewBox="0 0 220 154" role="img" aria-label="${T.lab}"><polygon points="110,8 18,146 202,146" fill="var(--panel)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><line x1="64" y1="77" x2="156" y2="77" stroke="var(--ink)" stroke-width="3"/><line x1="110" y1="77" x2="110" y2="146" stroke="var(--ink)" stroke-width="3"/>${L(T.L[0], 110, 50)}${L(T.L[1], 66, 112)}${L(T.L[2], 154, 112)}</svg>
+    <div class="trisum" aria-live="polite">${sum}</div><div class="trib">${T.L.map(k => `<button type="button" class="mini ${cov === k ? 'on' : ''}" data-tri="${k}" aria-pressed="${cov === k}">Cover ${k}</button>`).join('')}<button type="button" class="mini" data-tri="">Show all</button></div>`;
 }
-const triHTML = () => `<div class="tri noglos">${triInner('')}</div>`;
+const triHTML = kind => `<div class="tri noglos" data-kind="${kind || 'fma'}">${triInner('', kind)}</div>`;
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('trik')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-tri]'); if (!b) return; const root = b.closest('.tri'); let k = b.dataset.tri; if (b.classList.contains('trik') && root.querySelector('.mini.on[data-tri="' + k + '"]')) k = '';
-  root.innerHTML = triInner(k); const bb = $(`.mini[data-tri="${k}"]`, root); if (bb) bb.focus({ preventScroll: true });
-  if (k) { S.flags.tri = S.flags.tri || {}; S.flags.tri[k] = true; if (LAB.onChange) LAB.onChange(); }
+  const kind = root.dataset.kind || 'fma'; root.innerHTML = triInner(k, kind); const bb = $(`.mini[data-tri="${k}"]`, root); if (bb) bb.focus({ preventScroll: true });
+  if (k && (root.dataset.kind || 'fma') === 'fma') { S.flags.tri = S.flags.tri || {}; S.flags.tri[k] = true; if (LAB.onChange) LAB.onChange(); }
 });
 
 /* ===== Glossary: dotted underline + tap/hover definitions ===== */
@@ -2877,7 +2939,7 @@ function renderOnPage() {
 
 function setStep(i) {
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
-  const st = chd.steps[GI]; LASTSIG = '';
+  const st = chd.steps[GI]; LASTSIG = ''; if (st.unlocks) unlockFormulas(st.unlocks);
   // arena state
   clearCh2(); S.left = []; S.right = []; S.mass = 50; S.floor = 'concrete'; S.flags = newFlags(); PSEL = null; ADDLOG = []; CALC_USED = false; JOURNAL_OPENED = false; JRUNS_SEEN = journalOpen() && JTAB === 'runs';
   LAB.sides = st.sides || ['left', 'right']; LAB.pullers = st.pullers || ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = st.floors || null; LAB.showVert = true; LAB.showRes = true; LAB.idle = st.idle || null;
@@ -3099,7 +3161,7 @@ CHDATA.c1 = {
         { id: 'q2', type: 'reading', p: 'Type the Right pull reading for your teams.', unit: 'N', live: () => tot(S.right), need: () => S.right.length >= 2, needMsg: 'Put at least two pullers on the right first.', ok: 'Correct!' },
         { id: 'q3', type: 'reading', p: 'How many newtons more is the stronger team pulling? (Type 0 if they are the same.)', unit: 'N', live: () => Math.abs(tot(S.left) - tot(S.right)), need: () => S.left.length >= 2 && S.right.length >= 2, needMsg: 'Build both teams first.', ok: 'Great subtraction! You will use this idea a lot in Chapter 3.', hints: ['Take the smaller pull away from the bigger pull.', 'Bigger reading − smaller reading = the difference.'] }] },
 
-    { id: 's3r', title: 'The overall force', info: ['readRes'], floors: ['air'],
+    { id: 's3r', unlocks: ['resultant'], title: 'The overall force', info: ['readRes'], floors: ['air'],
       cards: [
         { html: `<p>When two teams pull against each other, their forces partly cancel out. What is left over is the ${T('resultant', 'resultant force')}: the overall force on the crate.</p><div class="law">Forces in <b>opposite</b> directions: take the smaller one away from the bigger one. The resultant points the same way as the bigger force.<br>Forces in the <b>same</b> direction: add them together.</div><div class="example">Left team 130 N, right team 200 N: the resultant is 200 − 130 = <b>70 N to the right</b>.</div>` },
         { html: `<p>If both teams pull equally hard, the resultant is <b>0 N</b>. The forces are ${T('balanced', 'balanced')} and the crate doesn't start to move.</p><p>If one team pulls harder, the forces are ${T('unbalanced', 'unbalanced')}, so there is a resultant force and the crate starts to move. Today the crate sits on a special floor with no friction, so you can see this clearly. You'll meet friction in the next step.</p>` }],
@@ -3124,7 +3186,7 @@ CHDATA.c1 = {
         { id: 'q2', type: 'mcq', p: 'The kid pulls the crate to the right. Which way does friction act on the crate?', opts: ['To the left, against the pull', 'To the right, the same way as the pull', 'Straight up, away from the floor', 'Nowhere, because a still crate has no friction'], a: 0, ok: 'That\'s right. Friction acts against the pull, so it points to the left.', why: { 1: 'Friction works against the pull. Look at the arrow in the Friction readout.', 3: 'The crate is still, but friction is still there. It is what holds the crate in place!' } },
         { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains why the crate glides on the air floor.', opts: ['The air floor has no friction, so nothing pushes back against the pull.', 'The air floor makes the crate lighter, so the pull can move it.', 'The kid pulls harder on the air floor, so the crate starts to slide.', 'Air pushes the crate along, so it moves even without the pull.'], a: 0, ok: 'Exactly. With no friction, even a small pull gets the crate moving.', why: { 1: 'The crate\'s mass doesn\'t change. What is missing on the air floor?', 2: 'The rope still reads 60 N. Check the newtonmeter.', 3: 'The air floats the crate, but it doesn\'t push it sideways.' } }] },
 
-    { id: 's5', title: 'Weight and mass',
+    { id: 's5', unlocks: ['weight'], title: 'Weight and mass',
       cards: [
         { html: `<p>${T('gravity', 'Gravity')} pulls everything towards the centre of the Earth. The pull of gravity on an object is called its ${T('weight')}.</p><p>Weight is a force, so it is measured in newtons. ${T('mass', 'Mass')} is how much stuff is in the object, and it is measured in kilograms (kg).</p>` },
         { html: `<p>On Earth, gravity pulls on every kilogram with 9.8 newtons. So to find an object's weight:</p><div class="law"><b>weight (N) = mass (kg) × 9.8</b></div><div class="example">A 50 kg crate: 50 × 9.8 = <b>490 N</b></div><p>Open the calculator if you need it. Its <b>g</b> key is 9.8.</p>` }],
@@ -3455,7 +3517,7 @@ CHDATA.c3 = {
         { id: 'q3', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that sums up what you found.', opts: ['A bigger resultant force gives a bigger acceleration. A bigger mass gives a smaller acceleration.', 'A bigger resultant force gives a smaller acceleration. A bigger mass gives a bigger acceleration.', 'A bigger resultant force gives a bigger acceleration. The mass makes no difference to it.', 'A bigger mass gives a bigger resultant force. The acceleration stays the same either way.'], a: 0, ok: 'Yes! That is the idea behind Newton\'s second law.', why: { 1: 'Check your readings. Two huskies gave a bigger acceleration than one.', 2: 'Your 60 kg and 120 kg readings were different, so the mass does matter.', 3: 'With the same two huskies, the acceleration changed when the mass changed.' } },
         { id: 'q4', type: 'gap', p: 'More ___ gives a bigger acceleration, and more ___ gives a smaller acceleration.', ans: [['force', 'resultant force', 'pull'], ['mass']], ok: 'Perfect.' }] },
 
-    { id: 'a3', title: 'The formula triangle', floors: ['snow0'],
+    { id: 'a3', unlocks: ['fma'], title: 'The formula triangle', floors: ['snow0'],
       cards: [
         { html: `<p>Newton worked out the exact rule. It is called ${T('newton2', 'Newton\'s second law')}:</p><div class="law"><b>Resultant force = mass × acceleration</b><br>F = m × a</div><p>F is in newtons (N), m is in kilograms (kg) and a is in m/s².</p>` },
         { html: `<p>The ${T('triangle', 'formula triangle')} helps you remember it. <b>Cover the letter you want to find.</b> What is left is the sum.</p>${triHTML()}<p>Try each letter now.</p>` },
@@ -3482,7 +3544,7 @@ CHDATA.c3 = {
         { id: 'q3', type: 'num', p: '<b>Job 2.</b> Two huskies (180 N) make a sled accelerate at 2.25 m/s². What is the sled\'s mass?', unit: 'kg', units: UNITS, ans: 80, tol: 0.3, ladder: true, work: 'm = F ÷ a = 180 ÷ 2.25 = 80 kg', ok: 'Yes: 80 kg.', hints: ['Cover m in the triangle. F is above a, so divide.', 'm = F ÷ a = 180 ÷ 2.25.', 'Type 180 ÷ 2.25 into the calculator.'] },
         { id: 'q4', type: 'reading', p: 'Check Job 2. What acceleration did the 80 kg sled have with 2 huskies?', unit: 'm/s²', tol: 0.03, live: () => rA(2, 80, 'snow0'), need: () => rA(2, 80, 'snow0') != null, needMsg: 'Set the mass to 80 kg, add 2 huskies and pull first.', ok: 'It was 2.25 m/s², just as your sum said.' }] },
 
-    { id: 'a5', title: 'Friction is back', info: ['readF', 'fbd'], floors: ['snow'],
+    { id: 'a5', unlocks: ['friction'], title: 'Friction is back', info: ['readF', 'fbd'], floors: ['snow'],
       cards: [
         { html: `<div class="notebox"><b>Friction is back on</b><p>The snow now has its normal friction. The label in the corner says <b>Friction: on</b>. Friction pushes against the sled, so the huskies' pull is <b>no longer the resultant force</b>.</p></div>` },
         { html: `<p>Now there are <b>two steps</b>.</p><ol><li>Find the ${T('resultant', 'resultant force')}: <b>pull − friction</b>.</li><li>Use F = m × a with that resultant: <b>a = resultant ÷ m</b>.</li></ol><div class="example"><b>Worked example.</b> Three huskies (270 N) pull a 60 kg sled. The Friction readout shows 29.4 N. Resultant = 270 − 29.4 = 240.6 N. Then a = 240.6 ÷ 60 = <b>4.01 m/s²</b>.</div>` }],
@@ -3514,7 +3576,7 @@ CHDATA.c3 = {
         { id: 'q5', type: 'num', p: '<b>Sled 5: the firewood sled.</b> This sled has a weight of 686 N. Three huskies pull it on packed snow, and the friction is 34.3 N. What is its acceleration? (g = 9.8 N/kg)', unit: 'm/s²', units: UNITS, ans: 3.37, tol: 0.03, ladder: true, work: 'Mass = 686 ÷ 9.8 = 70 kg. Resultant = 270 − 34.3 = 235.7 N. a = 235.7 ÷ 70 = 3.37 m/s²', ok: 'Yes: 3.37 m/s². Set 70 kg, add 3 huskies on packed snow and pull to check.', hints: ['There are two jobs before F = ma. Turn the weight into a mass, and find the resultant force.', 'Mass = 686 ÷ 9.8. Resultant = 270 − 34.3. Then a = resultant ÷ mass.', 'Type 686 ÷ 9.8 for the mass, then (270 − 34.3) ÷ that mass.'] }] },
 
     /* ---------- Extension ---------- */
-    { id: 'e1', title: 'Acceleration on a graph', floors: ['snow'], info: ['vt'],
+    { id: 'e1', unlocks: ['accel'], title: 'Acceleration on a graph', floors: ['snow'], info: ['vt'],
       cards: [
         { html: `<p>Welcome to the Chapter 3 Extension! A ${T('vtgraph', 'velocity–time graph')} shows acceleration as a <b>straight sloping line</b>. The steeper the ${T('slope', 'slope')}, the bigger the acceleration.</p><p>To work out the acceleration, take two points on the line: <b>acceleration = change in speed ÷ time taken</b>.</p>` },
         { html: `<p>Here is a sled that speeds up steadily.</p>${vtSVG([{ pts: [[0, 0], [5, 8]], col: '#1f5f8b' }], { tMax: 6, vMax: 9, vStep: 1, tri: [[1, 1.6], [4, 6.4]], alt: 'A straight line from 0 at 0 s up to 8 m/s at 5 s. A dashed triangle marks the speed rising from 1.6 to 6.4 m/s between 1 s and 4 s.' })}<div class="example">From 1 s to 4 s, the speed goes from 1.6 to 6.4 m/s. Change in speed = 4.8 m/s. Time taken = 3 s. Acceleration = 4.8 ÷ 3 = <b>1.6 m/s²</b>.</div>` }],
@@ -3628,7 +3690,7 @@ CHDATA.c4 = {
         { id: 'q3', type: 'mcq', p: 'The astronaut only pushed the pod. So why did the astronaut move too?', opts: ['The pod pushed back on the astronaut', 'The astronaut was pulled by gravity', 'The space around the astronaut pushed them', 'The astronaut\'s own push gave them a bounce'], a: 0, ok: 'Yes! When you push something, it pushes back on you. That is the idea of this whole chapter.', why: { 1: 'There is no gravity pulling sideways in the Space Dome. Something pushed the astronaut to the left.', 2: 'There is no air in space, so nothing else is there to push.', 3: 'Nothing bounced. A force on the astronaut made them move.' } },
         { id: 'q4', type: 'gap', p: 'When the astronaut pushes the pod to the right, the pod pushes the astronaut to the ___.', ans: [['left']], ok: 'Right: the opposite direction.' }] },
 
-    { id: 'f2', title: 'Force pairs', info: ['pushf', 'pairs'], floors: ['air'],
+    { id: 'f2', unlocks: ['third'], title: 'Force pairs', info: ['pushf', 'pairs'], floors: ['air'],
       cards: [
         { html: `<p>This is ${T('newton3', 'Newton\'s third law')}:</p><div class="law"><b>If object A pushes or pulls object B, then B pushes or pulls A back with the same size of force, in the opposite direction.</b></div><p>The two forces are called a ${T('forcepair', 'force pair')}. People sometimes call them the ${T('action', 'action')} and the ${T('reaction', 'reaction')}.</p>` },
         { html: `<p>Every force pair follows four rules:</p><ol><li>The two forces are <b>the same size</b>.</li><li>They point in <b>opposite directions</b>.</li><li>They are the <b>same type</b> of force (here, both are pushes).</li><li>They act on <b>two different objects</b>.</li></ol><p>The last rule is the one people forget. The astronaut pushes <i>the pod</i>. The pod pushes <i>the astronaut</i>.</p>` },
@@ -3643,7 +3705,7 @@ CHDATA.c4 = {
         { id: 'q4', type: 'tick', p: 'Tick every statement that is true about the two forces in a force pair.', opts: ['They are the same size', 'They point in opposite directions', 'They act on the same object', 'They are the same type of force', 'The heavier object gets the bigger force'], a: [0, 1, 3], ok: 'Yes: same size, opposite directions, same type.', work: 'The forces in a pair are the same size, point in opposite directions and are the same type of force. They act on two different objects, and the mass of an object does not change the size of its force.' },
         { id: 'q5', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is Newton\'s third law.', opts: ['If A pushes B, then B pushes A back with an equal force in the opposite direction.', 'If A pushes B, then B pushes A back with a smaller force in the same direction.', 'If A pushes B, then B does not push back unless it is moving.', 'If A pushes B, then B pushes back harder when B is heavier.'], a: 0, ok: 'Yes! Equal and opposite.', why: { 1: 'The forces are the same size and point in opposite directions.', 2: 'B pushes back even when it is not moving.', 3: 'The two forces are always exactly the same size.' } }] },
 
-    { id: 'f3', title: 'Same force, different speeds', info: ['astro'], floors: ['air'],
+    { id: 'f3', unlocks: ['fma', 'push1s'], title: 'Same force, different speeds', info: ['astro'], floors: ['air'],
       cards: [
         { html: `<p>The two forces in a pair are always the same size. But in the last step, you only used a pod and an astronaut with the <b>same mass</b>. What if their masses are different?</p><p>Think about ${T('newton2', 'Newton\'s second law')}: <b>F = m × a</b>. The same force on a smaller mass gives a bigger acceleration.</p>` },
         { html: `<div class="example"><b>Worked example.</b> A 100 N push on a 50 kg pod gives it an acceleration of 100 ÷ 50 = 2 m/s². The push lasts 1 second, so the pod is going <b>2 m/s</b> by the end of it.</div><p>In this chapter every push lasts <b>1 s</b>, so the number for the speed gained is the same as the number for the acceleration: <b>speed = force ÷ mass</b>.</p><p>Now use the same idea for the astronaut and the pod. <b>Work out both speeds first, then push to check.</b></p>` }],
@@ -3697,7 +3759,7 @@ CHDATA.c4 = {
         { id: 'q4', type: 'mcq', p: 'What pushes the pod forwards when the thruster fires?', opts: ['The gas that is pushed out of the back pushes the pod forwards', 'The empty space behind the pod pushes it', 'The astronaut pushes it from inside', 'The thruster pulls the pod forwards with a rope'], a: 0, ok: 'Yes: the thruster pushes the gas back, and the gas pushes the pod forwards. That is a force pair.', why: { 1: 'There is nothing in space to push against.', 2: 'The astronaut is not part of this force pair.', 3: 'There is no rope. A force pair here is the push on the gas and the push back on the pod.' } },
         { id: 'q5', type: 'mcq', p: 'The thrusters stop, but the pod keeps going at the same speed. Which law explains this?', opts: ['Newton\'s first law: with no resultant force, it keeps moving at a steady speed', 'Newton\'s third law: the pod pushes back on the thrusters', 'Newton\'s second law: the pod has no mass', 'Gravity pulls it along'], a: 0, ok: 'Yes: no friction, no resultant force, no change in speed.', why: { 1: 'The third law explains the burst, not the steady speed afterwards.', 2: 'The pod still has the same mass.', 3: 'Gravity is not acting sideways in the Space Dome.' } }] },
 
-    { id: 'g2', title: 'Docking orders practice', info: [], floors: ['air'],
+    { id: 'g2', unlocks: ['push1s'], title: 'Docking orders practice', info: [], floors: ['air'],
       cards: [
         { html: `<p>Mission control sends <b>docking orders</b>. They tell you the speed the pod must have when it reaches the station. If the pod is too fast, it will crash into the dock. If it is too slow, it will take far too long.</p><p>You know that <b>speed = force ÷ mass</b>. So the push you need is <b>force = mass × speed</b>.</p><div class="example"><b>Worked example.</b> The order is for a 200 kg pod to dock at 0.5 m/s. The push is 200 × 0.5 = <b>100 N</b>.</div>` }],
       setup() { space(250, 100, 100); }, adds: [], hide: SPACE_HIDE_MAIN.concat(['thrust', 'astro', 'readAV', 'readAM']), sides: [], pullers: [], idle: 'Set the push force, then press Push off!',
