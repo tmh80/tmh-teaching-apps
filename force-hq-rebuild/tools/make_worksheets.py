@@ -3,7 +3,7 @@
 import asyncio, os, shutil, zipfile
 from playwright.async_api import async_playwright
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); DIST=os.path.join(ROOT,'dist'); OUT=os.path.join(DIST,'toddle-files')
-SHEETS=[('c1f','Chapter-1-Foundation'),('c1x','Chapter-1-Extension'),('c2f','Chapter-2-Foundation'),('c2x','Chapter-2-Extension'),('c3f','Chapter-3-Foundation'),('c3x','Chapter-3-Extension'),('c4f','Chapter-4-Foundation'),('c4x','Chapter-4-Extension')]
+SHEETS=[('c1f','Chapter-1-Foundation'),('c1x','Chapter-1-Extension'),('c2f','Chapter-2-Foundation'),('c2x','Chapter-2-Extension'),('c3f','Chapter-3-Foundation'),('c3x','Chapter-3-Extension'),('c4f','Chapter-4-Foundation'),('c4x','Chapter-4-Extension'),('c5f','Chapter-5-Foundation'),('c5x','Chapter-5-Extension')]
 async def main():
   if os.path.exists(OUT): shutil.rmtree(OUT)
   os.makedirs(OUT)

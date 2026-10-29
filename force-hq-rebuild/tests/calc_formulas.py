@@ -17,7 +17,7 @@ with sync_playwright() as p:
     m = pg.locator('#modal #contAnyway')
     if m.count() and m.is_visible(): m.click(); pg.wait_for_timeout(200)
   opencalc(); allf = names('#calcForm .fcard'); print('home', allf)
-  assert len(allf) == 7 and not names('#calcForm .fcard.rel')
+  assert len(allf) == 9 and not names('#calcForm .fcard.rel')
   pg.click('#calcTabK'); pg.click('#calcX')
   goto('c1f', 6); opencalc(); print('chapter 1 glow', names('#calcForm .fcard.rel')); assert names('#calcForm .fcard.rel') == ['Weight', 'Resultant force']
   assert names('#calcForm .fcard')[:2] == ['Weight', 'Resultant force']
@@ -26,6 +26,8 @@ with sync_playwright() as p:
   goto('c4f', 2); opencalc(); g = names('#calcForm .fcard.rel'); print('chapter 4 glow', g)
   assert set(g) == {"Newton's second law", "Newton's third law", 'A push that lasts 1 s'} and names('#calcForm .fcard')[:3] == g
   pg.screenshot(path=OUT + 'calc_formulas_c4.png')
+  pg.click('#calcX'); goto('c5f', 2); opencalc(); g5 = names('#calcForm .fcard.rel'); print('chapter 5 glow', g5)
+  assert len(g5) == 4 and 'Weight' in g5 and 'Resultant force' in g5
   pg.click('#calcX'); goto('c3f', 2); opencalc()
   for k, want in (('F', 'F = m × a'), ('m', 'm = F ÷ a'), ('a', 'a = F ÷ m')):
     pg.locator(f'#calcForm .tri[data-kind=fma] .trib [data-tri={k}]').click()

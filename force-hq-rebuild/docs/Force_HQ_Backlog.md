@@ -5,7 +5,7 @@
 2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Tom confirmed (25 Oct): the Space Dome stays in Chapter 4 with the docking orders as its challenge.
 3. ~~Chapter 3, F = ma~~ (built 25 Oct 2026, all in the Snow Arena).
 4. ~~Chapter 4, Action and reaction~~ (built 27 Oct 2026: Space Dome push-offs, force pairs in the Space Dome and the tug-of-war, thrusters, docking-orders Challenge).
-5. **Chapter 5, Balanced forces and the Drop Zone.**
+5. ~~**Chapter 5, Balanced forces and the Drop Zone.**~~ (built 28 Oct 2026: Foundation `c5f` Skydive Spotter, Extension `c5x` Planet Hopper with the helicopter pad and three delivery missions; Tom still to test in class). The notes below are kept for reference.
    - New arena with an air slider ("% air removed").
    - Objects to drop: feather, ball, crate, parachutist.
    - Terminal velocity.
@@ -27,7 +27,9 @@
 - Chapter 2 polish from Tom's play-through (25 Oct 2026) done: slider number boxes, too-high/too-low markers, Journal tabs, scaffolded maths, words to use, steps summary, distractor rewrite. Ask Tom to replay the Inertia Extension and brake Challenge.
 - Chapter 2: small drawings for the real-life inertia examples (seatbelt, tablecloth, bowling ball).
 - Chapter 2: a "Put in order" question type (order objects by inertia) for the worksheets.
-- Port the fun facts from the old build, gated by chapter.
+- Port the fun facts from the old build, gated by chapter. Chapter 5 has no fun-fact engine to plug into, so its facts are the last example card of each Learn step (`CFACT` in `48-ch5.js`). When the engine is ported, move them across.
+- Chapter 5: the Fast-forward button resets to 1x whenever a drop is set up; if students find it annoying, remember the setting.
+- Chapter 1 table question `r10` overflows a 390 px phone by about 46 px.
 - Grow the glossary to 50–80 terms as the chapters are added.
 - Allow diagonal arrows in the FBD builder for later scenarios (pushes at an angle).
 - Add FBD build tasks for the teacher page: "balanced forces" and "speeding up and slowing down".

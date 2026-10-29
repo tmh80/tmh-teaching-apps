@@ -176,6 +176,15 @@ CHDATA.c5 = {
 };
 CHDATA.c5.review.forEach(q => { if (q.build) q.build(); });
 
+/* ---------- Fun facts: the last card of the step where the idea comes up (each one checked, 28 Oct 2026) ---------- */
+const CFACT = (...t) => ({ html: `<div class="example fact"><b>★ Fun fact${t.length > 1 ? 's' : ''}</b>${t.map(x => `<p>${x}</p>`).join('')}</div>` });
+const c5s = id => CHDATA.c5.steps.find(s => s.id === id);
+c5s('d3').cards.push(CFACT('A skydiver with the canopy closed falls at about 200 km/h (about 55 m/s).'));
+c5s('d4').cards.push(CFACT('In 2012 Felix Baumgartner jumped from about 39 km up. The air there is so thin that he fell faster than sound before the thicker air slowed him down.'));
+c5s('p1').cards.push(CFACT('In 1971 astronaut David Scott dropped a hammer and a falcon feather on the Moon during Apollo 15. They hit the ground at the same moment.'));
+c5s('p2').cards.push(CFACT('The Huygens probe parachuted through Titan\'s thick air in 2005. The descent took about two and a half hours, and it landed at about 5 m/s.', 'Venus\'s air is so thick that the Soviet Venera landers let go of their parachutes high above the ground and still landed gently.', 'In 2021 the Perseverance rover used a parachute on Mars, but the air was too thin to land it safely, so rockets did the rest.'));
+c5s('p3').cards.push(CFACT('NASA\'s Ingenuity helicopter flew on Mars in 2021. The air is so thin that its blades spun at about 2,400 turns a minute, several times faster than a helicopter\'s on Earth.'));
+
 /* ---------- Challenge: Drop Zone deliveries (three missions, judged when the load lands) ---------- */
 const dzOpenAt = r => r.openH == null ? 'the canopy was never opened' : `opened at ${fmt(r.openH, 0)} m`;
 CHDATA.c5.challenge = {

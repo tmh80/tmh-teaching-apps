@@ -765,3 +765,5 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 /* Chapter 5: the helicopter lift panel */
 .dzp .numbox input#liftNum{width:84px}
 .nudge.lf{flex-wrap:wrap}
+.example.fact{border-style:solid;border-color:var(--hazard);background:var(--hazard-soft)}
+.example.fact p{margin:4px 0 0}

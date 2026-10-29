@@ -45,13 +45,15 @@ function initCalc() {
 }
 /* ---- the calculator's Formulas tab: every formula is always there, and the ones used in the chapter the student is working on glow and come first (`ch` lists the chapters) ---- */
 const FORMULAS = [
-  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', ch: [1, 3] },
-  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', ch: [1, 3] },
+  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', ch: [1, 3, 5] },
+  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', ch: [1, 3, 5] },
   { id: 'friction', name: 'Resultant with friction', eq: 'resultant = pull − friction', note: 'Friction pushes against the pull, so take it away from the pull first. Then use F = m × a.', ch: [3] },
   { id: 'fma', name: 'Newton\'s second law', eq: 'F = m × a', note: 'F is the resultant force in N, m is the mass in kg and a is the acceleration in m/s².', tri: 'fma', ch: [3, 4] },
   { id: 'accel', name: 'Acceleration from velocities', eq: 'a = (v − u) ÷ t', note: 'u is the starting velocity, v is the final velocity and t is the time in seconds. On a velocity–time graph, this is the slope.', ch: [3] },
   { id: 'third', name: 'Newton\'s third law', eq: 'force of A on B = force of B on A', note: 'Always the same size, always in opposite directions, and on two different objects.', ch: [4] },
-  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'velocity = F ÷ m, so F = m × velocity', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] }
+  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'velocity = F ÷ m, so F = m × velocity', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] },
+  { id: 'fall', name: 'Resultant on a falling object', eq: 'resultant = weight − air resistance', note: 'Weight pulls down and air resistance pushes up. If the answer is negative, the resultant points up.', ch: [5] },
+  { id: 'dtime', name: 'Time at a steady velocity', eq: 'time = distance ÷ velocity', note: 'Only when the velocity is steady, for example at terminal velocity.', ch: [5] }
 ];
 const calcChapter = () => (typeof CH !== 'undefined' && CH && VIEW === 'vChapter') ? CH.n : null;
 function renderFormulas() {

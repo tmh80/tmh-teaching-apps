@@ -157,3 +157,45 @@ Q3 (1 mark): The two forces act on different objects, so they cannot cancel each
 Q4 (3 marks, 1 per point): The question gives the words to use (gas, third law, force); each point is about using one of them correctly. • Says the rocket pushes gas backwards • Says the gas pushes the rocket forwards with an equal force (Newton's third law) • Says this force makes the rocket speed up, without needing air to push against Model answer: The rocket pushes hot gas out of the back with a force. By Newton's third law, the gas pushes the rocket forwards with a force of the same size in the opposite direction. This force speeds the rocket up. It does not need anything to push against except the gas.
 Q5 (2 marks): 400 N (accept 398 to 402). 1 mark for the answer with its unit (N), 1 for correct working: force = mass × velocity = 500 × 0.8 = 400 N.
 Total: 9 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 5 Foundation: Falling and terminal velocity". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 22 marks.
+
+Mark scheme
+Q1 (2 marks): The correct order is 1st B (The skydiver speeds up quickly), 2nd A (Air resistance grows as the velocity grows), 3rd C (Air resistance equals the weight, so the velocity is steady), 4th F (The canopy opens and air resistance jumps up), 5th D (The skydiver slows down and air resistance shrinks), 6th E (The forces balance again at a much lower velocity). 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0.
+Q2 (2 marks): 1 mark for the answer: Air resistance is equal to their weight. 1 mark for the reason: Their velocity is steady, so the resultant force must be zero. Confidence is not marked.
+Q3 (2 marks): 217 N (accept 216 to 218). 1 mark for the answer with its unit (N), 1 for correct working: resultant = 735 − 518 = 217 N, pointing down, so the skydiver is still speeding up..
+Q4 (9 marks, 1 per cell): Just after jumping: Air resistance compared with weight = smaller, Resultant force = down, Velocity = speeding up; At terminal velocity: Air resistance compared with weight = equal, Resultant force = zero, Velocity = steady; Just after the canopy opens: Air resistance compared with weight = bigger, Resultant force = up, Velocity = slowing down.
+Q5 (2 marks, 1 per moment): Tap a moment when the forces were balanced and the canopy was still closed. Accept 14.5 to 19.8 s. Tap a moment when the air resistance was bigger than the weight. Accept 20.1 to 23.5 s.
+Q6 (2 marks): 1 mark for the line with the mistake: line 5 (So the skydiver starts to move upwards.). 1 mark for the correction: So the skydiver keeps moving down, but slows down. An upward resultant force slows down something that is falling. The skydiver keeps moving down the whole time, just more slowly.
+Q7 (3 marks, 1 per point): The question gives the words to use (weight, air resistance, balanced, resultant force); each point is about using one of them correctly. • Says the weight is bigger than the air resistance at first, so the skydiver speeds up • Says the air resistance grows as the velocity grows • Says the air resistance becomes equal to the weight, so the forces are balanced (resultant force zero) and the velocity stays steady Model answer: At first the skydiver's weight is much bigger than the air resistance, so there is a downward resultant force and they speed up. As they go faster, the air resistance grows. Eventually the air resistance is equal to the weight, so the forces are balanced and the resultant force is zero. They stop speeding up and fall at a steady terminal velocity.
+Total: 22 marks.
+
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 5 Extension: Falling and terminal velocity". The blank template and the answer key for this worksheet are attached too.
+• Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.
+• The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.
+• The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.
+• The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.
+• A blank question, or an empty template, scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.
+Total: 13 marks.
+
+Mark scheme
+Q1 (2 marks): 992 N (accept 991 to 993). 1 mark for the answer with its unit (N), 1 for correct working: weight = 40 × 24.8 = 992 N, more than two and a half times its weight on Earth..
+Q2 (2 marks): 1 mark for the answer: They hit the ground at the same moment. 1 mark for the reason: There is no air, so only weight acts, and both gain 1.6 m/s of velocity every second. On the Moon there's no air resistance. Every kilogram is pulled with 1.6 N, so every object speeds up at the same rate. Astronaut David Scott did exactly this on Apollo 15 in 1971. Confidence is not marked.
+Q3 (4 marks, 1 per check): Starts at zero; Speeds up all the way; Speeds up by the same amount every second; Never levels off. a straight line rising from zero, because with no air the resultant force is the weight all the way down. The key shows the right graph.
+Q4 (2 marks): The correct order is 1st B (Titan), 2nd A (The Moon), 3rd D (Mars), 4th E (Venus), 5th C (Earth), 6th F (Jupiter). 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0.
+Q5 (3 marks, 1 per point): The question gives the words to use (thin air, air resistance, terminal velocity, weight); each point is about using one of them correctly. • Says the air on Mars is very thin, so there is much less air resistance • Says the air resistance only balances the weight at a high velocity, so the terminal velocity is still too high • Says rockets give an extra upward force that slows the rover down Model answer: Mars has very thin air, so the air resistance on the rover is much smaller than it would be on Earth at the same velocity. The air resistance only balances the rover's weight at a very high velocity, so even with a parachute its terminal velocity is still far too fast for a safe landing. Rockets add an extra upward force to slow it down.
+Total: 13 marks.

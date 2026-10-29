@@ -813,6 +813,12 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 .skchip.ok{background:var(--okbg);color:var(--okfg);border-color:var(--good)} .skchip.no{background:var(--nobg);color:var(--badfg,#a2281a);border-color:var(--bad)}
 .predict .skhost{margin:6px 0}
 
+/* Chapter 5: the helicopter lift panel */
+.dzp .numbox input#liftNum{width:84px}
+.nudge.lf{flex-wrap:wrap}
+.example.fact{border-style:solid;border-color:var(--hazard);background:var(--hazard-soft)}
+.example.fact p{margin:4px 0 0}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -945,6 +951,11 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
         <div class="dzp" data-panel="dheight"><div class="ctlh"><h3>Drop height</h3><span class="numbox"><input type="number" id="dzHNum" min="10" max="3000" step="10" value="600" inputmode="numeric" aria-label="Drop height in metres: type a number"><span>m</span></span></div><input type="range" id="dzH" min="10" max="3000" step="10" value="600" aria-label="Drop height in metres"></div>
         <div data-panel="dcanopy"><div class="ctlh"><h3><button type="button" class="term tl" data-t="canopy">Canopy</button></h3><button type="button" class="info" data-info="dcanopy" aria-label="How do I choose a canopy?">ⓘ</button></div><div class="seg two" id="dzCans"></div></div>
         <div class="dzp" data-panel="dopenh"><div class="ctlh"><h3>Open automatically at</h3><span class="numbox"><input type="number" id="dzOpenNum" min="0" max="3000" step="10" placeholder="off" inputmode="numeric" aria-label="Open the canopy automatically at this height in metres: type a number, or leave empty for off"><span>m</span></span></div><p class="palhint">Leave the box empty to open the canopy yourself.</p></div>
+        <div class="dzp" data-panel="lift"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lift">Lift</button></h3><span class="numbox"><input type="number" id="liftNum" min="3000" max="16000" step="1" value="3000" inputmode="numeric" aria-label="Lift in newtons: type a number"><span>N</span></span></div>
+          <div class="slidewrap"><input type="range" id="liftR" min="3000" max="16000" step="1" value="3000" aria-label="Lift in newtons"><div class="bmarks" id="liftMarks" aria-hidden="true"></div></div>
+          <p class="bmnote" id="liftNote" hidden></p>
+          <div class="nudge lf"><button type="button" class="mini" data-lf="-100">−100</button><button type="button" class="mini" data-lf="-10">−10</button><button type="button" class="mini" data-lf="-1">−1</button><button type="button" class="mini" data-lf="1">+1</button><button type="button" class="mini" data-lf="10">+10</button><button type="button" class="mini" data-lf="100">+100</button></div>
+          <p class="palhint">Too fast? Lower the lift a little to slow down, then match it to the weight.</p></div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -960,7 +971,7 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
           <button class="ghost sm" id="dzFwd" type="button" data-panel="dpause">0.5 s ▶</button>
           <button class="ghost sm" id="dzSnap" type="button" data-panel="dpause">📸 Snapshot</button>
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop">Reset</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift">Reset</button>
         </div>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">
@@ -1119,6 +1130,7 @@ function spaceForces() {
 }
 function forces() {
   if (S.scene === 'drop') return dropForces();
+  if (S.scene === 'heli') return heliForces();
   if (S.scene === 'space') return spaceForces();
   const u = S.running ? Math.min(1, S.pullT / PULL_RAMP) : 1, k = sstep(u), m = S.mass, fl = FLOORS[S.floor];
   const L = tot(S.left) * k, R = tot(S.right) * k, W = m * G, N = W, fs = fl.mus * W, fk = fl.mu * W;
@@ -1171,10 +1183,11 @@ function stepSim(dt) {
 }
 function updateSim(dt) {
   if (S.scene === 'drop') { dzUpdate(dt); return; }
+  if (S.scene === 'heli') { heliUpdate(dt); return; }
   if (S.scene === 'space') { const n = Math.max(3, Math.ceil(dt * S.warp / 0.01)); for (let i = 0; i < n && S.running; i++) stepSim(dt * S.warp / n); return; }   // fixed small steps, so the speeds come out exact even when time is sped up
   for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3);
 }
-function resetSim() { if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = false;
+function resetSim() { if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); if (S.scene === 'heli') heliReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = S.scene === 'heli';
   S.ax = AST_X0; S.av = 0; S.avPeak = 0; S.thrT = -1; S.thrDir = 0; S.pushEndT = null; S.pushDone = null; S.lastPush = 0; S.lastThr = 0; S.lastKind = null; S.dockV = null; S.bursts = []; S.flags.docked = false; S.flags.tether = false;
   syncRun(); }
 /* Space Dome: the astronaut pushes off the pod. One push per run: pressing the button again starts a fresh run. */
@@ -1183,7 +1196,7 @@ function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S
 function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.lastThr = dir * SP_THR_F; S.lastKind = 'thr'; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
 function shove() { if (S.scene === 'space') return spacePush(); if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } if (S.scene === 'heli') S.running = false; S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
@@ -1414,9 +1427,9 @@ function drawTeam(c, side, s, col, edge, pulling, tt, ph, showMeter) {
 
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
 /* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
-const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT'];
+const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -1425,8 +1438,9 @@ let DRAG = null, PSEL = null, PTOAST = null, ADDLOG = [];
 function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
-  const isDz = S.scene === 'drop' && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
+  const isDz = (S.scene === 'drop' || S.scene === 'heli') && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
   if (S.scene === 'drop' && !cvo) { drawDropScene(c); return; }
+  if (S.scene === 'heli' && !cvo) { drawHeliScene(c); return; }
   if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
   if (S.scene === 'space' && !cvo) { drawSpaceScene(c, f); return; }
   arenaShell(c, 'MAIN ARENA');
@@ -1772,6 +1786,7 @@ function renderControls() {
   const am = $('#astM'); if (am) { am.value = S.astro; const an = $('#astNum'); if (document.activeElement !== an) an.value = S.astro; const pf = $('#pushF'); pf.value = S.pushF; const pn = $('#pushNum'); if (document.activeElement !== pn) pn.value = S.pushF; }
   const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   if (S.scene === 'drop') dzRenderControls();
+  if (S.scene === 'heli') heliRenderControls();
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -1812,7 +1827,7 @@ function initControls() {
 function applyPanels() {
   $$('#lab [data-panel]').forEach(el => { const ks = el.dataset.panel.split(' '); el.hidden = !ks.some(k => LAB.show.has(k)); });
   const kit = $('#lab .kit'); $('#lab .stagerow').classList.toggle('nokit', ![...kit.querySelectorAll('[data-panel]')].some(e => !e.hidden));
-  const dz = S.scene === 'drop'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)); $('#lab .scenebar').classList.toggle('dzbar', dz);
+  const dz = S.scene === 'drop' || S.scene === 'heli'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)); $('#lab .scenebar').classList.toggle('dzbar', dz);
   const anyRead = [...$$('#reads .rd')].some(e => !e.hidden) || !$('#dreads').hidden;
   $('#lab .underrow').hidden = !anyRead && !LAB.show.has('fbd');
   $('#lab .fbdcol').hidden = !LAB.show.has('fbd');
@@ -2057,7 +2072,7 @@ const CHAPTERS = [
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
   { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: true, arena: 'Space Dome', icon: 'pair' },
-  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Tug-of-war draws, steady velocities and the new Drop Zone.', stamp: 'Balance Master', ready: false, arena: 'Drop Zone', icon: 'chute' }
+  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' }
 ];
 const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
@@ -2249,13 +2264,15 @@ function initCalc() {
 }
 /* ---- the calculator's Formulas tab: every formula is always there, and the ones used in the chapter the student is working on glow and come first (`ch` lists the chapters) ---- */
 const FORMULAS = [
-  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', ch: [1, 3] },
-  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', ch: [1, 3] },
+  { id: 'weight', name: 'Weight', eq: 'W = m × g', note: 'g = 9.8 N/kg. Weight is in newtons (N) and mass is in kilograms (kg).', tri: 'w', ch: [1, 3, 5] },
+  { id: 'resultant', name: 'Resultant force', eq: 'bigger force − smaller force', note: 'Forces pointing opposite ways: subtract. The resultant points the way of the bigger force.', ch: [1, 3, 5] },
   { id: 'friction', name: 'Resultant with friction', eq: 'resultant = pull − friction', note: 'Friction pushes against the pull, so take it away from the pull first. Then use F = m × a.', ch: [3] },
   { id: 'fma', name: 'Newton\'s second law', eq: 'F = m × a', note: 'F is the resultant force in N, m is the mass in kg and a is the acceleration in m/s².', tri: 'fma', ch: [3, 4] },
   { id: 'accel', name: 'Acceleration from velocities', eq: 'a = (v − u) ÷ t', note: 'u is the starting velocity, v is the final velocity and t is the time in seconds. On a velocity–time graph, this is the slope.', ch: [3] },
   { id: 'third', name: 'Newton\'s third law', eq: 'force of A on B = force of B on A', note: 'Always the same size, always in opposite directions, and on two different objects.', ch: [4] },
-  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'velocity = F ÷ m, so F = m × velocity', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] }
+  { id: 'push1s', name: 'A push that lasts 1 s', eq: 'velocity = F ÷ m, so F = m × velocity', note: 'Only for a force that acts for exactly 1 second, like the pushes in the Space Dome.', ch: [4] },
+  { id: 'fall', name: 'Resultant on a falling object', eq: 'resultant = weight − air resistance', note: 'Weight pulls down and air resistance pushes up. If the answer is negative, the resultant points up.', ch: [5] },
+  { id: 'dtime', name: 'Time at a steady velocity', eq: 'time = distance ÷ velocity', note: 'Only when the velocity is steady, for example at terminal velocity.', ch: [5] }
 ];
 const calcChapter = () => (typeof CH !== 'undefined' && CH && VIEW === 'vChapter') ? CH.n : null;
 function renderFormulas() {
@@ -2350,7 +2367,14 @@ const TERMS = {
   action: ['Action', 'One force in a force pair. The other force is the reaction. Neither comes first: they happen at exactly the same time.', ['action']],
   reaction: ['Reaction', 'The other force in a force pair: the push or pull back from the object you pushed or pulled.', ['reaction']],
   thruster: ['Thruster', 'A small rocket on a spacecraft. It throws gas out one way, and the gas pushes the spacecraft the other way.', ['thrusters', 'thruster']],
-  shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []]
+  shove: ['Push (shove)', 'A quick push given to the crate by the arena crew.', []],
+  /* Chapter 5 words (4th item: the chapters where the word is auto-underlined, because lift, drag and hover are ordinary words elsewhere) */
+  parachute: ['Parachute', 'A big fabric canopy that a skydiver or a crate opens to make the air resistance much bigger, so it falls much more slowly.', ['parachute', 'parachutes'], [5]],
+  canopy: ['Canopy', 'The large fabric part of a parachute. A bigger canopy pushes more air out of the way, so the air resistance is bigger.', ['canopy', 'canopies'], [5]],
+  lift: ['Lift', 'The upward force on a helicopter or a plane. A helicopter\'s blades push air down, so the air pushes the helicopter up.', ['lift'], [5]],
+  hover: ['Hover', 'To stay still in the air. A hovering helicopter\'s lift is exactly equal to its weight.', ['hover', 'hovers', 'hovering'], [5]],
+  vacuum: ['Vacuum', 'A space with no air in it at all, so there is no air resistance.', ['vacuum'], [5]],
+  drag: ['Drag', 'Another name for air resistance (or water resistance): a force that pushes against an object moving through a fluid.', ['drag'], [5]]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */
 const GL_ALIASES = Object.entries(TERMS).flatMap(([k, [, , al]]) => (al || []).map(a => [a.toLowerCase(), k])).sort((a, b) => b[0].length - a[0].length);
@@ -2363,8 +2387,8 @@ function glossify(root) {
     let guard = 0;
     while (node && guard++ < 6) {
       const m = GL_RE.exec(node.nodeValue); if (!m) break;
-      const key = GL_ALIASES.find(a => a[0] === m[1].toLowerCase())[1];
-      if (seen.has(key)) { // skip this occurrence, look further along
+      const key = GL_ALIASES.find(a => a[0] === m[1].toLowerCase())[1], only = TERMS[key][3];
+      if (seen.has(key) || (only && !(typeof CH !== 'undefined' && CH && only.includes(CH.n)))) { // skip this occurrence, look further along
         const rest = node.splitText(m.index + m[0].length); node = rest; continue;
       }
       seen.add(key);
@@ -3512,6 +3536,9 @@ function predSketchBind(P) {
   });
 }
 
+/* how many rows of a freeze question (in the current Learn step) have a moment attached: used by "Do this" tasks */
+const frzCount = qid => { const s = dbGet(stepKey(CH.id, GI) + '.' + qid, null); return s && s.v && Array.isArray(s.v.rows) ? s.v.rows.filter(r => r.snap).length : 0; };
+
 /* ===== Guided (Learn) engine ===== */
 const CHDATA = {}; // filled by chapter modules: CHDATA.c1 = {steps, challenge, review, ...}
 let GI = 0, CARDS_SEEN = false, LASTSIG = '';
@@ -4514,7 +4541,8 @@ function renderChallenge(ch) {
   const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
   const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);
   const om = C1.missions.filter(m => m.kind === 'orders'); if (om.length) renderOrdersCourse(ch, om, host, save);
-  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders').forEach(m => {
+  const zm = C1.missions.filter(m => m.kind === 'drop'); if (zm.length) renderDropCourse(ch, zm, host, save);
+  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders' && m.kind !== 'drop').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -4669,6 +4697,51 @@ function renderOrdersCourse(ch, om, host, save) {
     const best = hit ? Math.max(1, 5 - n) : 0;
     const why = !okP ? (P.vp < m.lo ? `A push of ${fmt(P.F, 0)} N gave the pod ${fmt(P.vp, 2)} m/s. That is too slow, so the pod would take too long to arrive. Try a bigger push.` : `A push of ${fmt(P.F, 0)} N gave the pod ${fmt(P.vp, 2)} m/s. That is too fast, so the pod would crash into the dock. Try a smaller push.`) : `The pod's velocity was fine, but the ${P.ma} kg astronaut reached ${fmt(P.va, 2)} m/s. The tether snaps! The astronaut feels the same force, so a heavier astronaut goes slower.`;
     save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! On target after ${n} push${n > 1 ? 'es' : ''}! The pod docks at ${fmt(P.vp, 2)} m/s. You scored ${best} of 4 points.` : `Not quite. ${why}` });
+    paint();
+  };
+  load(cur);
+}
+
+/* Chapter 5 Challenge: Drop Zone deliveries (one shared Drop Zone, a tab per mission).
+   The mission fixes the object, world and height; the student chooses the canopy and the height to open it at. Every drop counts: all objectives met
+   on the 1st drop = 4 points, 2nd = 3, 3rd = 2, later = 1. "Move on" after 3 misses scores 1. */
+function renderDropCourse(ch, zm, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, zm.findIndex(m => !get(m.id).done)), judged = false;
+  const card = h('section', { class: 'panel mission', id: 'mi-drop' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a delivery"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="zClues"></div><div class="row"><button type="button" class="ghost sm" id="zNext">Show a clue</button></div></details>
+    <div class="labhost"></div><div class="fb" id="zFb" hidden></div><ol class="blog" id="zLog"></ol><ul class="objs" data-o></ul><div class="row" id="zMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
+  const paint = () => {
+    const m = zm[cur], s = get(m.id), nc = Math.min(s.clues || 0, m.clues.length);
+    $('.mtabs', card).innerHTML = zm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-zr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal} Choose the canopy size and the height to open it at, then press Drop!</p>`;
+    $('#zClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
+    const nx = $('#zNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
+    $('#zLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Drop ${i + 1}: ${r.canopy === 'none' ? 'no canopy' : r.canopy + ' canopy, ' + (r.openH == null ? 'never opened' : 'opened at ' + fmt(r.openH, 0) + ' m')}, landed at ${dz1(r.landV)} m/s after ${fmt(r.time, 0)} s${r.hit ? ' ✓ on target!' : ''}</li>`).join('');
+    const fb = $('#zFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.hit ? 'ok' : 'hint') : 'no'); fb.innerHTML = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Drop the load (every drop counts)', s.tried]].concat(m.objs.map(o => [o.label, s.done && s.hit]), [['Do it on your first drop', s.best === 4]]).map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#zMore', card).innerHTML = s.done ? (cur < zm.length - 1 ? `<button type="button" class="go" data-zr="${cur + 1}">Next delivery →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="zGive">Move on (1 point)</button>` : '');
+    const gv = $('#zGive', card); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} drops. ${m.give} You scored 1 of 4 points.${m.after ? ' ' + m.after : ''}` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = zm[cur];
+    dropSetup({ height: m.setup.height, a: { obj: m.setup.obj, world: m.setup.world, removed: 0, canopy: 'none' } }); S.flags = newFlags(); resetSim(); judged = false;
+    LAB.show = new Set(['drop', 'dcanopy', 'dopenh', 'dfbd', 'readH', 'readV', 'readT', 'dvt', 'warp']); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Choose a canopy, then press Drop!';
+    applyPanels(); labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-zr]'); if (b) load(+b.dataset.zr); });
+  $('#zNext', card).addEventListener('click', () => { const m = zm[cur], s = get(m.id); save(m, { clues: Math.min(m.clues.length, (s.clues || 0) + 1) }); paint(); });
+  LAB.tick = () => {
+    if (!DZ.ended || !DZ.started) { judged = false; return; }
+    if (judged) return; judged = true;
+    const m = zm[cur], s = get(m.id), L = DZ.lanes[0]; if (s.done || !L.landed) { paint(); return; }
+    const r = { landV: L.landV, time: L.landT, openH: L.openY, canopy: L.canopy }, n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
+    const log = (s.log || []).concat([{ canopy: r.canopy, openH: r.openH, landV: r.landV, time: r.time, hit }]);
+    const sayAll = m.objs.map(o => o.say(r)).join(' ');
+    save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! On target after ${n} drop${n > 1 ? 's' : ''}! ${sayAll} You scored ${best} of 4 points.${m.after ? ' ' + m.after : ''}` : `Not quite. ${sayAll} Change the canopy or the opening height, then drop again.` });
     paint();
   };
   load(cur);
@@ -4895,10 +4968,10 @@ function dropSetup(o) {
   [o.a || {}, o.b || o.a || {}].forEach((c, i) => Object.assign(DZ.lanes[i], { obj: 'crate', world: 'earth', removed: 0, canopy: 'none', autoOpen: null }, c));
 }
 /* Readouts the student has to work out stay hidden until the question that asks for them has been answered: a step lists mask: [{ q, keys, when(lane) }]. Keys: fbdR, fbdW, readV, readA. */
-function dzMasked() {
+function dzMasked(L) {
   const out = new Set(); if (typeof CH === 'undefined' || !CH || LAB.mode !== 'guided') return out;
   const st = CHDATA[CH.id] && CHDATA[CH.id].steps[GI]; if (!st || !st.mask) return out;
-  st.mask.forEach(M => { if (dzActive().some(L => M.when(L, DZ))) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
+  st.mask.forEach(M => { if ((L ? [L] : dzActive()).some(l => M.when(l, DZ))) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
   return out;
 }
 
@@ -4970,7 +5043,7 @@ function initDrop() {
   on('#dzDrop', 'click', () => { if (dzDrop()) labChanged(); });
   on('#dzPause', 'click', () => { dzPause(); labChanged(); });
   on('#dzBack', 'click', () => { dzStepView(-1); labChanged(); }); on('#dzFwd', 'click', () => { dzStepView(1); labChanged(); });
-  on('#dzSnap', 'click', () => { if (dzSnapNow()) { toast('📸 Snapshot saved in your Journal (Runs tab).', 'good'); labChanged(); } });
+  on('#dzSnap', 'click', () => { if (dzSnapNow()) { S.flags.snapBtn = true; toast('📸 Snapshot saved in your Journal (Runs tab).', 'good'); labChanged(); } });
   on('#dzOpen', 'click', () => { dzOpenAll(); labChanged(); });
   document.addEventListener('click', e => {
     if (S.scene !== 'drop') return;
@@ -5146,7 +5219,7 @@ function dzLane(c, L, idx, x0, w, tt) {
   c.restore();
   if (v.opened == null || !dzCoef(L).has) pill(c, `${fmt(DZ_OBJ[L.obj].m, 3)} kg`, ox, ay - hgtObj - 16, C.ink, 12);
   /* landing and state messages (they sit to the left of the diagram) */
-  const mk = dzMasked(), nx = x0 + 46 + (two ? 86 : 200), nw = two ? 164 : 380;
+  const mk = dzMasked(L), nx = x0 + 46 + (two ? 86 : 200), nw = two ? 164 : 380;
   if (L.landed) { const lv = L.landV, msg = lv < 7 ? 'Soft landing!' : lv <= 15 ? 'Bump! A bit fast.' : 'Thud! Far too fast for a safe landing.', col = lv < 7 ? C.good : lv <= 15 ? C.hazard : C.bad; dzNote(c, msg + (mk.has('readV') ? '' : ` (${dz1(lv)} m/s)`), nx, 92, col, nw, 14); }
   else if (L.started && v.opened != null && v.fr < 1) dzNote(c, 'Canopy opening…', nx, 92, C.hazard, nw);
   else if (L.started && Math.abs(v.R) <= 0.01 * v.W && v.t > 0.2) dzNote(c, 'Terminal velocity!', nx, 92, C.good, nw, 14);
@@ -5230,6 +5303,14 @@ function dzGraphs() {
     ser.forEach((s, i) => { if (s.length < 1) return; c.strokeStyle = DZ_LANECOL()[i]; c.lineWidth = 3.5; c.lineJoin = 'round'; c.beginPath(); const st = Math.max(1, Math.floor(s.length / 700)); s.forEach(([t, v], k) => { if (k % st && k < s.length - 1) return; k ? c.lineTo(X(t), Y(v)) : c.moveTo(X(t), Y(v)); }); c.stroke(); const l = s[s.length - 1]; c.fillStyle = DZ_LANECOL()[i]; c.beginPath(); c.arc(X(l[0]), Y(l[1]), 5, 0, 7); c.fill(); });
     lanes.forEach((L, i) => { if (L.opened != null && (!DZ.paused || DZ.viewT >= L.opened)) { const bx = X(L.opened); c.save(); c.setLineDash([6, 4]); c.strokeStyle = DZ_LANECOL()[i]; c.lineWidth = 1.8; c.beginPath(); c.moveTo(bx, y0); c.lineTo(bx, y1); c.stroke(); c.restore(); pill(c, 'canopy opened', bx, y0 + 12 + i * 20, DZ_LANECOL()[i], 11); } });
     if (DZ.two) lanes.forEach((L, i) => pill(c, `Lane ${L.id}`, x1 - 40, y0 + 14 + i * 22, DZ_LANECOL()[i], 12));
+
+    // the student's sketch prediction (Predict first), stretched over this run: the "canopy opens" column lands on the moment the canopy really opened
+    const ps = typeof CH !== 'undefined' && CH && LAB.mode === 'guided' && predSketch(), P = ps && CHDATA[CH.id].steps[GI].predict;
+    if (ps && P && ser[0] && ser[0].length > 1) {
+      const n = P.cols, mc = P.marks && P.marks[0] ? P.marks[0].col : null, tOp = lanes[0].opened, pts = ps.map((l, i) => { const t = mc != null && tOp != null ? (i <= mc ? tOp * i / mc : tOp + (tMax - tOp) * (i - mc) / (n - 1 - mc)) : tMax * i / (n - 1); return [X(t), Y(l / P.levels * top)]; });
+      c.save(); c.strokeStyle = C.warn || '#e08a1e'; c.lineWidth = 3; c.setLineDash([8, 5]); c.beginPath(); pts.forEach(([x, y], k) => k ? c.lineTo(x, y) : c.moveTo(x, y)); c.stroke(); c.setLineDash([]); c.fillStyle = c.strokeStyle; pts.forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 4, 0, 6.3); c.fill(); }); c.restore();
+      pill(c, 'Your prediction', x1 - 70, y1 - 16, C.warn || '#e08a1e', 12);
+    }
   }
   const cf = $('#cvDFT'); if (cf && cf.offsetParent) {
     const W = 900, H = 200, c = fit(cf, W, H); c.fillStyle = C.panel; c.fillRect(0, 0, W, H);
@@ -5254,6 +5335,381 @@ Object.assign(INFO, {
   dair: { title: 'The air removed slider', cards: [{ hi: '[data-panel="dair"]', html: `<p>This takes air away from the world you chose. <b>0%</b> is all the air. <b>100%</b> is a vacuum, with no air at all, so there is no air resistance.</p>` }] },
   dcanopy: { title: 'Choosing a canopy', cards: [{ hi: '[data-panel="dcanopy"]', html: `<p>A bigger canopy pushes more air out of the way, so the air resistance is bigger. Only the crate and the skydiver can carry one.</p><p>Press <b>Open canopy!</b> during the fall. The canopy takes about 3 seconds to open fully.</p>` }] }
 });
+
+/* ===== Chapter 5: Balanced forces and the Drop Zone =====
+   Foundation c5f (steps d1–d4, Check c5r1–c5r7): falling, air resistance, terminal velocity, the parachute.
+   Extension c5x (steps p1–p3, the three missions, Check c5r8–c5r12): air, weight and other worlds (added in a later step).
+   The physics is in 46-dropzone.js and matches tools/dropzone_model.py. The script is docs/Chapter5_Script.md. */
+const DZ_HIDE_OLD = ['shove', 'astro', 'readAV', 'readAM', 'pushf', 'thrust', 'pairs', 'pal', 'meter', 'readL', 'readR', 'readRes', 'readF', 'readW', 'readN', 'readM', 'floor', 'run', 'mass', 'fbd', 'vt', 'brake', 'launch', 'toggles', 'readD'];
+const DZ_TREND = ['gets bigger', 'stays the same', 'gets smaller'];
+const c5Crate = { obj: 'crate', world: 'earth', height: 600 };
+const c5Sky = { obj: 'para', world: 'earth', height: 1500 };
+/* the fixed example skydive used by the "tap the moment" questions: 1,500 m, medium canopy opened at 20 s (the same run as dropzone_model.run('para','earth',height=1500,canopy='medium',open_at=20)) */
+let DZ_FIXED = null;
+const dzFixedGraph = () => {
+  if (!DZ_FIXED) { const r = dzSimulate({ obj: 'para', world: 'earth', height: 1500, canopy: 'medium', openAt: 20, every: 0.5 }); DZ_FIXED = r.pts.filter(p => p[0] <= 40); }
+  return { lines: [{ pts: DZ_FIXED, col: '#1f5f8b' }], tMax: 40, vMax: 60, vStep: 10, tStep: 5, alt: 'Velocity–time graph of a skydive: the velocity climbs to about 54 m/s, stays steady, then drops sharply when the canopy opens and levels off at about 6 m/s.' };
+};
+
+CHDATA.c5 = {
+  goal: 'Describe how weight and air resistance change during a fall, use balanced forces to explain terminal velocity with and without a parachute, and compare falling on other worlds using W = m × g.',
+  vocab: ['air resistance', 'weight', 'terminal velocity', 'balanced forces', 'resultant force', 'parachute', 'canopy', 'gravitational field strength', 'vacuum', 'lift', 'hover'],
+  steps: [
+    /* ---------- Foundation ---------- */
+    { id: 'd1', title: 'First drop', info: ['dfbd'], floors: ['air'],
+      cards: [
+        { html: `<p>Welcome to Chapter 5 and the <b>Drop Zone</b>! A helicopter hovers high above the landing pad, ready to drop things for you. It stays perfectly still because its lift pushes up exactly as hard as its weight pulls down. Your first job: drop a 40 kg crate from 600 m and watch its velocity on the way down.</p>` },
+        { hi: '#cvScene', html: `<p>Keep an eye on the <b>free-body diagram</b> next to the crate. One arrow is the crate's <b>weight</b>, pulling it down. The other is <b>air resistance</b>, pushing up against the motion. Watch how each arrow changes as the crate falls. The Fast-forward button saves time on long drops.</p>` }],
+      predict: { q: 'The crate falls from 600 m. What will its velocity do on the way down?', opts: ['It will keep speeding up until it hits the ground', 'It will speed up at first, then stop speeding up', 'It will fall at the same velocity all the way down', 'It will speed up at first, then slow down before landing'], then: 'Press Drop! and watch the Velocity readout and the two arrows.' },
+      setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['drop', 'dfbd', 'readH', 'readV', 'readA', 'readT', 'warp'], hide: DZ_HIDE_OLD, sides: [], pullers: [], idle: 'Press Drop! to release the crate',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b> and watch the crate all the way down.', () => dzRun(c5Crate) != null]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'The crate\'s velocity stopped going up. What velocity did it settle at?', unit: 'm/s', tol: 0.3, live: () => dzTop(c5Crate), need: () => dzTop(c5Crate) != null, needMsg: 'Drop the crate first. Your runs are in the Journal.', ok: 'Spot on! The crate settled at about 38 m/s. That\'s nearly 140 km/h.' },
+        { id: 'q2', type: 'pick', p: 'As the crate fell faster and faster, its weight {0} and the air resistance on it {1}.', picks: [[DZ_TREND, 1], [DZ_TREND, 0]], after: 'Weight is mass × g, so it stays the same during the fall. Air resistance grows as the velocity grows.' },
+        { id: 'q3', type: 'mcq', p: 'Why did the air resistance arrow grow during the fall?', opts: ['Air resistance gets bigger as the crate\'s velocity gets bigger', 'Air resistance gets bigger as the crate gets closer to the ground', 'Air resistance gets bigger as the crate\'s weight gets bigger', 'Air resistance gets bigger as the air gets colder lower down'], a: 0, ok: 'Yes! The arrow grows because the crate speeds up.', why: { 1: 'The height doesn\'t matter: the arrow grows because the crate is moving faster.', 2: 'The weight stayed the same the whole way down.', 3: 'The Drop Zone\'s air stays the same all the way down. The arrow grows because the crate speeds up.' } }] },
+
+    { id: 'd2', title: 'Pause and look', info: ['dpause'], floors: ['air'],
+      cards: [
+        { hi: '#dzPause', html: `<p>Falls happen fast, so let's freeze time! Press <b>⏸ Pause</b> during a drop and everything stops. The <b>◀ 0.5 s</b> and <b>0.5 s ▶</b> buttons step backwards and forwards through the fall, and <b>📸 Snapshot</b> saves that moment to your Journal. Use them to catch the forces at exactly the right moment.</p>` },
+        { html: `<p>The <b>resultant force</b> is what's left over when you combine the forces. Weight pulls down and air resistance pushes up, so <b>resultant = weight − air resistance</b>. A downward resultant means the crate is still speeding up.</p><div class="example"><b>Worked example</b><br>At 20 m/s the air resistance on the crate is 108.6 N and its weight is 392 N. Resultant = 392 − 108.6 = <b>283.4 N</b>, pointing down, so the crate is still speeding up.</div><div class="law"><b>Key idea:</b> resultant = weight − air resistance.</div>` }],
+      setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['dpause'], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
+      mask: [{ q: 'q1', keys: ['fbdR'], when: () => true }],
+      tasks: [['Drop the crate and pause it at the three moments in the table. Press <b>Use this moment</b> on each row.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
+      qs: [
+        { id: 'q1', type: 'freeze', p: 'Fill in the table from your three paused moments. Type the forces from the free-body diagram, work out the resultant, and choose what the velocity is doing.', obj: 'crate',
+          cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['R', 'Resultant (N)'], ['motion', 'Velocity']],
+          rows: [{ label: 'Just after it leaves the helicopter', when: s => s.cstate === 'closed' && s.v < 12 && s.a > 0.5, whenMsg: 'Pause in the first second of the fall.' },
+            { label: 'About halfway to its top velocity', when: s => s.v >= 15 && s.v <= 23, whenMsg: 'Pause when the velocity is between 15 and 23 m/s.' },
+            { label: 'After it has stopped speeding up', when: s => Math.abs(s.a) < 0.2, whenMsg: 'Pause once the velocity has stopped going up.' }],
+          example: [[392, 25.0, 367.0, 0], [392, 108.6, 283.4, 0], [392, 391.2, 0.8, 1]] },
+        { id: 'q2', type: 'pick', p: 'Look at your table. As the crate sped up, the air resistance {0}, the resultant force {1} and the acceleration {2}.', picks: [[DZ_TREND, 0], [DZ_TREND, 2], [DZ_TREND, 2]] }] },
+
+    { id: 'd3', title: 'Terminal velocity', info: ['dpause'], floors: ['air'],
+      cards: [
+        { html: `<p>Here's what you just saw. As the crate speeds up, air resistance grows. Eventually it grows until it is <b>as big as the weight</b>. Now the forces are <b>balanced</b>, the resultant force is zero, and the crate stops speeding up. It keeps falling at a steady velocity called its <b>terminal velocity</b>.</p><div class="law"><b>Key idea:</b> When air resistance has grown to equal the weight, the forces are balanced and the object falls at a steady terminal velocity.</div>` },
+        { html: `<p>Balanced forces mean the <b>velocity does not change</b>. A still object stays still, and a moving object keeps moving at a steady velocity. That's Newton's first law from Chapter 2, working high above the Drop Zone!</p>` }],
+      setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: [], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
+      tasks: [['Answer the key idea question below.', () => hasAns('q1')], ['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
+      qs: [
+        { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains terminal velocity.', opts: ['Air resistance has grown to equal the weight, so the velocity stops changing.', 'Air resistance has grown bigger than the weight, so the velocity stops changing.', 'The weight has shrunk to zero, so the velocity stops changing.', 'The air resistance has disappeared, so the velocity stops changing.'], a: 0, ok: 'Yes! Equal forces mean a steady velocity.', why: { 1: 'If air resistance were bigger, the crate would slow down.', 2: 'Weight stays the same the whole way down.', 3: 'Air resistance is at its biggest at terminal velocity.' } },
+        { id: 'q2', type: 'reason', p: 'The crate is falling at a steady 38 m/s. Four friends disagree about the forces on it. Who\'s right?',
+          voices: [{ who: 'Mia', says: 'It has stopped speeding up, so there are no forces on it any more.' }, { who: 'Sam', says: 'Air resistance and weight are now equal, so the forces are balanced.' }, { who: 'Leo', says: 'The weight must still be bigger, or it would stop falling.' }, { who: 'Ana', says: 'Air resistance is bigger now, so it\'s about to slow down.' }], a: 1,
+          reasons: ['A steady velocity means the resultant force is zero', 'A falling object needs a downward resultant to keep moving', 'Weight switches off when an object reaches its top velocity', 'Air resistance always ends up bigger than weight in a long fall'], r: 0,
+          why: { a: { 0: 'Both forces are still there; they cancel.', 2: 'A moving object keeps moving with no resultant force (Newton\'s first law).', 3: 'Air resistance stops growing when it equals the weight.' }, r: { 1: 'That is Leo\'s idea. A moving object keeps moving with no resultant force.', 2: 'Weight never switches off.', 3: 'It only becomes bigger if something changes, like a canopy opening.' } } },
+        { id: 'q3', type: 'desk', p: 'Build the free-body diagram for the crate falling at its terminal velocity of 38 m/s.', deskTitle: 'A 40 kg crate falling at its terminal velocity',
+          scen: { id: 'c5d3', obj: 'crate', label: '40 kg', brief: '<p>The <b>40 kg crate</b> is falling at a steady <b>38 m/s</b>.</p><p>Draw every force on the crate. Use the calculator for its weight.</p>', forces: [{ type: 'weight', dir: 'down', value: 392 }, { type: 'airres', dir: 'up', value: 392 }] } }] },
+
+    { id: 'd4', title: 'Open the parachute', info: ['dcanopy', 'dvt', 'dft'], floors: ['air'],
+      cards: [
+        { html: `<p>Meet our skydiver! With the canopy closed, they fall just like the crate until they reach a terminal velocity of about <b>54 m/s</b>. That's nearly 200 km/h. Then they open the parachute.</p>` },
+        { hi: '#dzOpen', html: `<p>A <b>canopy</b> is huge, so it has to push a lot of air out of the way. At the same velocity, the air resistance is suddenly much bigger. Use <b>⏸ Pause</b> to catch the arrows just after the canopy opens, and again once things settle down.</p>` }],
+      predict: { kind: 'sketch', q: 'Sketch the skydiver\'s velocity from the jump until well after the canopy opens. The dashed line shows when the canopy opens.', cols: 10, levels: 10, xLabel: 'Time', yLabel: 'Velocity (downwards)', marks: [{ col: 6, label: 'Canopy opens' }], then: 'Drop the skydiver, open the canopy, then compare your sketch with the real graph.' },
+      setup() { dropSetup({ height: 1500, a: { obj: 'para', world: 'earth', removed: 0, canopy: 'medium' } }); }, adds: ['dcanopy', 'dvt', 'dft'], sides: [], pullers: [], idle: 'Press Drop!, then open the canopy',
+      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table and press <b>Use this moment</b> on each row.', () => frzCount('q1') >= 2]],
+      qs: [
+        { id: 'q1', type: 'freeze', p: 'Fill in the table from your two paused moments.', obj: 'para',
+          cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['big', 'The bigger force'], ['motion', 'Velocity']],
+          rows: [{ label: 'Just after the canopy opens', when: s => s.cstate !== 'closed' && s.a < -1, whenMsg: 'Pause in the first few seconds after the canopy opens. The step buttons help.' },
+            { label: 'Steady again with the canopy open', when: s => s.cstate === 'open' && Math.abs(s.a) < 0.2, whenMsg: 'Pause once the velocity has stopped going down.' }],
+          example: [[735, 2243, 1, 2], [735, 735, 2, 1]] },
+        { id: 'q2', type: 'reason', p: 'The canopy opens. Four friends describe what happens next. Who\'s right?',
+          voices: [{ who: 'Mia', says: 'The skydiver shoots upwards for a moment.' }, { who: 'Ana', says: 'The skydiver keeps falling, but slows down.' }, { who: 'Leo', says: 'The skydiver stops dead in mid-air.' }, { who: 'Sam', says: 'The skydiver keeps falling at the same velocity.' }], a: 1,
+          reasons: ['Air resistance is now bigger than the weight, so the resultant points up and slows the fall', 'Air resistance is now bigger than the weight, so the resultant points up and lifts the skydiver', 'The canopy cancels the weight completely, so no forces act on the skydiver at all', 'The canopy only changes the skydiver\'s shape, so the forces stay just the same'], r: 0,
+          why: 'An upward resultant on something moving down slows it down. It only looks like the skydiver goes up in videos, because the camera is held by someone who is still falling fast.' },
+        { id: 'q3', type: 'spot', p: 'Here\'s a velocity–time graph of a skydive. Tap where the canopy opened.', graph: dzFixedGraph, targets: [{ t: [19.5, 21.0], why: 'The canopy opens where the velocity suddenly drops, at 20 s.' }] },
+        { id: 'q4', type: 'pick', p: 'After the canopy opened, the air resistance {0} as the skydiver slowed down, until it was {1} the weight again.', picks: [[DZ_TREND, 2], [['bigger than', 'equal to', 'smaller than'], 1]] }] },
+
+    /* ---------- Extension ---------- */
+    { id: 'p1', title: 'Heavy and light', info: ['dair'], floors: ['air'],
+      cards: [
+        { hi: '[data-panel="dlanes"]', html: `<p>Time for a race! <b>Compare two drops</b> gives you a second lane, and each lane can drop a different object. Press <b>Drop!</b> and both objects are released at exactly the same moment. The buttons <b>Lane A</b> and <b>Lane B</b> above the controls choose which lane the controls change.</p>` },
+        { hi: '[data-panel="dair"]', html: `<p>The <b>Air removed</b> slider takes air out of the Drop Zone. At 100% the Drop Zone becomes a <b>vacuum</b>, with no air at all. Scientists build huge vacuum chambers to test exactly this.</p>` }],
+      predict: { q: 'You remove all the air, then drop a feather and a crate together from 50 m. What will happen?', opts: ['They will land at exactly the same moment', 'The crate will land well before the feather', 'The feather will land well before the crate', 'The feather will float and never land'], then: 'Race them with the air, then race them again with all the air removed.' },
+      setup() { dropSetup({ height: 50, two: true, a: { obj: 'feather', world: 'earth', removed: 0 }, b: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['dlanes', 'dobj', 'dair', 'dheight'], hide: ['dcanopy', 'dvt', 'dft', 'dopenh'], sides: [], pullers: [], idle: 'Press Drop! to race the two objects',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Race the <b>feather</b> against the <b>crate</b> from 50 m with all the air. The feather is slow, so use <b>Fast-forward</b>.', () => !!(dzRun({ obj: 'feather', world: 'earth', height: 50, air: 0, two: true }) && dzRun({ obj: 'crate', world: 'earth', height: 50, air: 0, two: true }))],
+        ['Remove <b>100%</b> of the air from both lanes and race them again.', () => !!(dzRun({ obj: 'feather', world: 'earth', height: 50, air: 100, two: true }) && dzRun({ obj: 'crate', world: 'earth', height: 50, air: 100, two: true }))],
+        ['Put the air back and drop the <b>basketball</b> once.', () => !!dzRun({ obj: 'basketball', world: 'earth', air: 0 })]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With all the air removed, how long did the feather and the crate take to land?', unit: 's', tol: 0.15, live: () => dzTime({ obj: 'crate', world: 'earth', height: 50, air: 100 }), need: () => dzTime({ obj: 'crate', world: 'earth', height: 50, air: 100 }) != null, needMsg: 'Race the feather and the crate with all the air removed first. Your runs are in the Journal.', ok: 'Yes, about 3.2 s, at exactly the same moment. With no air, nothing slows the feather down.' },
+        { id: 'q2', type: 'order', p: 'Put these in order of their terminal velocity on Earth, lowest first. Your runs in the Journal will help.', first: 'Lowest terminal velocity', last: 'Highest terminal velocity',
+          items: ['The feather', 'The skydiver with the medium canopy open', 'The basketball', 'The crate', 'The skydiver with the canopy closed'], after: 'Their terminal velocities are 0.6, 6.0, 20, 38 and 54 m/s.' },
+        { id: 'q3', type: 'reason', p: 'With the air in, the 40 kg crate falls faster than the 0.6 kg basketball. Why?',
+          opts: ['The crate has a higher terminal velocity', 'The crate feels less air resistance at every velocity', 'The crate is pulled harder on each kilogram', 'The crate has no air resistance acting on it'], a: 0,
+          reasons: ['Its bigger weight needs a bigger air resistance to balance it, which only happens at a higher velocity', 'Its bigger mass means air resistance stops working on it', 'Heavier objects always fall faster, even with no air', 'Its sharp corners cut through the air, so air resistance can\'t act'], r: 0,
+          why: 'Every kilogram is pulled by 9.8 N on Earth, whatever the object. The crate\'s weight is much bigger, so the air resistance has to grow much bigger before the forces balance, and that needs a higher velocity. With no air, as you saw, they land together.' }] },
+
+    { id: 'p2', title: 'Other worlds', info: ['dworld'], floors: ['air'],
+      cards: [
+        { hi: '[data-panel="dworld"]', html: `<p>The Drop Zone can now visit other worlds! Each one has its own <b>gravitational field strength</b>, g, which tells you how hard it pulls on each kilogram. Each world has its own air too: none at all, very thin, or very thick. Choose a world for each lane and race!</p>` },
+        { html: `<p><b>Weight = mass × g.</b> The crate's mass is 40 kg everywhere, but its weight changes from world to world.</p><div class="example">On Earth, g = 9.8 N/kg, so the crate weighs 40 × 9.8 = <b>392 N</b>. On Mars, g = 3.7 N/kg, so the same crate weighs 40 × 3.7 = <b>148 N</b>.</div>` },
+        { html: `<p>Some of these worlds are deadly! Venus is hot enough to melt lead, and Jupiter has no ground at all (our drops stop at a platform in the clouds). Luckily, our crates are made of pretend Force HQ super-metal.</p>` }],
+      predict: { q: 'You drop a crate from 100 m on Earth and another on the Moon, at the same moment. Which lands first?', opts: ['The crate on Earth lands first', 'The crate on the Moon lands first', 'They land at exactly the same moment', 'The Moon crate floats and never lands'], then: 'Race them and watch the two free-body diagrams.' },
+      setup() { dropSetup({ height: 100, two: true, a: { obj: 'crate', world: 'earth', removed: 0 }, b: { obj: 'crate', world: 'moon', removed: 0 } }); }, adds: ['dworld', 'dvt'], hide: ['dcanopy', 'dft', 'dopenh'], sides: [], pullers: [], idle: 'Press Drop! to race the two crates',
+      mask: [{ q: 'q2', keys: ['fbdW'], when: L => L.obj === 'para' && L.world === 'mars' }, { q: 'q4', keys: ['fbdW'], when: L => L.obj === 'crate' && L.world === 'moon' }],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Race a crate on <b>Earth</b> against a crate on the <b>Moon</b> from 100 m.', () => !!(dzRun({ obj: 'crate', world: 'earth', height: 100, two: true }) && dzRun({ obj: 'crate', world: 'moon', height: 100, two: true }))],
+        ['Drop a crate on <b>Venus</b> and watch its velocity.', () => !!dzRun({ obj: 'crate', world: 'venus' })],
+        ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'How long did the crate on the Moon take to land?', unit: 's', tol: 0.2, live: () => dzTime({ obj: 'crate', world: 'moon', height: 100 }), need: () => dzTime({ obj: 'crate', world: 'moon', height: 100 }) != null, needMsg: 'Race the crates first. Your runs are in the Journal.', ok: 'About 11.2 s. The Moon pulls each kilogram with only 1.6 N, so the crate speeds up slowly, even with no air at all.' },
+        { id: 'q2', type: 'num', p: 'A skydiver has a mass of 75 kg. What is their weight on Mars, where g = 3.7 N/kg?', unit: 'N', units: UNITS, ans: 277.5, tol: 0.5, ladder: true, hints: ['Weight = mass × g.', 'Use the skydiver\'s mass, 75 kg, and Mars\'s g, 3.7 N/kg.', 'Type 75 × 3.7 into the calculator.'], work: 'weight = 75 × 3.7 = 277.5 N.' },
+        { id: 'q3', type: 'pick', p: 'On Venus, the crate\'s terminal velocity was {0} its terminal velocity on Earth, because the air on Venus is {1}.', picks: [[['much higher than', 'about the same as', 'much lower than'], 2], [['much thinner', 'about the same', 'much thicker'], 2]] },
+        { id: 'q4', type: 'fix', p: 'Ana works out the weight of a 40 kg crate on the Moon. Spot her mistake. Tap it, then correct it.', who: 'Ana',
+          lines: ['Weight = mass × g', 'Weight = 40 × 9.8', 'Weight = 392 N'], bad: 1, fix: { kind: 'num', ans: 64, unit: 'N', units: UNITS, tol: 0.5 },
+          why: 'Ana used Earth\'s g. On the Moon g is 1.6 N/kg, so the weight is 40 × 1.6 = 64 N. The mass is still 40 kg, but the weight is much smaller.' }] },
+
+    { id: 'p3', title: 'Hover', info: ['lift'], floors: ['air'],
+      cards: [
+        { html: `<p>The helicopter that drops your crates has a mass of <b>1,180 kg</b>. Its spinning blades push air down, so the air pushes the helicopter up. That's Newton's third law again! The upward force is called <b>lift</b>.</p>` },
+        { hi: '[data-panel="lift"]', html: `<p>To <b>hover</b>, the helicopter must stay perfectly still in the air. Work out its weight first, then set the lift to match it. Red markers on the slider show lifts that were too big, and yellow ones show lifts that were too small.</p>` }],
+      setup() { heliSetup(); }, adds: ['lift'], hide: ['drop', 'dlanes', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dpause', 'dvt', 'dft', 'readA', 'readT', 'warp'], sides: [], pullers: [], idle: null,
+      mask: [{ q: 'q1', keys: ['heliW'], when: () => true }],
+      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['Take off: set the lift bigger than the weight and watch the helicopter climb.', () => !!S.flags.heliClimb20], ['Now make it <b>hover</b>: set the lift so it stays still in the air.', () => !!S.flags.heliHover]],
+      qs: [
+        { id: 'q1', type: 'num', p: 'The helicopter has a mass of 1,180 kg. What is its weight on Earth?', unit: 'N', units: UNITS, ans: 11564, tol: 2, ladder: true, hints: ['Weight = mass × g.', 'On Earth g = 9.8 N/kg.', 'Type 1180 × 9.8 into the calculator.'], work: 'weight = 1,180 × 9.8 = 11,564 N, so it hovers with a lift of 11,564 N.' },
+        { id: 'q2', type: 'sort', p: 'Always, sometimes or never? Sort each statement.', groups: ['Always true', 'Sometimes true', 'Never true'],
+          items: [['When the forces on an object are balanced, it is still', 1], ['When the forces on an object are balanced, its velocity does not change', 0], ['A hovering helicopter has no forces acting on it', 2], ['A falling object is speeding up', 1], ['Air resistance pushes in the opposite direction to the motion', 0]] },
+        { id: 'q3', type: 'pick', p: 'With the lift bigger than the weight, the helicopter first {0} upwards. As it climbs faster, air resistance grows until the forces are {1}, and then it climbs at a steady velocity.', picks: [[['slows down', 'speeds up', 'stays still'], 1], [['unbalanced', 'switched off', 'balanced'], 2]] }] }
+  ],
+  review: [
+    /* ---------- Foundation Check ---------- */
+    { id: 'c5r1', type: 'order', p: 'Put the stages of a skydive in order.', first: 'Leaves the helicopter', last: 'Lands',
+      items: ['The skydiver speeds up quickly', 'Air resistance grows as the velocity grows', 'Air resistance equals the weight, so the velocity is steady', 'The canopy opens and air resistance jumps up', 'The skydiver slows down and air resistance shrinks', 'The forces balance again at a much lower velocity'] },
+    { id: 'c5r2', type: 'reason', sure: true, p: 'A skydiver with the canopy closed is falling at a steady 54 m/s. Which is true about the forces on them?',
+      opts: ['Air resistance is equal to their weight', 'Air resistance is bigger than their weight', 'Air resistance is smaller than their weight', 'There are no forces acting on them at all'], a: 0,
+      reasons: ['Their velocity is steady, so the resultant force must be zero', 'They are still falling, so there must be a downward resultant', 'They are moving fast, so air resistance must be winning', 'They have stopped speeding up, so gravity has switched off'], r: 0,
+      why: { a: { 1: 'If air resistance were bigger, the skydiver would be slowing down.', 2: 'If air resistance were smaller, the skydiver would still be speeding up.', 3: 'Both forces are still there. They cancel.' }, r: { 1: 'A moving object keeps moving at a steady velocity with no resultant force (Newton\'s first law).', 2: 'Air resistance stops growing when it equals the weight.', 3: 'Gravity never switches off, so weight stays the same.' } } },
+    { id: 'c5r3', type: 'num', p: 'A skydiver with a weight of 735 N is falling at 45 m/s. The air resistance on them is 518 N. What is the resultant force on them?', unit: 'N', units: UNITS, ans: 217, tol: 1, ladder: true,
+      hints: ['Weight pulls down and air resistance pushes up, so the resultant is the difference.', 'resultant = weight − air resistance.', 'Type 735 − 518 into the calculator.'], work: 'resultant = 735 − 518 = 217 N, pointing down, so the skydiver is still speeding up.' },
+    { id: 'c5r4', type: 'table', p: 'Complete the table for three moments of a skydive.', cols: ['Air resistance compared with weight', 'Resultant force', 'Velocity'],
+      choices: [['bigger', 'smaller', 'equal'], ['zero', 'up', 'down'], ['steady', 'slowing down', 'speeding up']],
+      rows: [['Just after jumping', [1, 2, 2]], ['At terminal velocity', [2, 0, 0]], ['Just after the canopy opens', [0, 1, 1]]] },
+    { id: 'c5r5', type: 'spot', p: 'Here\'s a velocity–time graph of a skydive (the same graph as in the Drop Zone steps).', graph: dzFixedGraph,
+      targets: [{ ask: 'Tap a moment when the forces were balanced and the canopy was still closed.', t: [14.5, 19.8], why: 'The velocity is steady (the line is flat) before the canopy opens.' }, { ask: 'Tap a moment when the air resistance was bigger than the weight.', t: [20.1, 23.5], why: 'Just after the canopy opens, the velocity is dropping fast, so the resultant points up.' }] },
+    { id: 'c5r6', type: 'fix', p: 'Leo explains what happens when a canopy opens. One line has a mistake. Tap it, then choose the correct line.', who: 'Leo',
+      lines: ['The skydiver is falling at terminal velocity.', 'The canopy opens, so the air resistance gets much bigger.', 'Air resistance is now bigger than the weight.', 'So the resultant force points upwards.', 'So the skydiver starts to move upwards.'], bad: 4,
+      fix: { kind: 'mcq', opts: ['So the skydiver keeps moving down, but slows down', 'So the skydiver keeps moving down, and speeds up', 'So the skydiver stops moving and hangs still', 'So the skydiver keeps moving down at the same velocity'], a: 0 },
+      why: 'An upward resultant force slows down something that is falling. The skydiver keeps moving down the whole time, just more slowly.' },
+    { id: 'c5r7', type: 'explain', p: 'A skydiver jumps from a hovering helicopter. Explain why they reach a terminal velocity.', words: ['weight', 'air resistance', 'balanced', 'resultant force'],
+      model: 'At first the skydiver\'s weight is much bigger than the air resistance, so there is a downward resultant force and they speed up. As they go faster, the air resistance grows. Eventually the air resistance is equal to the weight, so the forces are balanced and the resultant force is zero. They stop speeding up and fall at a steady terminal velocity.',
+      check: ['Says the weight is bigger than the air resistance at first, so the skydiver speeds up', 'Says the air resistance grows as the velocity grows', 'Says the air resistance becomes equal to the weight, so the forces are balanced (resultant force zero) and the velocity stays steady'] },
+    /* ---------- Extension Check ---------- */
+    { id: 'c5r8', type: 'num', p: 'A 40 kg crate is dropped on Jupiter, where g = 24.8 N/kg. What is its weight?', unit: 'N', units: UNITS, ans: 992, tol: 1, ladder: true,
+      hints: ['Weight = mass × g.', 'The mass is 40 kg and g is 24.8 N/kg.', 'Type 40 × 24.8 into the calculator.'], work: 'weight = 40 × 24.8 = 992 N, more than two and a half times its weight on Earth.' },
+    { id: 'c5r9', type: 'reason', sure: true, p: 'An astronaut on the Moon drops a hammer and a feather from the same height at the same moment. What happens?',
+      opts: ['They hit the ground at the same moment', 'The hammer hits the ground well before the feather', 'The feather hits the ground well before the hammer', 'They both float, because the Moon has no gravity'], a: 0,
+      reasons: ['There is no air, so only weight acts, and both gain 1.6 m/s of velocity every second', 'The hammer has a bigger weight, so it always speeds up faster', 'The feather has a smaller mass, so it speeds up faster', 'The Moon has no gravity, so nothing can fall there at all'], r: 0,
+      why: 'On the Moon there\'s no air resistance. Every kilogram is pulled with 1.6 N, so every object speeds up at the same rate. Astronaut David Scott did exactly this on Apollo 15 in 1971.' },
+    { id: 'c5r10', type: 'sketch', p: 'A crate is dropped on the Moon. Sketch its velocity for the first 10 seconds.', xLabel: 'Time (s)', yLabel: 'Velocity downwards (m/s)', cols: 10, levels: 10, yMax: 16, xTicks: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
+      model: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      checks: [['Starts at zero', p => p[0] <= 0.5], ['Speeds up all the way', p => p.every((v, i) => i === 0 || v > p[i - 1])], ['Speeds up by the same amount every second', p => { const st = p.slice(1).map((v, i) => v - p[i]); return Math.max(...st) - Math.min(...st) <= 1; }], ['Never levels off', p => p[9] - p[8] >= 0.5]],
+      look: 'a straight line rising from zero, because with no air the resultant force is the weight all the way down.' },
+    { id: 'c5r11', type: 'order', p: 'The same 40 kg crate sits on six worlds. Put them in order of the crate\'s weight, lowest first.', first: 'Lowest weight', last: 'Highest weight',
+      items: ['Titan', 'The Moon', 'Mars', 'Venus', 'Earth', 'Jupiter'], after: 'The weights are Titan 56 N, Moon 64 N, Mars 148 N, Venus 356 N, Earth 392 N and Jupiter 992 N.' },
+    { id: 'c5r12', type: 'explain', p: 'Engineers landing a rover on Mars use a parachute, but they also need rockets to slow down at the end. Explain why a parachute alone is not enough on Mars.', words: ['thin air', 'air resistance', 'terminal velocity', 'weight'],
+      model: 'Mars has very thin air, so the air resistance on the rover is much smaller than it would be on Earth at the same velocity. The air resistance only balances the rover\'s weight at a very high velocity, so even with a parachute its terminal velocity is still far too fast for a safe landing. Rockets add an extra upward force to slow it down.',
+      check: ['Says the air on Mars is very thin, so there is much less air resistance', 'Says the air resistance only balances the weight at a high velocity, so the terminal velocity is still too high', 'Says rockets give an extra upward force that slows the rover down'] }
+  ]
+};
+CHDATA.c5.review.forEach(q => { if (q.build) q.build(); });
+
+/* ---------- Fun facts: the last card of the step where the idea comes up (each one checked, 28 Oct 2026) ---------- */
+const CFACT = (...t) => ({ html: `<div class="example fact"><b>★ Fun fact${t.length > 1 ? 's' : ''}</b>${t.map(x => `<p>${x}</p>`).join('')}</div>` });
+const c5s = id => CHDATA.c5.steps.find(s => s.id === id);
+c5s('d3').cards.push(CFACT('A skydiver with the canopy closed falls at about 200 km/h (about 55 m/s).'));
+c5s('d4').cards.push(CFACT('In 2012 Felix Baumgartner jumped from about 39 km up. The air there is so thin that he fell faster than sound before the thicker air slowed him down.'));
+c5s('p1').cards.push(CFACT('In 1971 astronaut David Scott dropped a hammer and a falcon feather on the Moon during Apollo 15. They hit the ground at the same moment.'));
+c5s('p2').cards.push(CFACT('The Huygens probe parachuted through Titan\'s thick air in 2005. The descent took about two and a half hours, and it landed at about 5 m/s.', 'Venus\'s air is so thick that the Soviet Venera landers let go of their parachutes high above the ground and still landed gently.', 'In 2021 the Perseverance rover used a parachute on Mars, but the air was too thin to land it safely, so rockets did the rest.'));
+c5s('p3').cards.push(CFACT('NASA\'s Ingenuity helicopter flew on Mars in 2021. The air is so thin that its blades spun at about 2,400 turns a minute, several times faster than a helicopter\'s on Earth.'));
+
+/* ---------- Challenge: Drop Zone deliveries (three missions, judged when the load lands) ---------- */
+const dzOpenAt = r => r.openH == null ? 'the canopy was never opened' : `opened at ${fmt(r.openH, 0)} m`;
+CHDATA.c5.challenge = {
+  title: 'Drop Zone deliveries',
+  intro: 'Mission control has three deliveries for you, on three very different worlds. For each one, choose the canopy and the height to open it at, then drop. Use what you know about terminal velocity and air, and try to get it right in as few drops as you can.',
+  missions: [
+    { id: 'z1', kind: 'drop', title: 'Mission 1: Skydive on Earth', setup: { obj: 'para', world: 'earth', height: 1500 },
+      brief: 'Our skydiver must land <b>slower than 7 m/s</b>, within <b>2 minutes</b> of jumping. For safety, the canopy must open <b>above 300 m</b>.',
+      goal: 'The skydiver jumps from 1,500 m on Earth.',
+      objs: [{ label: 'Land slower than 7 m/s', ok: r => r.landV < 7.0, say: r => `Landing velocity ${dz1(r.landV)} m/s: ${r.landV < 7.0 ? 'OK' : 'too fast'}.` },
+        { label: 'Land within 2 minutes (120 s)', ok: r => r.time <= 120, say: r => `Time ${fmt(r.time, 0)} s: ${r.time <= 120 ? 'OK' : 'too slow'}.` },
+        { label: 'Open the canopy above 300 m', ok: r => r.openH != null && r.openH > 300, say: r => r.openH == null ? 'The canopy was never opened: choose a canopy, then use "Open automatically at" or press Open canopy!.' : `Canopy ${dzOpenAt(r)}: ${r.openH > 300 ? 'OK' : 'too low'}.` }],
+      clues: ['Which canopies give a terminal velocity below 7 m/s? Your runs will tell you.', 'A big canopy is slow, so the time limit matters. How long does it take to fall 600 m at 6 m/s?', 'time = distance ÷ velocity: 600 ÷ 6 = 100 s. Add the time spent falling fast before the canopy opens.'],
+      give: 'A medium canopy opened at about 450 m works.' },
+    { id: 'z2', kind: 'drop', title: 'Mission 2: Supply crate for Mars', setup: { obj: 'crate', world: 'mars', height: 3000 },
+      brief: 'The Mars base needs supplies! The crate must land <b>slower than 20 m/s</b>. Mars has very thin air, so think carefully about the canopy.',
+      goal: 'The crate is dropped from 3,000 m above Mars.',
+      objs: [{ label: 'Land slower than 20 m/s', ok: r => r.landV < 20.0, say: r => `Landing velocity ${dz1(r.landV)} m/s: ${r.landV < 20.0 ? 'OK' : 'too fast'}.` }],
+      clues: ['Thin air means much less air resistance at every velocity. Which canopy gives the most air resistance?', 'Even with a canopy, the crate needs time and height to slow down. Open it high.', 'The large canopy works if it opens above about 350 m.'],
+      after: 'Even the large canopy only slows the crate to about 16 m/s. That\'s why real Mars landers use parachutes <b>and</b> rockets.',
+      give: 'The large canopy opened at 1,000 m or higher works.' },
+    { id: 'z3', kind: 'drop', title: 'Mission 3: Venus probe', setup: { obj: 'crate', world: 'venus', height: 1000 },
+      brief: 'Drop the science crate onto Venus. It must land <b>slower than 6 m/s</b>, within <b>4 minutes</b>, before the heat damages it.',
+      goal: 'The crate is dropped from 1,000 m above Venus.',
+      objs: [{ label: 'Land slower than 6 m/s', ok: r => r.landV < 6.0, say: r => `Landing velocity ${dz1(r.landV)} m/s: ${r.landV < 6.0 ? 'OK' : 'too fast'}.` },
+        { label: 'Land within 4 minutes (240 s)', ok: r => r.time <= 240, say: r => `Time ${fmt(r.time, 0)} s: ${r.time <= 240 ? 'OK' : 'too slow'}.` }],
+      clues: ['How thick is the air on Venus compared with Earth?', 'Try a drop with no canopy at all and watch the terminal velocity.', 'With no canopy, the crate\'s terminal velocity is about 5 m/s, so it lands in about 200 s. A canopy makes it far too slow.'],
+      give: 'No canopy at all works: the crate lands at about 5 m/s after about 200 s.' }
+  ]
+};
+
+
+/* ===== Chapter 5: the helicopter pad (S.scene = 'heli', Extension step p3) =====
+   The helicopter (mass 1,180 kg) starts on the pad. The student sets the lift (3,000 to 16,000 N). Vertical air resistance is 104 × v² against the motion,
+   so a lift of 12,500 N gives a steady climb of 3.0 m/s. Fixed 0.01 s steps, semi-implicit Euler, like the Drop Zone. It runs all the time (no Drop button).
+   Hovering = in the air with |v| < 0.05 m/s for 3 s. Script: docs/Chapter5_Script.md section B3. */
+const HE_M = 1180, HE_K = 104, HE_LO = 3000, HE_HI = 16000, HE_CEIL = 1000, HE_DT = 0.01;
+const HE = { lift: HE_LO, y: 0, v: 0, a: 0, t: 0, acc: 0, n: 0, hoverT: 0, hovering: false, holdV: null, holdT: 0, hi: null, lo: null, msg: '', msgAt: 0, landed: false, landReal: 0, marked: null };
+const heWeight = () => HE_M * G;
+function heliForce() {   // the forces at this moment
+  const W = heWeight(), D = HE_K * HE.v * Math.abs(HE.v), onPad = HE.y <= 0 && HE.v === 0, N = onPad ? Math.max(0, W - HE.lift) : 0;
+  const net = onPad && HE.lift <= W ? 0 : HE.lift - W - D;
+  return { W, D, N, lift: HE.lift, net, onPad };
+}
+function heliReset() {
+  Object.assign(HE, { lift: HE_LO, y: 0, v: 0, a: 0, t: 0, acc: 0, n: 0, hoverT: 0, hovering: false, holdV: null, holdT: 0, hi: null, lo: null, msg: '', landed: false, marked: null });
+}
+function heliStep() {
+  const f = heliForce(); HE.a = f.net / HE_M;
+  if (!(f.onPad && HE.lift <= f.W)) {
+    HE.v += HE.a * HE_DT; HE.y += HE.v * HE_DT;
+    if (HE.y <= 0) {   // back on the pad
+      const lv = -HE.v; HE.y = 0;
+      if (lv > 0.05) { HE.msg = lv > 4 ? 'Bump! Real pilots land more gently than that.' : 'Soft landing!'; HE.msgAt = performance.now(); HE.landed = true; HE.landReal = performance.now(); S.flags.heliLanded = true; }
+      HE.v = 0; HE.a = 0;
+    } else if (HE.y >= HE_CEIL) { HE.y = HE_CEIL; HE.v = Math.min(HE.v, 0); HE.msg = 'That is high enough! Press Reset to go back to the pad.'; HE.msgAt = performance.now(); }
+  }
+  HE.t += HE_DT; HE.n++;
+  if (HE.y > 20) S.flags.heliClimb20 = true;
+  if (HE.y > 50) S.flags.heliClimb50 = true;
+  if (HE.y > 0.3 && Math.abs(HE.a) < 0.01 && Math.abs(HE.v - 3) < 0.15) S.flags.heliSteady3 = true;
+  if (HE.y > 0.3 && Math.abs(HE.v) < 0.05) { HE.hoverT += HE_DT; if (HE.hoverT >= 3) { HE.hovering = true; S.flags.heliHover = true; } } else { HE.hoverT = 0; HE.hovering = false; }
+  /* markers: a lift that has been held for 2 s is judged by what it does from rest (climb or not) */
+  HE.holdT += HE_DT;
+  if (HE.holdV != null && HE.holdT >= 2 && HE.holdV !== HE.marked) {
+    HE.marked = HE.holdV;
+    if (HE.holdV > f.W) HE.hi = HE.hi == null ? HE.holdV : Math.min(HE.hi, HE.holdV);
+    else if (HE.holdV < f.W) HE.lo = HE.lo == null ? HE.holdV : Math.max(HE.lo, HE.holdV);
+    heliRenderControls();
+  }
+}
+function heliUpdate(dt) {
+  HE.acc += dt; let guard = 0;
+  while (HE.acc >= HE_DT - 1e-12 && guard++ < 80) { HE.acc -= HE_DT; heliStep(); }
+}
+function heliForces() { const f = heliForce(); return { L: 0, R: 0, shove: 0, app: 0, fr: 0, brk: 0, net: f.net, W: f.W, N: f.N, m: HE_M, a: HE.a, fmax: 0, fk: 0 }; }
+function heliSetup() {
+  clearCh2(); S.scene = 'heli'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; heliReset(); S.running = true;
+}
+/* headless run used by the tests: hold `lift` for `secs` seconds from the pad, returns y and v */
+function heliSimulate(lift, secs) {
+  const keep = JSON.stringify(HE), kf = S.flags; S.flags = newFlags(); heliReset(); HE.lift = lift; HE.holdV = lift;
+  for (let i = 0; i < Math.round(secs / HE_DT); i++) heliStep();
+  const out = { y: HE.y, v: HE.v }; Object.assign(HE, JSON.parse(keep)); S.flags = kf; return out;
+}
+function heliSetLift(v) {
+  v = clamp(Math.round(v), HE_LO, HE_HI); if (v === HE.lift) { heliRenderControls(); return; }
+  HE.lift = v; HE.holdV = v; HE.holdT = 0; HE.msg = ''; S.flags.heliLiftSet = true; heliRenderControls(); if (LAB.onChange) LAB.onChange();
+}
+function heliRenderControls() {
+  const r = $('#liftR'); if (!r) return;
+  if (document.activeElement !== r) r.value = HE.lift; const n = $('#liftNum'); if (n && document.activeElement !== n) n.value = HE.lift;
+  const mk = $('#liftMarks'), note = $('#liftNote'), pos = v => `${(v - HE_LO) / (HE_HI - HE_LO) * 100}%`;
+  if (mk) mk.innerHTML = (HE.hi != null ? `<i class="hi" style="left:${pos(HE.hi)}" title="Made it climb"></i>` : '') + (HE.lo != null ? `<i class="lo" style="left:${pos(HE.lo)}" title="Made it sink or stay on the pad"></i>` : '');
+  if (note) {
+    note.hidden = HE.hi == null && HE.lo == null;
+    note.innerHTML = `${HE.hi != null ? `<span class="hi">●</span> made it climb: ${fmt(HE.hi, 0)} N` : ''}${HE.hi != null && HE.lo != null ? ' · ' : ''}${HE.lo != null ? `<span class="lo">●</span> made it sink or stay put: ${fmt(HE.lo, 0)} N` : ''}${HE.hi != null && HE.lo != null ? '<br>The lift that makes it hover is between them.' : ''}`;
+  }
+}
+function initHeli() {
+  const r = $('#liftR'); if (!r) return;
+  r.addEventListener('input', () => heliSetLift(+r.value));
+  const n = $('#liftNum'), go = () => { const v = parseNum(n.value); if (isNaN(v)) { heliRenderControls(); return; } heliSetLift(v); };
+  n.addEventListener('change', go); n.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); n.blur(); } });
+  $$('[data-lf]').forEach(b => b.addEventListener('click', () => heliSetLift(HE.lift + +b.dataset.lf)));
+}
+
+/* ---------- drawing ---------- */
+function heliMasked() { return dzMasked(); }
+function drawHeliScene(c) {
+  const tt = performance.now() / 1000, sky = DZ_SKY.earth, alt = HE.y, camMin = (DZ_GY - DZ_REFY) / DZ_SC, cam = Math.max(alt, camMin), scr = a => DZ_REFY + (cam - a) * DZ_SC, x0 = 0, w = 900;
+  const f = heliForce(), mk = heliMasked();
+  const g = c.createLinearGradient(0, 0, 0, DZ_H); g.addColorStop(0, sky.top); g.addColorStop(1, sky.bot); c.fillStyle = g; c.fillRect(0, 0, w, DZ_H);
+  const lo = cam - (DZ_H - DZ_REFY) / DZ_SC - 10, hi = cam + DZ_REFY / DZ_SC + 10, sp = 45;
+  for (let i = Math.floor(lo / sp); i <= Math.ceil(hi / sp); i++) { const cx = 40 + dzHash(i, 5) * (w - 80), cy = scr(i * sp + dzHash(i, 6) * sp), r = 16 + dzHash(i, 7) * 22; c.fillStyle = 'rgba(255,255,255,.88)'; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.arc(cx + r * .9, cy + 4, r * .75, 0, 7); c.arc(cx - r * .9, cy + 5, r * .65, 0, 7); c.fill(); }
+  const gy = scr(0);
+  if (gy < DZ_H) {
+    c.fillStyle = sky.gnd; c.fillRect(0, gy, w, DZ_H - gy + 2); c.fillStyle = sky.gnd2; c.fillRect(0, gy + 8, w, 5);
+    c.fillStyle = '#5b6164'; c.beginPath(); c.roundRect(255, gy - 3, 150, 10, 4); c.fill(); c.fillStyle = '#f3d66a'; for (let q = 0; q < 6; q++) c.fillRect(265 + q * 24, gy + 0.5, 12, 3);
+    c.fillStyle = '#e8eef2'; c.beginPath(); c.arc(330, gy + 30, 13, 0, 7); c.fill(); txt(c, 'H', 330, gy + 31, '#5b6164', `800 17px ${C.fb}`);
+  }
+  /* altitude scale */
+  c.fillStyle = C.panel; c.globalAlpha = .86; c.fillRect(0, 0, 46, DZ_H); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(46.5, 0); c.lineTo(46.5, DZ_H); c.stroke();
+  const ds = DZ_STEPS.find(d => d * DZ_SC >= 44) || 1000, a0 = Math.max(0, Math.floor(lo / ds) * ds);
+  c.font = `600 11px ${C.fn}`; c.textAlign = 'right'; c.textBaseline = 'middle';
+  for (let a = a0; a <= hi + ds; a += ds) { const y = scr(a); if (y < 4 || y > DZ_H - 18) continue; c.strokeStyle = C.muted; c.lineWidth = 1.5; c.beginPath(); c.moveTo(46, y); c.lineTo(36, y); c.stroke(); c.fillStyle = C.ink; c.fillText(a >= 1000 ? Math.round(a).toLocaleString('en-GB') : String(a), 33, y); }
+  txt(c, 'metres', 23, DZ_H - 12, C.muted, `600 10px ${C.fn}`);
+  /* the helicopter (its skids touch the pad when y = 0) and the downwash */
+  const ox = 330, hy = scr(alt) - 24 - 2, airborne = alt > 0.05;
+  if (airborne || HE.lift > f.W * 0.6) { c.save(); c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 2; c.lineCap = 'round'; const ln = clamp(HE.lift / 16000 * 38, 4, 40); for (let q = 0; q < 5; q++) { const px = ox - 36 + q * 18, ph = RMOTION ? q / 5 : (tt * 1.6 + q / 5) % 1, py = hy + 30 + ph * 46; c.globalAlpha = (1 - ph) * (airborne ? .9 : .45); c.beginPath(); c.moveTo(px, py); c.lineTo(px, py + ln * (1 - ph * .4)); c.stroke(); } c.restore(); }
+  dzHeli(c, ox + 6, hy, HE.lift > f.W * 0.5 || airborne ? tt : 0);
+  pill(c, '1,180 kg', ox, hy - 46, C.ink, 12);
+  /* messages */
+  if (HE.hovering) dzNote(c, 'Hovering!', 246, 92, C.good, 380, 18);
+  else if (HE.msg && performance.now() - HE.msgAt < 6000) dzNote(c, HE.msg, 246, 92, HE.msg.startsWith('Bump') ? C.hazard : C.good, 380, 14);
+  else if (!airborne && HE.lift <= f.W) dzNote(c, 'On the pad. Make the lift bigger to take off.', 246, 92, C.line, 380, 14);
+  /* the free-body diagram */
+  if (LAB.show.has('dfbd')) heliFBD(c, f, mk);
+  hudBox(c, `${fmt(Math.round(HE.t * 10) / 10, 1)} s`, 54, 22, C.left, 'left'); hudBox(c, 'Earth · Helicopter pad', w - 8, 22, C.line, 'right');
+  heliReadouts(mk);
+}
+function heliFBD(c, f, mk) {
+  const px = 440, pw = 450, fcx = px + pw / 2 - 6, fcy = 372, kw = 56 / f.W;
+  c.save(); c.fillStyle = C.panel; c.globalAlpha = .93; c.beginPath(); c.roundRect(px, 86, pw, DZ_H - 96, 10); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.5; c.stroke();
+  txt(c, 'Free-body diagram', px + 10, 99, C.muted, `700 12px ${C.fb}`, 'left');
+  c.save(); c.globalAlpha = .9; c.translate(fcx, fcy + 6); c.scale(.5, .5); dzHeli(c, 0, 0, 0); c.restore();
+  const lab = (l1, l2, x, y, col) => { c.font = `700 11px ${C.fn}`; const ww = Math.max(c.measureText(l1).width, c.measureText(l2).width) + 8, xx = clamp(x, px + ww / 2 + 3, px + pw - ww / 2 - 3); c.fillStyle = C.panel; c.fillRect(xx - ww / 2, y - 14, ww, 28); txt(c, l1, xx, y - 6, col, `600 11px ${C.fn}`); txt(c, l2, xx, y + 6.5, col, `800 12px ${C.fn}`); };
+  const wx = fcx - 40, lx = fcx + 8, dx = fcx + 56;
+  arrow(c, wx, fcy, wx, fcy + 56, C.vert, 4); lab('weight', mk.has('heliW') ? '? N' : dzN(f.W), wx, fcy + 56 + 22, C.vert);
+  const ll = f.lift * kw; arrow(c, lx, fcy, lx, fcy - ll, C.accent, 4); lab('lift', dzN(f.lift), lx, fcy - ll - 22, C.accent);
+  if (f.N > 1) { const nl = f.N * kw; arrow(c, lx + 36, fcy, lx + 36, fcy - nl, C.vert, 4); lab('pad pushes up', dzN(f.N), lx + 36, fcy - nl - 22, C.vert); }
+  const dl = Math.abs(f.D) * kw;
+  if (dl > 2 && Math.abs(HE.v) > 0.05) { const up = HE.v < 0; arrow(c, dx, fcy, dx, up ? fcy - dl : fcy + dl, C.res, 4); lab('air resistance', dzN(f.D), dx, up ? fcy - dl - 22 : fcy + dl + 22, C.res); }
+  else lab('air resistance', '0 N', dx, fcy + 30, C.res);
+  c.restore();
+}
+function heliReadouts(mk) {
+  const el = $('#dreads'); if (!el || el.hidden) return;
+  const keys = ['readH', 'readV'].filter(k => LAB.show.has(k)), sig = 'heli' + keys.join();
+  if (el.dataset.sig !== sig) {
+    el.dataset.sig = sig; const lab = { readH: 'Height', readV: 'Velocity (upwards)' }, tip = { readH: 'height', readV: 'velocity' };
+    el.innerHTML = `<div class="dlane"><div class="dlh" style="color:${C.left}">Helicopter · Earth</div><div class="dgrid">${keys.map(k => `<div class="rd" data-panel="${k}"><div class="lbl"><button type="button" class="term tl" data-t="${tip[k]}">${lab[k]}</button></div><div class="v" id="he-${k}"></div></div>`).join('')}</div></div>`;
+  }
+  const set = (k, s) => { const e = document.getElementById('he-' + k); if (e && e.textContent !== s) e.textContent = s; };
+  set('readH', fmt(Math.max(0, HE.y), 1) + ' m'); set('readV', Math.abs(HE.v) < 0.005 ? '0 m/s' : fmt(Math.abs(HE.v), 1) + ' m/s ' + (HE.v > 0 ? '↑' : '↓'));
+}
+
+Object.assign(INFO, {
+  lift: { title: 'How to use the lift slider', cards: [{ hi: '[data-panel="lift"]', html: `<p>The <b>lift</b> is the upward force from the helicopter's blades. Drag the slider, type a number, or use the small buttons to change it. The <b>free-body diagram</b> shows the lift, the weight and the air resistance.</p><p>Each lift you hold for a couple of seconds leaves a marker: <b style="color:#d6402c">red</b> if it made the helicopter climb, <b style="color:#c99a10">yellow</b> if it made it sink or stay on the pad.</p>` }] }
+});
+
+/* ---- Explore: the helicopter pad with every control ---- */
+const HE_EXPLORE_TRY = [
+  ['Take off and climb above 50 m.', () => !!S.flags.heliClimb50],
+  ['Make the helicopter hover for 3 seconds.', () => !!S.flags.heliHover],
+  ['Find a lift that makes it climb at a steady 3 m/s. Check the Velocity readout stays at 3.0 m/s.', () => !!S.flags.heliSteady3]
+];
+function openExploreHeli() {
+  show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Helicopter pad', 'Helicopter pad sandbox');
+  heliSetup(); S.flags = newFlags(); resetSim();
+  LAB.mode = 'explore'; LAB.show = new Set(['lift', 'dfbd', 'readH', 'readV']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.idle = null; LAB.showVert = true; LAB.showRes = true;
+  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  const done = new Set(dbGet('tryDoneHe', []));
+  const draw = () => { $('#rail').innerHTML = `${exploreSwitch('heli')}<span class="lbl">Explore · Helicopter pad</span><h2>Test your own ideas</h2><p class="gl">Change the lift and watch the helicopter, the readouts and the free-body diagram. The helicopter's mass is 1,180 kg. Its weight is shown on the diagram.</p><div class="lbl">Try this</div><ul class="tasks gl">${HE_EXPLORE_TRY.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change the lift a little at a time. A small change makes a big difference near the weight.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
+  draw();
+  LAB.onChange = null; LAB.tick = () => { HE_EXPLORE_TRY.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDoneHe', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
+}
 
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
 CHDATA.c1.review = [
@@ -5341,9 +5797,19 @@ const SECTIONS = [
     blurb: 'Thrusters and rockets, then mission control\'s docking orders: work out the push that gives the right docking velocity.',
     steps: ['g1', 'g2'], challenge: ['o1', 'o2', 'o3'], review: ['c4r9', 'c4r10', 'c4r11', 'c4r12', 'c4r13'], needs: 'c4f',
     goal: 'Explain how thrusters and rockets use force pairs; work out the push needed for a target velocity using force = mass × velocity; keep the astronaut\'s velocity within a limit by choosing their mass.',
-    vocab: ['thruster', 'force pair', 'Newton\'s third law', 'Newton\'s first law', 'mass', 'force'] }
+    vocab: ['thruster', 'force pair', 'Newton\'s third law', 'Newton\'s first law', 'mass', 'force'] },
+  { id: 'c5f', ch: 'c5', n: 5, title: 'Falling and terminal velocity', part: 'Foundation', stamp: 'Skydive Spotter',
+    blurb: 'Drop a crate and a skydiver, pause the fall to read the forces, and find out why the velocity stops going up and what a parachute does.',
+    steps: ['d1', 'd2', 'd3', 'd4'], challenge: null, review: ['c5r1', 'c5r2', 'c5r3', 'c5r4', 'c5r5', 'c5r6', 'c5r7'],
+    goal: 'Describe how weight and air resistance change during a fall; use balanced forces to explain terminal velocity; say what happens to the forces and the velocity when a parachute opens.',
+    vocab: ['air resistance', 'weight', 'terminal velocity', 'balanced forces', 'resultant force', 'parachute', 'canopy'] },
+  { id: 'c5x', ch: 'c5', n: 5, title: 'Falling and terminal velocity', part: 'Extension', stamp: 'Planet Hopper',
+    blurb: 'Race a feather and a crate with and without air, drop on other worlds, make the helicopter hover, then deliver three loads on Earth, Mars and Venus.',
+    steps: ['p1', 'p2', 'p3'], challenge: ['z1', 'z2', 'z3'], review: ['c5r8', 'c5r9', 'c5r10', 'c5r11', 'c5r12'], needs: 'c5f',
+    goal: 'Explain why heavy and light objects fall differently in air but not in a vacuum; use W = m × g to find weight on different worlds; explain how the lift of a hovering helicopter equals its weight; choose a canopy and an opening height for a safe landing.',
+    vocab: ['air resistance', 'weight', 'terminal velocity', 'gravitational field strength', 'vacuum', 'lift', 'hover', 'parachute'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
 CHDATA.c1.review.push({ id: 'r12', seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];
@@ -5734,15 +6200,15 @@ function openExplore() {
 }
 /* Explore has two places to play: the Main Arena tug-of-war and the Drop Zone */
 const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
-const exploreSwitch = cur => `<div class="seg two exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button></div>`;
+const exploreSwitch = cur => `<div class="seg three exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button><button type="button" data-exscene="heli" aria-pressed="${cur === 'heli'}">Helicopter</button></div>`;
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initDrop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
   document.addEventListener('click', e => {
     const t = e.target;
-    const exs = t.closest('[data-exscene]'); if (exs && VIEW === 'vExplore') { if (exs.dataset.exscene === 'drop') openExploreDrop(); else openExplore(); return; }
+    const exs = t.closest('[data-exscene]'); if (exs && VIEW === 'vExplore') { if (exs.dataset.exscene === 'drop') openExploreDrop(); else if (exs.dataset.exscene === 'heli') openExploreHeli(); else openExplore(); return; }
     if (t.closest('[data-journal]')) { if (journalOpen()) closeJournal(); else openJournal(); return; }
     const op = t.closest('[data-open]'); if (op) { if (op.closest('[data-close]') || op.closest('.modal')) closeModal(); openChapter(op.dataset.open); return; }
     const tab = t.closest('#chTabs [data-ctab]'); if (tab) { setCTab(tab.dataset.ctab); return; }
