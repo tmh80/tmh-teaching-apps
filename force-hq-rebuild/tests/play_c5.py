@@ -61,6 +61,7 @@ with sync_playwright() as p:
     q('q2').locator('.pickin').nth(0).select_option('1'); q('q2').locator('.pickin').nth(1).select_option('0'); q('q2').locator('.qchk').click(); pg.wait_for_timeout(100)
     chk('d1 q2: pick right, feedback sensible', ptsq('q2') == '2 of 2 points' and 'stays the same during the fall' in fbq('q2'), (ptsq('q2'), fbq('q2')))
     q('q3').locator('[data-o="0"]').click(); pg.wait_for_timeout(100); chk('d1 q3: mcq right', ptsq('q3').startswith('1 of 1'), ptsq('q3'))
+    q('q4').locator('[data-o="0"]').click(); pg.wait_for_timeout(100); chk('d1 q4: helicopter review mcq right', ptsq('q4').startswith('1 of 1'), ptsq('q4'))
     chk('d1: step done', stepDone(), ev("JSON.stringify(dbGet(stepKey(CH.id,GI)))")[:200]); print('run text:', ev("runText(runsAll().filter(r=>r.kind==='drop').slice(-1)[0])")); pg.screenshot(path=OUT + 'd1_done.png'); nxt()
 
     # ================= d2 =================

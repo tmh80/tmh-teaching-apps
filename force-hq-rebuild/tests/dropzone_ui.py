@@ -76,6 +76,24 @@ with sync_playwright() as p:
     for w in ['earth', 'moon', 'mars', 'venus', 'titan', 'jupiter']:
         pg.locator(f'[data-dzworld="{w}"]').click(); pg.locator('[data-dzobj="basketball"]').click(); pg.wait_for_timeout(250); pg.screenshot(path=OUT + f'w_{w}.png')
     pg.locator('#dzDrop').click(); pg.wait_for_timeout(1200); pg.screenshot(path=OUT + 'w_jupiter_fall.png')
+    # held by the helicopter: still, so the resultant and acceleration are 0 and the rope arrow is drawn; the helicopter climbs after release
+    pg.locator('#journalClose, [data-close]').first.click() if pg.locator('#journal').is_visible() else None
+    ev("dzReset(); DZ.two=false; DZ.lanes[0].obj='crate'; DZ.lanes[0].world='earth'; DZ.lanes[0].removed=0; dzLaneReset(DZ.lanes[0], DZ.height)"); pg.wait_for_timeout(200)
+    held = ev("(()=>{const v=dzAt(DZ.lanes[0]);return [v.W,v.R,v.a,dzHeliRise(DZ.lanes[0],v.t)]})()")
+    chk('held crate: weight 392 N, resultant 0, acceleration 0, no climb yet', abs(held[0]-392)<1e-6 and held[1]==0 and held[2]==0 and held[3]==0, held)
+    ev("dzDrop(); S.running=false; (()=>{const L=DZ.lanes[0]; while(L.t<1-1e-9) dzStep(L);})()")
+    rel = ev("(()=>{const v=dzAt(DZ.lanes[0]);return [v.R,v.a]})()"); chk('after release the resultant is back (weight minus air resistance)', rel[0] > 300 and rel[1] > 7, rel)
+    # the helicopter's climb matches a step-by-step run of its own forces (lift fixed at the old hover value, drag 104 v^2 times the air factor)
+    for w, rm in (('earth', 0), ('mars', 0), ('moon', 0), ('earth', 50)):
+        got = ev("(()=>{const L=dzNewLane('T'); L.obj='crate'; L.world=%r; L.removed=%d; L.started=true; const m=40,g=dzWorld(L).g,f=dzFactor(L); let v=0,y=0; for(let i=0;i<800;i++){const a=(m*g-104*f*v*Math.abs(v))/1180; v+=a*0.01; y+=v*0.01;} return [y, dzHeliRise(L,8)];})()" % (w, rm))
+        chk(f'helicopter climb after 8 s ({w}, {rm}% removed) matches the step-by-step run', abs(got[0]-got[1]) < 0.02 * max(0.05, got[0]) + 0.01, got)
+    # speed effects draw without errors at several speeds, in one lane and two, with and without air
+    for tag, setup in (('earth', "dzReset(); DZ.two=false; DZ.lanes[0].world='earth'; DZ.lanes[0].removed=0"), ('vacuum', "dzReset(); DZ.two=false; DZ.lanes[0].world='earth'; DZ.lanes[0].removed=100"), ('moon', "dzReset(); DZ.two=false; DZ.lanes[0].world='moon'"), ('two', "dzReset(); DZ.two=true; DZ.lanes[1].world='mars'")):
+        ev(setup + "; DZ.lanes.forEach(L=>{L.obj='crate'; dzLaneReset(L, DZ.height)}); dzDrop(); S.running=false")
+        for t in (2, 8, 17):
+            ev("(()=>{DZ.lanes.filter(L=>dzActive().includes(L)).forEach(L=>{while(L.t<%s-1e-9 && !L.landed) dzStep(L);});})()" % t); pg.wait_for_timeout(100)
+        pg.locator('#cvScene').screenshot(path=OUT + f'fx_{tag}.png')
+    ev("DZ.two=false")
     # Journal runs tab shows the drops and snapshots
     pg.locator('[data-journal]').first.click(); pg.wait_for_timeout(300)
     chk('journal lists snapshot and runs', 'Snapshot' in pg.locator('#journal').inner_text() and 'You dropped' in pg.locator('#journal').inner_text())

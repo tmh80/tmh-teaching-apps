@@ -39,7 +39,9 @@ const dzFrac = L => L.opened == null ? 0 : Math.min(1, (L.t - L.opened) / DZ_OPE
 /* the forces at this moment (at the lane's t and v), stored on the lane */
 function dzCalc(L) {
   const o = DZ_OBJ[L.obj], k = dzCoef(L), fr = dzFrac(L), c = k.c0 + (k.c1 - k.c0) * fr;
-  L.fr = fr; L.W = o.m * dzWorld(L).g; L.D = c * dzFactor(L) * L.v * Math.abs(L.v); L.R = L.W - L.D; L.a = L.R / o.m; return L;
+  L.fr = fr; L.W = o.m * dzWorld(L).g; L.D = c * dzFactor(L) * L.v * Math.abs(L.v); L.R = L.W - L.D; L.a = L.R / o.m;
+  if (!L.started) { L.R = 0; L.a = 0; }   // still hanging from the helicopter: the rope pulls up as hard as the weight pulls down (the free-body diagram draws it)
+  return L;
 }
 /* one fixed step of 0.01 s */
 function dzStep(L) {

@@ -71,6 +71,51 @@ function dzHeli(c, x, y, tt) {
   c.lineWidth = 3; c.beginPath(); c.moveTo(-34, 24); c.lineTo(30, 24); c.moveTo(-20, 16); c.lineTo(-20, 24); c.moveTo(16, 16); c.lineTo(16, 24); c.stroke(); c.restore();
 }
 
+
+/* motion blur for the background: the same drawing three times, the two ghost copies shifted up and down, more as the object speeds up */
+function dzBlur(c, b, draw) {
+  if (b < 1) { draw(); return; }
+  const m = c.globalAlpha; c.globalAlpha = m * (1 - 0.45 * Math.min(1, b / 10)); draw();
+  c.globalAlpha = m * 0.3; c.save(); c.translate(0, -b); draw(); c.restore(); c.save(); c.translate(0, b); draw(); c.restore(); c.globalAlpha = m;
+}
+/* how far the helicopter has climbed since it let go: its lift stays the same but the load's weight is gone, so the resultant is the load's weight, upwards (same drag law as the hover pad) */
+function dzHeliRise(L, t) {
+  if (!L.started || t <= 0) return 0;
+  const m = DZ_OBJ[L.obj].m, g = dzWorld(L).g, a0 = m * g / HE_M, f = dzFactor(L);
+  if (f <= 0) return 0.5 * a0 * t * t;
+  const vt = Math.sqrt(m * g / (HE_K * f)), x = a0 * t / vt;
+  return vt * vt / a0 * (x + Math.log1p(Math.exp(-2 * x)) - Math.LN2);
+}
+/* things the object falls past, fixed at real heights so they slide by at the right speed: birds, skyscrapers, flood lights and crates on the floor */
+const DZ_TOWERS = [[.04, .11, 150], [.3, .1, 205], [.57, .12, 120]];   // [position across, width, roof height in m]
+function dzTowers(c, bx, bw, scr, gy, lo, hi) {
+  DZ_TOWERS.forEach(([u, ww, top], k) => {
+    const x = bx + u * bw, w = Math.max(24, ww * bw), y0 = scr(top); if (y0 > DZ_H || gy < 0) return;
+    c.fillStyle = k % 2 ? '#8fa9be' : '#7f9bb2'; c.fillRect(x, y0, w, gy - y0); c.fillStyle = '#a3bacc'; c.fillRect(x, y0, w, 4); c.fillStyle = '#6d879c'; c.fillRect(x + w / 2 - 1.5, y0 - 14, 3, 14);
+    const rows = Math.floor(top / 7), cols = Math.max(2, Math.floor(w / 9));
+    for (let r = 1; r < rows; r++) { const ry = scr(r * 7); if (ry < -10 || ry > DZ_H) continue; for (let q = 0; q < cols; q++) { c.fillStyle = dzHash(r * 9 + k, q + 3) > .55 ? 'rgba(255,240,180,.8)' : 'rgba(55,80,104,.4)'; c.fillRect(x + 4 + q * ((w - 8) / cols), ry - 14, ((w - 8) / cols) - 3, 9); } }
+  });
+}
+function dzBirds(c, bx, bw, scr, lo, hi, tt) {
+  const sp = 110, i0 = Math.max(0, Math.floor(lo / sp)), i1 = Math.min(Math.ceil(hi / sp), 4);
+  for (let i = i0; i <= i1; i++) {
+    const a = i * sp + 40 + dzHash(i, 41) * 40, y = scr(a), dir = dzHash(i, 42) > .5 ? 1 : -1, x = bx + ((dzHash(i, 43) + dir * (RMOTION ? 0 : tt * 0.02)) % 1 + 1) % 1 * bw, fl = RMOTION ? 0.3 : Math.sin(tt * 9 + i * 2);
+    if (y < -20 || y > DZ_H) continue;
+    c.save(); c.translate(x, y); c.scale(dir, 1); c.strokeStyle = '#2d3b48'; c.lineWidth = 2.4; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(-13, -4 - 6 * fl); c.quadraticCurveTo(-6, -8 - 5 * fl, 0, 0); c.quadraticCurveTo(6, -8 - 5 * fl, 13, -4 - 6 * fl); c.stroke(); c.fillStyle = '#2d3b48'; c.beginPath(); c.arc(0, 0, 2.6, 0, 7); c.fill(); c.restore();
+  }
+}
+function dzFloods(c, x0, two, scr, gy) {
+  (two ? [58, 200] : [58, 250]).forEach(dx => {
+    const x = x0 + dx, top = scr(24); if (top > DZ_H) return;
+    c.strokeStyle = '#4b5560'; c.lineWidth = 4; c.beginPath(); c.moveTo(x, gy); c.lineTo(x, top); c.stroke();
+    c.fillStyle = '#3a4650'; c.fillRect(x - 17, top - 9, 34, 10); c.fillStyle = '#fff6c4'; [-11, 0, 11].forEach(d => { c.beginPath(); c.arc(x + d, top - 4, 3.6, 0, 7); c.fill(); });
+    c.fillStyle = 'rgba(255,246,196,.16)'; c.beginPath(); c.moveTo(x - 15, top + 1); c.lineTo(x + 15, top + 1); c.lineTo(x + 46, gy); c.lineTo(x - 46, gy); c.closePath(); c.fill();
+  });
+}
+function dzFloorCrates(c, x0, two, gy) {
+  (two ? [[84, 2], [112, 1]] : [[96, 3], [176, 2]]).forEach(([dx, n]) => { const x = x0 + dx; for (let r = 0; r < n; r++) for (let q = 0; q < n - r; q++) dzCrate(c, x + (q - (n - r - 1) / 2) * 33, gy + 2 - r * 27, 0.7); });
+}
+
 /* a small rounded note that wraps its text to fit (state and landing messages) */
 function dzNote(c, text, cx, y, col, maxW, size = 13) {
   c.font = `700 ${size}px ${C.fn}`; const words = text.split(' '), lines = []; let cur = '';
@@ -89,19 +134,26 @@ function dzLane(c, L, idx, x0, w, tt) {
   const g = c.createLinearGradient(0, 0, 0, DZ_H); g.addColorStop(0, sky.top); g.addColorStop(1, sky.bot); c.fillStyle = g; c.fillRect(x0, 0, w, DZ_H);
   if (L.world === 'moon' || (L.world === 'mars' && cam > 800)) { c.fillStyle = '#fff'; dzStars.forEach(([a, b, r], i) => { c.globalAlpha = L.world === 'moon' ? 0.85 : 0.5; c.beginPath(); c.arc(x0 + a * w, b * (DZ_H - 50), r * .8, 0, 7); c.fill(); }); c.globalAlpha = 1; }
   const lo = cam - (DZ_H - DZ_REFY) / DZ_SC - 10, hi = cam + DZ_REFY / DZ_SC + 10;
+  /* speed effects: from about 8 m/s the background blurs and (where there is air) speed lines appear, both growing with the velocity */
+  const sfx = !RMOTION && L.started && !v.landed ? clamp((v.v - 8) / 40, 0, 1) : 0, blurPx = sfx * 14, airVis = dzFactor(L) <= 0 ? 0 : Math.min(1, 0.3 + dzFactor(L)), sl = sfx * airVis;
+  const bx0 = x0 + 52, bwid = (two ? 216 : 440) - 60;   // the strip of sky that is not behind the free-body diagram
   if (L.world === 'jupiter') {   // banded clouds at fixed altitudes
     const cols = ['#c9915f', '#ead5b6', '#b9784e', '#f1e3c8', '#d8ab7c']; const b0 = Math.floor(lo / 40) - 1, b1 = Math.ceil(hi / 40) + 1;
     for (let i = b0; i <= b1; i++) { c.fillStyle = cols[((i % 5) + 5) % 5]; c.globalAlpha = .75; const y = scr(i * 40); c.fillRect(x0, y, w, 40 * DZ_SC); } c.globalAlpha = 1;
-  } else if (L.world !== 'moon') {   // cloud puffs, haze streaks or dust that slide past as you fall
+  } else if (L.world !== 'moon') dzBlur(c, blurPx, () => {   // cloud puffs, haze streaks or dust that slide past as you fall
     const sp = L.world === 'earth' ? 45 : 60, i0 = Math.floor(lo / sp), i1 = Math.ceil(hi / sp);
     for (let i = i0; i <= i1; i++) {
       const cx = x0 + 40 + dzHash(i, 5) * (w - 80), cy = scr(i * sp + dzHash(i, 6) * sp), r = 16 + dzHash(i, 7) * 22;
       if (L.world === 'earth') { c.fillStyle = 'rgba(255,255,255,.88)'; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.arc(cx + r * .9, cy + 4, r * .75, 0, 7); c.arc(cx - r * .9, cy + 5, r * .65, 0, 7); c.fill(); }
       else { c.fillStyle = L.world === 'venus' ? 'rgba(255,238,170,.42)' : L.world === 'titan' ? 'rgba(255,214,150,.36)' : 'rgba(255,225,190,.3)'; c.beginPath(); c.roundRect(cx - r * 1.6, cy - 5, r * 3.2, 11, 6); c.fill(); }
     }
-  }
+  });
   /* ground, or the cloud-top platform */
   const gy = scr(0);
+  if (gy > 0) dzBlur(c, blurPx, () => {   // the things the object drops past (they blur with the clouds)
+    if (L.world === 'earth') { dzBirds(c, bx0, bwid, scr, lo, hi, tt); dzTowers(c, bx0, bwid, scr, gy, lo, hi); }
+    if (gy < DZ_H + 80) dzFloods(c, x0, two, scr, gy);
+  });
   if (gy < DZ_H) {
     if (L.world === 'jupiter') {
       c.fillStyle = '#b9784e'; c.fillRect(x0, gy + 14, w, DZ_H); c.fillStyle = '#ead5b6'; c.fillRect(x0, gy + 40, w, 18);
@@ -112,6 +164,18 @@ function dzLane(c, L, idx, x0, w, tt) {
       c.fillStyle = '#5b6164'; c.beginPath(); c.roundRect(x0 + (two ? 70 : 280), gy - 3, two ? 150 : 150, 10, 4); c.fill(); c.fillStyle = '#f3d66a'; for (let q = 0; q < 6; q++) c.fillRect(x0 + (two ? 70 : 280) + 10 + q * 24, gy + 0.5, 12, 3);
     }
   }
+  if (gy < DZ_H && L.world !== 'jupiter') dzBlur(c, blurPx * 0.6, () => dzFloorCrates(c, x0, two, gy));
+  /* speed lines: they sit at fixed heights in the air, so they slide up past the object, and they get longer and more numerous the faster it goes */
+  if (sl > 0.03) {
+    const sp = 12, i0 = Math.floor(lo / sp), i1 = Math.ceil(hi / sp), ln = clamp(v.v * 1.6, 10, 150); c.save(); c.lineCap = 'round';
+    for (let i = i0; i <= i1; i++) for (let k = 0; k < 3; k++) {
+      if (dzHash(i, 30 + k) > 0.12 + 0.88 * sl) continue;
+      const x = bx0 + dzHash(i, 33 + k) * (w - 60), y = scr(i * sp + dzHash(i, 36 + k) * sp), len = ln * (0.55 + 0.45 * dzHash(i, 39 + k)); if (y > gy) continue;
+      c.lineWidth = 2.5; c.strokeStyle = 'rgba(255,255,255,' + (0.28 + 0.3 * sl) + ')'; c.beginPath(); c.moveTo(x, y - len / 2); c.lineTo(x, y + len / 2); c.stroke();
+      c.lineWidth = 3.5; c.strokeStyle = 'rgba(255,255,255,' + (0.4 + 0.5 * sl) + ')'; c.beginPath(); c.moveTo(x, y - len * 0.2); c.lineTo(x, y + len * 0.2); c.stroke();
+    }
+    c.restore();
+  }
   /* altitude scale */
   c.fillStyle = C.panel; c.globalAlpha = .86; c.fillRect(x0, 0, 46, DZ_H); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1; c.beginPath(); c.moveTo(x0 + 46.5, 0); c.lineTo(x0 + 46.5, DZ_H); c.stroke();
   const ds = DZ_STEPS.find(d => d * DZ_SC >= 44) || 1000, a0 = Math.max(0, Math.floor(lo / ds) * ds);
@@ -120,9 +184,7 @@ function dzLane(c, L, idx, x0, w, tt) {
   txt(c, 'metres', x0 + 23, DZ_H - 12, C.muted, `600 10px ${C.fn}`);
   /* the helicopter hangs at the drop height (it scrolls away when the camera follows the object) */
   const ox = x0 + (two ? 132 : 330), objY = scr(alt);
-  const hy = scr(DZ.height) - 62 - hgtObj; if (hy > -50) { dzHeli(c, ox + 6, hy, tt); if (!L.started) { c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(ox, hy + 24); c.lineTo(ox, objY - hgtObj - (dzCoef(L).has ? 8 : 0)); c.stroke(); } }
-  /* speed lines */
-  if (L.started && !L.landed && v.v > 10 && !(DZ.paused)) { c.save(); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 2; c.lineCap = 'round'; const ln = clamp(v.v * 0.7, 8, 46); for (let q = 0; q < 7; q++) { const px = ox - 44 + q * 15 + (dzHash(q, 9) - .5) * 6, ph = RMOTION ? q / 7 : (tt * (v.v / 20) + q / 7) % 1, py = objY - hgtObj - 20 - ph * 150; c.globalAlpha = 1 - ph; c.beginPath(); c.moveTo(px, py); c.lineTo(px, py + ln); c.stroke(); } c.restore(); }
+  const hy = scr(DZ.height + dzHeliRise(L, v.t)) - 62 - hgtObj; if (hy > -50) { dzHeli(c, ox + 6, hy, tt); if (!L.started) { c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(ox, hy + 24); c.lineTo(ox, objY - hgtObj - (dzCoef(L).has ? 8 : 0)); c.stroke(); } }
   /* the object (it bounces or rolls when it lands) */
   let ay = objY, tilt = 0;
   if (L.landed) {
@@ -161,7 +223,8 @@ function dzFBD(c, L, v, x0, w, mk) {
   arrow(c, wx, fcy, wx, fcy + 56, C.vert, 4);
   lab('weight', mk.has('fbdW') ? '? N' : dzN(v.W), wx - 6, fcy + 56 + 22, C.vert);
   const dl = v.D * kw;
-  if (dl > 3) { const L2 = Math.min(dl, CAP); arrow(c, ax, fcy, ax, fcy - L2, C.res, 4); if (dl > CAP) brk(ax, fcy - 30 - (L2 - 30) / 2); if (fcy - L2 - 22 < 112) lab('air resistance', dzN(v.D), ax + 56, fcy - L2 + 18, C.res); else lab('air resistance', dzN(v.D), ax + 8, fcy - L2 - 22, C.res); }
+  if (!L.started) { arrow(c, ax, fcy, ax, fcy - 56, C.vert, 4); lab('rope pulls up', mk.has('fbdW') ? '? N' : dzN(v.W), ax + 18, fcy - 56 - 22, C.vert); lab('air resistance', '0 N', ax + 44, fcy - 22, C.res); }
+  else if (dl > 3) { const L2 = Math.min(dl, CAP); arrow(c, ax, fcy, ax, fcy - L2, C.res, 4); if (dl > CAP) brk(ax, fcy - 30 - (L2 - 30) / 2); if (fcy - L2 - 22 < 112) lab('air resistance', dzN(v.D), ax + 56, fcy - L2 + 18, C.res); else lab('air resistance', dzN(v.D), ax + 8, fcy - L2 - 22, C.res); }
   else lab('air resistance', '0 N', ax + 22, fcy - 30, C.res);
   if (!mk.has('fbdR')) {
     const bal = Math.abs(v.R) <= 0.01 * v.W, rl = Math.abs(v.R) * kw, down = v.R >= 0;
