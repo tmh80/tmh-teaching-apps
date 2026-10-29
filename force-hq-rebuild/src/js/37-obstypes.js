@@ -7,7 +7,7 @@ Object.assign(QLABEL, { freeze: 'Freeze-frame table', spot: 'Tap the moment', sk
    {id, type:'freeze', p, obj:'crate', cols:[['W','Weight (N)'], ['D','Air resistance (N)'], ['R','Resultant (N)'], ['motion','Velocity']],
     rows:[{label, when: snap => bool, whenMsg}], example:[[392, 25, 367, 'speeding up'], ...], after}
    Column keys: W, D (numbers read from the free-body diagram), R (resultant, W − D, a number), big (which force is bigger: pick), motion (pick).
-   1 mark per box. The student pauses the drop, presses "Use this moment" on a row (which attaches the snapshot for that moment), then fills in the row. */
+   1 mark per box. Each row says when to pause. When the student pauses the drop at a moment that fits a row with no moment yet, the app attaches a snapshot for it by itself (frzAuto) and the row shows it; "Pick another moment" lets the student redo a row. There is no button to press. */
 const FRZ_STEADY = 0.2, FRZ_EQUAL = 0.03;                   // |a| below this is "steady"; |R| below this fraction of the weight is "equal"
 const FRZ_PICK = { big: ['weight', 'air resistance', 'neither, they\'re equal'], motion: ['speeding up', 'steady', 'slowing down'] };
 const frzIsNum = k => k === 'W' || k === 'D' || k === 'R';
@@ -20,27 +20,50 @@ function frzTruth(k, s) {                                   // the right reading
 const frzFmt = (k, x) => frzIsNum(k) ? fmtN(x) : FRZ_PICK[k][x];
 const fmtN = x => { const a = Math.abs(x); return (a < 1 ? x.toFixed(3) : a < 10 ? x.toFixed(2) : String(Math.round(x))).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
 const frzState = (q, s) => (s && s.v && Array.isArray(s.v.rows)) ? s.v.rows : q.rows.map(() => ({ snap: null, vals: {} }));
-const frzAtTxt = sn => sn ? `Paused at ${fmt(sn.t, 1)} s · ${fmt(sn.y, 0)} m up · ${dz1(sn.v)} m/s` : 'No moment attached yet';
+const frzAtTxt = sn => sn ? `Paused at ${fmt(sn.t, 1)} s · ${fmt(sn.y, 0)} m up · ${dz1(sn.v)} m/s` : 'No moment yet';
+/* the line under a row's heading: what to look for until a moment is captured, then the moment that was captured */
+const frzGrab = (q, ri, sn) => sn
+  ? `<span class="frzat">✓ ${frzAtTxt(sn)}</span><button type="button" class="ghost sm frzredo" data-ri="${ri}">Pick another moment</button>`
+  : `<span class="frzat">⏸ ${esc(plain(q.rows[ri].whenMsg || 'Pause the drop at this moment.'))} The row fills in by itself.</span>`;
 function frzCell(q, k, head, ri, vals) {
   const val = vals && vals[k] != null ? vals[k] : '';
   return `<label class="frzf"><span>${head}</span>` + (frzIsNum(k)
     ? `<input class="frzin" inputmode="decimal" autocomplete="off" data-ri="${ri}" data-k="${k}" value="${esc(val)}" aria-label="${esc(head)}, ${esc(plain(q.rows[ri].label))}">`
     : `<select class="frzin" data-ri="${ri}" data-k="${k}" aria-label="${esc(head)}, ${esc(plain(q.rows[ri].label))}"><option value="">choose…</option>${FRZ_PICK[k].map((o, j) => `<option value="${j}"${String(val) === String(j) ? ' selected' : ''}>${o}</option>`).join('')}</select>`) + '</label>';
 }
-function frzMoment(q, ri) {                                  // the snapshot for the paused moment, if it is a fair choice for this row
-  const row = q.rows[ri];
-  if (!DZ.started || !DZ.paused) return { err: 'Pause the drop first, then press Use this moment.' };
-  const L = DZ.lanes[DZ.two ? DZ.edit : 0], sn = dzSnapHere(L);
-  if (q.obj && sn.obj !== q.obj) return { err: `This table is about the ${DZ_OBJ[q.obj].noun}. Drop the ${DZ_OBJ[q.obj].noun} and pause it.` };
-  if (row.when && !row.when(sn)) return { err: row.whenMsg || 'That moment does not fit this row. Try another.' };
-  return { snap: sn };
+/* show a captured moment (or the hint again) on a row without redrawing the whole table, so typed numbers stay where they are */
+function frzShow(el, q, ri, sn) {
+  const row = $(`.frzrow[data-ri="${ri}"]`, el); if (!row) return; $('.frzgrab', row).innerHTML = frzGrab(q, ri, sn); row.classList.toggle('has', !!sn);
+}
+const frzKey = qid => { const L = DZ.lanes[DZ.two ? DZ.edit : 0]; return [qid, L.id, Math.round(dzViewT() * 10), L.run ? L.run.n : 0].join(); };
+let FRZ_REG = [];                 // every freeze table that has been drawn: { el, q, api }
+const FRZ_LAST = {};
+/* called from checkStep: while the drop is paused, a moment that fits a row with no moment yet is attached to that row (and saved to the Journal as a snapshot with a picture). Only the first table on screen that wants the moment takes it. */
+function frzAuto() {
+  if (typeof DZ === 'undefined' || !DZ.started || !DZ.paused) return;
+  FRZ_REG = FRZ_REG.filter(r => r.el.isConnected);
+  const L = DZ.lanes[DZ.two ? DZ.edit : 0], T = Math.round(dzViewT() * 10) / 10, peek = dzMakeSnap(L, T, runsAll());
+  for (const r of FRZ_REG) {
+    const { el, q, api } = r; if (api.locked()) continue;
+    const key = frzKey(q.id); if (FRZ_LAST[q.id] === key) continue;
+    if (q.obj && peek.obj !== q.obj) continue;
+    const cur = api.state(), rows = frzState(q, cur).map(x => ({ snap: x.snap, vals: x.vals }));
+    if (rows.some(x => x.snap && x.snap.t === T && x.snap.run === peek.run)) { FRZ_LAST[q.id] = key; continue; }
+    const ri = q.rows.findIndex((row, i) => !rows[i].snap && (!row.when || row.when(peek))); if (ri < 0) continue;
+    FRZ_LAST[q.id] = key;
+    const sn = Object.assign({}, dzSnapHere(L)); delete sn.img; rows[ri].snap = sn;
+    const c2 = Object.assign({}, cur || {}); c2.v = { rows }; api.setRaw(c2); frzShow(el, q, ri, sn);
+    if (typeof toast === 'function') toast(`Moment ${ri + 1} captured at ${fmt(sn.t, 1)} s. Read the numbers off the free-body diagram.`, 'good');
+    return;
+  }
 }
 QT.freeze = {
   html(q, s) {
     const st = frzState(q, s);
-    return `<div class="frz">${q.rows.map((r, ri) => `<div class="frzrow" data-ri="${ri}"><div class="frzhd"><span class="frzn">${ri + 1}</span><b>${r.label}</b></div><div class="frzgrab"><button type="button" class="ghost sm frzbtn" data-ri="${ri}">Use this moment</button><span class="frzat">${frzAtTxt(st[ri].snap)}</span></div><div class="frzfields">${q.cols.map(([k, head]) => frzCell(q, k, head, ri, st[ri].vals)).join('')}</div></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check the table</button>`;
+    return `<div class="frz">${q.rows.map((r, ri) => `<div class="frzrow" data-ri="${ri}"><div class="frzhd"><span class="frzn">${ri + 1}</span><b>${r.label}</b></div><div class="frzgrab">${frzGrab(q, ri, st[ri].snap)}</div><div class="frzfields">${q.cols.map(([k, head]) => frzCell(q, k, head, ri, st[ri].vals)).join('')}</div></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check the table</button>`;
   },
   bind(el, q, api) {
+    FRZ_REG.push({ el, q, api });
     const save = () => {
       const rows = q.rows.map((_, ri) => { const cur = (frzState(q, api.state())[ri]) || { snap: null, vals: {} }, vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: cur.snap, vals }; });
       const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur); if (typeof checkStep === 'function') checkStep();
@@ -48,17 +71,15 @@ QT.freeze = {
     el.addEventListener('input', e => { if (e.target.closest('.frzin') && !api.locked()) save(); });
     el.addEventListener('change', e => { if (e.target.closest('.frzin') && !api.locked()) save(); });
     el.addEventListener('click', e => {
-      const b = e.target.closest('.frzbtn'); if (!b || api.locked()) return;
-      const ri = +b.dataset.ri, m = frzMoment(q, ri); if (m.err) { api.say(m.err, 'no'); return; }
-      const rows = frzState(q, api.state()).map(r => ({ snap: r.snap, vals: r.vals })); rows[ri].snap = m.snap;
-      const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur);
-      $('.frzat', b.parentNode).textContent = frzAtTxt(m.snap); $('.frzrow[data-ri="' + ri + '"]', el).classList.add('has'); api.say(`Moment ${ri + 1} attached: ${frzAtTxt(m.snap).toLowerCase()}. Now fill in the row.`, 'ok');
+      const b = e.target.closest('.frzredo'); if (!b || api.locked()) return;
+      const ri = +b.dataset.ri, rows = frzState(q, api.state()).map(r => ({ snap: r.snap, vals: r.vals })); rows[ri].snap = null;
+      const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur); FRZ_LAST[q.id] = frzKey(q.id); frzShow(el, q, ri, null);
       if (typeof checkStep === 'function') checkStep();
     });
     $$('.frzrow', el).forEach((r, ri) => { if (frzState(q, api.state())[ri].snap) r.classList.add('has'); });
     $('.qchk', el).addEventListener('click', () => {
       if (api.locked()) return; const rows = frzState(q, api.state());
-      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. Pause the drop and press Use this moment.`, 'no'); return; }
+      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. ${plain(q.rows[noSnap].whenMsg || 'Pause the drop at that moment.')}`, 'no'); return; }
       let n = 0, good = 0, v = rows.map((r, ri) => { const vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: r.snap, vals }; });
       for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
       v.forEach(r => q.cols.forEach(([k]) => { n++; if (frzCellOk(k, r.vals[k], r.snap)) good++; }));

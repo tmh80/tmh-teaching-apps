@@ -188,18 +188,30 @@ function dzFinishRuns(why) {
 /* ---- snapshots: saved in DB.dz.snaps and shown in the Journal's Runs tab ---- */
 const dzCanopyState = v => v.opened == null ? 'closed' : v.fr >= 1 ? 'open' : 'opening';
 const dzMakeSnap = (L, T, R) => { const v = dzAt(L); return { id: ++DZ.snapSeq + '-' + Date.now(), run: L.run ? L.run.n : (R.length ? R[R.length - 1].n : 0), lane: L.id, obj: L.obj, world: L.world, air: L.removed, canopy: L.canopy, cstate: dzCanopyState(v), t: Math.round(T * 10) / 10, y: Math.max(0, v.y), v: v.v, a: v.a, W: v.W, D: v.D, R: v.R, height: DZ.height }; };
+/* a small picture of the arena at the paused moment (the lane's half when two lanes are on), saved with the snapshot so the Journal can show and expand it */
+function dzSnapImage(L) {
+  try {
+    const two = DZ.two, idx = Math.max(0, dzActive().indexOf(L)), sx = two ? idx * 450 : 0, sw = two ? 450 : 900;
+    const big = document.createElement('canvas'); big.width = 900; big.height = DZ_H; drawDropScene(big.getContext('2d'));
+    const o = document.createElement('canvas'); o.width = two ? 360 : 640; o.height = Math.round(DZ_H * o.width / sw);
+    const c = o.getContext('2d'); c.drawImage(big, sx, 0, sw, DZ_H, 0, 0, o.width, o.height);
+    return o.toDataURL('image/jpeg', 0.6);
+  } catch (e) { return null; }
+}
 /* save the paused moment as a snapshot (one per lane, or just the lanes in `only`); returns the snapshots made */
 function dzSnapNow(only) {
   if (!DZ.started) return false;
   const T = dzViewT(), snaps = dbGet('dz.snaps', []), R = runsAll(), made = [];
   dzActive().filter(L => !only || only.includes(L)).forEach(L => {
-    const s = dzMakeSnap(L, T, R); made.push(s);
+    const s = dzMakeSnap(L, T, R); s.img = dzSnapImage(L); made.push(s);
     snaps.push(s); if (snaps.length > 50) snaps.splice(0, snaps.length - 50);
     RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
     R.push(Object.assign({ n: RUNSEQ, kind: 'snap', scene: 'drop', at: Date.now(), live: false, out: 'snap', lane: L.id, two: DZ.two, snap: s }, runWhere()));
   });
   if (R.length > 200) R.splice(0, R.length - 200);
-  dbSet('dz.snaps', snaps); dbSet('runs', R); RUNDIRTY = 1; S.flags.snapped = true; return made;
+  /* only the newest 20 pictures are kept (they are about 30 KB each), and the copy in dz.snaps carries none */
+  R.filter(r => r.kind === 'snap' && r.snap && r.snap.img).slice(0, -20).forEach(r => { delete r.snap.img; });
+  dbSet('dz.snaps', snaps.map(s => { const c = Object.assign({}, s); delete c.img; return c; })); dbSet('runs', R); RUNDIRTY = 1; S.flags.snapped = true; return made;
 }
 /* the snapshot of this lane at the paused time: the one already saved, or a new one (a question's "Use this moment" button) */
 function dzSnapHere(L) {

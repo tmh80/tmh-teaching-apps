@@ -64,7 +64,7 @@ Run `python3 tools/dropzone_model.py` for every terminal velocity on every world
 - **Things the object falls past (added 29 Oct):** Earth only: birds (up to about 500 m) and three skyscrapers with roofs at 120, 150 and 205 m. Every world with a floor: two flood-light masts (24 m) and stacks of crates on the floor beside the landing pad.
 - **Readouts per lane:** Height (m), Velocity (m/s, downwards), Acceleration (m/s²), Time (s).
 - **Live free-body diagram beside each falling object** (`dfbd`): weight down and air resistance up (`FTYPES.airres`), drawn from the centre of the real object (crate, skydiver with or without canopy, ball, feather), values in newtons, plus a dashed resultant arrow with its value. Scale each lane so its weight arrow is about 56 px long. Just after a canopy opens, air resistance can reach about 7 times the weight: cap the arrow at 4 times the weight length, with a zig-zag break, and keep the true value on the label. Weights below 1 N show 3 decimal places (the feather: 0.020 N).
-- **Pause tools** (`dpause`): a big **⏸ Pause** button right beside **Drop!** (it becomes **▶ Play**; Spacebar does the same), step buttons **◀ 0.5 s** and **0.5 s ▶** that move through the stored history while paused, a banner "Paused at 6.4 s" across the arena, and **📸 Snapshot**. A snapshot saves to the Journal's Runs tab with a sentence and chips: "At 6.4 s the crate was 289 m up and falling at 33.9 m/s. Weight 392 N, air resistance 311 N." Store in `DB.dz.snaps` (latest 50) with run id, lane, object, world, air %, canopy and its state, t, y, v, a, W, D, R.
+- **Pause tools** (`dpause`): a big **⏸ Pause** button right beside **Drop!** (it becomes **▶ Play**; Spacebar does the same), step buttons **◀ 0.5 s** and **0.5 s ▶** that move through the stored history while paused, a banner "Paused at 6.4 s" across the arena, and **📸 Snapshot**. A snapshot saves to the Journal's Runs tab with a picture of the arena at that moment (tap it to expand it; added 29 Oct at Tom's request, the newest 20 pictures are kept), a sentence and chips: "At 6.4 s the crate was 289 m up and falling at 33.9 m/s. Weight 392 N, air resistance 311 N." Store in `DB.dz.snaps` (latest 50) with run id, lane, object, world, air %, canopy and its state, t, y, v, a, W, D, R.
 - **Landing:** the run ends at the ground. Landing messages are friendly and never show injuries: under 7 m/s "Soft landing!"; 7 to 15 m/s "Bump! A bit fast."; over 15 m/s "Thud! Far too fast for a safe landing." (the skydiver rolls in a puff of dust; the crate bounces). The Jupiter platform works the same way.
 - **Runs:** every drop is a run (`runMark`/`runTick`/`runEnd`). `runText`: "You dropped the 40 kg crate from 600 m on Earth (all the air). It sped up to a terminal velocity of 38.0 m/s and landed after 18.5 s." With a canopy: "… You opened the medium canopy at 812 m. The skydiver slowed to 6.0 m/s and landed after 151 s." `runChips`: world, object, canopy, height, air removed, top velocity, landing velocity, time. Store per run: object, world, air, height, canopy, open time and height, top velocity, terminal reached (yes/no), landing velocity, time, plus the history for graphs. Helpers in the Chapter 5 module, like Chapter 4's: `dzRun(f)` (latest run matching a filter object), `dzTop(f)`, `dzLand(f)`, `dzTime(f)`, `dzSnap(f, test)`.
 - **Masks:** the same pattern as `spaceMasked`/`sledMasked` (`dzMasked`). Steps list `mask: [{ q, keys, when(lane) }]`; keys can be `fbdR` (resultant label), `fbdW` (weight label), `readV`, `heliW`.
@@ -147,6 +147,7 @@ After: Press Drop! and watch the Velocity readout and the two arrows.
 DO THIS
 - Make your prediction in the box above.
 - Press **Drop!** and watch the crate all the way down.   (ticks when a crate run from 600 m on Earth has landed)
+- (inline answer box, added 29 Oct at Tom's request) The crate's velocity stopped going up. What velocity did it settle at?   (q1 is typed here, in the Do this list, with a Check button, and copies into Your turn. Rule: every number a student reads from the simulation gets an inline box like this, so nothing needs a trip to Next: questions.)
 
 YOUR TURN QUESTIONS
 q1 | reading | The crate's velocity stopped going up. What velocity did it settle at? | live: dzTop({obj:'crate', world:'earth', h:600}) | unit m/s | tolerance 0.3
@@ -178,7 +179,7 @@ CARDS
    Key idea: resultant = weight − air resistance.
 
 DO THIS
-- Drop the crate and pause it at the three moments in the table under the arena. Press **Use this moment** on each of its three rows.   (ticks when all three rows of q1 have a moment attached. Changed 29 Oct at Tom's request: q1 is marked `early`, so the table sits under the arena from the start instead of waiting in the Your turn box. Anything students must collect data for is on screen at once.)
+- Drop the crate and pause it at the three moments in the table under the arena. Each row says when to pause and fills in by itself.   (ticks when all three rows of q1 have a moment attached. Changed 29 Oct at Tom's request: q1 is marked `early`, so the table sits under the arena from the start instead of waiting in the Your turn box, and there is no "Use this moment" button: pausing at a moment that fits a row attaches it automatically.)
 - Take at least one **📸 Snapshot**.   (ticks when a snapshot of a crate run exists)
 
 YOUR TURN QUESTIONS
@@ -206,7 +207,7 @@ CARDS
 2. Balanced forces mean the **velocity does not change**. A still object stays still, and a moving object keeps moving at a steady velocity. That's Newton's first law from Chapter 2, working high above the Drop Zone!
 
 DO THIS
-- Answer the key idea question.   (key-idea task, ticks when q1 is done)
+- (removed 29 Oct) The key idea question is no longer a task: it is not about the simulation, so it lives only in Your turn.
 - Drop the crate, pause it once it has reached terminal velocity, and take a **📸 Snapshot**.   (ticks on a crate snapshot with |a| < 0.2)
 
 YOUR TURN QUESTIONS
@@ -240,7 +241,7 @@ After: Drop the skydiver, open the canopy, then compare your sketch with the rea
 DO THIS
 - Sketch your prediction in the box above.
 - Press **Drop!**. When the velocity has stopped going up, press **Open canopy!**   (ticks when a skydiver run on Earth has a canopy opened after terminal velocity was reached)
-- Pause at the two moments in the table under the arena and press **Use this moment** on each of its two rows.   (`early` table, as in d2)
+- Pause at the two moments in the table under the arena. Each row says when to pause and fills in by itself.   (`early` table, as in d2)
 
 YOUR TURN QUESTIONS
 q1 | freeze | Fill in the table from your two paused moments. | obj para
@@ -325,6 +326,7 @@ DO THIS
 - Make your prediction in the box above.
 - Race the **feather** against the **crate** from 50 m with all the air.   (ticks on a two-lane run: feather and crate, Earth, 0% removed)
 - Remove **100%** of the air and race them again.   (same, 100% removed)
+- (inline answer box) With all the air removed, how long did the feather and the crate take to land?   (q1, as in d1)
 - Put the air back and drop the **basketball** once.   (ticks on a basketball run on Earth with 0% removed)
 
 YOUR TURN QUESTIONS
@@ -359,6 +361,7 @@ After: Race them and watch the two free-body diagrams.
 DO THIS
 - Make your prediction in the box above.
 - Race a crate on **Earth** against a crate on the **Moon** from 100 m.   (ticks on a two-lane run, crates, Earth and Moon, 100 m)
+- (inline answer box) How long did the crate on the Moon take to land?   (q1, as in d1)
 - Drop a crate on **Venus** and watch its velocity.   (ticks on a crate run on Venus)
 - (calculate task) `['', () => hasAns('q2'), { q: 'q2' }]`
 

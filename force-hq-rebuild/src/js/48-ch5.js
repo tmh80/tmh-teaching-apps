@@ -24,7 +24,7 @@ CHDATA.c5 = {
         { hi: '#cvScene', html: `<p>Keep an eye on the <b>free-body diagram</b> next to the crate. One arrow is the crate's <b>weight</b>, pulling it down. The other is <b>air resistance</b>, pushing up against the motion. Watch how each arrow changes as the crate falls. The Fast-forward button saves time on long drops. Before you press Drop!, check what the free-body diagram shows while the crate hangs from the helicopter. At the moment of release, watch the helicopter too.</p>` }],
       predict: { q: 'The crate falls from 600 m. What will its velocity do on the way down?', opts: ['It will keep speeding up until it hits the ground', 'It will speed up at first, then stop speeding up', 'It will fall at the same velocity all the way down', 'It will speed up at first, then slow down before landing'], then: 'Press Drop! and watch the Velocity readout and the two arrows.' },
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['drop', 'dfbd', 'readH', 'readV', 'readA', 'readT', 'warp'], hide: DZ_HIDE_OLD, sides: [], pullers: [], idle: 'Press Drop! to release the crate',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b> and watch the crate all the way down.', () => dzRun(c5Crate) != null]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b> and watch the crate all the way down.', () => dzRun(c5Crate) != null], ['', () => hasAns('q1'), { q: 'q1' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'The crate\'s velocity stopped going up. What velocity did it settle at?', unit: 'm/s', tol: 0.3, live: () => dzTop(c5Crate), need: () => dzTop(c5Crate) != null, needMsg: 'Drop the crate first. Your runs are in the Journal.', ok: 'Spot on! The crate settled at about 38 m/s. That\'s nearly 140 km/h.' },
         { id: 'q2', type: 'pick', p: 'As the crate fell faster and faster, its weight {0} and the air resistance on it {1}.', picks: [[DZ_TREND, 1], [DZ_TREND, 0]], after: 'Weight is mass × g, so it stays the same during the fall. Air resistance grows as the velocity grows.' },
@@ -37,7 +37,7 @@ CHDATA.c5 = {
         { html: `<p>The <b>resultant force</b> is what's left over when you combine the forces. Weight pulls down and air resistance pushes up, so <b>resultant = weight − air resistance</b>. A downward resultant means the crate is still speeding up.</p><div class="example"><b>Worked example</b><br>At 20 m/s the air resistance on the crate is 108.6 N and its weight is 392 N. Resultant = 392 − 108.6 = <b>283.4 N</b>, pointing down, so the crate is still speeding up.</div><div class="law"><b>Key idea:</b> resultant = weight − air resistance.</div>` }],
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['dpause'], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
       mask: [{ q: 'q1', keys: ['fbdR'], when: () => true }],
-      tasks: [['Drop the crate and pause it at the three moments in the table under the arena. Press <b>Use this moment</b> on each of its three rows.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
+      tasks: [['Drop the crate and pause it at the three moments in the table under the arena. Each row says when to pause and fills in by itself.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
       qs: [
         { id: 'q1', type: 'freeze', early: true, p: 'Fill in the table from your three paused moments. Type the forces from the free-body diagram, work out the resultant, and choose what the velocity is doing.', obj: 'crate',
           cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['R', 'Resultant (N)'], ['motion', 'Velocity']],
@@ -52,7 +52,7 @@ CHDATA.c5 = {
         { html: `<p>Here's what you just saw. As the crate speeds up, air resistance grows. Eventually it grows until it is <b>as big as the weight</b>. Now the forces are <b>balanced</b>, the resultant force is zero, and the crate stops speeding up. It keeps falling at a steady velocity called its <b>terminal velocity</b>.</p><div class="law"><b>Key idea:</b> When air resistance has grown to equal the weight, the forces are balanced and the object falls at a steady terminal velocity.</div>` },
         { html: `<p>Balanced forces mean the <b>velocity does not change</b>. A still object stays still, and a moving object keeps moving at a steady velocity. That's Newton's first law from Chapter 2, working high above the Drop Zone!</p>` }],
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: [], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
-      tasks: [['Answer the key idea question. It is in the Your turn box, which opens when you press <b>Next: questions</b>.', () => hasAns('q1')], ['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
+      tasks: [['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
       qs: [
         { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains terminal velocity.', opts: ['Air resistance has grown to equal the weight, so the velocity stops changing.', 'Air resistance has grown bigger than the weight, so the velocity stops changing.', 'The weight has shrunk to zero, so the velocity stops changing.', 'The air resistance has disappeared, so the velocity stops changing.'], a: 0, ok: 'Yes! Equal forces mean a steady velocity.', why: { 1: 'If air resistance were bigger, the crate would slow down.', 2: 'Weight stays the same the whole way down.', 3: 'Air resistance is at its biggest at terminal velocity.' } },
         { id: 'q2', type: 'reason', p: 'The crate is falling at a steady 38 m/s. Four friends disagree about the forces on it. Who\'s right?',
@@ -68,7 +68,7 @@ CHDATA.c5 = {
         { hi: '#dzOpen', html: `<p>A <b>canopy</b> is huge, so it has to push a lot of air out of the way. At the same velocity, the air resistance is suddenly much bigger. Use <b>⏸ Pause</b> to catch the arrows just after the canopy opens, and again once things settle down.</p>` }],
       predict: { kind: 'sketch', q: 'Sketch the skydiver\'s velocity from the jump until well after the canopy opens. The dashed line shows when the canopy opens.', cols: 10, levels: 10, xLabel: 'Time', yLabel: 'Velocity (downwards)', marks: [{ col: 6, label: 'Canopy opens' }], then: 'Drop the skydiver, open the canopy, then compare your sketch with the real graph.' },
       setup() { dropSetup({ height: 1500, a: { obj: 'para', world: 'earth', removed: 0, canopy: 'medium' } }); }, adds: ['dcanopy', 'dvt', 'dft'], sides: [], pullers: [], idle: 'Press Drop!, then open the canopy',
-      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table under the arena and press <b>Use this moment</b> on each of its two rows.', () => frzCount('q1') >= 2]],
+      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table under the arena. Each row says when to pause and fills in by itself.', () => frzCount('q1') >= 2]],
       qs: [
         { id: 'q1', type: 'freeze', early: true, p: 'Fill in the table from your two paused moments.', obj: 'para',
           cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['big', 'The bigger force'], ['motion', 'Velocity']],
@@ -92,6 +92,7 @@ CHDATA.c5 = {
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Race the <b>feather</b> against the <b>crate</b> from 50 m with all the air. The feather is slow, so use <b>Fast-forward</b>.', () => !!(dzRun({ obj: 'feather', world: 'earth', height: 50, air: 0, two: true }) && dzRun({ obj: 'crate', world: 'earth', height: 50, air: 0, two: true }))],
         ['Remove <b>100%</b> of the air from both lanes and race them again.', () => !!(dzRun({ obj: 'feather', world: 'earth', height: 50, air: 100, two: true }) && dzRun({ obj: 'crate', world: 'earth', height: 50, air: 100, two: true }))],
+        ['', () => hasAns('q1'), { q: 'q1' }],
         ['Put the air back and drop the <b>basketball</b> once.', () => !!dzRun({ obj: 'basketball', world: 'earth', air: 0 })]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With all the air removed, how long did the feather and the crate take to land?', unit: 's', tol: 0.15, live: () => dzTime({ obj: 'crate', world: 'earth', height: 50, air: 100 }), need: () => dzTime({ obj: 'crate', world: 'earth', height: 50, air: 100 }) != null, needMsg: 'Race the feather and the crate with all the air removed first. Your runs are in the Journal.', ok: 'Yes, about 3.2 s, at exactly the same moment. With no air, nothing slows the feather down.' },
@@ -112,6 +113,7 @@ CHDATA.c5 = {
       mask: [{ q: 'q2', keys: ['fbdW'], when: L => L.obj === 'para' && L.world === 'mars' }, { q: 'q4', keys: ['fbdW'], when: L => L.obj === 'crate' && L.world === 'moon' }],
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Race a crate on <b>Earth</b> against a crate on the <b>Moon</b> from 100 m.', () => !!(dzRun({ obj: 'crate', world: 'earth', height: 100, two: true }) && dzRun({ obj: 'crate', world: 'moon', height: 100, two: true }))],
+        ['', () => hasAns('q1'), { q: 'q1' }],
         ['Drop a crate on <b>Venus</b> and watch its velocity.', () => !!dzRun({ obj: 'crate', world: 'venus' })],
         ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [

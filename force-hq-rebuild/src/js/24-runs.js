@@ -135,7 +135,7 @@ const RUNOPEN = {};
 function runItem(r, open) {
   const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), id = r.n + '-' + r.at;
   const isOpen = RUNOPEN[id] != null ? RUNOPEN[id] : open;
-  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} ${r.kind === 'snap' ? 'Snapshot' : 'Run'} ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
+  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} ${r.kind === 'snap' ? 'Snapshot' : 'Run'} ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p>${r.kind === 'snap' && r.snap && r.snap.img ? `<button type="button" class="snapthumb" data-snapimg="${id}" aria-label="Expand the picture of this snapshot"><img src="${r.snap.img}" alt="The arena at this moment"><span>⤢ Tap to expand</span></button>` : ''}<div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
 }
 const sameStep = r => { const w = runWhere(); return r.sec === w.sec && r.step === w.step; };
 function runsTabHTML() {
@@ -159,6 +159,8 @@ function qRunsHTML() {
 }
 function initRuns() {
   document.addEventListener('click', e => {
+    const sb = e.target.closest('.snapthumb');
+    if (sb) { const r = runsAll().find(x => x.n + '-' + x.at === sb.dataset.snapimg); if (r && r.snap && r.snap.img) openModal(`<div class="modal snapbig"><h2>Snapshot ${r.n}</h2><img src="${r.snap.img}" alt="The arena at this moment"><p>${runText(r)}</p><div class="row"><button type="button" class="go" data-close>Close</button></div></div>`); return; }
     const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); RUNDIRTY = 1; runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
   });
   setInterval(() => runsRefresh(), 250);

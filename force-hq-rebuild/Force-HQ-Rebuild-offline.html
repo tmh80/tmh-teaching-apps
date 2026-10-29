@@ -591,6 +591,11 @@ body:not([data-view="vChapter"]):not([data-view="vExplore"]) .runstab,body:not([
 .seg3 button{flex:1;border:0;background:var(--chip);padding:7px 6px;font-weight:700;font-size:14px}
 .seg3 button[aria-pressed="true"]{background:var(--accent);color:#fff}
 .rempty{color:var(--muted);margin:0}
+.snapthumb{display:block;position:relative;padding:0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel);cursor:zoom-in;max-width:260px;margin:6px 0}
+.snapthumb img{display:block;width:100%;height:auto}
+.snapthumb span{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.65);color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px}
+.modal.snapbig{max-width:min(94vw,860px);align-items:center;text-align:center}
+.modal.snapbig img{max-width:100%;max-height:60vh;border-radius:10px;border:1.5px solid var(--line)}
 .runlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
 .run{border:1.5px solid var(--line);border-radius:12px;padding:9px 11px;background:var(--bg);display:flex;flex-direction:column;gap:5px}
 .run.live{border-color:var(--hazard);background:var(--hazard-soft)}
@@ -2721,7 +2726,7 @@ const RUNOPEN = {};
 function runItem(r, open) {
   const tm = new Date(r.at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }), id = r.n + '-' + r.at;
   const isOpen = RUNOPEN[id] != null ? RUNOPEN[id] : open;
-  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} ${r.kind === 'snap' ? 'Snapshot' : 'Run'} ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p><div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
+  return `<li><details class="run ${r.live ? 'live' : ''}" data-run="${id}" ${isOpen ? 'open' : ''}><summary class="rh"><b>${KINDICON[r.kind] || ''} ${r.kind === 'snap' ? 'Snapshot' : 'Run'} ${r.n}</b><span>${esc(r.label || '')}</span><span class="tm">${r.live ? 'running…' : tm}</span></summary><p>${runText(r)}</p>${r.kind === 'snap' && r.snap && r.snap.img ? `<button type="button" class="snapthumb" data-snapimg="${id}" aria-label="Expand the picture of this snapshot"><img src="${r.snap.img}" alt="The arena at this moment"><span>⤢ Tap to expand</span></button>` : ''}<div class="rchips">${runChips(r).map(([k, v]) => `<span><small>${k}</small>${v}</span>`).join('')}</div></details></li>`;
 }
 const sameStep = r => { const w = runWhere(); return r.sec === w.sec && r.step === w.step; };
 function runsTabHTML() {
@@ -2745,6 +2750,8 @@ function qRunsHTML() {
 }
 function initRuns() {
   document.addEventListener('click', e => {
+    const sb = e.target.closest('.snapthumb');
+    if (sb) { const r = runsAll().find(x => x.n + '-' + x.at === sb.dataset.snapimg); if (r && r.snap && r.snap.img) openModal(`<div class="modal snapbig"><h2>Snapshot ${r.n}</h2><img src="${r.snap.img}" alt="The arena at this moment"><p>${runText(r)}</p><div class="row"><button type="button" class="go" data-close>Close</button></div></div>`); return; }
     const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); RUNDIRTY = 1; runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
   });
   setInterval(() => runsRefresh(), 250);
@@ -3327,7 +3334,7 @@ Object.assign(QLABEL, { freeze: 'Freeze-frame table', spot: 'Tap the moment', sk
    {id, type:'freeze', p, obj:'crate', cols:[['W','Weight (N)'], ['D','Air resistance (N)'], ['R','Resultant (N)'], ['motion','Velocity']],
     rows:[{label, when: snap => bool, whenMsg}], example:[[392, 25, 367, 'speeding up'], ...], after}
    Column keys: W, D (numbers read from the free-body diagram), R (resultant, W − D, a number), big (which force is bigger: pick), motion (pick).
-   1 mark per box. The student pauses the drop, presses "Use this moment" on a row (which attaches the snapshot for that moment), then fills in the row. */
+   1 mark per box. Each row says when to pause. When the student pauses the drop at a moment that fits a row with no moment yet, the app attaches a snapshot for it by itself (frzAuto) and the row shows it; "Pick another moment" lets the student redo a row. There is no button to press. */
 const FRZ_STEADY = 0.2, FRZ_EQUAL = 0.03;                   // |a| below this is "steady"; |R| below this fraction of the weight is "equal"
 const FRZ_PICK = { big: ['weight', 'air resistance', 'neither, they\'re equal'], motion: ['speeding up', 'steady', 'slowing down'] };
 const frzIsNum = k => k === 'W' || k === 'D' || k === 'R';
@@ -3340,27 +3347,50 @@ function frzTruth(k, s) {                                   // the right reading
 const frzFmt = (k, x) => frzIsNum(k) ? fmtN(x) : FRZ_PICK[k][x];
 const fmtN = x => { const a = Math.abs(x); return (a < 1 ? x.toFixed(3) : a < 10 ? x.toFixed(2) : String(Math.round(x))).replace(/\B(?=(\d{3})+(?!\d))/g, ','); };
 const frzState = (q, s) => (s && s.v && Array.isArray(s.v.rows)) ? s.v.rows : q.rows.map(() => ({ snap: null, vals: {} }));
-const frzAtTxt = sn => sn ? `Paused at ${fmt(sn.t, 1)} s · ${fmt(sn.y, 0)} m up · ${dz1(sn.v)} m/s` : 'No moment attached yet';
+const frzAtTxt = sn => sn ? `Paused at ${fmt(sn.t, 1)} s · ${fmt(sn.y, 0)} m up · ${dz1(sn.v)} m/s` : 'No moment yet';
+/* the line under a row's heading: what to look for until a moment is captured, then the moment that was captured */
+const frzGrab = (q, ri, sn) => sn
+  ? `<span class="frzat">✓ ${frzAtTxt(sn)}</span><button type="button" class="ghost sm frzredo" data-ri="${ri}">Pick another moment</button>`
+  : `<span class="frzat">⏸ ${esc(plain(q.rows[ri].whenMsg || 'Pause the drop at this moment.'))} The row fills in by itself.</span>`;
 function frzCell(q, k, head, ri, vals) {
   const val = vals && vals[k] != null ? vals[k] : '';
   return `<label class="frzf"><span>${head}</span>` + (frzIsNum(k)
     ? `<input class="frzin" inputmode="decimal" autocomplete="off" data-ri="${ri}" data-k="${k}" value="${esc(val)}" aria-label="${esc(head)}, ${esc(plain(q.rows[ri].label))}">`
     : `<select class="frzin" data-ri="${ri}" data-k="${k}" aria-label="${esc(head)}, ${esc(plain(q.rows[ri].label))}"><option value="">choose…</option>${FRZ_PICK[k].map((o, j) => `<option value="${j}"${String(val) === String(j) ? ' selected' : ''}>${o}</option>`).join('')}</select>`) + '</label>';
 }
-function frzMoment(q, ri) {                                  // the snapshot for the paused moment, if it is a fair choice for this row
-  const row = q.rows[ri];
-  if (!DZ.started || !DZ.paused) return { err: 'Pause the drop first, then press Use this moment.' };
-  const L = DZ.lanes[DZ.two ? DZ.edit : 0], sn = dzSnapHere(L);
-  if (q.obj && sn.obj !== q.obj) return { err: `This table is about the ${DZ_OBJ[q.obj].noun}. Drop the ${DZ_OBJ[q.obj].noun} and pause it.` };
-  if (row.when && !row.when(sn)) return { err: row.whenMsg || 'That moment does not fit this row. Try another.' };
-  return { snap: sn };
+/* show a captured moment (or the hint again) on a row without redrawing the whole table, so typed numbers stay where they are */
+function frzShow(el, q, ri, sn) {
+  const row = $(`.frzrow[data-ri="${ri}"]`, el); if (!row) return; $('.frzgrab', row).innerHTML = frzGrab(q, ri, sn); row.classList.toggle('has', !!sn);
+}
+const frzKey = qid => { const L = DZ.lanes[DZ.two ? DZ.edit : 0]; return [qid, L.id, Math.round(dzViewT() * 10), L.run ? L.run.n : 0].join(); };
+let FRZ_REG = [];                 // every freeze table that has been drawn: { el, q, api }
+const FRZ_LAST = {};
+/* called from checkStep: while the drop is paused, a moment that fits a row with no moment yet is attached to that row (and saved to the Journal as a snapshot with a picture). Only the first table on screen that wants the moment takes it. */
+function frzAuto() {
+  if (typeof DZ === 'undefined' || !DZ.started || !DZ.paused) return;
+  FRZ_REG = FRZ_REG.filter(r => r.el.isConnected);
+  const L = DZ.lanes[DZ.two ? DZ.edit : 0], T = Math.round(dzViewT() * 10) / 10, peek = dzMakeSnap(L, T, runsAll());
+  for (const r of FRZ_REG) {
+    const { el, q, api } = r; if (api.locked()) continue;
+    const key = frzKey(q.id); if (FRZ_LAST[q.id] === key) continue;
+    if (q.obj && peek.obj !== q.obj) continue;
+    const cur = api.state(), rows = frzState(q, cur).map(x => ({ snap: x.snap, vals: x.vals }));
+    if (rows.some(x => x.snap && x.snap.t === T && x.snap.run === peek.run)) { FRZ_LAST[q.id] = key; continue; }
+    const ri = q.rows.findIndex((row, i) => !rows[i].snap && (!row.when || row.when(peek))); if (ri < 0) continue;
+    FRZ_LAST[q.id] = key;
+    const sn = Object.assign({}, dzSnapHere(L)); delete sn.img; rows[ri].snap = sn;
+    const c2 = Object.assign({}, cur || {}); c2.v = { rows }; api.setRaw(c2); frzShow(el, q, ri, sn);
+    if (typeof toast === 'function') toast(`Moment ${ri + 1} captured at ${fmt(sn.t, 1)} s. Read the numbers off the free-body diagram.`, 'good');
+    return;
+  }
 }
 QT.freeze = {
   html(q, s) {
     const st = frzState(q, s);
-    return `<div class="frz">${q.rows.map((r, ri) => `<div class="frzrow" data-ri="${ri}"><div class="frzhd"><span class="frzn">${ri + 1}</span><b>${r.label}</b></div><div class="frzgrab"><button type="button" class="ghost sm frzbtn" data-ri="${ri}">Use this moment</button><span class="frzat">${frzAtTxt(st[ri].snap)}</span></div><div class="frzfields">${q.cols.map(([k, head]) => frzCell(q, k, head, ri, st[ri].vals)).join('')}</div></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check the table</button>`;
+    return `<div class="frz">${q.rows.map((r, ri) => `<div class="frzrow" data-ri="${ri}"><div class="frzhd"><span class="frzn">${ri + 1}</span><b>${r.label}</b></div><div class="frzgrab">${frzGrab(q, ri, st[ri].snap)}</div><div class="frzfields">${q.cols.map(([k, head]) => frzCell(q, k, head, ri, st[ri].vals)).join('')}</div></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check the table</button>`;
   },
   bind(el, q, api) {
+    FRZ_REG.push({ el, q, api });
     const save = () => {
       const rows = q.rows.map((_, ri) => { const cur = (frzState(q, api.state())[ri]) || { snap: null, vals: {} }, vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: cur.snap, vals }; });
       const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur); if (typeof checkStep === 'function') checkStep();
@@ -3368,17 +3398,15 @@ QT.freeze = {
     el.addEventListener('input', e => { if (e.target.closest('.frzin') && !api.locked()) save(); });
     el.addEventListener('change', e => { if (e.target.closest('.frzin') && !api.locked()) save(); });
     el.addEventListener('click', e => {
-      const b = e.target.closest('.frzbtn'); if (!b || api.locked()) return;
-      const ri = +b.dataset.ri, m = frzMoment(q, ri); if (m.err) { api.say(m.err, 'no'); return; }
-      const rows = frzState(q, api.state()).map(r => ({ snap: r.snap, vals: r.vals })); rows[ri].snap = m.snap;
-      const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur);
-      $('.frzat', b.parentNode).textContent = frzAtTxt(m.snap); $('.frzrow[data-ri="' + ri + '"]', el).classList.add('has'); api.say(`Moment ${ri + 1} attached: ${frzAtTxt(m.snap).toLowerCase()}. Now fill in the row.`, 'ok');
+      const b = e.target.closest('.frzredo'); if (!b || api.locked()) return;
+      const ri = +b.dataset.ri, rows = frzState(q, api.state()).map(r => ({ snap: r.snap, vals: r.vals })); rows[ri].snap = null;
+      const cur = api.state() || {}; cur.v = { rows }; api.setRaw(cur); FRZ_LAST[q.id] = frzKey(q.id); frzShow(el, q, ri, null);
       if (typeof checkStep === 'function') checkStep();
     });
     $$('.frzrow', el).forEach((r, ri) => { if (frzState(q, api.state())[ri].snap) r.classList.add('has'); });
     $('.qchk', el).addEventListener('click', () => {
       if (api.locked()) return; const rows = frzState(q, api.state());
-      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. Pause the drop and press Use this moment.`, 'no'); return; }
+      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. ${plain(q.rows[noSnap].whenMsg || 'Pause the drop at that moment.')}`, 'no'); return; }
       let n = 0, good = 0, v = rows.map((r, ri) => { const vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: r.snap, vals }; });
       for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
       v.forEach(r => q.cols.forEach(([k]) => { n++; if (frzCellOk(k, r.vals[k], r.snap)) good++; }));
@@ -3682,7 +3710,7 @@ function renderStepQs() {
   qc.appendChild(h('div', { class: 'qhead' }));
   /* a question marked early collects data while the student works the arena (the freeze-frame table), so it sits under the arena from the start instead of waiting in the Your turn box */
   const early = qs.filter(q => q.early); dc.hidden = !early.length;
-  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop, press <b>Use this moment</b> on a row, then fill that row in.</span>'));
+  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop at each moment listed. The row fills itself in; then type its numbers from the free-body diagram.</span>'));
   qs.forEach(q => renderQuestion(q.early ? dc : qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
@@ -3744,6 +3772,7 @@ function autoQs() {
 }
 function checkStep(force) {
   if (VIEW !== 'vChapter' || CTAB !== 'learn' || !CH) return;
+  if (typeof frzAuto === 'function') frzAuto();
   autoQs();
   const ts = taskState(), qd = qsDone(), all = ts.every(Boolean) && qd && CARDS_SEEN, sig = ts.join() + qd + all + CARDS_SEEN;
   if (sig === LASTSIG && !force) return; LASTSIG = sig;
@@ -4945,18 +4974,30 @@ function dzFinishRuns(why) {
 /* ---- snapshots: saved in DB.dz.snaps and shown in the Journal's Runs tab ---- */
 const dzCanopyState = v => v.opened == null ? 'closed' : v.fr >= 1 ? 'open' : 'opening';
 const dzMakeSnap = (L, T, R) => { const v = dzAt(L); return { id: ++DZ.snapSeq + '-' + Date.now(), run: L.run ? L.run.n : (R.length ? R[R.length - 1].n : 0), lane: L.id, obj: L.obj, world: L.world, air: L.removed, canopy: L.canopy, cstate: dzCanopyState(v), t: Math.round(T * 10) / 10, y: Math.max(0, v.y), v: v.v, a: v.a, W: v.W, D: v.D, R: v.R, height: DZ.height }; };
+/* a small picture of the arena at the paused moment (the lane's half when two lanes are on), saved with the snapshot so the Journal can show and expand it */
+function dzSnapImage(L) {
+  try {
+    const two = DZ.two, idx = Math.max(0, dzActive().indexOf(L)), sx = two ? idx * 450 : 0, sw = two ? 450 : 900;
+    const big = document.createElement('canvas'); big.width = 900; big.height = DZ_H; drawDropScene(big.getContext('2d'));
+    const o = document.createElement('canvas'); o.width = two ? 360 : 640; o.height = Math.round(DZ_H * o.width / sw);
+    const c = o.getContext('2d'); c.drawImage(big, sx, 0, sw, DZ_H, 0, 0, o.width, o.height);
+    return o.toDataURL('image/jpeg', 0.6);
+  } catch (e) { return null; }
+}
 /* save the paused moment as a snapshot (one per lane, or just the lanes in `only`); returns the snapshots made */
 function dzSnapNow(only) {
   if (!DZ.started) return false;
   const T = dzViewT(), snaps = dbGet('dz.snaps', []), R = runsAll(), made = [];
   dzActive().filter(L => !only || only.includes(L)).forEach(L => {
-    const s = dzMakeSnap(L, T, R); made.push(s);
+    const s = dzMakeSnap(L, T, R); s.img = dzSnapImage(L); made.push(s);
     snaps.push(s); if (snaps.length > 50) snaps.splice(0, snaps.length - 50);
     RUNSEQ = Math.max(RUNSEQ, R.reduce((a, r) => Math.max(a, r.n || 0), 0)) + 1;
     R.push(Object.assign({ n: RUNSEQ, kind: 'snap', scene: 'drop', at: Date.now(), live: false, out: 'snap', lane: L.id, two: DZ.two, snap: s }, runWhere()));
   });
   if (R.length > 200) R.splice(0, R.length - 200);
-  dbSet('dz.snaps', snaps); dbSet('runs', R); RUNDIRTY = 1; S.flags.snapped = true; return made;
+  /* only the newest 20 pictures are kept (they are about 30 KB each), and the copy in dz.snaps carries none */
+  R.filter(r => r.kind === 'snap' && r.snap && r.snap.img).slice(0, -20).forEach(r => { delete r.snap.img; });
+  dbSet('dz.snaps', snaps.map(s => { const c = Object.assign({}, s); delete c.img; return c; })); dbSet('runs', R); RUNDIRTY = 1; S.flags.snapped = true; return made;
 }
 /* the snapshot of this lane at the paused time: the one already saved, or a new one (a question's "Use this moment" button) */
 function dzSnapHere(L) {
@@ -5435,7 +5476,7 @@ CHDATA.c5 = {
         { hi: '#cvScene', html: `<p>Keep an eye on the <b>free-body diagram</b> next to the crate. One arrow is the crate's <b>weight</b>, pulling it down. The other is <b>air resistance</b>, pushing up against the motion. Watch how each arrow changes as the crate falls. The Fast-forward button saves time on long drops. Before you press Drop!, check what the free-body diagram shows while the crate hangs from the helicopter. At the moment of release, watch the helicopter too.</p>` }],
       predict: { q: 'The crate falls from 600 m. What will its velocity do on the way down?', opts: ['It will keep speeding up until it hits the ground', 'It will speed up at first, then stop speeding up', 'It will fall at the same velocity all the way down', 'It will speed up at first, then slow down before landing'], then: 'Press Drop! and watch the Velocity readout and the two arrows.' },
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['drop', 'dfbd', 'readH', 'readV', 'readA', 'readT', 'warp'], hide: DZ_HIDE_OLD, sides: [], pullers: [], idle: 'Press Drop! to release the crate',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b> and watch the crate all the way down.', () => dzRun(c5Crate) != null]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b> and watch the crate all the way down.', () => dzRun(c5Crate) != null], ['', () => hasAns('q1'), { q: 'q1' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'The crate\'s velocity stopped going up. What velocity did it settle at?', unit: 'm/s', tol: 0.3, live: () => dzTop(c5Crate), need: () => dzTop(c5Crate) != null, needMsg: 'Drop the crate first. Your runs are in the Journal.', ok: 'Spot on! The crate settled at about 38 m/s. That\'s nearly 140 km/h.' },
         { id: 'q2', type: 'pick', p: 'As the crate fell faster and faster, its weight {0} and the air resistance on it {1}.', picks: [[DZ_TREND, 1], [DZ_TREND, 0]], after: 'Weight is mass × g, so it stays the same during the fall. Air resistance grows as the velocity grows.' },
@@ -5448,7 +5489,7 @@ CHDATA.c5 = {
         { html: `<p>The <b>resultant force</b> is what's left over when you combine the forces. Weight pulls down and air resistance pushes up, so <b>resultant = weight − air resistance</b>. A downward resultant means the crate is still speeding up.</p><div class="example"><b>Worked example</b><br>At 20 m/s the air resistance on the crate is 108.6 N and its weight is 392 N. Resultant = 392 − 108.6 = <b>283.4 N</b>, pointing down, so the crate is still speeding up.</div><div class="law"><b>Key idea:</b> resultant = weight − air resistance.</div>` }],
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['dpause'], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
       mask: [{ q: 'q1', keys: ['fbdR'], when: () => true }],
-      tasks: [['Drop the crate and pause it at the three moments in the table under the arena. Press <b>Use this moment</b> on each of its three rows.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
+      tasks: [['Drop the crate and pause it at the three moments in the table under the arena. Each row says when to pause and fills in by itself.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
       qs: [
         { id: 'q1', type: 'freeze', early: true, p: 'Fill in the table from your three paused moments. Type the forces from the free-body diagram, work out the resultant, and choose what the velocity is doing.', obj: 'crate',
           cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['R', 'Resultant (N)'], ['motion', 'Velocity']],
@@ -5463,7 +5504,7 @@ CHDATA.c5 = {
         { html: `<p>Here's what you just saw. As the crate speeds up, air resistance grows. Eventually it grows until it is <b>as big as the weight</b>. Now the forces are <b>balanced</b>, the resultant force is zero, and the crate stops speeding up. It keeps falling at a steady velocity called its <b>terminal velocity</b>.</p><div class="law"><b>Key idea:</b> When air resistance has grown to equal the weight, the forces are balanced and the object falls at a steady terminal velocity.</div>` },
         { html: `<p>Balanced forces mean the <b>velocity does not change</b>. A still object stays still, and a moving object keeps moving at a steady velocity. That's Newton's first law from Chapter 2, working high above the Drop Zone!</p>` }],
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: [], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
-      tasks: [['Answer the key idea question. It is in the Your turn box, which opens when you press <b>Next: questions</b>.', () => hasAns('q1')], ['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
+      tasks: [['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
       qs: [
         { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains terminal velocity.', opts: ['Air resistance has grown to equal the weight, so the velocity stops changing.', 'Air resistance has grown bigger than the weight, so the velocity stops changing.', 'The weight has shrunk to zero, so the velocity stops changing.', 'The air resistance has disappeared, so the velocity stops changing.'], a: 0, ok: 'Yes! Equal forces mean a steady velocity.', why: { 1: 'If air resistance were bigger, the crate would slow down.', 2: 'Weight stays the same the whole way down.', 3: 'Air resistance is at its biggest at terminal velocity.' } },
         { id: 'q2', type: 'reason', p: 'The crate is falling at a steady 38 m/s. Four friends disagree about the forces on it. Who\'s right?',
@@ -5479,7 +5520,7 @@ CHDATA.c5 = {
         { hi: '#dzOpen', html: `<p>A <b>canopy</b> is huge, so it has to push a lot of air out of the way. At the same velocity, the air resistance is suddenly much bigger. Use <b>⏸ Pause</b> to catch the arrows just after the canopy opens, and again once things settle down.</p>` }],
       predict: { kind: 'sketch', q: 'Sketch the skydiver\'s velocity from the jump until well after the canopy opens. The dashed line shows when the canopy opens.', cols: 10, levels: 10, xLabel: 'Time', yLabel: 'Velocity (downwards)', marks: [{ col: 6, label: 'Canopy opens' }], then: 'Drop the skydiver, open the canopy, then compare your sketch with the real graph.' },
       setup() { dropSetup({ height: 1500, a: { obj: 'para', world: 'earth', removed: 0, canopy: 'medium' } }); }, adds: ['dcanopy', 'dvt', 'dft'], sides: [], pullers: [], idle: 'Press Drop!, then open the canopy',
-      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table under the arena and press <b>Use this moment</b> on each of its two rows.', () => frzCount('q1') >= 2]],
+      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table under the arena. Each row says when to pause and fills in by itself.', () => frzCount('q1') >= 2]],
       qs: [
         { id: 'q1', type: 'freeze', early: true, p: 'Fill in the table from your two paused moments.', obj: 'para',
           cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['big', 'The bigger force'], ['motion', 'Velocity']],
@@ -5503,6 +5544,7 @@ CHDATA.c5 = {
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Race the <b>feather</b> against the <b>crate</b> from 50 m with all the air. The feather is slow, so use <b>Fast-forward</b>.', () => !!(dzRun({ obj: 'feather', world: 'earth', height: 50, air: 0, two: true }) && dzRun({ obj: 'crate', world: 'earth', height: 50, air: 0, two: true }))],
         ['Remove <b>100%</b> of the air from both lanes and race them again.', () => !!(dzRun({ obj: 'feather', world: 'earth', height: 50, air: 100, two: true }) && dzRun({ obj: 'crate', world: 'earth', height: 50, air: 100, two: true }))],
+        ['', () => hasAns('q1'), { q: 'q1' }],
         ['Put the air back and drop the <b>basketball</b> once.', () => !!dzRun({ obj: 'basketball', world: 'earth', air: 0 })]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With all the air removed, how long did the feather and the crate take to land?', unit: 's', tol: 0.15, live: () => dzTime({ obj: 'crate', world: 'earth', height: 50, air: 100 }), need: () => dzTime({ obj: 'crate', world: 'earth', height: 50, air: 100 }) != null, needMsg: 'Race the feather and the crate with all the air removed first. Your runs are in the Journal.', ok: 'Yes, about 3.2 s, at exactly the same moment. With no air, nothing slows the feather down.' },
@@ -5523,6 +5565,7 @@ CHDATA.c5 = {
       mask: [{ q: 'q2', keys: ['fbdW'], when: L => L.obj === 'para' && L.world === 'mars' }, { q: 'q4', keys: ['fbdW'], when: L => L.obj === 'crate' && L.world === 'moon' }],
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Race a crate on <b>Earth</b> against a crate on the <b>Moon</b> from 100 m.', () => !!(dzRun({ obj: 'crate', world: 'earth', height: 100, two: true }) && dzRun({ obj: 'crate', world: 'moon', height: 100, two: true }))],
+        ['', () => hasAns('q1'), { q: 'q1' }],
         ['Drop a crate on <b>Venus</b> and watch its velocity.', () => !!dzRun({ obj: 'crate', world: 'venus' })],
         ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [

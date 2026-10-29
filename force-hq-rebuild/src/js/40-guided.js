@@ -136,7 +136,7 @@ function renderStepQs() {
   qc.appendChild(h('div', { class: 'qhead' }));
   /* a question marked early collects data while the student works the arena (the freeze-frame table), so it sits under the arena from the start instead of waiting in the Your turn box */
   const early = qs.filter(q => q.early); dc.hidden = !early.length;
-  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop, press <b>Use this moment</b> on a row, then fill that row in.</span>'));
+  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop at each moment listed. The row fills itself in; then type its numbers from the free-body diagram.</span>'));
   qs.forEach(q => renderQuestion(q.early ? dc : qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
@@ -198,6 +198,7 @@ function autoQs() {
 }
 function checkStep(force) {
   if (VIEW !== 'vChapter' || CTAB !== 'learn' || !CH) return;
+  if (typeof frzAuto === 'function') frzAuto();
   autoQs();
   const ts = taskState(), qd = qsDone(), all = ts.every(Boolean) && qd && CARDS_SEEN, sig = ts.join() + qd + all + CARDS_SEEN;
   if (sig === LASTSIG && !force) return; LASTSIG = sig;
