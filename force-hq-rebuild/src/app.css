@@ -735,6 +735,10 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 #cvScene.dzscene{aspect-ratio:900/500}
 
 /* ===== freeze, spot and sketch questions (Chapter 5) ===== */
+.datacard{padding:14px;border:2.5px solid var(--accent);display:flex;flex-direction:column;gap:10px}
+.datacard[hidden]{display:none}
+.dchead{display:flex;flex-direction:column;gap:2px;font-size:15px}
+.dchead span{font-size:13.5px;color:var(--muted)}
 .frz{display:flex;flex-direction:column;gap:10px}
 .frzrow{border:1.5px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 .frzrow.has{border-color:var(--accent)}

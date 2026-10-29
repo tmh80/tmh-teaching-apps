@@ -147,7 +147,7 @@ function openExploreHeli() {
   show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Helicopter pad', 'Helicopter pad sandbox');
   heliSetup(); S.flags = newFlags(); resetSim();
   LAB.mode = 'explore'; LAB.show = new Set(['lift', 'dfbd', 'readH', 'readV']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.idle = null; LAB.showVert = true; LAB.showRes = true;
-  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  applyPanels(); $('#qCard').hidden = true; $('#dataCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDoneHe', []));
   const draw = () => { $('#rail').innerHTML = `${exploreSwitch('heli')}<span class="lbl">Explore · Helicopter pad</span><h2>Test your own ideas</h2><p class="gl">Change the lift and watch the helicopter, the readouts and the free-body diagram. The helicopter's mass is 1,180 kg. Its weight is shown on the diagram.</p><div class="lbl">Try this</div><ul class="tasks gl">${HE_EXPLORE_TRY.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change the lift a little at a time. A small change makes a big difference near the weight.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();

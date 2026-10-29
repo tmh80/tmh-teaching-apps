@@ -178,7 +178,7 @@ CARDS
    Key idea: resultant = weight − air resistance.
 
 DO THIS
-- Drop the crate and pause it at the three moments in the table. Press **Use this moment** on each row.   (ticks when all three rows of q1 have a moment attached; `{ q: 'q1', box: false }`)
+- Drop the crate and pause it at the three moments in the table under the arena. Press **Use this moment** on each of its three rows.   (ticks when all three rows of q1 have a moment attached. Changed 29 Oct at Tom's request: q1 is marked `early`, so the table sits under the arena from the start instead of waiting in the Your turn box. Anything students must collect data for is on screen at once.)
 - Take at least one **📸 Snapshot**.   (ticks when a snapshot of a crate run exists)
 
 YOUR TURN QUESTIONS
@@ -240,7 +240,7 @@ After: Drop the skydiver, open the canopy, then compare your sketch with the rea
 DO THIS
 - Sketch your prediction in the box above.
 - Press **Drop!**. When the velocity has stopped going up, press **Open canopy!**   (ticks when a skydiver run on Earth has a canopy opened after terminal velocity was reached)
-- Pause at the two moments in the table and press **Use this moment** on each row.   (`{ q: 'q1', box: false }`)
+- Pause at the two moments in the table under the arena and press **Use this moment** on each of its two rows.   (`early` table, as in d2)
 
 YOUR TURN QUESTIONS
 q1 | freeze | Fill in the table from your two paused moments. | obj para

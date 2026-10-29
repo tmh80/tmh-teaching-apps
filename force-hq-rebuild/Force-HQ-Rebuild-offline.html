@@ -786,6 +786,10 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 #cvScene.dzscene{aspect-ratio:900/500}
 
 /* ===== freeze, spot and sketch questions (Chapter 5) ===== */
+.datacard{padding:14px;border:2.5px solid var(--accent);display:flex;flex-direction:column;gap:10px}
+.datacard[hidden]{display:none}
+.dchead{display:flex;flex-direction:column;gap:2px;font-size:15px}
+.dchead span{font-size:13.5px;color:var(--muted)}
 .frz{display:flex;flex-direction:column;gap:10px}
 .frzrow{border:1.5px solid var(--line);border-radius:10px;background:var(--panel);padding:8px 10px;display:flex;flex-direction:column;gap:6px}
 .frzrow.has{border-color:var(--accent)}
@@ -973,6 +977,7 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
           <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift">Reset</button>
         </div>
+        <section class="panel datacard" id="dataCard" aria-label="Collect your data" hidden></section>
         <div class="underrow">
           <div class="fbdcol" data-panel="fbd">
             <div class="lbl"><button type="button" class="term tl" data-t="fbd">Free-body diagram of the crate</button><button type="button" class="info" data-info="fbd" aria-label="How do I read the free-body diagram?">ⓘ</button></div>
@@ -3633,7 +3638,7 @@ function bindTkAns() {
     if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter' && cb) { e.preventDefault(); cb.click(); } });
     /* Check here: press the matching question's own Check button (its answer is already copied in), so Your turn shows it done. Any problem message comes back to this box. */
     if (cb) cb.addEventListener('click', () => {
-      const qi = $(`#qCard .qitem[data-q="${q.id}"]`), chk = qi && $('.qchk', qi); if (!chk) return;
+      const qi = $(`#qCard .qitem[data-q="${q.id}"], #dataCard .qitem[data-q="${q.id}"]`), chk = qi && $('.qchk', qi); if (!chk) return;
       if (qi.querySelector('.ansin') && qi.querySelector('.ansin').value !== (inp ? inp.value : '')) qi.querySelector('.ansin').value = inp ? inp.value : '';
       chk.click();
       const m = $('.tkmsg', box), fb = $('.fb', qi); if (m && !qi.classList.contains('locked') && fb) { m.textContent = fb.textContent; m.className = 'tkmsg no'; }
@@ -3672,10 +3677,13 @@ function predictBox(st) {
     : `<div class="predict done"><span class="lbl">Your prediction</span><p class="gl"><b>${P.opts[v]}</b></p><p class="scaleNote">${P.then || 'Now test it in the arena and see if you were right!'}</p></div>`;
 }
 function renderStepQs() {
-  const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
+  const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'), dc = $('#dataCard'); qc.innerHTML = ''; dc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
-  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
+  /* a question marked early collects data while the student works the arena (the freeze-frame table), so it sits under the arena from the start instead of waiting in the Your turn box */
+  const early = qs.filter(q => q.early); dc.hidden = !early.length;
+  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop, press <b>Use this moment</b> on a row, then fill that row in.</span>'));
+  qs.forEach(q => renderQuestion(q.early ? dc : qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
     wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });
@@ -5076,7 +5084,7 @@ function openExploreDrop() {
   show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Drop Zone', 'Drop Zone sandbox');
   dropSetup({ height: 600, a: { obj: 'crate', world: 'earth' } }); S.flags = newFlags(); resetSim();
   LAB.mode = 'explore'; LAB.show = new Set(['drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readV', 'readA', 'readT', 'warp']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.idle = null; LAB.showVert = true; LAB.showRes = true;
-  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  applyPanels(); $('#qCard').hidden = true; $('#dataCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDoneDz', []));
   const draw = () => { $('#rail').innerHTML = `${exploreSwitch('drop')}<span class="lbl">Explore · Drop Zone</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${DZ_EXPLORE_TRY.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();
@@ -5440,9 +5448,9 @@ CHDATA.c5 = {
         { html: `<p>The <b>resultant force</b> is what's left over when you combine the forces. Weight pulls down and air resistance pushes up, so <b>resultant = weight − air resistance</b>. A downward resultant means the crate is still speeding up.</p><div class="example"><b>Worked example</b><br>At 20 m/s the air resistance on the crate is 108.6 N and its weight is 392 N. Resultant = 392 − 108.6 = <b>283.4 N</b>, pointing down, so the crate is still speeding up.</div><div class="law"><b>Key idea:</b> resultant = weight − air resistance.</div>` }],
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: ['dpause'], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
       mask: [{ q: 'q1', keys: ['fbdR'], when: () => true }],
-      tasks: [['Drop the crate and pause it at the three moments in the table. Press <b>Use this moment</b> on each row.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
+      tasks: [['Drop the crate and pause it at the three moments in the table under the arena. Press <b>Use this moment</b> on each of its three rows.', () => frzCount('q1') >= 3], ['Take at least one <b>📸 Snapshot</b>.', () => !!S.flags.snapBtn]],
       qs: [
-        { id: 'q1', type: 'freeze', p: 'Fill in the table from your three paused moments. Type the forces from the free-body diagram, work out the resultant, and choose what the velocity is doing.', obj: 'crate',
+        { id: 'q1', type: 'freeze', early: true, p: 'Fill in the table from your three paused moments. Type the forces from the free-body diagram, work out the resultant, and choose what the velocity is doing.', obj: 'crate',
           cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['R', 'Resultant (N)'], ['motion', 'Velocity']],
           rows: [{ label: 'Just after it leaves the helicopter', when: s => s.cstate === 'closed' && s.v < 12 && s.a > 0.5, whenMsg: 'Pause in the first second of the fall.' },
             { label: 'About halfway to its top velocity', when: s => s.v >= 15 && s.v <= 23, whenMsg: 'Pause when the velocity is between 15 and 23 m/s.' },
@@ -5455,7 +5463,7 @@ CHDATA.c5 = {
         { html: `<p>Here's what you just saw. As the crate speeds up, air resistance grows. Eventually it grows until it is <b>as big as the weight</b>. Now the forces are <b>balanced</b>, the resultant force is zero, and the crate stops speeding up. It keeps falling at a steady velocity called its <b>terminal velocity</b>.</p><div class="law"><b>Key idea:</b> When air resistance has grown to equal the weight, the forces are balanced and the object falls at a steady terminal velocity.</div>` },
         { html: `<p>Balanced forces mean the <b>velocity does not change</b>. A still object stays still, and a moving object keeps moving at a steady velocity. That's Newton's first law from Chapter 2, working high above the Drop Zone!</p>` }],
       setup() { dropSetup({ height: 600, a: { obj: 'crate', world: 'earth', removed: 0 } }); }, adds: [], sides: [], pullers: [], idle: 'Press Drop!, then pause the crate',
-      tasks: [['Answer the key idea question below.', () => hasAns('q1')], ['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
+      tasks: [['Answer the key idea question. It is in the Your turn box, which opens when you press <b>Next: questions</b>.', () => hasAns('q1')], ['Drop the crate, pause it once it has reached terminal velocity, and take a <b>📸 Snapshot</b>.', () => !!dzSnap({ obj: 'crate', world: 'earth' }, s => Math.abs(s.a) < 0.2 && S.flags.snapBtn)]],
       qs: [
         { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that explains terminal velocity.', opts: ['Air resistance has grown to equal the weight, so the velocity stops changing.', 'Air resistance has grown bigger than the weight, so the velocity stops changing.', 'The weight has shrunk to zero, so the velocity stops changing.', 'The air resistance has disappeared, so the velocity stops changing.'], a: 0, ok: 'Yes! Equal forces mean a steady velocity.', why: { 1: 'If air resistance were bigger, the crate would slow down.', 2: 'Weight stays the same the whole way down.', 3: 'Air resistance is at its biggest at terminal velocity.' } },
         { id: 'q2', type: 'reason', p: 'The crate is falling at a steady 38 m/s. Four friends disagree about the forces on it. Who\'s right?',
@@ -5471,9 +5479,9 @@ CHDATA.c5 = {
         { hi: '#dzOpen', html: `<p>A <b>canopy</b> is huge, so it has to push a lot of air out of the way. At the same velocity, the air resistance is suddenly much bigger. Use <b>⏸ Pause</b> to catch the arrows just after the canopy opens, and again once things settle down.</p>` }],
       predict: { kind: 'sketch', q: 'Sketch the skydiver\'s velocity from the jump until well after the canopy opens. The dashed line shows when the canopy opens.', cols: 10, levels: 10, xLabel: 'Time', yLabel: 'Velocity (downwards)', marks: [{ col: 6, label: 'Canopy opens' }], then: 'Drop the skydiver, open the canopy, then compare your sketch with the real graph.' },
       setup() { dropSetup({ height: 1500, a: { obj: 'para', world: 'earth', removed: 0, canopy: 'medium' } }); }, adds: ['dcanopy', 'dvt', 'dft'], sides: [], pullers: [], idle: 'Press Drop!, then open the canopy',
-      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table and press <b>Use this moment</b> on each row.', () => frzCount('q1') >= 2]],
+      tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table under the arena and press <b>Use this moment</b> on each of its two rows.', () => frzCount('q1') >= 2]],
       qs: [
-        { id: 'q1', type: 'freeze', p: 'Fill in the table from your two paused moments.', obj: 'para',
+        { id: 'q1', type: 'freeze', early: true, p: 'Fill in the table from your two paused moments.', obj: 'para',
           cols: [['W', 'Weight (N)'], ['D', 'Air resistance (N)'], ['big', 'The bigger force'], ['motion', 'Velocity']],
           rows: [{ label: 'Just after the canopy opens', when: s => s.cstate !== 'closed' && s.a < -1, whenMsg: 'Pause in the first few seconds after the canopy opens. The step buttons help.' },
             { label: 'Steady again with the canopy open', when: s => s.cstate === 'open' && Math.abs(s.a) < 0.2, whenMsg: 'Pause once the velocity has stopped going down.' }],
@@ -5770,7 +5778,7 @@ function openExploreHeli() {
   show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Helicopter pad', 'Helicopter pad sandbox');
   heliSetup(); S.flags = newFlags(); resetSim();
   LAB.mode = 'explore'; LAB.show = new Set(['lift', 'dfbd', 'readH', 'readV']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.idle = null; LAB.showVert = true; LAB.showRes = true;
-  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  applyPanels(); $('#qCard').hidden = true; $('#dataCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDoneHe', []));
   const draw = () => { $('#rail').innerHTML = `${exploreSwitch('heli')}<span class="lbl">Explore · Helicopter pad</span><h2>Test your own ideas</h2><p class="gl">Change the lift and watch the helicopter, the readouts and the free-body diagram. The helicopter's mass is 1,180 kg. Its weight is shown on the diagram.</p><div class="lbl">Try this</div><ul class="tasks gl">${HE_EXPLORE_TRY.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change the lift a little at a time. A small change makes a big difference near the weight.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();
@@ -6258,7 +6266,7 @@ function openExplore() {
   show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Main Arena', 'Tug-of-war sandbox');
   clearCh2(); S.left = ['adult']; S.right = ['adult', 'kid']; S.mass = 50; S.floor = 'smooth'; S.flags = newFlags(); resetSim();
   clearCh2(); LAB.mode = 'explore'; LAB.show = new Set(PANELS.filter(k => !EXPLORE_HIDE.includes(k))); LAB.sides = ['left', 'right']; LAB.pullers = ['kid', 'dog', 'adult', 'strong', 'pony', 'horse']; LAB.floors = null; LAB.idle = null;
-  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  applyPanels(); $('#qCard').hidden = true; $('#dataCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDone', []));
   const draw = () => { $('#rail').innerHTML = `${exploreSwitch('main')}<span class="lbl">Explore · Main Arena</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${TRYTHIS.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();

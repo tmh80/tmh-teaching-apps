@@ -92,7 +92,7 @@ function bindTkAns() {
     if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter' && cb) { e.preventDefault(); cb.click(); } });
     /* Check here: press the matching question's own Check button (its answer is already copied in), so Your turn shows it done. Any problem message comes back to this box. */
     if (cb) cb.addEventListener('click', () => {
-      const qi = $(`#qCard .qitem[data-q="${q.id}"]`), chk = qi && $('.qchk', qi); if (!chk) return;
+      const qi = $(`#qCard .qitem[data-q="${q.id}"], #dataCard .qitem[data-q="${q.id}"]`), chk = qi && $('.qchk', qi); if (!chk) return;
       if (qi.querySelector('.ansin') && qi.querySelector('.ansin').value !== (inp ? inp.value : '')) qi.querySelector('.ansin').value = inp ? inp.value : '';
       chk.click();
       const m = $('.tkmsg', box), fb = $('.fb', qi); if (m && !qi.classList.contains('locked') && fb) { m.textContent = fb.textContent; m.className = 'tkmsg no'; }
@@ -131,10 +131,13 @@ function predictBox(st) {
     : `<div class="predict done"><span class="lbl">Your prediction</span><p class="gl"><b>${P.opts[v]}</b></p><p class="scaleNote">${P.then || 'Now test it in the arena and see if you were right!'}</p></div>`;
 }
 function renderStepQs() {
-  const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'); qc.innerHTML = '';
+  const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'), dc = $('#dataCard'); qc.innerHTML = ''; dc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
-  qs.forEach(q => renderQuestion(qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
+  /* a question marked early collects data while the student works the arena (the freeze-frame table), so it sits under the arena from the start instead of waiting in the Your turn box */
+  const early = qs.filter(q => q.early); dc.hidden = !early.length;
+  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop, press <b>Use this moment</b> on a row, then fill that row in.</span>'));
+  qs.forEach(q => renderQuestion(q.early ? dc : qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
     wrap.addEventListener('click', e => { const b = e.target.closest('[data-more]'); if (!b) return; const n = dbGet('moreN', 0) + 1; dbSet('moreN', n); renderQuestion($('.morehost', wrap), MBMORE(+b.dataset.more, n), { store: 'more.' + CH.id }); });

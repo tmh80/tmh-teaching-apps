@@ -327,7 +327,7 @@ function openExploreDrop() {
   show('vExplore'); placeLab($('#exploreHost')); exploreHead('Explore · Drop Zone', 'Drop Zone sandbox');
   dropSetup({ height: 600, a: { obj: 'crate', world: 'earth' } }); S.flags = newFlags(); resetSim();
   LAB.mode = 'explore'; LAB.show = new Set(['drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readV', 'readA', 'readT', 'warp']); LAB.sides = []; LAB.pullers = []; LAB.floors = null; LAB.idle = null; LAB.showVert = true; LAB.showRes = true;
-  applyPanels(); $('#qCard').hidden = true; hideCards(); closeDesk();
+  applyPanels(); $('#qCard').hidden = true; $('#dataCard').hidden = true; hideCards(); closeDesk();
   const done = new Set(dbGet('tryDoneDz', []));
   const draw = () => { $('#rail').innerHTML = `${exploreSwitch('drop')}<span class="lbl">Explore · Drop Zone</span><h2>Test your own ideas</h2><p class="gl">Every control, readout and diagram is switched on. Tap any <b>ⓘ</b> to find out how to read a panel.</p><div class="lbl">Try this</div><ul class="tasks gl">${DZ_EXPLORE_TRY.map((t, i) => `<li class="${done.has(i) ? 'ok' : ''}"><span class="box">✓</span><span>${t[0]}</span></li>`).join('')}</ul><p class="scaleNote">Change one thing at a time and keep everything else the same. That way you know what caused the difference.</p><button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button><button type="button" class="ghost" data-act="home">← Home</button>`; };
   draw();

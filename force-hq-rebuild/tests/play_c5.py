@@ -28,7 +28,7 @@ with sync_playwright() as p:
         if m.count() and m.is_visible(): m.click(); pg.wait_for_timeout(200)
     jclick = lambda sel: pg.evaluate('s=>document.querySelector(s).click()', sel)   # the Your turn box can sit over the arena; a student drags it aside, the test clicks through
     stepDone = lambda: ev("stepDone(CH.id, GI)")
-    q = lambda qid: pg.locator(f'#qCard [data-q="{qid}"]')
+    q = lambda qid: pg.locator(f'#qCard [data-q="{qid}"], #dataCard [data-q="{qid}"]')
     fbq = lambda qid: q(qid).locator('.fb').inner_text()
     def ptsq(qid): return q(qid).locator('.ptsb').first.inner_text().strip()
     def tapgraph(sel, t, tmax=40):
@@ -65,8 +65,11 @@ with sync_playwright() as p:
     chk('d1: step done', stepDone(), ev("JSON.stringify(dbGet(stepKey(CH.id,GI)))")[:200]); print('run text:', ev("runText(runsAll().filter(r=>r.kind==='drop').slice(-1)[0])")); pg.screenshot(path=OUT + 'd1_done.png'); nxt()
 
     # ================= d2 =================
-    cards(); dock(); pg.wait_for_timeout(300); pg.screenshot(path=OUT + 'd2_start.png')
+    cards(); ev("qPlace('hidden')"); pg.wait_for_timeout(300); pg.screenshot(path=OUT + 'd2_start.png')
     chk('d2: pause buttons appear', pg.locator('#dzPause').is_visible() and pg.locator('#dzSnap').is_visible())
+    chk('d2: the freeze table is on screen straight away (under the arena), with its Use this moment buttons, before any Next', pg.locator('#dataCard').is_visible() and pg.locator('#dataCard .frzbtn').count() == 3 and pg.locator('#dataCard .frzbtn').first.is_visible() and ev("QSTATE") != 'pop', ev("QSTATE"))
+    chk('d2: the task says where the table is', 'under the arena' in pg.locator('#rail .tasks').inner_text())
+    pg.locator('#dataCard').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'd2_table_visible.png', full_page=True)
     jclick('#dzDrop'); adv(0.6); jclick('#dzPause'); pg.wait_for_timeout(150)
     chk('d2: resultant label is masked until q1 is answered', ev("dzMasked().has('fbdR')"))
     q('q1').locator('.frzbtn').nth(0).click(); chk('d2: moment 1 attached', 'Paused at' in q('q1').locator('.frzat').nth(0).inner_text(), fbq('q1'))
@@ -79,7 +82,7 @@ with sync_playwright() as p:
     fill_freeze('q1', ['W', 'D', 'R', 'motion']); q('q1').locator('.qchk').click(); pg.wait_for_timeout(150)
     chk('d2 q1: freeze table 12 of 12', ptsq('q1') == '12 of 12 points', (ptsq('q1'), fbq('q1')))
     chk('d2: resultant label shows after q1', not ev("dzMasked().has('fbdR')"))
-    q('q2').locator('.pickin').nth(0).select_option('0'); q('q2').locator('.pickin').nth(1).select_option('2'); q('q2').locator('.pickin').nth(2).select_option('2'); q('q2').locator('.qchk').click(); pg.wait_for_timeout(100)
+    dock(); q('q2').locator('.pickin').nth(0).select_option('0'); q('q2').locator('.pickin').nth(1).select_option('2'); q('q2').locator('.pickin').nth(2).select_option('2'); q('q2').locator('.qchk').click(); pg.wait_for_timeout(100)
     chk('d2 q2: trend pick 3 of 3', ptsq('q2') == '3 of 3 points', ptsq('q2')); chk('d2: step done', stepDone()); pg.screenshot(path=OUT + 'd2_done.png'); nxt()
 
     # ================= d3 =================
@@ -102,7 +105,7 @@ with sync_playwright() as p:
     pg.click('#deskClose'); pg.wait_for_timeout(300); dock(); chk('d3: step done', stepDone()); nxt()
 
     # ================= d4 =================
-    cards(); dock(); pg.wait_for_timeout(300); pg.screenshot(path=OUT + 'd4_start.png')
+    cards(); ev("qPlace('hidden')"); pg.wait_for_timeout(300); pg.screenshot(path=OUT + 'd4_start.png')
     chk('d4: canopy button, v-t graph and force strip appear', pg.locator('#dzOpen').is_visible() and pg.locator('#cvDVT').is_visible() and pg.locator('#cvDFT').is_visible())
     chk('d4: sketch grid in the Predict box', pg.locator('#rail [data-psk] svg.skg').count() == 1)
     pg.locator('#predSkLock').click(); chk('d4: needs every column', 'every column' in pg.locator('#predSkFb').inner_text(), pg.locator('#predSkFb').inner_text())
@@ -121,7 +124,7 @@ with sync_playwright() as p:
     chk('d4: both rows attached; open-canopy task ticked', ev("frzCount('q1')") == 2 and ev("!!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)"))
     fill_freeze('q1', ['W', 'D', 'big', 'motion']); q('q1').locator('.qchk').click(); pg.wait_for_timeout(150)
     chk('d4 q1: freeze 8 of 8', ptsq('q1') == '8 of 8 points', (ptsq('q1'), fbq('q1')))
-    q('q2').locator('.voice[data-o="1"]').click(); q('q2').locator('.rR [data-r="0"]').click(); q('q2').locator('.qchk').click(); pg.wait_for_timeout(100); chk('d4 q2: cartoon (Ana)', ptsq('q2') == '2 of 2 points', (ptsq('q2'), fbq('q2')))
+    dock(); q('q2').locator('.voice[data-o="1"]').click(); q('q2').locator('.rR [data-r="0"]').click(); q('q2').locator('.qchk').click(); pg.wait_for_timeout(100); chk('d4 q2: cartoon (Ana)', ptsq('q2') == '2 of 2 points', (ptsq('q2'), fbq('q2')))
     tapgraph('#qCard [data-q="q3"]', 20.3); q('q3').locator('.qchk').click(); pg.wait_for_timeout(100); chk('d4 q3: spot the canopy', ptsq('q3').startswith('1 of 1'), (ptsq('q3'), fbq('q3')))
     q('q4').locator('.pickin').nth(0).select_option('2'); q('q4').locator('.pickin').nth(1).select_option('1'); q('q4').locator('.qchk').click(); pg.wait_for_timeout(100); chk('d4 q4: pick', ptsq('q4') == '2 of 2 points', ptsq('q4'))
     ev("dzPlay()"); pg.wait_for_timeout(100); adv(2); jclick('#dzPause')
