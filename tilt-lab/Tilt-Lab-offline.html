@@ -646,10 +646,11 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
 @page{size:A4;margin:12mm}
 @media print{
   html,body{background:#fff!important}
-  body[data-ws] .app,body[data-ws] .gate,body[data-ws] .nb,body[data-ws] .toast,body[data-ws] .teach{display:none!important}
+  body[data-ws]>*:not(.wsv):not(script):not(style){display:none!important}
   body[data-ws] .wsv{position:static!important;inset:auto!important;background:#fff!important;overflow:visible!important;padding:0!important}
   body[data-ws] .wsv .wstool,body[data-ws] .wsv .wsnote{display:none!important}
   body[data-ws] .wsdoc{width:100%!important;margin:0!important;padding:0!important;border-radius:0!important}
+  body[data-ws] .wsdoc .wsin{zoom:var(--wsz,1)}
 }
 /* additions */
 .chgrp{display:block;margin-top:8px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
@@ -740,6 +741,120 @@ details.info p{position:absolute;right:0;top:28px;z-index:5;width:min(300px,80vw
 .lockn{font-size:13px;color:var(--muted);font-weight:600;text-align:right;max-width:9em}
 .librow.okrow{border-color:#2f9e63;background:#eef9f2}
 .primary:disabled{opacity:.45;cursor:not-allowed}
+/* ---- research questions: picker, journal, screenshots, help pop-ups ---- */
+.nb .nbhb{display:flex;gap:6px;align-items:center}
+.nb h3,.nb h4{margin:0}
+.nb h4{font-size:14.5px;margin-bottom:4px}
+.nb .gtext{margin:0;font-size:14.5px;line-height:1.5}
+.nb .rqtier{display:flex;flex-direction:column;gap:7px;border-top:1px solid var(--line);padding-top:10px}
+.nb .rqtier h3{font-size:16px}.nb .rqtier .note{margin:-3px 0 2px}
+.nb .rqcard{font:inherit;text-align:left;display:flex;gap:10px;align-items:center;width:100%;background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:12px;padding:9px 12px;cursor:pointer}
+.nb .rqcard:hover,.nb .rqcard:focus-visible{border-color:var(--sun);outline:none}
+.nb .rqcard i{font-style:normal;font-size:26px;flex:none}
+.nb .rqcard span{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.nb .rqcard b{font-size:14.5px}.nb .rqcard small{font-size:12.5px;color:var(--muted);line-height:1.35}
+.nb .rqcard em{font-style:normal;font-size:12px;font-weight:700;color:var(--sun);flex:none}.nb .rqcard em.done{color:#2e7d4f}
+.nb .rqown{border:1.5px dashed var(--line);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.nb .rqown .note{margin:0}
+.nb .rqback{align-self:flex-start}
+.nb .rqq{border:2px solid var(--sun);border-radius:14px;padding:10px 14px;background:var(--sun-soft)}
+.nb .rqq.t-e{border-color:var(--ice);background:var(--ice-soft)}.nb .rqq.t-m{border-color:#8a5cc2;background:rgba(138,92,194,.1)}
+.nb .rqq h3{font-size:17px;margin:4px 0 4px}.nb .rqq p{margin:0;font-size:14.5px;line-height:1.5}
+.nb .rqchip{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.nb .rqstat{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;background:var(--chip);border-radius:10px;padding:7px 12px;position:sticky;top:-12px;z-index:3;border:1px solid var(--line)}
+.nb .rqstat b{font-size:15px}
+.nb section{display:flex;flex-direction:column;gap:7px}
+.nb section>.note{margin:0}
+.nb .rqtip{background:var(--sun-soft);border:1px solid var(--sun);border-radius:10px;padding:8px 11px;display:flex;flex-direction:column;gap:5px;align-items:flex-start}
+.nb .rqtip p{margin:0;font-size:14px;line-height:1.5}
+.nb .rqtn{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--sun)}
+.nb .rqview{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:1px 8px;margin-left:6px;text-transform:none;letter-spacing:0;font-weight:700}
+.nb .rqtipbtn{align-self:flex-start;margin-left:0}
+.nb textarea.rqtext{width:100%;resize:vertical;font:inherit;font-size:14px;line-height:1.5;padding:8px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.nb .rqcount{align-self:flex-end;color:var(--muted);font-size:11.5px;margin-top:-4px}
+.nb .rqshots{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.nb .rqsh{border:2px solid var(--line);border-radius:12px;padding:7px;display:flex;flex-direction:column;gap:6px;background:var(--bg)}
+.nb .rqsh.on{border-color:#2e7d4f;background:#eef9f2}
+.nb .rqsh img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line);display:block}
+.nb .rqevlab{display:flex;gap:6px;align-items:center;font-weight:700;font-size:13px;cursor:pointer}
+.nb .rqsh textarea{width:100%;resize:vertical;font:inherit;font-size:13px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.nb .rqdel{align-self:flex-start}
+.nb .wordsuse{background:var(--chip);border-radius:10px;padding:8px 10px}
+.nb .wordsuse div{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.nb .wordsuse b{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px}
+.nb .rqans{margin:0;white-space:normal;border-left:4px solid var(--sun);padding:6px 12px;background:var(--bg);border-radius:0 8px 8px 0;font-size:14px;line-height:1.55}
+.nb .rqchk div{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.nb .rqchk span{border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700;border:1px solid var(--line)}
+.nb .rqchk span.yes{background:#e3f5ea;color:#1f6b40;border-color:#2e7d4f}.nb .rqchk span.no{color:var(--muted)}
+.nb .model{background:var(--ice-soft);border:1px solid var(--ice);border-radius:10px;padding:8px 11px;display:flex;flex-direction:column;gap:6px}
+.nb .model p{margin:0;font-size:13.5px;line-height:1.5}
+.nb .checklist{display:flex;flex-direction:column;gap:6px}
+.nb .checklist label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;line-height:1.45;cursor:pointer}
+.nb .checklist input{margin-top:3px}
+.nb .rqws{border-top:1px solid var(--line);padding-top:10px;align-items:center}
+.pshot{font:inherit;font-size:14px;line-height:1;width:28px;height:24px;border-radius:8px;border:1px solid var(--line);background:var(--chip);cursor:pointer;margin-left:4px;padding:0}
+.pshot:hover{background:var(--sun-soft);border-color:var(--sun)}
+.pshot.flash{background:var(--sun);border-color:var(--sun)}
+.rqhelp{position:fixed;inset:0;z-index:90;background:rgba(4,6,13,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+.rqhelp[hidden]{display:none}
+.rqhbox{background:var(--panel);color:var(--ink);border-radius:16px;max-width:440px;width:100%;padding:20px 22px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);text-align:center;align-items:center}
+.rqhstep{font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rqhi{font-size:44px;line-height:1}
+.rqhbox h3{margin:0;font-size:21px}.rqhbox p{margin:0;font-size:15.5px;line-height:1.55}
+.rqhdots{display:flex;gap:7px}
+.rqhdots button{width:11px;height:11px;border-radius:50%;border:0;background:var(--line);padding:0;cursor:pointer}
+.rqhdots button[aria-current="true"]{background:var(--sun);transform:scale(1.25)}
+.rqhbtn{display:flex;gap:10px;justify-content:center;width:100%;margin-top:4px}
+.rqhbtn .primary{margin-left:0}
+.rqhhide{font-size:12.5px;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+/* worksheet: research question */
+.wsdoc .rqwq{border:2px solid #1b4f72;border-radius:8px;padding:6px 12px;margin:8px 0}
+.wsdoc .rqwq p{margin:3px 0 0;font-size:13px}
+.wsdoc .rqmark{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:6px 0 2px}
+.wsdoc .rqmark div{border:1.5px solid #c9d2dc;border-radius:8px;text-align:center;padding:4px 4px;min-height:44px}
+.wsdoc .rqmark b{display:block;font-size:18px;color:var(--wsblue)}.wsdoc .rqmark span{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:#5a6878}
+.wsdoc .rqevg{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+.wsdoc .rqevg figure{margin:0;break-inside:avoid}
+.wsdoc .rqevg img{width:100%;max-height:2.3in;object-fit:contain;object-position:left top;border:1px solid #8a97a6;border-radius:4px;display:block;background:#fff}
+.wsdoc .rqevg figcaption{font-size:11px;line-height:1.35;color:var(--wsblue);margin-top:2px}
+.wsdoc .rqwords span{display:inline-block;border:1px solid #c9d2dc;border-radius:999px;padding:0 8px;margin:1px 2px;font-size:11.5px}
+.wsdoc .rqwords span.yes{color:#1f6b40;border-color:#2e7d4f;font-weight:700}
+.wsdoc .rqideas{list-style:none;margin:4px 0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:11.5px}
+.wsdoc .rqideas li{display:flex;gap:7px;align-items:flex-start}
+.wsdoc .rqideas li.no{color:#445366}
+@media (max-width:560px){.nb .rqshots{grid-template-columns:1fr 1fr}}
+@media print{#rqhelp{display:none!important}}
+
+/* fit-to-two-pages measuring state: same width and zoom as the printed page */
+.wsdoc.wsm{width:703px!important;max-width:none!important;margin:0!important;padding:0!important}
+.wsdoc.wsm .wsin{zoom:var(--wsz,1)}
+
+/* compact section worksheets */
+.wsdoc .cs{display:grid;grid-template-columns:66px 1fr;gap:8px;margin:0;padding:3px 0;border-bottom:1px solid #e3e8ee;break-inside:avoid;font-size:12px;line-height:1.4}
+.wsdoc .cl{align-self:start;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:#6b7c8f;border-radius:999px;padding:1px 0;text-align:center;margin-top:1px}
+.wsdoc .cl.wr{background:#c2700c}.wsdoc .cl.ck{background:#1b7ea6}.wsdoc .cl.pr{background:#5b6abf}.wsdoc .cl.ex{background:#2e7d4f}
+.wsdoc .cq{color:#44566a;font-size:11.5px}
+.wsdoc .ca{color:var(--wsblue);font-weight:600}
+.wsdoc .ca.wrt{white-space:pre-wrap;border-left:3px solid var(--wsblue);padding-left:8px;margin-top:2px}
+.wsdoc .cm{color:#b3541e;font-weight:600;font-size:11px}
+.wsdoc .ckey{color:#2e7d4f;font-weight:700;font-size:11.5px}
+.wsdoc .cls i{display:block;height:20px;border-bottom:1px solid #8a97a6}
+.wsdoc h2{break-after:avoid}
+.wsdoc .wscols{column-count:2;column-gap:18px;column-rule:1px solid #e3e8ee}
+.wsdoc .wscols h2{font-size:14px;margin:10px 0 4px;column-span:none}
+.wsdoc .wscols .cs{grid-template-columns:54px 1fr;gap:6px}
+
+/* teacher page: research question guide */
+.teach .rqtq{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:6px 0;background:var(--bg)}
+.teach .rqtq summary{cursor:pointer;font-size:14.5px}
+.teach .rqtq .rqtv{color:var(--muted);font-size:12.5px;margin-left:6px}
+.teach .rqtq ul,.teach .rqtq ol{margin:3px 0 6px 20px;padding:0;font-size:14px;line-height:1.45}
+.teach h5.rqth{font-size:15px;margin:14px 0 2px}
+/* journal open on a wide screen: keep the header buttons in one row under the title */
+@media (min-width:1101px){
+  .app[data-nb="1"] header.top{grid-template-columns:auto minmax(0,1fr)}
+  .app[data-nb="1"] header.top .hdrSpace{grid-column:1/-1;justify-content:flex-start}
+}
 
 </style>
 
@@ -2351,7 +2466,7 @@ function renderStep(){
     if(st.keys)h+=`<div class="gkeys"><span class="lbl">What you have learned</span><ul>${st.keys.map(x=>`<li>${linkTerms(x)}</li>`).join("")}</ul></div>`;
     h+=st.evidence?evidenceHTML():findingsHTML();
     h+=`<div class="gstart"><span class="lbl">Sentence starters</span><ul>${st.starters.map(x=>`<li>${x}</li>`).join("")}</ul></div>`;
-    h+=`<div class="gans ${hasText(S.gs)?"ok":""}"><label class="lbl" for="gTxt">Write your answer here (or in your notebook)</label><textarea id="gTxt" rows="7" maxlength="2500" placeholder="Start with one of the sentence starters. Any answer counts, even a short one!">${esc(MEM.text[S.gs]||"")}</textarea><small class="note">Your answer is saved on this computer and printed on your worksheet.</small></div>`;
+    h+=`<div class="gans ${hasText(S.gs)?"ok":""}"><label class="lbl" for="gTxt">Write your answer here (or in your notebook)</label><textarea id="gTxt" rows="7" maxlength="700" placeholder="Start with one of the sentence starters. Any answer counts, even a short one!">${esc(MEM.text[S.gs]||"")}</textarea><small class="note">Your answer is saved on this computer and printed on your worksheet.</small></div>`;
     if(st.checklist&&coopMode()!=="solo")h+=peerHTML(st);
     else if(st.checklist){MEM.ticks=MEM.ticks||{};h+=`<div class="gcheck"><span class="lbl">Before you finish, check your answer:</span>${st.checklist.map((x,i)=>`<label><input type="checkbox" data-k="${i}" ${MEM.ticks[i]?"checked":""}> ${x}</label>`).join("")}</div>`}
   }else if(st.type==="learn"){
@@ -3450,12 +3565,12 @@ function xCard(t){
 }
 function EXPLORE_HTML(){
   return `<h3 id="t-explore">Exploration mode: ideas and group tables</h3>
-  <p>Use this when students choose their own path, for example in a student-choice workshop or as an extension. Everything in Tilt Lab is open. Students pick Guided challenges, Exploration or My investigation on the home page, and they can swap between Guided and Exploration whenever they like with the two big buttons at the top. <b>Exploration is a dashboard:</b> the “Your dashboard” buttons add or remove views (Sky, Flat map, Planet from space, Year graphs, Heat, All the numbers), so a student can build exactly the screen their question needs. The button <b>📓 My investigation</b> is their notebook.</p>
+  <p>Use this when students choose their own path, for example in a student-choice workshop or as an extension. Everything in Tilt Lab is open. Students pick Guided challenges, Exploration or My investigation on the home page, and they can swap between Guided and Exploration whenever they like with the two big buttons at the top. <b>Exploration is a dashboard:</b> the “Your dashboard” buttons add or remove views (Sky, Flat map, Planet from space, Year graphs, Heat, All the numbers), so a student can build exactly the screen their question needs. The button <b>📓 My investigation</b> opens their journal, where they choose one of twelve research questions (see “Research questions and marking” below) or write their own question.</p>
   <ol class="ttips">
-   <li>Students open <b>My investigation</b>, then write their own question or pick a <b>Try this</b> idea. Picking an idea sets up the model for them.</li>
+   <li>For their own question, students open <b>My investigation</b>, choose <b>Write my own question</b>, then write a question or pick a <b>Try this</b> idea. Picking an idea sets up the model for them.</li>
    <li>They set up the model (planet, place, date, tilt) and press <b>Add a reading</b>. The notebook records the set-up. <b>They read the numbers from the screen and type them in.</b> The model checks each number and shows where to look if one is off.</li>
    <li>They write what they noticed and a conclusion. Each question can have its own readings, and one student can run several investigations.</li>
-   <li>They press <b>📄 Save worksheet</b> at the bottom of the notebook. It becomes available once they have a question and a reading, and it prints their question, their readings table, their notes, and a set of writing prompts that depend on what they varied: planets, dates, places or tilts. Students choose “Save as PDF” to upload it to Toddle. Approx. 25 to 35 minutes for a first investigation.</li>
+   <li>They press <b>📄 Save worksheet</b> at the bottom of the notebook. It becomes available once they have a question and a reading, and it prints their question, their readings table, their notes, and a set of writing prompts that depend on what they varied: planets, dates, places or tilts. A question can hold up to 8 readings, and a student can keep 2 questions, so the worksheet always fits on two pages. Students choose “Save as PDF” to upload it to Toddle. Approx. 25 to 35 minutes for a first investigation.</li>
   </ol>
   <h4 class="xh4">Ways to run it</h4>
   <div class="xways">${XWAYS.map(w=>`<div>${w}</div>`).join("")}</div>
@@ -3504,7 +3619,7 @@ const STD=[
 const TEACH_HTML=`<div class="tbox" role="dialog" aria-modal="true" aria-labelledby="teachTitle"><button type="button" class="mini tclose" id="teachClose">Close ✕</button>
 <h2 id="teachTitle">How to use this model (for teachers)</h2>
 <p class="tlead">Tilt Lab is a seasons simulator for Grades 6–8. Students change the planet, its tilt, the place and the date, and see the effect on the Sun’s height, daylight and temperature. This page is for teachers only. Keep the standards off student materials.</p>
-<nav class="tnav"><a href="#t-glance">At a glance</a><a href="#t-lo">Learning objectives</a><a href="#t-std">ACARA standards</a><a href="#t-tips">Beyond guided mode</a><a href="#t-explore">Exploration ideas and tables</a><a href="#t-lim">Model limitations</a></nav>
+<nav class="tnav"><a href="#t-glance">At a glance</a><a href="#t-lo">Learning objectives</a><a href="#t-std">ACARA standards</a><a href="#t-tips">Beyond guided mode</a><a href="#t-explore">Exploration ideas and tables</a><a href="#t-rq">Research questions and marking</a><a href="#t-lim">Model limitations</a></nav>
 <h3 id="t-glance">At a glance</h3>
 <div class="tgrid">
  <div><b>Foundation</b><span>5 challenges · about one lesson</span><small>Why seasons happen: angle of sunlight, distance, the equator, tilt and orbit, day length.</small></div>
@@ -3549,6 +3664,7 @@ ${STD.map(r=>`<tr><th>${r[0]}<small>${r[1]}</small></th><td>${r[2]}</td><td>${r[
  <li><b>Pairs.</b> For one shared computer, the model swaps who drives and who records. For two computers, the partner tasks give A and B different questions that each checks for the other.</li>
 </ul>
 ${EXPLORE_HTML()}
+<!--RQSLOT-->
 <h3 id="t-lim">Model limitations (worth discussing with students)</h3>
 <ul class="ttips">
  <li>No atmospheric refraction, so day lengths are a few minutes short and the North Pole gets exactly half a year of light (real: about 186 days).</li>
@@ -3556,7 +3672,7 @@ ${EXPLORE_HTML()}
  <li>Planets move round their orbits at a steady speed, so solstice dates can be a day or two early.</li>
  <li>No land is drawn on the map, because latitude, not land shape, sets the sunlight in this model.</li>
 </ul></div>`;
-function openTeach(){const m=$("teach");m.innerHTML=TEACH_HTML;m.hidden=false;wireExplore(m);$("teachClose").addEventListener("click",closeTeach);m.querySelectorAll(".tnav a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();const t=m.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView({behavior:"smooth",block:"start"})}));$("teachClose").focus()}
+function openTeach(){const m=$("teach");m.innerHTML=TEACH_HTML.replace("<!--RQSLOT-->",RQ_TEACH_HTML());m.hidden=false;wireExplore(m);$("teachClose").addEventListener("click",closeTeach);m.querySelectorAll(".tnav a").forEach(a=>a.addEventListener("click",e=>{e.preventDefault();const t=m.querySelector(a.getAttribute("href"));if(t)t.scrollIntoView({behavior:"smooth",block:"start"})}));$("teachClose").focus()}
 function closeTeach(){$("teach").hidden=true}
 
 /* ---------- Names, saved work, stage map, investigation notebook, worksheet (Oct 2026) ---------- */
@@ -3576,19 +3692,20 @@ const ukey=()=>"tiltlab-v2:"+(USER.cls+"|"+USER.name).toLowerCase().replace(/\s+
 let saveT=null;
 function saveProgress(){clearTimeout(saveT);saveT=null;if(USER.teacher||!USER.name)return;
   try{if(MEM&&!S.intro&&!S.inSetup&&STORE[S.gi]===MEM)captureModel();
-    localStorage.setItem(ukey(),JSON.stringify({v:2,at:Date.now(),user:{name:USER.name,cls:USER.cls},gi:S.gi,store:STORE,ck:S.ck,coop:S.coop||null,inv:INV}))}catch(e){}}
+    localStorage.setItem(ukey(),JSON.stringify({v:2,at:Date.now(),user:{name:USER.name,cls:USER.cls},gi:S.gi,store:STORE,ck:S.ck,coop:S.coop||null,inv:INV,rq:RQ}))}catch(e){}}
 function saveSoon(){if(saveT||USER.teacher||!USER.name)return;saveT=setTimeout(saveProgress,600)}
 function loadProgress(){
   Object.keys(STORE).forEach(k=>delete STORE[k]);S.ck={};MEM=null;S.finish=false;S.gi=0;S.returnTo=null;
-  INV.list=[newInv()];INV.cur=0;
+  INV.list=[newInv()];INV.cur=0;rqReset();NBV="pick";
   if(USER.teacher||!USER.name)return false;
   let d=null;try{d=JSON.parse(localStorage.getItem(ukey())||"null")}catch(e){}
   if(!d||d.v!==2)return false;
   Object.assign(STORE,d.store||{});S.ck=d.ck||{};
   if(d.inv&&Array.isArray(d.inv.list)&&d.inv.list.length){INV.list=d.inv.list;INV.cur=clamp(d.inv.cur||0,0,INV.list.length-1)}
   if(d.coop&&!S.coop){S.coop=d.coop;try{sessionStorage.setItem("tiltlab-coop",JSON.stringify(S.coop))}catch(e){}}
+  rqLoad(d.rq);
   S.gi=clamp(d.gi||0,0,CHALLENGES.length-1);
-  return Object.keys(STORE).length>0||INV.list.some(v=>v.q||v.rows.length);
+  return Object.keys(STORE).length>0||INV.list.some(v=>v.q||v.rows.length)||Object.keys(RQ.qs).length>0;
 }
 
 /* ----- progress helpers ----- */
@@ -3617,7 +3734,7 @@ function mapHTML(){
   });
   return `<h3 class="glearn">Go to any stage</h3><p class="gtext">Start wherever you like. Every stage is open, and inside a challenge you can jump to any step with the bars at the top. You can leave for Exploration at any time with the big buttons at the top. Your answers are saved under your name.</p><div class="chlist">${rows}</div>`;
 }
-const actionsHTML=()=>`<div class="introact"><button type="button" class="gaction" data-act="nb">📓 Start my own investigation</button><button type="button" class="gaction" data-act="lib">📄 My worksheets</button></div>`;
+const actionsHTML=()=>`<div class="introact"><button type="button" class="gaction" data-act="nb">📓 My investigation</button><button type="button" class="gaction" data-act="lib">📄 My worksheets</button></div>`;
 /* ----- sections: one worksheet for each ----- */
 function secList(){
   const out=[];
@@ -3632,7 +3749,7 @@ function secProg(s){const d=s.core.filter(gi=>chStatus(gi)==="done").length;retu
 const secUnlocked=s=>USER.teacher||secProg(s).ok;
 function secChecks(s){let ck=0,right=0;s.gis.forEach(gi=>{const c=CHALLENGES[gi],M=STORE[gi];if(!M)return;c.steps.forEach((st,i)=>{if(st.type==="check"&&M.tries&&M.tries[i]&&M.tries[i].n>=1){ck++;if(M.correct&&M.correct[i])right++}})});return {ck,right}}
 function invReady(){return INV.list.some(v=>v.q.trim()&&v.rows.length)}
-function libCount(){return secList().filter(s=>secProg(s).ok).length+(invReady()?1:0)}
+function libCount(){return secList().filter(s=>secProg(s).ok).length+(invReady()?1:0)+rqCount()}
 function introHTML(){return INTRO_TOP+mapHTML()+actionsHTML()+`<p class="note tlinkrow">Teacher? <a href="#" id="teachLink">How to use this model (for teachers)</a></p>`}
 function secEndHTML(s){
   const p=secProg(s),k=secChecks(s);
@@ -3775,16 +3892,18 @@ function invPrompts(inv){
 }
 
 /* ----- notebook drawer ----- */
-let NB=false,NBDEL=false;
+let NB=false,NBDEL=false,NBV="pick";
 function ensureModel(){
   if(S.mode!=="guided")return;
   const free=!S.intro&&!S.inSetup&&MEM&&curStep().free;
   if(!free){S.inSetup=false;setMode("explore");toast("Opened in Exploration mode so you can see the model while you work. Guided mode is one tap away at the top.")}
 }
 function nbToggle(forceOpen){if(NB&&forceOpen!==true){closeNb();return}if(!NB)nbOpen()}
-function nbOpen(){
+function nbOpen(view){
   ensureModel();NB=true;NBDEL=false;$("nb").hidden=false;$("app").dataset.nb="1";
+  NBV=view||(NBV==="own"?"own":(RQ.cur&&rqById(RQ.cur)?"rq":"pick"));
   [$("nbBtn"),$("gNb")].forEach(b=>b&&b.setAttribute("aria-pressed","true"));renderNb();
+  if(NBV==="pick"&&!RQ.hideIntro)showRqHelp();
   const q=$("nbQ");if(q&&!q.value)q.focus();
 }
 function closeNb(silent){NB=false;$("nb").hidden=true;delete $("app").dataset.nb;[$("nbBtn"),$("gNb")].forEach(b=>b&&b.setAttribute("aria-pressed","false"));if(!silent)saveSoon()}
@@ -3801,13 +3920,14 @@ function rowHTML(r,i){
    <div class="nbrf"><button type="button" class="gcheckbtn" data-rchk="${i}">Check my numbers</button><button type="button" class="mini" data-rgo="${i}">Show this set-up in the model</button><button type="button" class="mini" data-rdel="${i}">Remove</button></div></div>`;
 }
 function renderNb(){
+  if(NBV!=="own")return renderRq();
   const nb=$("nb"),inv=curInv(),old=nb.querySelector(".nbbody"),sc=old?old.scrollTop:0;
   const tabs=INV.list.map((v,i)=>`<button type="button" data-nbt="${i}" aria-pressed="${i===INV.cur}">Investigation ${i+1}</button>`).join("")+`<button type="button" data-nbnew="1">＋ New</button>`;
   const tr=TRY.find(x=>x.id===inv.tryId);
   const tryList=TRY.map(t=>`<button type="button" class="tryb" data-try="${t.id}"><b>${t.icon} ${esc(t.title)}</b><span>${esc(t.q)}</span></button>`).join("");
   const chips=DAY_F.map(k=>`<button type="button" data-fld="${k}" aria-pressed="${inv.fields.includes(k)}">${FLD[k].lab}</button>`).join("");
-  const prompts=invPrompts(inv).map((p,i)=>`<div><label class="lbl" for="nbA${i}"><b>${i+1}.</b> ${esc(p.t)}</label><textarea id="nbA${i}" rows="3" maxlength="1500" data-ans="${p.k}" placeholder="Write your answer here">${esc(inv.ans[p.k]||"")}</textarea></div>`).join("");
-  nb.innerHTML=`<div class="nbh"><b>📓 My investigation</b><button type="button" class="mini" data-nbclose="1">Close ✕</button></div>
+  const prompts=invPrompts(inv).map((p,i)=>`<div><label class="lbl" for="nbA${i}"><b>${i+1}.</b> ${esc(p.t)}</label><textarea id="nbA${i}" rows="3" maxlength="600" data-ans="${p.k}" placeholder="Write your answer here">${esc(inv.ans[p.k]||"")}</textarea></div>`).join("");
+  nb.innerHTML=`<div class="nbh"><b>📓 My own question</b><span class="nbhb"><button type="button" class="mini" data-rqback="1">← Research questions</button><button type="button" class="mini" data-nbclose="1">Close ✕</button></span></div>
   <div class="nbbody">
    <div class="nbtabs">${tabs}</div>
    <div><label class="lbl" for="nbQ">My question</label><textarea id="nbQ" rows="2" maxlength="300" placeholder="What do you want to find out? For example: does a bigger tilt make hotter summers?">${esc(inv.q)}</textarea></div>
@@ -3825,6 +3945,7 @@ function renderNb(){
 }
 function addRow(kind){
   const inv=curInv(),s=snapNow(false);
+  if(inv.rows.length>=8){toast("You can add up to 8 readings for one question. Start another question for more.");return}
   const r={id:"r"+Math.random().toString(36).slice(2,8),kind,fields:kind==="year"?YEAR_F.slice():inv.fields.slice(),
     lab:{planet:s.planet,place:s.place,when:kind==="year"?"whole year":s.when,tilt:s.tilt},
     set:{planet:S.planet,tilt:S.tilt,lat:S.lat,lon:S.lon,city:S.city,span:S.span,t:S.t,tod:S.tod},vals:{},ok:{},tr:{}};
@@ -3843,7 +3964,7 @@ function wireNb(){
     const t=e.target.closest("button");if(!t)return;const inv=curInv(),d=t.dataset;
     if(d.nbclose)return closeNb();
     if(d.nbt!==undefined){INV.cur=+d.nbt;NBDEL=false;return renderNb()}
-    if(d.nbnew){INV.list.push(newInv());INV.cur=INV.list.length-1;NBDEL=false;renderNb();saveSoon();return}
+    if(d.nbnew){if(INV.list.length>=2){toast("You can keep up to 2 of your own questions. Your worksheet holds both.");return}INV.list.push(newInv());INV.cur=INV.list.length-1;NBDEL=false;renderNb();saveSoon();return}
     if(d.nbdel){if(!NBDEL){NBDEL=true;return renderNb()}INV.list.splice(INV.cur,1);if(!INV.list.length)INV.list.push(newInv());INV.cur=clamp(INV.cur,0,INV.list.length-1);NBDEL=false;renderNb();saveSoon();return}
     if(d.try)return applyTry(d.try);
     if(d.fld){const k=d.fld,i=inv.fields.indexOf(k);if(i>=0){if(inv.fields.length>1)inv.fields.splice(i,1)}else{inv.fields.push(k);inv.fields.sort((a,b)=>DAY_F.indexOf(a)-DAY_F.indexOf(b))}renderNb();saveSoon();return}
@@ -3868,7 +3989,7 @@ function wireNb(){
 }
 
 /* ----- worksheet ----- */
-const WS={sel:new Set(),blank:false,key:false,name:""};
+const WS={sel:new Set(),blank:false,key:false,name:"",rq:null};
 function hasWork(gi){
   const c=CHALLENGES[gi],M=STORE[gi];
   if(c.tier==="check"){const st=c.steps[0];return !!(st&&st.cid&&S.ck[st.cid]&&Object.keys(S.ck[st.cid]).length)}
@@ -3879,6 +4000,66 @@ function hasWork(gi){
     !!(M.sort&&Object.keys(M.sort).some(k=>Object.keys((M.sort[k]||{}).place||{}).length));
 }
 function invHasWork(){return INV.list.some(v=>v.q.trim()||v.rows.length||Object.values(v.ans).some(a=>String(a).trim()))}
+/* Compact version of a step for the section worksheets: the student's own answers, nothing extra. */
+function wsStepC(c,i,o,num){
+  const st=c.steps[i],M=MEM,blank=o.blank,key=o.key;
+  const row=(cls,lab,inner)=>`<div class="cs"><span class="cl ${cls}">${lab}</span><div>${inner}</div></div>`;
+  const q=t=>`<div class="cq">${esc(plain(t))}</div>`;
+  const a=t=>t?`<div class="ca">${t}</div>`:"";
+  const ln=n=>`<div class="cls">${"<i></i>".repeat(n)}</div>`;
+  try{
+    if(st.type==="predict")return row("pr","Predict",q(st.text)+(blank?ln(1):a(esc(st.options[M.pred]||"…"))));
+    if(st.type==="check"){
+      const tr=M.tries&&M.tries[i],last=tr?tr.last:undefined,right=M.correct&&M.correct[i];
+      let ans="";if(!blank&&last!==undefined)ans=esc(st.options[last])+(right?" ✓":"");
+      else if(!blank)ans="…";
+      const extra=!blank&&tr&&tr.n>=1&&!right?` &nbsp;·&nbsp; <span class="cm">Model answer: ${esc(st.options[st.answer])}</span>`:"";
+      return row("ck","Check",q(st.text)+(blank?ln(1):a(ans+extra))+(key?`<div class="ckey">Answer: ${esc(st.options[st.answer])}</div>`:""));
+    }
+    if(st.type==="do"){
+      let body="";
+      if(st.ask){const v=(M.askVal||{})[i]||{};let val="";
+        if(st.ask.kind==="date")val=(v.d&&v.m!==undefined)?`${v.d} ${MONTHS[v.m]}`:"";else val=(v.n!==undefined&&v.n!=="")?`${v.n} ${st.ask.unit||""}`:"";
+        body=q(st.ask.label)+(blank?ln(1):a(esc(val)||"…"));}
+      else if(st.places){const P=M.pl||{};
+        body=blank?q(st.places.map(p=>p.label).join(" · "))+ln(1):a(st.places.map(p=>{const r=P[p.label]||{};return `${esc(p.label)}: ${r.ok?(r.truth?"the Sun stays up":"the Sun sets"):"…"}`}).join(" · "));}
+      else body=blank?q(st.text)+ln(1):(M.done[i]===true&&st.done?a(esc(plain(st.done(M)))):M.done[i]==="skip"?a("(skipped)"):a("…"));
+      return row("ex","Explore",body);
+    }
+    if(st.type==="write"){
+      const t=((M.text||{})[i]||"").trim(),pr=typeof st.prompt==="function"?st.prompt(M):st.prompt;
+      return row("wr","Write",q(pr)+(!blank&&t?`<div class="ca wrt">${esc(t)}</div>`:ln(blank?2:1))+(key&&st.keys?`<div class="ckey">Key ideas: ${st.keys.map(k=>esc(plain(k))).join(" · ")}</div>`:""));
+    }
+    if(st.type==="pair"){
+      const P=M.pair||{};
+      const one=who=>{const part=st[who],r=P[who]||{};let v="";if(part.kind==="date")v=(r.d&&r.m!==undefined&&r.m!=="")?`${r.d} ${MONTHS[r.m]}`:"";else v=(r.v!==undefined&&r.v!=="")?`${r.v} ${part.unit||""}`:"";
+        return `${esc(plain(part.q))} <span class="ca">${blank?"______":(esc(v)||"…")}${!blank&&r.ok?" ✓":""}</span>`};
+      return row("pr","Partners",`<div class="cq">${one("A")}</div><div class="cq">${one("B")}</div>`);
+    }
+    if(st.type==="sort"){
+      const sm=sortMem(st.sid),cards=sortCards(st);if(!cards.length)return "";
+      const colOf=cd=>key&&st.key&&cd.col!==undefined?cd.col:sm.place[cd.id];
+      if(blank)return row("ex","Sort",q(st.text)+ln(1));
+      const cols=st.cols.map((cn,k)=>{const L=cards.filter(cd=>colOf(cd)===k);return `<b>${esc(plain(cn))}:</b> ${L.length?L.map(cd=>esc(plain(cd.text))).join("; "):"…"}`}).join("<br>");
+      const un=cards.filter(cd=>colOf(cd)===undefined);
+      return row("ex","Sort",a(cols+(un.length?`<br><b>Not sorted:</b> ${un.map(cd=>esc(plain(cd.text))).join("; ")}`:"")));
+    }
+    if(st.type==="choose"){
+      const o2=st.options[M.claim];
+      return row("pr","Choose",blank?q(st.text)+ln(1):a(o2?`${esc(plain(o2.title))}: “${esc(plain(o2.short))}”`:"…"));
+    }
+    if(st.type==="collect"){
+      const ev=M.ev||[];
+      return row("ex","Collect",blank?q(st.text)+ln(2):a(ev.length?ev.map((e,k)=>`${k+1}. ${esc(plain(snapText(e)))}`).join("<br>"):"…"));
+    }
+    if(st.type==="table")return wsStep(c,i,o,num);
+    if(st.type==="checklist"){
+      const ck=S.ck[st.cid]||{},n=st.items.length,yes=st.items.filter((it,k)=>ck[k]==="y").length,no=st.items.filter((it,k)=>ck[k]==="n");
+      return row("ck","Check-in",blank?q(st.text)+ln(1):a(`${yes} of ${n} “I know this”${no.length?`. Not sure yet: ${no.map(it=>esc(plain(it.text))).join("; ")}`:""}`));
+    }
+  }catch(err){return `<div class="cs"><span class="cl">Step ${num}</span><div class="cq">This part could not be printed.</div></div>`}
+  return "";
+}
 function wsStep(c,i,o,num){
   const st=c.steps[i],M=MEM,blank=o.blank,key=o.key,done=stepComplete();
   const head=(cls,lab)=>`<div class="wsq ${cls}"><span class="wsl">${lab}</span> <small>Step ${num}${done||blank?"":" · not finished"}</small>`;
@@ -3949,8 +4130,8 @@ function wsChallenge(gi,o){
     const vis=c.steps.map((s,i)=>stepVisible(s)?i:-1).filter(i=>i>=0);
     const act=vis.filter(i=>c.steps[i].type!=="learn");
     const marks=act.map(i=>{S.gs=i;return `<span><i class="wsbox ${!o.blank&&stepComplete()?"on":""}">${!o.blank&&stepComplete()?"✓":""}</i> Step ${vis.indexOf(i)+1}</span>`}).join("");
-    let h=`<h2>${c.tier==="check"?esc(c.title):`${TIERS[c.tier]} ${c.num}: ${esc(c.title)}`}</h2><div class="wssteps">${marks}</div>`;
-    act.forEach(i=>{S.gs=i;h+=wsStep(c,i,o,vis.indexOf(i)+1)});
+    let h=`<h2>${c.tier==="check"?esc(c.title):`${TIERS[c.tier]} ${c.num}: ${esc(c.title)}`}</h2>${o.compact?"":`<div class="wssteps">${marks}</div>`}`;
+    act.forEach(i=>{S.gs=i;h+=(o.compact?wsStepC:wsStep)(c,i,o,vis.indexOf(i)+1)});
     return h;
   });
 }
@@ -3978,7 +4159,8 @@ function wsInv(o){
   return h;
 }
 function buildWorksheet(){
-  const o={blank:WS.blank&&USER.teacher,key:WS.key&&USER.teacher};
+  const o={blank:WS.blank&&USER.teacher,key:WS.key&&USER.teacher,compact:true};
+  if(WS.rq)return rqWs(WS.rq,o);
   const sel=[...WS.sel].filter(x=>x!=="inv").map(Number).sort((a,b)=>a-b);
   let h=`<div class="wshead"><h1>Tilt <span>Lab</span> · Worksheet</h1><small>${esc(WS.name)} · Why do we have seasons?${o.key?" · ANSWER KEY":""}${o.blank?" · BLANK COPY":""}</small></div>
   <div class="wsbar"><div><b>Name</b><span>${o.blank?"":esc(USER.name)}</span></div><div><b>Class</b><span>${o.blank?"":esc(USER.cls)}</span></div><div><b>Date</b><span>${o.blank?"":new Date().toLocaleDateString("en-GB")}</span></div></div>
@@ -3990,22 +4172,33 @@ function buildWorksheet(){
       return `<tr><th>${TIERS[c.tier]} ${c.num}: ${esc(c.title)}</th><td class="b">${n} of ${idx.length}</td><td class="b">${ck?`${right} of ${ck}`:"–"}</td></tr>`}).join("");
     if(rows)h+=`<h2>Summary</h2><table class="wst"><thead><tr><th>Challenge</th><th>Steps finished</th><th>Check questions right</th></tr></thead><tbody>${rows}</tbody></table>`;
   }
-  sel.forEach(gi=>{h+=wsChallenge(gi,o)});
+  h+=`<div class="wscols">`;sel.forEach(gi=>{h+=wsChallenge(gi,o)});h+=`</div>`;
   if(WS.sel.has("inv"))h+=wsInv(o);
   return h;
 }
 function showDoc(title,docHTML,toolHTML){
   const v=$("wsv");v.innerHTML=`<div class="wstool"><div class="wsrow"><b>${esc(title)}</b><button type="button" class="primary" data-wsprint="1">🖨 Print or save as PDF</button><button type="button" class="mini" data-wsclose="1">Close ✕</button></div>${toolHTML||""}</div>
-  <div class="wsnote">Press “Print or save as PDF”, then choose “Save as PDF” as the printer if you want a file to upload to Toddle.</div><div class="wsdoc" id="wsdoc">${docHTML}</div>`;
-  v.hidden=false;v.scrollTop=0;document.body.dataset.ws="1";syncInert();
+  <div class="wsnote">Press “Print or save as PDF”, then choose “Save as PDF” as the printer if you want a file to upload to Toddle.</div><div class="wsdoc" id="wsdoc"><div class="wsin">${docHTML}</div></div>`;
+  v.hidden=false;v.scrollTop=0;document.body.dataset.ws="1";syncInert();fitDoc();
   WS.title=document.title;document.title=`Tilt Lab ${WS.name} worksheet${USER.name?" - "+USER.name:""}${USER.cls?" "+USER.cls:""}`;
+}
+/* Worksheets never go over two A4 pages: shrink the whole sheet until it fits. */
+const WS_PAGES=2,WS_PAGE_H=1032,WS_FILL=0.9,WS_MINZ=0.5;
+function fitDoc(){
+  const d=$("wsdoc");if(!d)return;
+  d.classList.add("wsm");
+  const lim=WS_PAGES*WS_PAGE_H*WS_FILL;let z=1;
+  for(;z>WS_MINZ;z=Math.round((z-0.02)*100)/100){d.style.setProperty("--wsz",z);if(d.getBoundingClientRect().height<=lim)break}
+  d.style.setProperty("--wsz",z);
+  d.dataset.z=z;d.classList.remove("wsm");
 }
 function printDoc(title,html){showDoc(title,html,"")}
 function closeWs(){const v=$("wsv");if(!v||v.hidden)return;v.hidden=true;v.innerHTML="";delete document.body.dataset.ws;if(WS.title)document.title=WS.title;syncInert()}
 function openWs(opt){
   if(!$("wsv").hidden)return;opt=opt||{};
-  WS.blank=false;WS.key=false;WS.sel=new Set();WS.name="";
-  if(opt.sec){const s=secList().find(x=>x.id===opt.sec);if(!s||!secUnlocked(s))return;
+  WS.blank=false;WS.key=false;WS.sel=new Set();WS.name="";WS.rq=null;
+  if(opt.rq){const q=rqById(opt.rq);if(!q||!(rqAnswered(q.id)||USER.teacher))return;WS.rq=q.id;WS.name=q.title}
+  else if(opt.sec){const s=secList().find(x=>x.id===opt.sec);if(!s||!secUnlocked(s))return;
     s.gis.forEach(gi=>{if(USER.teacher||hasWork(gi))WS.sel.add(gi)});WS.name=s.name}
   else if(opt.inv){if(!(invReady()||USER.teacher))return;WS.sel.add("inv");WS.name="My own investigation"}
   else return;
@@ -4018,7 +4211,7 @@ function wireWs(){
   v.addEventListener("change",e=>{const t=e.target;
     if(t.dataset.wsb){WS[t.dataset.wsb]=t.checked}
     else return;
-    $("wsdoc").innerHTML=buildWorksheet();
+    $("wsdoc").innerHTML=`<div class="wsin">${buildWorksheet()}</div>`;fitDoc();
   });
 }
 
@@ -4038,6 +4231,476 @@ function wireNew(){
   window.addEventListener("pagehide",saveProgress);
   document.addEventListener("visibilitychange",()=>{if(document.hidden)saveProgress()});
   window.addEventListener("afterprint",()=>{});
+}
+
+/* ---------- Research questions: the question bank (Oct 2026) ----------
+   Every question is open: there is no single route to the answer. Tips are given one at a time, and each says which view to open and what to look for.
+   Numbers in the ideas were read from the model (Earth tilt 23.4°, Bangkok, Beijing, Sydney, Mars, Saturn, Uranus, Mercury, Venus). */
+const RQ_TIERS=[
+  {id:"f",name:"Foundation",icon:"🌱",blurb:"Start here. Use one or two views to find a pattern."},
+  {id:"e",name:"Extension",icon:"🔭",blurb:"Compare places, planets or tilts and explain what you find."},
+  {id:"m",name:"Mastery",icon:"🚀",blurb:"A puzzle with more than one reason. You will need several views."}
+];
+const RQ_VIEWS={sky:"Sky",map:"Flat map",globe:"Planet from space",graph:"Year graphs",heat:"Heat",read:"All the numbers"};
+const WD=(l,s)=>({l,re:new RegExp(s||"\\b"+l.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i")});
+const RQS=[
+/* ---------------- Foundation ---------------- */
+{id:"f1",tier:"f",icon:"☀️",title:"Hot June, cold December",short:"Why is Beijing so much hotter in June than in December?",
+ q:"Why is it so much hotter in Beijing in June than in December? Find out what changes, and use evidence from the model to show it.",
+ words:[WD("tilt"),WD("angle"),WD("daylight"),WD("energy"),WD("midday Sun","midday\\s+sun")],
+ ideas:["The midday Sun is much higher in June (about 73°) than in December (about 27°).",
+  "A higher Sun spreads its light over a smaller patch of ground, so each bit of ground gets more energy.",
+  "Days are longer in June (about 14 h 50 min) than in December (about 9 h 10 min), so there is more time for heating.",
+  "The cause is the tilt of the Earth's axis. In June the northern half leans towards the Sun.",
+  "Distance is not the cause. The Earth is slightly further from the Sun in June (about 152 million km) than in December (about 147 million km)."],
+ model:"Beijing is hotter in June because of the Earth's tilt. In June the northern half of the Earth leans towards the Sun, so the midday Sun is high in the sky (about 73°) and the days are long (about 14 h 50 min). A high Sun spreads its light over a small patch of ground, so the ground gets more energy, and long days give more time to heat up. In December the midday Sun is only about 27° high and the days are about 9 h long. The distance cannot be the reason: the Earth is a little further from the Sun in June (152 million km) than in December (147 million km).",
+ tips:[
+  {v:"sky",t:"Open <b>Sky</b>. Look at the Sun's path across the sky on 21 June, then on 21 December. How high does it climb each time?"},
+  {v:"graph",t:"Open <b>Year graphs</b>. Look at the midday Sun line and the daylight line. What shape do they make from January to December, and when are they highest?"},
+  {v:"globe",t:"Open <b>Planet from space</b> and move the date between June and December. Which way does the planet lean compared with the sunlight each time?"},
+  {v:"heat",t:"Open <b>Heat</b> and compare the daytime high in June and in December. Which change in the Sun goes with the change in temperature?"},
+  {v:"read",t:"Open <b>All the numbers</b> and write down the midday Sun height and the hours of daylight for both dates. Use at least two of these numbers in your answer."},
+  {v:"read",t:"Test an idea: is the Earth closer to the Sun in June? Check the <b>Distance from the Sun</b> number on each date before you decide."}]},
+
+{id:"f2",tier:"f",icon:"🌏",title:"Opposite seasons",short:"It is winter in Beijing and summer in Sydney. How?",
+ q:"When it is winter in Beijing it is summer in Sydney. How can both be true? Use the model to find out what is the same and what is different in the two places at the same moment.",
+ words:[WD("tilt"),WD("hemisphere"),WD("latitude"),WD("lean","\\blean"),WD("overhead")],
+ ideas:["On 21 December the Sun is straight overhead at about 23°S (the Tropic of Capricorn), so the southern half gets the most direct sunlight.",
+  "On 21 December Sydney's midday Sun is high (about 80°) and Beijing's is low (about 27°).",
+  "Sydney has long days (about 14 h 15 min) and Beijing has short days (about 9 h 10 min).",
+  "The Earth's tilt makes one half lean towards the Sun while the other half leans away. Six months later this swaps.",
+  "Both places are the same distance from the Sun, so distance cannot explain the difference."],
+ model:"The Earth is tilted. On 21 December the southern half leans towards the Sun and the northern half leans away. The Sun is straight overhead at about 23°S, so Sydney's midday Sun is high (about 80°) and its days are long (about 14 h 15 min). Beijing's midday Sun is low (about 27°) and its days are short (about 9 h 10 min). Both places are the same distance from the Sun, so distance does not explain it. Six months later the lean swaps and Beijing has summer while Sydney has winter.",
+ tips:[
+  {v:"sky",t:"Set the date to 21 December. Open <b>Sky</b> for Beijing, then for Sydney (use the Place box). How high is the Sun at midday in each place?"},
+  {v:"map",t:"Open the <b>Flat map</b> on 21 December. Find the Sun symbol: that is where the Sun is straight overhead. Is it north or south of the Equator?"},
+  {v:"globe",t:"Open <b>Planet from space</b> on 21 December. Which pole leans towards the Sun? Find Beijing and Sydney on the planet."},
+  {v:"graph",t:"Open <b>Year graphs</b> for Beijing, then for Sydney. Compare when each place has its highest midday Sun and its longest days."},
+  {v:"read",t:"Open <b>All the numbers</b>. For both places on 21 December, write down the midday Sun height and the daylight. Then check the <b>Distance from the Sun</b>: is it the same for both?"}]},
+
+{id:"f3",tier:"f",icon:"🌌",title:"The 24-hour day",short:"Where does the Sun stay up all day in June, and why?",
+ q:"In June, some places on Earth have a day that lasts 24 hours. Find out where they are and why only those places get a 24-hour day.",
+ words:[WD("Arctic Circle","arctic"),WD("tilt"),WD("latitude"),WD("pole"),WD("24 hours","24")],
+ ideas:["Places north of about 66.6°N (the Arctic Circle), such as Tromsø, Longyearbyen and the North Pole, get 24 hours of daylight around 21 June.",
+  "Reykjavik (64°N) is just south of the line, so its day is about 20 h 26 min, not 24 h.",
+  "In June the North Pole leans towards the Sun because of the 23.4° tilt. As the Earth spins, these places never turn into the shadow.",
+  "The Arctic Circle is at 90° minus the tilt (90° − 23.4° = 66.6°).",
+  "In December the same places get no Sun at all: a 24-hour night."],
+ model:"Places north of the Arctic Circle (about 66.6°N) have a 24-hour day around 21 June. Examples are Tromsø, Longyearbyen and the North Pole. In June the North Pole leans towards the Sun because the Earth is tilted by 23.4°. As the Earth spins, places near the pole stay in the light all day. The edge of the 24-hour zone is at 90° minus the tilt, which is 66.6°N. Reykjavik is at 64°N, just south of the line, so it still has a night (its day is about 20 h 26 min). In December the same places have a 24-hour night.",
+ tips:[
+  {v:"map",t:"Open the <b>Flat map</b> and set the date to 21 June. Look for places that the dark night area never reaches. Where are they on the map?"},
+  {v:"read",t:"Choose different places in the Place box (try Reykjavik, Tromsø and the North Pole). Open <b>All the numbers</b> and read the daylight for each. Which ones have 24 hours?"},
+  {v:"map",t:"Look for the dashed <b>Arctic Circle</b> line on the Flat map. What latitude is it at? Which of your places are north of it?"},
+  {v:"globe",t:"Open <b>Planet from space</b> on 21 June. As the planet spins, which places stay in the light all day?"},
+  {v:"graph",t:"Open <b>Year graphs</b> for Tromsø. When is the daylight line at 24 hours, and when is it at 0? How long does each last?"},
+  {v:"map",t:"Change the tilt (the Tilt box at the top) and watch the polar circle line move on the Flat map. What is the link between the tilt and the line?"}]},
+
+{id:"f4",tier:"f",icon:"⬆️",title:"The overhead Sun",short:"Where can the Sun be straight overhead, and where never?",
+ q:"Where on Earth can the Sun ever be straight overhead at midday, and where can it never be? Find a rule that tells you which places are which.",
+ words:[WD("tropics","tropic"),WD("overhead"),WD("latitude"),WD("Equator"),WD("tilt")],
+ ideas:["The overhead Sun moves between the Tropic of Cancer (23.4°N) and the Tropic of Capricorn (23.4°S) during the year.",
+  "Places between the tropics, such as Singapore, Bangkok and Quito, get the Sun straight overhead at least once a year. Bangkok gets it twice.",
+  "Places outside the tropics, such as Beijing, London and Cairo, never get it. Beijing's highest midday Sun is 73.5°.",
+  "The tropics are at a latitude equal to the tilt of the Earth's axis (23.4°).",
+  "A rule: outside the tropics, the highest midday Sun in the year is 90° minus the distance in degrees from the nearest tropic (Beijing: 90° − (39.9° − 23.4°) = 73.5°)."],
+ model:"The Sun can be straight overhead only between the Tropic of Cancer (23.4°N) and the Tropic of Capricorn (23.4°S). During the year the overhead Sun moves north to the Tropic of Cancer and back south to the Tropic of Capricorn. Places between the tropics, such as Singapore and Quito, get the overhead Sun at least once a year, and Bangkok gets it twice. Places outside the tropics, such as Beijing (73.5° at best), London and Cairo, never get it. The tropics sit at a latitude equal to the Earth's tilt, 23.4°.",
+ tips:[
+  {v:"map",t:"Open the <b>Flat map</b>. Find the Sun symbol where the Sun is straight overhead right now, and the two orange dashed lines. What are those lines called?"},
+  {v:"map",t:"Step the date through a whole year (use the Month arrows). Where does the Sun symbol travel to, and where does it turn around?"},
+  {v:"sky",t:"Open <b>Sky</b> in different places (Singapore, Bangkok, Cairo, Beijing). In which places does the Sun ever reach the very top of the sky?"},
+  {v:"graph",t:"Open <b>Year graphs</b> for each place. Look at the highest point of the midday Sun line. Which places reach 90°?"},
+  {v:"read",t:"Open <b>All the numbers</b> and write down the highest midday Sun in the year for four or five places. Can you find a rule that uses latitude?"}]},
+
+/* ---------------- Extension ---------------- */
+{id:"e1",tier:"e",icon:"⏱️",title:"Daylight around the world",short:"How does daylight change through a year at the Equator, in Beijing and at the North Pole?",
+ q:"Compare how the length of daylight changes through a whole year at the Equator, in Beijing and at the North Pole. What pattern do you find, and what causes it?",
+ words:[WD("latitude"),WD("daylight"),WD("tilt"),WD("Equator"),WD("pole")],
+ ideas:["At the Equator the day stays about 12 hours all year.",
+  "In Beijing daylight changes from about 9 h to about 15 h through the year.",
+  "At the North Pole there are about six months of constant daylight and six months of darkness (24 h and 0 h).",
+  "The further a place is from the Equator, the bigger the change in daylight through the year. Latitude decides how big the change is.",
+  "The tilt causes this. With no tilt, every place would have 12 hours of daylight all year."],
+ model:"The further a place is from the Equator, the more its daylight changes through the year. At the Equator the day is about 12 hours long all year. In Beijing (40°N) it changes from about 9 hours in December to about 15 hours in June. At the North Pole there are about six months of daylight (24 hours) and six months of night (0 hours). The Earth's tilt causes this pattern. If the tilt were 0°, every place would have 12 hours of daylight all year and there would be no seasons.",
+ tips:[
+  {v:"graph",t:"Open <b>Year graphs</b> for Beijing. Look at the daylight line: how high and how low does it go?"},
+  {v:"graph",t:"Change the place to Singapore, which is almost on the Equator, and look at the daylight line again. How is it different from Beijing?"},
+  {v:"graph",t:"Now choose the North Pole. What does the daylight line look like? How many months of day and night does it show?"},
+  {v:"map",t:"Open the <b>Flat map</b> and step through the year. Watch how the edge between day and night moves at the Equator, in Beijing and near the poles."},
+  {v:"read",t:"Open <b>All the numbers</b> and write down the shortest and longest daylight for each place. Put the places in order from the smallest change to the biggest."},
+  {v:"graph",t:"Test your idea: what would happen to these lines if the tilt were smaller? Change the Tilt box and check."}]},
+
+{id:"e2",tier:"e",icon:"🌀",title:"Tilt tester",short:"What would Beijing's seasons be like with a smaller, bigger or zero tilt?",
+ q:"What would Beijing's seasons be like if the Earth's tilt were smaller, bigger or zero? Use the tilt box to find out, and explain what the tilt does.",
+ words:[WD("tilt"),WD("seasons","season"),WD("daylight"),WD("midday Sun","midday\\s+sun"),WD("extreme")],
+ ideas:["With 0° tilt there are no seasons. The midday Sun and the daylight stay the same all year (Beijing: 12 hours every day).",
+  "As the tilt gets bigger, the summer midday Sun gets higher and the winter midday Sun gets lower (at about 47° tilt, Beijing's highest Sun is 90°).",
+  "A bigger tilt gives longer summer days and shorter winter days (about 47°: from 3 h 33 min to 20 h 27 min).",
+  "Temperatures become more extreme with a bigger tilt: Beijing's hottest day goes from about 27 °C (12° tilt) to 36 °C (23°) to 46 °C (47°).",
+  "The tilt causes the seasons, not the distance from the Sun."],
+ model:"The tilt makes the seasons. With 0° tilt, Beijing would have 12 hours of daylight every day and the same midday Sun all year, so there would be no seasons. As the tilt gets bigger, the midday Sun gets higher in summer and lower in winter, the summer days get longer and the winter days get shorter, and the temperatures get more extreme. With a 12° tilt Beijing's hottest day is about 27 °C. With the real tilt (23.4°) it is about 36 °C. With a 47° tilt it is about 46 °C, and the winter day is only about 3.5 hours long.",
+ tips:[
+  {v:"graph",t:"Set the place to Beijing and open <b>Year graphs</b>. Write down the highest and lowest midday Sun and the shortest and longest daylight with the real tilt (23.4°)."},
+  {v:"graph",t:"Change the tilt to 0°. What happens to the lines? Then try about 12° and about 47°. How does each line change?"},
+  {v:"heat",t:"Open <b>Heat</b> at each tilt. How do the summer and winter temperatures change as the tilt changes?"},
+  {v:"globe",t:"Open <b>Planet from space</b> in June at each tilt. Describe how the planet leans compared with the sunlight."},
+  {v:"read",t:"Open <b>All the numbers</b> and record the midday Sun height and the daylight for 21 June and 21 December at each tilt. Which pattern do you see?"}]},
+
+{id:"e3",tier:"e",icon:"🔴",title:"Mars and Earth",short:"Mars and Earth have almost the same tilt. Are their winters alike?",
+ q:"Mars and Earth are tilted by almost the same amount. At 45°N, is a winter on Mars like a winter on Earth? Compare the two planets and explain what is the same and what is different.",
+ words:[WD("tilt"),WD("year"),WD("distance"),WD("air","\\bair|atmosphere"),WD("temperature")],
+ ideas:["The midday Sun height and the pattern of daylight are very similar on both planets (Earth 68°, Mars 70° at 45°N) because the tilts are almost the same.",
+  "A Mars year is about 687 Earth days, so each season lasts nearly twice as long.",
+  "Mars is much colder. It is about 1.5 times further from the Sun, so it gets less sunlight.",
+  "Mars has very thin air that cannot hold heat, so its nights are far colder (about −120 °C at 45°N, compared with about −15 °C on Earth).",
+  "Similar tilts give a similar pattern of Sun height and daylight. The big temperature differences come from distance and air, not from tilt."],
+ model:"Mars and Earth have almost the same tilt (25.2° and 23.4°), so at 45°N the midday Sun height and the pattern of daylight through the year are very similar. The two planets are different in other ways. A Mars year lasts about 687 Earth days, so each season is nearly twice as long. Mars is about 1.5 times further from the Sun, so it gets less sunlight. Its air is very thin and cannot hold heat, so its nights are extremely cold (about −120 °C at 45°N, compared with about −15 °C on Earth). The tilt explains the seasons, but distance and air explain the temperatures.",
+ tips:[
+  {v:"graph",t:"Choose Earth, set the latitude to 45°N and open <b>Year graphs</b>. Then switch to Mars, keeping 45°N. Which lines look alike? Which are different?"},
+  {v:"sky",t:"Open <b>Sky</b> at midday in winter on each planet. How high is the Sun in each?"},
+  {v:"heat",t:"Open <b>Heat</b> on each planet at 45°N. Compare the daytime high and the night-time low."},
+  {v:"read",t:"Open <b>All the numbers</b> for each planet. Compare the length of a year and the distance from the Sun."},
+  {v:"globe",t:"Open <b>Planet from space</b> and press Zoom out: see the orbit. How does the size of Mars's orbit compare with Earth's, and what does that mean for sunlight?"}]},
+
+{id:"e4",tier:"e",icon:"🌡️",title:"The hottest planet",short:"Mercury is closest to the Sun, but Venus is hotter. Why?",
+ q:"Mercury is the closest planet to the Sun, but Venus is the hottest. Use the model to find out why, and decide which planet has the bigger difference between day and night.",
+ words:[WD("air","\\bair|atmosphere"),WD("heat"),WD("distance"),WD("trap"),WD("night")],
+ ideas:["Mercury is closer to the Sun (about 46 to 70 million km, compared with about 109 million km for Venus), so it gets more sunlight.",
+  "Mercury has almost no air to hold the heat, so its night side loses it (about −180 °C at night, about 433 °C by day).",
+  "Venus has very thick air that traps heat like a blanket, so it is about 464 °C everywhere, day and night.",
+  "Mercury has the bigger difference between day and night (more than 600 °C). Venus has almost none.",
+  "Being closest to the Sun does not make a planet the hottest. Air that traps heat matters too."],
+ model:"Mercury is closer to the Sun than Venus, so it gets more sunlight, but it has almost no air. Without air to hold the heat, Mercury reaches about 433 °C by day and falls to about −180 °C at night, a difference of more than 600 °C. Venus is further away (about 109 million km) but has very thick air that traps heat like a blanket. It stays at about 464 °C everywhere, day and night. So the planet that is closest to the Sun is not the hottest. The air matters as much as the distance.",
+ tips:[
+  {v:"heat",t:"Open <b>Heat</b>, choose Mercury, then Venus, and set the latitude to 0° (the Equator). Compare the daytime high and the night-time low."},
+  {v:"read",t:"Open <b>All the numbers</b> for each planet. Which is closer to the Sun? Write down the distances."},
+  {v:"heat",t:"Press the <b>i</b> button on the Heat view for each planet. What does it say about the air?"},
+  {v:"graph",t:"Open <b>Year graphs</b> for each planet. What does the temperature line do through the year? Which planet has the bigger swings?"},
+  {v:null,t:"Think: if you wrapped a thick blanket around Mercury, what would happen to its night-time temperature? Use your Venus readings to decide."}]},
+
+/* ---------------- Mastery ---------------- */
+{id:"m1",tier:"m",icon:"🌴",title:"Bangkok's longest day",short:"In Bangkok the longest day is in June, but the Sun is not at its highest then. Why?",
+ q:"Why is the longest day in Bangkok in June, but the highest Sun is not on the same day?",
+ words:[WD("overhead"),WD("tropics","tropic"),WD("daylight"),WD("midday Sun","midday\\s+sun"),WD("twice")],
+ ideas:["The longest day is around 21 June (12 h 49 min), when the Sun reaches its furthest north (the Tropic of Cancer, 23.4°N).",
+  "Bangkok (13.75°N) is between the tropics, so the Sun is straight overhead twice a year: about 26 April and about 12 August.",
+  "On 21 June the overhead Sun is north of Bangkok, so Bangkok's midday Sun is about 80°, not 90°.",
+  "Daylight length depends on how far the overhead Sun is from the Equator, so it peaks at the solstice.",
+  "The midday Sun height depends on how far the overhead Sun is from Bangkok's own latitude, so it peaks when the overhead Sun passes over Bangkok."],
+ model:"Two different things are measured here. The length of the day depends on how far north the overhead Sun has travelled. It is greatest around 21 June, when the overhead Sun reaches the Tropic of Cancer (23.4°N), and Bangkok's day is then 12 h 49 min. The height of the midday Sun depends on how close the overhead Sun is to Bangkok's latitude (13.75°N). The overhead Sun passes over Bangkok on its way north (about 26 April) and again on its way back south (about 12 August). On 21 June it is already north of Bangkok, so the midday Sun is about 80° and not 90°. Bangkok is between the tropics, so it has two highest-Sun dates and one longest day.",
+ tips:[
+  {v:"graph",t:"Open <b>Year graphs</b> for Bangkok. Find the highest point of the daylight line and the highest point of the midday Sun line. Do they happen at the same time?"},
+  {v:"map",t:"Open the <b>Flat map</b> and step through the year. Watch the Sun symbol (the overhead Sun). When does it cross Bangkok's latitude?"},
+  {v:"sky",t:"Open <b>Sky</b> on the date of the longest day, then on a date when the Sun reaches 90°. Compare the Sun's path and height."},
+  {v:"read",t:"Open <b>All the numbers</b> to find the highest midday Sun in the year. Then set the date to 21 June and compare the midday Sun height."},
+  {v:"map",t:"Look at where Bangkok sits compared with the Tropic of Cancer line. What does that tell you about how many times the Sun passes overhead?"},
+  {v:"map",t:"On 21 June, where is the overhead Sun compared with Bangkok? Which way is it travelling next?"}]},
+
+{id:"m2",tier:"m",icon:"🪐",title:"Tropics on three planets",short:"The tropics are in very different places on Uranus, Saturn and Mars. Why?",
+ q:"The tropics are in very different places on Uranus, Saturn and Mars. Find out where each planet's tropics are and why, and explain what this means for where the Sun can be straight overhead.",
+ words:[WD("tropics","tropic"),WD("tilt"),WD("latitude"),WD("overhead"),WD("polar circle","polar")],
+ ideas:["The tropics sit at the same latitude as the planet's tilt: Mars about 25°, Saturn about 27° and Uranus about 82°.",
+  "The polar circles are at 90° minus the tilt: about 65° on Mars, 63° on Saturn and only 8° on Uranus.",
+  "Uranus is tipped almost on its side (98°), so its tropics stretch nearly to the poles and its polar circles nearly to the Equator.",
+  "On Uranus almost every place gets the Sun straight overhead at some time, and most places have times with 24 hours of daylight or none. Mars and Saturn do not.",
+  "Mars and Saturn are similar to each other (and to Earth) because their tilts are similar."],
+ model:"A planet's tropics are at the same latitude as its tilt, and its polar circles are at 90° minus the tilt. Mars (tilt 25.2°) has tropics at about 25° and polar circles at about 65°. Saturn (26.7°) has tropics at about 27° and polar circles at about 63°. Uranus is tipped almost on its side (97.8°, which counts as 82.2° away from upright), so its tropics are at about 82° and its polar circles are only about 8° from the Equator. This means the Sun can be straight overhead almost anywhere on Uranus, and almost everywhere has a time of 24-hour day or 24-hour night. On Mars and Saturn the overhead Sun stays close to the Equator.",
+ tips:[
+  {v:"map",t:"Open the <b>Flat map</b>, choose Mars, then Saturn, then Uranus. Read the latitude of the orange dashed tropic lines on each planet."},
+  {v:"globe",t:"Open <b>Planet from space</b> for each planet. Compare how far each one leans from upright."},
+  {v:"read",t:"Open <b>All the numbers</b> for each planet and read the tilt and the latitude of the tropics. What do you notice about the two numbers?"},
+  {v:"map",t:"Now look at the blue polar circle lines. Where are they on Uranus compared with Saturn and Mars?"},
+  {v:"graph",t:"Set the latitude to 45°N and open <b>Year graphs</b> on each planet. What do the midday Sun and daylight lines look like on Uranus compared with Mars and Saturn?"}]},
+
+{id:"m3",tier:"m",icon:"🧊",title:"A year on Uranus",short:"The poles of Uranus get years of daylight. What is a year like at the pole and at the Equator?",
+ q:"At the poles of Uranus the Sun can stay up for years. Work out what one year is like at the North Pole, at the Equator and in between, and explain why Uranus has such extreme seasons.",
+ words:[WD("orbit"),WD("year"),WD("pole"),WD("Equator"),WD("tilt")],
+ ideas:["A year on Uranus lasts about 84 Earth years. At each pole the Sun stays up for about 42 years, then it is dark for about 42 years.",
+  "Uranus is tipped on its side (98°), so near a solstice one pole points almost straight at the Sun.",
+  "At the Equator each day still has about half daylight and half night. The midday Sun changes from straight overhead (twice a year) to low in the sky (about 8°) at the solstices.",
+  "Places between the Equator and the poles swing from 24 hours of daylight to 24 hours of night during the year.",
+  "The tilt makes the seasons extreme. A Uranus year is so long that each season lasts about 21 Earth years."],
+ model:"A Uranus year lasts about 84 Earth years. Uranus is tipped on its side (98°), so around a solstice one pole points almost straight at the Sun. That pole has about 42 years of daylight, then about 42 years of darkness. At the Equator the days and nights stay about equal, but the midday Sun changes from straight overhead (twice a year) to about 8° above the horizon at the solstices. Places in between swing from 24 hours of daylight to 24 hours of night during the year. The extreme tilt makes the seasons extreme, and the long orbit makes each season last about 21 Earth years.",
+ tips:[
+  {v:"graph",t:"Choose Uranus and set the latitude to 90°N (the North Pole). Open <b>Year graphs</b>. A Uranus year lasts 84 Earth years. What does the daylight line do?"},
+  {v:"globe",t:"Open <b>Planet from space</b> and press Zoom out: see the orbit. Step through the year. Which part of the planet faces the Sun at each stage?"},
+  {v:"sky",t:"Open <b>Sky</b> at the North Pole in the middle of its summer. What does the Sun's path look like?"},
+  {v:"map",t:"Open the <b>Flat map</b> and step through the Uranus year. Which parts of the planet are in daylight the whole time, and which are in night?"},
+  {v:"graph",t:"Now set the latitude to 0° (the Equator) and look at the daylight and midday Sun lines. How is the Equator different from the pole?"},
+  {v:"read",t:"Open <b>All the numbers</b> and write down how long a Uranus day and a Uranus year are. Use them to describe how many days and nights a place at the Equator sees in one year."}]},
+
+{id:"m4",tier:"m",icon:"🔥",title:"The hottest day arrives late",short:"Beijing's longest day is in June. Why is the hottest weather weeks later?",
+ q:"In Beijing the longest day is around 21 June, but the hottest weather comes about six weeks later. Use the model to find the gap and explain why the heat arrives late.",
+ words:[WD("energy"),WD("delay"),WD("store"),WD("longest day"),WD("temperature")],
+ ideas:["The longest day and the highest midday Sun are around 21 June (14 h 50 min and 73.5°). The highest temperature is around late July to early August (about 36 °C).",
+  "After 21 June the Sun is still high and the days are still long, so the ground and air keep gaining more energy than they lose.",
+  "The ground, air and water take time to heat up and store energy, so the temperature lags behind the Sun.",
+  "The same delay happens at other places. Sydney has its longest day on 21 December but its hottest day around 31 January.",
+  "The coldest night in Beijing is around early February, weeks after the shortest day (21 December)."],
+ model:"The Sun is strongest around 21 June, when the midday Sun is highest (73.5°) and the day is longest (14 h 50 min). After that date the Sun is still high and the days are still long, so the ground and air keep gaining more energy than they lose, and the temperature keeps rising. Heating takes time, because the ground and air have to store energy. In the model the hottest day in Beijing is about 30 July (36 °C), roughly six weeks after the longest day. The same delay happens in the cold season: the coldest night is around early February, weeks after the shortest day. Sydney shows it too, with its hottest day around 31 January.",
+ tips:[
+  {v:"graph",t:"Open <b>Year graphs</b> for Beijing. Find when the daylight line and the midday Sun line peak, and when the temperature line peaks. Which is last?"},
+  {v:"heat",t:"Open <b>Heat</b> and move the date forward in steps (use the Month arrows). On which date is the daytime high biggest?"},
+  {v:"sky",t:"Open <b>Sky</b> on 21 June and on early August. Compare the Sun's height and the length of the day. How much have they changed?"},
+  {v:null,t:"Think about a pan of water on a hob. When you turn the heat down, does the water cool at once? How might that help you explain Beijing between June and August?"},
+  {v:"graph",t:"Test your idea in other places. Try Sydney and London. Does the delay happen there too? Compare the temperature peak with the longest day."}]}
+];
+const rqById=id=>RQS.find(q=>q.id===id);
+const rqTier=q=>RQ_TIERS.find(t=>t.id===q.tier);
+
+/* ---------- Teacher page: research questions and marking ---------- */
+function RQ_TEACH_HTML(){
+  const views=q=>[...new Set(q.tips.filter(t=>t.v).map(t=>RQ_VIEWS[t.v]))].join(", ");
+  const card=q=>`<details class="rqtq"><summary>${q.icon} <b>${esc(q.title)}</b> <span class="rqtv">${esc(views(q))}</span></summary>
+    <p class="xq">“${esc(q.q)}”</p>
+    <p class="xmeta"><b>Words students are asked to use:</b> ${q.words.map(w=>esc(w.l)).join(", ")}</p>
+    <p class="xmeta"><b>A strong answer includes:</b></p><ul>${q.ideas.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>
+    <p class="xmeta"><b>Tips, in the order students see them:</b></p><ol>${q.tips.map(t=>`<li>${t.v?`<i>(${esc(RQ_VIEWS[t.v])})</i> `:`<i>(think)</i> `}${t.t}</li>`).join("")}</ol>
+    <p class="xmeta"><b>One possible answer:</b> ${esc(q.model)}</p></details>`;
+  const tier=T=>`<h5 class="rqth">${T.icon} ${T.name}</h5><p class="tsmall">${esc(T.blurb)}</p>${RQS.filter(q=>q.tier===T.id).map(card).join("")}`;
+  return `<h3 id="t-rq">My investigation: research questions and marking</h3>
+  <p>My investigation is the open-ended part of Tilt Lab. Students choose one of twelve research questions, grouped as <b>Foundation</b>, <b>Extension</b> and <b>Mastery</b>, or write their own. A research question has no set route. Students decide which views to open, what to change and what to look for, and they build their answer from evidence they collect themselves.</p>
+  <ol class="ttips">
+   <li>A short pop-up explains how it works the first time a student opens My investigation. They can read it again with <b>ℹ️ How it works</b>.</li>
+   <li>The student picks a question. It opens in a <b>journal</b> with a notes box, a screenshot gallery, a tips area and an answer box.</li>
+   <li>They explore on the Exploration dashboard. Every view has a <b>📷</b> button that adds a screenshot to the journal. The picture has a title bar showing the view, planet, place, date and tilt. A student keeps up to 12 screenshots and chooses <b>up to 5 as evidence</b>, with a sentence explaining what each one shows.</li>
+   <li><b>Tips</b> are optional and come one at a time. Each one names a view and says what to look for in it, and a button adds that view to the dashboard. The number of tips used is recorded.</li>
+   <li>The answer box shows the words to use. After the student submits (at least 12 words), the answer is locked and shown with a checklist: the key words they used, and a “Did you include…?” list of ideas they tick themselves, next to one possible answer.</li>
+   <li>Submitting unlocks a <b>worksheet for that question</b> (“My completed worksheets” or the journal). It always fits on one or two A4 pages.</li>
+  </ol>
+  <h4 class="xh4">Marking the worksheet</h4>
+  <p>The strip at the top of each worksheet carries what you need: <b>Tips used</b> (out of the total), <b>Evidence screenshots</b>, <b>Key words used</b> and <b>Ideas I included</b>. Below it are the student’s notes, each screenshot with their explanation, and the answer. Two things carry the mark:</p>
+  <ul>
+   <li><b>Tips used.</b> Fewer tips mean more independence. A student who needed all the tips can still earn a strong mark through the quality of the answer.</li>
+   <li><b>Quality of the answer.</b> Look for a clear claim, evidence that matches it (the screenshots and their explanations, with numbers), the key words used correctly, and a reason that explains the pattern. The “A strong answer includes” list for each question below is a marking guide. The ideas the student ticked are their own judgement, so check them against the answer they wrote.</li>
+  </ul>
+  <p class="tsmall">Open any question’s worksheet from <b>My completed worksheets</b> when you are signed in as a teacher. There is a blank copy and an answer key for each. Work is saved in the browser on the computer the student used, so students should use the same computer and the same name and class when they come back.</p>
+  ${RQ_TIERS.map(tier).join("")}
+  <p class="tsmall">Question “Tropics on three planets” compares the planet tropics of Uranus, Saturn and Mars. Saturn and Mars have nearly the same tilt (about 26.7° and 25.2°), so their tropics are about the same width. Uranus, tilted about 98° (its tropics reach to about 82°), is the odd one out. The question is worded around where each planet’s tropics are and why Uranus differs.</p>`;
+}
+
+/* ---------- Research questions: journal, tips, screenshots, answer check, worksheet (Oct 2026) ---------- */
+const RQ={cur:null,qs:{},shots:[],hideIntro:false};
+const MAXEV=5,MAXSHOTS=12;
+const rqSt=id=>RQ.qs[id]||(RQ.qs[id]={tips:0,notes:"",ev:[],ans:"",sub:false,ticks:[]});
+const rqAnswered=id=>!!(RQ.qs[id]&&RQ.qs[id].sub);
+const rqStarted=id=>{const s=RQ.qs[id];return !!s&&(s.tips>0||!!s.notes.trim()||s.ev.length>0||!!s.ans.trim()||s.sub)};
+const rqCount=()=>RQS.filter(q=>rqAnswered(q.id)).length;
+const rqWords=(q,text)=>q.words.map(w=>({l:w.l,ok:w.re.test(text||"")}));
+const wc=t=>(String(t||"").trim().match(/\S+/g)||[]).length;
+const rqShot=id=>RQ.shots.find(x=>x.id===id);
+function rqReset(){RQ.cur=null;RQ.qs={};RQ.shots=[];RQ.hideIntro=false}
+function rqLoad(d){rqReset();if(!d||typeof d!=="object")return;
+  RQ.cur=d.cur||null;RQ.qs=d.qs||{};RQ.shots=Array.isArray(d.shots)?d.shots:[];RQ.hideIntro=!!d.hideIntro;
+  Object.values(RQ.qs).forEach(s=>{s.ev=s.ev||[];s.ticks=s.ticks||[];s.notes=s.notes||"";s.ans=s.ans||"";s.tips=s.tips||0})}
+
+/* ----- the first-time pop-up instructions ----- */
+const RQ_HELP=[
+ {i:"🎯",h:"Choose a research question",p:"Pick one question. They come in three levels: 🌱 Foundation, 🔭 Extension and 🚀 Mastery. Each one is open. You decide which views to use and how to find the answer."},
+ {i:"🔭",h:"Explore with your dashboard",p:"Add the views you need to your dashboard: Sky, Flat map, Planet from space, Year graphs, Heat and All the numbers. Change the planet, the place, the date and the tilt to test your ideas."},
+ {i:"💡",h:"Stuck? Ask for a tip",p:"Press <b>Ask for a tip</b>. You get one tip at a time. Each tip tells you which view to open and what to look for. Your worksheet shows how many tips you used, so try on your own first."},
+ {i:"📷",h:"Collect evidence",p:"Press the 📷 button at the top of any view to take a screenshot. It goes into your journal. Choose up to 5 screenshots as evidence and write what each one shows."},
+ {i:"✍️",h:"Write your answer",p:"Write your answer using the key words shown. When you submit it, a checklist shows the words you used and the ideas a strong answer includes. Tick the ideas you included."},
+ {i:"📄",h:"Save your worksheet",p:"Press <b>Save worksheet</b> for a two-page summary with your tips, your evidence and your answer. Your teacher marks the number of tips you used and the quality of your answer."}
+];
+let HELP_I=0;
+function showRqHelp(){
+  HELP_I=0;let h=$("rqhelp");if(!h){h=document.createElement("div");h.id="rqhelp";h.className="rqhelp";document.body.appendChild(h);
+    h.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+      if(b.dataset.hn){HELP_I=Math.min(RQ_HELP.length-1,HELP_I+1);drawRqHelp()}
+      else if(b.dataset.hp){HELP_I=Math.max(0,HELP_I-1);drawRqHelp()}
+      else if(b.dataset.hd!==undefined){HELP_I=+b.dataset.hd;drawRqHelp()}
+      else if(b.dataset.hx){closeRqHelp()}});
+    h.addEventListener("change",e=>{if(e.target.id==="rqhHide"){RQ.hideIntro=e.target.checked;saveSoon()}});
+    document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("rqhelp").hidden){e.stopPropagation();closeRqHelp()}},true)}
+  h.hidden=false;$("nb").inert=true;drawRqHelp();
+}
+function drawRqHelp(){
+  const h=$("rqhelp"),c=RQ_HELP[HELP_I],last=HELP_I===RQ_HELP.length-1;
+  h.innerHTML=`<div class="rqhbox" role="dialog" aria-modal="true" aria-labelledby="rqhT">
+   <div class="rqhstep">How My investigation works · ${HELP_I+1} of ${RQ_HELP.length}</div>
+   <div class="rqhi" aria-hidden="true">${c.i}</div><h3 id="rqhT">${c.h}</h3><p>${c.p}</p>
+   <div class="rqhdots">${RQ_HELP.map((x,i)=>`<button type="button" data-hd="${i}" aria-label="Go to step ${i+1}" aria-current="${i===HELP_I}"></button>`).join("")}</div>
+   <div class="rqhbtn">${HELP_I?`<button type="button" class="mini" data-hp="1">← Back</button>`:`<button type="button" class="mini" data-hx="1">Skip</button>`}
+    ${last?`<button type="button" class="primary" data-hx="1">Got it, let's start</button>`:`<button type="button" class="primary" data-hn="1">Next →</button>`}</div>
+   <label class="rqhhide"><input type="checkbox" id="rqhHide" ${RQ.hideIntro?"checked":""}> Do not show this when I open My investigation</label>
+  </div>`;
+  const f=h.querySelector(".primary");if(f)f.focus();
+}
+function closeRqHelp(){const h=$("rqhelp");if(h)h.hidden=true;$("nb").inert=false;const b=$("nb").querySelector(".primary,.rqcard");if(b)b.focus()}
+
+/* ----- screenshots ----- */
+function viewTitle(v){return RQ_VIEWS[v]||v}
+function readoutsCanvas(){
+  const dts=[...document.querySelectorAll("#readouts dt")],dds=[...document.querySelectorAll("#readouts dd")];
+  const rows=dts.map((t,i)=>[t.textContent.trim(),(dds[i]?dds[i].textContent:"").trim()]);
+  const c=document.createElement("canvas"),W=620,RH=26;c.width=W;c.height=rows.length*RH+16;
+  const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,W,c.height);x.textBaseline="middle";
+  rows.forEach((r,i)=>{const y=8+i*RH+RH/2;if(i%2===0){x.fillStyle="#f1f4f8";x.fillRect(0,8+i*RH,W,RH)}
+    x.fillStyle="#445366";x.font="13px system-ui,sans-serif";x.textAlign="left";x.fillText(r[0].slice(0,46),10,y);
+    x.fillStyle="#14202e";x.font="bold 13px system-ui,sans-serif";x.textAlign="right";x.fillText(r[1].slice(0,46),W-10,y)});
+  return c;
+}
+function captureImage(v){
+  const p=document.querySelector(`#grid .panel[data-v="${v}"]`);if(!p)throw new Error("no panel");
+  const src=v==="read"?readoutsCanvas():p.querySelector("canvas.cv");if(!src||!src.width)throw new Error("no canvas");
+  const s=snapNow(false),MW=540,sc=Math.min(1,MW/src.width),cw=Math.round(src.width*sc),ch=Math.round(src.height*sc),band=46;
+  const c=document.createElement("canvas");c.width=cw;c.height=ch+band;const x=c.getContext("2d");
+  x.fillStyle="#fff";x.fillRect(0,0,cw,ch+band);
+  x.drawImage(src,0,band,cw,ch);
+  x.fillStyle="#1b4f72";x.fillRect(0,0,cw,band);x.fillStyle="#fff";x.textBaseline="alphabetic";x.textAlign="left";
+  const fit=(t,px,bold)=>{let f=px;x.font=`${bold?"bold ":""}${f}px system-ui,sans-serif`;while(f>8&&x.measureText(t).width>cw-14){f--;x.font=`${bold?"bold ":""}${f}px system-ui,sans-serif`}};
+  const l1=`${viewTitle(v)} · ${s.planet} · ${s.place}`,l2=`${s.when} · tilt ${s.tilt}° · midday Sun ${s.noon} · daylight ${s.day}`;
+  fit(l1,14,true);x.fillText(l1,7,19);x.fillStyle="#d7e6f2";fit(l2,12,false);x.fillText(l2,7,37);
+  return {img:c.toDataURL("image/jpeg",.68),set:`${s.planet} · ${s.place} · ${s.when} · tilt ${s.tilt}°`};
+}
+function takeShot(v,btn){
+  if(RQ.shots.length>=MAXSHOTS){toast(`Your journal holds ${MAXSHOTS} screenshots. Open My investigation and delete one to take another.`);return}
+  let r;try{r=captureImage(v)}catch(e){toast("The screenshot did not work. Check that the view is showing, then try again.");return}
+  RQ.shots.push({id:"s"+Date.now().toString(36)+Math.floor(Math.random()*1e3),img:r.img,view:v,set:r.set,cap:"",at:Date.now()});
+  saveSoon();
+  if(btn){btn.classList.add("flash");setTimeout(()=>btn.classList.remove("flash"),700)}
+  toast(NB?`📷 Screenshot ${RQ.shots.length} added to your journal.`:`📷 Screenshot ${RQ.shots.length} added to your journal. Open My investigation to use it as evidence.`);
+  if(NB&&NBV==="rq")renderRq();
+}
+function addCamBtns(){
+  document.querySelectorAll("#grid .panel").forEach(p=>{const h=p.querySelector("h2");if(!h||h.querySelector(".pshot"))return;
+    const b=document.createElement("button");b.type="button";b.className="pshot";b.textContent="📷";b.title="Take a screenshot for your journal";b.setAttribute("aria-label","Take a screenshot of "+viewTitle(p.dataset.v)+" for your journal");
+    b.addEventListener("click",()=>takeShot(p.dataset.v,b));const x=h.querySelector(".pclose");x?h.insertBefore(b,x):h.appendChild(b)});
+}
+
+/* ----- the question picker and the journal ----- */
+const esc2=esc;
+function tipsLeft(q,s){return q.tips.length-s.tips}
+function pickHTML(){
+  const card=q=>{const st=rqAnswered(q.id)?`<em class="done">✓ Answered</em>`:rqStarted(q.id)?`<em>● Started</em>`:"";
+    return `<button type="button" class="rqcard" data-rqpick="${q.id}"><i aria-hidden="true">${q.icon}</i><span><b>${esc(q.title)}</b><small>${esc(q.short)}</small></span>${st}</button>`};
+  return `<div class="nbh"><b>📓 My investigation</b><span class="nbhb"><button type="button" class="mini" data-rqhelp="1">ℹ️ How it works</button><button type="button" class="mini" data-nbclose="1">Close ✕</button></span></div>
+  <div class="nbbody">
+   <p class="gtext">Choose a research question. Every question is open: you decide which views to use and how to find the answer.</p>
+   ${RQ_TIERS.map(t=>`<section class="rqtier t-${t.id}"><h3>${t.icon} ${t.name}</h3><p class="note">${t.blurb}</p>${RQS.filter(q=>q.tier===t.id).map(card).join("")}</section>`).join("")}
+   <section class="rqown"><b>Have your own question?</b><p class="note">Write it yourself and collect readings in a table. The model checks your numbers.</p><button type="button" class="mini" data-rqown="1">Write my own question</button></section>
+  </div>`;
+}
+function tipHTML(q,t,i){
+  const lbl=t.v?viewTitle(t.v):"";
+  return `<div class="rqtip"><div class="rqtn">Tip ${i+1} of ${q.tips.length}${lbl?` <span class="rqview">${lbl}</span>`:""}</div><p>${t.t}</p>${t.v?`<button type="button" class="mini" data-rqview="${t.v}">Show ${lbl} on my dashboard</button>`:""}</div>`;
+}
+function shotHTML(sh,s){
+  const on=s.ev.includes(sh.id);
+  return `<div class="rqsh ${on?"on":""}" data-sh="${sh.id}"><img src="${sh.img}" alt="Screenshot of the ${viewTitle(sh.view)} view">
+   <label class="rqevlab"><input type="checkbox" data-shev="${sh.id}" ${on?"checked":""}> Use as evidence</label>
+   <textarea rows="2" maxlength="160" data-shcap="${sh.id}" aria-label="What this screenshot shows" placeholder="What does this screenshot show? Explain it in a sentence or two.">${esc(sh.cap)}</textarea>
+   <button type="button" class="mini rqdel" data-shdel="${sh.id}">Delete</button></div>`;
+}
+function answerHTML(q,s){
+  if(!s.sub)return `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w=>`<b>${esc(w.l)}</b>`).join("")}</div></div>
+    <textarea id="rqAns" class="rqtext" rows="7" maxlength="900" data-rqf="ans" aria-label="My answer" placeholder="Write your answer in full sentences. Use evidence from your screenshots.">${esc(s.ans)}</textarea>
+    <small class="rqcount" id="rqAnsN">${s.ans.length}/900</small>
+    <div class="nbadd"><button type="button" class="primary" data-rqsub="1">Submit my answer</button></div><p class="note" id="rqSubMsg" role="status"></p>`;
+  const wd=rqWords(q,s.ans);
+  return `<p class="rqans">${esc(s.ans).replace(/\n/g,"<br>")}</p>
+   <div class="rqchk"><span class="lbl">Key words you used (${wd.filter(w=>w.ok).length} of ${wd.length})</span><div>${wd.map(w=>`<span class="${w.ok?"yes":"no"}">${w.ok?"✓":"○"} ${esc(w.l)}</span>`).join("")}</div></div>
+   <div class="model"><div class="lbl">One possible answer</div><p>${esc(q.model)}</p>
+    <div class="lbl">Did you include…? Tick the ideas you included in your answer.</div>
+    <div class="checklist">${q.ideas.map((c,i)=>`<label><input type="checkbox" data-rqtick="${i}" ${s.ticks.includes(i)?"checked":""}> ${esc(c)}</label>`).join("")}</div></div>
+   <div class="nbadd"><button type="button" class="mini" data-rqedit="1">Edit my answer</button></div>`;
+}
+function journalHTML(){
+  const q=rqById(RQ.cur),s=rqSt(q.id),T=rqTier(q),left=tipsLeft(q,s);
+  return `<div class="nbh"><b>📓 My investigation</b><span class="nbhb"><button type="button" class="mini" data-rqhelp="1">ℹ️ How it works</button><button type="button" class="mini" data-nbclose="1">Close ✕</button></span></div>
+  <div class="nbbody">
+   <button type="button" class="mini rqback" data-rqall="1">← All questions</button>
+   <div class="rqq t-${T.id}"><span class="rqchip">${T.icon} ${T.name}</span><h3>${q.icon} ${esc(q.title)}</h3><p>${esc(q.q)}</p></div>
+   <div class="rqstat" id="rqStat"></div>
+   <section><h4>💡 Tips</h4><p class="note">Explore on your own first. When you are stuck, ask for a tip. You get one tip at a time, and your worksheet shows how many you used.</p>
+    <div id="rqTips">${q.tips.slice(0,s.tips).map((t,i)=>tipHTML(q,t,i)).join("")}</div>
+    <button type="button" class="primary rqtipbtn" data-rqtip="1" ${left?"":"disabled"}>${left?(s.tips?"💡 Ask for another tip":"💡 Ask for a tip"):"You have used every tip"}</button></section>
+   <section><h4>📝 My ideas and notes</h4><textarea id="rqNotes" class="rqtext" rows="4" maxlength="600" data-rqf="notes" aria-label="My ideas and notes" placeholder="Write your ideas, what you notice and what you want to test next.">${esc(s.notes)}</textarea><small class="rqcount" id="rqNotesN">${s.notes.length}/600</small></section>
+   <section><h4>📷 My screenshots</h4><p class="note">Press the 📷 button at the top of any view to add a screenshot here. Tick up to ${MAXEV} to use as evidence, and write what each one shows.</p>
+    <div class="rqshots" id="rqShots">${RQ.shots.length?RQ.shots.map(sh=>shotHTML(sh,s)).join(""):`<p class="note rqnone">No screenshots yet. Open a view on your dashboard and press its 📷 button.</p>`}</div></section>
+   <section><h4>✍️ My answer</h4><div id="rqAnsBox">${answerHTML(q,s)}</div></section>
+   <div class="nbadd rqws"><button type="button" class="primary" data-rqws="1" ${s.sub||USER.teacher?"":"disabled"}>📄 Save worksheet</button>${s.sub||USER.teacher?"":`<span class="note">Submit your answer to unlock your worksheet.</span>`}</div>
+  </div>`;
+}
+function rqStatUpdate(){
+  const el=$("rqStat");if(!el||!RQ.cur)return;const q=rqById(RQ.cur),s=rqSt(q.id);
+  el.innerHTML=`<span>💡 Tips used <b>${s.tips}</b> of ${q.tips.length}</span><span>📷 Evidence <b>${s.ev.length}</b> of ${MAXEV}</span><span>✍️ Answer <b>${s.sub?"submitted":"not yet"}</b></span>`;
+}
+function renderRq(keepScroll){
+  const nb=$("nb"),old=nb.querySelector(".nbbody"),sc=keepScroll&&old?old.scrollTop:0;
+  nb.innerHTML=NBV==="rq"&&rqById(RQ.cur)?journalHTML():pickHTML();
+  if(NBV==="rq")rqStatUpdate();
+  const nb2=nb.querySelector(".nbbody");if(nb2)nb2.scrollTop=sc;
+}
+function rqPick(id){RQ.cur=id;NBV="rq";rqSt(id);renderRq();saveSoon();
+  const t=$("nb").querySelector(".nbbody");if(t)t.scrollTop=0}
+function rqShowView(v){
+  if(S.mode!=="explore")setMode("explore");
+  if(!S.views.includes(v))toggleView(v);else {syncUI();requestRender()}
+  toast(`${viewTitle(v)} is on your dashboard.`);
+}
+function wireRq(){
+  const nb=$("nb");
+  nb.addEventListener("click",e=>{
+    const b=e.target.closest("button");if(!b)return;const d=b.dataset;
+    if(d.rqpick){rqPick(d.rqpick);return}
+    if(d.rqall!==undefined){NBV="pick";renderRq();return}
+    if(d.rqown!==undefined){NBV="own";renderNb();return}
+    if(d.rqback!==undefined){NBV="pick";renderRq();return}
+    if(d.rqhelp!==undefined){showRqHelp();return}
+    if(!RQ.cur)return;const q=rqById(RQ.cur);if(!q)return;const s=rqSt(q.id);
+    if(d.rqtip!==undefined){if(s.tips<q.tips.length){s.tips++;saveSoon();renderRq(true);const ts=nb.querySelectorAll(".rqtip");if(ts.length)ts[ts.length-1].scrollIntoView({block:"nearest"})}return}
+    if(d.rqview){rqShowView(d.rqview);return}
+    if(d.shdel){RQ.shots=RQ.shots.filter(x=>x.id!==d.shdel);Object.values(RQ.qs).forEach(z=>{z.ev=z.ev.filter(i=>i!==d.shdel)});saveSoon();renderRq(true);return}
+    if(d.rqsub!==undefined){
+      const t=$("rqAns"),txt=t?t.value.trim():"",m=$("rqSubMsg");
+      if(wc(txt)<12){if(m)m.textContent="Write a little more first. Aim for at least two full sentences, using your evidence.";if(t)t.focus();return}
+      s.ans=txt;s.sub=true;s.ticks=[];saveSoon();renderRq(true);toast("Answer submitted. Now check what you included, then save your worksheet.");
+      const ab=$("rqAnsBox");if(ab)ab.scrollIntoView({block:"start"});return}
+    if(d.rqedit!==undefined){s.sub=false;s.ticks=[];saveSoon();renderRq(true);return}
+    if(d.rqws!==undefined){openWs({rq:q.id});return}
+  });
+  nb.addEventListener("input",e=>{
+    const t=e.target;if(!RQ.cur)return;const q=rqById(RQ.cur);if(!q)return;const s=rqSt(q.id);
+    if(t.dataset.rqf==="notes"){s.notes=t.value;const n=$("rqNotesN");if(n)n.textContent=t.value.length+"/600";saveSoon()}
+    else if(t.dataset.rqf==="ans"){s.ans=t.value;const n=$("rqAnsN");if(n)n.textContent=t.value.length+"/900";saveSoon()}
+    else if(t.dataset.shcap){const sh=rqShot(t.dataset.shcap);if(sh){sh.cap=t.value;saveSoon()}}
+  });
+  nb.addEventListener("change",e=>{
+    const t=e.target;if(!RQ.cur)return;const q=rqById(RQ.cur);if(!q)return;const s=rqSt(q.id);
+    if(t.dataset.shev){const id=t.dataset.shev,on=s.ev.includes(id);
+      if(t.checked&&!on){if(s.ev.length>=MAXEV){t.checked=false;toast(`You can use up to ${MAXEV} screenshots as evidence. Untick one first.`);return}s.ev.push(id)}
+      else if(!t.checked&&on)s.ev=s.ev.filter(x=>x!==id);
+      const box=t.closest(".rqsh");if(box)box.classList.toggle("on",t.checked);rqStatUpdate();saveSoon()}
+    else if(t.dataset.rqtick!==undefined){const i=+t.dataset.rqtick;s.ticks=s.ticks.filter(x=>x!==i);if(t.checked)s.ticks.push(i);saveSoon()}
+  });
+  addCamBtns();
+}
+
+/* ----- the worksheet for one research question (always fits two pages) ----- */
+function rqWs(id,o){
+  const q=rqById(id),s=rqSt(id),T=rqTier(q),blank=o.blank,key=o.key;
+  const ev=blank||key?[]:s.ev.map(rqShot).filter(Boolean),wd=rqWords(q,s.ans),got=wd.filter(w=>w.ok).length;
+  const lines=n=>`<div class="wslines">${"<i></i>".repeat(n)}</div>`;
+  let h=`<div class="wshead"><h1>Tilt <span>Lab</span> · Research question</h1><small>${T.icon} ${T.name}${key?" · ANSWER KEY":""}${blank?" · BLANK COPY":""}</small></div>
+  <div class="wsbar"><div><b>Name</b><span>${blank?"":esc(USER.name)}</span></div><div><b>Class</b><span>${blank?"":esc(USER.cls)}</span></div><div><b>Date</b><span>${blank?"":new Date().toLocaleDateString("en-GB")}</span></div></div>
+  <div class="rqwq"><b>${q.icon} ${esc(q.title)}</b><p>${esc(q.q)}</p></div>
+  <div class="rqmark"><div><b>${blank||key?"":s.tips}${blank||key?"":" / "+q.tips.length}</b><span>${blank||key?"Tips used: ______":"tips used"}</span></div><div><b>${blank||key?"":ev.length+" / "+MAXEV}</b><span>${blank||key?"Evidence: ______":"evidence screenshots"}</span></div><div><b>${blank||key?"":got+" / "+q.words.length}</b><span>${blank||key?"":"key words used"}</span></div><div><b>${blank||key?"":s.ticks.length+" / "+q.ideas.length}</b><span>${blank||key?"":"ideas I included"}</span></div></div>`;
+  h+=`<h2>My ideas and notes</h2>${blank||key?lines(3):(s.notes.trim()?`<div class="wsans">${esc(s.notes)}</div>`:lines(2))}`;
+  h+=`<h2>My evidence</h2>`;
+  if(blank||key)h+=`<p class="wsstart">Up to ${MAXEV} screenshots from the model, each with a sentence that says what it shows.</p>`+lines(2);
+  else if(!ev.length)h+=`<p class="wsstart">No screenshots chosen.</p>`;
+  else h+=`<div class="rqevg">${ev.map((sh,i)=>`<figure><img src="${sh.img}" alt="Evidence ${i+1}"><figcaption><b>Evidence ${i+1}.</b> ${sh.cap.trim()?esc(sh.cap):"<i>No explanation written.</i>"}</figcaption></figure>`).join("")}</div>`;
+  h+=`<h2>My answer</h2>`;
+  if(key)h+=`<div class="wsans">${esc(q.model)}</div>`;
+  else if(blank)h+=lines(6);
+  else h+=s.ans.trim()?`<div class="wsans">${esc(s.ans)}</div>`:lines(4);
+  h+=`<h2>${key?"A strong answer includes":"Check my answer"}</h2>`;
+  if(!blank){
+    h+=`<p class="rqwords"><b>Key words${key?"":" I used"}:</b> ${wd.map(w=>`<span class="${key||w.ok?"yes":"no"}">${key||w.ok?"✓":"○"} ${esc(w.l)}</span>`).join(" ")}</p>`;
+    h+=`<ul class="rqideas">${q.ideas.map((c,i)=>`<li class="${key||s.ticks.includes(i)?"yes":"no"}"><span class="wsbox ${key||s.ticks.includes(i)?"on":""}">${key||s.ticks.includes(i)?"✓":""}</span> ${esc(c)}</li>`).join("")}</ul>`;
+  }else h+=`<p class="rqwords"><b>Key words:</b> ${q.words.map(w=>esc(w.l)).join(", ")}</p>`+`<ul class="rqideas">${q.ideas.map(()=>`<li><span class="wsbox"></span> ______________________________________________</li>`).join("")}</ul>`;
+  return h;
 }
 
 /* ---------- Home page, completed worksheets, exploration dashboard (Oct 2026) ---------- */
@@ -4199,7 +4862,7 @@ function wireHome(){
     <div class="homeCards">
      <button type="button" class="hcard guided" data-home="guided"><i aria-hidden="true">🧭</i><b>Guided challenges</b><small>Step-by-step challenges: Foundation, Extension and Investigation</small><em>Start →</em></button>
      <button type="button" class="hcard explore" data-home="explore"><i aria-hidden="true">🔭</i><b>Exploration</b><small>Build your own dashboard with any views you like and test your own ideas</small><em>Open the dashboard →</em></button>
-     <button type="button" class="hcard inv" data-home="inv"><i aria-hidden="true">📓</i><b>My investigation</b><small>Ask your own question, collect readings and write it up</small><em>Open my notebook →</em></button>
+     <button type="button" class="hcard inv" data-home="inv"><i aria-hidden="true">📓</i><b>My investigation</b><small>Choose a research question, explore, collect evidence and write your answer</small><em>Open my journal →</em></button>
     </div>
     <div class="homeLinks"><button type="button" class="hlink" data-home="lib">📄 <span>My completed worksheets (0)</span></button></div>
    </div>
@@ -4209,7 +4872,7 @@ function wireHome(){
     const b=e.target.closest("[data-home]");if(!b)return;const a=b.dataset.home;
     if(a==="guided")goMode("guided");
     else if(a==="explore")goMode("explore");
-    else if(a==="inv"){goMode("explore");nbOpen()}
+    else if(a==="inv"){goMode("explore");nbOpen("pick")}
     else if(a==="lib")showLib();
     else if(a==="teach")openTeach();
   });
@@ -4229,12 +4892,14 @@ function showLib(){
   const rows=secList().map(s=>{const p=secProg(s),k=secChecks(s),ok=secUnlocked(s);
     const info=`${p.done} of ${p.total} challenges finished${k.ck?` · ${k.right} of ${k.ck} check questions right`:""}`;
     return `<div class="librow ${p.ok?"okrow":""}"><div><b>${p.ok?"✓ ":""}${esc(s.name)}</b><small>${info}</small></div>${ok?`<button type="button" class="${p.ok?"primary":"mini"}" data-lsec="${s.id}">📄 Save worksheet</button>`:`<span class="lockn">Finish all ${p.total} to save</span>`}</div>`}).join("");
+  const rqList=RQS.filter(q=>rqStarted(q.id)||USER.teacher),rqRows=rqList.length?rqList.map(q=>{const st=rqSt(q.id),T=rqTier(q),ok=rqAnswered(q.id),can=ok||USER.teacher;
+    return `<div class="librow ${ok?"okrow":""}"><div><b>${ok?"✓ ":""}${q.icon} ${esc(q.title)}</b><small>${T.name} · ${st.tips} tip${st.tips===1?"":"s"} used · ${st.ev.length} evidence screenshot${st.ev.length===1?"":"s"}</small></div>${can?`<button type="button" class="${ok?"primary":"mini"}" data-lrq="${q.id}">📄 Save worksheet</button>`:`<span class="lockn">Submit your answer to save</span>`}</div>`}).join(""):`<p class="note">When you answer a research question in My investigation, its worksheet shows up here.</p>`;
   const rdy=invReady()||USER.teacher,nrows=INV.list.reduce((a,v)=>a+v.rows.length,0);
   const invRow=`<div class="librow ${invReady()?"okrow":""}"><div><b>${invReady()?"✓ ":""}My own investigation</b><small>${invReady()?`${INV.list.length} investigation${INV.list.length>1?"s":""} · ${nrows} reading${nrows===1?"":"s"}`:"Write a question and add a reading to unlock it"}</small></div>${rdy?`<button type="button" class="${invReady()?"primary":"mini"}" data-linv="1">📄 Save worksheet</button>`:`<span class="lockn">Not finished yet</span>`}</div>`;
   box.innerHTML=`<div class="gbox libbox" role="dialog" aria-modal="true" aria-labelledby="libT">
    <div class="libhead"><h2 id="libT">📄 My completed worksheets</h2><button type="button" class="mini" data-lclose="1">Close ✕</button></div>
-   <p>You get one worksheet for each section. When you finish every challenge in a section, its “Save worksheet” button opens. The worksheet has all your answers, and you can save it as a PDF to upload to Toddle.</p>
-   ${rows}<h3>Your own work</h3>${invRow}
+   <p>You get one worksheet for each section. When you finish every challenge in a section, its “Save worksheet” button opens. The worksheet has all your answers, and you can save it as a PDF to upload to Toddle. Each research question you answer has its own worksheet too.</p>
+   ${rows}<h3>Research questions</h3>${rqRows}<h3>Your own work</h3>${invRow}
   </div>`;
   box.hidden=false;syncInert();
   const f=box.querySelector("button");if(f)f.focus();
@@ -4245,6 +4910,7 @@ function wireLib(){
     const b=e.target.closest("button");if(!b)return;const d=b.dataset;
     if(d.lclose){closeLib();return}
     if(d.lsec){openWs({sec:d.lsec});return}
+    if(d.lrq){openWs({rq:d.lrq});return}
     if(d.linv)openWs({inv:true});
   });
 }
@@ -4259,8 +4925,11 @@ $("teachBtn").addEventListener("click",openTeach);$("teach").addEventListener("c
 $("gStep").addEventListener("click",e=>{if(e.target.closest("#teachLink")){e.preventDefault();openTeach()}});
 $("gCoop").addEventListener("click",()=>{S.coopDraft=Object.assign({},S.coop||{});S.coop=null;try{sessionStorage.removeItem("tiltlab-coop")}catch(e){}showSetup(S.gi)});
 $("gStep").addEventListener("click",e=>{const b=e.target.closest("[data-tier]");if(!b)return;const k=b.dataset.tier,i=k==="foundation"?0:CHALLENGES.findIndex(c=>c.tier==="check"&&c.steps[0].cid===(k==="extension"?"ext":"inv"));goChallenge(i)});
+/* the teacher page sits outside the app, so it stays usable while the home page is open */
+document.body.appendChild($("teach"));
 wireHome();
 wireNew();
+wireRq();
 showGate();
 requestAnimationFrame(loop);
 })();
