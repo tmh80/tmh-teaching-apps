@@ -30,6 +30,7 @@ const WS_CSS = `
 .ws .words{margin:2px 0 6px;font-size:10.5pt}
 .ws .fbdbox{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:start}
 .ws .fbdbox svg{width:100%;height:auto}
+.ws .mypt{display:inline-block;margin-left:6px;padding:0 6px;border:1px solid #555;border-radius:8px;font-size:8.5pt;font-weight:600;color:#333}.ws .mypline{font-weight:600}
 .ws .mk{float:right;font-size:9pt;color:#555;font-weight:400}
 .ws .noname{font-size:28pt;text-align:center;padding:40mm 0;font-weight:800}
 @media print{@page{size:A4;margin:12mm}.ws .page{padding:0}}
@@ -40,7 +41,7 @@ function wsHeader(ch, title, mode) {
   const name = mode === 'student' ? `<span class="stu">${esc(u.teacher ? 'Teacher copy' : u.name || '')}</span>` : '';
   return `<div class="hd"><div class="l"><b>FORCE HQ</b><div style="font-size:10pt;color:#cfe0ea">Force Arenas · Chapter ${ch.n} · ${ch.part}</div></div><div class="r"><div style="font-size:14pt;font-weight:800">${title}</div><div style="font-size:10pt">${ch.title}${mode === 'key' ? ' · ANSWER KEY (teacher only)' : mode === 'blank' ? ' · Blank template' : ''}</div></div></div>
     <div class="namebar"><div>Name: ${name}</div><div>Class: ${mode === 'student' ? `<span class="stu">${esc(u.cls || '')}</span>` : ''}</div><div>Date: ${mode === 'student' ? today : ''}</div></div>
-    ${mode === 'student' ? '<p class="note">Everything printed in blue was added by the student in the sim.</p>' : mode === 'blank' ? '<p class="note">Answer every question. Show your working for calculations.</p>' : ''}`;
+    ${mode === 'key' ? sheetStrandHTML(ch.id) : ''}${mode === 'student' ? '<p class="note">Everything printed in blue was added by the student in the sim.</p>' : mode === 'blank' ? '<p class="note">Answer every question. Show your working for calculations.</p>' : ''}`;
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
@@ -99,7 +100,7 @@ function wsQuestion(q, i, mode, s) {
   }
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   const head = q.type === 'gap' ? 'Fill the gaps.' : q.type === 'pick' ? 'Choose the right words.' : q.type === 'fix' ? paperTap(qp) : qp;
-  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}</span></div>${fig}${body}</div>`;
+  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}${mode === 'key' ? strandTagHTML(q) : ''}</span></div>${fig}${body}</div>`;
 }
 /* "Steps completed in the sim": a tick list of the Learn steps and Challenge missions, so the teacher (and Toddle AI)
    can see the student did the work that leads up to the questions. Blue ticks are from the sim. */
@@ -127,14 +128,8 @@ function feedbackPage(chId) {
 }
 /* ---------- marking scheme (also on the answer key) ---------- */
 function markingInstructions(title, total, hasSure) {
-  return `<h2>Marking instructions for Toddle AI</h2><p>This marking scheme is for the Force HQ worksheet "${title}". The blank template and the answer key for this worksheet are attached too.</p>
-  <ul><li>Compare the student's upload with the blank template and mark only what the student added. Student work is printed in blue. The template's own text, choices and word lists are not student work.</li>
-  <li>The answer key is the standard. Students don't need to match it word for word: accept any correct scientific wording.</li>
-  <li>The student's feedback page shows how they did in the sim. If it disagrees with what you can see on the worksheet, trust the worksheet and say so.</li>
-  <li>The worksheet starts with "Steps completed in the sim". Students are expected to complete these steps before answering the questions. A blue tick means the sim recorded that step as done; an empty box means it wasn't done. These ticks are not marked, but mention any skipped steps in the feedback.</li>
-  <li>A blank question, or an empty template, scores 0. Add a kind note saying what is missing.</li>
-  ${hasSure ? '<li>Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.</li>' : ''}
-  <li>Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer. Don't take marks off for spelling unless the meaning is unclear.</li></ul><p><b>Total: ${total} marks.</b></p>`;
+  return `<h2>Marking instructions for Toddle AI</h2><p>This marking scheme is for the Force HQ worksheet "${title}". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.</p>
+  <ul>${markingRules(hasSure).map(r => `<li>${r}</li>`).join('')}<li>${FEEDBACK_STYLE}</li></ul><p><b>Total: ${total} marks.</b></p>`;
 }
 function markItem(q, i) {
   const n = i + 1, m = qMarks(q);
@@ -161,7 +156,7 @@ function markItem(q, i) {
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)}</p>`).join('')}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 
