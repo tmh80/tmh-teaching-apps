@@ -61,7 +61,7 @@ with sync_playwright() as p:
     pg.wait_for_function("__fhq.ev('DZ.ended')", timeout=120000)
     r = ev("runsAll().filter(r=>r.kind==='drop').pop()"); print('RUN TEXT:', ev("runText(runsAll().filter(r=>r.kind==='drop').pop())"))
     chk('canopy run slowed to about 6.0', r['vt2'] is not None and abs(r['vt2'] - 6.0) < 0.1 and r['landV'] < 7, (r['vt2'], r['landV']))
-    chk('Soft landing', ev('DZ.lanes[0].landV') < 7)
+    chk('Slow landing', ev('DZ.lanes[0].landV') < 7)
     pg.screenshot(path=OUT + '07_soft.png')
     # two lanes
     pg.locator('#resetBtn').click(); pg.locator('[data-dzcan="none"]').click(); pg.locator('#dzTwo').check(); pg.wait_for_timeout(200)

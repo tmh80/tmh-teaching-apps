@@ -219,7 +219,7 @@ function renderDropCourse(ch, zm, host, save) {
   };
   const load = i => {
     cur = i; const m = zm[cur];
-    dropSetup({ height: m.setup.height, a: { obj: m.setup.obj, world: m.setup.world, removed: 0, canopy: 'none' } }); S.flags = newFlags(); resetSim(); judged = false;
+    dropSetup({ height: m.setup.height, a: { obj: m.setup.obj, world: m.setup.world, removed: 0, canopy: 'none' } }); S.flags = newFlags(); resetSim(); judged = false; DZ.mission = m;
     LAB.show = new Set(['drop', 'dcanopy', 'dopenh', 'dfbd', 'readH', 'readV', 'readT', 'dvt', 'warp']); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Choose a canopy, then press Drop!';
     applyPanels(); labChanged(); paint();
   };
@@ -229,7 +229,7 @@ function renderDropCourse(ch, zm, host, save) {
     if (!DZ.ended || !DZ.started) { judged = false; return; }
     if (judged) return; judged = true;
     const m = zm[cur], s = get(m.id), L = DZ.lanes[0]; if (s.done || !L.landed) { paint(); return; }
-    const r = { landV: L.landV, time: L.landT, openH: L.openY, canopy: L.canopy }, n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
+    const r = { landV: Math.round(L.landV * 10) / 10, time: Math.round(L.landT), openH: L.openY == null ? null : Math.round(L.openY), canopy: L.canopy }, n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
     const log = (s.log || []).concat([{ canopy: r.canopy, openH: r.openH, landV: r.landV, time: r.time, hit }]);
     const sayAll = m.objs.map(o => o.say(r)).join(' ');
     save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! On target after ${n} drop${n > 1 ? 's' : ''}! ${sayAll} You scored ${best} of 4 points.${m.after ? ' ' + m.after : ''}` : `Not quite. ${sayAll} Change the canopy or the opening height, then drop again.` });

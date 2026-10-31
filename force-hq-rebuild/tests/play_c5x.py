@@ -126,12 +126,12 @@ with sync_playwright() as p:
     jclick('[data-zr="1"]'); pg.wait_for_timeout(300)
     chk('z2: crate on Mars from 3,000 m', ev("DZ.lanes[0].obj==='crate' && DZ.lanes[0].world==='mars' && DZ.height===3000"))
     jclick('#warpBtn'); jclick('#dzDrop'); waitEnd(); pg.wait_for_timeout(300)
-    fb = pg.locator('#zFb').inner_text(); chk('z2: a miss names the landing velocity', fb.startswith('Not quite') and 'too fast' in fb, fb); shot('x_z2_miss')
+    fb = pg.locator('#zFb').inner_text(); chk('z2: a miss names the landing velocity', fb.startswith('Not quite') and 'Target: slower than 20 m/s. ✗' in fb, fb); shot('x_z2_miss')
     jclick('[data-dzcan="large"]'); setnum('#dzOpenNum', 1000); jclick('#dzDrop'); waitEnd(); pg.wait_for_timeout(300)
     fb = pg.locator('#zFb').inner_text(); chk('z2: second drop passes for 3 of 4 points, with the rocket note', fb.startswith('Congratulations') and '3 of 4' in fb and 'rockets' in fb, fb); shot('x_z2_pass')
     # z1
     jclick('[data-zr="0"]'); pg.wait_for_timeout(300); jclick('#warpBtn'); jclick('[data-dzcan="small"]'); setnum('#dzOpenNum', 500); jclick('#dzDrop'); waitEnd(); pg.wait_for_timeout(300)
-    fb = pg.locator('#zFb').inner_text(); chk('z1: small canopy misses with each objective named', fb.startswith('Not quite') and 'Landing velocity' in fb and 'Time' in fb and 'Canopy opened at 500 m: OK' in fb, fb)
+    fb = pg.locator('#zFb').inner_text(); chk('z1: small canopy misses with each objective named', fb.startswith('Not quite') and 'Landing velocity' in fb and 'Time' in fb and 'Canopy opened at 500 m. Target: above 300 m. ✓' in fb, fb)
     jclick('[data-dzcan="medium"]'); setnum('#dzOpenNum', 450); jclick('#dzDrop'); waitEnd(); pg.wait_for_timeout(300)
     fb = pg.locator('#zFb').inner_text(); chk('z1: medium canopy opened at 450 m passes', fb.startswith('Congratulations') and '3 of 4' in fb, fb)
     # z1's clue ladder

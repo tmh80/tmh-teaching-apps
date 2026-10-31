@@ -19,7 +19,7 @@ function heliStep() {
     HE.v += HE.a * HE_DT; HE.y += HE.v * HE_DT;
     if (HE.y <= 0) {   // back on the pad
       const lv = -HE.v; HE.y = 0;
-      if (lv > 0.05) { HE.msg = lv > 4 ? 'Bump! Real pilots land more gently than that.' : 'Soft landing!'; HE.msgAt = performance.now(); HE.landed = true; HE.landReal = performance.now(); S.flags.heliLanded = true; }
+      if (lv > 0.05) { HE.msg = lv > 4 ? 'Bump! Real pilots land more gently than that.' : 'Landed gently.'; HE.msgAt = performance.now(); HE.landed = true; HE.landReal = performance.now(); S.flags.heliLanded = true; }
       HE.v = 0; HE.a = 0;
     } else if (HE.y >= HE_CEIL) { HE.y = HE_CEIL; HE.v = Math.min(HE.v, 0); HE.msg = 'That is high enough! Press Reset to go back to the pad.'; HE.msgAt = performance.now(); }
   }

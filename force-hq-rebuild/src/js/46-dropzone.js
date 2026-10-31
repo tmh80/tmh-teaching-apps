@@ -23,7 +23,7 @@ const DZ_CAN = { small: 9, medium: 6, large: 4.5 };   // the SKYDIVER's Earth te
 const DZ_CANW = { small: 66, medium: 104, large: 150 };   // drawn width of the open canopy (px)
 const dzMassTxt = o => `${fmt(DZ_OBJ[o].m, 3)} kg ${DZ_OBJ[o].noun}`;
 
-const DZ = { lanes: [], two: false, edit: 0, height: 600, started: false, paused: false, ended: false, viewT: 0, n: 0, acc: 0, snapSeq: 0 };
+const DZ = { lanes: [], two: false, edit: 0, height: 600, started: false, paused: false, ended: false, viewT: 0, n: 0, acc: 0, snapSeq: 0, mission: null };
 function dzNewLane(id) {
   return { id, obj: 'crate', world: 'earth', removed: 0, canopy: 'none', autoOpen: null, run: null, t: 0, n: 0, y: 600, v: 0, a: 0, W: 0, D: 0, R: 0, fr: 0, opened: null, openY: null, openV: null, hist: [], top: 0, vt1: null, vt2: null, peakDec: 0, peakD: 0, landed: false, landV: null, landT: null, landReal: 0, started: false };
 }
@@ -159,9 +159,27 @@ function dzUpdate(dt) {
   const sig = (dzCanOpen() ? 1 : 0) + '' + (DZ.ended ? 1 : 0); if (sig !== DZ.sig) { DZ.sig = sig; labChanged(); }   // keep the buttons in step (landing, canopy opened by itself)
 }
 function dzEnd() {
+  const gst = (LAB.mode === 'guided' && typeof CH !== 'undefined' && CH && CHDATA[CH.id]) ? CHDATA[CH.id].steps[GI] : null;
+  const before = gst && !stepDone(CH.id, GI) ? (gst.tasks || []).map(t => !!t[1]()) : null;
   DZ.ended = true; S.running = false; S.t = dzLatest(); S.flags.landed = true;
   dzActive().forEach(L => { dzRunSync(L); });
   dzFinishRuns('landed');
+  if (before && (gst.tasks || []).some((t, i) => !before[i] && t[1]())) toast('✓ Drop recorded. That ticks off the job in your Do this list.', 'good');   // "the step is done" stays separate from "how fast it landed"
+}
+
+/* The label drawn on the canvas after a landing. In the Challenge it judges the landing with the mission's own objectives, on the rounded numbers the student sees.
+   In Learn and Explore it gives the number and no pass or fail words. */
+function dzVerdict(L, mk) {
+  const lv = Math.round(L.landV * 10) / 10, m = LAB.mode === 'challenge' && DZ.mission;
+  if (m) {
+    const r = { landV: lv, time: Math.round(L.landT), openH: L.openY == null ? null : Math.round(L.openY), canopy: L.canopy };
+    const bad = m.objs.filter(o => !o.ok(r)), vo = m.objs.find(o => o.k === 'v');
+    if (!bad.length) return { text: `✓ On target! Landed at ${dz1(lv)} m/s (target: ${vo.tgt})`, col: C.good };
+    if (vo && bad.includes(vo)) return { text: `✗ Too fast for this delivery: ${dz1(lv)} m/s (target: ${vo.tgt})`, col: C.bad };
+    return { text: `Landed gently, but ${bad[0].miss(r)}`, col: C.hazard };
+  }
+  const known = !(mk && mk.has('readV'));
+  return { text: known ? `Landed at ${dz1(lv)} m/s${L.obj === 'para' ? ' (a safe landing for a person is under 7 m/s)' : ''}` : 'Landed.', col: C.ink };
 }
 
 /* ---- runs: one run per lane per drop, saved with the others in DB.runs ---- */
@@ -229,7 +247,7 @@ const dzSnap = (f, test) => { const S2 = dbGet('dz.snaps', []).filter(s => dzMat
 /* set up the Drop Zone from a step: dropSetup({ height, two, a:{obj,world,removed,canopy,autoOpen}, b:{...} }) */
 function dropSetup(o) {
   o = o || {}; clearCh2(); S.scene = 'drop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1;
-  DZ.height = o.height || 600; DZ.two = !!o.two; DZ.edit = 0; DZ.lanes[1].touched = !!o.b;
+  DZ.mission = null; DZ.height = o.height || 600; DZ.two = !!o.two; DZ.edit = 0; DZ.lanes[1].touched = !!o.b;
   [o.a || {}, o.b || o.a || {}].forEach((c, i) => Object.assign(DZ.lanes[i], { obj: 'crate', world: 'earth', removed: 0, canopy: 'none', autoOpen: null }, c));
 }
 /* Readouts the student has to work out stay hidden until the question that asks for them has been answered: a step lists mask: [{ q, keys, when(lane) }]. Keys: fbdR, fbdW, readV, readA. */

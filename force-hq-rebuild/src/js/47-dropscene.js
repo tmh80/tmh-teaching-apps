@@ -199,7 +199,7 @@ function dzLane(c, L, idx, x0, w, tt) {
   if (v.opened == null || !dzCoef(L).has) pill(c, `${fmt(DZ_OBJ[L.obj].m, 3)} kg`, ox, ay - hgtObj - 16, C.ink, 12);
   /* landing and state messages (they sit to the left of the diagram) */
   const mk = dzMasked(L), nx = x0 + 46 + (two ? 86 : 200), nw = two ? 164 : 380;
-  if (L.landed) { const lv = L.landV, msg = lv < 7 ? 'Soft landing!' : lv <= 15 ? 'Bump! A bit fast.' : 'Thud! Far too fast for a safe landing.', col = lv < 7 ? C.good : lv <= 15 ? C.hazard : C.bad; dzNote(c, msg + (mk.has('readV') ? '' : ` (${dz1(lv)} m/s)`), nx, 92, col, nw, 14); }
+  if (L.landed) { const vd = dzVerdict(L, mk); dzNote(c, vd.text, nx, 92, vd.col, nw, 14); }
   else if (L.started && v.opened != null && v.fr < 1) dzNote(c, 'Canopy opening…', nx, 92, C.hazard, nw);
   else if (L.started && Math.abs(v.R) <= 0.01 * v.W && v.t > 0.2) dzNote(c, 'Terminal velocity!', nx, 92, C.good, nw, 14);
   /* the live free-body diagram */

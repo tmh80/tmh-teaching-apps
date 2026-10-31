@@ -189,7 +189,14 @@ c5s('p2').cards.push(CFACT('The Huygens probe parachuted through Titan\'s thick 
 c5s('p3').cards.push(CFACT('NASA\'s Ingenuity helicopter flew on Mars in 2021. The air is so thin that its blades spun at about 2,400 turns a minute, several times faster than a helicopter\'s on Earth.'));
 
 /* ---------- Challenge: Drop Zone deliveries (three missions, judged when the load lands) ---------- */
-const dzOpenAt = r => r.openH == null ? 'the canopy was never opened' : `opened at ${fmt(r.openH, 0)} m`;
+/* Mission objectives. Each one is judged on the rounded numbers the student sees (velocity to 1 d.p., time and canopy height to whole numbers).
+   k = which measurement it is (dzVerdict looks for 'v'), tgt = the target in words, miss(r) = the phrase for the canvas label. */
+const dzMark = ok => ok ? '✓' : '✗';
+const dzObjV = lim => ({ k: 'v', label: `Land slower than ${lim} m/s`, tgt: `slower than ${lim} m/s`, ok: r => r.landV < lim, say: r => `Landing velocity: ${dz1(r.landV)} m/s. Target: slower than ${lim} m/s. ${dzMark(r.landV < lim)}`, miss: r => `landed at ${dz1(r.landV)} m/s (target: slower than ${lim} m/s)` });
+const dzObjT = (lim, label) => ({ k: 't', label, tgt: `within ${lim} s`, ok: r => r.time <= lim, say: r => `Time: ${r.time} s. Target: within ${lim} s. ${dzMark(r.time <= lim)}`, miss: r => `took ${r.time} s (target: within ${lim} s)` });
+const dzObjH = lim => ({ k: 'h', label: `Open the canopy above ${lim} m`, tgt: `above ${lim} m`, ok: r => r.openH != null && r.openH > lim,
+  say: r => r.openH == null ? `The canopy was never opened. Target: open it above ${lim} m. ✗ Choose a canopy, then use "Open automatically at" or press Open canopy!.` : `Canopy opened at ${r.openH} m. Target: above ${lim} m. ${dzMark(r.openH > lim)}`,
+  miss: r => r.openH == null ? `the canopy was never opened (target: above ${lim} m)` : `the canopy opened at ${r.openH} m (target: above ${lim} m)` });
 CHDATA.c5.challenge = {
   title: 'Drop Zone deliveries',
   intro: 'Mission control has three deliveries for you, on three very different worlds. For each one, choose the canopy and the height to open it at, then drop. Use what you know about terminal velocity and air, and try to get it right in as few drops as you can.',
@@ -197,23 +204,20 @@ CHDATA.c5.challenge = {
     { id: 'z1', kind: 'drop', title: 'Mission 1: Skydive on Earth', setup: { obj: 'para', world: 'earth', height: 1500 },
       brief: 'Our skydiver must land <b>slower than 7 m/s</b>, within <b>2 minutes</b> of jumping. For safety, the canopy must open <b>above 300 m</b>.',
       goal: 'The skydiver jumps from 1,500 m on Earth.',
-      objs: [{ label: 'Land slower than 7 m/s', ok: r => r.landV < 7.0, say: r => `Landing velocity ${dz1(r.landV)} m/s: ${r.landV < 7.0 ? 'OK' : 'too fast'}.` },
-        { label: 'Land within 2 minutes (120 s)', ok: r => r.time <= 120, say: r => `Time ${fmt(r.time, 0)} s: ${r.time <= 120 ? 'OK' : 'too slow'}.` },
-        { label: 'Open the canopy above 300 m', ok: r => r.openH != null && r.openH > 300, say: r => r.openH == null ? 'The canopy was never opened: choose a canopy, then use "Open automatically at" or press Open canopy!.' : `Canopy ${dzOpenAt(r)}: ${r.openH > 300 ? 'OK' : 'too low'}.` }],
+      objs: [dzObjV(7), dzObjT(120, 'Land within 2 minutes (120 s)'), dzObjH(300)],
       clues: ['Which canopies give a terminal velocity below 7 m/s? Your runs will tell you.', 'A big canopy is slow, so the time limit matters. How long does it take to fall 600 m at 6 m/s?', 'time = distance ÷ velocity: 600 ÷ 6 = 100 s. Add the time spent falling fast before the canopy opens.'],
       give: 'A medium canopy opened at about 450 m works.' },
     { id: 'z2', kind: 'drop', title: 'Mission 2: Supply crate for Mars', setup: { obj: 'crate', world: 'mars', height: 3000 },
       brief: 'The Mars base needs supplies! The crate must land <b>slower than 20 m/s</b>. Mars has very thin air, so think carefully about the canopy.',
       goal: 'The crate is dropped from 3,000 m above Mars.',
-      objs: [{ label: 'Land slower than 20 m/s', ok: r => r.landV < 20.0, say: r => `Landing velocity ${dz1(r.landV)} m/s: ${r.landV < 20.0 ? 'OK' : 'too fast'}.` }],
+      objs: [dzObjV(20)],
       clues: ['Thin air means much less air resistance at every velocity. Which canopy gives the most air resistance?', 'Even with a canopy, the crate needs time and height to slow down. Open it high.', 'The large canopy works if it opens above about 350 m.'],
       after: 'Even the large canopy only slows the crate to about 16 m/s. That\'s why real Mars landers use parachutes <b>and</b> rockets.',
       give: 'The large canopy opened at 1,000 m or higher works.' },
     { id: 'z3', kind: 'drop', title: 'Mission 3: Venus probe', setup: { obj: 'crate', world: 'venus', height: 1000 },
       brief: 'Drop the science crate onto Venus. It must land <b>slower than 6 m/s</b>, within <b>4 minutes</b>, before the heat damages it.',
       goal: 'The crate is dropped from 1,000 m above Venus.',
-      objs: [{ label: 'Land slower than 6 m/s', ok: r => r.landV < 6.0, say: r => `Landing velocity ${dz1(r.landV)} m/s: ${r.landV < 6.0 ? 'OK' : 'too fast'}.` },
-        { label: 'Land within 4 minutes (240 s)', ok: r => r.time <= 240, say: r => `Time ${fmt(r.time, 0)} s: ${r.time <= 240 ? 'OK' : 'too slow'}.` }],
+      objs: [dzObjV(6), dzObjT(240, 'Land within 4 minutes (240 s)')],
       clues: ['How thick is the air on Venus compared with Earth?', 'Try a drop with no canopy at all and watch the terminal velocity.', 'With no canopy, the crate\'s terminal velocity is about 5 m/s, so it lands in about 200 s. A canopy makes it far too slow.'],
       give: 'No canopy at all works: the crate lands at about 5 m/s after about 200 s.' }
   ]
