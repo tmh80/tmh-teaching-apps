@@ -1,0 +1,35 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A i: describe scientific knowledge
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+- A iii: analyse information to make scientifically supported judgments
+- D i: describe the ways in which science is applied and used to address a specific problem or issue
+- D iii: apply scientific language effectively
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch2 Extension (Inertia) worksheet (13 marks) · MYP: A i, A ii, A iii, D i, D iii ===
+Q1 Match it up, 4 marks, 1 per row [A i]: A flat line above 0 → Moving at a steady velocity; A line sloping upwards → Speeding up; A line sloping down to 0 → Slowing down and stopping; A flat line along 0 → Standing still.
+Q2 Choose one, 1 mark [A iii]: Line 2, because it takes longer to stop.
+Q3 Calculate, 2 marks [A ii]: 144 N (accept 143 to 145). 1 mark for the answer, 1 for correct working: 120 kg is 3 times 40 kg, so it needs 3 times the force: 3 × 48 = 144 N.
+Q4 Draw it: free-body diagram, 3 marks [A ii]: 1 mark for each correct arrow (right force, right direction, right size): Weight 509.6 N down; Normal force 509.6 N up. 1 more mark if bigger forces have longer arrows and equal forces have equal arrows. Arrows should start at the centre of the crate.
+Q5 Explain it, 3 marks, 1 per point [A ii, D i, D iii]: The question gives the words to use (mass, inertia, brake force, braking distance); each point is about using one of them correctly. • Says the truck has more mass than the car, so it has more inertia • Says that with the same brake force, the truck would have a longer braking distance • Says the truck needs a bigger brake force to stop in the same distance (for example, 3 times the mass needs 3 times the force) Model answer: The loaded truck has much more mass than the car, so it has much more inertia. With the same brake force, the truck would have a much longer braking distance. To stop in a safe distance, it needs a much bigger brake force: for example, 3 times the mass needs 3 times the brake force. So it needs stronger brakes.
+
+TOTALS
+Total marks for this task: 13.
+Criterion A: 13 marks available; Criterion D: 3 marks available.

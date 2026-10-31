@@ -1,0 +1,36 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A i: describe scientific knowledge
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+- A iii: analyse information to make scientifically supported judgments
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch5 Foundation (Falling and terminal velocity) worksheet (22 marks) · MYP: A i, A ii, A iii ===
+Q1 Put in order, 2 marks [A i]: The correct order is 1st B (The skydiver speeds up quickly), 2nd A (Air resistance grows as the velocity grows), 3rd C (Air resistance equals the weight, so the velocity is steady), 4th F (The canopy opens and air resistance jumps up), 5th D (The skydiver slows down and air resistance shrinks), 6th E (The forces balance again at a much lower velocity). 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0.
+Q2 Answer and reason, 2 marks [A ii]: 1 mark for the answer: Air resistance is equal to their weight. 1 mark for the reason: Their velocity is steady, so the resultant force must be zero. Confidence is not marked.
+Q3 Calculate, 2 marks [A ii]: 217 N (accept 216 to 218). 1 mark for the answer with its unit (N), 1 for correct working: resultant = 735 − 518 = 217 N, pointing down, so the skydiver is still speeding up..
+Q4 Complete the table, 9 marks, 1 per cell [A ii]: Just after jumping: Air resistance compared with weight = smaller, Resultant force = down, Velocity = speeding up; At terminal velocity: Air resistance compared with weight = equal, Resultant force = zero, Velocity = steady; Just after the canopy opens: Air resistance compared with weight = bigger, Resultant force = up, Velocity = slowing down.
+Q5 Tap the moment, 2 marks, 1 per moment [A iii]: Tap a moment when the forces were balanced and the canopy was still closed. Accept 14.5 to 19.8 s. Tap a moment when the air resistance was bigger than the weight. Accept 20.1 to 23.5 s.
+Q6 Spot the mistake, 2 marks [A iii]: 1 mark for the line with the mistake: line 5 (So the skydiver starts to move upwards.). 1 mark for the correction: So the skydiver keeps moving down, but slows down. An upward resultant force slows down something that is falling. The skydiver keeps moving down the whole time, just more slowly.
+Q7 Explain it, 3 marks, 1 per point [A i]: The question gives the words to use (weight, air resistance, balanced, resultant force); each point is about using one of them correctly. • Says the weight is bigger than the air resistance at first, so the skydiver speeds up • Says the air resistance grows as the velocity grows • Says the air resistance becomes equal to the weight, so the forces are balanced (resultant force zero) and the velocity stays steady Model answer: At first the skydiver's weight is much bigger than the air resistance, so there is a downward resultant force and they speed up. As they go faster, the air resistance grows. Eventually the air resistance is equal to the weight, so the forces are balanced and the resultant force is zero. They stop speeding up and fall at a steady terminal velocity.
+
+TOTALS
+Total marks for this task: 22.
+Criterion A: 22 marks available.

@@ -51,3 +51,9 @@
 
 ## Done: working out calculations (28 Oct)
 - Calculation tasks show the question; answer boxes under tasks sync with Your turn; Journal tab on the right edge; Journal Working tab; calculator "Save to Journal". Not yet done: other tasks that only say "work out" in Chapter 2 (x2) could get answer boxes too.
+
+## Done: November update (Nov 2026)
+- Drop Zone verdict, g on other worlds, `calcorder`, lorry→truck, PDF file names and direct download, MYP strand tags, Toddle AI feedback text.
+- Open: no Check question covers MYP D ii (safety, cost, environmental effects). Tom to decide whether to rewrite one explain question.
+- Open: Toddle's real limit for the AI feedback box (the page warns above 10,000 characters). Tom to report.
+- Open: test the Download PDF button on a real student account in Toddle, on a laptop and an iPad. Toddle's viewer may block downloads; the print menu is the backup.

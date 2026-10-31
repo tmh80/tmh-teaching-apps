@@ -120,3 +120,11 @@ Glossary words to underline: <words>
 Masked readouts: <which readout stays hidden until which question is answered>
 ```
 Voice and terminology rules for the script are in section 3 (velocity, not speed; short sentences; no "it isn't X, it's Y"; no standards on student screens; g = 9.8 N/kg).
+
+## 9. Patterns added in November 2026 (reuse these)
+- `dzVerdict(L, mk)` returns `{text, col}` for the Drop Zone landing label. Mission targets live in `objs` on each mission (`dzObjV`, `dzObjT`, `dzObjH` in `48-ch5.js`).
+- `calcorder` question type: `QT.calcorder` in `36-qtypes.js`, marks via `coScore`, worksheet and key cases in `60-worksheet.js`.
+- PDF download: `downloadWorksheetPdf` and `downloadSheetPdf` in `61-pdf.js`. Libraries are inlined from `vendor/` by `build.py`. Never edit `dist/` by hand.
+- MYP tags: add `obj: ['Aii']` to every new Check question. Run `python3 tests/strands.py`. Strands never go on student screens or sheets.
+- AI feedback text: `aiFeedbackText(secIds, optIds)` and `answerKeyText(chId)` in `58-myp.js`; `markingRules` is shared with the printable scheme. The prompt in step 4 never contains the answer key.
+- Teacher code: `FORCE`. g = 9.8 N/kg. Students say "velocity", not "speed".

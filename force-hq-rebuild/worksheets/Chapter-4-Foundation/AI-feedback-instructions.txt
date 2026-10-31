@@ -1,0 +1,35 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A i: describe scientific knowledge
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch4 Foundation (Action and reaction) worksheet (16 marks) · MYP: A i, A ii ===
+Q1 Choose one, 1 mark [A i]: 80 N, in the opposite direction.
+Q2 Fill the gaps, 2 marks, 1 per gap [A i]: gap 1: same (also accept equal); gap 2: opposite (also accept against, opposite to, opposite way to, opposing, in the opposite direction to, opposite direction to).
+Q3 Choose one, 1 mark [A i]: 200 N, pointing the opposite way.
+Q4 Calculate, 2 marks [A ii]: 2 m/s (accept 1.98 to 2.02). 1 mark for the answer with its unit (m/s), 1 for correct working: The astronaut feels a force of 100 N. velocity = F ÷ m = 100 ÷ 50 = 2 m/s.
+Q5 Tick all that apply, 2 marks [A i]: The two forces in a pair are the same size; The two forces in a pair act on different objects; The two forces in a pair point in opposite directions. 2 marks for exactly these; 1 mark if one is missing or one extra is ticked; otherwise 0.
+Q6 Choose one, 1 mark [A ii]: The lighter skater goes twice as fast.
+Q7 Match it up, 4 marks, 1 per row [A ii]: A hand pushes the table down → The table pushes the hand up; A boot kicks a ball forwards → The ball pushes the boot backwards; A rope pulls a crate to the right → The crate pulls the rope to the left; A swimmer pushes the water backwards → The water pushes the swimmer forwards.
+Q8 Explain it, 3 marks, 1 per point [A ii]: The question gives the words to use (force, third law, opposite); each point is about using one of them correctly. • Says the astronaut pushes the tool, and the tool pushes back on the astronaut • Says the two forces are the same size and in opposite directions (Newton's third law) • Says the force on the astronaut makes them move the opposite way to the tool Model answer: The astronaut pushes the tool with a force, so the tool pushes back on the astronaut with a force of the same size in the opposite direction (Newton's third law). This force makes the astronaut accelerate in the opposite direction to the tool, so the astronaut drifts away.
+
+TOTALS
+Total marks for this task: 16.
+Criterion A: 16 marks available.

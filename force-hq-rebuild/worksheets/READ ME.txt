@@ -1,8 +1,10 @@
 Force HQ: files for Toddle
 
-There is one folder for each worksheet. When you set a worksheet in Toddle, attach all three files from its folder to the AI task maker together with the prompt from the sim's teacher page:
+Toddle's AI feedback can't take attachments. Use the teacher page in the sim: step 5 gives the text to paste into the AI feedback box (it includes a written answer key and the MYP levels). Each folder here also has AI-feedback-instructions.txt for a single worksheet.
+
+The PDFs are optional copies for your own records:
 1. Blank template: what the worksheet looks like before a student fills it in.
-2. Answer key: model answers for every question (teachers only).
-3. Marking scheme: how Toddle should mark and give feedback (teachers only).
+2. Answer key: model answers for every question, with MYP strands (teachers only).
+3. Marking scheme: how to mark, with MYP strands (teachers only).
 
 Teacher code inside the sim: FORCE

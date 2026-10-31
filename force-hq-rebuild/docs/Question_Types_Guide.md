@@ -118,18 +118,18 @@ Rules every new type keeps (from the skill and the Brief): one go, then lock and
 - **Lock:** draws the model in green over the student's dots, and, if the student has a matching run, a third line "Your run".
 - **Paper (part B):** blank grid with axes in the blank and key modes; student dots in blue; the key draws the model and lists the checks as "Look for".
 
-### 3.9 `calcorder`: Work it out, then order (added Nov 2026)
-- `{id, type:'calcorder', p, mass, given:'g (N/kg)', calc:'Weight of the crate (N)', unit:'N', tol:0.5, col0:'World', items:[[name, given value], …] (in the CORRECT order), first, last, after, f?}`. The calculated value is `mass × given` unless the question supplies `f:(given, mass) => value`.
-- **Sim:** a table (item, given value, a number box), then the `order` cards, then one Check. Rows and cards start in the same seeded shuffle as `order` (`orderPerm`). Typed values and card moves are saved as a draft. One go: after Check, the correct value shows beside each wrong box and the correct order shows underneath, then `after`.
-- **Marks (5):** sums 3 (all right = 3; at least two thirds right = 2; at least a third right = 1; else 0); order 2 (the `order` rule, or 2 if the order matches the student's own typed values: error carried forward; needs a number in every box and not all the same). `QMIN.calcorder = 3` minutes.
-- **Paper:** lettered table (letter, item, given, value) with the student's typed values in blue, then the letters written in order. Blank template: empty boxes. Key: every correct value and the letters. `markItem` gives every value, the order, the 3 + 2 rule and the error-carried-forward note.
-
 ### 3.8 Add-on: "How sure are you?" (confidence tier, no marks)
 - Opt-in flag `sure: true` on `mcq`, `reason` and `pick`. Three buttons appear above Check: *Guessing*, *Fairly sure*, *Certain*. The student must choose one before checking.
 - Not marked. Saved in the answer state (`st.sure`). The feedback page lists "Certain but wrong" answers, the confident misconceptions, which are the most useful thing for Tom to see. Add one line to the Toddle marking instructions: "Confidence is not marked."
 - Use sparingly (one or two per section), on the key misconception items.
 
 ---
+
+### 3.9 `calcorder`: Work it out, then order (added Nov 2026)
+- `{id, type:'calcorder', p, mass, given:'g (N/kg)', calc:'Weight of the crate (N)', unit:'N', tol:0.5, col0:'World', items:[[name, given value], …] (in the CORRECT order), first, last, after, f?}`. The calculated value is `mass × given` unless the question supplies `f:(given, mass) => value`.
+- **Sim:** a table (item, given value, a number box), then the `order` cards, then one Check. Rows and cards start in the same seeded shuffle as `order` (`orderPerm`). Typed values and card moves are saved as a draft. One go: after Check, the correct value shows beside each wrong box and the correct order shows underneath, then `after`.
+- **Marks (5):** sums 3 (all right = 3; at least two thirds right = 2; at least a third right = 1; else 0); order 2 (the `order` rule, or 2 if the order matches the student's own typed values: error carried forward; needs a number in every box and not all the same). `QMIN.calcorder = 3` minutes.
+- **Paper:** lettered table (letter, item, given, value) with the student's typed values in blue, then the letters written in order. Blank template: empty boxes. Key: every correct value and the letters. `markItem` gives every value, the order, the 3 + 2 rule and the error-carried-forward note.
 
 ## 4. Formats that need no new code (reuse existing types)
 

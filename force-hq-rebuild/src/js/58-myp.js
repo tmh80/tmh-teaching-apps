@@ -11,7 +11,8 @@ const MYP_STRANDS = {
   Diii: 'apply scientific language effectively'
 };
 const MYP_CRIT = { A: 'Criterion A: Knowing and understanding', D: 'Criterion D: Reflecting on the impacts of science' };
-const strandsOf = q => q.obj || [];
+// q.obj is also the Drop Zone object name (a string) on some freeze questions, so only an array counts as strand tags
+const strandsOf = q => Array.isArray(q.obj) ? q.obj : [];
 const strandLabel = s => s[0] + ' ' + s.slice(1);                                   // 'Aii' -> 'A ii'
 const strandsFull = list => list.map(strandLabel).join(', ');                       // 'A i, A ii'
 const strandsTag = q => strandsOf(q).length ? strandsFull(strandsOf(q)) : '';
