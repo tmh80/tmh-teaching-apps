@@ -945,15 +945,21 @@ function stampSVG(stop, kind, on, size){
   }
   s.append(g); return s;
 }
-function showStampModal(stop, kind, then){
+function showStampModal(stop, kind, then, opts){
+  opts = opts || {};
   const close = ()=>{ ov.remove(); if (then) then(); };
-  const btn = h('button',{class:'btn primary', type:'button', onclick:close}, 'Brilliant!');
+  const mk = (b, i)=>h('button',{class:'btn' + (b.primary ? ' primary' : ''), type:'button', 'data-modal-btn':String(i), onclick:()=>{ ov.remove(); if (b.onclick) b.onclick(); else if (then) then(); }}, b.label);
+  const btns = (opts.buttons && opts.buttons.length) ? opts.buttons.map(mk) : [h('button',{class:'btn primary', type:'button', onclick:close}, 'Brilliant!')];
   const big = stampSVG(stop, kind, true, 140); big.classList.add('stamp-in');
-  const ov = h('div',{class:'stamp-overlay', role:'dialog', 'aria-modal':'true', 'aria-label':'Stamp collected', onclick:e=>{ if (e.target===ov) close(); }},
-    h('div',{class:'stamp-modal'}, big, h('h3',{}, kind==='L' ? 'Learn stamp collected!' : 'Challenge stamp collected!'),
-      h('p',{}, `That’s ${totalStamps()} of ${STOPS.length*2} stamps in your Time Passport.`), btn));
-  document.body.append(ov); btn.focus();
+  const ov = h('div',{class:'stamp-overlay', role:'dialog', 'aria-modal':'true', 'aria-label':opts.title || 'Stamp collected', onclick:e=>{ if (e.target===ov) close(); }},
+    h('div',{class:'stamp-modal'}, big, h('h3',{}, opts.title || (kind==='L' ? 'Learn stamp collected!' : 'Challenge stamp collected!')),
+      h('p',{}, `That’s ${totalStamps()} of ${STOPS.length*2} stamps in your Time Passport.`),
+      opts.text ? h('p',{html:opts.text}) : null,
+      h('div',{class:'row', style:{justifyContent:'center'}}, ...btns)));
+  document.body.append(ov); btns[0].focus();
 }
+/* has the student answered every question of this stop's review? part 'f' = Foundation, 'c' = Challenge */
+function reviewComplete(stop, part){ const items = rvItems(stop, part), st = rvStore(rvKey(stop, part)); return items.length>0 && items.every((_,i)=>st[i] && st[i].done); }
 
 /* ================= small UI pieces ================= */
 function seg(options, value, onPick, label){
@@ -1333,9 +1339,9 @@ function renderStop(stop, tab){
   else if (!p.learn && !T){
     panel.append(h('div',{class:'card locked'},
       pipSay(`<p>This part of the lab unlocks once you’ve finished the Learn steps. They’ll give you everything you need for the ${tab==='explore'?'free play':tab==='review' || tab==='creview'?'review questions':'challenge missions'}!</p>`),
-      h('div',{class:'row'}, h('button',{class:'btn primary', type:'button', onclick:()=>renderStop(stop,'learn')}, 'Go to the Learn steps'), tab==='explore' ? h('button',{class:'btn', type:'button', onclick:()=>{ panel.innerHTML = ''; stop.explore(panel); }}, 'Open it anyway') : null)));
+      h('div',{class:'row'}, h('button',{class:'btn primary', type:'button', onclick:()=>renderStop(stop,'learn')}, 'Go to the Learn steps'), tab==='explore' ? h('button',{class:'btn', type:'button', onclick:()=>{ panel.innerHTML = ''; exploreBanner(panel, stop); stop.explore(panel); }}, 'Open it anyway') : null)));
   }
-  else if (tab==='explore'){ stop.explore(panel); }
+  else if (tab==='explore'){ exploreBanner(panel, stop); stop.explore(panel); }
   else if (tab==='review'){ renderReview(panel, stop, 'f'); }
   else if (tab==='creview' && !cOpen){
     const ms = stop.challenge.missions ? stop.challenge.missions(stop) : [];
@@ -1347,7 +1353,7 @@ function renderStop(stop, tab){
   }
   else if (tab==='creview'){ renderReview(panel, stop, 'c'); }
   else {
-    stop.challenge(panel, ()=>{ if (!p.challenge){ p.challenge = true; Store.save(); const t = tabs.querySelector('[data-tab="challenge"] .tag'); t.textContent='Done'; t.classList.add('done'); const rt = tabs.querySelector('[data-tab="creview"] .tag'); if (rt && rt.textContent==='After Missions') rt.textContent = `${cvDone}/${cvN}`; showStampModal(stop, 'C'); } });
+    stop.challenge(panel, ()=>{ if (!p.challenge){ p.challenge = true; Store.save(); const t = tabs.querySelector('[data-tab="challenge"] .tag'); t.textContent='Done'; t.classList.add('done'); const rt = tabs.querySelector('[data-tab="creview"] .tag'); if (rt && rt.textContent==='After Missions') rt.textContent = `${cvDone}/${cvN}`; showStampModal(stop, 'C', null, {text:'Now try the <b>Challenge review</b>. Its questions make your <b>Challenge worksheet</b> to hand in on Toddle.', buttons:[{label:'Start the Challenge review \u2192', primary:true, onclick:()=>renderStop(stop,'creview')}, {label:'Not now', onclick:()=>{}}]}); } });
   }
 }
 
@@ -1395,6 +1401,12 @@ function runLearn(el, stop){
   function finish(){
     const first = !p.learn; p.learn = true; Store.save(); LCTX = null;
     el.innerHTML = '';
+    if (!teacherMode() && (first || !reviewComplete(stop, 'f'))) setTimeout(()=>{
+      if (document.querySelector('.stamp-overlay')) return;
+      showStampModal(stop, 'L', null, {title: first ? 'Learn stamp collected!' : 'All steps reviewed!',
+        text:'Brilliant work! Your next job is the <b>Foundation review</b>. Answering its questions makes your <b>Foundation worksheet</b>, the PDF you hand in on Toddle. The Explore lab will still be here afterwards, so you can play as much as you like.',
+        buttons:[{label:'Start the Foundation review \u2192', primary:true, onclick:()=>renderStop(stop,'review')}, {label:'Explore first', onclick:()=>renderStop(stop,'explore')}]});
+    }, 0);
     const big = stampSVG(stop, 'L', true, 150); big.classList.add('stamp-in');
     el.append(h('div',{class:'celebrate'},
       h('div',{class:'celebrate-stamp'}, big),
@@ -4717,6 +4729,13 @@ function reviewCard(el, it, n, saved, onSave, opts){
 }
 
 /* ---------- Review tab ---------- */
+/* reminder at the top of every Explore tab until the Foundation review is finished (never in teacher mode) */
+function exploreBanner(panel, stop){
+  if (teacherMode() || reviewComplete(stop, 'f')) return;
+  panel.append(h('div',{class:'rv-banner explore-reminder'}, h('b',{}, '\ud83d\udcc4 Don\u2019t forget your worksheet!'),
+    h('span',{}, 'When you\u2019ve finished exploring, answer the Foundation review to make your Foundation worksheet.'),
+    h('button',{class:'btn small primary', type:'button', onclick:()=>renderStop(stop,'review')}, 'Go to the Foundation review')));
+}
 function renderReview(panel, stop, part){
   part = part || 'f';
   const items = rvItems(stop, part); const st = rvStore(rvKey(stop, part)); const A = `rv-${rvKey(stop, part).replace('~','-')}-`;
