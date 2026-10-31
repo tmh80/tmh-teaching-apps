@@ -14,11 +14,12 @@ function renderTeacher() {
       <label style="flex-direction:column;gap:4px">Message to students (optional)<input type="text" id="tMsg" value="${esc(T0.msg)}" style="font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)"></label>
       <p class="scaleNote">Set the due date in Toddle after the task is made.</p></section>
     <section class="panel tsec"><h2>4. Copy into Toddle</h2><p id="tTime"></p><textarea id="tPrompt" readonly></textarea><div class="row"><button type="button" class="go" id="tCopy">Copy instructions</button><span class="scaleNote" id="tCopied"></span></div>
-      <p class="scaleNote">Paste this prompt into Toddle's AI task maker, together with the files from step 5.</p></section>
-    <section class="panel tsec"><h2>5. Files for Toddle</h2><div class="notebox">Attach all three files for each sheet when you give your prompt to Toddle's AI task maker.<br><b>1. Blank template</b>: what the worksheet looks like before a student fills it in. <b>2. Answer key</b>: model answers for every question (teachers only). <b>3. Marking scheme</b>: how Toddle should give marks and feedback (teachers only).</div>
+      <p class="scaleNote">Paste this prompt into Toddle's AI task maker, together with the Force HQ file.</p></section>
+    <section class="panel tsec"><h2>5. AI feedback instructions (paste into Toddle's AI feedback box)</h2><p class="scaleNote">Toddle's AI feedback can't take attachments, so this text holds everything it needs: how to mark, the MYP levels and a written answer key. Teachers only: students must never see it.</p>
+      <div id="tAiBox"></div></section>
+    <section class="panel tsec"><h2>6. Printable PDFs (optional)</h2><div class="notebox">Optional: save these if you'd like paper copies or a record. Toddle's AI uses the text in step 5, so nothing needs attaching.<br><b>Blank template</b>, <b>Answer key</b> and <b>Marking scheme</b> each open a preview with a Download PDF button.</div>
       <div id="tFiles"></div>
-      <div class="row">${unlocked() ? '<span class="scaleNote">Answer keys are unlocked on this device.</span><button type="button" class="mini" id="tLock">Lock again</button>' : '<span class="scaleNote">🔒 Answer keys and marking schemes need the teacher code.</span><button type="button" class="mini" id="tUnlock">Unlock</button>'}</div>
-      <details><summary>All marking schemes in one (text)</summary><textarea id="tAllSchemes" readonly></textarea></details></section></div>`;
+      <div class="row">${unlocked() ? '<span class="scaleNote">Answer keys are unlocked on this device.</span><button type="button" class="mini" id="tLock">Lock again</button>' : '<span class="scaleNote">🔒 Answer keys and marking schemes need the teacher code.</span><button type="button" class="mini" id="tUnlock">Unlock</button>'}</div></section></div>`;
   const update = () => {
     $$('[data-opt]').forEach(o => { if (o.checked) { const b = $(`[data-sec="${o.dataset.opt}"]`); if (b && !b.checked) b.checked = true; } });
     const ticked = $$('[data-sec]').filter(x => x.checked).map(x => x.dataset.sec), optional = $$('[data-opt]').filter(x => x.checked).map(x => x.dataset.opt), parts = $$('[data-part]').filter(x => x.checked).map(x => x.dataset.part);
@@ -27,14 +28,22 @@ function renderTeacher() {
     const mt = list => Math.round(list.reduce((a, s) => a + parts.reduce((b, p) => b + (p === 'challenge' && !CHDATA[s].challenge ? 0 : TMIN[p](s)), 0), 0)), mins = mt(secs), omins = mt(opt);
     $('#tTime').innerHTML = `Estimated time: <b>approx. ${mins} minutes</b>${opt.length ? `, plus approx. ${omins} minutes for the optional section${opt.length > 1 ? 's' : ''}` : ''}${mins > 40 && T1.where !== 'class' ? ' (consider splitting it across two evenings)' : ''}.`;
     $('#tPrompt').value = teacherPrompt(T1, mins, omins);
-    $('#tFiles').innerHTML = parts.includes('review') ? [...secs, ...opt].map(s => { const ch = secOf(s), tot = CHDATA[s].review.reduce((a, q) => a + qMarks(q), 0); return `<div class="filerow"><b>Chapter ${ch.n} ${ch.part} worksheet · ${tot} marks${opt.includes(s) ? ' (optional)' : ''}</b><button type="button" class="mini" data-file="${s}:blank">1. Blank template</button><button type="button" class="mini" data-file="${s}:key">${unlocked() ? '' : '🔒 '}2. Answer key</button><button type="button" class="mini" data-file="${s}:scheme">${unlocked() ? '' : '🔒 '}3. Marking scheme</button></div>`; }).join('') : '<p class="scaleNote">Tick "Check questions + worksheet" in step 2 to get worksheet files. The other parts have no worksheet.</p>';
-    $('#tAllSchemes').value = unlocked() ? [...secs, ...opt].map(schemeText).join('\n\n') : 'Unlock with the teacher code to see the marking schemes.';
+    $('#tFiles').innerHTML = parts.includes('review') ? [...secs, ...opt].map(s => { const ch = secOf(s), tot = CHDATA[s].review.reduce((a, q) => a + qMarks(q), 0); return `<div class="filerow"><b>Chapter ${ch.n} ${ch.part} worksheet · ${tot} marks${opt.includes(s) ? ' (optional)' : ''}</b><button type="button" class="mini" data-file="${s}:blank">Blank template</button><button type="button" class="mini" data-file="${s}:key">${unlocked() ? '' : '🔒 '}Answer key</button><button type="button" class="mini" data-file="${s}:scheme">${unlocked() ? '' : '🔒 '}Marking scheme</button></div>`; }).join('') : '<p class="scaleNote">Tick "Check questions + worksheet" in step 2 to get worksheet files. The other parts have no worksheet.</p>';
+    const aiIds = [...secs, ...opt];
+    if (!parts.includes('review') || !aiIds.length) $('#tAiBox').innerHTML = '<p class="scaleNote">Tick "Check questions + worksheet" in step 2 to get the AI feedback instructions.</p>';
+    else if (!unlocked()) $('#tAiBox').innerHTML = '<p class="scaleNote">🔒 The AI feedback instructions contain the answer key and need the teacher code.</p><button type="button" class="mini" id="tAiUnlock">🔒 Unlock</button>';
+    else {
+      const txt = aiFeedbackText(secs, opt), n = txt.length;
+      if (!$('#tAi') || $('#tAi').value !== txt) $('#tAiBox').innerHTML = `<textarea id="tAi" readonly></textarea><div class="row"><button type="button" class="go" id="tAiCopy">Copy AI feedback instructions</button><span class="scaleNote" id="tAiCount"></span><span class="scaleNote" id="tAiCopied"></span></div><p class="scaleNote" id="tAiLong" hidden>This is long. If Toddle cuts it off, set fewer sections in one task.</p>`, $('#tAi').value = txt;
+      $('#tAiCount').textContent = n.toLocaleString('en-GB') + ' characters'; $('#tAiLong').hidden = n <= 10000;
+    }
   };
   $('#vTeacher').oninput = update; $('#vTeacher').onchange = update;
   $('#vTeacher').onclick = e => {
     const f = e.target.closest('[data-file]'); if (f) { const [s, m] = f.dataset.file.split(':'); openSheet(s, m); return; }
     if (e.target.id === 'tCopy') { const t = $('#tPrompt'); try { navigator.clipboard.writeText(t.value).then(() => $('#tCopied').textContent = 'Copied!', () => { t.select(); $('#tCopied').textContent = 'Press Ctrl+C (or ⌘+C) to copy.'; }); } catch (err) { t.select(); $('#tCopied').textContent = 'Press Ctrl+C (or ⌘+C) to copy.'; } }
-    if (e.target.id === 'tUnlock') askCode(ok => { if (ok) { closeModal(); renderTeacher(); } });
+    if (e.target.id === 'tAiCopy') { const t = $('#tAi'); try { navigator.clipboard.writeText(t.value).then(() => $('#tAiCopied').textContent = 'Copied!', () => { t.select(); $('#tAiCopied').textContent = 'Press Ctrl+C (or ⌘+C) to copy.'; }); } catch (err) { t.select(); $('#tAiCopied').textContent = 'Press Ctrl+C (or ⌘+C) to copy.'; } }
+    if (e.target.id === 'tUnlock' || e.target.id === 'tAiUnlock') askCode(ok => { if (ok) { closeModal(); renderTeacher(); } });
     if (e.target.id === 'tLock') { DB.unlocked = false; saveDB(); renderTeacher(); }
   };
   update();
@@ -66,7 +75,11 @@ function teacherPrompt(T1, mins, omins) {
   L.push(''); L.push('Learning goals:'); all.forEach(c => L.push(`- ${nm(c)}: ${CHDATA[c.id].goal}`));
   L.push(''); L.push('Key vocabulary: ' + [...new Set(all.flatMap(c => CHDATA[c.id].vocab))].join(', ') + '.');
   L.push(''); L.push('Teacher-only notes: g = 9.8 N/kg is used throughout. Answer keys are locked inside the simulation with a teacher code.');
-  if (parts.includes('review')) { L.push(''); L.push('AI marking: For each worksheet, I am attaching three teacher-only PDFs: (1) the blank template, (2) the answer key with model answers, and (3) the marking scheme. Students must not see the answer keys or marking schemes. Each worksheet starts with "Steps completed in the sim": students are expected to complete these steps before answering the questions, and a blue tick means the sim recorded that step as done. The ticks are not marked, but mention any skipped steps in the feedback. Mark only what each student added to the template (their work is printed in blue). Mark each worksheet separately. An optional worksheet that wasn\'t submitted is not a missing piece of work.');
+  if (parts.includes('review')) {
+    const st = taskStrands(all.map(c => c.id)), crit = k => { const l = st.filter(x => x[0] === k); return l.length ? `Criterion ${k} (strands ${l.map(strandLabel).join(', ')})` : ''; };
+    L.push(''); L.push(`MYP objectives: please attach these MYP Year 3 Sciences objectives to the task: ${['A', 'D'].map(crit).filter(Boolean).join(' and ')}.`);
+    L.push('AI marking: I will paste the AI feedback instructions, which include a written answer key, into the AI feedback settings separately. Students must never see them.');
+    L.push(''); L.push('Marks for each worksheet:');
     all.forEach(c => L.push(`- ${nm(c)} worksheet${opt.includes(c) && req.length ? ' (optional)' : ''}: ${CHDATA[c.id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); }
   return L.join('\n');
 }

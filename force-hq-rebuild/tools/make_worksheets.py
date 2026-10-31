@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render the Toddle files for every worksheet: one folder per sheet with blank template, answer key and marking scheme PDFs."""
+"""Render the Toddle files for every worksheet: one folder per sheet with blank template, answer key and marking scheme PDFs (answer key and scheme carry the MYP strands; the blank template does not), plus the AI feedback text for each sheet."""
 import asyncio, os, shutil, zipfile
 from playwright.async_api import async_playwright
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__))); DIST=os.path.join(ROOT,'dist'); OUT=os.path.join(DIST,'toddle-files')
@@ -21,8 +21,9 @@ async def main():
         out=os.path.join(d,fn); await p2.pdf(path=out,format='A4',print_background=True,margin={'top':'12mm','bottom':'12mm','left':'12mm','right':'12mm'}); await p2.close()
         if fn.startswith('2'): allkeys.append(out)
       schemes.append(await pg.evaluate(f"()=>__fhq.schemeText('{ch}')"))
+      open(os.path.join(d,'AI-feedback-instructions.txt'),'w').write(await pg.evaluate(f"()=>__fhq.ev(\"aiFeedbackText(['{ch}'],[])\")"))
     open(os.path.join(OUT,'All-marking-schemes.txt'),'w').write('\n\n'.join(schemes))
-    open(os.path.join(OUT,'READ ME.txt'),'w').write('Force HQ: files for Toddle\n\nThere is one folder for each worksheet. When you set a worksheet in Toddle, attach all three files from its folder to the AI task maker together with the prompt from the sim\'s teacher page:\n1. Blank template: what the worksheet looks like before a student fills it in.\n2. Answer key: model answers for every question (teachers only).\n3. Marking scheme: how Toddle should mark and give feedback (teachers only).\n\nTeacher code inside the sim: FORCE\n')
+    open(os.path.join(OUT,'READ ME.txt'),'w').write('Force HQ: files for Toddle\n\nToddle\'s AI feedback can\'t take attachments. Use the teacher page in the sim: step 5 gives the text to paste into the AI feedback box (it includes a written answer key and the MYP levels). Each folder here also has AI-feedback-instructions.txt for a single worksheet.\n\nThe PDFs are optional copies for your own records:\n1. Blank template: what the worksheet looks like before a student fills it in.\n2. Answer key: model answers for every question, with MYP strands (teachers only).\n3. Marking scheme: how to mark, with MYP strands (teachers only).\n\nTeacher code inside the sim: FORCE\n')
   zp=os.path.join(DIST,'Force-HQ-Toddle-files.zip')
   with zipfile.ZipFile(zp,'w',zipfile.ZIP_DEFLATED) as z:
     for r,_,fs in os.walk(OUT):
