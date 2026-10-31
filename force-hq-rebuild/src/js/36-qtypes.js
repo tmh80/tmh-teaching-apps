@@ -46,6 +46,62 @@ QT.order = {
   model(q) { return q.items.map((t, k) => `${k + 1}. ${t}`).join('<br>'); }
 };
 
+/* ---------- calcorder: work out a value for each item, then put the items in order ("Work it out, then order") ----------
+   {id, type:'calcorder', p, mass, given:'g (N/kg)', calc:'Weight of the crate (N)', unit:'N', tol:0.5, col0:'World',
+    items:[[name, given value], ...] in the CORRECT order (lowest first), first, last, after, f:(given, mass) => value (optional: the default is mass × given)}
+   One table (item, given value, a box for the calculated value), then the order cards, then one Check button. One go.
+   5 marks. Sums, 3 marks: all right = 3; at least two thirds right = 2; at least a third right = 1; else 0 (six items: 6 = 3, 4 or 5 = 2, 2 or 3 = 1).
+   Order, 2 marks: the `order` rule, or 2 if the order matches the student's OWN typed values (error carried forward: one wrong sum does not cost the order marks too).
+   The rows and the cards start in the same seeded shuffle that `order` uses (orderPerm), so the paper worksheet matches the sim. */
+Object.assign(QLABEL, { calcorder: 'Work it out, then order' });
+const coVal = (q, i) => q.f ? q.f(q.items[i][1], q.mass) : q.mass * q.items[i][1];
+function coOwnOrderOk(q, vals, ord) {   // does the card order follow the student's own numbers (lowest first)? Needs a number in every box, and not all the same.
+  const n = vals.map(parseNum); if (n.some(isNaN) || Math.max(...n) === Math.min(...n)) return false;
+  return ord.every((it, k) => k === 0 || n[ord[k - 1]] <= n[it]);
+}
+function coScore(q, vals, ord) {
+  const n = q.items.length, right = q.items.map((_, i) => { const x = parseNum(vals[i]); return !isNaN(x) && near(x, coVal(q, i), q.tol != null ? q.tol : 0.5); });
+  const r = right.filter(Boolean).length, calc = r === n ? 3 : r >= n * 2 / 3 ? 2 : r >= n / 3 ? 1 : 0;
+  const strict = orderScore(ord), own = coOwnOrderOk(q, vals, ord), order = Math.max(strict, own ? 2 : 0);
+  return { right, r, calc, strict, own, order, total: calc + order };
+}
+QT.calcorder = {
+  html(q, s) {
+    const perm = orderPerm(q), v = s && s.v && Array.isArray(s.v.ord) ? s.v : { vals: [], ord: perm };
+    return `<div class="cotbl"><table class="tbl"><tr><th>${q.col0 || 'Item'}</th><th>${q.given}</th><th>${q.calc}</th></tr>${perm.map(it => `<tr data-it="${it}"><th>${q.items[it][0]}</th><td>${q.items[it][1]}</td><td><input class="coin" inputmode="decimal" autocomplete="off" aria-label="${esc(q.calc + ' for ' + plain(q.items[it][0]))}" data-it="${it}" value="${esc(v.vals[it] == null ? '' : v.vals[it])}"><span class="unit">${q.unit || ''}</span></td></tr>`).join('')}</table></div>
+      ${q.first ? `<div class="ordend"><b>First</b> ${q.first}</div>` : ''}<ol class="orderlist">${v.ord.map((it, pos) => `<li class="ordcard" data-it="${it}"><span class="ordn">${pos + 1}</span><span class="ordt">${q.items[it][0]}</span><span class="ordbtns"><button type="button" class="ordb" data-mv="-1" aria-label="Move up: ${esc(plain(q.items[it][0]))}">▲</button><button type="button" class="ordb" data-mv="1" aria-label="Move down: ${esc(plain(q.items[it][0]))}">▼</button></span></li>`).join('')}</ol>${q.last ? `<div class="ordend"><b>Last</b> ${q.last}</div>` : ''}<button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`;
+  },
+  bind(el, q, api) {
+    const list = $('.orderlist', el), readOrd = () => $$('.ordcard', list).map(c => +c.dataset.it), readVals = () => { const a = []; $$('.coin', el).forEach(i => { a[+i.dataset.it] = i.value; }); return a; };
+    const save = () => { if (api.locked()) return; const cur = api.state() || {}; cur.v = { vals: readVals(), ord: readOrd() }; api.setRaw(cur); };
+    $$('.coin', el).forEach(i => i.addEventListener('input', save));
+    list.addEventListener('click', e => {
+      const b = e.target.closest('.ordb'); if (!b || api.locked()) return;
+      const card = b.closest('.ordcard'), dir = +b.dataset.mv, sib = dir < 0 ? card.previousElementSibling : card.nextElementSibling; if (!sib) return;
+      if (dir < 0) list.insertBefore(card, sib); else list.insertBefore(sib, card);
+      $$('.ordcard', list).forEach((c, i) => { $('.ordn', c).textContent = i + 1; });
+      save(); b.focus();
+    });
+    $('.qchk', el).addEventListener('click', () => {
+      if (api.locked()) return; const vals = readVals(), ord = readOrd();
+      if (q.items.some((_, i) => isNaN(parseNum(vals[i])))) { api.say('Type a number in every box first. If you are not sure, give your best answer.', 'no'); return; }
+      const sc = coScore(q, vals, ord), n = q.items.length, ok = sc.total === 5;
+      const part1 = sc.r === n ? 'All the calculations are right.' : `${sc.r} of ${n} calculations were right. The right values are shown in green.`;
+      const part2 = sc.strict === 2 ? 'The order is right.' : sc.own ? 'Your order matches your own values, so you keep the order marks. Check the sums that were wrong.' : sc.strict === 1 ? 'Close! Two neighbours in the order are the wrong way round.' : 'The order wasn\'t right. The correct order is shown below.';
+      api.answer({ vals, ord }, ok, (ok ? (q.ok || 'Every value and the order are right!') : 'Whoops! ' + part1 + ' ' + part2) + afterTxt(q), { score: sc.total });
+    });
+  },
+  lock(el, q, s) {
+    const v = s.v || { vals: [], ord: [] }, sc = coScore(q, v.vals || [], v.ord || []);
+    $$('.coin', el).forEach(i => { const it = +i.dataset.it, ok = sc.right[it]; i.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr($('.unit', i.parentElement), fmt(coVal(q, it), 2) + ' ' + (q.unit || '')); });
+    $$('.ordcard', el).forEach((c, pos) => { const it = +c.dataset.it, ok = it === pos; c.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr($('.ordt', c), 'goes ' + ORD(it + 1)); });
+    if (!$('.corrorder', el)) { const d = document.createElement('div'); d.className = 'corrorder gl'; d.innerHTML = `<b>Correct order${q.first ? ' (' + q.first.toLowerCase() + ' first)' : ''}:</b> ${q.items.map(x => x[0]).join(', ')}`; $('.orderlist', el).after(d); }
+    lockInputs(el);
+  },
+  show(q, v) { return v && Array.isArray(v.ord) ? q.items.map((x, i) => `${plain(x[0])}: ${esc(v.vals[i] == null ? '' : v.vals[i])} ${q.unit || ''}`).join('<br>') + '<br><b>Order:</b> ' + v.ord.map(i => plain(q.items[i][0])).join(', ') : ''; },
+  model(q) { return q.items.map((x, i) => `${plain(x[0])}: ${fmt(coVal(q, i), 2)} ${q.unit || ''}`).join('<br>') + '<br><b>Order:</b> ' + q.items.map(x => plain(x[0])).join(', '); }
+};
+
 /* ---------- pick: choose the words from drop-downs inside a sentence ----------
    {id, type:'pick', p:'As it speeds up, air resistance {0}. Its weight {1}.', picks:[[['gets bigger','stays the same','gets smaller'], 0], [[...], 1]], after, sure}
    1 mark per drop-down. Ordered scales keep their natural order (they are not shuffled). */

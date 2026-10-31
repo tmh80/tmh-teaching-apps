@@ -776,3 +776,12 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 .nudge.lf{flex-wrap:wrap}
 .example.fact{border-style:solid;border-color:var(--hazard);background:var(--hazard-soft)}
 .example.fact p{margin:4px 0 0}
+/* calcorder: Work it out, then order */
+.cotbl{overflow-x:auto;margin-bottom:6px}
+.cotbl table{width:100%}
+.cotbl td{white-space:nowrap}
+.coin{font:inherit;font-family:var(--f-num);font-size:17px;padding:5px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);width:96px;margin-right:6px}
+input.coin.right{border-color:var(--good)!important;background:var(--okbg)} input.coin.wrong{border-color:var(--bad)!important;background:var(--nobg);text-decoration:line-through}
+.cotbl .unit{font-family:var(--f-num);font-weight:700}
+.corrorder{margin-top:6px;font-size:15px}
+.gtbl{margin-top:8px;width:100%}

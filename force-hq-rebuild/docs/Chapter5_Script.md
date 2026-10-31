@@ -65,7 +65,7 @@ Run `python3 tools/dropzone_model.py` for every terminal velocity on every world
 - **Readouts per lane:** Height (m), Velocity (m/s, downwards), Acceleration (m/s²), Time (s).
 - **Live free-body diagram beside each falling object** (`dfbd`): weight down and air resistance up (`FTYPES.airres`), drawn from the centre of the real object (crate, skydiver with or without canopy, ball, feather), values in newtons, plus a dashed resultant arrow with its value. Scale each lane so its weight arrow is about 56 px long. Just after a canopy opens, air resistance can reach about 7 times the weight: cap the arrow at 4 times the weight length, with a zig-zag break, and keep the true value on the label. Weights below 1 N show 3 decimal places (the feather: 0.020 N).
 - **Pause tools** (`dpause`): a big **⏸ Pause** button right beside **Drop!** (it becomes **▶ Play**; Spacebar does the same), step buttons **◀ 0.5 s** and **0.5 s ▶** that move through the stored history while paused, a banner "Paused at 6.4 s" across the arena, and **📸 Snapshot**. A snapshot saves to the Journal's Runs tab with a picture of the arena at that moment (tap it to expand it; added 29 Oct at Tom's request, the newest 20 pictures are kept), a sentence and chips: "At 6.4 s the crate was 289 m up and falling at 33.9 m/s. Weight 392 N, air resistance 311 N." Store in `DB.dz.snaps` (latest 50) with run id, lane, object, world, air %, canopy and its state, t, y, v, a, W, D, R.
-- **Landing:** the run ends at the ground. Landing messages are friendly and never show injuries: under 7 m/s "Soft landing!"; 7 to 15 m/s "Bump! A bit fast."; over 15 m/s "Thud! Far too fast for a safe landing." (the skydiver rolls in a puff of dust; the crate bounces). The Jupiter platform works the same way.
+- **Landing:** the run ends at the ground. The label after landing never uses fixed cut-offs (Nov 2026 update, `dzVerdict`). In the Challenge it judges the landing with the mission's own objectives, on the rounded numbers on screen: green "✓ On target! Landed at 16.2 m/s (target: slower than 20 m/s)", red "✗ Too fast for this delivery: 23.4 m/s (target: …)", or yellow "Landed gently, but took 135 s (target: within 120 s)". In Learn and Explore it is neutral: "Landed at 38.0 m/s" (the skydiver also gets "a safe landing for a person is under 7 m/s") (the skydiver rolls in a puff of dust; the crate bounces). The Jupiter platform works the same way.
 - **Runs:** every drop is a run (`runMark`/`runTick`/`runEnd`). `runText`: "You dropped the 40 kg crate from 600 m on Earth (all the air). It sped up to a terminal velocity of 38.0 m/s and landed after 18.5 s." With a canopy: "… You opened the medium canopy at 812 m. The skydiver slowed to 6.0 m/s and landed after 151 s." `runChips`: world, object, canopy, height, air removed, top velocity, landing velocity, time. Store per run: object, world, air, height, canopy, open time and height, top velocity, terminal reached (yes/no), landing velocity, time, plus the history for graphs. Helpers in the Chapter 5 module, like Chapter 4's: `dzRun(f)` (latest run matching a filter object), `dzTop(f)`, `dzLand(f)`, `dzTime(f)`, `dzSnap(f, test)`.
 - **Masks:** the same pattern as `spaceMasked`/`sledMasked` (`dzMasked`). Steps list `mask: [{ q, keys, when(lane) }]`; keys can be `fbdR` (resultant label), `fbdW` (weight label), `readV`, `heliW`.
 - **Explore:** the Drop Zone and the helicopter pad are both in Explore with every control. Add the Drop Zone panels to `EXPLORE_HIDE` only where they would confuse (none expected).
@@ -374,7 +374,7 @@ q2 | num | A skydiver has a mass of 75 kg. What is their weight on Mars, where g
 q3 | pick | On Venus, the crate's terminal velocity was {0} its terminal velocity on Earth, because the air on Venus is {1}.
    {0}: much higher than / about the same as / much lower than → much lower than
    {1}: much thinner / about the same / much thicker → much thicker
-q4 | fix | Ana works out the weight of a 40 kg crate on the Moon. Spot her mistake. Tap it, then correct it.
+q4 | fix | Ana works out the weight of a 40 kg crate on the Moon. On the Moon, g = 1.6 N/kg. Spot her mistake. Tap it, then correct it.
    lines: 1. Weight = mass × g · 2. Weight = 40 × 9.8 · 3. Weight = 392 N
    mistake: line 2
    fix (num): answer 64 | unit N | units picker | tolerance 0.5
@@ -448,13 +448,14 @@ c5r9 | reason | sure: true | An astronaut on the Moon drops a hammer and a feath
    correct reason 0
    why: On the Moon there's no air resistance. Every kilogram is pulled with 1.6 N, so every object speeds up at the same rate. Astronaut David Scott did exactly this on Apollo 15 in 1971.
 
-c5r10 | sketch | A crate is dropped on the Moon. Sketch its velocity for the first 10 seconds.
+c5r10 | sketch | A crate is dropped on the Moon. Sketch its velocity for the first 10 seconds. (On the Moon, g = 1.6 N/kg.)
    xLabel: Time (s), 0 to 9 · yLabel: Velocity downwards (m/s), 0 to 16 · cols 10 · levels 10 (each level 1.6 m/s)
    model: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
    checks: Starts at zero (p0 ≤ 0.5) · Speeds up all the way (every point higher than the one before) · Speeds up by the same amount every second (the biggest and smallest step differ by at most 1 level) · Never levels off (p9 − p8 ≥ 0.5)
    Look for: a straight line rising from zero, because with no air the resultant force is the weight all the way down.
 
-c5r11 | order | The same 40 kg crate sits on six worlds. Put them in order of the crate's weight, lowest first.
+c5r11 | calcorder (Work it out, then order) | The same 40 kg crate sits on six worlds. Use weight = mass × g to work out its weight on each world, then put the worlds in order of weight, lowest first.
+   given: g (N/kg) for each world: Titan 1.4 · the Moon 1.6 · Mars 3.7 · Venus 8.9 · Earth 9.8 · Jupiter 24.8. Students type the weight in N (accept ±0.5 N). 5 marks: 3 for the sums, 2 for the order (error carried forward).
    items (correct order): Titan · the Moon · Mars · Venus · Earth · Jupiter
    (weights: 56, 64, 148, 356, 392, 992 N)
 
