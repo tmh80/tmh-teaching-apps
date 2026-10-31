@@ -1,6 +1,7 @@
 """Chapter 5 (the Drop Zone): play Foundation (Learn d1-d4, Check c5r1-c5r7) with real clicks, as a Grade 7 student would.
 Run after build.py:  python3 tests/play_c5.py     Screenshots: /tmp/fhq-shots/c5/"""
-import json, pathlib, re, time
+import json, pathlib, re, sys, time
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from playwright.sync_api import sync_playwright
 F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/c5/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
 fails = []
@@ -183,5 +184,12 @@ with sync_playwright() as p:
     # worksheets
     for mode in ['student', 'blank', 'key']:
         html = pg.evaluate(f"__fhq.buildWorksheet('c5f','{mode}')"); chk(f'worksheet {mode}: seven questions', html.count('class="q"') == 7, html.count('class="q"'))
+    # ---- the direct PDF download (Chapter 5 Foundation: freeze-frame table, graph, order, explain) ----
+    from pdfcheck import download_check
+    r = download_check(pg, 'c5f', 'student', OUT + 'pdf/', 'c5f_student')
+    chk('download c5f: named after the chapter, part and student', r['filename'] == 'Force HQ Ch5 Foundation (Falling and terminal velocity) - Sam.pdf', r['filename'])
+    chk('download c5f: valid PDF, page count matches the print preview', r['pages'] >= 2 and r['pages'] == r['print_pages'], (r['pages'], r['print_pages']))
+    chk('download c5f: text layer has the name, the moments table and the tapped graph times', 'Sam' in r['text'] and 'Complete the table for three moments' in r['text'] and '16.9 s' in r['text'], r['text'][:200])
+    chk('download c5f: feedback page is its own page', 'Feedback page' in __import__('subprocess').run(['pdftotext', '-f', str(r['pages']), '-l', str(r['pages']), str(r['path']), '-'], capture_output=True, text=True).stdout)
     print('errors', errs); chk('no page errors', not errs, errs)
 print('ALL PASSED' if not fails else 'FAILED: ' + ', '.join(fails))

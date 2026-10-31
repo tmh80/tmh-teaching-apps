@@ -1,6 +1,7 @@
 """Chapter 5 Extension (the Drop Zone): play Learn p1-p3, the three Challenge missions and the Extension Check c5r8-c5r12 with real clicks.
 Run after build.py:  python3 tests/play_c5x.py     Screenshots: /tmp/fhq-shots/c5/ (names start with x_)"""
-import json, pathlib, re, time
+import json, pathlib, re, sys, time
+sys.path.insert(0, str(pathlib.Path(__file__).parent))
 from playwright.sync_api import sync_playwright
 F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/c5/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
 fails = []
@@ -162,5 +163,12 @@ with sync_playwright() as p:
     prog = json.loads(ev("JSON.stringify(reviewProgress('c5x'))")); chk('Check: all five answered', prog['done'] == prog['total'] == 5, prog)
     for mode in ['student', 'blank', 'key']:
         html = pg.evaluate(f"__fhq.buildWorksheet('c5x','{mode}')"); chk(f'worksheet {mode}: five questions', html.count('class="q"') == 5, html.count('class="q"'))
+    # ---- the direct PDF download (Chapter 5 Extension: sketch, calcorder, explain) ----
+    from pdfcheck import download_check
+    r = download_check(pg, 'c5x', 'student', OUT + 'pdf/', 'c5x_student')
+    chk('download: file is named after the chapter, part and student', r['filename'] == 'Force HQ Ch5 Extension (Falling and terminal velocity) - Sam.pdf', r['filename'])
+    chk('download: a valid PDF with pages', r['pages'] >= 2, r['pages']); chk('download: page count matches the print preview', r['pages'] == r['print_pages'], (r['pages'], r['print_pages']))
+    chk('download: invisible text layer has the student name and a typed answer', 'Sam' in r['text'] and '992' in r['text'] and 'Work it out, then order' in r['text'], r['text'][:300])
+    chk('download: the saved message names the file', 'Downloads' in r['msg'] and 'Sam.pdf' in r['msg'], r['msg'])
     print('errors', errs); chk('no page errors', not errs, errs)
 print('ALL PASSED' if not fails else 'FAILED: ' + ', '.join(fails))

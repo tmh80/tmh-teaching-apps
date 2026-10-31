@@ -168,13 +168,31 @@ function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [..
 /* ---------- preview + print ---------- */
 function openSheet(chId, mode) {
   if ((mode === 'key' || mode === 'scheme') && !unlocked()) { askCode(ok => { if (ok) { closeModal(); openSheet(chId, mode); } }, 'Answer keys and marking schemes are for teachers. Type the teacher code to open them.'); return; }
-  const html = mode === 'progress' ? progressHTML() : mode === 'scheme' ? `<div class="ws"><div class="page">${schemeHTML(chId)}</div></div>` : buildWorksheet(chId, mode);
+  const html = wsSheetHTML(chId, mode), student = mode === 'student', fname = wsFileName(chId, mode);
   const back = h('div', { class: 'modalback', style: 'z-index:75' });
-  back.innerHTML = `<div class="modal wide" style="max-width:860px"><div class="row" style="justify-content:space-between"><h2>${mode === 'blank' ? 'Blank worksheet' : mode === 'key' ? 'Answer key' : mode === 'scheme' ? 'Marking scheme' : mode === 'progress' ? 'My work so far' : 'My worksheet'}</h2><div class="row"><button type="button" class="go" id="wsPrint">🖨 Print or save as PDF</button><button type="button" class="ghost" id="wsClose">Close</button></div></div>
-    <p class="scaleNote">In the print window, choose <b>Save as PDF</b> as the printer, then upload the PDF to Toddle.</p><style>${WS_CSS}</style><div style="border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff;color:#13212a;max-height:70vh;overflow:auto">${html}</div></div>`;
+  back.innerHTML = `<div class="modal wide" style="max-width:860px"><div class="row" style="justify-content:space-between"><h2>${mode === 'blank' ? 'Blank worksheet' : mode === 'key' ? 'Answer key' : mode === 'scheme' ? 'Marking scheme' : mode === 'progress' ? 'My work so far' : 'My worksheet'}</h2><div class="row"><button type="button" class="go" id="wsDown">${student ? '⬇ Download my worksheet (PDF)' : '⬇ Download (PDF)'}</button><button type="button" class="ghost" id="wsClose">Close</button></div></div>
+    <div class="row" style="gap:10px;align-items:baseline;flex-wrap:wrap"><button type="button" class="mini" id="wsPrint">Use the print menu instead</button><span class="scaleNote" id="wsTip" hidden>In the print window, choose <b>Save as PDF</b> as the printer, then press Save.</span></div>
+    <p class="fb" id="wsMsg" role="status" aria-live="polite" hidden></p><style>${WS_CSS}</style><div style="border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff;color:#13212a;max-height:70vh;overflow:auto">${html}</div></div>`;
   document.body.appendChild(back);
+  const msg = (t, cls) => { const m = $('#wsMsg', back); m.hidden = !t; m.className = 'fb ' + (cls || ''); m.innerHTML = t || ''; };
   $('#wsClose', back).addEventListener('click', () => back.remove()); back.addEventListener('click', e => { if (e.target === back) back.remove(); });
-  $('#wsPrint', back).addEventListener('click', () => { const needName = (mode === 'student' || mode === 'progress') && !user().name && !isTeacher(); $('#printArea').innerHTML = `<style>${WS_CSS}</style>` + (needName ? '<div class="ws"><div class="noname">No name, no worksheet!<br><span style="font-size:14pt">Go back and type your name first.</span></div></div>' : html); try { window.print(); } catch (e) { toast('Printing is blocked here. Download the file and open it in a browser to print.'); } });
+  $('#wsPrint', back).addEventListener('click', () => {
+    $('#wsTip', back).hidden = false;
+    $('#printArea').innerHTML = `<style>${WS_CSS}</style>` + (wsNeedsName(mode) ? '<div class="ws"><div class="noname">No name, no worksheet!<br><span style="font-size:14pt">Go back and type your name first.</span></div></div>' : html);
+    try { printAs(fname); } catch (e) { toast('Printing is blocked here. Use the Download button instead.'); }
+  });
+  const down = $('#wsDown', back);
+  down.addEventListener('click', async () => {
+    if (down.disabled) return; down.disabled = true;
+    const ok = await downloadWorksheetPdf(chId, mode, {
+      busy: t => msg(t, 'hint'),
+      saved: n => msg(`Saved! Look in your <b>Downloads</b> folder for <i>${esc(n)}</i>, then upload it to Toddle. Can't find it? Use the print menu instead.`, 'ok'),
+      failed: () => msg('Sorry, the PDF could not be made on this device. Please use the print menu instead: press "Use the print menu instead" and choose Save as PDF.', 'no'),
+      declined: () => msg('', ''),
+      noName: () => msg('No name, no worksheet! Close this window and type your name first.', 'no')
+    }, html);
+    down.disabled = false;
+  });
 }
 function makeWorksheet(chId) {
   if (!user().name && !isTeacher()) { toast('Type your name first, so your teacher knows whose worksheet it is.'); askWho(false); return; }

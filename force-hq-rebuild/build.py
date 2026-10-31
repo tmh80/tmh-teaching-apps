@@ -9,12 +9,20 @@ for f in js_files:
     r = subprocess.run(['node', '--check', f], capture_output=True, text=True)
     if r.returncode: print(r.stderr); sys.exit(1)
 js = '\n'.join(open(f, encoding='utf-8').read() for f in js_files)
+# vendored libraries (see vendor/): inlined, each in its own <script>, before the app. No CDN links: the file stays fully offline.
+VENDOR = ['html2canvas.min.js', 'jspdf.umd.min.js']
+def vendor_js(name):
+    t = open(os.path.join(ROOT, 'vendor', name), encoding='utf-8').read()
+    t = '\n'.join(l for l in t.split('\n') if not l.startswith('//# sourceMappingURL='))   # no source map: nothing to fetch offline
+    if '</script' in t.lower(): print('vendor file would end the script block early:', name); sys.exit(1)
+    return t
+vendor_blocks = ''.join(f'<script>\n{vendor_js(n)}\n</script>\n' for n in VENDOR)
 css = S('fonts.css') + '\n' + S('tokens.css') + '\n' + S('app.css')
 head = '<title>Force HQ</title>\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
 def page(hook=False, full=True):
     hookjs = ('window.__fhq={get S(){return S},LAB,CHDATA,FBDB,setStep:(i)=>setStep(i),openChapter,setCTab,forces,staticForces,dbGet,dbSet,resetDB:()=>{DB={};saveDB()},get DB(){return DB},addPuller,renderReview,openSheet,buildWorksheet,schemeHTML,schemeText,teacherPrompt,progressHTML,openExplore,checkStep,qMarks,CHAPTERS,get GI(){return GI},calcEval,WS_CSS,user,ev:c=>eval(c)};' if hook else '')
     script = '(()=>{' + js + '\n' + hookjs + '\n})();'
-    body = f'<style>\n{css}\n</style>\n' + S('index.html') + f'\n<script>\n{script}\n</script>\n'
+    body = f'<style>\n{css}\n</style>\n' + S('index.html') + '\n' + vendor_blocks + f'<script>\n{script}\n</script>\n'
     if not full: return head.replace('<title>Force HQ</title>', '<title>Force HQ Rebuild</title>') + body
     return '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n' + head + '</head>\n<body>\n' + body + '</body>\n</html>\n'
 os.makedirs(os.path.join(ROOT, 'dist'), exist_ok=True)
