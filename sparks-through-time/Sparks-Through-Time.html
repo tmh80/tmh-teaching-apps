@@ -7363,7 +7363,7 @@ function renderTeacher(){
         h('div',{class:'card hw-col'}, h('h3',{}, '3. Details'), h('label',{for:grade.id}, 'Class: ', grade), h('div',{class:'ctrl'}, h('label',{}, 'Where will students do it?'), seg([['classwork','In class'],['homework','At home'],['either','Both']], saved.mode||'homework', v=>{ saved.mode = v; save(); }, 'Classwork or homework')), h('label',{for:note.id}, 'Message for students: '), note),
         h('div',{class:'card hw-col'}, h('div',{class:'row between'}, h('h3',{}, '4. Copy into Toddle'), h('span',{}, 'Time: ', mins)), out, h('div',{class:'row'}, copyBtn), h('p',{class:'legend'}, 'Paste this prompt into Toddle\u2019s AI task maker. Then paste the step 5 text into the task\u2019s AI feedback settings.')),
         h('div',{class:'card hw-col'}, h('h3',{}, '5. AI feedback instructions (paste into Toddle\u2019s AI feedback box)'), lockBox),
-        h('div',{class:'card hw-col'}, h('h3',{}, '6. Printable PDFs (optional)'), h('div',{class:'feedback hint hw-howto'}, h('span',{}, 'Optional: save these if you\u2019d like paper copies or a record. Toddle\u2019s AI uses the text in step 5, so nothing needs attaching. Each button opens a printable page with a download button. Keep the answer key and marking scheme teacher-only.')), filesBox)))));
+        h('div',{class:'card hw-col'}, h('h3',{}, '6. Printable PDFs (optional)'), h('div',{class:'feedback hint hw-howto'}, h('span',{}, 'Optional: save these if you\u2019d like paper copies or a record. Toddle\u2019s AI uses the text in step 5, so nothing needs attaching. Each button opens a printable page with a download button. Keep the answer key and marking scheme teacher-only.')), filesBox))));
   drawLock();
   gen();
 }
