@@ -25,6 +25,8 @@ Both load automatically in Claude Code.
 
 ## Still in the claude.ai project
 
+The project holds small text docs only (briefs, handoffs, scripts, specs). HTML files live here in the repo and are no longer copied into the project (1 Nov 2026), because the project has a size limit.
+
 Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Planet Dice, Tilt Lab worksheet notes) are still in the "Science Apps and Sims" project. They can be moved here into each app's `docs/` folder when that app is next worked on.
 
 ## Backlog

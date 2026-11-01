@@ -307,7 +307,7 @@ In claude.ai:
 - Publish/republish the Artifact at the same URL (online preview). Read the live artifact first in case it changed elsewhere.
 - Send `dist/<Name>-offline.html` with SendUserFile: this is the file Tom uploads to Toddle.
 - Send the Toddle files zip (one folder per sheet) and the merged answer-key PDF when questions, build tasks or schemes change.
-- Save the current source build to the project at `claude/<Name>.html`, replacing the previous copy. Don't keep multiple old offline copies in the project; it has a size limit.
+- Don't save HTML files to the claude.ai project: it has a size limit, and GitHub already keeps every version. Keep the project for small text docs (briefs, handoffs, scripts, specs) and update those when they change.
 - Tell Tom the teacher code (first word of the sim's name).
 
 In Claude Code:

@@ -8,7 +8,7 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
   - Chapter 2: inertia, Newton's first law, velocity–time graph, brake challenge.
   - Chapter 3: F = ma in the Snow Arena (huskies and sled), friction, formula triangle, delivery challenge.
   - Chapter 4: action and reaction in the Space Dome (pod, astronaut, tether, thrusters, force pairs), docking-orders challenge.
-- **Chapter 5 is built (28 Oct 2026, steps 1 to 6 of the script's section J).** Physics reference: `tools/dropzone_model.py` (the JS engine matches it, tested). New question types: `docs/Question_Types_Guide.md`. **Next: the Workshop, then Explore ("draw what's happening now").** Tom plays Chapter 5 in the morning of 29 Oct; fix what he finds first. See the Backlog.
+- **Chapter 5 is built (28 Oct 2026, steps 1 to 6 of the script's section J).** Physics reference: `tools/dropzone_model.py` (the JS engine matches it, tested). New question types: `docs/Question_Types_Guide.md`. **Next: the Workshop (Chapter 6), then Explore ("draw what's happening now").** The Workshop script is `claude/Force_HQ_Chapter6_Workshop_Script.md` in the claude.ai project, with its number model `claude/workshop_model.py` (written 1 Nov 2026; copy both into the repo as its section R step 1 says). Tom plays Chapter 5 in the morning of 29 Oct; fix what he finds first. See the Backlog.
 - **Chapter 5 progress (section J of the script):** all six steps are done (28 Oct). Steps 1 to 3: the `order`, `pick`, `reason`, `fix`, `freeze`, `spot` and `sketch` question types and the Drop Zone engine and scene. Step 4: Foundation `c5f`. Step 5: Extension `c5x` with the helicopter pad. Step 6: glossary, formulas, fun facts, Chapter 5 home card live, Explore Helicopter, worksheets, full tests. Decisions made unattended are logged in the Brief's Chapter 5 build log.
 - **Tom's latest feedback has all been actioned** (28 Oct, last commit `31d4a46`). He has not yet replayed everything after those fixes, so expect another round of review comments.
 
@@ -27,10 +27,10 @@ Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes)
   1. copy `dist/Force-HQ-offline.html` to `force-hq-rebuild/Force-HQ-Rebuild-offline.html`
   2. regenerate and copy the worksheets if wording or questions changed
   3. commit (with the attribution lines the session asks for), `git fetch`, rebase, push to `main`
-  4. `project_write` the offline file to `claude/Force-HQ-Rebuild.html`
-  5. republish the preview artifact
-  6. `SendUserFile` the offline file, and tell Tom which file to upload to Toddle
-  7. update the Brief, Backlog and this Handoff at the end of the session
+  4. republish the preview artifact
+  5. `SendUserFile` the offline file, and tell Tom which file to upload to Toddle
+  6. update the Brief, Backlog and this Handoff at the end of the session, in the repo and in the claude.ai project (`claude/Force_HQ_*.md`)
+  - Never save HTML to the claude.ai project (Tom, 1 Nov 2026): it has a size limit, and GitHub holds every version. The project keeps only small text docs.
 
 ## 2. Saving effort: porting from the old build
 - **Never Read `force-hq/Force-HQ.html` whole** (550 KB). Use `tools/old.py`: `list <word>`, then print named definitions (`python3 tools/old.py drawSled genQ`), or `grep <text>`.

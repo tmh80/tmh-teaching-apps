@@ -14,7 +14,7 @@
 |---|---|
 | `wab-science-sim-builder` skill | The house rules for every sim: shell, Review questions, worksheets, teacher page, Toddle AI marking, open builders, testing, delivery. This brief adds to it. |
 | `claude/Force-HQ.html` (project) | The current build. Reuse its arena engine, drawings, drag-and-drop pullers, free-body diagram, Journal and Workshop code (section 9 lists what to keep). Open it in Playwright and play through the Force Arenas and the Workshop before writing code. |
-| `claude/Sparks-Through-Time.html` (project) | The reference for the section → Review → worksheet flow, the teacher page and the Toddle files. Force HQ should feel like a sibling of it. |
+| `sparks-through-time/Sparks-Through-Time.html` (repo) | The reference for the section → Review → worksheet flow, the teacher page and the Toddle files. Force HQ should feel like a sibling of it. |
 | Project memory `preferences.md` | Tom's standing preferences for sims. All of them apply. |
 
 ---
