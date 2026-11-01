@@ -738,6 +738,11 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 .exsw{margin-bottom:6px} .exsw button{font-weight:800;font-size:14px;padding:7px 4px}
 .dzp .ctlh{flex-wrap:wrap} .dzp .numbox{margin-left:auto}
 #cvScene.dzscene{aspect-ratio:900/500}
+/* ===== Chapter 6: the Workshop ===== */
+#cvScene.shopscene{aspect-ratio:900/430}
+.wsctl{display:flex;flex-direction:column;gap:10px} .wsctl>div[hidden]{display:none}
+.stepper{display:flex;align-items:center;gap:14px;margin-top:4px} .stepper b{font-family:var(--f-num);font-size:24px;min-width:30px;text-align:center} .stepper .mini{min-width:44px;min-height:40px;font-size:20px;font-weight:800}
+.scenebar #wsPull{min-width:150px;font-size:19px}
 
 /* ===== freeze, spot and sketch questions (Chapter 5) ===== */
 .datacard{padding:14px;border:2.5px solid var(--accent);display:flex;flex-direction:column;gap:10px}
@@ -785,3 +790,21 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .cotbl .unit{font-family:var(--f-num);font-weight:700}
 .corrorder{margin-top:6px;font-size:15px}
 .gtbl{margin-top:8px;width:100%}
+
+/* ===== Chapter 6: the Rescue board and the transmission ===== */
+.rescueboard{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0;padding:0;overflow:hidden;margin-bottom:12px} .rescueboard[hidden]{display:none}
+#cvRescue{width:100%;aspect-ratio:520/190;display:block}
+.rbside{padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.rbhd h2{font-family:var(--f-display);font-size:22px;margin:0}
+.rbslots{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rbslots li{display:flex;gap:8px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:5px 8px;background:var(--chip);font-size:14px}
+.rbslots li small{display:block;color:var(--muted);font-size:12px}
+.rbslots li.on{border-color:var(--good);background:var(--okbg)} .rbslots li.soon{opacity:.6;border-style:dashed}
+.rbtick{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:800;font-family:var(--f-num)} .rbslots li.on .rbtick{background:var(--good);color:#fff}
+.rbnext{margin:2px 0;font-weight:700}
+@media (max-width:760px){.rescueboard{grid-template-columns:1fr}.rbslots{grid-template-columns:1fr}}
+.txmodal{max-width:480px} .txmodal .tx-head{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;cursor:grab;padding:2px 0} .txmodal.dragging .tx-head{cursor:grabbing}
+.txmodal.placed{position:fixed;margin:0}
+.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/170}
+.txlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.rlog{margin-top:6px;font-size:14px;font-weight:700;color:var(--muted)}

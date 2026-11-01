@@ -18,7 +18,7 @@ function openExplore() {
 const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
 const exploreSwitch = cur => `<div class="seg three exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button><button type="button" data-exscene="heli" aria-pressed="${cur === 'heli'}">Helicopter</button></div>`;
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initShop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
@@ -34,7 +34,7 @@ function init() {
     if (t.closest('[data-close]')) { closeModal(); return; }
     const a = t.closest('[data-act]'); if (a) { const k = a.dataset.act;
       if (!$('#modal').hidden && (k === 'explore' || k === 'explore-anyway')) closeModal();
-      if (k === 'home') { parkLab(); show('vHome'); } else if (k === 'explore') openExplore(); else if (k === 'explore-anyway') { dbSet('exploreAnyway', true); openExplore(); } else if (k === 'who') askWho(false);
+      if (k === 'home') { parkLab(); show('vHome'); } else if (k === 'explore') openExplore(); else if (k === 'explore-anyway') { dbSet('exploreAnyway', true); openExplore(); } else if (k === 'who') askWho(false); else if (k === 'transmission') openTransmission();
       else if (k === 'student') { DB.user = {}; saveDB(); refreshWho(); renderHome(); askWho(true); } return; }
     if (t.closest('#homeBtn')) { hideCards(); closeDesk(); parkLab(); show('vHome'); return; }
     if (t.closest('#teacherBtn')) { parkLab(); show('vTeacher'); renderTeacher(); return; }

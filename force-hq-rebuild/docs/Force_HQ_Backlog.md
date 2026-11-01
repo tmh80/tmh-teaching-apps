@@ -17,7 +17,7 @@
      - **Compare drops side by side**: two lanes, each with its own planet, object and air setting, so students can race them (for example the same crate on Earth and the Moon, or with and without air).
    - **Observation and question variety (Tom, 28 Oct):** live FBD next to the drop, an obvious Pause button so students can check the forces at a chosen moment, questions on the trends in the arrow sizes, and a wider range of question types. Plan: `docs/Question_Types_Guide.md`.
    - **Drag model (explained to Tom 28 Oct, he has not objected):** weight = m × g pulls down. Air resistance pushes up, starts at zero and grows with velocity squared, with the area facing the air, and with how thick the air is. When air resistance equals the weight the forces are balanced and the object falls at a steady terminal velocity. Students never calculate drag: they watch the arrows, read velocities and type them in.
-6. **Workshop.** Machine sections in this order: pulleys and mechanical advantage first, then levers, wheel and axle, ramps, wedges and screws, compound machines, and an efficiency extension. Add a machine builder with build tasks.
+6. **Workshop (Chapter 6).** Stage 1 is done (1 Nov 2026): Part 1 plus the story frame. Next stages follow section R of `docs/Chapter6_Workshop_Script.md`. Original plan: machine sections in this order: pulleys and mechanical advantage first, then levers, wheel and axle, ramps, wedges and screws, compound machines, and an efficiency extension. Add a machine builder with build tasks.
 7. **Explore.** "Draw what's happening now", which checks a student's FBD against the live forces.
 
 ## Banked ideas

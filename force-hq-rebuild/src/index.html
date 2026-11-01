@@ -55,6 +55,7 @@
         <button type="button" role="tab" data-ctab="review">3 · Review</button>
       </div>
     </div>
+    <div class="panel rescueboard" id="rescueBoard" hidden></div>
     <div class="onpage" id="onPage"></div>
     <div id="learnHost"></div>
     <div id="challengeHost" hidden></div>
@@ -134,6 +135,26 @@
           <p class="bmnote" id="liftNote" hidden></p>
           <div class="nudge lf"><button type="button" class="mini" data-lf="-100">−100</button><button type="button" class="mini" data-lf="-10">−10</button><button type="button" class="mini" data-lf="-1">−1</button><button type="button" class="mini" data-lf="1">+1</button><button type="button" class="mini" data-lf="10">+10</button><button type="button" class="mini" data-lf="100">+100</button></div>
           <p class="palhint">Too fast? Lower the lift a little to slow down, then match it to the weight.</p></div>
+        <!-- Chapter 6: the Workshop controls (shown only when S.scene = 'shop') -->
+        <div data-panel="wsmach"><div class="ctlh"><h3>Machine</h3></div><div class="seg two" id="wsMachs"></div></div>
+        <div data-panel="wsload"><div class="ctlh"><h3>Load</h3></div><div class="seg two" id="wsLoads"></div></div>
+        <div class="wsctl" data-panel="wsctl">
+          <div id="wsClsRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lever">Lever class</button></h3></div><div class="seg three" id="wsCls"></div></div>
+          <div data-wsm="lever"><div class="ctlh"><h3 id="wsArmTitle">Load arm</h3><span class="numbox"><input type="number" id="wsArmNum" min="0.2" max="1.8" step="0.05" value="1" inputmode="decimal" aria-label="Arm length in metres: type a number"><span>m</span></span></div>
+            <input type="range" id="wsArm" min="0.2" max="1.8" step="0.05" value="1" aria-label="Arm length in metres"><p class="palhint" id="wsArmNote"></p></div>
+          <div data-wsm="pulley"><div class="ctlh"><h3><button type="button" class="term tl" data-t="supporting">Supporting ropes</button></h3></div>
+            <div class="stepper"><button type="button" class="mini" id="wsRopesDn" aria-label="One fewer supporting rope">−</button><b id="wsRopesN">1</b><button type="button" class="mini" id="wsRopesUp" aria-label="One more supporting rope">+</button></div></div>
+          <div data-wsm="pulley" id="wsLiftRow"><div class="ctlh"><h3>Lift height</h3></div><div class="seg two" id="wsLift"></div></div>
+          <div data-wsm="winch"><div class="ctlh"><h3>Handle radius</h3><span class="numbox"><input type="number" id="wsRNum" min="0.1" max="0.6" step="0.05" value="0.1" inputmode="decimal" aria-label="Handle radius in metres: type a number"><span>m</span></span></div>
+            <input type="range" id="wsR" min="0.1" max="0.6" step="0.05" value="0.1" aria-label="Handle radius in metres"></div>
+          <div data-wsm="winch" id="wsAxleRow"><div class="ctlh"><h3>Axle radius</h3><span class="numbox"><input type="number" id="wsAxleNum" min="0.04" max="0.1" step="0.01" value="0.05" inputmode="decimal" aria-label="Axle radius in metres: type a number"><span>m</span></span></div></div>
+          <div data-wsm="ramp"><div class="ctlh"><h3>Ramp length</h3><span class="numbox"><input type="number" id="wsLNum" min="1" max="6" step="0.5" value="2" inputmode="decimal" aria-label="Ramp length in metres: type a number"><span>m</span></span></div>
+            <input type="range" id="wsL" min="1" max="6" step="0.5" value="2" aria-label="Ramp length in metres"></div>
+          <div data-wsm="ramp" id="wsHRow"><div class="ctlh"><h3>Ramp height</h3></div><div class="seg" id="wsH"></div></div>
+          <div data-wsm="wedge"><div class="ctlh"><h3>Wedge thickness</h3></div><div class="seg" id="wsThick"></div></div>
+          <div data-wsm="screw"><div class="ctlh"><h3>Distance per turn</h3></div><div class="seg three" id="wsPer"></div>
+            <div class="ctlh" style="margin-top:8px"><h3><button type="button" class="term tl" data-t="pitch">Pitch</button></h3></div><div class="seg three" id="wsPitch"></div><p class="palhint" id="wsTurnNote"></p></div>
+        </div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -143,13 +164,14 @@
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
           <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
           <button class="go" id="dzDrop" type="button" data-panel="drop">Drop!</button>
+          <button class="go" id="wsPull" type="button" data-panel="wspull">Pull!</button>
           <button class="ghost dzpause" id="dzPause" type="button" data-panel="dpause" aria-pressed="false">⏸ Pause</button>
           <button class="ghost" id="dzOpen" type="button" data-panel="dcanopy">Open canopy!</button>
           <button class="ghost sm" id="dzBack" type="button" data-panel="dpause">◀ 0.5 s</button>
           <button class="ghost sm" id="dzFwd" type="button" data-panel="dpause">0.5 s ▶</button>
           <button class="ghost sm" id="dzSnap" type="button" data-panel="dpause">📸 Snapshot</button>
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift">Reset</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift wspull">Reset</button>
         </div>
         <section class="panel datacard" id="dataCard" aria-label="Collect your data" hidden></section>
         <div class="underrow">

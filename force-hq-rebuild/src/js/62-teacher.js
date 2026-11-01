@@ -7,7 +7,7 @@ function renderTeacher() {
   $('#vTeacher').innerHTML = `<div class="tpage"><div class="chhead"><div><span class="lbl">For teachers</span><h1>Set classwork or homework</h1></div><button type="button" class="ghost" data-act="home">← Back to the home page</button></div>
     <section class="panel tsec"><h2>1. Choose the sections</h2><p class="scaleNote">Every section takes approx. 20–30 minutes and makes its own worksheet. Tick one for a short task, or several for a longer session. Mark a section as optional to let keen students carry on into it.</p>
       ${SECTIONS.map(c => `<div class="row" style="justify-content:space-between;border-bottom:1px dashed var(--line);padding:4px 0"><label><input type="checkbox" data-sec="${c.id}" ${T0.secs.includes(c.id) || T0.opt.includes(c.id) ? 'checked' : ''}> <span><b>Chapter ${c.n} ${c.part}</b>: ${c.title} · about ${secMins(c.id).total} min</span></label><label><input type="checkbox" data-opt="${c.id}" ${T0.opt.includes(c.id) ? 'checked' : ''}> Optional</label></div>`).join('')}
-      <p class="scaleNote">More chapters, and the Workshop, will appear here as they are added.</p></section>
+      <p class="scaleNote">Any new chapters will appear here as they are added.</p></section>
     <section class="panel tsec"><h2>2. What should students do?</h2>${TPARTS.map(([k, n]) => `<label><input type="checkbox" data-part="${k}" ${T0.parts.includes(k) ? 'checked' : ''}> ${n}</label>`).join('')}</section>
     <section class="panel tsec"><h2>3. Details</h2><label style="flex-direction:column;gap:4px">Class<input type="text" id="tCls" value="${esc(T0.cls)}" placeholder="for example 7/8B" style="font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;max-width:240px;background:var(--panel);color:var(--ink)"></label>
       <div class="row"><b>Where:</b>${[['class', 'In class'], ['home', 'At home'], ['both', 'Both']].map(([k, n]) => `<label><input type="radio" name="tWhere" value="${k}" ${T0.where === k ? 'checked' : ''}> ${n}</label>`).join('')}</div>
@@ -59,7 +59,7 @@ function teacherPrompt(T1, mins, omins) {
   L.push(`Estimated time: approx. ${mins || omins} minutes, ${where}.${opt.length && req.length ? ` There is also an optional extra section of approx. ${omins} minutes for students who want to go further.` : ''}`);
   L.push(''); L.push('About the resource: Force HQ is a self-contained simulation. Students open the HTML file in a browser, type their name and class, then work through guided steps in the Force Arenas. Every section makes its own worksheet PDF. Progress saves in the browser, so students should use the same device and browser each time.');
   if (T1.msg) { L.push(''); L.push(`Message from the teacher: ${T1.msg}`); }
-  const steps = (c, start) => { let n = start; const out = [`${n++}. On the home page, find Chapter ${c.n} and press "Start the ${c.part}".`];
+  const steps = (c, start) => { let n = start; const out = [`${n++}. On the home page, find Chapter ${c.n} and press "Start ${startWord(c.part)}".`];
     if (parts.includes('learn')) out.push(`${n++}. Learn: work through every step. Read the cards, do the jobs in the Do this list and answer the Your turn questions.`);
     if (parts.includes('challenge') && CHDATA[c.id].challenge) out.push(`${n++}. Challenge: try every mission in "${CHDATA[c.id].challenge.title}". Trying every mission is enough to finish.`);
     if (parts.includes('review')) out.push(`${n++}. Check + worksheet: answer every Check question, then press "Make my worksheet" and choose "Save as PDF".`);

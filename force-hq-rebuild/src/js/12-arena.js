@@ -1,8 +1,8 @@
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift', 'wsmach', 'wsload', 'wsctl', 'wspull', 'readMA', 'readWork', 'rulers'];
 /* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
-const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
+const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift', 'wsmach', 'wsload', 'wsctl', 'wspull', 'readMA', 'readWork', 'rulers'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -11,7 +11,8 @@ let DRAG = null, PSEL = null, PTOAST = null, ADDLOG = [];
 function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
-  const isDz = (S.scene === 'drop' || S.scene === 'heli') && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
+  const isDz = (S.scene === 'drop' || S.scene === 'heli') && !cvo, isSh = S.scene === 'shop' && !cvo; cv.classList.toggle('dzscene', isDz); cv.classList.toggle('shopscene', isSh); const c = fit(cv, 900, isSh ? WS_H : isDz ? DZ_H : 380); HITS = [];
+  if (isSh) { drawShopScene(c); return; }
   if (S.scene === 'drop' && !cvo) { drawDropScene(c); return; }
   if (S.scene === 'heli' && !cvo) { drawHeliScene(c); return; }
   if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
@@ -360,6 +361,7 @@ function renderControls() {
   const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   if (S.scene === 'drop') dzRenderControls();
   if (S.scene === 'heli') heliRenderControls();
+  if (S.scene === 'shop') wsRenderControls();
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -400,7 +402,7 @@ function initControls() {
 function applyPanels() {
   $$('#lab [data-panel]').forEach(el => { const ks = el.dataset.panel.split(' '); el.hidden = !ks.some(k => LAB.show.has(k)); });
   const kit = $('#lab .kit'); $('#lab .stagerow').classList.toggle('nokit', ![...kit.querySelectorAll('[data-panel]')].some(e => !e.hidden));
-  const dz = S.scene === 'drop' || S.scene === 'heli'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)) || S.scene === 'drop';   // the Drop Zone draws its readouts on the scene $('#lab .scenebar').classList.toggle('dzbar', dz);
+  const dz = S.scene === 'drop' || S.scene === 'heli' || S.scene === 'shop'; $('#reads').hidden = dz; $('#dreads').hidden = S.scene === 'shop' || !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)) || S.scene === 'drop';   // the Drop Zone draws its readouts on the scene $('#lab .scenebar').classList.toggle('dzbar', dz);
   const anyRead = [...$$('#reads .rd')].some(e => !e.hidden) || !$('#dreads').hidden;
   $('#lab .underrow').hidden = !anyRead && !LAB.show.has('fbd');
   $('#lab .fbdcol').hidden = !LAB.show.has('fbd');
@@ -498,6 +500,7 @@ let lastT = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (S.running) updateSim(dt);
+  if (S.scene === 'shop') wsUpdate(dt);
   const f = forces(); runTick(f, dt);
   if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); drawVT(); readouts(f); if (LAB.tick) LAB.tick(f); }
   requestAnimationFrame(frame);

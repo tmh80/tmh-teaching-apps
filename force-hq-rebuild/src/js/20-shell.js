@@ -4,8 +4,11 @@ const CHAPTERS = [
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
   { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: true, arena: 'Space Dome', icon: 'pair' },
-  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' }
+  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' },
+  { id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: true, arena: 'Workshop', icon: 'gear' }
 ];
+/* "Start Part 1" / "Start the Extension": Chapter 6 uses Part 1 to Part 4 and an Extension instead of Foundation and Extension */
+const startWord = p => /^Part \d/.test(p) ? p : 'the ' + p;
 const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
 const user = () => DB.user || {};
@@ -36,6 +39,7 @@ const CHICON = {
   move: '<rect x="18" y="14" width="14" height="14" rx="2"/><path d="M4 17h9M7 21h8M4 25h9" stroke-width="2.6"/>',
   tri: '<path d="M20 6L35 32H5z"/><path d="M11 22h18" stroke-width="2"/><text x="20" y="19" text-anchor="middle" font-size="7.5" font-weight="800" stroke="none" fill="currentColor">F</text><text x="13.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">m</text><text x="26.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">a</text>',
   pair: '<path d="M18 20H4M8 15l-5 5 5 5M22 20h14M32 15l5 5-5 5" stroke-width="3"/><path d="M20 10v20" stroke-width="2" stroke-dasharray="3 3"/>',
+  gear: '<circle cx="14" cy="12" r="6"/><circle cx="14" cy="12" r="1.5"/><path d="M8 12v18M20 12v8"/><rect x="16" y="20" width="8" height="8" rx="1.5"/><path d="M4 32h32"/><path d="M27 32l9-10"/>',
   chute: '<path d="M7 18a13 11 0 0 1 26 0z"/><path d="M8 18l12 12 12-12M20 18v12" stroke-width="1.6"/><circle cx="20" cy="32" r="3"/>'
 };
 const chIcon = k => `<svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${CHICON[k] || ''}</svg>`;
@@ -52,7 +56,7 @@ function secRow(sec) {
     <p>${sec.blurb}</p>
     <div class="parts"><span class="pillst ${P.L.done === P.L.total ? 'done' : P.L.done ? 'part' : 'todo'}">Learn ${P.L.done}/${P.L.total}</span>${d.challenge ? `<span class="pillst ${challengeDone(id) ? 'done' : P.C2.tried ? 'part' : 'todo'}">Challenge ${P.C2.tried}/${P.C2.total}</span>` : ''}<span class="pillst ${P.R.done === P.R.total ? 'done' : P.R.done ? 'part' : 'todo'}">Check ${P.R.done}/${P.R.total}</span></div>
     ${pctBar(P.total ? P.done / P.total : 0, st.cls)}
-    <div class="tilefoot"><button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start the ' + sec.part : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button>${stamped ? `<span class="minis on" title="Stamp earned">${sec.stamp}</span>` : `<span class="minis">Stamp: ${sec.stamp}</span>`}</div></div>`;
+    <div class="tilefoot"><button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start ' + startWord(sec.part) : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button>${stamped ? `<span class="minis on" title="Stamp earned">${sec.stamp}</span>` : `<span class="minis">Stamp: ${sec.stamp}</span>`}</div></div>`;
 }
 function nextSection() { const st = dbGet('stamps', {}); return SECTIONS.find(s => !st[s.id]) || null; }
 function renderHome() {
@@ -65,7 +69,7 @@ function renderHome() {
     $('#resume').innerHTML = `<div class="rlbl">${started ? 'Carry on where you left off' : u.name && !u.teacher ? `Ready, ${esc(u.name)}? Up next` : 'Up next'}</div>
       <div class="rtitle">Chapter ${nx.n} · ${nx.part}: ${ch.title}</div>
       <div class="rmeta">approx. ${secMins(nx.id).total} min · ${P.done} of ${P.total} parts done</div>${pctBar(P.total ? P.done / P.total : 0, 'onDark')}
-      <button type="button" class="go big" data-open="${nx.id}">${started ? 'Carry on' : 'Start'} ${nx.part === 'Foundation' ? `Chapter ${nx.n}` : `the ${nx.part}`} →</button>`;
+      <button type="button" class="go big" data-open="${nx.id}">${started ? 'Carry on' : 'Start'} ${nx.part === 'Foundation' ? `Chapter ${nx.n}` : startWord(nx.part)} →</button>`;
   } else $('#resume').innerHTML = `<div class="rlbl">All done so far</div><div class="rtitle">You've finished every chapter that's open. Brilliant work!</div><button type="button" class="go big" data-act="explore">Go to Explore →</button>`;
   const nst = Object.keys(stamps).filter(k => secOf(k)).length;
   $('#heroStats').innerHTML = [[`${nst}<small>/${SECTIONS.length}</small>`, 'stamps'], [`${SECTIONS.filter(s => chStatus(s.id).cls === 'done').length}<small>/${SECTIONS.length}</small>`, 'sections done'], [J.order.length, 'Journal cards']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
@@ -76,7 +80,8 @@ function renderHome() {
   $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
     ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
-  $('#workshopCard').innerHTML = `<div class="hcicon"><svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="12" r="6"/><circle cx="14" cy="12" r="1.5"/><path d="M8 12v18M20 12v8"/><rect x="16" y="20" width="8" height="8" rx="1.5"/><path d="M4 32h32"/><path d="M27 32l9-10"/></svg></div><div class="hcbody"><span class="kicker2">Coming soon</span><h3>The Workshop</h3><p>Pulleys, levers, ramps, wedges and screws. Find out how machines make a job feel easier, and calculate the work done.</p></div>`;
+  { const w = nextSection() && SECTIONS.some(x => x.ch === 'c6'); const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
+    $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop</span><h3>Save Captain Smooshy!</h3><p>A gummy bear astronaut is stuck in a crater and only has 60 N of pull. Learn how levers, pulleys, ramps, wedges and screws work, then use them to rescue his spaceship.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
   $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
     + SECTIONS.map(s => `<div class="sbitem"><div class="stamp ${stamps[s.id] ? 'on' : 'ghoststamp'}" title="${s.stamp}">${s.stamp}</div><span>${stamps[s.id] ? s.stamp : `Chapter ${s.n} ${s.part}`}</span></div>`).join('')
     + CHAPTERS.filter(c => !c.ready).map(c => `<div class="sbitem soon"><div class="stamp ghoststamp">${c.stamp}</div><span>Chapter ${c.n}</span></div>`).join('') + '</div>';
@@ -103,7 +108,8 @@ function homeClick(e) {
   if (hit.id === 'main') { $('#chapterCards').scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); return; }
   if (hit.id === 'snow' && CHDATA.c3f) { openChapter('c3f'); return; }
   if (hit.id === 'space' && CHDATA.c4f) { openChapter('c4f'); return; }
-  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is being built. Coming soon!' }[hit.id]);
+  if (hit.id === 'workshop' && CHDATA.c6a) { openChapter('c6a'); return; }
+  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.' }[hit.id]);
 }
 
 /* ---------- modal helpers ---------- */

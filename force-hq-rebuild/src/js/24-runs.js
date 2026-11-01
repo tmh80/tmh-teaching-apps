@@ -41,6 +41,7 @@ function runTick(f, dt) {
   if (S.flags.finished) { RUN.finT = S.finT - RUN.t0; RUN.finV = S.finV; }
   /* Chapter 4: the velocities the pod and the astronaut reached when the push ended, any thruster bursts, and the docking velocity */
   if (S.scene === 'space') { if (S.pushDone && RUN.vp == null) { RUN.vp = S.pushDone.vp; RUN.va = S.pushDone.va; } RUN.bursts = S.bursts.slice(); if (S.flags.docked) RUN.dockV = S.dockV; RUN.curV = S.v; }
+  if (S.scene === 'shop') { RUNDIRTY = 1; return; }   // the Workshop ends its own runs when the pull finishes
   if (!S.running) runEnd(S.flags.docked ? 'dock' : S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.msg && /drifted/.test(S.msg) ? 'drift' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
   else if (S.scene !== 'space' && av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
   RUNDIRTY = 1;
@@ -77,6 +78,7 @@ function spaceText(r) {
 }
 function runText(r) {
   if (r.scene === 'drop') return dropText(r);
+  if (r.scene === 'shop') return wsText(r);
   if (r.scene === 'sled') return sledText(r);
   if (r.scene === 'space') return spaceText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
@@ -104,6 +106,7 @@ function runText(r) {
 }
 function runChips(r) {
   if (r.scene === 'drop') return dropChips(r);
+  if (r.scene === 'shop') return wsChips(r);
   if (r.scene === 'space') {
     const mk = spaceMasked(r.pushF, r.mass, r.astro), c = [['Pod mass', r.mass + ' kg'], ['Astronaut mass', r.astro + ' kg']];
     if (r.kind === 'push') c.push(['Push', NN(r.pushF)]);

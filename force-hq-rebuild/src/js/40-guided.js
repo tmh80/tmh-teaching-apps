@@ -16,7 +16,8 @@ function openChapter(id, tab) {
   if (d.challenge) $('[data-ctab=challenge]').textContent = `2 · Challenge (approx. ${M.challenge} min)`;
   $('[data-ctab=review]').textContent = `${d.challenge ? 3 : 2} · Check + worksheet (approx. ${M.review} min)`;
   if (sec.needs && !tab) { const P = learnProgress(sec.needs), need = secOf(sec.needs); if (P.done < P.total) setTimeout(() => { openModal(`<div class="modal"><h2>Have you done the ${need.part}?</h2><p>The ${sec.part} builds on the Chapter ${need.n} ${need.part}. You have finished ${P.done} of ${P.total} ${need.part} Learn steps.</p><p>It's best to finish those first, but you can carry on anyway.</p><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-open="${need.id}">Go to the ${need.part}</button><button type="button" class="go" data-close>Continue anyway →</button></div></div>`); }, 50); }
-  show('vChapter'); setCTab(tab || (learnProgress(id).done === learnProgress(id).total ? (d.challenge && !challengeDone(id) ? 'challenge' : 'review') : 'learn'));
+  show('vChapter'); if (sec.ch === 'c6' && !dbGet('ws.briefed', false)) setTimeout(openTransmission, 250);
+  setCTab(tab || (learnProgress(id).done === learnProgress(id).total ? (d.challenge && !challengeDone(id) ? 'challenge' : 'review') : 'learn'));
 }
 function setCTab(t) {
   CTAB = t; $$('#chTabs [data-ctab]').forEach(b => { b.setAttribute('aria-selected', b.dataset.ctab === t); });
@@ -29,7 +30,7 @@ function setCTab(t) {
 }
 function tabTicks() { if (!CH) return; const L = learnProgress(CH.id), R = reviewProgress(CH.id); $('[data-ctab=learn]').classList.toggle('ok', L.done === L.total); $('[data-ctab=challenge]').classList.toggle('ok', challengeDone(CH.id)); $('[data-ctab=review]').classList.toggle('ok', R.done === R.total); }
 function renderOnPage() {
-  if (!CH) return; const el = $('#onPage');
+  if (!CH) return; if (typeof renderRescue === 'function') renderRescue(); const el = $('#onPage');
   if (CTAB === 'learn') { const L = learnProgress(CH.id); el.innerHTML = `<span class="lbl">On this page</span> <b>${L.done} of ${L.total}</b> Learn steps done ${CHDATA[CH.id].steps.map((s, i) => `<button type="button" class="chip ${stepDone(CH.id, i) ? 'done' : ''}" data-goto="${i}" title="${esc(s.title)}">${stepDone(CH.id, i) ? '✓' : i + 1}</button>`).join('')}`; }
   else if (CTAB === 'challenge') { const c = challengeState(CH.id); el.innerHTML = `<span class="lbl">On this page</span> <b>${c.tried} of ${c.total}</b> missions tried · <b>${c.score} of ${c.max}</b> objectives met. Trying every mission is enough to finish the Challenge.`; }
   else { const R = reviewProgress(CH.id); el.innerHTML = `<span class="lbl">On this page</span> <b>${R.done} of ${R.total}</b> questions done. A question turns green when you have answered it, even if it isn't right yet.`; }
@@ -205,11 +206,11 @@ function checkStep(force) {
   ts.forEach((ok, i) => { const li = $('#tk' + i); if (li) li.classList.toggle('ok', ok); });
   if (all && !stepDone(CH.id, GI)) {
     const d = dbGet('learnDone.' + CH.id, {}); d[CHDATA[CH.id].steps[GI].id] = true; dbSet('learnDone.' + CH.id, d);
-    renderRail(); renderOnPage(); tabTicks(); toast('Step complete! Press Next when you\'re ready.', 'good'); maybeStamp(CH.id);
+    renderRail(); renderOnPage(); tabTicks(); toast('Step complete! Press Next when you\'re ready.' + (CHDATA[CH.id].steps[GI].rescue ? ' Rescue log: ' + CHDATA[CH.id].steps[GI].rescue : ''), 'good'); maybeStamp(CH.id);
   }
   qChrome();
   const n = $('#gNext'); if (n) n.classList.toggle('ready', all || stepDone(CH.id, GI) || (hasQs() && !qsDone() && ts.every(Boolean) && CARDS_SEEN));
-  const box = $('#stepDoneBox'); if (box) box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' : '';
+  const box = $('#stepDoneBox'); if (box) { const rl = CHDATA[CH.id].steps[GI].rescue; box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' + (rl ? `<div class="rlog">📡 Rescue log: ${rl}</div>` : '') : ''; }
   $$('#rail .tasks li').forEach((li, i) => li.classList.toggle('ok', ts[i]));
 }
 function tryNext() {

@@ -789,6 +789,11 @@ body.jopen .jtab{right:min(430px,100vw);z-index:65}
 .exsw{margin-bottom:6px} .exsw button{font-weight:800;font-size:14px;padding:7px 4px}
 .dzp .ctlh{flex-wrap:wrap} .dzp .numbox{margin-left:auto}
 #cvScene.dzscene{aspect-ratio:900/500}
+/* ===== Chapter 6: the Workshop ===== */
+#cvScene.shopscene{aspect-ratio:900/430}
+.wsctl{display:flex;flex-direction:column;gap:10px} .wsctl>div[hidden]{display:none}
+.stepper{display:flex;align-items:center;gap:14px;margin-top:4px} .stepper b{font-family:var(--f-num);font-size:24px;min-width:30px;text-align:center} .stepper .mini{min-width:44px;min-height:40px;font-size:20px;font-weight:800}
+.scenebar #wsPull{min-width:150px;font-size:19px}
 
 /* ===== freeze, spot and sketch questions (Chapter 5) ===== */
 .datacard{padding:14px;border:2.5px solid var(--accent);display:flex;flex-direction:column;gap:10px}
@@ -836,6 +841,24 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .cotbl .unit{font-family:var(--f-num);font-weight:700}
 .corrorder{margin-top:6px;font-size:15px}
 .gtbl{margin-top:8px;width:100%}
+
+/* ===== Chapter 6: the Rescue board and the transmission ===== */
+.rescueboard{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0;padding:0;overflow:hidden;margin-bottom:12px} .rescueboard[hidden]{display:none}
+#cvRescue{width:100%;aspect-ratio:520/190;display:block}
+.rbside{padding:12px 16px;display:flex;flex-direction:column;gap:6px}
+.rbhd h2{font-family:var(--f-display);font-size:22px;margin:0}
+.rbslots{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rbslots li{display:flex;gap:8px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:5px 8px;background:var(--chip);font-size:14px}
+.rbslots li small{display:block;color:var(--muted);font-size:12px}
+.rbslots li.on{border-color:var(--good);background:var(--okbg)} .rbslots li.soon{opacity:.6;border-style:dashed}
+.rbtick{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:800;font-family:var(--f-num)} .rbslots li.on .rbtick{background:var(--good);color:#fff}
+.rbnext{margin:2px 0;font-weight:700}
+@media (max-width:760px){.rescueboard{grid-template-columns:1fr}.rbslots{grid-template-columns:1fr}}
+.txmodal{max-width:480px} .txmodal .tx-head{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;cursor:grab;padding:2px 0} .txmodal.dragging .tx-head{cursor:grabbing}
+.txmodal.placed{position:fixed;margin:0}
+.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/170}
+.txlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
+.rlog{margin-top:6px;font-size:14px;font-weight:700;color:var(--muted)}
 
 </style>
 <header class="top">
@@ -895,6 +918,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
         <button type="button" role="tab" data-ctab="review">3 · Review</button>
       </div>
     </div>
+    <div class="panel rescueboard" id="rescueBoard" hidden></div>
     <div class="onpage" id="onPage"></div>
     <div id="learnHost"></div>
     <div id="challengeHost" hidden></div>
@@ -974,6 +998,26 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
           <p class="bmnote" id="liftNote" hidden></p>
           <div class="nudge lf"><button type="button" class="mini" data-lf="-100">−100</button><button type="button" class="mini" data-lf="-10">−10</button><button type="button" class="mini" data-lf="-1">−1</button><button type="button" class="mini" data-lf="1">+1</button><button type="button" class="mini" data-lf="10">+10</button><button type="button" class="mini" data-lf="100">+100</button></div>
           <p class="palhint">Too fast? Lower the lift a little to slow down, then match it to the weight.</p></div>
+        <!-- Chapter 6: the Workshop controls (shown only when S.scene = 'shop') -->
+        <div data-panel="wsmach"><div class="ctlh"><h3>Machine</h3></div><div class="seg two" id="wsMachs"></div></div>
+        <div data-panel="wsload"><div class="ctlh"><h3>Load</h3></div><div class="seg two" id="wsLoads"></div></div>
+        <div class="wsctl" data-panel="wsctl">
+          <div id="wsClsRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lever">Lever class</button></h3></div><div class="seg three" id="wsCls"></div></div>
+          <div data-wsm="lever"><div class="ctlh"><h3 id="wsArmTitle">Load arm</h3><span class="numbox"><input type="number" id="wsArmNum" min="0.2" max="1.8" step="0.05" value="1" inputmode="decimal" aria-label="Arm length in metres: type a number"><span>m</span></span></div>
+            <input type="range" id="wsArm" min="0.2" max="1.8" step="0.05" value="1" aria-label="Arm length in metres"><p class="palhint" id="wsArmNote"></p></div>
+          <div data-wsm="pulley"><div class="ctlh"><h3><button type="button" class="term tl" data-t="supporting">Supporting ropes</button></h3></div>
+            <div class="stepper"><button type="button" class="mini" id="wsRopesDn" aria-label="One fewer supporting rope">−</button><b id="wsRopesN">1</b><button type="button" class="mini" id="wsRopesUp" aria-label="One more supporting rope">+</button></div></div>
+          <div data-wsm="pulley" id="wsLiftRow"><div class="ctlh"><h3>Lift height</h3></div><div class="seg two" id="wsLift"></div></div>
+          <div data-wsm="winch"><div class="ctlh"><h3>Handle radius</h3><span class="numbox"><input type="number" id="wsRNum" min="0.1" max="0.6" step="0.05" value="0.1" inputmode="decimal" aria-label="Handle radius in metres: type a number"><span>m</span></span></div>
+            <input type="range" id="wsR" min="0.1" max="0.6" step="0.05" value="0.1" aria-label="Handle radius in metres"></div>
+          <div data-wsm="winch" id="wsAxleRow"><div class="ctlh"><h3>Axle radius</h3><span class="numbox"><input type="number" id="wsAxleNum" min="0.04" max="0.1" step="0.01" value="0.05" inputmode="decimal" aria-label="Axle radius in metres: type a number"><span>m</span></span></div></div>
+          <div data-wsm="ramp"><div class="ctlh"><h3>Ramp length</h3><span class="numbox"><input type="number" id="wsLNum" min="1" max="6" step="0.5" value="2" inputmode="decimal" aria-label="Ramp length in metres: type a number"><span>m</span></span></div>
+            <input type="range" id="wsL" min="1" max="6" step="0.5" value="2" aria-label="Ramp length in metres"></div>
+          <div data-wsm="ramp" id="wsHRow"><div class="ctlh"><h3>Ramp height</h3></div><div class="seg" id="wsH"></div></div>
+          <div data-wsm="wedge"><div class="ctlh"><h3>Wedge thickness</h3></div><div class="seg" id="wsThick"></div></div>
+          <div data-wsm="screw"><div class="ctlh"><h3>Distance per turn</h3></div><div class="seg three" id="wsPer"></div>
+            <div class="ctlh" style="margin-top:8px"><h3><button type="button" class="term tl" data-t="pitch">Pitch</button></h3></div><div class="seg three" id="wsPitch"></div><p class="palhint" id="wsTurnNote"></p></div>
+        </div>
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
@@ -983,13 +1027,14 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
           <button class="go" id="launchBtn" type="button" data-panel="launch">Launch the crate →</button>
           <button class="go" id="dzDrop" type="button" data-panel="drop">Drop!</button>
+          <button class="go" id="wsPull" type="button" data-panel="wspull">Pull!</button>
           <button class="ghost dzpause" id="dzPause" type="button" data-panel="dpause" aria-pressed="false">⏸ Pause</button>
           <button class="ghost" id="dzOpen" type="button" data-panel="dcanopy">Open canopy!</button>
           <button class="ghost sm" id="dzBack" type="button" data-panel="dpause">◀ 0.5 s</button>
           <button class="ghost sm" id="dzFwd" type="button" data-panel="dpause">0.5 s ▶</button>
           <button class="ghost sm" id="dzSnap" type="button" data-panel="dpause">📸 Snapshot</button>
           <button class="ghost" id="warpBtn" type="button" data-panel="warp" aria-pressed="false">Fast-forward</button>
-          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift">Reset</button>
+          <button class="ghost" id="resetBtn" type="button" data-panel="run shove launch drop lift wspull">Reset</button>
         </div>
         <section class="panel datacard" id="dataCard" aria-label="Collect your data" hidden></section>
         <div class="underrow">
@@ -1572,6 +1617,7 @@ function spaceForces() {
 function forces() {
   if (S.scene === 'drop') return dropForces();
   if (S.scene === 'heli') return heliForces();
+  if (S.scene === 'shop') return wsForces();
   if (S.scene === 'space') return spaceForces();
   const u = S.running ? Math.min(1, S.pullT / PULL_RAMP) : 1, k = sstep(u), m = S.mass, fl = FLOORS[S.floor];
   const L = tot(S.left) * k, R = tot(S.right) * k, W = m * G, N = W, fs = fl.mus * W, fk = fl.mu * W;
@@ -1628,7 +1674,7 @@ function updateSim(dt) {
   if (S.scene === 'space') { const n = Math.max(3, Math.ceil(dt * S.warp / 0.01)); for (let i = 0; i < n && S.running; i++) stepSim(dt * S.warp / n); return; }   // fixed small steps, so the speeds come out exact even when time is sped up
   for (let i = 0; i < 3 && S.running; i++) stepSim(dt / 3);
 }
-function resetSim() { if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); if (S.scene === 'heli') heliReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = S.scene === 'heli';
+function resetSim() { if (S.scene === 'shop') { wsReset(); S.running = false; } if (RUN) runEnd('reset'); if (S.scene === 'drop') dzReset(); if (S.scene === 'heli') heliReset(); S.fall = null; S.flags.finished = false; S.finT = null; S.finV = null; S.brakeFrom = null; S.brakeT = null; S.x = S.x0; S.v = 0; S.a = 0; S.t = 0; S.pullT = 0; S.shoveT = -1; S.lastShoveT = null; S.hist = []; S.msg = ''; S.running = S.scene === 'heli';
   S.ax = AST_X0; S.av = 0; S.avPeak = 0; S.thrT = -1; S.thrDir = 0; S.pushEndT = null; S.pushDone = null; S.lastPush = 0; S.lastThr = 0; S.lastKind = null; S.dockV = null; S.bursts = []; S.flags.docked = false; S.flags.tether = false;
   syncRun(); }
 /* Space Dome: the astronaut pushes off the pod. One push per run: pressing the button again starts a fresh run. */
@@ -1637,7 +1683,7 @@ function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S
 function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.lastThr = dir * SP_THR_F; S.lastKind = 'thr'; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
 function shove() { if (S.scene === 'space') return spacePush(); if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } if (S.scene === 'heli') S.running = false; S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { if (S.scene === 'shop') S.running = false; if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } if (S.scene === 'heli') S.running = false; S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
@@ -1868,9 +1914,9 @@ function drawTeam(c, side, s, col, edge, pulling, tt, ph, showMeter) {
 
 /* ===== The arena "lab": scene, drag-and-drop pullers, readouts, live free-body diagram =====
    LAB.show is the set of panels on screen. Guided steps reveal them one at a time; Explore shows all. */
-const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
+const PANELS = ['pal', 'meter', 'readL', 'readR', 'readF', 'readW', 'readN', 'readM', 'readRes', 'readA', 'readV', 'readD', 'fbd', 'vt', 'floor', 'mass', 'brake', 'shove', 'launch', 'toggles', 'run', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift', 'wsmach', 'wsload', 'wsctl', 'wspull', 'readMA', 'readWork', 'rulers'];
 /* Explore keeps to the tug-of-war set-up: the launcher, brake and braking distance belong to Chapter 2 */
-const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift'];
+const EXPLORE_HIDE = ['launch', 'brake', 'readD', 'astro', 'pushf', 'thrust', 'warp', 'pairs', 'readAV', 'readAM', 'drop', 'dobj', 'dworld', 'dair', 'dheight', 'dcanopy', 'dopenh', 'dlanes', 'dpause', 'dvt', 'dft', 'dfbd', 'readH', 'readT', 'lift', 'wsmach', 'wsload', 'wsctl', 'wspull', 'readMA', 'readWork', 'rulers'];
 const LAB = { show: new Set(PANELS), sides: ['left', 'right'], pullers: ['kid', 'dog', 'adult', 'strong', 'pony', 'horse'], showVert: true, showRes: true, mode: 'explore', onChange: null };
 const TEAMCOL = () => ({ left: C.left, right: C.right });
 
@@ -1879,7 +1925,8 @@ let DRAG = null, PSEL = null, PTOAST = null, ADDLOG = [];
 function palToast(t) { PTOAST = { t, at: performance.now() }; }
 function drawScene(f, cvo) {
   const cv = cvo || $('#cvScene'); if (!cv || !cv.offsetParent) return;
-  const isDz = (S.scene === 'drop' || S.scene === 'heli') && !cvo; cv.classList.toggle('dzscene', isDz); const c = fit(cv, 900, isDz ? DZ_H : 380); HITS = [];
+  const isDz = (S.scene === 'drop' || S.scene === 'heli') && !cvo, isSh = S.scene === 'shop' && !cvo; cv.classList.toggle('dzscene', isDz); cv.classList.toggle('shopscene', isSh); const c = fit(cv, 900, isSh ? WS_H : isDz ? DZ_H : 380); HITS = [];
+  if (isSh) { drawShopScene(c); return; }
   if (S.scene === 'drop' && !cvo) { drawDropScene(c); return; }
   if (S.scene === 'heli' && !cvo) { drawHeliScene(c); return; }
   if (S.scene === 'sled' && !cvo) { drawSledScene(c, f); return; }
@@ -2228,6 +2275,7 @@ function renderControls() {
   const sb = $('#shoveBtn'); if (sb) sb.textContent = sp ? 'Push off! →' : 'Give it a push →'; const wb = $('#warpBtn'); if (wb) { wb.textContent = S.warp > 1 ? 'Back to normal time' : 'Fast-forward'; wb.setAttribute('aria-pressed', String(S.warp > 1)); }
   if (S.scene === 'drop') dzRenderControls();
   if (S.scene === 'heli') heliRenderControls();
+  if (S.scene === 'shop') wsRenderControls();
   const tp = $('#tgPairs'); if (tp) tp.checked = LAB.showPairs !== false;
   $('#tgVert').checked = LAB.showVert; $('#tgRes').checked = LAB.showRes;
   const bk = $('#brakeF'); if (bk) { bk.value = S.brakeF; const bn = $('#brakeNum'); if (document.activeElement !== bn) bn.value = S.brakeF; }
@@ -2268,7 +2316,7 @@ function initControls() {
 function applyPanels() {
   $$('#lab [data-panel]').forEach(el => { const ks = el.dataset.panel.split(' '); el.hidden = !ks.some(k => LAB.show.has(k)); });
   const kit = $('#lab .kit'); $('#lab .stagerow').classList.toggle('nokit', ![...kit.querySelectorAll('[data-panel]')].some(e => !e.hidden));
-  const dz = S.scene === 'drop' || S.scene === 'heli'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)) || S.scene === 'drop';   // the Drop Zone draws its readouts on the scene $('#lab .scenebar').classList.toggle('dzbar', dz);
+  const dz = S.scene === 'drop' || S.scene === 'heli' || S.scene === 'shop'; $('#reads').hidden = dz; $('#dreads').hidden = S.scene === 'shop' || !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)) || S.scene === 'drop';   // the Drop Zone draws its readouts on the scene $('#lab .scenebar').classList.toggle('dzbar', dz);
   const anyRead = [...$$('#reads .rd')].some(e => !e.hidden) || !$('#dreads').hidden;
   $('#lab .underrow').hidden = !anyRead && !LAB.show.has('fbd');
   $('#lab .fbdcol').hidden = !LAB.show.has('fbd');
@@ -2366,6 +2414,7 @@ let lastT = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
   if (S.running) updateSim(dt);
+  if (S.scene === 'shop') wsUpdate(dt);
   const f = forces(); runTick(f, dt);
   if ($('#lab') && $('#lab').offsetParent) { drawScene(f); drawLiveFBD(f); drawVT(); readouts(f); if (LAB.tick) LAB.tick(f); }
   requestAnimationFrame(frame);
@@ -2513,8 +2562,11 @@ const CHAPTERS = [
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
   { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: true, arena: 'Space Dome', icon: 'pair' },
-  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' }
+  { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' },
+  { id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: true, arena: 'Workshop', icon: 'gear' }
 ];
+/* "Start Part 1" / "Start the Extension": Chapter 6 uses Part 1 to Part 4 and an Extension instead of Foundation and Extension */
+const startWord = p => /^Part \d/.test(p) ? p : 'the ' + p;
 const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
 const user = () => DB.user || {};
@@ -2545,6 +2597,7 @@ const CHICON = {
   move: '<rect x="18" y="14" width="14" height="14" rx="2"/><path d="M4 17h9M7 21h8M4 25h9" stroke-width="2.6"/>',
   tri: '<path d="M20 6L35 32H5z"/><path d="M11 22h18" stroke-width="2"/><text x="20" y="19" text-anchor="middle" font-size="7.5" font-weight="800" stroke="none" fill="currentColor">F</text><text x="13.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">m</text><text x="26.5" y="29" text-anchor="middle" font-size="7" font-weight="800" stroke="none" fill="currentColor">a</text>',
   pair: '<path d="M18 20H4M8 15l-5 5 5 5M22 20h14M32 15l5 5-5 5" stroke-width="3"/><path d="M20 10v20" stroke-width="2" stroke-dasharray="3 3"/>',
+  gear: '<circle cx="14" cy="12" r="6"/><circle cx="14" cy="12" r="1.5"/><path d="M8 12v18M20 12v8"/><rect x="16" y="20" width="8" height="8" rx="1.5"/><path d="M4 32h32"/><path d="M27 32l9-10"/>',
   chute: '<path d="M7 18a13 11 0 0 1 26 0z"/><path d="M8 18l12 12 12-12M20 18v12" stroke-width="1.6"/><circle cx="20" cy="32" r="3"/>'
 };
 const chIcon = k => `<svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">${CHICON[k] || ''}</svg>`;
@@ -2561,7 +2614,7 @@ function secRow(sec) {
     <p>${sec.blurb}</p>
     <div class="parts"><span class="pillst ${P.L.done === P.L.total ? 'done' : P.L.done ? 'part' : 'todo'}">Learn ${P.L.done}/${P.L.total}</span>${d.challenge ? `<span class="pillst ${challengeDone(id) ? 'done' : P.C2.tried ? 'part' : 'todo'}">Challenge ${P.C2.tried}/${P.C2.total}</span>` : ''}<span class="pillst ${P.R.done === P.R.total ? 'done' : P.R.done ? 'part' : 'todo'}">Check ${P.R.done}/${P.R.total}</span></div>
     ${pctBar(P.total ? P.done / P.total : 0, st.cls)}
-    <div class="tilefoot"><button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start the ' + sec.part : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button>${stamped ? `<span class="minis on" title="Stamp earned">${sec.stamp}</span>` : `<span class="minis">Stamp: ${sec.stamp}</span>`}</div></div>`;
+    <div class="tilefoot"><button type="button" class="${st.cls === 'done' ? 'ghost' : 'go'} sm open" data-open="${id}">${st.cls === 'todo' ? 'Start ' + startWord(sec.part) : st.cls === 'done' ? 'Open again' : 'Carry on'} →</button>${stamped ? `<span class="minis on" title="Stamp earned">${sec.stamp}</span>` : `<span class="minis">Stamp: ${sec.stamp}</span>`}</div></div>`;
 }
 function nextSection() { const st = dbGet('stamps', {}); return SECTIONS.find(s => !st[s.id]) || null; }
 function renderHome() {
@@ -2574,7 +2627,7 @@ function renderHome() {
     $('#resume').innerHTML = `<div class="rlbl">${started ? 'Carry on where you left off' : u.name && !u.teacher ? `Ready, ${esc(u.name)}? Up next` : 'Up next'}</div>
       <div class="rtitle">Chapter ${nx.n} · ${nx.part}: ${ch.title}</div>
       <div class="rmeta">approx. ${secMins(nx.id).total} min · ${P.done} of ${P.total} parts done</div>${pctBar(P.total ? P.done / P.total : 0, 'onDark')}
-      <button type="button" class="go big" data-open="${nx.id}">${started ? 'Carry on' : 'Start'} ${nx.part === 'Foundation' ? `Chapter ${nx.n}` : `the ${nx.part}`} →</button>`;
+      <button type="button" class="go big" data-open="${nx.id}">${started ? 'Carry on' : 'Start'} ${nx.part === 'Foundation' ? `Chapter ${nx.n}` : startWord(nx.part)} →</button>`;
   } else $('#resume').innerHTML = `<div class="rlbl">All done so far</div><div class="rtitle">You've finished every chapter that's open. Brilliant work!</div><button type="button" class="go big" data-act="explore">Go to Explore →</button>`;
   const nst = Object.keys(stamps).filter(k => secOf(k)).length;
   $('#heroStats').innerHTML = [[`${nst}<small>/${SECTIONS.length}</small>`, 'stamps'], [`${SECTIONS.filter(s => chStatus(s.id).cls === 'done').length}<small>/${SECTIONS.length}</small>`, 'sections done'], [J.order.length, 'Journal cards']].map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('');
@@ -2585,7 +2638,8 @@ function renderHome() {
   $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
     ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
-  $('#workshopCard').innerHTML = `<div class="hcicon"><svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="14" cy="12" r="6"/><circle cx="14" cy="12" r="1.5"/><path d="M8 12v18M20 12v8"/><rect x="16" y="20" width="8" height="8" rx="1.5"/><path d="M4 32h32"/><path d="M27 32l9-10"/></svg></div><div class="hcbody"><span class="kicker2">Coming soon</span><h3>The Workshop</h3><p>Pulleys, levers, ramps, wedges and screws. Find out how machines make a job feel easier, and calculate the work done.</p></div>`;
+  { const w = nextSection() && SECTIONS.some(x => x.ch === 'c6'); const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
+    $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop</span><h3>Save Captain Smooshy!</h3><p>A gummy bear astronaut is stuck in a crater and only has 60 N of pull. Learn how levers, pulleys, ramps, wedges and screws work, then use them to rescue his spaceship.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
   $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
     + SECTIONS.map(s => `<div class="sbitem"><div class="stamp ${stamps[s.id] ? 'on' : 'ghoststamp'}" title="${s.stamp}">${s.stamp}</div><span>${stamps[s.id] ? s.stamp : `Chapter ${s.n} ${s.part}`}</span></div>`).join('')
     + CHAPTERS.filter(c => !c.ready).map(c => `<div class="sbitem soon"><div class="stamp ghoststamp">${c.stamp}</div><span>Chapter ${c.n}</span></div>`).join('') + '</div>';
@@ -2612,7 +2666,8 @@ function homeClick(e) {
   if (hit.id === 'main') { $('#chapterCards').scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); return; }
   if (hit.id === 'snow' && CHDATA.c3f) { openChapter('c3f'); return; }
   if (hit.id === 'space' && CHDATA.c4f) { openChapter('c4f'); return; }
-  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is being built. Coming soon!' }[hit.id]);
+  if (hit.id === 'workshop' && CHDATA.c6a) { openChapter('c6a'); return; }
+  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.' }[hit.id]);
 }
 
 /* ---------- modal helpers ---------- */
@@ -3063,6 +3118,7 @@ function runTick(f, dt) {
   if (S.flags.finished) { RUN.finT = S.finT - RUN.t0; RUN.finV = S.finV; }
   /* Chapter 4: the velocities the pod and the astronaut reached when the push ended, any thruster bursts, and the docking velocity */
   if (S.scene === 'space') { if (S.pushDone && RUN.vp == null) { RUN.vp = S.pushDone.vp; RUN.va = S.pushDone.va; } RUN.bursts = S.bursts.slice(); if (S.flags.docked) RUN.dockV = S.dockV; RUN.curV = S.v; }
+  if (S.scene === 'shop') { RUNDIRTY = 1; return; }   // the Workshop ends its own runs when the pull finishes
   if (!S.running) runEnd(S.flags.docked ? 'dock' : S.flags.finished ? 'finish' : S.msg && /end of the arena/.test(S.msg) ? 'end' : S.msg && /drifted/.test(S.msg) ? 'drift' : S.flags.stopped && S.brakeFrom != null ? 'braked' : 'paused');
   else if (S.scene !== 'space' && av < 1e-6 && f.L < 0.5 && f.R < 0.5 && f.shove < 0.5 && RUN.t > 0.7) runEnd(RUN.moved ? 'friction' : 'still');   // a push that has died away
   RUNDIRTY = 1;
@@ -3099,6 +3155,7 @@ function spaceText(r) {
 }
 function runText(r) {
   if (r.scene === 'drop') return dropText(r);
+  if (r.scene === 'shop') return wsText(r);
   if (r.scene === 'sled') return sledText(r);
   if (r.scene === 'space') return spaceText(r);
   const crate = `the ${r.mass} kg crate ${FLOORPH[r.floor] || ''}`.trim(), steady = r.floor === 'air' && Math.abs(r.lastV - r.top) < 0.02;
@@ -3126,6 +3183,7 @@ function runText(r) {
 }
 function runChips(r) {
   if (r.scene === 'drop') return dropChips(r);
+  if (r.scene === 'shop') return wsChips(r);
   if (r.scene === 'space') {
     const mk = spaceMasked(r.pushF, r.mass, r.astro), c = [['Pod mass', r.mass + ' kg'], ['Astronaut mass', r.astro + ' kg']];
     if (r.kind === 'push') c.push(['Push', NN(r.pushF)]);
@@ -4077,7 +4135,8 @@ function openChapter(id, tab) {
   if (d.challenge) $('[data-ctab=challenge]').textContent = `2 · Challenge (approx. ${M.challenge} min)`;
   $('[data-ctab=review]').textContent = `${d.challenge ? 3 : 2} · Check + worksheet (approx. ${M.review} min)`;
   if (sec.needs && !tab) { const P = learnProgress(sec.needs), need = secOf(sec.needs); if (P.done < P.total) setTimeout(() => { openModal(`<div class="modal"><h2>Have you done the ${need.part}?</h2><p>The ${sec.part} builds on the Chapter ${need.n} ${need.part}. You have finished ${P.done} of ${P.total} ${need.part} Learn steps.</p><p>It's best to finish those first, but you can carry on anyway.</p><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-open="${need.id}">Go to the ${need.part}</button><button type="button" class="go" data-close>Continue anyway →</button></div></div>`); }, 50); }
-  show('vChapter'); setCTab(tab || (learnProgress(id).done === learnProgress(id).total ? (d.challenge && !challengeDone(id) ? 'challenge' : 'review') : 'learn'));
+  show('vChapter'); if (sec.ch === 'c6' && !dbGet('ws.briefed', false)) setTimeout(openTransmission, 250);
+  setCTab(tab || (learnProgress(id).done === learnProgress(id).total ? (d.challenge && !challengeDone(id) ? 'challenge' : 'review') : 'learn'));
 }
 function setCTab(t) {
   CTAB = t; $$('#chTabs [data-ctab]').forEach(b => { b.setAttribute('aria-selected', b.dataset.ctab === t); });
@@ -4090,7 +4149,7 @@ function setCTab(t) {
 }
 function tabTicks() { if (!CH) return; const L = learnProgress(CH.id), R = reviewProgress(CH.id); $('[data-ctab=learn]').classList.toggle('ok', L.done === L.total); $('[data-ctab=challenge]').classList.toggle('ok', challengeDone(CH.id)); $('[data-ctab=review]').classList.toggle('ok', R.done === R.total); }
 function renderOnPage() {
-  if (!CH) return; const el = $('#onPage');
+  if (!CH) return; if (typeof renderRescue === 'function') renderRescue(); const el = $('#onPage');
   if (CTAB === 'learn') { const L = learnProgress(CH.id); el.innerHTML = `<span class="lbl">On this page</span> <b>${L.done} of ${L.total}</b> Learn steps done ${CHDATA[CH.id].steps.map((s, i) => `<button type="button" class="chip ${stepDone(CH.id, i) ? 'done' : ''}" data-goto="${i}" title="${esc(s.title)}">${stepDone(CH.id, i) ? '✓' : i + 1}</button>`).join('')}`; }
   else if (CTAB === 'challenge') { const c = challengeState(CH.id); el.innerHTML = `<span class="lbl">On this page</span> <b>${c.tried} of ${c.total}</b> missions tried · <b>${c.score} of ${c.max}</b> objectives met. Trying every mission is enough to finish the Challenge.`; }
   else { const R = reviewProgress(CH.id); el.innerHTML = `<span class="lbl">On this page</span> <b>${R.done} of ${R.total}</b> questions done. A question turns green when you have answered it, even if it isn't right yet.`; }
@@ -4266,11 +4325,11 @@ function checkStep(force) {
   ts.forEach((ok, i) => { const li = $('#tk' + i); if (li) li.classList.toggle('ok', ok); });
   if (all && !stepDone(CH.id, GI)) {
     const d = dbGet('learnDone.' + CH.id, {}); d[CHDATA[CH.id].steps[GI].id] = true; dbSet('learnDone.' + CH.id, d);
-    renderRail(); renderOnPage(); tabTicks(); toast('Step complete! Press Next when you\'re ready.', 'good'); maybeStamp(CH.id);
+    renderRail(); renderOnPage(); tabTicks(); toast('Step complete! Press Next when you\'re ready.' + (CHDATA[CH.id].steps[GI].rescue ? ' Rescue log: ' + CHDATA[CH.id].steps[GI].rescue : ''), 'good'); maybeStamp(CH.id);
   }
   qChrome();
   const n = $('#gNext'); if (n) n.classList.toggle('ready', all || stepDone(CH.id, GI) || (hasQs() && !qsDone() && ts.every(Boolean) && CARDS_SEEN));
-  const box = $('#stepDoneBox'); if (box) box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' : '';
+  const box = $('#stepDoneBox'); if (box) { const rl = CHDATA[CH.id].steps[GI].rescue; box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' + (rl ? `<div class="rlog">📡 Rescue log: ${rl}</div>` : '') : ''; }
   $$('#rail .tasks li').forEach((li, i) => li.classList.toggle('ok', ts[i]));
 }
 function tryNext() {
@@ -4437,7 +4496,7 @@ CHDATA.c1 = {
         { html: `<p>Brilliant work! You now know what a force is, how to measure one, and the main types of force. Here's a sneak peek at what comes next.</p>` },
         { html: `<p><b>Chapter 1 Extension: Free-body diagrams.</b> Learn to draw every force on an object as an arrow, then become an Arena Inspector. It has its own worksheet.</p>` },
         { html: `<p><b>Chapter 2: Inertia.</b> Why is a heavy crate so hard to start moving, and so hard to stop? You'll find out in the Main Arena, with a launcher, a brake and your first velocity–time graph.</p><p><b>Chapter 3: F = ma.</b> Race huskies in the Snow Arena and use a formula to predict how fast things speed up.</p>` },
-        { html: `<p><b>Chapter 4: Action and reaction.</b> Push off a space pod and discover that forces always come in pairs.</p><p><b>Chapter 5: Balanced forces.</b> Drop things in the new Drop Zone, where you can take the air out of the tower!</p><p><b>The Workshop.</b> Pulleys, levers, ramps, wedges and screws: machines that make a job feel easier.</p>` }],
+        { html: `<p><b>Chapter 4: Action and reaction.</b> Push off a space pod and discover that forces always come in pairs.</p><p><b>Chapter 5: Balanced forces.</b> Drop things in the new Drop Zone, where you can take the air out of the tower!</p><p><b>Chapter 6: The Workshop.</b> Levers, pulleys, ramps, wedges and screws: machines that make a job feel easier. Captain Smooshy, a gummy bear astronaut, needs your help!</p>` }],
       setup() { S.left = ['adult', 'dog']; S.right = ['strong']; S.floor = 'ice'; }, adds: [],
       qs: [{ id: 'q1', type: 'mcq', p: 'Before you move on: which of these is NOT a force?', opts: ['Mass', 'Weight', 'Friction', 'Tension'], a: 0, ok: 'Correct! Mass is the amount of stuff in an object, measured in kg. The others are all forces, measured in N.', why: { 1: 'Weight is the pull of gravity, so it is a force measured in newtons.', 2: 'Friction is a force between surfaces.', 3: 'Tension is the pulling force in a rope.' } }] },
     { id: 's8', title: 'Free-body diagrams', info: ['fbd'],
@@ -6357,6 +6416,673 @@ function openExploreHeli() {
   LAB.onChange = null; LAB.tick = () => { HE_EXPLORE_TRY.forEach((t, i) => { if (!done.has(i) && t[1]()) { done.add(i); dbSet('tryDoneHe', [...done]); addEvidence('challenge', 'Explore: ' + t[0]); toast('Nice experiment! That one is ticked off.', 'good'); draw(); } }); };
 }
 
+/* ===== Chapter 6: the Workshop engine (S.scene = 'shop') =====
+   Machine maths (must match tools/workshop_model.py), the Pull! animation, runs and masks, and the control panels.
+   Script: docs/Chapter6_Workshop_Script.md sections C1 to C5. All Workshop machines are perfect (no friction) unless WS.real is on (Part 5, Explore).
+   Judging uses the numbers students see: forces to 0.1 N, distances to 0.01 m, MA to 0.01. "At most" limits are inclusive.
+   Names to avoid reusing elsewhere (one shared scope): WS, WS_*, ws*, shop*, SMOOSHY. */
+const SMOOSHY = { name: 'Captain Smooshy', ship: 'the Gumdrop', planet: 'Glimmer-9', g: 4.2, pull: 60, base: 'Gummy Base One' };
+const WS_H = 430, WS_WORLDS = { earth: { n: 'Earth', g: 9.8 }, moon: { n: 'the Moon', g: 1.6 }, mars: { n: 'Mars', g: 3.7 }, glim: { n: 'Glimmer-9', g: 4.2 } };
+const WS_EFF = { lever: .95, winch: .90, ramp: .75, wedge: .40, screw: .30 }, WS_PEFF = { 1: .95, 2: .90, 3: .85, 4: .80, 5: .75, 6: .70 };
+const WS_MACH = { lever: 'Lever', pulley: 'Pulley system', winch: 'Wheel and axle (winch)', ramp: 'Ramp', wedge: 'Wedge', screw: 'Screw jack' };
+const WS_ICON = { lever: '⚖️', pulley: '🪢', winch: '⚙️', ramp: '📐', wedge: '🪓', screw: '🔩' };
+const WS_VERB = { lever: 'Pull!', pulley: 'Pull!', winch: 'Turn!', ramp: 'Pull!', wedge: 'Push!', screw: 'Turn!' };
+const WS_DONE = { wedge: 'Split!' };
+const WS_BAR = 2, WS_T1 = 0.8, WS_WEDGE_OPEN = 0.05;
+const wsR1 = x => Math.round((x + 1e-9) * 10) / 10, wsR2 = x => Math.round((x + 1e-9) * 100) / 100;
+const wsNear = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) < 1e-6 : a === b;
+
+/* the Workshop's settings. A step sets them with wsSetup({...}). `loads` is { machine: { id, N, name, short } } so each machine can have its own load. */
+const WS = {
+  mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10,
+  load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null, world: 'earth', real: false, cap: null, maxTravel: 1.5,
+  lim: {}, classPick: false, rampH: false, axleEdit: false,
+  busy: false, ph: 0, pt: 0, T2: 2.2, c: null, done: false, msg: '', reading: 0, prog: 0, effort: 0, last: null, bubble: null, bubbleAt: 0, lastBub: -1, shown: false
+};
+/* ---------- the maths ---------- */
+function wsArms() {
+  if (WS.cls === 1) return { la: WS.arm, ea: WS_BAR - WS.arm };
+  if (WS.cls === 2) return { la: WS.arm, ea: WS_BAR };
+  return { la: WS_BAR, ea: WS.arm };
+}
+function wsParts(o) {   // machine settings -> { ma, eff, rise, ... } for the CURRENT settings (or the overrides in o)
+  const s = Object.assign({}, WS, o || {}), m = s.mach; let ma, eff = 1, rise = s.lift, ex = {};
+  if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; }
+  else if (m === 'pulley') { ma = s.ropes; eff = WS_PEFF[s.ropes] || .7; }
+  else if (m === 'winch') { ma = Math.round(s.R / s.axle * 1e6) / 1e6; eff = WS_EFF.winch; }
+  else if (m === 'ramp') { ma = Math.round(s.L / s.h * 1e6) / 1e6; eff = WS_EFF.ramp; rise = s.h; }
+  else if (m === 'wedge') { ma = 20 / s.thick; eff = WS_EFF.wedge; rise = WS_WEDGE_OPEN; }
+  else { ma = Math.round(s.per / s.pitch * 1e6) / 1e6; eff = WS_EFF.screw; ex = { turns: Math.round(s.lift * 100 / s.pitch * 1e6) / 1e6 }; }
+  return Object.assign({ ma, eff: s.real ? eff : 1, rise }, ex);
+}
+function wsCalc(o) {
+  const s = Object.assign({}, WS, o || {}), P = wsParts(o), load = s.load, ma = P.ma, E = wsR1(load / (ma * P.eff)); let rise = P.rise, capped = false, short = false, need = E;
+  if (s.cap != null && E > s.cap) { capped = true; rise = 0; }
+  if (!capped && s.mach === 'lever' && s.maxTravel != null && ma * rise > s.maxTravel + 1e-9) { rise = Math.round(s.maxTravel / ma * 1000) / 1000; short = true; }
+  const eDist = wsR2(ma * rise), out = Math.round(load * rise * 100) / 100, win = P.eff < 1 ? Math.round(out / P.eff) : out;
+  return { mach: s.mach, ma, eff: P.eff, E: capped ? s.cap : E, need, capped, short, rise: wsR2(rise), eDist, workOut: out, workIn: win, wasted: wsR2(win - out), effPct: out ? Math.round(out / win * 1000) / 10 : 0,
+    turns: P.turns != null && !capped ? Math.round(P.turns * 100) / 100 : null, la: P.la, ea: P.ea, ropes: s.ropes, cable: s.ropes * s.lift, travel: eDist };
+}
+const wsRecord = c => ({ mach: WS.mach, cls: WS.mach === 'lever' ? WS.cls : null, la: c.la != null ? wsR2(c.la) : null, ea: c.ea != null ? wsR2(c.ea) : null, ropes: WS.mach === 'pulley' ? WS.ropes : null,
+  R: WS.mach === 'winch' ? WS.R : null, L: WS.mach === 'ramp' ? WS.L : null, h: WS.mach === 'ramp' ? WS.h : null, thick: WS.mach === 'wedge' ? WS.thick : null,
+  per: WS.mach === 'screw' ? WS.per : null, pitch: WS.mach === 'screw' ? WS.pitch : null, loadN: WS.load, loadName: WS.loadName, loadShort: WS.loadShort, world: WS.world, real: !!WS.real, cap: WS.cap,
+  liftSet: WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
+
+/* ---------- the student's own runs (a question never forces a re-run) ---------- */
+const shopRuns = () => runsFor().filter(r => r.scene === 'shop' && !r.live);
+function shopRun(f) {
+  const R = shopRuns().filter(r => !r.capped && (('real' in f) || !r.real) && Object.keys(f).every(k => k === 'load' ? wsNear(r.loadN, f[k]) : k === 'rise' ? wsNear(r.rise, f[k]) : wsNear(r[k], f[k])));
+  return R.length ? R[R.length - 1] : null;
+}
+const shopE = f => { const r = shopRun(f); return r ? r.E : null; };
+const shopDist = f => { const r = shopRun(f); return r ? r.eDist : null; };
+const shopHas = f => shopRun(f) != null;
+/* masks: a step lists mask: [{ q, keys, when(run-like) }]. Keys: readE, readMA, readWork, turns (more in later parts). */
+function wsMasked(rec) {
+  const out = new Set(); if (typeof CH === 'undefined' || !CH || LAB.mode !== 'guided') return out;
+  const st = CHDATA[CH.id] && CHDATA[CH.id].steps[GI]; if (!st || !st.mask) return out;
+  const r = rec || Object.assign(wsRecord(wsCalc()));
+  st.mask.forEach(M => { if (M.when(r)) { const q = dbGet(stepKey(CH.id, GI) + '.' + M.q, null); if (!(q && q.done)) M.keys.forEach(k => out.add(k)); } });
+  return out;
+}
+
+/* ---------- state changes ---------- */
+function wsLoadFor(m) { const l = WS.loads[m]; if (l) { WS.load = l.N; WS.loadName = l.name; WS.loadShort = l.short; WS.loadId = l.id; } }
+function wsSetLoad(id) { const l = WS.loadOpts && WS.loadOpts.find(x => x.id === id); if (!l) return; WS.load = l.N; WS.loadName = l.name; WS.loadShort = l.short; WS.loadId = l.id; wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange(); }
+function wsResetLoad() { WS.busy = false; WS.ph = 0; WS.pt = 0; WS.prog = 0; WS.reading = 0; WS.done = false; WS.msg = ''; WS.c = null; if (typeof RUN !== 'undefined' && RUN && RUN.scene === 'shop' && RUN.live) runEnd('reset'); }
+function wsSetup(o) {
+  const d = { mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10, load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null,
+    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false };
+  Object.assign(WS, d, o || {}); wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
+}
+function wsSetMach(m) {
+  if (!WS.allow.includes(m) || m === WS.mach) return; WS.mach = m; wsLoadFor(m); const d = WS.lim[m]; if (d) Object.assign(WS, d); WS.lift = ({ lever: 0.10, pulley: 1.0, winch: 1.0, ramp: WS.h, wedge: WS_WEDGE_OPEN, screw: 0.20 })[m] || WS.lift;
+  if (WS.lifts && WS.lifts[m] != null) WS.lift = WS.lifts[m];
+  wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange();
+}
+function wsSet(k, v) {
+  const lim = wsLimits(k); if (lim) v = clamp(Math.round(v / lim.step) * lim.step, lim.min, lim.max);
+  v = Math.round(v * 1000) / 1000; if (WS[k] === v) { wsRenderControls(); return; }
+  if (k === 'cls') { WS.cls = v; WS.arm = v === 3 ? 0.5 : 1.0; } else WS[k] = v;
+  wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange();
+}
+function wsLimits(k) {
+  if (k === 'arm') return { min: 0.2, max: 1.8, step: 0.05 };
+  if (k === 'R') return { min: WS.lim.winchR ? WS.lim.winchR[0] : 0.1, max: WS.lim.winchR ? WS.lim.winchR[1] : 0.6, step: 0.05 };
+  if (k === 'axle') return { min: 0.04, max: 0.10, step: 0.01 };
+  if (k === 'L') return WS.lim.rampL ? { min: WS.lim.rampL[0], max: WS.lim.rampL[1], step: WS.lim.rampL[2] } : { min: 1, max: 6, step: 0.5 };
+  if (k === 'h') return { min: 0.6, max: 1.5, step: 0.2 };
+  if (k === 'ropes') return { min: 1, max: WS.lim.ropesMax || 6, step: 1 };
+  if (k === 'lift') return { min: 0.5, max: 2, step: 0.5 };
+  return null;
+}
+
+/* ---------- Pull! ---------- */
+function wsPull() {
+  if (WS.busy) return false; wsResetLoad(); const c = wsCalc(); WS.c = c; WS.busy = true; WS.ph = 1; WS.pt = 0; WS.done = false; WS.msg = ''; WS.prog = 0; WS.reading = 0;
+  WS.T2 = RMOTION ? 0.3 : clamp(1.6 + Math.min(c.rise || 1, 3) * 0.4, 1.8, 3.4);
+  S.running = false; runMark('pull'); if (RUN) Object.assign(RUN, wsRecord(c), { scene: 'shop' });
+  S.flags.shopRan = true; WS.shown = true; return true;
+}
+function wsUpdate(dt) {
+  if (!WS.busy || !WS.c) return; const c = WS.c, t1 = RMOTION ? 0.2 : WS_T1;
+  WS.pt += dt;
+  if (WS.ph === 1) { WS.reading = c.E * sstep(clamp(WS.pt / t1, 0, 1)); if (WS.pt >= t1) { WS.reading = c.E; WS.ph = 2; WS.pt = 0; if (c.capped) { WS.ph = 3; wsFinish(); } } }
+  else if (WS.ph === 2) { WS.prog = clamp(WS.pt / WS.T2, 0, 1); WS.reading = c.E; if (WS.pt >= WS.T2) { WS.prog = 1; WS.ph = 3; wsFinish(); } }
+}
+function wsFinish() {
+  const c = WS.c; WS.busy = false; WS.done = true; WS.last = c;
+  const verb = WS.mach === 'wedge' ? 'Split!' : 'Lifted!';
+  if (c.capped) WS.msg = `${SMOOSHY.name} pulled as hard as he can (${SMOOSHY.pull} N), but this set-up needs ${fmt(c.need, 1)} N.`;
+  else if (c.short) WS.msg = `The lever only lifted the load ${fmt(c.rise, 2)} m before your end hit the floor.`;
+  else WS.msg = verb;
+  if (c.capped || c.short) WS.prog = c.capped ? 0 : 1;
+  S.flags.shopDone = true; if (!c.capped && !c.short) S.flags.shopLifted = true;
+  if (RUN) { RUN.done = true; runEnd(c.capped ? 'capped' : c.short ? 'short' : 'lifted'); }
+  wsBubble(c.E <= SMOOSHY.pull && !c.capped);
+  if (typeof checkStep === 'function') checkStep();
+}
+const WS_SAY_OK = ['Yes! Even my gummy arms could do that!', 'Sweet! That one\'s Smooshy-sized.', 'Now that\'s a gummy-friendly pull!'], WS_SAY_BAD = ['Too much for my gummy arms!', 'Ooh, that would turn me to jelly.', 'I\'d be a puddle of jelly after that one!'];
+function wsBubble(ok) {
+  const L = ok ? WS_SAY_OK : WS_SAY_BAD; let i = Math.floor(Math.random() * L.length); const key = (ok ? 0 : 10) + i; if (key === WS.lastBub) i = (i + 1) % L.length;
+  WS.lastBub = (ok ? 0 : 10) + i; WS.bubble = L[i]; WS.bubbleAt = performance.now();
+}
+const wsForces = () => ({ L: 0, R: 0, shove: 0, app: 0, fr: 0, brk: 0, net: 0, W: WS.load, N: 0, m: WS.load / G, a: 0, fmax: 0, fk: 0 });
+function wsReset() { wsResetLoad(); WS.bubble = null; }
+
+/* ---------- run sentences and chips ---------- */
+const wsLoadTxt = r => `${fmt(r.loadN, r.loadN % 1 ? 1 : 0)} N ${r.loadShort || 'load'}`;
+function wsText(r) {
+  if (r.live && r.out === 'running') return `You are working the ${WS_MACH[r.mach].toLowerCase()}…`;
+  const mk = wsMasked(r), hideE = mk.has('readE'), E = hideE ? 'hidden until you answer' : fmt(r.E, 1) + ' N', obj = r.loadShort || 'load', num = v => fmt(v, 2) + ' m';
+  const lev = r.mach === 'lever' ? `a class ${r.cls} lever (load arm ${fmt(r.la, 2)} m, effort arm ${fmt(r.ea, 2)} m)` : r.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes === 1 ? '' : 's'}` : r.mach === 'winch' ? `a winch with a handle radius of ${fmt(r.R, 2)} m` : r.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp that rises ${fmt(r.h, 1)} m` : r.mach === 'wedge' ? `a wedge ${r.thick} cm thick` : `a screw jack (${fmt(r.per, 0)} cm per turn, pitch ${fmt(r.pitch, 1)} cm)`;
+  const verb = r.mach === 'wedge' ? `You pushed the ${wsLoadTxt(r)} apart with` : r.mach === 'ramp' ? `You pulled the ${wsLoadTxt(r)} up` : `You lifted the ${wsLoadTxt(r)} with`;
+  const worldNote = r.world && r.world !== 'earth' ? ` (on ${WS_WORLDS[r.world].n})` : '';
+  if (r.capped) return `With ${lev}, the load needed ${fmt(r.need, 1)} N, which is more than ${SMOOSHY.name}'s ${r.cap} N, so it didn't move.`;
+  const move = r.mach === 'ramp' ? ` The ${obj} rose ${num(r.rise)} and you pulled it ${num(r.eDist)} along the ramp.` : r.mach === 'pulley' ? ` The ${obj} rose ${num(r.rise)} and you pulled ${num(r.eDist)} of rope.` : r.mach === 'wedge' ? ` The halves opened ${fmt(r.rise * 100, 0)} cm and you pushed the wedge ${num(r.eDist)}.` : r.mach === 'screw' ? ` The ${obj} rose ${fmt(r.rise * 100, 0)} cm.${mk.has('turns') ? '' : ` It took ${fmt(r.turns, 0)} turns.`}` : ` The ${obj} rose ${num(r.rise)} and ${r.mach === 'lever' ? 'your end' : 'your hand'} moved ${num(r.eDist)}.`;
+  const sh = r.short ? ` The lever only lifted the load ${num(r.rise)} before your end hit the floor.` : '';
+  return `${verb} ${lev}${worldNote}. The effort was ${E}.${sh || move}`.replace('.. ', '. ');
+}
+function wsChips(r) {
+  const mk = wsMasked(r), c = [['Machine', WS_MACH[r.mach]]];
+  if (r.mach === 'lever') c.push(['Class', String(r.cls)], ['Load arm', fmt(r.la, 2) + ' m'], ['Effort arm', fmt(r.ea, 2) + ' m']);
+  if (r.mach === 'pulley') c.push(['Supporting ropes', String(r.ropes)]);
+  if (r.mach === 'winch') c.push(['Handle radius', fmt(r.R, 2) + ' m']);
+  if (r.mach === 'ramp') c.push(['Ramp length', fmt(r.L, 1) + ' m'], ['Height', fmt(r.h, 1) + ' m']);
+  if (r.mach === 'wedge') c.push(['Thickness', r.thick + ' cm']);
+  if (r.mach === 'screw') { c.push(['Per turn', fmt(r.per, 0) + ' cm'], ['Pitch', fmt(r.pitch, 1) + ' cm']); if (r.turns != null && !mk.has('turns')) c.push(['Turns', fmt(r.turns, 0)]); }
+  c.push(['Load', fmt(r.loadN, r.loadN % 1 ? 1 : 0) + ' N']);
+  if (!r.capped && !mk.has('readE')) c.push(['Effort', fmt(r.E, 1) + ' N']);
+  if (r.capped) c.push(['Needed', fmt(r.need, 1) + ' N'], ['Result', 'too much']);
+  else { c.push([r.mach === 'wedge' ? 'Opened' : 'Load rise', fmt(r.rise, 2) + ' m'], ['Effort distance', fmt(r.eDist, 2) + ' m']); if (!mk.has('readMA') && wsHas('readMA')) c.push(['MA', fmt(r.ma, 2)]); if (!mk.has('readWork') && wsHas('readWork')) c.push(['Work in', fmt(r.workIn, 0) + ' J'], ['Work out', fmt(r.workOut, 0) + ' J']); }
+  return c;
+}
+const wsHas = k => LAB.show.has(k) || VIEW === 'vExplore';
+
+/* ---------- controls ---------- */
+const wsFmt = (k, v) => k === 'ropes' ? String(v) : fmt(v, k === 'arm' || k === 'R' || k === 'axle' ? 2 : 1);
+function wsRenderControls() {
+  if (!$('#wsMachs')) return;
+  $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach); });   // only the controls of the machine on the bench
+  const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
+  const A = WS.allow; $('#wsMachs').className = 'seg ' + (A.length > 3 ? 'three' : A.length > 2 ? 'three' : 'two'); seg('#wsMachs', A.map(m => [m, `${WS_ICON[m]} ${WS_MACH[m].replace(' (winch)', '')}`]), WS.mach, 'data-mach');
+  if (WS.loadOpts) seg('#wsLoads', WS.loadOpts.map(l => [l.id, l.name]), WS.loadId, 'data-load');
+  seg('#wsCls', [[1, 'Class 1'], [2, 'Class 2'], [3, 'Class 3']], WS.cls, 'data-cls');
+  seg('#wsThick', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick, 'data-thick');
+  seg('#wsPer', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per, 'data-per'); seg('#wsPitch', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch, 'data-pitch');
+  seg('#wsH', [[0.6, '0.6 m'], [0.8, '0.8 m'], [1.0, '1.0 m'], [1.2, '1.2 m']], WS.h, 'data-h');
+  seg('#wsLift', [[1, '1 m'], [2, '2 m']], WS.lift, 'data-lift');
+  const num = (id, v) => { const e = $(id); if (e && document.activeElement !== e) e.value = v; };
+  const al = wsLimits('arm'), lab = WS.cls === 3 ? 'Effort arm' : 'Load arm'; const t = $('#wsArmTitle'); if (t) t.textContent = lab; $('#wsArm').min = al.min; $('#wsArm').max = al.max; $('#wsArm').step = al.step; $('#wsArm').value = WS.arm; num('#wsArmNum', fmt(WS.arm, 2));
+  const arms = wsArms(), note = $('#wsArmNote'); if (note) note.textContent = `Load arm ${fmt(arms.la, 2)} m · effort arm ${fmt(arms.ea, 2)} m`;
+  const rl = wsLimits('R'); [$('#wsR'), $('#wsRNum')].forEach(e => { e.min = rl.min; e.max = rl.max; }); $('#wsR').step = 0.05; $('#wsR').value = WS.R; num('#wsRNum', fmt(WS.R, 2));
+  const ll = wsLimits('L'); [$('#wsL'), $('#wsLNum')].forEach(e => { e.min = ll.min; e.max = ll.max; }); $('#wsL').step = ll.step; $('#wsL').value = WS.L; num('#wsLNum', fmt(WS.L, 1));
+  $('#wsRopesN').textContent = WS.ropes; $('#wsRopesDn').disabled = WS.ropes <= 1; $('#wsRopesUp').disabled = WS.ropes >= (WS.lim.ropesMax || 6);
+  const ax = $('#wsAxleRow'); if (ax) { ax.hidden = !WS.axleEdit || WS.mach !== 'winch'; num('#wsAxleNum', fmt(WS.axle, 2)); }
+  $('#wsClsRow').hidden = !WS.classPick || WS.mach !== 'lever'; $('#wsHRow').hidden = !WS.rampH || WS.mach !== 'ramp'; $('#wsLiftRow').hidden = !WS.lifts || WS.lifts.pick !== true || !['pulley'].includes(WS.mach);
+  const pb = $('#wsPull'); if (pb) { pb.textContent = WS_VERB[WS.mach]; pb.disabled = WS.busy; }
+  const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and the screw ${fmt(WS.pitch, 1)} cm.` : '';
+}
+function initShop() {
+  if (!$('#wsMachs')) return;
+  const dl = (sel, attr, fn) => document.addEventListener('click', e => { const b = e.target.closest(sel); if (b && $('#lab').contains(b)) fn(b.getAttribute(attr), b); });
+  dl('#wsMachs [data-mach]', 'data-mach', v => wsSetMach(v)); dl('#wsLoads [data-load]', 'data-load', v => wsSetLoad(v)); dl('#wsCls [data-cls]', 'data-cls', v => wsSet('cls', +v));
+  dl('#wsThick [data-thick]', 'data-thick', v => wsSet('thick', +v)); dl('#wsPer [data-per]', 'data-per', v => wsSet('per', +v)); dl('#wsPitch [data-pitch]', 'data-pitch', v => wsSet('pitch', +v));
+  dl('#wsH [data-h]', 'data-h', v => wsSet('h', +v)); dl('#wsLift [data-lift]', 'data-lift', v => wsSet('lift', +v));
+  const pair = (r, n, k) => { $(r).addEventListener('input', () => wsSet(k, +$(r).value)); const go = () => { const v = parseNum($(n).value); if (isNaN(v)) { wsRenderControls(); return; } wsSet(k, v); }; $(n).addEventListener('change', go); $(n).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); $(n).blur(); } }); };
+  pair('#wsArm', '#wsArmNum', 'arm'); pair('#wsR', '#wsRNum', 'R'); pair('#wsL', '#wsLNum', 'L');
+  const ax = $('#wsAxleNum'); if (ax) { const go = () => { const v = parseNum(ax.value); if (!isNaN(v)) wsSet('axle', v); else wsRenderControls(); }; ax.addEventListener('change', go); }
+  $('#wsRopesDn').addEventListener('click', () => wsSet('ropes', WS.ropes - 1)); $('#wsRopesUp').addEventListener('click', () => wsSet('ropes', WS.ropes + 1));
+  $('#wsPull').addEventListener('click', () => { if (wsPull()) labChanged(); });
+}
+
+/* ===== Chapter 6: drawing for the Workshop (Smooshy, the Gumdrop, the machines, the newtonmeter, the rulers) =====
+   Flat, rounded, outline-free shapes, like the rest of Force HQ. The Workshop interior has its own fixed palette (like the Drop Zone sky). Script: section B6 and C2. */
+const WSC = { wall: '#d9e0e4', wall2: '#c9d3d9', floor: '#8a6a45', floor2: '#76593a', bench: '#a98456', peg: '#b9c4cb', hole: '#9aa7af', beam: '#5d6b74', wood: '#c9a36a', wood2: '#a98456', steel: '#8e9ca5', steel2: '#6c7b84', rock: '#8b8f93', rock2: '#a3a7ab',
+  crate: '#c58a4a', crate2: '#a46f36', ice: '#bfe6f5', ice2: '#8cc8e0', ink: '#243038', red: '#d6402c', amber: '#e3a51c', green: '#2a7d48', glass: 'rgba(255,255,255,.55)' };
+const SMOO = { jelly: '#3b82f6', hi: '#9cc4ff', ear: '#2563c9', dark: '#1d4ed8' };
+
+/* ---------- Captain Smooshy: a blue gummy bear astronaut. (x, y) = the middle of the body; s = scale (1 = about 120 px tall). Moods: wave, cheer, strain, worried. ---------- */
+function drawSmooshy(c, x, y, s, mood, tt) {
+  mood = mood || 'wave'; tt = tt == null ? performance.now() / 1000 : tt; const sw = RMOTION ? 0 : Math.sin(tt * 5) * (mood === 'strain' ? 2.2 : 0), wob = mood === 'cheer' && !RMOTION ? Math.sin(tt * 7) * 3 : 0;
+  c.save(); c.translate(x + sw, y); c.scale(s, s); c.rotate(wob * Math.PI / 180);
+  const J = SMOO.jelly; c.globalAlpha = .88;
+  /* legs, body, arms */
+  c.fillStyle = J; c.beginPath(); c.roundRect(-26, 22, 20, 32, 9); c.fill(); c.beginPath(); c.roundRect(6, 22, 20, 32, 9); c.fill();
+  c.beginPath(); c.ellipse(0, 6, 33, 36, 0, 0, 7); c.fill();
+  const arm = (side, up) => { c.save(); c.translate(side * 30, -6); c.rotate(side * (up ? -2.5 : mood === 'strain' ? 0.5 : 0.7)); c.beginPath(); c.roundRect(-8, -4, 16, 36, 8); c.fill(); c.restore(); };
+  arm(-1, mood === 'cheer'); arm(1, mood === 'cheer' || mood === 'wave');
+  /* head and ears */
+  c.beginPath(); c.arc(0, -36, 28, 0, 7); c.fill(); [-1, 1].forEach(sd => { c.beginPath(); c.arc(sd * 22, -58, 11, 0, 7); c.fill(); });
+  c.globalAlpha = 1; c.fillStyle = SMOO.ear; [-1, 1].forEach(sd => { c.beginPath(); c.arc(sd * 22, -58, 5.5, 0, 7); c.fill(); });
+  /* highlight down the left side */
+  c.strokeStyle = SMOO.hi; c.lineWidth = 4; c.lineCap = 'round'; c.globalAlpha = .75; c.beginPath(); c.arc(0, 6, 26, 2.3, 3.2); c.stroke(); c.globalAlpha = 1;
+  /* chest patch with a star */
+  c.fillStyle = '#fffaf2'; c.beginPath(); c.roundRect(-11, 4, 22, 20, 6); c.fill(); c.fillStyle = '#e3a51c'; star5(c, 0, 14, 7, 3);
+  /* face */
+  c.fillStyle = '#1f1d26';
+  if (mood === 'strain') { c.strokeStyle = '#1f1d26'; c.lineWidth = 2.6; [-1, 1].forEach(sd => { c.beginPath(); c.moveTo(sd * 15 - 4, -40); c.lineTo(sd * 15 + 4, -37); c.stroke(); }); c.beginPath(); c.moveTo(-7, -23); c.lineTo(7, -23); c.stroke(); }
+  else { [-1, 1].forEach(sd => { c.beginPath(); c.arc(sd * 13, -39, 3.4, 0, 7); c.fill(); });
+    c.strokeStyle = '#1f1d26'; c.lineWidth = 2.6; c.beginPath();
+    if (mood === 'worried') { c.moveTo(-8, -22); c.quadraticCurveTo(0, -27, 8, -22); c.stroke(); c.beginPath(); c.moveTo(-18, -44); c.lineTo(-8, -48); c.moveTo(18, -44); c.lineTo(8, -48); c.stroke(); }
+    else if (mood === 'cheer') { c.moveTo(-9, -26); c.quadraticCurveTo(0, -12, 9, -26); c.closePath(); c.fillStyle = '#1f1d26'; c.fill(); }
+    else { c.moveTo(-8, -26); c.quadraticCurveTo(0, -18, 8, -26); c.stroke(); } }
+  c.fillStyle = '#1f1d26'; c.beginPath(); c.arc(0, -32, 2, 0, 7); c.fill();
+  /* the bubble helmet with a glint */
+  c.fillStyle = 'rgba(255,255,255,.22)'; c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 3; c.beginPath(); c.arc(0, -38, 36, 0, 7); c.fill(); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.95)'; c.lineWidth = 3.4; c.beginPath(); c.arc(0, -38, 29, 3.7, 4.5); c.stroke();
+  /* a soft white rim glow so Smooshy reads against dark or violet backgrounds */
+  c.strokeStyle = 'rgba(255,255,255,.35)'; c.lineWidth = 2; c.beginPath(); c.ellipse(0, 6, 35.5, 38, 0, 0, 7); c.stroke();
+  c.restore();
+}
+function star5(c, x, y, R, r) { c.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r : R; c.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } c.closePath(); c.fill(); }
+/* the Gumdrop: a dome-shaped ship like a gumdrop sweet. (x, y) = the middle of the base; tilt in radians. */
+function drawGumdrop(c, x, y, s, tilt) {
+  c.save(); c.translate(x, y); c.rotate(tilt || 0); c.scale(s, s);
+  c.fillStyle = '#6c7b84'; [[-34, 0], [0, 4], [34, 0]].forEach(([lx]) => { c.beginPath(); c.roundRect(lx - 4, 0, 8, 22, 4); c.fill(); c.beginPath(); c.roundRect(lx - 10, 20, 20, 5, 3); c.fill(); });
+  const g = c.createLinearGradient(0, -80, 0, 6); g.addColorStop(0, '#ff9ec4'); g.addColorStop(1, '#e8639b'); c.fillStyle = g;
+  c.beginPath(); c.moveTo(-52, 4); c.quadraticCurveTo(-52, -86, 0, -86); c.quadraticCurveTo(52, -86, 52, 4); c.closePath(); c.fill();
+  c.fillStyle = '#c94a82'; c.beginPath(); c.roundRect(-56, -6, 112, 14, 7); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.85)'; [[-30, -50], [24, -62], [34, -28], [-18, -22], [0, -72], [-40, -30], [10, -40]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 2.4, 0, 7); c.fill(); });
+  c.fillStyle = '#bfe6f5'; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 4; c.stroke();
+  c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.arc(-5, -47, 4, 0, 7); c.fill();
+  c.restore();
+}
+
+/* ---------- the Workshop room ---------- */
+function wsRoom(c) {
+  c.fillStyle = WSC.wall; c.fillRect(0, 0, 900, WS_H); c.fillStyle = WSC.wall2; for (let i = 0; i < 900; i += 60) c.fillRect(i, 0, 2, 350);
+  c.fillStyle = WSC.floor; c.fillRect(0, 350, 900, WS_H - 350); c.fillStyle = WSC.floor2; c.fillRect(0, 350, 900, 6);
+  /* the hoist beam across the ceiling */
+  c.fillStyle = WSC.beam; c.fillRect(0, 0, 900, 22); c.fillStyle = 'rgba(255,255,255,.16)'; c.fillRect(0, 0, 900, 5);
+  /* the pegboard of tools, on the left */
+  c.fillStyle = WSC.peg; c.beginPath(); c.roundRect(14, 205, 142, 128, 6); c.fill(); c.fillStyle = WSC.hole; for (let i = 0; i < 9; i++) for (let j = 0; j < 6; j++) { c.beginPath(); c.arc(24 + i * 15.5, 216 + j * 20, 1.6, 0, 7); c.fill(); }
+  c.strokeStyle = WSC.steel2; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.moveTo(34, 230); c.lineTo(34, 290); c.stroke(); c.beginPath(); c.arc(34, 222, 8, 0, 7); c.stroke();
+  c.fillStyle = WSC.red; c.beginPath(); c.roundRect(60, 236, 44, 12, 4); c.fill(); c.fillStyle = WSC.steel2; c.fillRect(60, 248, 6, 36);
+  c.strokeStyle = WSC.steel2; c.lineWidth = 5; c.beginPath(); c.arc(128, 262, 14, 0.4, 5.9); c.stroke(); c.beginPath(); c.moveTo(138, 276); c.lineTo(140, 308); c.stroke();
+  /* the Force HQ hangar door, far right, and a workbench */
+  c.fillStyle = WSC.beam; c.fillRect(884, 120, 16, 230); c.fillStyle = WSC.amber; for (let i = 0; i < 6; i++) c.fillRect(884, 128 + i * 38, 16, 12);
+}
+function wsMonitor(c) {
+  const x = 12, y = 30, w = 146, h = 112, tt = performance.now() / 1000;
+  c.fillStyle = '#1f2a30'; c.beginPath(); c.roundRect(x, y, w, h, 9); c.fill(); c.fillStyle = '#26364a'; c.beginPath(); c.roundRect(x + 6, y + 6, w - 12, h - 12, 6); c.fill();
+  c.save(); c.beginPath(); c.roundRect(x + 6, y + 6, w - 12, h - 12, 6); c.clip();
+  const sk = c.createLinearGradient(0, y, 0, y + h); sk.addColorStop(0, '#5d3f99'); sk.addColorStop(1, '#8b6bd0'); c.fillStyle = sk; c.fillRect(x, y, w, h);
+  c.fillStyle = 'rgba(255,255,255,.7)'; [[24, 46], [140, 52], [118, 40], [40, 66]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 1.5, 0, 7); c.fill(); });
+  const bub = WS.bubble && performance.now() - WS.bubbleAt < 5200, last = WS.last, mood = WS.busy ? (WS.c && WS.c.capped ? 'strain' : 'strain') : bub ? (last && !last.capped && last.E <= SMOOSHY.pull ? 'cheer' : 'worried') : 'wave';
+  drawSmooshy(c, x + 68, y + 66, 0.62, mood, tt); c.restore();
+  if (!RMOTION && !bub) { c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(x + 6, y + ((tt * 40) % (h - 12)) + 6, w - 12, 3); }
+  /* the sticky note */
+  c.save(); c.translate(x + w - 12, y + h - 6); c.rotate(.12); c.fillStyle = '#f6e27a'; c.fillRect(-52, -22, 56, 30); txt(c, '60 N max!', -24, -7, '#5a4a10', `800 11px ${C.fb}`); c.restore();
+  txt(c, 'CAPTAIN SMOOSHY · LIVE', x + 6, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left');
+  if (bub) wsBubbleDraw(c, WS.bubble, x, y + h + 10, w);
+}
+function wsBubbleDraw(c, s, x, y, w) {
+  c.font = `700 12px ${C.fb}`; const words = s.split(' '), lines = []; let cur = '';
+  words.forEach(wd => { const t = cur ? cur + ' ' + wd : wd; if (c.measureText(t).width > w - 18 && cur) { lines.push(cur); cur = wd; } else cur = t; }); lines.push(cur);
+  const h = lines.length * 15 + 14; c.fillStyle = '#fffaf2'; c.strokeStyle = SMOO.ear; c.lineWidth = 2; c.beginPath(); c.roundRect(x, y, w, h, 9); c.fill(); c.stroke();
+  c.beginPath(); c.moveTo(x + 30, y); c.lineTo(x + 40, y - 9); c.lineTo(x + 50, y); c.fillStyle = '#fffaf2'; c.fill();
+  lines.forEach((l, i) => txt(c, l, x + w / 2, y + 14 + i * 15, WSC.ink, `700 12px ${C.fb}`));
+}
+
+/* ---------- the newtonmeter: a dial with a red band from 60 N ("Smooshy's limit") and a digital window ---------- */
+const WS_DIALS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000];
+function wsDialMax(need) { return WS_DIALS.find(v => v >= Math.max(need, 60) * 1.05) || WS_DIALS[WS_DIALS.length - 1]; }
+function wsNewtonmeter(c, cx, cy, M, val, hideVal, ex, ey) {
+  const r = 50, a0 = Math.PI * 0.75, sw = Math.PI * 1.5, ang = v => a0 + clamp(v / M, 0, 1) * sw;
+  if (ex != null) { c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(ex, ey); c.lineTo(cx, cy + r + 20); c.stroke(); c.setLineDash([]); }
+  c.fillStyle = '#243038'; c.beginPath(); c.roundRect(cx - 62, cy - 62, 124, 148, 14); c.fill(); c.fillStyle = '#e9eef1'; c.beginPath(); c.arc(cx, cy, r + 4, 0, 7); c.fill();
+  c.lineCap = 'butt'; c.lineWidth = 9; c.strokeStyle = '#cfd8dd'; c.beginPath(); c.arc(cx, cy, r - 10, a0, a0 + sw); c.stroke();
+  c.strokeStyle = WSC.red; c.beginPath(); c.arc(cx, cy, r - 10, ang(Math.min(SMOOSHY.pull, M)), a0 + sw); c.stroke();
+  c.strokeStyle = WSC.ink; c.lineWidth = 2; for (let i = 0; i <= 10; i++) { const a = a0 + i / 10 * sw; c.beginPath(); c.moveTo(cx + Math.cos(a) * (r - 4), cy + Math.sin(a) * (r - 4)); c.lineTo(cx + Math.cos(a) * (r - (i % 5 ? 8 : 14) - 4), cy + Math.sin(a) * (r - (i % 5 ? 8 : 14) - 4)); c.stroke(); }
+  [0, M / 2, M].forEach((v, i) => { const a = ang(v); txt(c, v >= 1000 ? (v / 1000) + 'k' : String(v), cx + Math.cos(a) * (r - 24), cy + Math.sin(a) * (r - 24), WSC.ink, `700 9px ${C.fn}`); });
+  if (!hideVal) { const a = ang(val); c.strokeStyle = WSC.ink; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * (r - 12), cy + Math.sin(a) * (r - 12)); c.stroke(); }
+  c.fillStyle = WSC.ink; c.beginPath(); c.arc(cx, cy, 5, 0, 7); c.fill();
+  c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx - 44, cy + 36, 88, 26, 5); c.fill(); txt(c, hideVal ? '? N' : fmt(val, 1) + ' N', cx, cy + 49.5, '#9ef0b2', `700 17px ${C.fn}`);
+  txt(c, 'NEWTONMETER', cx, cy + 74, '#cfd8dd', `800 9px ${C.fb}`);
+  c.fillStyle = WSC.red; c.fillRect(cx - 52, cy + 79, 7, 7); txt(c, 'Smooshy\'s limit: 60 N', cx - 42, cy + 82.5, '#cfd8dd', `700 8.5px ${C.fb}`, 'left');
+}
+
+/* ---------- little shared bits ---------- */
+function wsLoadBlock(c, x, y, w, h, id, label) {   // x,y = the middle of the bottom edge
+  const ice = id === 'ice', rock = id === 'rock', car = id === 'car';
+  c.fillStyle = ice ? WSC.ice : rock ? WSC.rock : WSC.crate; c.beginPath(); c.roundRect(x - w / 2, y - h, w, h, rock ? h / 2.2 : 6); c.fill();
+  c.fillStyle = ice ? WSC.ice2 : rock ? WSC.rock2 : WSC.crate2; if (!rock) { c.fillRect(x - w / 2 + 5, y - h + 5, w - 10, 4); c.fillRect(x - w / 2 + 5, y - 9, w - 10, 4); } else { c.beginPath(); c.ellipse(x - w * .18, y - h * .62, w * .18, h * .14, -.4, 0, 7); c.fill(); }
+  if (label) txt(c, label, x, y - h / 2 + 0.5, '#fffaf2', `800 12px ${C.fn}`);
+}
+function wsBracket(c, x1, x2, y, label, col, above) {
+  c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke(); txt(c, label, (x1 + x2) / 2, above ? y - 10 : y + 12, col, `700 11px ${C.fn}`);
+}
+const wsHand = (c, x, y, down) => { c.fillStyle = '#e8b896'; c.beginPath(); c.roundRect(x - 11, y - 11, 22, 22, 9); c.fill(); c.fillStyle = '#b8916f'; c.fillRect(x - 11, y + (down ? 6 : -9), 22, 4); };
+function wsEffArrow(c, x, y, down) { const col = WSC.red; if (down) arrow(c, x, y - 54, x, y - 14, col, 4); else arrow(c, x, y + 54, x, y + 14, col, 4); }
+
+/* ---------- the machines. Each returns the effort point { x, y } so the newtonmeter can be joined to it ---------- */
+function wsDrawLever(c, cur, riseNow) {
+  const k = 170, fy = 262, arms = { la: cur.la, ea: cur.ea }, X0 = 200, fx = WS.cls === 1 ? X0 + arms.la * k : X0;
+  const th = WS.cls === 1 ? riseNow / arms.la : WS.cls === 2 ? -riseNow / arms.la : -riseNow / 2;
+  const P = d => ({ x: fx + d * k * Math.cos(th), y: fy + d * k * Math.sin(th) });
+  const d0 = WS.cls === 1 ? -arms.la : 0, d1 = WS.cls === 1 ? arms.ea : WS_BAR, dl = WS.cls === 1 ? -arms.la : WS.cls === 2 ? arms.la : WS_BAR, de = WS.cls === 1 ? arms.ea : WS.cls === 2 ? WS_BAR : arms.ea;
+  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(fx - 22, 350); c.lineTo(fx + 22, 350); c.lineTo(fx, fy + 9); c.closePath(); c.fill();
+  const a = P(d0), b = P(d1); c.strokeStyle = WSC.wood2; c.lineWidth = 14; c.lineCap = 'round'; c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.strokeStyle = WSC.wood; c.lineWidth = 8; c.beginPath(); c.moveTo(a.x, a.y - 1); c.lineTo(b.x, b.y - 1); c.stroke();
+  c.fillStyle = WSC.steel; c.beginPath(); c.arc(fx, fy, 6, 0, 7); c.fill();
+  const L = P(dl), E = P(de); wsLoadBlock(c, L.x, L.y - 7, 54, 40, WS.loadId === 'rock' ? 'rock' : WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
+  const down = WS.cls === 1; wsEffArrow(c, E.x, E.y - (down ? 8 : -8), down); wsHand(c, E.x, E.y + (down ? -62 : 62), down);
+  /* the two arms, measured along the floor of the bench */
+  const lx = fx + dl * k, ex = fx + de * k;
+  wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), 178, `load arm ${fmt(arms.la, 2)} m`, WSC.green, true); wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), 148, `effort arm ${fmt(arms.ea, 2)} m`, WSC.red, true);
+  c.fillStyle = '#fff'; c.font = `800 9px ${C.fb}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('fulcrum', fx, 336);
+  return { x: E.x + (down ? 0 : 0), y: down ? E.y - 62 : E.y + 62 };
+}
+function wsDrawPulley(c, cur, riseNow, prog) {
+  const N = WS.ropes, cx = 330, w = Math.max(40, N * 28), pxM = 70, bY = 250 - riseNow * pxM, top = 84;
+  c.fillStyle = WSC.beam; c.fillRect(190, 22, 400, 8); c.fillStyle = WSC.steel2; c.fillRect(cx - 3, 30, 6, 40);
+  c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 6, 68, w + 12, 18, 6); c.fill();
+  const xs = []; for (let i = 0; i < N; i++) xs.push(cx - w / 2 + (i + .5) * w / N);
+  xs.forEach(x => { c.fillStyle = WSC.steel; c.beginPath(); c.arc(x, 77, 7.5, 0, 7); c.fill(); c.fillStyle = WSC.steel2; c.beginPath(); c.arc(x, 77, 2.5, 0, 7); c.fill(); });
+  /* the moving block and the supporting ropes */
+  if (N > 1) { c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 6, bY - 14, w + 12, 18, 6); c.fill(); xs.forEach(x => { c.fillStyle = WSC.steel; c.beginPath(); c.arc(x, bY - 5, 7.5, 0, 7); c.fill(); c.fillStyle = WSC.steel2; c.beginPath(); c.arc(x, bY - 5, 2.5, 0, 7); c.fill(); }); }
+  c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.lineCap = 'round';
+  xs.forEach((x, i) => { c.beginPath(); c.moveTo(x, 84); c.lineTo(x, bY - (N > 1 ? 14 : 4)); c.stroke(); txt(c, String(i + 1), x + (N > 1 ? 11 : 12), (84 + bY) / 2 - (i % 2 ? 14 : 0), WSC.green, `800 12px ${C.fn}`); });
+  c.fillStyle = WSC.steel; c.fillRect(cx - 2, bY - (N > 1 ? 0 : 4), 4, 14);
+  wsLoadBlock(c, cx, bY + 62, 64, 50, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
+  /* the free end comes down over the last wheel to the puller's hand */
+  const hx = 500, hy = 190 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, hy); c.stroke();
+  wsEffArrow(c, hx, hy + 52, false); wsHand(c, hx, hy + 6, false); txt(c, 'free end', hx + 10, 150, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, 'not counted', hx + 10, 162, WSC.ink, `700 10px ${C.fb}`, 'left');
+  return { x: hx, y: hy + 10 };
+}
+function wsDrawWinch(c, cur, riseNow) {
+  const ax = 330, ay = 165, pxm = 185, ar = Math.max(8, WS.axle * pxm), hr = WS.R * pxm, rot = riseNow / WS.axle;
+  c.fillStyle = WSC.beam; c.fillRect(ax - 6, 22, 12, ay - 22);
+  c.setLineDash([6, 5]); c.strokeStyle = WSC.steel2; c.lineWidth = 2; c.beginPath(); c.arc(ax, ay, hr, 0, 7); c.stroke(); c.setLineDash([]);
+  c.fillStyle = WSC.steel; c.beginPath(); c.arc(ax, ay, ar, 0, 7); c.fill(); c.fillStyle = WSC.steel2; c.beginPath(); c.arc(ax, ay, 3, 0, 7); c.fill();
+  /* the cable winds off the axle and the bucket rises */
+  const by = 326 - riseNow * 70, rx = ax + ar - 1; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(rx, ay); c.lineTo(rx, by - 30); c.stroke();
+  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(rx - 24, by - 30); c.lineTo(rx + 24, by - 30); c.lineTo(rx + 18, by + 18); c.lineTo(rx - 18, by + 18); c.closePath(); c.fill(); txt(c, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N', rx, by - 6, '#fffaf2', `800 12px ${C.fn}`);
+  /* the crank handle turning */
+  const a = rot, gx = ax + Math.cos(a) * hr, gy = ay + Math.sin(a) * hr; c.strokeStyle = WSC.wood2; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(gx, gy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(gx, gy, 9, 0, 7); c.fill();
+  const tx = -Math.sin(a), ty = Math.cos(a); arrow(c, gx - tx * 4, gy - ty * 4, gx + tx * 42, gy + ty * 42, WSC.red, 4);
+  wsBracket(c, ax - hr, ax, ay, '', WSC.red); txt(c, `handle radius ${fmt(WS.R, 2)} m`, ax - hr - 10, ay, WSC.red, `700 11px ${C.fn}`, 'right'); txt(c, `axle radius ${fmt(WS.axle, 2)} m`, ax + hr + 14, ay + 4, WSC.green, `700 11px ${C.fn}`, 'left');
+  return { x: gx, y: gy };
+}
+function wsDrawRamp(c, cur, riseNow, prog) {
+  const run = Math.sqrt(Math.max(.01, WS.L * WS.L - WS.h * WS.h)), sc = Math.min(85, 440 / run, 200 / WS.h), A = { x: 50, y: 340 }, B = { x: 50 + run * sc, y: 340 - WS.h * sc };
+  c.fillStyle = WSC.wood; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.lineTo(B.x, A.y); c.closePath(); c.fill(); c.fillStyle = WSC.wood2; c.fillRect(B.x, B.y, 60, A.y - B.y); c.fillStyle = WSC.steel; c.fillRect(B.x, B.y - 4, 60, 5);
+  wsBracket(c, A.x, B.x, 232, `ramp length ${fmt(WS.L, 1)} m`, WSC.red, true); txt(c, `height ${fmt(WS.h, 1)} m`, B.x + 30, (A.y + B.y) / 2 + 4, '#fffaf2', `700 10.5px ${C.fn}`);
+  const ang = Math.atan2(B.y - A.y, B.x - A.x), t = clamp(prog, 0, 1), px = A.x + (B.x - A.x) * t, py = A.y + (B.y - A.y) * t, cs = Math.cos(ang), sn = Math.sin(ang);
+  c.save(); c.translate(px, py); c.rotate(ang); c.fillStyle = WSC.crate; c.beginPath(); c.roundRect(2, -36, 54, 28, 5); c.fill(); c.fillStyle = WSC.ink; [[13, -6], [45, -6]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 6, 0, 7); c.fill(); }); txt(c, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N', 29, -22, '#fffaf2', `800 11px ${C.fn}`); c.restore();
+  /* the pull is up the slope, along a rope from the front of the cart to the puller's hand on the platform */
+  const fx = px + cs * 56 - sn * 20 * -1 * 0 + 0, fy = py + sn * 56 - cs * 20, hx = B.x + 28, hy = B.y - 36;
+  c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(px + cs * 54 + sn * 20, py + sn * 54 - cs * 20); c.lineTo(hx, hy + 8); c.stroke();
+  wsHand(c, hx, hy, false); arrow(c, px + cs * 58 + sn * 20, py + sn * 58 - cs * 20, px + cs * 100 + sn * 20, py + sn * 100 - cs * 20, WSC.red, 4);
+  return { x: hx + 8, y: hy };
+}
+function wsDrawWedge(c, cur, riseNow, prog) {
+  const cx = 330, sc = 5, wd = WS.thick * sc, ht = 20 * sc, open = riseNow / WS_WEDGE_OPEN * 14, ice = WS.loadId === 'ice', tip = 218 + prog * 82, top = tip - ht;
+  c.fillStyle = WSC.wood2; c.beginPath(); c.roundRect(cx - 130, 320, 260, 30, 6); c.fill();
+  const col = ice ? WSC.ice : WSC.wood, col2 = ice ? WSC.ice2 : WSC.wood2;
+  [-1, 1].forEach(sd => { const x0 = sd < 0 ? cx - 100 - open : cx + open + 1; c.fillStyle = col; c.beginPath(); c.roundRect(x0, 250, 99, 70, 8); c.fill(); c.fillStyle = col2; c.fillRect(x0 + 8, 262, 83, 3); });
+  txt(c, (ice ? 'ice block' : 'log') + ' · needs ' + fmt(WS.load, 0) + ' N to split', cx, 336, '#fffaf2', `700 11px ${C.fn}`);
+  c.fillStyle = WSC.steel; c.beginPath(); c.moveTo(cx - wd / 2, top); c.lineTo(cx + wd / 2, top); c.lineTo(cx, tip); c.closePath(); c.fill();
+  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(cx + wd / 2, top); c.lineTo(cx, tip); c.lineTo(cx + wd / 2 - 3, top); c.fill();
+  wsBracket(c, cx - wd / 2, cx + wd / 2, top - 8, '', WSC.red); txt(c, `thickness ${WS.thick} cm`, cx - wd / 2 - 10, top - 8, WSC.red, `700 11px ${C.fn}`, 'right'); txt(c, 'length 20 cm', cx + wd / 2 + 10, top + ht / 2, WSC.green, `700 11px ${C.fn}`, 'left');
+  const hy = top - 62; wsHand(c, cx, hy, true); arrow(c, cx, hy + 16, cx, hy + 50, WSC.red, 4);
+  return { x: cx + 14, y: hy };
+}
+function wsDrawScrew(c, cur, riseNow, prog) {
+  const cx = 330, liftPx = riseNow * 300, py = 250 - liftPx, turnsNow = cur.turns != null ? cur.turns * prog : 0;
+  c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(cx - 70, 334, 140, 16, 6); c.fill();
+  c.fillStyle = WSC.steel; c.fillRect(cx - 18, py + 12, 36, 334 - py - 12); c.strokeStyle = WSC.steel2; c.lineWidth = 3; const off = (turnsNow * 14) % 14; for (let y = py + 20 + off; y < 332; y += 14) { c.beginPath(); c.moveTo(cx - 18, y + 5); c.lineTo(cx + 18, y - 5); c.stroke(); }
+  c.fillStyle = WSC.beam; c.beginPath(); c.roundRect(cx - 78, py, 156, 14, 5); c.fill();
+  /* a car's corner on the jack (or the supply pod) */
+  c.fillStyle = WSC.red; c.beginPath(); c.roundRect(cx - 90, py - 50, 180, 50, 12); c.fill(); c.fillStyle = WSC.glass; c.beginPath(); c.roundRect(cx - 50, py - 78, 110, 32, 10); c.fill(); c.fillStyle = WSC.ink; c.beginPath(); c.arc(cx - 52, py - 2, 17, 0, 7); c.fill(); txt(c, fmt(WS.load, 0) + ' N', cx + 30, py - 24, '#fffaf2', `800 13px ${C.fn}`);
+  const a = Math.min(turnsNow, 8) * 6.2832, hl = 74 * Math.abs(Math.cos(a)), hx = cx + 20 + hl * Math.sign(Math.cos(a) || 1), hy = 306;
+  c.strokeStyle = WSC.wood2; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx + 18, hy); c.lineTo(hx, hy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(hx, hy, 9, 0, 7); c.fill();
+  arrow(c, hx + 6, hy - 14, hx + 6, hy - 52, WSC.red, 4);
+  const mk = wsMasked(), tn = Math.floor(turnsNow + 1e-6); c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx + 108, 280, 108, 40, 8); c.fill(); txt(c, 'TURNS', cx + 162, 291, '#cfd8dd', `800 9px ${C.fb}`); txt(c, mk.has('turns') ? '?' : String(tn), cx + 162, 308, '#9ef0b2', `700 18px ${C.fn}`);
+  txt(c, `pitch ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
+  return { x: hx + 8, y: hy - 52 };
+}
+
+/* ---------- the rulers (after a pull): the load's path and the effort's path, ticks every 0.05 m ---------- */
+function wsRuler(c, x, y, w, dist, title, col) {
+  const len = Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2), pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : 1, lab = pxm >= 150 ? 0.1 : pxm >= 60 ? 0.5 : len > 6 ? 2 : 1;
+  c.fillStyle = '#fbf3da'; c.beginPath(); c.roundRect(x, y, w, 42, 6); c.fill(); c.strokeStyle = '#8a7a50'; c.lineWidth = 1;
+  c.fillStyle = col; c.globalAlpha = .45; c.fillRect(x + 10, y + 3, dist * pxm, 7); c.globalAlpha = 1;
+  c.fillStyle = WSC.ink; c.font = `600 9px ${C.fn}`; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
+  for (let v = 0; v <= len + 1e-9; v += minor) { const xx = x + 10 + v * pxm, major = Math.abs(v / lab - Math.round(v / lab)) < 1e-6, half = Math.abs(v * 10 - Math.round(v * 10)) < 1e-6; c.beginPath(); c.moveTo(xx, y + 10); c.lineTo(xx, y + 10 + (major ? 14 : half ? 9 : 5)); c.stroke(); if (major) c.fillText(String(Math.round(v * 100) / 100), xx, y + 36); }
+  c.fillStyle = col; c.beginPath(); c.moveTo(x + 10 + dist * pxm, y + 2); c.lineTo(x + 6 + dist * pxm, y - 5); c.lineTo(x + 14 + dist * pxm, y - 5); c.closePath(); c.fill();
+  txt(c, title, x + 6, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left');
+}
+
+/* ---------- the whole scene ---------- */
+function drawShopScene(c) {
+  wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
+  let ep;
+  if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow);
+  else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
+  const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
+  wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
+  wsMonitor(c);
+  /* readouts */
+  const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], ['Effort distance', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
+  if (wsHas('readMA')) rows.push(['Mechanical advantage', mk.has('readMA') ? '?' : fmt(cur.ma, 2)]);
+  if (wsHas('readWork')) { const done = WS.done && !WS.c.capped; rows.push(['Work in', mk.has('readWork') ? '?' : done ? fmt(WS.c.workIn, 0) + ' J' : '–'], ['Work out', mk.has('readWork') ? '?' : done ? fmt(WS.c.workOut, 0) + ' J' : '–']); }
+  rows.forEach(([l, v], i) => { const y = 24 + i * 46; c.fillStyle = C.panel; c.globalAlpha = .94; c.beginPath(); c.roundRect(728, y, 164, 40, 8); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.2; c.stroke(); txt(c, l, 738, y + 11, C.muted, `700 10.5px ${C.fb}`, 'left'); txt(c, v, 738, y + 28, C.ink, `700 15px ${C.fn}`, 'left'); });
+  /* messages */
+  if (WS.done && WS.msg) { const bad = WS.c && (WS.c.capped || WS.c.short); const w = Math.min(560, c.measureText(WS.msg).width + 40); c.font = `700 14px ${C.fb}`; const ww = clamp(c.measureText(WS.msg).width + 36, 110, 520); c.fillStyle = bad ? WSC.amber : WSC.green; c.beginPath(); c.roundRect(450 - ww / 2 + 30, 6, ww, 30, 8); c.fill(); txt(c, WS.msg, 450 + 30, 21.5, '#fff', `700 14px ${C.fb}`, 'center'); }
+  else if (!WS.busy && !WS.shown) txt(c, `Press ${WS_VERB[WS.mach]} to work the machine`, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`);
+  if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, 418, C.line, 'right');
+  if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
+  /* rulers */
+  if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
+    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'EFFORT DISTANCE (m)', WSC.red);
+  }
+}
+
+/* ===== Chapter 6: the Workshop (Save Captain Smooshy!) =====
+   Part 1 c6a (steps w1–w5, Check c6r1–c6r6): the six simple machines. More Parts are added in later builds.
+   The maths is in 4a-workshop.js and matches tools/workshop_model.py. The script is docs/Chapter6_Workshop_Script.md (sections F and G). */
+Object.assign(TERMS, {
+  machine: ['Machine', 'Something that makes a job easier, often by letting a small force move a big load.', ['machines', 'machine']],
+  simplemach: ['Simple machine', 'One of the six basic machines: the lever, pulley, wheel and axle, inclined plane, wedge and screw.', ['simple machines', 'simple machine']],
+  compound: ['Compound machine', 'Two or more simple machines working together, like scissors, a bicycle or a crane.', ['compound machines', 'compound machine']],
+  lever: ['Lever', 'A strong bar that turns around a fixed point called the fulcrum.', ['levers', 'lever']],
+  fulcrum: ['Fulcrum', 'The point a lever turns around (its pivot).', ['fulcrum']],
+  effort: ['Effort', 'The force you put into a machine.', ['effort']],
+  load: ['Load', 'The force the machine has to move, often the weight of the object.', ['load']],
+  effortarm: ['Effort arm', 'The distance from the fulcrum to where the effort pushes.', ['effort arm']],
+  loadarm: ['Load arm', 'The distance from the fulcrum to the load.', ['load arm']],
+  pulley: ['Pulley', 'A wheel with a rope running round it.', ['pulleys', 'pulley']],
+  supporting: ['Supporting rope', 'A section of rope that holds up the moving pulley block and the load.', ['supporting ropes', 'supporting rope']],
+  wheelaxle: ['Wheel and axle', 'A big wheel (or handle) fixed to a thin rod, the axle, so they turn together.', ['wheel and axle']],
+  winch: ['Winch', 'A wheel and axle that winds in a rope or cable.', ['winch']],
+  incline: ['Inclined plane', 'A ramp: a flat sloping surface that lets you raise a load with a smaller force.', ['inclined plane', 'inclined planes']],
+  wedge: ['Wedge', 'Two ramps back to back, used to split, cut or hold things apart.', ['wedges', 'wedge']],
+  screw: ['Screw', 'A ramp wrapped round a rod. The spiral ridge is the thread.', ['screws', 'screw']],
+  pitch: ['Pitch', 'The distance a screw moves forward in one full turn.', ['pitch']],
+  mechadv: ['Mechanical advantage', 'How many times bigger the load is than the effort: load ÷ effort. It has no unit.', ['mechanical advantage']],
+  work: ['Work', 'The energy transferred when a force moves something: force × distance, measured in joules.', ['work']],
+  joule: ['Joule (J)', 'The unit of work and energy. One joule is the work done when a 1 N force moves something 1 m.', ['joules', 'joule']],
+  efficiency: ['Efficiency', 'How much of the work you put into a machine comes out as useful work: useful work out ÷ work in × 100%.', ['efficiency']],
+  wasted: ['Wasted energy', 'Energy that goes somewhere you didn\'t want it. In a machine, friction turns some of the work in into heat.', ['wasted energy']],
+  lubricant: ['Lubricant', 'A slippery substance, like oil or grease, that reduces friction between moving parts.', ['lubricant']],
+  terraform: ['Terraform', 'To change a planet so that it can become a home, for example by making its air breathable.', ['terraform']]
+});
+FORMULAS.find(f => f.id === 'weight').ch.push(6);
+FORMULAS.push(
+  { id: 'ma', name: 'Mechanical advantage', eq: 'MA = load ÷ effort', note: 'No unit: it\'s newtons divided by newtons.', ch: [6] },
+  { id: 'effortq', name: 'Effort needed', eq: 'effort = load ÷ MA', note: 'A bigger mechanical advantage means a smaller effort.', ch: [6] },
+  { id: 'maparts', name: 'MA from the shape', eq: 'pulley: supporting ropes · lever: effort arm ÷ load arm · wheel and axle: wheel radius ÷ axle radius · ramp: length ÷ height · wedge: length ÷ thickness · screw: distance per turn ÷ pitch', note: 'Use the same unit for both lengths.', ch: [6] },
+  { id: 'edist', name: 'Effort distance', eq: 'effort distance = MA × load distance', note: 'Less force means more distance.', ch: [6] },
+  { id: 'macomp', name: 'Compound machines', eq: 'total MA = MA₁ × MA₂ × MA₃', note: 'Multiply, don\'t add.', ch: [6] },
+  { id: 'work', name: 'Work', eq: 'work = force × distance', note: 'In joules (J). Force in N, distance in m.', ch: [6] },
+  { id: 'eff', name: 'Efficiency', eq: 'efficiency = useful work out ÷ work in × 100%', note: 'It can never be more than 100%.', ch: [6] },
+  { id: 'wasted', name: 'Wasted energy', eq: 'wasted energy = work in − useful work out', note: 'Friction turns it into heat.', ch: [6] }
+);
+
+/* ---- the loads used in Part 1 ---- */
+const WL = {
+  rock: { id: 'rock', N: 294, name: '30 kg rock', short: 'rock' }, crate: { id: 'crate', N: 235.2, name: '24 kg crate', short: 'crate' },
+  bucket: { id: 'bucket', N: 196, name: '20 kg water bucket', short: 'bucket' }, cart: { id: 'cart', N: 490, name: '50 kg cart', short: 'cart' },
+  log: { id: 'log', N: 1200, name: 'log', short: 'log' }, ice: { id: 'ice', N: 500, name: 'ice block', short: 'ice block' }, car: { id: 'car', N: 3000, name: 'car', short: 'car' }
+};
+const shopStage = o => { clearCh2(); S.scene = 'shop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; S.running = false; wsSetup(o); };
+const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
+
+CHDATA.c6 = {
+  goal: 'Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn\'t reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue.',
+  vocab: ['machine', 'simple machine', 'compound machine', 'lever', 'fulcrum', 'effort', 'load', 'pulley', 'supporting rope', 'wheel and axle', 'inclined plane', 'wedge', 'screw', 'mechanical advantage', 'work', 'joule'],
+  steps: [
+    /* ---------- Part 1: Simple machines ---------- */
+    { id: 'w1', title: 'Levers', rescue: 'Levers packed in the toolkit.',
+      cards: [
+        { hi: '#cvScene', html: `<p>Welcome to the Workshop! Before anyone flies to Glimmer-9, you need to master the six ${T('simplemach', 'simple machines')}. A simple machine lets a small force, the ${T('effort')}, move a big force, the ${T('load')}. First up is the ${T('lever')}: a strong bar that turns around a pivot called the ${T('fulcrum')}.</p>` },
+        { hi: '#wsPull', html: `<p>Press <b>Pull!</b> and watch the ${T('newtonmeter')} at your end of the bar. The reading climbs until the rock starts to rise, so that reading is the effort needed. Then slide the fulcrum and pull again. The red band on the newtonmeter shows Captain Smooshy's limit of 60 N.</p>` },
+        CFACT('The Greek scientist Archimedes, over 2,200 years ago, said that with a long enough lever and a place to stand, he could move the Earth.')],
+      predict: { q: 'You slide the fulcrum closer to the rock. What happens to the effort you need?', opts: ['It gets smaller, because more of the bar is on your side', 'It gets bigger, because the rock is now closer to the pivot', 'It stays the same, because the rock\'s weight hasn\'t changed', 'It drops to zero, because the fulcrum now carries the rock'], then: 'Test it! Lift the rock with the fulcrum in the middle, then with the fulcrum close to the rock.' },
+      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5 }); }, adds: ['wsctl', 'wspull', 'rulers'], sides: [], pullers: [], idle: 'Press Pull! to work the lever',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Set the load arm to <b>1.0 m</b> (fulcrum in the middle) and press <b>Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Set the load arm to <b>0.4 m</b> and pull again.', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q2'), { q: 'q2' }],
+        ['Find a fulcrum position where the effort is <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'lever' && !r.capped && r.E <= 60)]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With the fulcrum in the middle, what effort lifted the rock?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 1 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 1 }), needMsg: 'Lift the rock with the load arm at 1.0 m first. Your runs are in the Journal.', ok: 'Right! With the fulcrum in the middle, the effort equals the rock\'s weight, 294 N. The lever only changed the direction of your push.' },
+        { id: 'q2', type: 'reading', p: 'With the load arm at 0.4 m, what effort lifted the rock?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Lift the rock with the load arm at 0.4 m first. Your runs are in the Journal.', ok: 'Yes, 73.5 N. That\'s four times smaller than the rock\'s weight.' },
+        { id: 'q3', type: 'pick', p: 'When the fulcrum moved closer to the rock, the effort {0} and your end of the bar had to move {1}.', picks: [[WS_TREND, 2], [['less far', 'the same distance', 'further'], 2]], after: 'Less force, more distance. Keep an eye on this trade-off: it turns up in every machine.' },
+        { id: 'q4', type: 'reading', p: 'With the load arm at 0.4 m, the rock rose 0.10 m. Use the ruler beside your end of the bar. How far did your end move down?', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Lift the rock with the load arm at 0.4 m first.', ok: 'That\'s right, 0.40 m: four times further than the rock rose.' }] },
+
+    { id: 'w2', title: 'Three classes of lever', rescue: 'All three classes of lever logged.',
+      cards: [
+        { hi: '[data-panel="wsctl"]', html: `<p>Levers come in three classes, depending on what sits in the middle. <b>Class 1:</b> the ${T('fulcrum')} is in the middle, like a seesaw or a crowbar. <b>Class 2:</b> the ${T('load')} is in the middle, like a wheelbarrow or a nutcracker. <b>Class 3:</b> the ${T('effort')} is in the middle, like tweezers, a fishing rod or your own forearm.</p>` },
+        { html: `<p>A class 3 lever needs an effort <b>bigger</b> than the load! Engineers still love them, because the load end moves much further and faster than your hand. A small movement of your arm muscle swings your hand a long way.</p>` },
+        CFACT('Your forearm is a class 3 lever. To hold a 1 kg bag in your hand, your biceps pulls with several times the bag\'s weight.')],
+      predict: { q: 'In a class 3 lever, you push 0.5 m from the fulcrum and the rock sits at the far end, 2 m away. How will the effort compare with the rock\'s weight?', opts: ['The effort will be bigger than the rock\'s weight', 'The effort will be smaller than the rock\'s weight', 'The effort will be equal to the rock\'s weight', 'The effort will be zero, because the fulcrum holds it'], then: 'Try class 2 first, then class 3.' },
+      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true }); }, adds: [], sides: [], pullers: [], idle: 'Press Pull! to work the lever',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Switch to <b>class 2</b> and lift the rock with the load arm at <b>0.5 m</b>.', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 })],
+        ['Switch to <b>class 3</b>, set the effort arm to <b>0.5 m</b>, and lift the rock.', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With the class 3 lever, what effort lifted the rock?', unit: 'N', tol: 2, live: () => shopE({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Lift the rock with a class 3 lever and an effort arm of 0.5 m first.', ok: 'Whoa, 1,176 N! That\'s four times the rock\'s weight, but the rock moved four times further than your hand.' },
+        { id: 'q2', type: 'sort', p: 'Sort these levers into their classes.', groups: ['Class 1: fulcrum in the middle', 'Class 2: load in the middle', 'Class 3: effort in the middle'],
+          items: [['Crowbar', 0], ['Seesaw', 0], ['Pair of scissors', 0], ['Wheelbarrow', 1], ['Nutcracker', 1], ['Bottle opener', 1], ['Tweezers', 2], ['Fishing rod', 2], ['Your forearm lifting a cup', 2]] },
+        { id: 'q3', type: 'mcq', p: 'Why would anyone use a class 3 lever, like a fishing rod?', opts: ['It makes the load end move further and faster than your hands', 'It makes the effort smaller than the load at the far end', 'It means the rod doesn\'t need a fulcrum at the handle end', 'It makes the weight of the fish smaller as it is lifted'], a: 0, ok: 'Yes! A small movement at your hands swings the tip a long way.', why: { 1: 'In a class 3 lever the effort is bigger than the load.', 2: 'Your back hand is the fulcrum.', 3: 'The fish\'s weight is mass × g, which doesn\'t change.' } }] },
+
+    { id: 'w3', title: 'Pulleys', rescue: 'Pulley blocks packed in the toolkit.',
+      cards: [
+        { hi: '#cvScene', html: `<p>A ${T('pulley')} is a wheel with a rope running round it. One fixed pulley at the top only changes the direction of your pull: you pull down and the crate goes up. Add pulleys that move up with the crate, and something amazing happens.</p>` },
+        { hi: '[data-panel="wsctl"]', html: `<p>Count the ${T('supporting', 'supporting ropes')}: the sections of rope that hold up the moving pulley block and the crate. Don't count the end you pull on when it comes down from a fixed pulley. Each extra supporting rope shares the crate's weight.</p>` }],
+      predict: { q: 'You change from 1 supporting rope to 2. What happens to the effort?', opts: ['It halves, because two ropes share the crate\'s weight', 'It doubles, because there is twice as much rope to pull', 'It stays the same, because the crate\'s weight hasn\'t changed', 'It drops to zero, because the top pulley holds the crate'], then: 'Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter and the rope you pull.' },
+      setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate }, lim: { ropesMax: 6 } }); }, adds: ['wsctl', 'wspull', 'rulers'], sides: [], pullers: [], idle: 'Press Pull! to lift the crate',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Lift the crate with <b>1, 2, 3 and 4</b> supporting ropes.', () => [1, 2, 3, 4].every(n => shopHas({ mach: 'pulley', ropes: n }))], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With 4 supporting ropes, what effort lifted the 235.2 N crate?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first. Your runs are in the Journal.', ok: 'Yes, 58.8 N, a quarter of the crate\'s weight. That\'s under Smooshy\'s limit!' },
+        { id: 'q2', type: 'reading', p: 'With 4 supporting ropes, the crate rose 1.0 m. Use the ruler on the rope. How much rope did you pull?', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first.', ok: '4 m of rope for a 1 m lift. Each of the 4 supporting ropes got 1 m shorter.' },
+        { id: 'q3', type: 'reason', p: 'With 1 supporting rope (a single fixed pulley), the effort was 235.2 N, the same as lifting the crate by hand. Four friends argue about it. Who\'s right?',
+          voices: [{ who: 'Mia', says: 'A single fixed pulley is useless. The effort didn\'t change at all.' }, { who: 'Sam', says: 'It still helps, because pulling down is easier than lifting up.' }, { who: 'Leo', says: 'It halves the effort, because the rope goes over a wheel.' }, { who: 'Ana', says: 'It makes the crate lighter while it hangs on the rope.' }], a: 1,
+          reasons: ['You can pull down using your own weight, and lift a load high above your head', 'The wheel spins, and a spinning wheel always reduces the force you need', 'Two pieces of rope come out of the pulley, so each one carries half the load', 'The crate\'s mass gets smaller once the rope takes the strain'], r: 0,
+          why: { a: { 0: 'The force is the same, but its direction changes, which is useful.', 2: 'The effort was 235.2 N, the full weight.', 3: 'The crate\'s weight stays mass × g.' }, r: { 1: 'The readings showed no change with 1 rope.', 2: 'Only the supporting ropes share the load, and there is just one.', 3: 'Mass never changes.' } } },
+        { id: 'q4', type: 'pick', p: 'Each extra supporting rope makes the effort {0} and the length of rope you pull {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['shorter', 'the same', 'longer'], 2]] }] },
+
+    { id: 'w4', title: 'Wheels, axles and ramps', rescue: 'A winch and a folding ramp packed in the toolkit.',
+      cards: [
+        { hi: '#cvScene', html: `<p>A ${T('wheelaxle', 'wheel and axle')} is a big wheel (or handle) fixed to a thin rod called the axle, so they turn together. Turn the big wheel with a small force and the axle turns with a big force. Doorknobs, steering wheels, screwdrivers and the ${T('winch')} on a well all use this idea.</p>` },
+        { hi: '[data-panel="wsmach"]', html: `<p>An ${T('incline', 'inclined plane')} is a ramp. Pushing a load up a long, gentle ramp takes much less force than lifting it straight up, but you push it a much longer way. Truck loading ramps and wheelchair ramps work like this.</p>` },
+        CFACT('Ancient Egyptian builders probably used ramps to haul huge stone blocks up the pyramids.')],
+      predict: { q: 'You pull a 490 N cart up onto a 1 m high platform. Which ramp needs the smallest pull?', opts: ['The longest ramp, 5 m long and gentle', 'The shortest ramp, 2 m long and steep', 'Every ramp needs exactly the same pull', 'The middle ramp, 4 m long and medium'], then: 'Try the winch first, then the ramps.' },
+      setup() { shopStage({ mach: 'winch', allow: ['winch', 'ramp'], R: 0.1, axle: 0.05, L: 2, h: 1, lift: 1.0, loads: { winch: WL.bucket, ramp: WL.cart }, lim: { rampL: [1, 6, 1] } }); }, adds: ['wsctl', 'wspull', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Press Turn! to wind the winch',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['<b>Winch:</b> lift the bucket with a handle radius of <b>0.1 m</b>, then <b>0.25 m</b>.', () => shopHas({ mach: 'winch', R: 0.1 }) && shopHas({ mach: 'winch', R: 0.25 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['<b>Ramp:</b> pull the cart up the <b>2 m</b> ramp, then the <b>5 m</b> ramp.', () => shopHas({ mach: 'ramp', L: 2, h: 1 }) && shopHas({ mach: 'ramp', L: 5, h: 1 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With a handle radius of 0.25 m, what effort lifted the 196 N bucket?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'winch', R: 0.25 }), need: () => shopHas({ mach: 'winch', R: 0.25 }), needMsg: 'Lift the bucket with a handle radius of 0.25 m first. Your runs are in the Journal.', ok: 'Yes, 39.2 N. The big handle made your force five times bigger at the axle.' },
+        { id: 'q2', type: 'reading', p: 'What pull got the 490 N cart up the 5 m ramp?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'ramp', L: 5, h: 1 }), need: () => shopHas({ mach: 'ramp', L: 5, h: 1 }), needMsg: 'Pull the cart up the 5 m ramp first.', ok: '98 N, a fifth of the cart\'s weight. You pulled it 5 m to raise it 1 m.' },
+        { id: 'q3', type: 'mcq', p: 'Why does the 5 m ramp need a smaller pull than the 2 m ramp?', opts: ['The cart travels a longer distance, so each metre needs less force', 'The cart weighs less when it sits on a long, gentle ramp', 'The long ramp has less friction, so the cart rolls more easily', 'The steep ramp pushes back on the cart and makes it heavier'], a: 0, ok: 'Yes! Less force, more distance, again.', why: { 1: 'The cart\'s weight is mass × g on any ramp.', 2: 'Workshop machines have no friction at all.', 3: 'The cart\'s weight doesn\'t change with the slope.' } },
+        { id: 'q4', type: 'match', colA: 'Everyday object', p: 'Match each everyday object to its simple machine.', rows: [['Doorknob', 'Wheel and axle'], ['Wheelchair ramp', 'Inclined plane'], ['Flagpole', 'Pulley'], ['Crowbar', 'Lever']] }] },
+
+    { id: 'w5', title: 'Wedges and screws', rescue: 'Wedges and a screw jack packed. The toolkit is ready!',
+      cards: [
+        { hi: '#cvScene', html: `<p>A ${T('wedge')} is two ramps back to back. Push it into a log and its sloping sides push the two halves apart with a much bigger force. Axes, knives, doorstops and even your front teeth are wedges. A long, thin wedge needs the smallest push.</p>` },
+        { hi: '[data-panel="wsmach"]', html: `<p>A ${T('screw')} is a ramp wrapped round a rod, and the spiral ridge is called the <b>thread</b>. Each turn of the handle moves the screw forward by just a small distance, the ${T('pitch')}. A car jack uses a screw to lift one side of a car with one hand.</p>` },
+        CFACT('The Archimedes screw, a screw turning inside a tube, has been lifting water for over 2,000 years, and some are still in use today.', 'A car jack lets one person lift one side of a car by turning a handle, thanks to a screw with a very small pitch.')],
+      predict: { q: 'You split the same log with a fat wedge (5 cm thick) and a thin wedge (2 cm thick). Both are 20 cm long. Which needs the smaller push?', opts: ['The thin wedge needs the smaller push', 'The fat wedge needs the smaller push', 'Both wedges need the same push', 'Neither wedge can split the log'], then: 'Split the log with each wedge and watch the newtonmeter.' },
+      setup() { shopStage({ mach: 'wedge', allow: ['wedge', 'screw'], thick: 10, per: 120, pitch: 1.0, lift: 0.20, loads: { wedge: WL.log, screw: WL.car }, lim: { pitch: [0.5, 1.0] } }); }, adds: ['wsctl', 'wspull', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Press Push! to split the log',
+      mask: [{ q: 'q1', keys: ['turns'], when: r => r.mach === 'screw' && r.pitch === 0.5 }],
+      tick() { if (!S.flags.iceOn && [0, 1, 2, 3].every(i => CHDATA.c6.steps[4].tasks[i][1]())) { S.flags.iceOn = true; WS.loads.wedge = WL.ice; if (WS.mach === 'wedge') { wsLoadFor('wedge'); wsResetLoad(); wsRenderControls(); } } },
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Split the log with the <b>5 cm</b> wedge, then the <b>2 cm</b> wedge.', () => shopHas({ mach: 'wedge', thick: 5, load: 1200 }) && shopHas({ mach: 'wedge', thick: 2, load: 1200 })],
+        ['Lift the car with the screw jack, first with a <b>1.0 cm</b> pitch, then a <b>0.5 cm</b> pitch. Watch the turn counter.', () => shopHas({ mach: 'screw', pitch: 1 }) && shopHas({ mach: 'screw', pitch: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['<b>Toolbox job:</b> Smooshy\'s ice block needs <b>500 N</b> to split. Choose a wedge that splits it with <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'wedge' && r.loadN === 500 && !r.capped && r.E <= 60)]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'How many turns of the handle lifted the car 20 cm with the 0.5 cm pitch?', unit: 'turns', tol: 0, live: () => { const r = shopRun({ mach: 'screw', pitch: 0.5 }); return r ? r.turns : null; }, need: () => shopHas({ mach: 'screw', pitch: 0.5 }), needMsg: 'Lift the car with the 0.5 cm pitch first. Your runs are in the Journal.', ok: '40 turns! The finer thread needed half the effort, but twice as many turns.' },
+        { id: 'q2', type: 'pick', p: 'With the finer thread (0.5 cm pitch), the effort was {0} and the number of turns was {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['smaller', 'the same', 'bigger'], 2]] },
+        { id: 'q3', type: 'tick', p: 'Tick every object that uses a wedge.', opts: ['An axe', 'A kitchen knife', 'A doorstop', 'The point of a nail', 'A doorknob', 'A seesaw'], a: [0, 1, 2, 3], ok: 'Yes! A doorknob is a wheel and axle, and a seesaw is a lever.' }] }
+  ],
+  review: [
+    /* ---------- Part 1 Check ---------- */
+    { id: 'c6r1', obj: ['Ai'], type: 'match', colA: 'Simple machine', p: 'Match each simple machine to an everyday example.', rows: [['Lever', 'Crowbar'], ['Pulley', 'Flagpole'], ['Wheel and axle', 'Steering wheel'], ['Inclined plane', 'Wheelchair ramp'], ['Wedge', 'Axe'], ['Screw', 'Jar lid']] },
+    { id: 'c6r2', obj: ['Aii'], type: 'reason', sure: true, p: 'Mia moves the fulcrum of her crowbar closer to her hand. What happens to the effort she needs to lift the rock?',
+      opts: ['It gets bigger', 'It gets smaller', 'It stays the same', 'It drops to zero'], a: 0,
+      reasons: ['The load arm gets longer and her effort arm gets shorter', 'Her hand is closer to the pivot, so the bar is easier to turn', 'The rock\'s weight increases as the fulcrum moves', 'The fulcrum now carries more of the rock\'s weight for her'], r: 0,
+      why: { a: { 1: 'Moving the fulcrum towards her hand makes her effort arm shorter, so the lever gives her less help.', 2: 'The rock\'s weight stays the same, but the lever\'s mechanical advantage changes.', 3: 'The fulcrum never takes the effort away: she still has to lift the rock.' }, r: { 1: 'A hand close to the pivot has a short effort arm, which makes the bar harder to turn, not easier.', 2: 'The rock\'s weight is mass × g, so it never changes.', 3: 'The fulcrum only gives the bar something to turn around.' } } },
+    { id: 'c6r3', obj: ['Aii'], type: 'sort', p: 'Sort these levers into their classes.', groups: ['Class 1: fulcrum in the middle', 'Class 2: load in the middle', 'Class 3: effort in the middle'],
+      items: [['Pliers', 0], ['Claw hammer pulling out a nail', 0], ['Door pushed open at the handle', 1], ['Bottle opener', 1], ['Broom swept with both hands', 2], ['Ice tongs', 2]] },
+    { id: 'c6r4', obj: ['Aii'], type: 'pick', p: 'A crane lifts a load with 4 supporting ropes. Compared with lifting the load straight up, the effort is {0} and the rope pulled is {1}.', picks: [[['four times bigger', 'the same', 'a quarter as big'], 2], [['a quarter as long', 'the same length', 'four times longer'], 2]] },
+    { id: 'c6r5', obj: ['Aiii'], type: 'fix', p: 'Leo explains ramps and pulleys. One line has a mistake. Tap it, then choose the correct line.', who: 'Leo',
+      lines: ['Ana needs to get a heavy box onto a 1 m high stage.', 'She could pull it up a long ramp or a short, steep ramp.', 'The long ramp needs a smaller pull, but she pulls it further.', 'A steeper ramp would need a smaller pull, because it is shorter.'], bad: 3,
+      fix: { kind: 'mcq', opts: ['A steeper ramp would need a bigger pull, but over a shorter distance', 'A steeper ramp would need the same pull, because the box weighs the same', 'A steeper ramp would need no pull at all, because the box slides down', 'A steeper ramp would need a smaller pull, because the box rises faster'], a: 0 },
+      why: 'Ramp MA = length ÷ height. A shorter ramp to the same height has a smaller MA, so the pull is bigger, over a shorter distance.' },
+    { id: 'c6r6', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy wants to split a block of space ice with a wedge. Explain how a wedge works, and which shape of wedge he should choose.', words: ['wedge', 'force', 'thin', 'distance'],
+      model: 'A wedge is two ramps back to back. When Smooshy pushes the wedge into the ice, its sloping sides push the two halves apart with a much bigger force than his push. He should choose a long, thin wedge, because it needs the smallest push. The catch is that he has to push it further into the ice.',
+      check: ['Says the sloping sides push the ice apart with a bigger force than the push (the word "force" used for the push or the splitting force)', 'Says a long, thin wedge needs a smaller push than a short, fat one', 'Says the smaller push has to move further (the force–distance trade-off)'] }
+  ]
+};
+
+/* ===== Chapter 6: the story. The transmission (B2) and the Rescue board (B3), drawn from the script in docs/Chapter6_Workshop_Script.md =====
+   The board sits at the top of every Chapter 6 page. A slot lights up when that Part's stamp is earned. Names live in the SMOOSHY constant (4a-workshop.js). */
+const RB_SLOTS = [
+  { sec: 'c6a', title: 'Toolkit packed', part: 'Part 1', next: 'Next: Part 1 packs the toolkit with the six simple machines.' },
+  { sec: 'c6b', title: 'Mission computer loaded', part: 'Part 2', next: 'Next: Part 2 teaches the maths the mission computer needs.' },
+  { sec: 'c6c', title: 'Crane kit built', part: 'Part 3', next: 'Next: Part 3 builds the crane kit.' },
+  { sec: 'c6d', title: 'Smooshy saved!', part: 'Part 4', next: 'Next: Part 4 is the rescue itself.' }
+];
+const rbDone = id => !!dbGet('stamps', {})[id];
+/* Glimmer-9's crater, side-on: violet sky, two moons, crystal rocks, the Gumdrop tipped over at the bottom */
+function drawCrater(c, w, h, st) {
+  const sk = c.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, '#3d2a78'); sk.addColorStop(1, '#8e6fd6'); c.fillStyle = sk; c.fillRect(0, 0, w, h);
+  c.fillStyle = 'rgba(255,255,255,.8)'; [[30, 20], [90, 44], [160, 14], [250, 30], [330, 18], [410, 40], [470, 12]].forEach(([x, y]) => { c.beginPath(); c.arc(x * w / 520, y, 1.4, 0, 7); c.fill(); });
+  c.fillStyle = '#f3e9ff'; c.beginPath(); c.arc(w * .78, 32, 17, 0, 7); c.fill(); c.fillStyle = '#d9c5f5'; c.beginPath(); c.arc(w * .78 - 5, 28, 4, 0, 7); c.fill();
+  c.fillStyle = '#ffd6f0'; c.beginPath(); c.arc(w * .9, 52, 9, 0, 7); c.fill();
+  /* rim and crater wall */
+  c.fillStyle = '#b9a2e4'; c.beginPath(); c.moveTo(0, h * .5); c.lineTo(w * .14, h * .5); c.lineTo(w * .3, h * .86); c.lineTo(w * .7, h * .86); c.lineTo(w * .86, h * .5); c.lineTo(w, h * .5); c.lineTo(w, h); c.lineTo(0, h); c.closePath(); c.fill();
+  c.fillStyle = '#9a80d0'; c.beginPath(); c.moveTo(w * .3, h * .86); c.lineTo(w * .7, h * .86); c.lineTo(w * .7, h); c.lineTo(w * .3, h); c.closePath(); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.85)'; [[.06, .55], [.1, .6], [.9, .56], [.95, .62], [.38, .93], [.62, .95], [.5, .97]].forEach(([x, y]) => { c.beginPath(); c.moveTo(w * x, h * y - 7); c.lineTo(w * x + 4, h * y); c.lineTo(w * x - 4, h * y); c.closePath(); c.fill(); });
+  /* the things that appear as Parts are finished */
+  if (st.a) { c.fillStyle = '#c94a82'; c.beginPath(); c.roundRect(w * .035, h * .5 - 20, 34, 20, 4); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(w * .035 + 12, h * .5 - 26, 10, 7); c.fillStyle = '#fff'; c.fillRect(w * .035 + 5, h * .5 - 13, 24, 3); }
+  if (st.b) { c.fillStyle = '#1d2a35'; c.beginPath(); c.roundRect(w * .13, h * .5 - 22, 24, 18, 3); c.fill(); c.fillStyle = '#7ef0a8'; c.fillRect(w * .13 + 3, h * .5 - 19, 18, 12); }
+  if (st.c) { c.strokeStyle = '#e3a51c'; c.lineWidth = 4; c.beginPath(); c.moveTo(w * .9, h * .5); c.lineTo(w * .9, h * .5 - 34); c.lineTo(w * .96, h * .5 - 40); c.stroke(); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w * .96, h * .5 - 40); c.lineTo(w * .96, h * .5 - 20); c.stroke(); }
+  if (st.d) { drawGumdrop(c, w * .5, h * .5, .52, 0); drawSmooshy(c, w * .62, h * .5 - 22, .34, 'cheer'); }
+  else { drawGumdrop(c, w * .5, h * .86, .62, .5); drawSmooshy(c, w * .42, h * .83 - 18, .3, 'wave'); }
+}
+function renderRescue() {
+  const host = $('#rescueBoard'); if (!host) return;
+  const on = !!CH && CH.ch === 'c6' && VIEW === 'vChapter'; host.hidden = !on; if (!on) return;
+  const have = RB_SLOTS.map(s => !!secOf(s.sec)), done = RB_SLOTS.map(s => rbDone(s.sec)), nx = RB_SLOTS.findIndex((s, i) => have[i] && !done[i]);
+  host.innerHTML = `<canvas id="cvRescue" role="img" aria-label="Glimmer-9's crater. Captain Smooshy's spaceship, the Gumdrop, is tipped over at the bottom, and he waves from the window."></canvas>
+    <div class="rbside"><div class="rbhd"><span class="lbl">Rescue board</span><h2>Save Captain Smooshy!</h2></div>
+    <ol class="rbslots">${RB_SLOTS.map((s, i) => `<li class="${done[i] ? 'on' : ''} ${have[i] ? '' : 'soon'}"><span class="rbtick">${done[i] ? '✓' : i + 1}</span><span><b>${s.title}</b><small>${s.part}${have[i] ? '' : ' · coming soon'}</small></span></li>`).join('')}</ol>
+    <p class="rbnext">${nx >= 0 ? RB_SLOTS[nx].next : done.every(Boolean) ? 'Captain Smooshy is safe. Brilliant rescue!' : 'More of the mission is on its way.'}</p>
+    <div class="row"><button type="button" class="ghost sm" data-act="transmission">📡 Replay transmission</button></div></div>`;
+  rbDraw();
+}
+function rbDraw() {
+  const cv = $('#cvRescue'); if (!cv || !cv.offsetParent) return; readColors(); const W = 520, H = 190, c = fit(cv, W, H);
+  drawCrater(c, W, H, { a: rbDone('c6a'), b: rbDone('c6b'), c: rbDone('c6c'), d: rbDone('c6d') });
+}
+/* ---------- the transmission: an incoming video call ---------- */
+let TXRAF = 0;
+function openTransmission() {
+  const first = `<div class="tx-head"><span>📡 Incoming transmission from deep space!</span></div>
+    <div class="tx-screen"><canvas id="cvTx" role="img" aria-label="Captain Smooshy, a blue gummy bear astronaut in a bubble helmet, waving from his spaceship"></canvas></div>
+    <p>Captain Smooshy here, the bravest gummy bear in the universe! A while ago, the Grade 6 scientists at WAB tested Intergalactic Space Fluids to find the one that could carry me to a galaxy thousands of light years away. It worked! Then disaster struck. My ship, the Gumdrop, crash-landed at the bottom of a deep crater on Planet Glimmer-9, and it's stuck.</p>
+    <p>My squishy gummy arms can only pull with <b>60 N</b>, and the Gumdrop weighs thousands of newtons. Force HQ engineers, I need you to learn how machines work and build me a way out. Over and out!</p>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="go" id="txGo">Accept the mission!</button></div>`;
+  openModal(`<div class="modal txmodal" role="dialog" aria-label="Incoming transmission from Captain Smooshy">${first}</div>`, () => { cancelAnimationFrame(TXRAF); });
+  const box = $('#modal .txmodal'); makeDraggable(box, '.tx-head', 'tx');
+  const cv = $('#cvTx'), t0 = performance.now();
+  const paint = () => { if (!cv.isConnected) return; const c = fit(cv, 360, 170), t = (performance.now() - t0) / 1000; readColors();
+    const sk = c.createLinearGradient(0, 0, 0, 170); sk.addColorStop(0, '#3d2a78'); sk.addColorStop(1, '#8e6fd6'); c.fillStyle = sk; c.fillRect(0, 0, 360, 170);
+    c.fillStyle = 'rgba(255,255,255,.8)'; [[20, 20], [60, 50], [300, 24], [330, 70], [250, 12], [120, 16]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 1.5, 0, 7); c.fill(); });
+    drawGumdrop(c, 250, 150, .62, .5); drawSmooshy(c, 120, 100, .95, 'wave', t);
+    if (!RMOTION) { c.fillStyle = 'rgba(255,255,255,.07)'; for (let y = (t * 30) % 6; y < 170; y += 6) c.fillRect(0, y, 360, 1.5); if (Math.sin(t * 9) > .93) { c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(0, (t * 97) % 170, 360, 10); } }
+    TXRAF = requestAnimationFrame(paint); };
+  paint();
+  $('#txGo').addEventListener('click', () => {
+    cancelAnimationFrame(TXRAF); dbSet('ws.briefed', true);
+    box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>Four jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.map((s, i) => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
+  });
+}
+
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
 CHDATA.c1.review = [
   { id: 'r1', obj: ['Ai'], type: 'match', p: 'Match each force to what causes it.', rows: [['Weight', 'The Earth\'s gravity pulling on an object'], ['Normal force', 'A surface pushing back on an object resting on it'], ['Friction', 'Two surfaces rubbing or trying to slide past each other'], ['Tension', 'A stretched rope or string pulling'], ['Air resistance', 'Air pushing against something moving through it']] },
@@ -6453,9 +7179,14 @@ const SECTIONS = [
     blurb: 'Race a feather and a crate with and without air, drop on other worlds, make the helicopter hover, then deliver three loads on Earth, Mars and Venus.',
     steps: ['p1', 'p2', 'p3'], challenge: ['z1', 'z2', 'z3'], review: ['c5r8', 'c5r9', 'c5r10', 'c5r11', 'c5r12'], needs: 'c5f',
     goal: 'Explain why heavy and light objects fall differently in air but not in a vacuum; use W = m × g to find weight on different worlds; explain how the lift of a hovering helicopter equals its weight; choose a canopy and an opening height for a safe landing.',
-    vocab: ['air resistance', 'weight', 'terminal velocity', 'gravitational field strength', 'vacuum', 'lift', 'hover', 'parachute'] }
+    vocab: ['air resistance', 'weight', 'terminal velocity', 'gravitational field strength', 'vacuum', 'lift', 'hover', 'parachute'] },
+  { id: 'c6a', ch: 'c6', n: 6, title: 'Simple machines', part: 'Part 1', stamp: 'Machine Spotter',
+    blurb: 'Levers, pulleys, wheels and axles, ramps, wedges and screws: the six simple machines, and the trade-off they all share.',
+    steps: ['w1', 'w2', 'w3', 'w4', 'w5'], challenge: null, review: ['c6r1', 'c6r2', 'c6r3', 'c6r4', 'c6r5', 'c6r6'],
+    goal: 'Name the six simple machines and say how each one helps Captain Smooshy; find out how moving the fulcrum, adding supporting ropes, lengthening a ramp or thinning a wedge changes the effort; explain the trade-off that a smaller effort needs a longer distance.',
+    vocab: ['machine', 'simple machine', 'lever', 'fulcrum', 'effort', 'load', 'pulley', 'supporting rope', 'wheel and axle', 'winch', 'inclined plane', 'wedge', 'screw', 'pitch'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, w1: 5, w2: 3, w3: 5, w4: 4, w5: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
 CHDATA.c1.review.push({ id: 'r12', obj: ['Aii'], seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];
@@ -6888,7 +7619,7 @@ function renderTeacher() {
   $('#vTeacher').innerHTML = `<div class="tpage"><div class="chhead"><div><span class="lbl">For teachers</span><h1>Set classwork or homework</h1></div><button type="button" class="ghost" data-act="home">← Back to the home page</button></div>
     <section class="panel tsec"><h2>1. Choose the sections</h2><p class="scaleNote">Every section takes approx. 20–30 minutes and makes its own worksheet. Tick one for a short task, or several for a longer session. Mark a section as optional to let keen students carry on into it.</p>
       ${SECTIONS.map(c => `<div class="row" style="justify-content:space-between;border-bottom:1px dashed var(--line);padding:4px 0"><label><input type="checkbox" data-sec="${c.id}" ${T0.secs.includes(c.id) || T0.opt.includes(c.id) ? 'checked' : ''}> <span><b>Chapter ${c.n} ${c.part}</b>: ${c.title} · about ${secMins(c.id).total} min</span></label><label><input type="checkbox" data-opt="${c.id}" ${T0.opt.includes(c.id) ? 'checked' : ''}> Optional</label></div>`).join('')}
-      <p class="scaleNote">More chapters, and the Workshop, will appear here as they are added.</p></section>
+      <p class="scaleNote">Any new chapters will appear here as they are added.</p></section>
     <section class="panel tsec"><h2>2. What should students do?</h2>${TPARTS.map(([k, n]) => `<label><input type="checkbox" data-part="${k}" ${T0.parts.includes(k) ? 'checked' : ''}> ${n}</label>`).join('')}</section>
     <section class="panel tsec"><h2>3. Details</h2><label style="flex-direction:column;gap:4px">Class<input type="text" id="tCls" value="${esc(T0.cls)}" placeholder="for example 7/8B" style="font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;max-width:240px;background:var(--panel);color:var(--ink)"></label>
       <div class="row"><b>Where:</b>${[['class', 'In class'], ['home', 'At home'], ['both', 'Both']].map(([k, n]) => `<label><input type="radio" name="tWhere" value="${k}" ${T0.where === k ? 'checked' : ''}> ${n}</label>`).join('')}</div>
@@ -6940,7 +7671,7 @@ function teacherPrompt(T1, mins, omins) {
   L.push(`Estimated time: approx. ${mins || omins} minutes, ${where}.${opt.length && req.length ? ` There is also an optional extra section of approx. ${omins} minutes for students who want to go further.` : ''}`);
   L.push(''); L.push('About the resource: Force HQ is a self-contained simulation. Students open the HTML file in a browser, type their name and class, then work through guided steps in the Force Arenas. Every section makes its own worksheet PDF. Progress saves in the browser, so students should use the same device and browser each time.');
   if (T1.msg) { L.push(''); L.push(`Message from the teacher: ${T1.msg}`); }
-  const steps = (c, start) => { let n = start; const out = [`${n++}. On the home page, find Chapter ${c.n} and press "Start the ${c.part}".`];
+  const steps = (c, start) => { let n = start; const out = [`${n++}. On the home page, find Chapter ${c.n} and press "Start ${startWord(c.part)}".`];
     if (parts.includes('learn')) out.push(`${n++}. Learn: work through every step. Read the cards, do the jobs in the Do this list and answer the Your turn questions.`);
     if (parts.includes('challenge') && CHDATA[c.id].challenge) out.push(`${n++}. Challenge: try every mission in "${CHDATA[c.id].challenge.title}". Trying every mission is enough to finish.`);
     if (parts.includes('review')) out.push(`${n++}. Check + worksheet: answer every Check question, then press "Make my worksheet" and choose "Save as PDF".`);
@@ -7072,7 +7803,7 @@ function openExplore() {
 const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
 const exploreSwitch = cur => `<div class="seg three exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button><button type="button" data-exscene="heli" aria-pressed="${cur === 'heli'}">Helicopter</button></div>`;
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initShop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
@@ -7088,7 +7819,7 @@ function init() {
     if (t.closest('[data-close]')) { closeModal(); return; }
     const a = t.closest('[data-act]'); if (a) { const k = a.dataset.act;
       if (!$('#modal').hidden && (k === 'explore' || k === 'explore-anyway')) closeModal();
-      if (k === 'home') { parkLab(); show('vHome'); } else if (k === 'explore') openExplore(); else if (k === 'explore-anyway') { dbSet('exploreAnyway', true); openExplore(); } else if (k === 'who') askWho(false);
+      if (k === 'home') { parkLab(); show('vHome'); } else if (k === 'explore') openExplore(); else if (k === 'explore-anyway') { dbSet('exploreAnyway', true); openExplore(); } else if (k === 'who') askWho(false); else if (k === 'transmission') openTransmission();
       else if (k === 'student') { DB.user = {}; saveDB(); refreshWho(); renderHome(); askWho(true); } return; }
     if (t.closest('#homeBtn')) { hideCards(); closeDesk(); parkLab(); show('vHome'); return; }
     if (t.closest('#teacherBtn')) { parkLab(); show('vTeacher'); renderTeacher(); return; }
