@@ -217,7 +217,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
 /* info cards over the arena */
 .chunk{position:absolute;top:10px;left:10px;z-index:6;width:min(430px,calc(100% - 20px));background:var(--panel);border:2.5px solid var(--hazard);border-radius:12px;padding:12px 14px;box-shadow:0 10px 26px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:8px}
-.chunk .gbody{font-size:16px;max-height:260px;overflow:auto} .chunk .gbody p{margin:0 0 6px}
+.chunk .gbody{font-size:16px;max-height:260px;overflow:auto} .chunk .gbody:has(.pic){max-height:330px} .chunk .gbody p{margin:0 0 6px}
 .chunk .chead{display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .chunk .chead .lbl{flex:1}
 .chunk.dragging .chead{cursor:grabbing}
@@ -856,7 +856,9 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 @media (max-width:760px){.rescueboard{grid-template-columns:1fr}.rbslots{grid-template-columns:1fr}}
 .txmodal{max-width:480px} .txmodal .tx-head{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;cursor:grab;padding:2px 0} .txmodal.dragging .tx-head{cursor:grabbing}
 .txmodal.placed{position:fixed;margin:0}
-.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/170}
+.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/200}
+.txrec{margin:8px 0 0;font-size:13px;letter-spacing:.02em;color:var(--muted)}
+.pic text{paint-order:stroke}
 .txlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .rlog{margin-top:6px;font-size:14px;font-weight:700;color:var(--muted)}
 
@@ -1002,7 +1004,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
         <div data-panel="wsmach"><div class="ctlh"><h3>Machine</h3></div><div class="seg two" id="wsMachs"></div></div>
         <div data-panel="wsload"><div class="ctlh"><h3>Load</h3></div><div class="seg two" id="wsLoads"></div></div>
         <div class="wsctl" data-panel="wsctl">
-          <div id="wsClsRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lever">Lever class</button></h3></div><div class="seg three" id="wsCls"></div></div>
+          <div id="wsClsRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lever">How the lever is built</button></h3></div><div class="seg three" id="wsCls"></div></div>
           <div data-wsm="lever"><div class="ctlh"><h3 id="wsArmTitle">Load arm</h3><span class="numbox"><input type="number" id="wsArmNum" min="0.2" max="1.8" step="0.05" value="1" inputmode="decimal" aria-label="Arm length in metres: type a number"><span>m</span></span></div>
             <input type="range" id="wsArm" min="0.2" max="1.8" step="0.05" value="1" aria-label="Arm length in metres"><p class="palhint" id="wsArmNote"></p></div>
           <div data-wsm="pulley"><div class="ctlh"><h3><button type="button" class="term tl" data-t="supporting">Supporting ropes</button></h3></div>
@@ -1016,7 +1018,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
           <div data-wsm="ramp" id="wsHRow"><div class="ctlh"><h3>Ramp height</h3></div><div class="seg" id="wsH"></div></div>
           <div data-wsm="wedge"><div class="ctlh"><h3>Wedge thickness</h3></div><div class="seg" id="wsThick"></div></div>
           <div data-wsm="screw"><div class="ctlh"><h3>Distance per turn</h3></div><div class="seg three" id="wsPer"></div>
-            <div class="ctlh" style="margin-top:8px"><h3><button type="button" class="term tl" data-t="pitch">Pitch</button></h3></div><div class="seg three" id="wsPitch"></div><p class="palhint" id="wsTurnNote"></p></div>
+            <div class="ctlh" style="margin-top:8px"><h3><button type="button" class="term tl" data-t="pitch">Gap between threads</button></h3></div><div class="seg three" id="wsPitch"></div><p class="palhint" id="wsTurnNote"></p></div>
         </div>
       </aside>
       <div class="stagecol">
@@ -6424,11 +6426,14 @@ function openExploreHeli() {
 const SMOOSHY = { name: 'Captain Smooshy', ship: 'the Gumdrop', planet: 'Glimmer-9', g: 4.2, pull: 60, base: 'Gummy Base One' };
 const WS_H = 430, WS_WORLDS = { earth: { n: 'Earth', g: 9.8 }, moon: { n: 'the Moon', g: 1.6 }, mars: { n: 'Mars', g: 3.7 }, glim: { n: 'Glimmer-9', g: 4.2 } };
 const WS_EFF = { lever: .95, winch: .90, ramp: .75, wedge: .40, screw: .30 }, WS_PEFF = { 1: .95, 2: .90, 3: .85, 4: .80, 5: .75, 6: .70 };
-const WS_MACH = { lever: 'Lever', pulley: 'Pulley system', winch: 'Wheel and axle (winch)', ramp: 'Ramp', wedge: 'Wedge', screw: 'Screw jack' };
-const WS_ICON = { lever: '⚖️', pulley: '🪢', winch: '⚙️', ramp: '📐', wedge: '🪓', screw: '🔩' };
-const WS_VERB = { lever: 'Pull!', pulley: 'Pull!', winch: 'Turn!', ramp: 'Pull!', wedge: 'Push!', screw: 'Turn!' };
+const WS_MACH = { hand: 'By hand (no machine)', lever: 'Lever', pulley: 'Pulley system', winch: 'Wheel and axle (winch)', ramp: 'Ramp', wedge: 'Wedge', screw: 'Screw jack' };
+const WS_ICON = { hand: '✋', lever: '⚖️', pulley: '🪢', winch: '⚙️', ramp: '📐', wedge: '🪓', screw: '🔩' };
+const WS_VERB = { hand: 'Lift!', lever: 'Pull!', pulley: 'Pull!', winch: 'Turn!', ramp: 'Pull!', wedge: 'Push!', screw: 'Turn!' };
 const WS_DONE = { wedge: 'Split!' };
 const WS_BAR = 2, WS_T1 = 0.8, WS_WEDGE_OPEN = 0.05;
+/* Part 1 names the three lever set-ups by what sits in the middle; the class numbers are only shown once step lv5 has taught them (WS.clsNames). */
+const WS_SETUP = { 1: 'fulcrum in the middle', 2: 'load in the middle', 3: 'effort in the middle' };
+const WS_LIFT3 = 0.40;   // with the effort in the middle (class 3) the rock rises 0.40 m, so the hand moves a visible 0.10 m at an effort arm of 0.5 m
 const wsR1 = x => Math.round((x + 1e-9) * 10) / 10, wsR2 = x => Math.round((x + 1e-9) * 100) / 100;
 const wsNear = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) < 1e-6 : a === b;
 
@@ -6436,7 +6441,7 @@ const wsNear = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.a
 const WS = {
   mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10,
   load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null, world: 'earth', real: false, cap: null, maxTravel: 1.5,
-  lim: {}, classPick: false, rampH: false, axleEdit: false,
+  lim: {}, classPick: false, rampH: false, axleEdit: false, lift3: WS_LIFT3, clsNames: false,
   busy: false, ph: 0, pt: 0, T2: 2.2, c: null, done: false, msg: '', reading: 0, prog: 0, effort: 0, last: null, bubble: null, bubbleAt: 0, lastBub: -1, shown: false
 };
 /* ---------- the maths ---------- */
@@ -6447,7 +6452,8 @@ function wsArms() {
 }
 function wsParts(o) {   // machine settings -> { ma, eff, rise, ... } for the CURRENT settings (or the overrides in o)
   const s = Object.assign({}, WS, o || {}), m = s.mach; let ma, eff = 1, rise = s.lift, ex = {};
-  if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; }
+  if (m === 'hand') { ma = 1; }
+  else if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; if (s.cls === 3) rise = s.lift3 != null ? s.lift3 : WS_LIFT3; }
   else if (m === 'pulley') { ma = s.ropes; eff = WS_PEFF[s.ropes] || .7; }
   else if (m === 'winch') { ma = Math.round(s.R / s.axle * 1e6) / 1e6; eff = WS_EFF.winch; }
   else if (m === 'ramp') { ma = Math.round(s.L / s.h * 1e6) / 1e6; eff = WS_EFF.ramp; rise = s.h; }
@@ -6466,7 +6472,7 @@ function wsCalc(o) {
 const wsRecord = c => ({ mach: WS.mach, cls: WS.mach === 'lever' ? WS.cls : null, la: c.la != null ? wsR2(c.la) : null, ea: c.ea != null ? wsR2(c.ea) : null, ropes: WS.mach === 'pulley' ? WS.ropes : null,
   R: WS.mach === 'winch' ? WS.R : null, L: WS.mach === 'ramp' ? WS.L : null, h: WS.mach === 'ramp' ? WS.h : null, thick: WS.mach === 'wedge' ? WS.thick : null,
   per: WS.mach === 'screw' ? WS.per : null, pitch: WS.mach === 'screw' ? WS.pitch : null, loadN: WS.load, loadName: WS.loadName, loadShort: WS.loadShort, world: WS.world, real: !!WS.real, cap: WS.cap,
-  liftSet: WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
+  liftSet: WS.mach === 'lever' && WS.cls === 3 ? WS.lift3 : WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
 
 /* ---------- the student's own runs (a question never forces a re-run) ---------- */
 const shopRuns = () => runsFor().filter(r => r.scene === 'shop' && !r.live);
@@ -6492,11 +6498,11 @@ function wsSetLoad(id) { const l = WS.loadOpts && WS.loadOpts.find(x => x.id ===
 function wsResetLoad() { WS.busy = false; WS.ph = 0; WS.pt = 0; WS.prog = 0; WS.reading = 0; WS.done = false; WS.msg = ''; WS.c = null; if (typeof RUN !== 'undefined' && RUN && RUN.scene === 'shop' && RUN.live) runEnd('reset'); }
 function wsSetup(o) {
   const d = { mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10, load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null,
-    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false };
+    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false };
   Object.assign(WS, d, o || {}); wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
 }
 function wsSetMach(m) {
-  if (!WS.allow.includes(m) || m === WS.mach) return; WS.mach = m; wsLoadFor(m); const d = WS.lim[m]; if (d) Object.assign(WS, d); WS.lift = ({ lever: 0.10, pulley: 1.0, winch: 1.0, ramp: WS.h, wedge: WS_WEDGE_OPEN, screw: 0.20 })[m] || WS.lift;
+  if (!WS.allow.includes(m) || m === WS.mach) return; WS.mach = m; wsLoadFor(m); const d = WS.lim[m]; if (d) Object.assign(WS, d); WS.lift = ({ hand: 0.10, lever: 0.10, pulley: 1.0, winch: 1.0, ramp: WS.h, wedge: WS_WEDGE_OPEN, screw: 0.20 })[m] || WS.lift;
   if (WS.lifts && WS.lifts[m] != null) WS.lift = WS.lifts[m];
   wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange();
 }
@@ -6555,26 +6561,27 @@ const wsLoadTxt = r => `${fmt(r.loadN, r.loadN % 1 ? 1 : 0)} N ${r.loadShort || 
 function wsText(r) {
   if (r.live && r.out === 'running') return `You are working the ${WS_MACH[r.mach].toLowerCase()}…`;
   const mk = wsMasked(r), hideE = mk.has('readE'), E = hideE ? 'hidden until you answer' : fmt(r.E, 1) + ' N', obj = r.loadShort || 'load', num = v => fmt(v, 2) + ' m';
-  const lev = r.mach === 'lever' ? `a class ${r.cls} lever (load arm ${fmt(r.la, 2)} m, effort arm ${fmt(r.ea, 2)} m)` : r.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes === 1 ? '' : 's'}` : r.mach === 'winch' ? `a winch with a handle radius of ${fmt(r.R, 2)} m` : r.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp that rises ${fmt(r.h, 1)} m` : r.mach === 'wedge' ? `a wedge ${r.thick} cm thick` : `a screw jack (${fmt(r.per, 0)} cm per turn, pitch ${fmt(r.pitch, 1)} cm)`;
+  const lev = r.mach === 'hand' ? 'your bare hands (no machine)' : r.mach === 'lever' ? `a lever with the ${WS_SETUP[r.cls]} (the ${obj} ${fmt(r.la, 2)} m from the fulcrum, your hand ${fmt(r.ea, 2)} m from it)` : r.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes === 1 ? '' : 's'}` : r.mach === 'winch' ? `a winch with a handle radius of ${fmt(r.R, 2)} m` : r.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp that rises ${fmt(r.h, 1)} m` : r.mach === 'wedge' ? `a wedge ${r.thick} cm thick` : `a screw jack (${fmt(r.per, 0)} cm per turn, threads ${fmt(r.pitch, 1)} cm apart)`;
   const verb = r.mach === 'wedge' ? `You pushed the ${wsLoadTxt(r)} apart with` : r.mach === 'ramp' ? `You pulled the ${wsLoadTxt(r)} up` : `You lifted the ${wsLoadTxt(r)} with`;
   const worldNote = r.world && r.world !== 'earth' ? ` (on ${WS_WORLDS[r.world].n})` : '';
   if (r.capped) return `With ${lev}, the load needed ${fmt(r.need, 1)} N, which is more than ${SMOOSHY.name}'s ${r.cap} N, so it didn't move.`;
-  const move = r.mach === 'ramp' ? ` The ${obj} rose ${num(r.rise)} and you pulled it ${num(r.eDist)} along the ramp.` : r.mach === 'pulley' ? ` The ${obj} rose ${num(r.rise)} and you pulled ${num(r.eDist)} of rope.` : r.mach === 'wedge' ? ` The halves opened ${fmt(r.rise * 100, 0)} cm and you pushed the wedge ${num(r.eDist)}.` : r.mach === 'screw' ? ` The ${obj} rose ${fmt(r.rise * 100, 0)} cm.${mk.has('turns') ? '' : ` It took ${fmt(r.turns, 0)} turns.`}` : ` The ${obj} rose ${num(r.rise)} and ${r.mach === 'lever' ? 'your end' : 'your hand'} moved ${num(r.eDist)}.`;
+  const handMove = r.mach === 'lever' ? ` The ${obj} rose ${num(r.rise)} and your hand moved ${num(r.eDist)}.` : r.mach === 'hand' ? ` The ${obj} rose ${num(r.rise)}.` : '';
+  const move = handMove ? handMove : r.mach === 'ramp' ? ` The ${obj} rose ${num(r.rise)} and you pulled it ${num(r.eDist)} along the ramp.` : r.mach === 'pulley' ? ` The ${obj} rose ${num(r.rise)} and you pulled ${num(r.eDist)} of rope.` : r.mach === 'wedge' ? ` The halves opened ${fmt(r.rise * 100, 0)} cm and you pushed the wedge ${num(r.eDist)}.` : r.mach === 'screw' ? ` The ${obj} rose ${fmt(r.rise * 100, 0)} cm.${mk.has('turns') ? '' : ` It took ${fmt(r.turns, 0)} turns.`}` : ` The ${obj} rose ${num(r.rise)} and ${r.mach === 'lever' ? 'your end' : 'your hand'} moved ${num(r.eDist)}.`;
   const sh = r.short ? ` The lever only lifted the load ${num(r.rise)} before your end hit the floor.` : '';
   return `${verb} ${lev}${worldNote}. The effort was ${E}.${sh || move}`.replace('.. ', '. ');
 }
 function wsChips(r) {
   const mk = wsMasked(r), c = [['Machine', WS_MACH[r.mach]]];
-  if (r.mach === 'lever') c.push(['Class', String(r.cls)], ['Load arm', fmt(r.la, 2) + ' m'], ['Effort arm', fmt(r.ea, 2) + ' m']);
+  if (r.mach === 'lever') c.push(['Set-up', WS_SETUP[r.cls]], ['Fulcrum to load', fmt(r.la, 2) + ' m'], ['Fulcrum to effort', fmt(r.ea, 2) + ' m']);
   if (r.mach === 'pulley') c.push(['Supporting ropes', String(r.ropes)]);
   if (r.mach === 'winch') c.push(['Handle radius', fmt(r.R, 2) + ' m']);
   if (r.mach === 'ramp') c.push(['Ramp length', fmt(r.L, 1) + ' m'], ['Height', fmt(r.h, 1) + ' m']);
   if (r.mach === 'wedge') c.push(['Thickness', r.thick + ' cm']);
-  if (r.mach === 'screw') { c.push(['Per turn', fmt(r.per, 0) + ' cm'], ['Pitch', fmt(r.pitch, 1) + ' cm']); if (r.turns != null && !mk.has('turns')) c.push(['Turns', fmt(r.turns, 0)]); }
+  if (r.mach === 'screw') { c.push(['Per turn', fmt(r.per, 0) + ' cm'], ['Thread gap', fmt(r.pitch, 1) + ' cm']); if (r.turns != null && !mk.has('turns')) c.push(['Turns', fmt(r.turns, 0)]); }
   c.push(['Load', fmt(r.loadN, r.loadN % 1 ? 1 : 0) + ' N']);
   if (!r.capped && !mk.has('readE')) c.push(['Effort', fmt(r.E, 1) + ' N']);
   if (r.capped) c.push(['Needed', fmt(r.need, 1) + ' N'], ['Result', 'too much']);
-  else { c.push([r.mach === 'wedge' ? 'Opened' : 'Load rise', fmt(r.rise, 2) + ' m'], ['Effort distance', fmt(r.eDist, 2) + ' m']); if (!mk.has('readMA') && wsHas('readMA')) c.push(['MA', fmt(r.ma, 2)]); if (!mk.has('readWork') && wsHas('readWork')) c.push(['Work in', fmt(r.workIn, 0) + ' J'], ['Work out', fmt(r.workOut, 0) + ' J']); }
+  else { c.push([r.mach === 'wedge' ? 'Opened' : 'Load rise', fmt(r.rise, 2) + ' m'], [r.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(r.eDist, 2) + ' m']); if (!mk.has('readMA') && wsHas('readMA')) c.push(['MA', fmt(r.ma, 2)]); if (!mk.has('readWork') && wsHas('readWork')) c.push(['Work in', fmt(r.workIn, 0) + ' J'], ['Work out', fmt(r.workOut, 0) + ' J']); }
   return c;
 }
 const wsHas = k => LAB.show.has(k) || VIEW === 'vExplore';
@@ -6584,24 +6591,24 @@ const wsFmt = (k, v) => k === 'ropes' ? String(v) : fmt(v, k === 'arm' || k === 
 function wsRenderControls() {
   if (!$('#wsMachs')) return;
   $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach); });   // only the controls of the machine on the bench
-  const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
+  const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0] + ':' + i[1]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
   const A = WS.allow; $('#wsMachs').className = 'seg ' + (A.length > 3 ? 'three' : A.length > 2 ? 'three' : 'two'); seg('#wsMachs', A.map(m => [m, `${WS_ICON[m]} ${WS_MACH[m].replace(' (winch)', '')}`]), WS.mach, 'data-mach');
   if (WS.loadOpts) seg('#wsLoads', WS.loadOpts.map(l => [l.id, l.name]), WS.loadId, 'data-load');
-  seg('#wsCls', [[1, 'Class 1'], [2, 'Class 2'], [3, 'Class 3']], WS.cls, 'data-cls');
+  seg('#wsCls', [1, 2, 3].map(n => [n, (WS.clsNames ? `Class ${n}: ` : '') + WS_SETUP[n].replace(/^./, ch => ch.toUpperCase())]), WS.cls, 'data-cls');
   seg('#wsThick', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick, 'data-thick');
   seg('#wsPer', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per, 'data-per'); seg('#wsPitch', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch, 'data-pitch');
   seg('#wsH', [[0.6, '0.6 m'], [0.8, '0.8 m'], [1.0, '1.0 m'], [1.2, '1.2 m']], WS.h, 'data-h');
   seg('#wsLift', [[1, '1 m'], [2, '2 m']], WS.lift, 'data-lift');
   const num = (id, v) => { const e = $(id); if (e && document.activeElement !== e) e.value = v; };
-  const al = wsLimits('arm'), lab = WS.cls === 3 ? 'Effort arm' : 'Load arm'; const t = $('#wsArmTitle'); if (t) t.textContent = lab; $('#wsArm').min = al.min; $('#wsArm').max = al.max; $('#wsArm').step = al.step; $('#wsArm').value = WS.arm; num('#wsArmNum', fmt(WS.arm, 2));
-  const arms = wsArms(), note = $('#wsArmNote'); if (note) note.textContent = `Load arm ${fmt(arms.la, 2)} m · effort arm ${fmt(arms.ea, 2)} m`;
+  const al = wsLimits('arm'), lab = WS.cls === 1 ? 'Move the fulcrum' : WS.cls === 2 ? 'Move the rock' : 'Move your hand'; const t = $('#wsArmTitle'); if (t) t.textContent = lab; $('#wsArm').min = al.min; $('#wsArm').max = al.max; $('#wsArm').step = al.step; $('#wsArm').value = WS.arm; num('#wsArmNum', fmt(WS.arm, 2));
+  const arms = wsArms(), note = $('#wsArmNote'); if (note) note.textContent = `${WS.loadShort.replace(/^./, ch => ch.toUpperCase())} to fulcrum: ${fmt(arms.la, 2)} m · your hand to fulcrum: ${fmt(arms.ea, 2)} m`;
   const rl = wsLimits('R'); [$('#wsR'), $('#wsRNum')].forEach(e => { e.min = rl.min; e.max = rl.max; }); $('#wsR').step = 0.05; $('#wsR').value = WS.R; num('#wsRNum', fmt(WS.R, 2));
   const ll = wsLimits('L'); [$('#wsL'), $('#wsLNum')].forEach(e => { e.min = ll.min; e.max = ll.max; }); $('#wsL').step = ll.step; $('#wsL').value = WS.L; num('#wsLNum', fmt(WS.L, 1));
   $('#wsRopesN').textContent = WS.ropes; $('#wsRopesDn').disabled = WS.ropes <= 1; $('#wsRopesUp').disabled = WS.ropes >= (WS.lim.ropesMax || 6);
   const ax = $('#wsAxleRow'); if (ax) { ax.hidden = !WS.axleEdit || WS.mach !== 'winch'; num('#wsAxleNum', fmt(WS.axle, 2)); }
   $('#wsClsRow').hidden = !WS.classPick || WS.mach !== 'lever'; $('#wsHRow').hidden = !WS.rampH || WS.mach !== 'ramp'; $('#wsLiftRow').hidden = !WS.lifts || WS.lifts.pick !== true || !['pulley'].includes(WS.mach);
   const pb = $('#wsPull'); if (pb) { pb.textContent = WS_VERB[WS.mach]; pb.disabled = WS.busy; }
-  const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and the screw ${fmt(WS.pitch, 1)} cm.` : '';
+  const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the jack ${fmt(WS.pitch, 1)} cm (the gap between threads).` : '';
 }
 function initShop() {
   if (!$('#wsMachs')) return;
@@ -6710,7 +6717,6 @@ const WS_DIALS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000];
 function wsDialMax(need) { return WS_DIALS.find(v => v >= Math.max(need, 60) * 1.05) || WS_DIALS[WS_DIALS.length - 1]; }
 function wsNewtonmeter(c, cx, cy, M, val, hideVal, ex, ey) {
   const r = 50, a0 = Math.PI * 0.75, sw = Math.PI * 1.5, ang = v => a0 + clamp(v / M, 0, 1) * sw;
-  if (ex != null) { c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(ex, ey); c.lineTo(cx, cy + r + 20); c.stroke(); c.setLineDash([]); }
   c.fillStyle = '#243038'; c.beginPath(); c.roundRect(cx - 62, cy - 62, 124, 148, 14); c.fill(); c.fillStyle = '#e9eef1'; c.beginPath(); c.arc(cx, cy, r + 4, 0, 7); c.fill();
   c.lineCap = 'butt'; c.lineWidth = 9; c.strokeStyle = '#cfd8dd'; c.beginPath(); c.arc(cx, cy, r - 10, a0, a0 + sw); c.stroke();
   c.strokeStyle = WSC.red; c.beginPath(); c.arc(cx, cy, r - 10, ang(Math.min(SMOOSHY.pull, M)), a0 + sw); c.stroke();
@@ -6719,7 +6725,7 @@ function wsNewtonmeter(c, cx, cy, M, val, hideVal, ex, ey) {
   if (!hideVal) { const a = ang(val); c.strokeStyle = WSC.ink; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * (r - 12), cy + Math.sin(a) * (r - 12)); c.stroke(); }
   c.fillStyle = WSC.ink; c.beginPath(); c.arc(cx, cy, 5, 0, 7); c.fill();
   c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx - 44, cy + 36, 88, 26, 5); c.fill(); txt(c, hideVal ? '? N' : fmt(val, 1) + ' N', cx, cy + 49.5, '#9ef0b2', `700 17px ${C.fn}`);
-  txt(c, 'NEWTONMETER', cx, cy + 74, '#cfd8dd', `800 9px ${C.fb}`);
+  txt(c, 'NEWTONMETER READING', cx, cy + 74, '#cfd8dd', `800 9px ${C.fb}`);
   c.fillStyle = WSC.red; c.fillRect(cx - 52, cy + 79, 7, 7); txt(c, 'Smooshy\'s limit: 60 N', cx - 42, cy + 82.5, '#cfd8dd', `700 8.5px ${C.fb}`, 'left');
 }
 
@@ -6737,21 +6743,50 @@ const wsHand = (c, x, y, down) => { c.fillStyle = '#e8b896'; c.beginPath(); c.ro
 function wsEffArrow(c, x, y, down) { const col = WSC.red; if (down) arrow(c, x, y - 54, x, y - 14, col, 4); else arrow(c, x, y + 54, x, y + 14, col, 4); }
 
 /* ---------- the machines. Each returns the effort point { x, y } so the newtonmeter can be joined to it ---------- */
+/* a spring-balance newtonmeter on the line from the machine (ax, ay) to the puller's hand (hx, hy): hook, body with a scale, ring and hand,
+   and a red arrow past the hand pointing the way the hand pulls. It always reads as a PULL (Tom, 1 Nov 2026). */
+function wsSpring(c, ax, ay, hx, hy, label) {
+  const dx = hx - ax, dy = hy - ay, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, ang = Math.atan2(dy, dx);
+  const hook = Math.min(14, L * .18), body = Math.max(26, Math.min(58, L - hook - 22));
+  c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax + ux * hook, ay + uy * hook); c.stroke();
+  c.save(); c.translate(ax + ux * hook, ay + uy * hook); c.rotate(ang);
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.roundRect(0, -9, body, 18, 6); c.fill(); c.fillStyle = '#fff3cc'; c.fillRect(4, -4, body - 8, 8);
+  c.strokeStyle = WSC.ink; c.lineWidth = 1; for (let k = 6; k < body - 4; k += 5) { c.beginPath(); c.moveTo(k, -4); c.lineTo(k, k % 10 < 5 ? 1 : -1); c.stroke(); }
+  c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.beginPath(); c.moveTo(body, 0); c.lineTo(L - hook - 10, 0); c.stroke(); c.beginPath(); c.arc(L - hook - 4, 0, 6, 0, 7); c.stroke();
+  c.restore();
+  wsHand(c, hx, hy, uy > 0);
+  arrow(c, hx + ux * 14, hy + uy * 14, hx + ux * 50, hy + uy * 50, WSC.red, 4);
+  if (label) { const mx = ax + ux * (hook + body / 2), my = ay + uy * (hook + body / 2); if (Math.abs(uy) > .7) txt(c, label, mx + 16, my, WSC.red, `800 11px ${C.fb}`, 'left'); else txt(c, label, mx - uy * 18, my + ux * 18 - 4, WSC.red, `800 11px ${C.fb}`, 'center'); }
+}
+/* the lever. A wider pivot height for each set-up keeps the bar, the spring balance and the hand above the floor at every slider setting:
+   fulcrum in the middle (class 1): your end goes DOWN, so the bar sits high and the newtonmeter hangs below it;
+   load or effort in the middle (classes 2 and 3): your hand pulls UP, so the bar sits low and the newtonmeter is above it. */
 function wsDrawLever(c, cur, riseNow) {
-  const k = 170, fy = 262, arms = { la: cur.la, ea: cur.ea }, X0 = 200, fx = WS.cls === 1 ? X0 + arms.la * k : X0;
+  const k = 120, arms = { la: cur.la, ea: cur.ea }, X0 = 214, fx = WS.cls === 1 ? X0 + arms.la * k : X0, fy = WS.cls === 1 ? 140 : 296;
   const th = WS.cls === 1 ? riseNow / arms.la : WS.cls === 2 ? -riseNow / arms.la : -riseNow / 2;
   const P = d => ({ x: fx + d * k * Math.cos(th), y: fy + d * k * Math.sin(th) });
   const d0 = WS.cls === 1 ? -arms.la : 0, d1 = WS.cls === 1 ? arms.ea : WS_BAR, dl = WS.cls === 1 ? -arms.la : WS.cls === 2 ? arms.la : WS_BAR, de = WS.cls === 1 ? arms.ea : WS.cls === 2 ? WS_BAR : arms.ea;
-  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(fx - 22, 350); c.lineTo(fx + 22, 350); c.lineTo(fx, fy + 9); c.closePath(); c.fill();
+  /* the fulcrum: a steel stand from the floor up to the pivot */
+  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(fx - 26, 350); c.lineTo(fx + 26, 350); c.lineTo(fx + 5, fy + 9); c.lineTo(fx - 5, fy + 9); c.closePath(); c.fill();
   const a = P(d0), b = P(d1); c.strokeStyle = WSC.wood2; c.lineWidth = 14; c.lineCap = 'round'; c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.strokeStyle = WSC.wood; c.lineWidth = 8; c.beginPath(); c.moveTo(a.x, a.y - 1); c.lineTo(b.x, b.y - 1); c.stroke();
   c.fillStyle = WSC.steel; c.beginPath(); c.arc(fx, fy, 6, 0, 7); c.fill();
   const L = P(dl), E = P(de); wsLoadBlock(c, L.x, L.y - 7, 54, 40, WS.loadId === 'rock' ? 'rock' : WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
-  const down = WS.cls === 1; wsEffArrow(c, E.x, E.y - (down ? 8 : -8), down); wsHand(c, E.x, E.y + (down ? -62 : 62), down);
-  /* the two arms, measured along the floor of the bench */
-  const lx = fx + dl * k, ex = fx + de * k;
-  wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), 178, `load arm ${fmt(arms.la, 2)} m`, WSC.green, true); wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), 148, `effort arm ${fmt(arms.ea, 2)} m`, WSC.red, true);
-  c.fillStyle = '#fff'; c.font = `800 9px ${C.fb}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('fulcrum', fx, 336);
-  return { x: E.x + (down ? 0 : 0), y: down ? E.y - 62 : E.y + 62 };
+  /* the newtonmeter and the hand: below the bar for a pull down, above it for a pull up */
+  const down = WS.cls === 1, hy = down ? Math.min(E.y + 84, 330) : Math.max(E.y - 84, 52);
+  wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
+  /* labels: the three parts of a lever, then the two distances along the bar in plain words */
+  if (down) txt(c, 'fulcrum', fx, 342, '#fff', `800 10px ${C.fb}`); else txt(c, 'fulcrum', fx - 30, 334, WSC.steel2, `800 11px ${C.fb}`, 'right');
+  const lx = fx + dl * k, ex = fx + de * k, yb = down ? 58 : 318;
+  wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(arms.la, 2)} m`, WSC.green, true);
+  wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), yb, `hand to fulcrum ${fmt(arms.ea, 2)} m`, WSC.red, true);
+  return { x: E.x, y: hy };
+}
+/* lifting by hand: the newtonmeter hooks onto the rock and the hand pulls straight up */
+function wsDrawHand(c, cur, riseNow) {
+  const cx = 360, by = 350 - riseNow * 300;
+  wsLoadBlock(c, cx, by, 70, 52, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
+  wsSpring(c, cx, by - 52, cx, by - 150, 'pull up');
+  return { x: cx, y: by - 150 };
 }
 function wsDrawPulley(c, cur, riseNow, prog) {
   const N = WS.ropes, cx = 330, w = Math.max(40, N * 28), pxM = 70, bY = 250 - riseNow * pxM, top = 84;
@@ -6766,9 +6801,9 @@ function wsDrawPulley(c, cur, riseNow, prog) {
   c.fillStyle = WSC.steel; c.fillRect(cx - 2, bY - (N > 1 ? 0 : 4), 4, 14);
   wsLoadBlock(c, cx, bY + 62, 64, 50, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
   /* the free end comes down over the last wheel to the puller's hand */
-  const hx = 500, hy = 190 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, hy); c.stroke();
-  wsEffArrow(c, hx, hy + 52, false); wsHand(c, hx, hy + 6, false); txt(c, 'free end', hx + 10, 150, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, 'not counted', hx + 10, 162, WSC.ink, `700 10px ${C.fb}`, 'left');
-  return { x: hx, y: hy + 10 };
+  const hx = 500, ry = 150 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, ry); c.stroke();
+  wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); txt(c, 'the end you pull', hx + 10, 110, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, '(not counted)', hx + 10, 122, WSC.ink, `700 10px ${C.fb}`, 'left');
+  return { x: hx, y: ry + 66 };
 }
 function wsDrawWinch(c, cur, riseNow) {
   const ax = 330, ay = 165, pxm = 185, ar = Math.max(8, WS.axle * pxm), hr = WS.R * pxm, rot = riseNow / WS.axle;
@@ -6791,10 +6826,11 @@ function wsDrawRamp(c, cur, riseNow, prog) {
   const ang = Math.atan2(B.y - A.y, B.x - A.x), t = clamp(prog, 0, 1), px = A.x + (B.x - A.x) * t, py = A.y + (B.y - A.y) * t, cs = Math.cos(ang), sn = Math.sin(ang);
   c.save(); c.translate(px, py); c.rotate(ang); c.fillStyle = WSC.crate; c.beginPath(); c.roundRect(2, -36, 54, 28, 5); c.fill(); c.fillStyle = WSC.ink; [[13, -6], [45, -6]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 6, 0, 7); c.fill(); }); txt(c, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N', 29, -22, '#fffaf2', `800 11px ${C.fn}`); c.restore();
   /* the pull is up the slope, along a rope from the front of the cart to the puller's hand on the platform */
-  const fx = px + cs * 56 - sn * 20 * -1 * 0 + 0, fy = py + sn * 56 - cs * 20, hx = B.x + 28, hy = B.y - 36;
-  c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(px + cs * 54 + sn * 20, py + sn * 54 - cs * 20); c.lineTo(hx, hy + 8); c.stroke();
-  wsHand(c, hx, hy, false); arrow(c, px + cs * 58 + sn * 20, py + sn * 58 - cs * 20, px + cs * 100 + sn * 20, py + sn * 100 - cs * 20, WSC.red, 4);
-  return { x: hx + 8, y: hy };
+  const fx = px + cs * 56 - sn * 20 * -1 * 0 + 0, fy = py + sn * 56 - cs * 20, hx = Math.min(B.x + 120, 590), hy = B.y - 40;
+  const rx = px + cs * 54 + sn * 20, ry = py + sn * 54 - cs * 20, rl = Math.hypot(hx - rx, hy - ry), sx = hx - (hx - rx) / rl * 70, sy = hy - (hy - ry) / rl * 70;
+  c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(rx, ry); c.lineTo(sx, sy); c.stroke();
+  if (rl > 80) wsSpring(c, sx, sy, hx, hy, 'pull'); else wsHand(c, hx, hy, false);
+  return { x: hx, y: hy };
 }
 function wsDrawWedge(c, cur, riseNow, prog) {
   const cx = 330, sc = 5, wd = WS.thick * sc, ht = 20 * sc, open = riseNow / WS_WEDGE_OPEN * 14, ice = WS.loadId === 'ice', tip = 218 + prog * 82, top = tip - ht;
@@ -6819,7 +6855,7 @@ function wsDrawScrew(c, cur, riseNow, prog) {
   c.strokeStyle = WSC.wood2; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx + 18, hy); c.lineTo(hx, hy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(hx, hy, 9, 0, 7); c.fill();
   arrow(c, hx + 6, hy - 14, hx + 6, hy - 52, WSC.red, 4);
   const mk = wsMasked(), tn = Math.floor(turnsNow + 1e-6); c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx + 108, 280, 108, 40, 8); c.fill(); txt(c, 'TURNS', cx + 162, 291, '#cfd8dd', `800 9px ${C.fb}`); txt(c, mk.has('turns') ? '?' : String(tn), cx + 162, 308, '#9ef0b2', `700 18px ${C.fn}`);
-  txt(c, `pitch ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
+  txt(c, `thread gap ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
   return { x: hx + 8, y: hy - 52 };
 }
 
@@ -6838,13 +6874,13 @@ function wsRuler(c, x, y, w, dist, title, col) {
 function drawShopScene(c) {
   wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
-  if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow);
+  if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow);
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
   wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
   wsMonitor(c);
   /* readouts */
-  const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], ['Effort distance', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
+  const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], [WS.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
   if (wsHas('readMA')) rows.push(['Mechanical advantage', mk.has('readMA') ? '?' : fmt(cur.ma, 2)]);
   if (wsHas('readWork')) { const done = WS.done && !WS.c.capped; rows.push(['Work in', mk.has('readWork') ? '?' : done ? fmt(WS.c.workIn, 0) + ' J' : '–'], ['Work out', mk.has('readWork') ? '?' : done ? fmt(WS.c.workOut, 0) + ' J' : '–']); }
   rows.forEach(([l, v], i) => { const y = 24 + i * 46; c.fillStyle = C.panel; c.globalAlpha = .94; c.beginPath(); c.roundRect(728, y, 164, 40, 8); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.2; c.stroke(); txt(c, l, 738, y + 11, C.muted, `700 10.5px ${C.fb}`, 'left'); txt(c, v, 738, y + 28, C.ink, `700 15px ${C.fn}`, 'left'); });
@@ -6855,12 +6891,168 @@ function drawShopScene(c) {
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
-    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'EFFORT DISTANCE (m)', WSC.red);
+    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)', WSC.red);
   }
 }
 
+/* ===== Chapter 6: labelled pictures for the cards, questions and worksheets (Tom, 1 Nov 2026: "an image of these, labelled, would really support student understanding").
+   Plain inline SVG, no <style> blocks (question text is parsed for {0} gaps), same colours as the Workshop scene:
+   fulcrum = steel grey, load = green, effort = red. Every picture has a role="img" and an aria-label. Names: pic*, PIC_*. */
+const PIC_C = { F: '#4f5d66', L: '#2a7d48', E: '#d6402c', wood: '#c9a36a', wood2: '#a98456', rock: '#8b8f93', ink: '#243038', soft: '#eef2f4', skin: '#e8b896', rope: '#b99a56', steel: '#8e9ca5' };
+const picWrap = (w, h, label, body, extra, cap) => `<svg class="pic" viewBox="0 0 ${w} ${h}" role="img" aria-label="${label}" style="width:100%;max-width:${Math.min(w, cap || 360)}px;height:auto;display:block;margin:6px auto${extra ? ';' + extra : ''}">${body}</svg>`;
+const picTxt = (x, y, t, col, size, anchor, weight) => `<text x="${x}" y="${y}" fill="${col || PIC_C.ink}" font-size="${size || 13}" font-weight="${weight || 800}" text-anchor="${anchor || 'middle'}" font-family="system-ui, sans-serif">${t}</text>`;
+const picArrow = (x1, y1, x2, y2, col, w) => { const a = Math.atan2(y2 - y1, x2 - x1), h = 9, s = 5.5; return `<line x1="${x1}" y1="${y1}" x2="${x2 - Math.cos(a) * h * .7}" y2="${y2 - Math.sin(a) * h * .7}" stroke="${col}" stroke-width="${w || 4}" stroke-linecap="round"/><polygon points="${x2},${y2} ${x2 - Math.cos(a) * h + Math.sin(a) * s},${y2 - Math.sin(a) * h - Math.cos(a) * s} ${x2 - Math.cos(a) * h - Math.sin(a) * s},${y2 - Math.sin(a) * h + Math.cos(a) * s}" fill="${col}"/>`; };
+const picHand = (x, y) => `<rect x="${x - 10}" y="${y - 10}" width="20" height="20" rx="8" fill="${PIC_C.skin}"/>`;
+const picTri = (x, y, w, h, col) => `<polygon points="${x - w / 2},${y + h} ${x + w / 2},${y + h} ${x},${y}" fill="${col}"/>`;
+const picRock = (x, y, w, h, label) => `<rect x="${x - w / 2}" y="${y - h}" width="${w}" height="${h}" rx="${h / 2.2}" fill="${PIC_C.rock}"/>${label ? picTxt(x, y - h / 2 + 4, label, '#fff', 11) : ''}`;
+/* a label tag with a short leader line: name in its colour, optional plain words underneath */
+const picTag = (x, y, tx, ty, name, col, sub, dim) => `<g opacity="${dim ? .28 : 1}"><line x1="${x}" y1="${y}" x2="${tx}" y2="${ty + (ty > y ? -14 : 4)}" stroke="${col}" stroke-width="1.6" stroke-dasharray="3 3"/>${picTxt(tx, ty, name, col, 14)}${sub ? picTxt(tx, ty + 15, sub, PIC_C.ink, 11, 'middle', 600) : ''}</g>`;
+
+/* ---------- a lever. o.mid = 'F' (fulcrum in the middle), 'L' (load in the middle) or 'E' (effort in the middle).
+   o.show = which labels to show ('FLE' by default); o.focus = one letter to highlight while the others are dimmed;
+   o.names = { L: 'the rock' } plain words under a label; o.letters = true puts A, B, C on the parts instead of names (for label-it questions);
+   o.title = a caption above; o.flip = true mirrors it (load on the right). ---------- */
+function picLever(o) {
+  o = Object.assign({ mid: 'F', show: 'FLE', focus: null, names: {}, letters: false, title: '', flip: false, w: 380 }, o || {});
+  const W = o.w, H = 196, y = 104, xa = 50, xm = W / 2, xb = W - 50;
+  const pos = o.mid === 'F' ? { L: xa, F: xm, E: xb } : o.mid === 'L' ? { F: xa, L: xm, E: xb } : { F: xa, E: xm, L: xb };
+  if (o.flip) Object.keys(pos).forEach(k => pos[k] = W - pos[k]);
+  const effDown = o.mid === 'F', dim = k => o.focus && o.focus !== k;
+  let b = '';
+  if (o.title) b += picTxt(W / 2, 18, o.title, PIC_C.ink, 13, 'middle', 800);
+  b += `<rect x="${xa - 14}" y="${y - 6}" width="${xb - xa + 28}" height="12" rx="6" fill="${PIC_C.wood}"/>`;
+  b += picTri(pos.F, y + 6, 34, 38, PIC_C.F);
+  b += picRock(pos.L, y - 6, 46, 34, '');
+  b += effDown ? picArrow(pos.E, y + 10, pos.E, y + 52, PIC_C.E, 4) + picHand(pos.E, y + 62) : picArrow(pos.E, y - 10, pos.E, y - 52, PIC_C.E, 4) + picHand(pos.E, y - 62);
+  const L = o.letters ? (typeof o.letters === 'object' ? o.letters : { F: 'A', L: 'B', E: 'C' }) : null, nm = { F: 'Fulcrum', L: 'Load', E: 'Effort' }, col = { F: PIC_C.F, L: PIC_C.L, E: PIC_C.E };
+  const sub = { F: o.names.F || 'the pivot', L: o.names.L || 'the rock', E: o.names.E || 'your pull' };
+  if (o.letters) {
+    const at = { F: [pos.F, y + 64], L: [pos.L, y - 52], E: [pos.E + 24, effDown ? y + 40 : y - 36] };
+    Object.keys(L).forEach(k => { const [x, yy] = at[k]; b += `<circle cx="${x}" cy="${yy - 5}" r="13" fill="#fff" stroke="${PIC_C.ink}" stroke-width="2"/>` + picTxt(x, yy, L[k], PIC_C.ink, 14); });
+  } else {
+    if (o.show.includes('F')) b += picTag(pos.F, y + 40, pos.F, y + 72, nm.F, col.F, sub.F, dim('F'));
+    if (o.show.includes('L')) b += picTag(pos.L, y - 42, pos.L + (o.mid === 'L' ? 0 : 0), y - 60, nm.L, col.L, sub.L, dim('L'));
+    if (o.show.includes('E')) { const side = pos.E > W / 2 ? -1 : 1, hy = effDown ? y + 62 : y - 62; b += `<g opacity="${dim('E') ? .28 : 1}">${picTxt(pos.E + side * 22, hy, nm.E, col.E, 14, side < 0 ? 'end' : 'start')}${picTxt(pos.E + side * 22, hy + 14, sub.E, PIC_C.ink, 11, side < 0 ? 'end' : 'start', 600)}</g>`; }
+  }
+  const lab = o.letters ? 'A lever with three parts marked A, B and C' : `A lever with the ${o.mid === 'F' ? 'fulcrum' : o.mid === 'L' ? 'load' : 'effort'} in the middle`;
+  return picWrap(W, H, lab, b);
+}
+/* just the bar and the pivot, for the very first card */
+function picBar() {
+  let b = `<rect x="40" y="88" width="300" height="12" rx="6" fill="${PIC_C.wood}"/>` + picTri(190, 100, 34, 38, PIC_C.F);
+  b += picTag(80, 86, 80, 52, 'Lever', PIC_C.wood2, 'a strong bar') + picTag(190, 132, 190, 160, 'Fulcrum', PIC_C.F, 'the pivot it turns on');
+  return picWrap(380, 186, 'A lever: a strong bar resting on a pivot called the fulcrum', b);
+}
+/* the three set-ups side by side, each named by what is in the middle (o.classes = true adds Class 1, 2, 3) */
+function picThree(o) {
+  o = o || {}; const one = (mid, cx, n) => {
+    const y = 74, xa = cx - 62, xm = cx, xb = cx + 62, pos = mid === 'F' ? { L: xa, F: xm, E: xb } : mid === 'L' ? { F: xa, L: xm, E: xb } : { F: xa, E: xm, L: xb }, down = mid === 'F';
+    let b = `<rect x="${xa - 8}" y="${y - 4}" width="${xb - xa + 16}" height="8" rx="4" fill="${PIC_C.wood}"/>` + picTri(pos.F, y + 4, 22, 24, PIC_C.F) + picRock(pos.L, y - 4, 26, 20, '');
+    b += down ? picArrow(pos.E, y + 6, pos.E, y + 32, PIC_C.E, 3) : picArrow(pos.E, y - 6, pos.E, y - 32, PIC_C.E, 3);
+    b += picTxt(pos.F, y + 46, 'F', PIC_C.F, 16) + picTxt(pos.L, y - 30, 'L', PIC_C.L, 16) + picTxt(pos.E + 10, down ? y + 30 : y - 20, 'E', PIC_C.E, 16, 'start');
+    b += picTxt(cx, 140, (o.classes ? `Class ${n}` : (mid === 'F' ? 'Fulcrum' : mid === 'L' ? 'Load' : 'Effort')), mid === 'F' ? PIC_C.F : mid === 'L' ? PIC_C.L : PIC_C.E, 18) + picTxt(cx, 160, (o.classes ? (mid === 'F' ? 'fulcrum' : mid === 'L' ? 'load' : 'effort') + ' in the middle' : 'in the middle'), mid === 'F' ? PIC_C.F : mid === 'L' ? PIC_C.L : PIC_C.E, 15);
+    return b; };
+  let b = one('F', 92, 1) + one('L', 272, 2) + one('E', 452, 3);
+  b += picTxt(272, 192, 'F = fulcrum   ·   L = load   ·   E = effort', PIC_C.ink, 15, 'middle', 600);
+  return picWrap(544, 202, o.classes ? 'The three classes of lever: class 1 has the fulcrum in the middle, class 2 the load in the middle and class 3 the effort in the middle' : 'Three ways to build a lever: fulcrum in the middle, load in the middle, or effort in the middle', b, '', 420);
+}
+/* ---------- everyday levers, each labelled ---------- */
+function picSeesaw() {
+  let b = `<rect x="30" y="96" width="320" height="12" rx="6" fill="${PIC_C.wood}" transform="rotate(-6 190 102)"/>` + picTri(190, 104, 40, 50, PIC_C.F);
+  b += `<rect x="40" y="56" width="52" height="46" rx="8" fill="${PIC_C.rock}" transform="rotate(-6 190 102)"/>` + picTxt(64, 84, 'box', '#fff', 11);
+  b += picArrow(318, 92, 318, 136, PIC_C.E, 4) + picHand(318, 146);
+  b += picTag(190, 150, 190, 176, 'Fulcrum', PIC_C.F, 'the middle of the seesaw') + picTag(64, 52, 92, 26, 'Load', PIC_C.L, 'a heavy box') + picTag(330, 146, 300, 182, 'Effort', PIC_C.E, 'you push down');
+  return picWrap(380, 206, 'A seesaw: the fulcrum is in the middle, a heavy box sits on one end and you push down on the other end', b);
+}
+function picWheelbarrow() {
+  let b = `<circle cx="70" cy="140" r="26" fill="${PIC_C.ink}"/><circle cx="70" cy="140" r="8" fill="${PIC_C.steel}"/>`;
+  b += `<polygon points="60,104 250,98 236,138 96,140" fill="#2f8f8a"/><path d="M84 104 q60 -34 150 -6 z" fill="#8a6a45"/>`;
+  b += `<line x1="70" y1="140" x2="330" y2="96" stroke="${PIC_C.wood2}" stroke-width="8" stroke-linecap="round"/><line x1="200" y1="128" x2="196" y2="166" stroke="${PIC_C.wood2}" stroke-width="6" stroke-linecap="round"/>`;
+  b += picArrow(330, 88, 330, 46, PIC_C.E, 4) + picHand(330, 38);
+  b += picTag(70, 168, 70, 192, 'Fulcrum', PIC_C.F, 'the wheel') + picTag(160, 84, 160, 30, 'Load', PIC_C.L, 'the soil in the middle') + picTag(318, 44, 262, 22, 'Effort', PIC_C.E, 'you lift the handles');
+  return picWrap(380, 214, 'A wheelbarrow: the wheel is the fulcrum, the soil in the middle is the load, and you lift the handles at the end', b);
+}
+function picChopsticks() {
+  let b = `<line x1="40" y1="70" x2="330" y2="96" stroke="${PIC_C.wood2}" stroke-width="7" stroke-linecap="round"/><line x1="40" y1="70" x2="330" y2="128" stroke="${PIC_C.wood}" stroke-width="7" stroke-linecap="round"/>`;
+  b += `<ellipse cx="346" cy="112" rx="18" ry="14" fill="#f3e6c8"/><path d="M332 106 q14 -10 28 0" stroke="#d9c49a" stroke-width="2" fill="none"/>`;
+  b += `<circle cx="40" cy="70" r="9" fill="${PIC_C.F}"/>` + picArrow(152, 128, 152, 98, PIC_C.E, 4) + `<ellipse cx="152" cy="138" rx="14" ry="10" fill="${PIC_C.skin}"/>`;
+  b += picTag(40, 80, 88, 118, 'Fulcrum', PIC_C.F, 'where they rest in your hand') + picTag(152, 148, 200, 172, 'Effort', PIC_C.E, 'your fingers squeeze') + picTag(346, 98, 316, 40, 'Load', PIC_C.L, 'the dumpling at the tips');
+  return picWrap(380, 196, 'A pair of chopsticks: they pivot where they rest in your hand, your fingers squeeze in the middle, and the dumpling is at the tips', b);
+}
+/* ---------- the trade-off on a lever: your end moves a long way, the rock only a little ---------- */
+function picCatch() {
+  let b = `<line x1="40" y1="100" x2="340" y2="100" stroke="${PIC_C.wood}" stroke-width="10" stroke-linecap="round" opacity=".25"/>`;
+  b += `<line x1="40" y1="86" x2="340" y2="146" stroke="${PIC_C.wood}" stroke-width="10" stroke-linecap="round"/>` + picTri(110, 100, 30, 66, PIC_C.F) + picRock(40, 82, 40, 28, '');
+  b += picArrow(14, 100, 14, 78, PIC_C.L, 4) + picTxt(8, 40, 'the rock rises', PIC_C.L, 12, 'start') + picTxt(8, 54, 'a little', PIC_C.L, 12, 'start');
+  b += picArrow(358, 100, 358, 148, PIC_C.E, 4) + picTxt(372, 172, 'your hand moves', PIC_C.E, 12, 'end') + picTxt(372, 186, 'a long way', PIC_C.E, 12, 'end');
+  b += picTxt(170, 200, 'Smaller effort = bigger distance', PIC_C.ink, 14);
+  return picWrap(380, 210, 'The catch: with the fulcrum close to the rock, your hand moves a long way and the rock only rises a little', b);
+}
+/* ---------- class 3, animated: a small movement of the hand swings the far end a long way, but the effort is bigger than the load.
+   SMIL animateTransform, so it needs no <style>. Reduced motion: the "end" position is drawn as a faded ghost and nothing moves. ---------- */
+function picClass3Anim() {
+  const still = typeof RMOTION !== 'undefined' && RMOTION, y = 100, fx = 40, hx = 130, lx = 340;
+  const anim = still ? '' : `<animateTransform attributeName="transform" type="rotate" values="0 ${fx} ${y};-11 ${fx} ${y};-11 ${fx} ${y};0 ${fx} ${y};0 ${fx} ${y}" keyTimes="0;.35;.6;.95;1" dur="3.2s" repeatCount="indefinite"/>`;
+  const bar = (op, rot) => `<g opacity="${op}" ${rot ? `transform="rotate(${rot} ${fx} ${y})"` : ''}>${rot == null ? anim : ''}<rect x="${fx - 6}" y="${y - 5}" width="${lx - fx + 12}" height="10" rx="5" fill="${PIC_C.wood}"/>${picRock(lx, y - 5, 34, 26, '')}${picArrow(lx, y + 34, lx, y + 8, PIC_C.L, 3)}${picArrow(hx, y + 66, hx, y + 8, PIC_C.E, 6)}${picHand(hx, y + 74)}</g>`;
+  let b = picTri(fx, y + 4, 28, 30, PIC_C.F) + bar(.22, -11) + bar(1, null);
+  b += picTxt(fx, y + 52, 'Fulcrum', PIC_C.F, 12) + picTxt(hx + 14, y + 104, 'Effort: a BIG pull,', PIC_C.E, 12, 'start') + picTxt(hx + 14, y + 118, 'but your hand moves a little', PIC_C.E, 12, 'start');
+  b += picTxt(374, 30, 'Load: the rock swings', PIC_C.L, 12, 'end') + picTxt(374, 44, 'a long way', PIC_C.L, 12, 'end');
+  return picWrap(380, 230, 'Class 3 lever, animated: the hand near the fulcrum pulls up a little with a big force, and the rock at the far end swings up a long way', b);
+}
+/* ---------- Part 2 pictures ---------- */
+function picFlagpole() {
+  let b = `<rect x="96" y="20" width="8" height="196" fill="${PIC_C.steel}"/><circle cx="100" cy="24" r="12" fill="${PIC_C.F}"/><circle cx="100" cy="24" r="4" fill="#fff"/>`;
+  b += `<line x1="88" y1="24" x2="88" y2="170" stroke="${PIC_C.rope}" stroke-width="3"/><line x1="112" y1="24" x2="112" y2="96" stroke="${PIC_C.rope}" stroke-width="3"/>`;
+  b += `<rect x="114" y="96" width="62" height="40" fill="#d6402c"/><rect x="114" y="112" width="62" height="8" fill="#fff"/>` + picArrow(146, 92, 146, 58, PIC_C.L, 3);
+  b += picArrow(88, 176, 88, 206, PIC_C.E, 4) + picHand(88, 214);
+  b += picTag(112, 24, 200, 30, 'Pulley', PIC_C.F, 'a wheel at the top') + picTag(178, 116, 260, 110, 'Load', PIC_C.L, 'the flag goes up') + picTag(80, 210, 40, 200, 'Effort', PIC_C.E, 'pull down');
+  return picWrap(340, 236, 'A flagpole: a pulley wheel at the top lets you pull the rope down to raise the flag up', b);
+}
+function picMovingPulley() {
+  let b = `<rect x="80" y="14" width="200" height="10" rx="4" fill="${PIC_C.ink}"/><circle cx="140" cy="40" r="13" fill="${PIC_C.steel}"/><circle cx="140" cy="132" r="13" fill="${PIC_C.steel}"/>`;
+  b += `<line x1="127" y1="24" x2="127" y2="132" stroke="${PIC_C.L}" stroke-width="3.5"/><line x1="153" y1="40" x2="153" y2="132" stroke="${PIC_C.L}" stroke-width="3.5"/>`;
+  b += `<line x1="127" y1="40" x2="127" y2="40" stroke="${PIC_C.rope}"/><path d="M153 40 q0 -14 -13 -14 q-13 0 -13 14" stroke="${PIC_C.rope}" stroke-width="3" fill="none"/>`;
+  b += `<line x1="230" y1="24" x2="230" y2="150" stroke="${PIC_C.rope}" stroke-width="3" stroke-dasharray="6 4"/>`;
+  b += `<rect x="114" y="150" width="52" height="40" rx="6" fill="#c58a4a"/>` + picTxt(140, 175, 'crate', '#fff', 11) + picArrow(230, 156, 230, 196, PIC_C.E, 4) + picHand(230, 204);
+  b += picTxt(110, 92, '1', PIC_C.L, 15) + picTxt(170, 92, '2', PIC_C.L, 15) + picTxt(300, 70, '2 supporting ropes', PIC_C.L, 12, 'end') + picTxt(300, 84, 'hold up the crate', PIC_C.L, 11, 'end', 600);
+  b += picTxt(244, 132, 'the end you pull', PIC_C.E, 11, 'start', 700) + picTxt(244, 146, '(not counted)', PIC_C.E, 11, 'start', 600);
+  return picWrap(340, 220, 'A pulley that moves with the crate: two supporting ropes hold it up, and the end you pull is not counted', b);
+}
+function picScrewdriver() {
+  let b = `<rect x="40" y="64" width="110" height="64" rx="26" fill="#e3a51c"/><rect x="150" y="88" width="170" height="16" rx="5" fill="${PIC_C.steel}"/><polygon points="320,88 344,96 320,104" fill="${PIC_C.steel}"/>`;
+  b += `<ellipse cx="95" cy="96" rx="20" ry="36" fill="none" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="4 4"/>` + picArrow(80, 52, 112, 52, PIC_C.E, 3);
+  b += picTag(95, 132, 95, 160, 'Wheel', PIC_C.E, 'the fat handle: a small twist') + picTag(240, 106, 250, 150, 'Axle', PIC_C.L, 'the thin shaft: a strong turn');
+  return picWrap(380, 186, 'A screwdriver is a wheel and axle: the fat handle is the wheel and the thin metal shaft is the axle', b);
+}
+function picRamp() {
+  let b = `<polygon points="30,170 330,170 330,110" fill="${PIC_C.wood}"/><rect x="330" y="110" width="30" height="60" fill="${PIC_C.wood2}"/>`;
+  b += `<line x1="30" y1="160" x2="330" y2="102" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="5 4"/>` + picTxt(170, 112, 'length of the ramp', PIC_C.E, 12);
+  b += `<line x1="372" y1="110" x2="372" y2="170" stroke="${PIC_C.L}" stroke-width="2"/>` + picTxt(380, 144, 'height', PIC_C.L, 12, 'start');
+  b += `<g transform="rotate(-11.3 120 150)"><rect x="96" y="124" width="50" height="26" rx="5" fill="#c58a4a"/><circle cx="106" cy="154" r="5" fill="${PIC_C.ink}"/><circle cx="136" cy="154" r="5" fill="${PIC_C.ink}"/></g>`;
+  b += picTxt(200, 196, 'a cart pulled up a ramp onto a platform', PIC_C.ink, 12, 'middle', 600);
+  return picWrap(420, 206, 'A cart on a ramp up to a platform, with the length of the ramp and the height of the platform marked', b);
+}
+function picWedge() {
+  const still = typeof RMOTION !== 'undefined' && RMOTION;
+  const slide = (dx) => still ? '' : `<animateTransform attributeName="transform" type="translate" values="${dx} 0;0 0;0 0;${dx} 0" keyTimes="0;.4;.8;1" dur="3s" repeatCount="indefinite"/>`;
+  let b = `<g>${slide(-26)}<polygon points="60,40 100,40 100,150" fill="${PIC_C.steel}"/></g><g>${slide(26)}<polygon points="140,40 100,40 100,150" fill="${PIC_C.F}"/></g>`;
+  b += picTxt(100, 176, 'two ramps back to back', PIC_C.ink, 12);
+  b += `<polygon points="246,40 286,40 266,150" fill="${PIC_C.steel}"/><rect x="196" y="120" width="68" height="44" rx="6" fill="${PIC_C.wood}"/><rect x="268" y="120" width="68" height="44" rx="6" fill="${PIC_C.wood}"/>`;
+  b += picArrow(266, 14, 266, 36, PIC_C.E, 4) + picArrow(226, 142, 202, 142, PIC_C.L, 3) + picArrow(306, 142, 330, 142, PIC_C.L, 3) + picTxt(266, 182, 'a push down splits the wood apart', PIC_C.ink, 12);
+  return picWrap(380, 192, 'A wedge is two ramps back to back. Pushing it down into a log pushes the two halves apart', b);
+}
+function picScrewIdea() {
+  let b = `<polygon points="30,150 150,150 150,60" fill="#fff3cc" stroke="${PIC_C.wood2}" stroke-width="2"/><line x1="30" y1="150" x2="150" y2="60" stroke="${PIC_C.E}" stroke-width="3"/>` + picTxt(90, 176, 'a paper ramp', PIC_C.ink, 12);
+  b += picArrow(170, 108, 214, 108, PIC_C.ink, 3) + picTxt(192, 96, 'wrap it', PIC_C.ink, 11);
+  b += `<rect x="250" y="40" width="44" height="120" rx="6" fill="#e3a51c"/>`;
+  for (let i = 0; i < 5; i++) b += `<path d="M250 ${54 + i * 22} q22 16 44 -8" stroke="${PIC_C.E}" stroke-width="3" fill="none"/>`;
+  b += picTxt(272, 176, 'round a pencil', PIC_C.ink, 12) + picTag(296, 76, 336, 60, 'Thread', PIC_C.E, 'the spiral ramp');
+  return picWrap(380, 190, 'A screw is a ramp wrapped round a rod: wrap a paper triangle round a pencil and its sloping edge makes a spiral thread', b);
+}
+
 /* ===== Chapter 6: the Workshop (Save Captain Smooshy!) =====
-   Part 1 c6a (steps w1–w5, Check c6r1–c6r6): the six simple machines. More Parts are added in later builds.
+   Part 1 c6a (steps lv1–lv5, Check c6r1–c6r5): levers, taught slowly. Part 2 c6b (steps pl1–pl4, Check c6r7–c6r11): pulleys, wheels and axles, ramps, wedges and screws.
+   Redesigned 1 Nov 2026 after Tom's playtest: one new word per card, a labelled picture beside each new idea (4e-shoppics.js), familiar examples only.
    The maths is in 4a-workshop.js and matches tools/workshop_model.py. The script is docs/Chapter6_Workshop_Script.md (sections F and G). */
 Object.assign(TERMS, {
   machine: ['Machine', 'Something that makes a job easier, often by letting a small force move a big load.', ['machines', 'machine']],
@@ -6892,8 +7084,8 @@ FORMULAS.find(f => f.id === 'weight').ch.push(6);
 FORMULAS.push(
   { id: 'ma', name: 'Mechanical advantage', eq: 'MA = load ÷ effort', note: 'No unit: it\'s newtons divided by newtons.', ch: [6] },
   { id: 'effortq', name: 'Effort needed', eq: 'effort = load ÷ MA', note: 'A bigger mechanical advantage means a smaller effort.', ch: [6] },
-  { id: 'maparts', name: 'MA from the shape', eq: 'pulley: supporting ropes · lever: effort arm ÷ load arm · wheel and axle: wheel radius ÷ axle radius · ramp: length ÷ height · wedge: length ÷ thickness · screw: distance per turn ÷ pitch', note: 'Use the same unit for both lengths.', ch: [6] },
-  { id: 'edist', name: 'Effort distance', eq: 'effort distance = MA × load distance', note: 'Less force means more distance.', ch: [6] },
+  { id: 'maparts', name: 'MA from the shape', eq: 'pulley: supporting ropes · lever: (your hand to fulcrum) ÷ (load to fulcrum) · wheel and axle: wheel radius ÷ axle radius · ramp: length ÷ height · wedge: length ÷ thickness · screw: distance the handle moves in one turn ÷ gap between threads', note: 'Use the same unit for both lengths.', ch: [6] },
+  { id: 'edist', name: 'How far your hand moves', eq: 'your hand\'s distance = MA × the load\'s distance', note: 'Less force means more distance.', ch: [6] },
   { id: 'macomp', name: 'Compound machines', eq: 'total MA = MA₁ × MA₂ × MA₃', note: 'Multiply, don\'t add.', ch: [6] },
   { id: 'work', name: 'Work', eq: 'work = force × distance', note: 'In joules (J). Force in N, distance in m.', ch: [6] },
   { id: 'eff', name: 'Efficiency', eq: 'efficiency = useful work out ÷ work in × 100%', note: 'It can never be more than 100%.', ch: [6] },
@@ -6911,122 +7103,180 @@ const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
 
 CHDATA.c6 = {
   goal: 'Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn\'t reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue.',
-  vocab: ['machine', 'simple machine', 'compound machine', 'lever', 'fulcrum', 'effort', 'load', 'pulley', 'supporting rope', 'wheel and axle', 'inclined plane', 'wedge', 'screw', 'mechanical advantage', 'work', 'joule'],
+  vocab: ['machine', 'lever', 'fulcrum', 'load', 'effort', 'pulley', 'supporting rope', 'wheel and axle', 'inclined plane', 'wedge', 'screw', 'mechanical advantage', 'work', 'joule'],
   steps: [
-    /* ---------- Part 1: Simple machines ---------- */
-    { id: 'w1', title: 'Levers', rescue: 'Levers packed in the toolkit.',
+    /* ================= Part 1: Levers (c6a) ================= */
+    { id: 'lv1', title: 'Too heavy for Smooshy', rescue: 'Lever found. Time to put it to work!',
       cards: [
-        { hi: '#cvScene', html: `<p>Welcome to the Workshop! Before anyone flies to Glimmer-9, you need to master the six ${T('simplemach', 'simple machines')}. A simple machine lets a small force, the ${T('effort')}, move a big force, the ${T('load')}. First up is the ${T('lever')}: a strong bar that turns around a pivot called the ${T('fulcrum')}.</p>` },
-        { hi: '#wsPull', html: `<p>Press <b>Pull!</b> and watch the ${T('newtonmeter')} at your end of the bar. The reading climbs until the rock starts to rise, so that reading is the effort needed. Then slide the fulcrum and pull again. The red band on the newtonmeter shows Captain Smooshy's limit of 60 N.</p>` },
+        { hi: '#cvScene', html: `<p>Welcome to the Workshop! Captain Smooshy's squishy gummy arms can only pull with <b>60 N</b>. A big rock is pinning his spaceship, so let's find out how hard a 30 kg rock is to lift. You'll lift it with a ${T('newtonmeter', 'newtonmeter')} in your hand, and its reading tells you how hard you pulled.</p>` },
+        { html: `<p>When a job is too hard, engineers use a ${T('machine', 'machine')}: something that helps a small force do a big job. Your first machine is a ${T('lever', 'lever')}. It is a strong bar resting on a pivot, and the pivot is called the ${T('fulcrum', 'fulcrum')}.</p>${picBar()}` },
+        { html: `<p>The thing a lever moves is called the ${T('load', 'load')}. In the Workshop, the load is the rock.</p>${picLever({ show: 'FL', focus: 'L' })}` },
+        { html: `<p>Your pull on the other end of the bar is called the ${T('effort', 'effort')}. So every lever has three parts: the fulcrum, the load and the effort.</p>${picLever({ focus: 'E' })}` }],
+      setup() { shopStage({ mach: 'hand', allow: ['hand', 'lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { hand: WL.rock, lever: WL.rock }, maxTravel: 1.5 }); }, adds: ['wsctl', 'wspull', 'wsmach'], sides: [], pullers: [], idle: 'Press Lift! to lift the rock by hand',
+      tasks: [['Choose <b>By hand</b> and press <b>Lift!</b>', () => shopHas({ mach: 'hand' })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Now choose the <b>Lever</b>. The fulcrum starts in the middle of the bar. Press <b>Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'Lifting the rock by hand, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'hand' }), need: () => shopHas({ mach: 'hand' }), needMsg: 'Lift the rock by hand first. Your runs are in the Journal.', ok: 'Right, 294 N. That\'s nearly five times more than Smooshy\'s 60 N!' },
+        { id: 'q2', type: 'reading', p: 'With the lever and the fulcrum in the middle, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 1 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 1 }), needMsg: 'Pull with the lever first. Your runs are in the Journal.', ok: '294 N again! With the fulcrum in the middle, the lever doesn\'t make the job any easier yet. You\'ll change that in the next step.' },
+        { id: 'q3', type: 'pick', p: `<p>Label the lever.</p>${picLever({ letters: true })}<p>Part A is the {0}, part B is the {1} and part C is the {2}.</p>`, picks: [[['fulcrum', 'load', 'effort'], 0], [['fulcrum', 'load', 'effort'], 1], [['fulcrum', 'load', 'effort'], 2]], after: 'The fulcrum is the pivot, the load is the rock, and the effort is your pull.' }] },
+
+    { id: 'lv2', title: 'Move the fulcrum', rescue: 'Fulcrum trick learned.',
+      cards: [
+        { hi: '[data-panel="wsctl"]', html: `<p>Here's where a lever gets clever. Use the slider to move the fulcrum along the bar. The labels above the bar show how far the rock is from the fulcrum, and how far your hand is from it. After each move, press <b>Pull!</b> and read the newtonmeter.</p>` },
         CFACT('The Greek scientist Archimedes, over 2,200 years ago, said that with a long enough lever and a place to stand, he could move the Earth.')],
-      predict: { q: 'You slide the fulcrum closer to the rock. What happens to the effort you need?', opts: ['It gets smaller, because more of the bar is on your side', 'It gets bigger, because the rock is now closer to the pivot', 'It stays the same, because the rock\'s weight hasn\'t changed', 'It drops to zero, because the fulcrum now carries the rock'], then: 'Test it! Lift the rock with the fulcrum in the middle, then with the fulcrum close to the rock.' },
-      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5 }); }, adds: ['wsctl', 'wspull', 'rulers'], sides: [], pullers: [], idle: 'Press Pull! to work the lever',
+      predict: { q: 'You move the fulcrum closer to the rock. What will happen to the effort you need?', opts: ['It gets smaller, because more of the bar is on your side', 'It gets bigger, because the rock is now closer to the fulcrum', 'It stays the same, because the rock\'s weight hasn\'t changed', 'It drops to zero, because the fulcrum now holds up the rock'], then: 'Test it! Move the fulcrum close to the rock and pull.' },
+      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5 }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to work the lever',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Set the load arm to <b>1.0 m</b> (fulcrum in the middle) and press <b>Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 })], ['', () => hasAns('q1'), { q: 'q1' }],
-        ['Set the load arm to <b>0.4 m</b> and pull again.', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q2'), { q: 'q2' }],
-        ['Find a fulcrum position where the effort is <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'lever' && !r.capped && r.E <= 60)]],
+        ['Move the fulcrum so the rock is <b>0.4 m</b> from it, then press <b>Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Find a fulcrum position where the effort is <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'lever' && r.cls === 1 && !r.capped && r.E <= 60)]],
       qs: [
-        { id: 'q1', type: 'reading', p: 'With the fulcrum in the middle, what effort lifted the rock?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 1 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 1 }), needMsg: 'Lift the rock with the load arm at 1.0 m first. Your runs are in the Journal.', ok: 'Right! With the fulcrum in the middle, the effort equals the rock\'s weight, 294 N. The lever only changed the direction of your push.' },
-        { id: 'q2', type: 'reading', p: 'With the load arm at 0.4 m, what effort lifted the rock?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Lift the rock with the load arm at 0.4 m first. Your runs are in the Journal.', ok: 'Yes, 73.5 N. That\'s four times smaller than the rock\'s weight.' },
-        { id: 'q3', type: 'pick', p: 'When the fulcrum moved closer to the rock, the effort {0} and your end of the bar had to move {1}.', picks: [[WS_TREND, 2], [['less far', 'the same distance', 'further'], 2]], after: 'Less force, more distance. Keep an eye on this trade-off: it turns up in every machine.' },
-        { id: 'q4', type: 'reading', p: 'With the load arm at 0.4 m, the rock rose 0.10 m. Use the ruler beside your end of the bar. How far did your end move down?', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Lift the rock with the load arm at 0.4 m first.', ok: 'That\'s right, 0.40 m: four times further than the rock rose.' }] },
+        { id: 'q1', type: 'reading', p: 'With the rock 0.4 m from the fulcrum, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Pull with the rock 0.4 m from the fulcrum first. Your runs are in the Journal.', ok: 'Yes, 73.5 N. That\'s four times smaller than lifting the rock by hand.' },
+        { id: 'q2', type: 'pick', p: 'Moving the fulcrum closer to the rock made the effort {0}.', picks: [[WS_TREND, 2]], after: 'The closer the fulcrum is to the rock, the smaller the effort you need.' },
+        { id: 'q3', type: 'mcq', p: 'Captain Smooshy wants to lift a heavy rock with a lever and a small pull. Where should he put the fulcrum?', opts: ['Close to the rock, so his side of the bar is long', 'Close to his hand, so his side of the bar is short', 'Exactly in the middle, so both sides are the same', 'Anywhere, because the fulcrum doesn\'t change the pull'], a: 0, ok: 'Spot on! A long side for his hand means a small pull.', why: { 1: 'That makes his side of the bar short, so he would need a bigger pull.', 2: 'In the middle, the effort was the same as lifting the rock by hand.', 3: 'Your readings changed every time you moved the fulcrum.' } }] },
 
-    { id: 'w2', title: 'Three classes of lever', rescue: 'All three classes of lever logged.',
+    { id: 'lv3', title: 'The catch', rescue: 'The catch is noted in the mission log.',
       cards: [
-        { hi: '[data-panel="wsctl"]', html: `<p>Levers come in three classes, depending on what sits in the middle. <b>Class 1:</b> the ${T('fulcrum')} is in the middle, like a seesaw or a crowbar. <b>Class 2:</b> the ${T('load')} is in the middle, like a wheelbarrow or a nutcracker. <b>Class 3:</b> the ${T('effort')} is in the middle, like tweezers, a fishing rod or your own forearm.</p>` },
-        { html: `<p>A class 3 lever needs an effort <b>bigger</b> than the load! Engineers still love them, because the load end moves much further and faster than your hand. A small movement of your arm muscle swings your hand a long way.</p>` },
-        CFACT('Your forearm is a class 3 lever. To hold a 1 kg bag in your hand, your biceps pulls with several times the bag\'s weight.')],
-      predict: { q: 'In a class 3 lever, you push 0.5 m from the fulcrum and the rock sits at the far end, 2 m away. How will the effort compare with the rock\'s weight?', opts: ['The effort will be bigger than the rock\'s weight', 'The effort will be smaller than the rock\'s weight', 'The effort will be equal to the rock\'s weight', 'The effort will be zero, because the fulcrum holds it'], then: 'Try class 2 first, then class 3.' },
-      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true }); }, adds: [], sides: [], pullers: [], idle: 'Press Pull! to work the lever',
+        { hi: '#cvScene', html: `<p>Is there a catch to this trick? Let's find out. After each pull, two rulers appear under the bench. The <b style="color:#2a7d48">green ruler</b> shows how far the rock rose. The <b style="color:#d6402c">red ruler</b> shows how far your hand moved. Compare them carefully.</p>` }],
+      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 0.4, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5 }); }, adds: ['rulers'], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! and look at both rulers',
+      tasks: [['Pull with the rock <b>0.4 m</b> from the fulcrum and look at both rulers.', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Now move the fulcrum so the rock is <b>0.2 m</b> from it, and pull again.', () => shopHas({ mach: 'lever', cls: 1, la: 0.2 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With the rock 0.4 m from the fulcrum, the rock rose 0.10 m. How far did your hand move? Use the red ruler.', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Pull with the rock 0.4 m from the fulcrum first.', ok: '0.40 m: four times further than the rock rose.' },
+        { id: 'q2', type: 'reading', p: 'With the rock 0.2 m from the fulcrum, how far did your hand move?', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 1, la: 0.2 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.2 }), needMsg: 'Pull with the rock 0.2 m from the fulcrum first.', ok: '0.90 m! The effort was tiny, but your hand moved nine times further than the rock.' },
+        { id: 'q3', type: 'pick', p: 'When the effort got smaller, your hand had to move {0} to lift the rock the same height.', picks: [[['a shorter distance', 'the same distance', 'a longer distance'], 2]], after: 'That\'s the catch: a smaller effort always needs a bigger distance. Every machine in the Workshop works like this.' }] },
+
+    { id: 'lv4', title: 'Three ways to build a lever', rescue: 'Three lever designs tested.',
+      cards: [
+        { hi: '#wsClsRow', html: `<p>So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Use the new buttons to try each design. Pull, then check the newtonmeter and the two rulers.</p>${picThree()}` }],
+      predict: { q: 'With the effort in the middle, your hand pulls up close to the fulcrum and the rock sits at the far end. How will the effort compare with the rock\'s weight?', opts: ['The effort will be bigger than the rock\'s weight', 'The effort will be smaller than the rock\'s weight', 'The effort will be equal to the rock\'s weight', 'The effort will be zero, because the fulcrum holds it'], then: 'Try the load in the middle first, then the effort in the middle.' },
+      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Choose a design, then press Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Switch to <b>class 2</b> and lift the rock with the load arm at <b>0.5 m</b>.', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 })],
-        ['Switch to <b>class 3</b>, set the effort arm to <b>0.5 m</b>, and lift the rock.', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }]],
+        ['Choose <b>Load in the middle</b>. Put the rock <b>0.5 m</b> from the fulcrum and pull.', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 })],
+        ['Choose <b>Effort in the middle</b>. Put your hand <b>0.5 m</b> from the fulcrum and pull.', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
-        { id: 'q1', type: 'reading', p: 'With the class 3 lever, what effort lifted the rock?', unit: 'N', tol: 2, live: () => shopE({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Lift the rock with a class 3 lever and an effort arm of 0.5 m first.', ok: 'Whoa, 1,176 N! That\'s four times the rock\'s weight, but the rock moved four times further than your hand.' },
-        { id: 'q2', type: 'sort', p: 'Sort these levers into their classes.', groups: ['Class 1: fulcrum in the middle', 'Class 2: load in the middle', 'Class 3: effort in the middle'],
-          items: [['Crowbar', 0], ['Seesaw', 0], ['Pair of scissors', 0], ['Wheelbarrow', 1], ['Nutcracker', 1], ['Bottle opener', 1], ['Tweezers', 2], ['Fishing rod', 2], ['Your forearm lifting a cup', 2]] },
-        { id: 'q3', type: 'mcq', p: 'Why would anyone use a class 3 lever, like a fishing rod?', opts: ['It makes the load end move further and faster than your hands', 'It makes the effort smaller than the load at the far end', 'It means the rod doesn\'t need a fulcrum at the handle end', 'It makes the weight of the fish smaller as it is lifted'], a: 0, ok: 'Yes! A small movement at your hands swings the tip a long way.', why: { 1: 'In a class 3 lever the effort is bigger than the load.', 2: 'Your back hand is the fulcrum.', 3: 'The fish\'s weight is mass × g, which doesn\'t change.' } }] },
+        { id: 'q1', type: 'reading', p: 'With the effort in the middle, what did the newtonmeter read?', unit: 'N', tol: 2, live: () => shopE({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle and your hand 0.5 m from the fulcrum first.', ok: '1,176 N: four times the rock\'s weight!' },
+        { id: 'q2', type: 'reading', p: 'With the effort in the middle, the rock rose 0.40 m. How far did your hand move? Use the red ruler.', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle first.', ok: 'Only 0.10 m. A small movement of your hand swung the rock four times as far.' },
+        { id: 'q3', type: 'pick', p: 'With the effort in the middle, the effort was {0} the rock\'s weight, but the rock moved {1} your hand.', picks: [[['smaller than', 'the same as', 'bigger than'], 2], [['less far than', 'the same distance as', 'further than'], 2]], after: 'It\'s the catch again, the other way round: a bigger effort, but a bigger distance at the load.' }] },
 
-    { id: 'w3', title: 'Pulleys', rescue: 'Pulley blocks packed in the toolkit.',
+    { id: 'lv5', title: 'The three classes of lever', rescue: 'All three classes of lever logged. The lever kit is packed!',
       cards: [
-        { hi: '#cvScene', html: `<p>A ${T('pulley')} is a wheel with a rope running round it. One fixed pulley at the top only changes the direction of your pull: you pull down and the crate goes up. Add pulleys that move up with the crate, and something amazing happens.</p>` },
-        { hi: '[data-panel="wsctl"]', html: `<p>Count the ${T('supporting', 'supporting ropes')}: the sections of rope that hold up the moving pulley block and the crate. Don't count the end you pull on when it comes down from a fixed pulley. Each extra supporting rope shares the crate's weight.</p>` }],
-      predict: { q: 'You change from 1 supporting rope to 2. What happens to the effort?', opts: ['It halves, because two ropes share the crate\'s weight', 'It doubles, because there is twice as much rope to pull', 'It stays the same, because the crate\'s weight hasn\'t changed', 'It drops to zero, because the top pulley holds the crate'], then: 'Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter and the rope you pull.' },
-      setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate }, lim: { ropesMax: 6 } }); }, adds: ['wsctl', 'wspull', 'rulers'], sides: [], pullers: [], idle: 'Press Pull! to lift the crate',
+        { html: `<p>Scientists give the three designs names. They are the three <b>classes</b> of lever, and you name each one by what is in the middle.</p>${picThree({ classes: true })}` },
+        { html: `<p>Here's an everyday example of each one. A seesaw is a <b>class 1</b> lever: the fulcrum is in the middle.</p>${picSeesaw()}` },
+        { html: `<p>A wheelbarrow is a <b>class 2</b> lever. The wheel is the fulcrum, the heavy soil in the middle is the load, and you lift the handles at the end.</p>${picWheelbarrow()}` },
+        { html: `<p>Chopsticks are a <b>class 3</b> lever. They pivot where they rest in your hand, your fingers squeeze in the middle, and the food is at the tips.</p>${picChopsticks()}` },
+        { html: `<p>Watch a class 3 lever in action. The effort is big, but your hand only moves a little, and the far end swings a long way.</p>${picClass3Anim()}` }],
+      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 3, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true, clsNames: true }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to work the class 3 lever',
+      tasks: [['The buttons now show the class names. Build a <b>class 3</b> lever with your hand <b>1.0 m</b> from the fulcrum and pull. Watch the far end swing.', () => shopHas({ mach: 'lever', cls: 3, ea: 1 })]],
+      qs: [
+        { id: 'q1', type: 'pick', p: 'In a class 2 lever, the {0} is in the middle. In a class 3 lever, the {1} is in the middle.', picks: [[['fulcrum', 'load', 'effort'], 1], [['fulcrum', 'load', 'effort'], 2]] },
+        { id: 'q2', type: 'mcq', p: 'Chopsticks are a class 3 lever. Why are they so useful?', opts: ['A small squeeze of your fingers moves the tips a long way', 'Your fingers squeeze with less force than the food\'s weight', 'The food gets lighter when you hold it at the tips', 'Class 3 levers can work without any fulcrum at all'], a: 0, ok: 'Yes! Small finger movements open and close the tips wide.', why: { 1: 'In a class 3 lever the effort is bigger than the load.', 2: 'The food\'s weight is mass × g, which never changes.', 3: 'Chopsticks pivot where they rest in your hand: that\'s the fulcrum.' } }] },
+
+    /* ================= Part 2: Pulleys, wheels and ramps (c6b) ================= */
+    { id: 'pl1', title: 'Pulleys', rescue: 'Pulley blocks packed in the toolkit.',
+      cards: [
+        { html: `<p>Welcome to Part 2! Remember the catch from the lever: a smaller effort means your hand moves further. Look out for it in every new machine.</p>${picCatch()}` },
+        { hi: '#cvScene', html: `<p>A ${T('pulley', 'pulley')} is a wheel with a rope running round it. A flagpole has one at the top: you pull the rope down, and the flag goes up.</p>${picFlagpole()}` },
+        { hi: '[data-panel="wsctl"]', html: `<p>Now hang the crate from a pulley that moves up with it. Count the ${T('supporting', 'supporting ropes')}: the pieces of rope that hold the crate up. Don't count the end you pull.</p>${picMovingPulley()}` }],
+      predict: { q: 'You change from 1 supporting rope to 2. What will happen to the effort?', opts: ['It halves, because two ropes share the crate\'s weight', 'It doubles, because there is twice as much rope to pull', 'It stays the same, because the crate\'s weight hasn\'t changed', 'It drops to zero, because the top pulley holds the crate'], then: 'Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter.' },
+      setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate }, lim: { ropesMax: 6 } }); }, adds: ['wsctl', 'wspull', 'rulers'], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to lift the crate',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Lift the crate with <b>1, 2, 3 and 4</b> supporting ropes.', () => [1, 2, 3, 4].every(n => shopHas({ mach: 'pulley', ropes: n }))], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With 4 supporting ropes, what effort lifted the 235.2 N crate?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first. Your runs are in the Journal.', ok: 'Yes, 58.8 N, a quarter of the crate\'s weight. That\'s under Smooshy\'s limit!' },
-        { id: 'q2', type: 'reading', p: 'With 4 supporting ropes, the crate rose 1.0 m. Use the ruler on the rope. How much rope did you pull?', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first.', ok: '4 m of rope for a 1 m lift. Each of the 4 supporting ropes got 1 m shorter.' },
-        { id: 'q3', type: 'reason', p: 'With 1 supporting rope (a single fixed pulley), the effort was 235.2 N, the same as lifting the crate by hand. Four friends argue about it. Who\'s right?',
-          voices: [{ who: 'Mia', says: 'A single fixed pulley is useless. The effort didn\'t change at all.' }, { who: 'Sam', says: 'It still helps, because pulling down is easier than lifting up.' }, { who: 'Leo', says: 'It halves the effort, because the rope goes over a wheel.' }, { who: 'Ana', says: 'It makes the crate lighter while it hangs on the rope.' }], a: 1,
-          reasons: ['You can pull down using your own weight, and lift a load high above your head', 'The wheel spins, and a spinning wheel always reduces the force you need', 'Two pieces of rope come out of the pulley, so each one carries half the load', 'The crate\'s mass gets smaller once the rope takes the strain'], r: 0,
-          why: { a: { 0: 'The force is the same, but its direction changes, which is useful.', 2: 'The effort was 235.2 N, the full weight.', 3: 'The crate\'s weight stays mass × g.' }, r: { 1: 'The readings showed no change with 1 rope.', 2: 'Only the supporting ropes share the load, and there is just one.', 3: 'Mass never changes.' } } },
-        { id: 'q4', type: 'pick', p: 'Each extra supporting rope makes the effort {0} and the length of rope you pull {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['shorter', 'the same', 'longer'], 2]] }] },
+        { id: 'q2', type: 'reading', p: 'With 4 supporting ropes, the crate rose 1.0 m. How much rope did you pull? Use the red ruler.', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first.', ok: '4 m of rope for a 1 m lift. Each of the 4 supporting ropes got 1 m shorter.' },
+        { id: 'q3', type: 'pick', p: 'Each extra supporting rope made the effort {0} and the length of rope you pulled {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['shorter', 'the same', 'longer'], 2]], after: 'The catch again: less force, more rope.' },
+        { id: 'q4', type: 'mcq', p: 'A flagpole has just one pulley, so the pull you need is the same as the flag\'s weight. Why is the pulley still useful?', opts: ['You can stand at the bottom and pull down to raise the flag to the top', 'It makes the flag lighter, so it is easier to lift to the top', 'It halves the pull you need to raise the flag to the top', 'It stops the flag from ever sliding back down the pole'], a: 0, ok: 'Exactly. One pulley changes the direction of your pull, so you pull down and the flag goes up.', why: { 1: 'The flag\'s weight doesn\'t change.', 2: 'With 1 supporting rope, the effort was the full weight of the crate.', 3: 'Let go of the rope and the flag slides down. The pulley only changes the direction.' } }] },
 
-    { id: 'w4', title: 'Wheels, axles and ramps', rescue: 'A winch and a folding ramp packed in the toolkit.',
+    { id: 'pl2', title: 'Wheel and axle', rescue: 'A winch packed in the toolkit.',
       cards: [
-        { hi: '#cvScene', html: `<p>A ${T('wheelaxle', 'wheel and axle')} is a big wheel (or handle) fixed to a thin rod called the axle, so they turn together. Turn the big wheel with a small force and the axle turns with a big force. Doorknobs, steering wheels, screwdrivers and the ${T('winch')} on a well all use this idea.</p>` },
-        { hi: '[data-panel="wsmach"]', html: `<p>An ${T('incline', 'inclined plane')} is a ramp. Pushing a load up a long, gentle ramp takes much less force than lifting it straight up, but you push it a much longer way. Truck loading ramps and wheelchair ramps work like this.</p>` },
-        CFACT('Ancient Egyptian builders probably used ramps to haul huge stone blocks up the pyramids.')],
-      predict: { q: 'You pull a 490 N cart up onto a 1 m high platform. Which ramp needs the smallest pull?', opts: ['The longest ramp, 5 m long and gentle', 'The shortest ramp, 2 m long and steep', 'Every ramp needs exactly the same pull', 'The middle ramp, 4 m long and medium'], then: 'Try the winch first, then the ramps.' },
-      setup() { shopStage({ mach: 'winch', allow: ['winch', 'ramp'], R: 0.1, axle: 0.05, L: 2, h: 1, lift: 1.0, loads: { winch: WL.bucket, ramp: WL.cart }, lim: { rampL: [1, 6, 1] } }); }, adds: ['wsctl', 'wspull', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Press Turn! to wind the winch',
+        { html: `<p>A ${T('wheelaxle', 'wheel and axle')} is a big wheel fixed to a thin rod, called the axle, so they turn together. A screwdriver is one: the fat handle is the wheel, and the thin metal shaft is the axle.</p>${picScrewdriver()}` },
+        { hi: '#cvScene', html: `<p>The Workshop's ${T('winch', 'winch')} is a wheel and axle too. You turn the handle, and the thin axle winds up the rope to lift the bucket. Try a short handle, then a long one.</p>` }],
+      predict: { q: 'You swap a short winch handle for a long one. What will happen to the effort?', opts: ['It gets smaller, because your hand moves round a bigger circle', 'It gets bigger, because a long handle is heavier to turn', 'It stays the same, because the bucket weighs the same', 'It drops to zero, because the handle does all the work'], then: 'Lift the bucket with each handle and watch the newtonmeter.' },
+      setup() { shopStage({ mach: 'winch', allow: ['winch'], R: 0.1, axle: 0.05, lift: 1.0, loads: { winch: WL.bucket } }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Turn! to wind the winch',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['<b>Winch:</b> lift the bucket with a handle radius of <b>0.1 m</b>, then <b>0.25 m</b>.', () => shopHas({ mach: 'winch', R: 0.1 }) && shopHas({ mach: 'winch', R: 0.25 })], ['', () => hasAns('q1'), { q: 'q1' }],
-        ['<b>Ramp:</b> pull the cart up the <b>2 m</b> ramp, then the <b>5 m</b> ramp.', () => shopHas({ mach: 'ramp', L: 2, h: 1 }) && shopHas({ mach: 'ramp', L: 5, h: 1 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+        ['Lift the bucket with a handle radius of <b>0.1 m</b>, then <b>0.25 m</b>.', () => shopHas({ mach: 'winch', R: 0.1 }) && shopHas({ mach: 'winch', R: 0.25 })], ['', () => hasAns('q1'), { q: 'q1' }]],
       qs: [
-        { id: 'q1', type: 'reading', p: 'With a handle radius of 0.25 m, what effort lifted the 196 N bucket?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'winch', R: 0.25 }), need: () => shopHas({ mach: 'winch', R: 0.25 }), needMsg: 'Lift the bucket with a handle radius of 0.25 m first. Your runs are in the Journal.', ok: 'Yes, 39.2 N. The big handle made your force five times bigger at the axle.' },
-        { id: 'q2', type: 'reading', p: 'What pull got the 490 N cart up the 5 m ramp?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'ramp', L: 5, h: 1 }), need: () => shopHas({ mach: 'ramp', L: 5, h: 1 }), needMsg: 'Pull the cart up the 5 m ramp first.', ok: '98 N, a fifth of the cart\'s weight. You pulled it 5 m to raise it 1 m.' },
-        { id: 'q3', type: 'mcq', p: 'Why does the 5 m ramp need a smaller pull than the 2 m ramp?', opts: ['The cart travels a longer distance, so each metre needs less force', 'The cart weighs less when it sits on a long, gentle ramp', 'The long ramp has less friction, so the cart rolls more easily', 'The steep ramp pushes back on the cart and makes it heavier'], a: 0, ok: 'Yes! Less force, more distance, again.', why: { 1: 'The cart\'s weight is mass × g on any ramp.', 2: 'Workshop machines have no friction at all.', 3: 'The cart\'s weight doesn\'t change with the slope.' } },
-        { id: 'q4', type: 'match', colA: 'Everyday object', p: 'Match each everyday object to its simple machine.', rows: [['Doorknob', 'Wheel and axle'], ['Wheelchair ramp', 'Inclined plane'], ['Flagpole', 'Pulley'], ['Crowbar', 'Lever']] }] },
+        { id: 'q1', type: 'reading', p: 'With a handle radius of 0.25 m, what effort lifted the 196 N bucket?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'winch', R: 0.25 }), need: () => shopHas({ mach: 'winch', R: 0.25 }), needMsg: 'Lift the bucket with a handle radius of 0.25 m first. Your runs are in the Journal.', ok: 'Yes, 39.2 N. The long handle made your force five times bigger at the axle.' },
+        { id: 'q2', type: 'pick', p: 'The longer handle made the effort {0}, and your hand moved {1} as it turned the handle.', picks: [[['bigger', 'the same', 'smaller'], 2], [['less far', 'the same distance', 'further'], 2]], after: 'Your hand travels round a bigger circle, so a smaller force does the job.' }] },
 
-    { id: 'w5', title: 'Wedges and screws', rescue: 'Wedges and a screw jack packed. The toolkit is ready!',
+    { id: 'pl3', title: 'Ramps', rescue: 'A folding ramp packed in the toolkit.',
       cards: [
-        { hi: '#cvScene', html: `<p>A ${T('wedge')} is two ramps back to back. Push it into a log and its sloping sides push the two halves apart with a much bigger force. Axes, knives, doorstops and even your front teeth are wedges. A long, thin wedge needs the smallest push.</p>` },
-        { hi: '[data-panel="wsmach"]', html: `<p>A ${T('screw')} is a ramp wrapped round a rod, and the spiral ridge is called the <b>thread</b>. Each turn of the handle moves the screw forward by just a small distance, the ${T('pitch')}. A car jack uses a screw to lift one side of a car with one hand.</p>` },
-        CFACT('The Archimedes screw, a screw turning inside a tube, has been lifting water for over 2,000 years, and some are still in use today.', 'A car jack lets one person lift one side of a car by turning a handle, thanks to a screw with a very small pitch.')],
-      predict: { q: 'You split the same log with a fat wedge (5 cm thick) and a thin wedge (2 cm thick). Both are 20 cm long. Which needs the smaller push?', opts: ['The thin wedge needs the smaller push', 'The fat wedge needs the smaller push', 'Both wedges need the same push', 'Neither wedge can split the log'], then: 'Split the log with each wedge and watch the newtonmeter.' },
-      setup() { shopStage({ mach: 'wedge', allow: ['wedge', 'screw'], thick: 10, per: 120, pitch: 1.0, lift: 0.20, loads: { wedge: WL.log, screw: WL.car }, lim: { pitch: [0.5, 1.0] } }); }, adds: ['wsctl', 'wspull', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Press Push! to split the log',
+        { hi: '#cvScene', html: `<p>A ramp lets you raise a load without lifting it straight up. You'll see ramps at school entrances, for wheelchairs and trolleys. Scientists call a ramp an ${T('incline', 'inclined plane')}.</p>${picRamp()}` }],
+      predict: { q: 'You pull a 490 N cart up onto a 1 m high platform. Which ramp will need the smallest pull?', opts: ['The longest ramp, 5 m long and gentle', 'The shortest ramp, 2 m long and steep', 'Every ramp needs exactly the same pull', 'The middle ramp, 4 m long and medium'], then: 'Try the 2 m ramp, then the 5 m ramp.' },
+      setup() { shopStage({ mach: 'ramp', allow: ['ramp'], L: 2, h: 1, lift: 1.0, loads: { ramp: WL.cart }, lim: { rampL: [1, 6, 1] } }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to pull the cart up the ramp',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Pull the cart up the <b>2 m</b> ramp, then the <b>5 m</b> ramp.', () => shopHas({ mach: 'ramp', L: 2, h: 1 }) && shopHas({ mach: 'ramp', L: 5, h: 1 })], ['', () => hasAns('q1'), { q: 'q1' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'What pull got the 490 N cart up the 5 m ramp?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'ramp', L: 5, h: 1 }), need: () => shopHas({ mach: 'ramp', L: 5, h: 1 }), needMsg: 'Pull the cart up the 5 m ramp first.', ok: '98 N, a fifth of the cart\'s weight. You pulled it 5 m to raise it 1 m.' },
+        { id: 'q2', type: 'mcq', p: 'Why does the 5 m ramp need a smaller pull than the 2 m ramp?', opts: ['The cart travels a longer distance, so each metre needs less force', 'The cart weighs less when it sits on a long, gentle ramp', 'The long ramp has less friction, so the cart rolls more easily', 'The steep ramp pushes back on the cart and makes it heavier'], a: 0, ok: 'Yes! Less force, more distance, again.', why: { 1: 'The cart\'s weight is mass × g on any ramp.', 2: 'Workshop machines have no friction at all.', 3: 'The cart\'s weight doesn\'t change with the slope.' } }] },
+
+    { id: 'pl4', title: 'Ramps in disguise', rescue: 'Wedges and a screw jack packed. The toolkit is ready!',
+      cards: [
+        { hi: '#cvScene', html: `<p>Two more simple machines are ramps in disguise. A ${T('wedge', 'wedge')} is two ramps back to back. Push it down into a log and its sloping sides push the two halves apart. A knife and a doorstop are wedges.</p>${picWedge()}` },
+        { hi: '[data-panel="wsmach"]', html: `<p>A ${T('screw', 'screw')} is a ramp wrapped round a rod, and the spiral ramp is called the <b>thread</b>. A car jack uses a screw: each turn of the handle lifts the car by the small gap between two threads.</p>${picScrewIdea()}` }],
+      predict: { q: 'You split the same log with a fat wedge (5 cm thick) and a thin wedge (2 cm thick). Both are 20 cm long. Which will need the smaller push?', opts: ['The thin wedge needs the smaller push', 'The fat wedge needs the smaller push', 'Both wedges need the same push', 'Neither wedge can split the log'], then: 'Split the log with each wedge and watch the newtonmeter.' },
+      setup() { shopStage({ mach: 'wedge', allow: ['wedge', 'screw'], thick: 10, per: 120, pitch: 1.0, lift: 0.20, loads: { wedge: WL.log, screw: WL.car }, lim: { pitch: [0.5, 1.0] } }); }, adds: ['wsmach'], sides: [], pullers: [], idle: 'Press Push! to split the log',
       mask: [{ q: 'q1', keys: ['turns'], when: r => r.mach === 'screw' && r.pitch === 0.5 }],
-      tick() { if (!S.flags.iceOn && [0, 1, 2, 3].every(i => CHDATA.c6.steps[4].tasks[i][1]())) { S.flags.iceOn = true; WS.loads.wedge = WL.ice; if (WS.mach === 'wedge') { wsLoadFor('wedge'); wsResetLoad(); wsRenderControls(); } } },
+      tick() { const st = CHDATA.c6.steps.find(x => x.id === 'pl4'); if (!S.flags.iceOn && [0, 1, 2, 3].every(i => st.tasks[i][1]())) { S.flags.iceOn = true; WS.loads.wedge = WL.ice; if (WS.mach === 'wedge') { wsLoadFor('wedge'); wsResetLoad(); wsRenderControls(); } } },
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Split the log with the <b>5 cm</b> wedge, then the <b>2 cm</b> wedge.', () => shopHas({ mach: 'wedge', thick: 5, load: 1200 }) && shopHas({ mach: 'wedge', thick: 2, load: 1200 })],
-        ['Lift the car with the screw jack, first with a <b>1.0 cm</b> pitch, then a <b>0.5 cm</b> pitch. Watch the turn counter.', () => shopHas({ mach: 'screw', pitch: 1 }) && shopHas({ mach: 'screw', pitch: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Lift the car with the screw jack, first with a <b>1.0 cm</b> gap between threads, then a <b>0.5 cm</b> gap. Watch the turn counter.', () => shopHas({ mach: 'screw', pitch: 1 }) && shopHas({ mach: 'screw', pitch: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }],
         ['<b>Toolbox job:</b> Smooshy\'s ice block needs <b>500 N</b> to split. Choose a wedge that splits it with <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'wedge' && r.loadN === 500 && !r.capped && r.E <= 60)]],
       qs: [
-        { id: 'q1', type: 'reading', p: 'How many turns of the handle lifted the car 20 cm with the 0.5 cm pitch?', unit: 'turns', tol: 0, live: () => { const r = shopRun({ mach: 'screw', pitch: 0.5 }); return r ? r.turns : null; }, need: () => shopHas({ mach: 'screw', pitch: 0.5 }), needMsg: 'Lift the car with the 0.5 cm pitch first. Your runs are in the Journal.', ok: '40 turns! The finer thread needed half the effort, but twice as many turns.' },
-        { id: 'q2', type: 'pick', p: 'With the finer thread (0.5 cm pitch), the effort was {0} and the number of turns was {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['smaller', 'the same', 'bigger'], 2]] },
-        { id: 'q3', type: 'tick', p: 'Tick every object that uses a wedge.', opts: ['An axe', 'A kitchen knife', 'A doorstop', 'The point of a nail', 'A doorknob', 'A seesaw'], a: [0, 1, 2, 3], ok: 'Yes! A doorknob is a wheel and axle, and a seesaw is a lever.' }] }
+        { id: 'q1', type: 'reading', p: 'How many turns of the handle lifted the car 20 cm with the 0.5 cm gap between threads?', unit: 'turns', tol: 0, live: () => { const r = shopRun({ mach: 'screw', pitch: 0.5 }); return r ? r.turns : null; }, need: () => shopHas({ mach: 'screw', pitch: 0.5 }), needMsg: 'Lift the car with the 0.5 cm gap first. Your runs are in the Journal.', ok: '40 turns! The closer threads needed half the effort, but twice as many turns.' },
+        { id: 'q2', type: 'pick', p: 'With the threads closer together (0.5 cm), the effort was {0} and the number of turns was {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['smaller', 'the same', 'bigger'], 2]] },
+        { id: 'q3', type: 'tick', p: 'Tick every object that uses a wedge.', opts: ['A kitchen knife', 'A doorstop', 'The point of a nail', 'Your front teeth', 'A doorknob', 'A seesaw'], a: [0, 1, 2, 3], ok: 'Yes! A doorknob is a wheel and axle, and a seesaw is a lever.' }] }
   ],
   review: [
-    /* ---------- Part 1 Check ---------- */
-    { id: 'c6r1', obj: ['Ai'], type: 'match', colA: 'Simple machine', p: 'Match each simple machine to an everyday example.', rows: [['Lever', 'Crowbar'], ['Pulley', 'Flagpole'], ['Wheel and axle', 'Steering wheel'], ['Inclined plane', 'Wheelchair ramp'], ['Wedge', 'Axe'], ['Screw', 'Jar lid']] },
-    { id: 'c6r2', obj: ['Aii'], type: 'reason', sure: true, p: 'Mia moves the fulcrum of her crowbar closer to her hand. What happens to the effort she needs to lift the rock?',
+    /* ---------- Part 1 Check (levers) ---------- */
+    { id: 'c6r1', obj: ['Ai'], type: 'pick', p: `<p>Label the parts of this lever.</p>${picLever({ flip: true, letters: { F: 'C', L: 'A', E: 'B' } })}<p>A is the {0}, B is the {1} and C is the {2}.</p>`, picks: [[['fulcrum', 'load', 'effort'], 1], [['fulcrum', 'load', 'effort'], 2], [['fulcrum', 'load', 'effort'], 0]] },
+    { id: 'c6r2', obj: ['Aii'], type: 'reason', sure: true, p: 'Mia uses a plank resting on a brick to lift a heavy box. The brick is the fulcrum. She moves the brick closer to her hand. What happens to the effort she needs?',
       opts: ['It gets bigger', 'It gets smaller', 'It stays the same', 'It drops to zero'], a: 0,
-      reasons: ['The load arm gets longer and her effort arm gets shorter', 'Her hand is closer to the pivot, so the bar is easier to turn', 'The rock\'s weight increases as the fulcrum moves', 'The fulcrum now carries more of the rock\'s weight for her'], r: 0,
-      why: { a: { 1: 'Moving the fulcrum towards her hand makes her effort arm shorter, so the lever gives her less help.', 2: 'The rock\'s weight stays the same, but the lever\'s mechanical advantage changes.', 3: 'The fulcrum never takes the effort away: she still has to lift the rock.' }, r: { 1: 'A hand close to the pivot has a short effort arm, which makes the bar harder to turn, not easier.', 2: 'The rock\'s weight is mass × g, so it never changes.', 3: 'The fulcrum only gives the bar something to turn around.' } } },
-    { id: 'c6r3', obj: ['Aii'], type: 'sort', p: 'Sort these levers into their classes.', groups: ['Class 1: fulcrum in the middle', 'Class 2: load in the middle', 'Class 3: effort in the middle'],
-      items: [['Pliers', 0], ['Claw hammer pulling out a nail', 0], ['Door pushed open at the handle', 1], ['Bottle opener', 1], ['Broom swept with both hands', 2], ['Ice tongs', 2]] },
-    { id: 'c6r4', obj: ['Aii'], type: 'pick', p: 'A crane lifts a load with 4 supporting ropes. Compared with lifting the load straight up, the effort is {0} and the rope pulled is {1}.', picks: [[['four times bigger', 'the same', 'a quarter as big'], 2], [['a quarter as long', 'the same length', 'four times longer'], 2]] },
-    { id: 'c6r5', obj: ['Aiii'], type: 'fix', p: 'Leo explains ramps and pulleys. One line has a mistake. Tap it, then choose the correct line.', who: 'Leo',
+      reasons: ['Her side of the plank gets shorter and the box\'s side gets longer', 'Her hand is closer to the brick, so the plank is easier to push', 'The box gets heavier when the brick moves towards her', 'The brick now holds up more of the box\'s weight for her'], r: 0,
+      why: { a: { 1: 'Moving the fulcrum towards her hand makes her side of the plank shorter, so the lever helps less.', 2: 'The box\'s weight stays the same, but the lever helps less.', 3: 'She still has to lift the box.' }, r: { 1: 'A short side for her hand makes the plank harder to push, not easier.', 2: 'The box\'s weight is mass × g, so it never changes.', 3: 'The fulcrum only gives the plank something to turn on.' } } },
+    { id: 'c6r3', obj: ['Aii'], type: 'mcq', p: `<p>Which class of lever is this?</p>${picLever({ mid: 'L' })}`, opts: ['Class 1', 'Class 2', 'Class 3', 'It isn\'t a lever'], a: 1, why: { 0: 'Class 1 has the fulcrum in the middle.', 2: 'Class 3 has the effort in the middle.', 3: 'It has a bar, a fulcrum, a load and an effort, so it is a lever.' } },
+    { id: 'c6r4', obj: ['Aiii'], type: 'fix', p: 'Leo explains how he used a lever. One line has a mistake. Tap it, then choose the correct line.', who: 'Leo',
+      lines: ['Leo put the fulcrum close to the rock.', 'That made his side of the bar much longer.', 'So he needed a smaller effort to lift the rock.', 'And his hand moved a shorter distance than before.'], bad: 3,
+      fix: { kind: 'mcq', opts: ['And his hand moved a longer distance than before', 'And the rock rose a longer distance than before', 'And his hand did not need to move at all', 'And the rock became lighter than before'], a: 0 },
+      why: 'That\'s the catch: a smaller effort always needs a bigger distance. His hand moved further, not less far.' },
+    { id: 'c6r5', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy needs to lift a heavy boulder off his spaceship\'s leg. He has a long bar and a small rock to use as the fulcrum, and he can only pull with 60 N. Explain where he should put the fulcrum, and what the catch is.', words: ['fulcrum', 'effort', 'load', 'distance'],
+      model: 'He should put the fulcrum close to the boulder, so his side of the bar is long. That makes the effort much smaller than the weight of the boulder (the load), so his 60 N pull can lift it. The catch is distance: his end of the bar has to move a long way to lift the boulder only a little.',
+      check: ['Says the fulcrum should go close to the boulder (the load), so his side of the bar is long', 'Says this makes the effort smaller than the load', 'Says the catch: his hand has to move further than the boulder rises'] },
+    /* ---------- Part 2 Check (pulleys, wheels and ramps) ---------- */
+    { id: 'c6r7', obj: ['Ai'], type: 'match', colA: 'Everyday object', p: 'Match each everyday object to its simple machine.', rows: [['Flagpole', 'Pulley'], ['Screwdriver', 'Wheel and axle'], ['Wheelchair ramp', 'Ramp (inclined plane)'], ['Doorstop', 'Wedge'], ['Jar lid', 'Screw'], ['Seesaw', 'Lever']] },
+    { id: 'c6r8', obj: ['Aii'], type: 'pick', p: 'A crane lifts a load with 4 supporting ropes. Compared with lifting the load straight up, the effort is {0} and the rope pulled is {1}.', picks: [[['four times bigger', 'the same', 'a quarter as big'], 2], [['a quarter as long', 'the same length', 'four times longer'], 2]] },
+    { id: 'c6r9', obj: ['Aiii'], type: 'fix', p: 'Leo explains ramps. One line has a mistake. Tap it, then choose the correct line.', who: 'Leo',
       lines: ['Ana needs to get a heavy box onto a 1 m high stage.', 'She could pull it up a long ramp or a short, steep ramp.', 'The long ramp needs a smaller pull, but she pulls it further.', 'A steeper ramp would need a smaller pull, because it is shorter.'], bad: 3,
       fix: { kind: 'mcq', opts: ['A steeper ramp would need a bigger pull, but over a shorter distance', 'A steeper ramp would need the same pull, because the box weighs the same', 'A steeper ramp would need no pull at all, because the box slides down', 'A steeper ramp would need a smaller pull, because the box rises faster'], a: 0 },
-      why: 'Ramp MA = length ÷ height. A shorter ramp to the same height has a smaller MA, so the pull is bigger, over a shorter distance.' },
-    { id: 'c6r6', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy wants to split a block of space ice with a wedge. Explain how a wedge works, and which shape of wedge he should choose.', words: ['wedge', 'force', 'thin', 'distance'],
+      why: 'A shorter ramp to the same height needs a bigger pull, but the box travels a shorter distance.' },
+    { id: 'c6r10', obj: ['Aii'], type: 'reason', sure: true, p: 'Ana swaps the handle on her winch for a longer one. What happens to the effort she needs to lift the same bucket?',
+      opts: ['It gets smaller', 'It gets bigger', 'It stays the same', 'It drops to zero'], a: 0,
+      reasons: ['Her hand moves round a bigger circle, so a smaller force does the same job', 'A longer handle is heavier, so its weight helps to turn the axle', 'The axle gets bigger, so the rope winds in much faster', 'The bucket gets lighter when the handle is longer'], r: 0,
+      why: { a: { 1: 'A longer handle makes the job easier, not harder.', 2: 'In the Workshop, the longer handle needed a much smaller effort.', 3: 'She still has to lift the bucket.' }, r: { 1: 'Workshop handles weigh nothing: the help comes from the bigger circle.', 2: 'The axle stays the same size.', 3: 'The bucket\'s weight never changes.' } } },
+    { id: 'c6r11', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy wants to split a block of space ice with a wedge. Explain how a wedge works, and which shape of wedge he should choose.', words: ['wedge', 'force', 'thin', 'distance'],
       model: 'A wedge is two ramps back to back. When Smooshy pushes the wedge into the ice, its sloping sides push the two halves apart with a much bigger force than his push. He should choose a long, thin wedge, because it needs the smallest push. The catch is that he has to push it further into the ice.',
-      check: ['Says the sloping sides push the ice apart with a bigger force than the push (the word "force" used for the push or the splitting force)', 'Says a long, thin wedge needs a smaller push than a short, fat one', 'Says the smaller push has to move further (the force–distance trade-off)'] }
+      check: ['Says the sloping sides push the ice apart with a bigger force than the push', 'Says a long, thin wedge needs a smaller push than a short, fat one', 'Says the smaller push has to move further (the catch)'] }
   ]
 };
 
 /* ===== Chapter 6: the story. The transmission (B2) and the Rescue board (B3), drawn from the script in docs/Chapter6_Workshop_Script.md =====
    The board sits at the top of every Chapter 6 page. A slot lights up when that Part's stamp is earned. Names live in the SMOOSHY constant (4a-workshop.js). */
 const RB_SLOTS = [
-  { sec: 'c6a', title: 'Toolkit packed', part: 'Part 1', next: 'Next: Part 1 packs the toolkit with the six simple machines.' },
-  { sec: 'c6b', title: 'Mission computer loaded', part: 'Part 2', next: 'Next: Part 2 teaches the maths the mission computer needs.' },
-  { sec: 'c6c', title: 'Crane kit built', part: 'Part 3', next: 'Next: Part 3 builds the crane kit.' },
-  { sec: 'c6d', title: 'Smooshy saved!', part: 'Part 4', next: 'Next: Part 4 is the rescue itself.' }
+  { sec: 'c6a', title: 'Levers packed', part: 'Part 1', next: 'Next: Part 1 packs the first tool, the lever.' },
+  { sec: 'c6b', title: 'Toolkit packed', part: 'Part 2', next: 'Next: Part 2 packs pulleys, a winch, ramps, wedges and a screw jack.' },
+  { sec: 'c6c', title: 'Mission computer loaded', part: 'Part 3', next: 'Next: Part 3 teaches the maths the mission computer needs.' },
+  { sec: 'c6d', title: 'Crane kit built', part: 'Part 4', next: 'Next: Part 4 builds the crane kit.' },
+  { sec: 'c6e', title: 'Smooshy saved!', part: 'Part 5', next: 'Next: Part 5 is the rescue itself.' }
 ];
 const rbDone = id => !!dbGet('stamps', {})[id];
+/* the Gumdrop with Captain Smooshy trapped inside, peeping out of the round window (Tom, 1 Nov 2026: he's stuck in his ship) */
+function drawGumdropInside(c, x, y, s, tilt, mood, tt) {
+  drawGumdrop(c, x, y, s, tilt);
+  c.save(); c.translate(x, y); c.rotate(tilt || 0); c.scale(s, s);
+  c.beginPath(); c.arc(0, -42, 13.5, 0, 7); c.clip(); c.fillStyle = '#26364a'; c.fillRect(-16, -58, 32, 32);
+  drawSmooshy(c, 0, -25, 0.42, mood || 'worried', tt); c.restore();
+  c.save(); c.translate(x, y); c.rotate(tilt || 0); c.scale(s, s); c.strokeStyle = '#fffaf2'; c.lineWidth = 4; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.stroke(); c.restore();
+}
 /* Glimmer-9's crater, side-on: violet sky, two moons, crystal rocks, the Gumdrop tipped over at the bottom */
 function drawCrater(c, w, h, st) {
   const sk = c.createLinearGradient(0, 0, 0, h); sk.addColorStop(0, '#3d2a78'); sk.addColorStop(1, '#8e6fd6'); c.fillStyle = sk; c.fillRect(0, 0, w, h);
@@ -7039,16 +7289,19 @@ function drawCrater(c, w, h, st) {
   c.fillStyle = 'rgba(255,255,255,.85)'; [[.06, .55], [.1, .6], [.9, .56], [.95, .62], [.38, .93], [.62, .95], [.5, .97]].forEach(([x, y]) => { c.beginPath(); c.moveTo(w * x, h * y - 7); c.lineTo(w * x + 4, h * y); c.lineTo(w * x - 4, h * y); c.closePath(); c.fill(); });
   /* the things that appear as Parts are finished */
   if (st.a) { c.fillStyle = '#c94a82'; c.beginPath(); c.roundRect(w * .035, h * .5 - 20, 34, 20, 4); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(w * .035 + 12, h * .5 - 26, 10, 7); c.fillStyle = '#fff'; c.fillRect(w * .035 + 5, h * .5 - 13, 24, 3); }
-  if (st.b) { c.fillStyle = '#1d2a35'; c.beginPath(); c.roundRect(w * .13, h * .5 - 22, 24, 18, 3); c.fill(); c.fillStyle = '#7ef0a8'; c.fillRect(w * .13 + 3, h * .5 - 19, 18, 12); }
-  if (st.c) { c.strokeStyle = '#e3a51c'; c.lineWidth = 4; c.beginPath(); c.moveTo(w * .9, h * .5); c.lineTo(w * .9, h * .5 - 34); c.lineTo(w * .96, h * .5 - 40); c.stroke(); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w * .96, h * .5 - 40); c.lineTo(w * .96, h * .5 - 20); c.stroke(); }
-  if (st.d) { drawGumdrop(c, w * .5, h * .5, .52, 0); drawSmooshy(c, w * .62, h * .5 - 22, .34, 'cheer'); }
-  else { drawGumdrop(c, w * .5, h * .86, .62, .5); drawSmooshy(c, w * .42, h * .83 - 18, .3, 'wave'); }
+  if (st.c) { c.fillStyle = '#1d2a35'; c.beginPath(); c.roundRect(w * .13, h * .5 - 22, 24, 18, 3); c.fill(); c.fillStyle = '#7ef0a8'; c.fillRect(w * .13 + 3, h * .5 - 19, 18, 12); }
+  if (st.d) { c.strokeStyle = '#e3a51c'; c.lineWidth = 4; c.beginPath(); c.moveTo(w * .9, h * .5); c.lineTo(w * .9, h * .5 - 34); c.lineTo(w * .96, h * .5 - 40); c.stroke(); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w * .96, h * .5 - 40); c.lineTo(w * .96, h * .5 - 20); c.stroke(); }
+  if (st.b) { c.fillStyle = '#6c7b84'; c.beginPath(); c.roundRect(w * .2, h * .5 - 16, 28, 16, 3); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(w * .2 + 4, h * .5 - 12, 20, 3); }
+  if (st.e) { drawGumdrop(c, w * .5, h * .5, .52, 0); drawSmooshy(c, w * .62, h * .5 - 22, .34, 'cheer'); }
+  else { drawGumdropInside(c, w * .5, h * .86, .62, .5, 'worried');
+    /* the black box beacon, still blinking beside the ship */
+    const on = RMOTION || Math.floor(performance.now() / 600) % 2 === 0; c.fillStyle = '#e8762c'; c.beginPath(); c.roundRect(w * .62, h * .86 - 14, 18, 14, 3); c.fill(); c.fillStyle = on ? '#ff3b30' : '#7a2a24'; c.beginPath(); c.arc(w * .62 + 9, h * .86 - 18, 3.5, 0, 7); c.fill(); }
 }
 function renderRescue() {
   const host = $('#rescueBoard'); if (!host) return;
   const on = !!CH && CH.ch === 'c6' && VIEW === 'vChapter'; host.hidden = !on; if (!on) return;
   const have = RB_SLOTS.map(s => !!secOf(s.sec)), done = RB_SLOTS.map(s => rbDone(s.sec)), nx = RB_SLOTS.findIndex((s, i) => have[i] && !done[i]);
-  host.innerHTML = `<canvas id="cvRescue" role="img" aria-label="Glimmer-9's crater. Captain Smooshy's spaceship, the Gumdrop, is tipped over at the bottom, and he waves from the window."></canvas>
+  host.innerHTML = `<canvas id="cvRescue" role="img" aria-label="Glimmer-9's crater. Captain Smooshy's spaceship, the Gumdrop, is tipped over at the bottom. He is trapped inside and peeps out of the window, and the ship's black box is blinking beside it."></canvas>
     <div class="rbside"><div class="rbhd"><span class="lbl">Rescue board</span><h2>Save Captain Smooshy!</h2></div>
     <ol class="rbslots">${RB_SLOTS.map((s, i) => `<li class="${done[i] ? 'on' : ''} ${have[i] ? '' : 'soon'}"><span class="rbtick">${done[i] ? '✓' : i + 1}</span><span><b>${s.title}</b><small>${s.part}${have[i] ? '' : ' · coming soon'}</small></span></li>`).join('')}</ol>
     <p class="rbnext">${nx >= 0 ? RB_SLOTS[nx].next : done.every(Boolean) ? 'Captain Smooshy is safe. Brilliant rescue!' : 'More of the mission is on its way.'}</p>
@@ -7057,29 +7310,56 @@ function renderRescue() {
 }
 function rbDraw() {
   const cv = $('#cvRescue'); if (!cv || !cv.offsetParent) return; readColors(); const W = 520, H = 190, c = fit(cv, W, H);
-  drawCrater(c, W, H, { a: rbDone('c6a'), b: rbDone('c6b'), c: rbDone('c6c'), d: rbDone('c6d') });
+  drawCrater(c, W, H, { a: rbDone('c6a'), b: rbDone('c6b'), c: rbDone('c6c'), d: rbDone('c6d'), e: rbDone('c6e') });
 }
-/* ---------- the transmission: an incoming video call ---------- */
+/* ---------- the transmission: the Gumdrop crashes into a crater, and its black box sends Smooshy's recorded message (Tom, 1 Nov 2026) ---------- */
 let TXRAF = 0;
+function txCrash(c, t) {
+  const W = 360, H = 200, shake = !RMOTION && t > 1.8 && t < 2.3 ? Math.sin(t * 90) * 3 * (2.3 - t) * 2 : 0;
+  c.save(); c.translate(shake, 0);
+  const sk = c.createLinearGradient(0, 0, 0, H); sk.addColorStop(0, '#2b1d5c'); sk.addColorStop(1, '#8e6fd6'); c.fillStyle = sk; c.fillRect(-10, 0, W + 20, H);
+  c.fillStyle = 'rgba(255,255,255,.8)'; [[20, 18], [60, 46], [300, 22], [330, 64], [250, 12], [120, 16], [190, 40]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 1.4, 0, 7); c.fill(); });
+  c.fillStyle = '#f3e9ff'; c.beginPath(); c.arc(300, 40, 13, 0, 7); c.fill(); c.fillStyle = '#ffd6f0'; c.beginPath(); c.arc(330, 64, 6, 0, 7); c.fill();
+  /* the ground and the crater */
+  c.fillStyle = '#b9a2e4'; c.beginPath(); c.moveTo(-10, 150); c.lineTo(170, 150); c.lineTo(196, 182); c.lineTo(280, 182); c.lineTo(306, 150); c.lineTo(W + 10, 150); c.lineTo(W + 10, H); c.lineTo(-10, H); c.closePath(); c.fill();
+  c.fillStyle = '#9a80d0'; c.fillRect(196, 182, 84, 18);
+  const land = { x: 238, y: 182 };
+  if (t < 1.8) {
+    /* falling: the ship streaks down from the top left with a flame trail */
+    const k = t / 1.8, e = k * k, x = -40 + (land.x + 40) * k, y = 20 + (land.y - 20) * e, tilt = -0.9 + k * 1.4;
+    for (let i = 1; i <= 7; i++) { const kk = Math.max(0, k - i * 0.035), ee = kk * kk, px = -40 + (land.x + 40) * kk, py = 20 + (land.y - 20) * ee; c.fillStyle = i < 3 ? 'rgba(255,220,90,.85)' : 'rgba(255,140,60,' + (0.7 - i * 0.08) + ')'; c.beginPath(); c.arc(px, py - 20, 10 - i, 0, 7); c.fill(); }
+    drawGumdrop(c, x, y, .5, tilt);
+  } else {
+    drawGumdropInside(c, land.x, land.y + 6, .95, .42, t > 2.6 ? 'worried' : 'strain', t);
+    if (t < 2.9) { const r = (t - 1.8) * 70; c.fillStyle = `rgba(230,215,250,${Math.max(0, .8 - (t - 1.8) * .7)})`; [[-30, 0], [0, -14], [30, 0], [10, 10], [-14, 8]].forEach(([dx, dy]) => { c.beginPath(); c.arc(land.x + dx * r / 40, land.y - 10 + dy * r / 40, 12 + r * .25, 0, 7); c.fill(); }); }
+    if (t > 2.4) {
+      /* the black box: an orange flight recorder with a blinking light, sending radio rings */
+      const bx = 314, by = 176, on = RMOTION || Math.floor(t * 2) % 2 === 0;
+      c.fillStyle = '#e8762c'; c.beginPath(); c.roundRect(bx - 12, by - 14, 24, 16, 3); c.fill(); c.fillStyle = '#fff'; c.fillRect(bx - 8, by - 9, 16, 2.5);
+      c.fillStyle = on ? '#ff3b30' : '#7a2a24'; c.beginPath(); c.arc(bx, by - 19, 3.5, 0, 7); c.fill();
+      if (!RMOTION) for (let i = 0; i < 3; i++) { const rr = ((t * 26 + i * 18) % 54) + 8; c.strokeStyle = `rgba(255,255,255,${.7 - rr / 80})`; c.lineWidth = 2; c.beginPath(); c.arc(bx, by - 19, rr, -2.4, -0.7); c.stroke(); }
+      c.fillStyle = 'rgba(13,23,29,.75)'; c.beginPath(); c.roundRect(10, 10, 168, 24, 6); c.fill(); c.fillStyle = on ? '#ff3b30' : '#7a2a24'; c.beginPath(); c.arc(24, 22, 4.5, 0, 7); c.fill();
+      txt(c, 'BLACK BOX SIGNAL · GUMDROP', 34, 22.5, '#fffaf2', `800 10px ${C.fb}`, 'left');
+    }
+  }
+  c.restore();
+}
 function openTransmission() {
-  const first = `<div class="tx-head"><span>📡 Incoming transmission from deep space!</span></div>
-    <div class="tx-screen"><canvas id="cvTx" role="img" aria-label="Captain Smooshy, a blue gummy bear astronaut in a bubble helmet, waving from his spaceship"></canvas></div>
-    <p>Captain Smooshy here, the bravest gummy bear in the universe! A while ago, the Grade 6 scientists at WAB tested Intergalactic Space Fluids to find the one that could carry me to a galaxy thousands of light years away. It worked! Then disaster struck. My ship, the Gumdrop, crash-landed at the bottom of a deep crater on Planet Glimmer-9, and it's stuck.</p>
-    <p>My squishy gummy arms can only pull with <b>60 N</b>, and the Gumdrop weighs thousands of newtons. Force HQ engineers, I need you to learn how machines work and build me a way out. Over and out!</p>
-    <div class="row" style="justify-content:flex-end"><button type="button" class="go" id="txGo">Accept the mission!</button></div>`;
-  openModal(`<div class="modal txmodal" role="dialog" aria-label="Incoming transmission from Captain Smooshy">${first}</div>`, () => { cancelAnimationFrame(TXRAF); });
+  const first = `<div class="tx-head"><span>📡 Black box signal detected!</span></div>
+    <div class="tx-screen"><canvas id="cvTx" role="img" aria-label="Captain Smooshy's spaceship, the Gumdrop, crashes into a crater on Planet Glimmer-9. Smooshy is trapped inside and peeps out of the window, while the ship's black box blinks and sends a signal."></canvas></div>
+    <p class="txrec"><b>Black box recording · the Gumdrop · Planet Glimmer-9</b></p>
+    <p>Captain Smooshy here, the bravest gummy bear in the universe! The Grade 6 scientists at WAB found the Intergalactic Space Fluid that carried me to a galaxy thousands of light years away. Then disaster struck: the Gumdrop crashed into a deep crater on Planet Glimmer-9. I'm trapped inside, and the ship won't budge.</p>
+    <p>My squishy gummy arms can only pull with <b>60 N</b>, and the Gumdrop weighs thousands of newtons. My black box is sending this message to Force HQ. Engineers, please learn how machines work and build me a way out. Over and out!</p>
+    <div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><button type="button" class="ghost sm" id="txAgain">↺ Watch the crash again</button><button type="button" class="go" id="txGo">Accept the mission!</button></div>`;
+  openModal(`<div class="modal txmodal" role="dialog" aria-label="Black box message from Captain Smooshy">${first}</div>`, () => { cancelAnimationFrame(TXRAF); });
   const box = $('#modal .txmodal'); makeDraggable(box, '.tx-head', 'tx');
-  const cv = $('#cvTx'), t0 = performance.now();
-  const paint = () => { if (!cv.isConnected) return; const c = fit(cv, 360, 170), t = (performance.now() - t0) / 1000; readColors();
-    const sk = c.createLinearGradient(0, 0, 0, 170); sk.addColorStop(0, '#3d2a78'); sk.addColorStop(1, '#8e6fd6'); c.fillStyle = sk; c.fillRect(0, 0, 360, 170);
-    c.fillStyle = 'rgba(255,255,255,.8)'; [[20, 20], [60, 50], [300, 24], [330, 70], [250, 12], [120, 16]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 1.5, 0, 7); c.fill(); });
-    drawGumdrop(c, 250, 150, .62, .5); drawSmooshy(c, 120, 100, .95, 'wave', t);
-    if (!RMOTION) { c.fillStyle = 'rgba(255,255,255,.07)'; for (let y = (t * 30) % 6; y < 170; y += 6) c.fillRect(0, y, 360, 1.5); if (Math.sin(t * 9) > .93) { c.fillStyle = 'rgba(255,255,255,.18)'; c.fillRect(0, (t * 97) % 170, 360, 10); } }
-    TXRAF = requestAnimationFrame(paint); };
+  const cv = $('#cvTx'); let t0 = performance.now();
+  const paint = () => { if (!cv.isConnected) return; const c = fit(cv, 360, 200), t = RMOTION ? 9 : (performance.now() - t0) / 1000; readColors(); txCrash(c, t); TXRAF = requestAnimationFrame(paint); };
   paint();
+  $('#txAgain').addEventListener('click', () => { t0 = performance.now(); });
   $('#txGo').addEventListener('click', () => {
     cancelAnimationFrame(TXRAF); dbSet('ws.briefed', true);
-    box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>Four jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.map((s, i) => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
+    box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>${RB_SLOTS.length} jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.map(s => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
   });
 }
 
@@ -7180,13 +7460,18 @@ const SECTIONS = [
     steps: ['p1', 'p2', 'p3'], challenge: ['z1', 'z2', 'z3'], review: ['c5r8', 'c5r9', 'c5r10', 'c5r11', 'c5r12'], needs: 'c5f',
     goal: 'Explain why heavy and light objects fall differently in air but not in a vacuum; use W = m × g to find weight on different worlds; explain how the lift of a hovering helicopter equals its weight; choose a canopy and an opening height for a safe landing.',
     vocab: ['air resistance', 'weight', 'terminal velocity', 'gravitational field strength', 'vacuum', 'lift', 'hover', 'parachute'] },
-  { id: 'c6a', ch: 'c6', n: 6, title: 'Simple machines', part: 'Part 1', stamp: 'Machine Spotter',
-    blurb: 'Levers, pulleys, wheels and axles, ramps, wedges and screws: the six simple machines, and the trade-off they all share.',
-    steps: ['w1', 'w2', 'w3', 'w4', 'w5'], challenge: null, review: ['c6r1', 'c6r2', 'c6r3', 'c6r4', 'c6r5', 'c6r6'],
-    goal: 'Name the six simple machines and say how each one helps Captain Smooshy; find out how moving the fulcrum, adding supporting ropes, lengthening a ramp or thinning a wedge changes the effort; explain the trade-off that a smaller effort needs a longer distance.',
-    vocab: ['machine', 'simple machine', 'lever', 'fulcrum', 'effort', 'load', 'pulley', 'supporting rope', 'wheel and axle', 'winch', 'inclined plane', 'wedge', 'screw', 'pitch'] }
+  { id: 'c6a', ch: 'c6', n: 6, title: 'Levers', part: 'Part 1', stamp: 'Lever Learner',
+    blurb: 'Lift a heavy rock by hand, then with a lever. Move the fulcrum, find the catch, and meet the three classes of lever.',
+    steps: ['lv1', 'lv2', 'lv3', 'lv4', 'lv5'], challenge: null, review: ['c6r1', 'c6r2', 'c6r3', 'c6r4', 'c6r5'],
+    goal: 'Name the three parts of a lever (fulcrum, load and effort); explain how moving the fulcrum changes the effort; describe the catch that a smaller effort needs a bigger distance; name the three classes of lever by what is in the middle.',
+    vocab: ['machine', 'lever', 'fulcrum', 'load', 'effort'] },
+  { id: 'c6b', ch: 'c6', n: 6, title: 'Pulleys, wheels and ramps', part: 'Part 2', stamp: 'Toolkit Packer',
+    blurb: 'Pulleys, a winch, ramps, and wedges and screws (ramps in disguise): the rest of the simple machines, each with the same catch.',
+    steps: ['pl1', 'pl2', 'pl3', 'pl4'], challenge: null, review: ['c6r7', 'c6r8', 'c6r9', 'c6r10', 'c6r11'], needs: 'c6a',
+    goal: 'Describe how pulleys, a wheel and axle, ramps, wedges and screws each let a small effort move a big load; find out how adding supporting ropes, lengthening a handle or a ramp, or thinning a wedge changes the effort; explain the catch that a smaller effort needs a bigger distance.',
+    vocab: ['pulley', 'supporting rope', 'wheel and axle', 'winch', 'inclined plane', 'wedge', 'screw'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, w1: 5, w2: 3, w3: 5, w4: 4, w5: 4 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 4, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
 CHDATA.c1.review.push({ id: 'r12', obj: ['Aii'], seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

@@ -1,3 +1,5 @@
+> **Actioned 1 Nov 2026 (Claude, Opus).** Part 1 was split into Part 1 Levers and Part 2 Pulleys, wheels and ramps. The lever drawing, the pull direction, the labelled pictures, the class 3 animation and the plainer vocabulary are all in. See the script's section A2.
+
 # Chapter 6, Part 1, step w2 ("Three classes of lever"): feedback from Tom's playtest
 
 Written for Opus to design and build a fix. Source: Tom's review comments on the Part 1 build (commit 3535b80), plus his summary remark. Tom is a teacher, not a programmer, so explain changes to him in plain language and handle git. Follow `CLAUDE.md` and `.claude/skills/wab-science-sim-builder/SKILL.md`.

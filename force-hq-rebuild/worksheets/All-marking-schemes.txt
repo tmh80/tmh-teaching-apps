@@ -239,3 +239,54 @@ Q3 (4 marks, 1 per check): Starts at zero; Speeds up all the way; Speeds up by t
 Q4 (5 marks): Titan 56 N; The Moon 64 N; Mars 148 N; Venus 356 N; Earth 392 N; Jupiter 992 N (accept within 0.5 N). Correct order: 1st B (Titan), 2nd A (The Moon), 3rd D (Mars), 4th E (Venus), 5th C (Earth), 6th F (Jupiter). Calculations, 3 marks: all 6 right = 3; 4 or more = 2; 2 or more = 1; otherwise 0. Order, 2 marks: 2 if every letter is right; 1 if only two neighbouring letters are swapped. Error carried forward: also give the 2 order marks if the student's order matches their own calculated values, even when one calculation was wrong. MYP: A ii, A iii
 Q5 (3 marks, 1 per point): The question gives the words to use (thin air, air resistance, terminal velocity, weight); each point is about using one of them correctly. • Says the air on Mars is very thin, so there is much less air resistance • Says the air resistance only balances the weight at a high velocity, so the terminal velocity is still too high • Says rockets give an extra upward force that slows the rover down Model answer: Mars has very thin air, so the air resistance on the rover is much smaller than it would be on Earth at the same velocity. The air resistance only balances the rover's weight at a very high velocity, so even with a parachute its terminal velocity is still far too fast for a safe landing. Rockets add an extra upward force to slow it down. MYP: A ii, D i, D iii
 Total: 16 marks.
+
+MYP strands on this sheet: A i, A ii, A iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Part 1: Levers". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 11 marks.
+
+Mark scheme
+Q1 (3 marks, 1 per choice): 
+Label the parts of this lever.
+A is the [load], B is the [effort] and C is the [fulcrum].
+
+Q2 (2 marks): 1 mark for the answer: It gets bigger. 1 mark for the reason: Her side of the plank gets shorter and the box's side gets longer. Confidence is not marked. MYP: A ii
+Q3 (1 mark): Class 2. MYP: A ii
+Q4 (2 marks): 1 mark for the line with the mistake: line 4 (And his hand moved a shorter distance than before.). 1 mark for the correction: And his hand moved a longer distance than before. That's the catch: a smaller effort always needs a bigger distance. His hand moved further, not less far. MYP: A iii
+Q5 (3 marks, 1 per point): The question gives the words to use (fulcrum, effort, load, distance); each point is about using one of them correctly. • Says the fulcrum should go close to the boulder (the load), so his side of the bar is long • Says this makes the effort smaller than the load • Says the catch: his hand has to move further than the boulder rises Model answer: He should put the fulcrum close to the boulder, so his side of the bar is long. That makes the effort much smaller than the weight of the boulder (the load), so his 60 N pull can lift it. The catch is distance: his end of the bar has to move a long way to lift the boulder only a little. MYP: A ii
+Total: 11 marks.
+
+MYP strands on this sheet: A i, A ii, A iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Part 2: Pulleys, wheels and ramps". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 15 marks.
+
+Mark scheme
+Q1 (6 marks, 1 per row): Flagpole → Pulley; Screwdriver → Wheel and axle; Wheelchair ramp → Ramp (inclined plane); Doorstop → Wedge; Jar lid → Screw; Seesaw → Lever. MYP: A i
+Q2 (2 marks, 1 per choice): A crane lifts a load with 4 supporting ropes. Compared with lifting the load straight up, the effort is [a quarter as big] and the rope pulled is [four times longer].. 1 mark for each right choice. MYP: A ii
+Q3 (2 marks): 1 mark for the line with the mistake: line 4 (A steeper ramp would need a smaller pull, because it is shorter.). 1 mark for the correction: A steeper ramp would need a bigger pull, but over a shorter distance. A shorter ramp to the same height needs a bigger pull, but the box travels a shorter distance. MYP: A iii
+Q4 (2 marks): 1 mark for the answer: It gets smaller. 1 mark for the reason: Her hand moves round a bigger circle, so a smaller force does the same job. Confidence is not marked. MYP: A ii
+Q5 (3 marks, 1 per point): The question gives the words to use (wedge, force, thin, distance); each point is about using one of them correctly. • Says the sloping sides push the ice apart with a bigger force than the push • Says a long, thin wedge needs a smaller push than a short, fat one • Says the smaller push has to move further (the catch) Model answer: A wedge is two ramps back to back. When Smooshy pushes the wedge into the ice, its sloping sides push the two halves apart with a much bigger force than his push. He should choose a long, thin wedge, because it needs the smallest push. The catch is that he has to push it further into the ice. MYP: A ii
+Total: 15 marks.

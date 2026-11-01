@@ -6,11 +6,14 @@
 const SMOOSHY = { name: 'Captain Smooshy', ship: 'the Gumdrop', planet: 'Glimmer-9', g: 4.2, pull: 60, base: 'Gummy Base One' };
 const WS_H = 430, WS_WORLDS = { earth: { n: 'Earth', g: 9.8 }, moon: { n: 'the Moon', g: 1.6 }, mars: { n: 'Mars', g: 3.7 }, glim: { n: 'Glimmer-9', g: 4.2 } };
 const WS_EFF = { lever: .95, winch: .90, ramp: .75, wedge: .40, screw: .30 }, WS_PEFF = { 1: .95, 2: .90, 3: .85, 4: .80, 5: .75, 6: .70 };
-const WS_MACH = { lever: 'Lever', pulley: 'Pulley system', winch: 'Wheel and axle (winch)', ramp: 'Ramp', wedge: 'Wedge', screw: 'Screw jack' };
-const WS_ICON = { lever: '⚖️', pulley: '🪢', winch: '⚙️', ramp: '📐', wedge: '🪓', screw: '🔩' };
-const WS_VERB = { lever: 'Pull!', pulley: 'Pull!', winch: 'Turn!', ramp: 'Pull!', wedge: 'Push!', screw: 'Turn!' };
+const WS_MACH = { hand: 'By hand (no machine)', lever: 'Lever', pulley: 'Pulley system', winch: 'Wheel and axle (winch)', ramp: 'Ramp', wedge: 'Wedge', screw: 'Screw jack' };
+const WS_ICON = { hand: '✋', lever: '⚖️', pulley: '🪢', winch: '⚙️', ramp: '📐', wedge: '🪓', screw: '🔩' };
+const WS_VERB = { hand: 'Lift!', lever: 'Pull!', pulley: 'Pull!', winch: 'Turn!', ramp: 'Pull!', wedge: 'Push!', screw: 'Turn!' };
 const WS_DONE = { wedge: 'Split!' };
 const WS_BAR = 2, WS_T1 = 0.8, WS_WEDGE_OPEN = 0.05;
+/* Part 1 names the three lever set-ups by what sits in the middle; the class numbers are only shown once step lv5 has taught them (WS.clsNames). */
+const WS_SETUP = { 1: 'fulcrum in the middle', 2: 'load in the middle', 3: 'effort in the middle' };
+const WS_LIFT3 = 0.40;   // with the effort in the middle (class 3) the rock rises 0.40 m, so the hand moves a visible 0.10 m at an effort arm of 0.5 m
 const wsR1 = x => Math.round((x + 1e-9) * 10) / 10, wsR2 = x => Math.round((x + 1e-9) * 100) / 100;
 const wsNear = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) < 1e-6 : a === b;
 
@@ -18,7 +21,7 @@ const wsNear = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.a
 const WS = {
   mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10,
   load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null, world: 'earth', real: false, cap: null, maxTravel: 1.5,
-  lim: {}, classPick: false, rampH: false, axleEdit: false,
+  lim: {}, classPick: false, rampH: false, axleEdit: false, lift3: WS_LIFT3, clsNames: false,
   busy: false, ph: 0, pt: 0, T2: 2.2, c: null, done: false, msg: '', reading: 0, prog: 0, effort: 0, last: null, bubble: null, bubbleAt: 0, lastBub: -1, shown: false
 };
 /* ---------- the maths ---------- */
@@ -29,7 +32,8 @@ function wsArms() {
 }
 function wsParts(o) {   // machine settings -> { ma, eff, rise, ... } for the CURRENT settings (or the overrides in o)
   const s = Object.assign({}, WS, o || {}), m = s.mach; let ma, eff = 1, rise = s.lift, ex = {};
-  if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; }
+  if (m === 'hand') { ma = 1; }
+  else if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; if (s.cls === 3) rise = s.lift3 != null ? s.lift3 : WS_LIFT3; }
   else if (m === 'pulley') { ma = s.ropes; eff = WS_PEFF[s.ropes] || .7; }
   else if (m === 'winch') { ma = Math.round(s.R / s.axle * 1e6) / 1e6; eff = WS_EFF.winch; }
   else if (m === 'ramp') { ma = Math.round(s.L / s.h * 1e6) / 1e6; eff = WS_EFF.ramp; rise = s.h; }
@@ -48,7 +52,7 @@ function wsCalc(o) {
 const wsRecord = c => ({ mach: WS.mach, cls: WS.mach === 'lever' ? WS.cls : null, la: c.la != null ? wsR2(c.la) : null, ea: c.ea != null ? wsR2(c.ea) : null, ropes: WS.mach === 'pulley' ? WS.ropes : null,
   R: WS.mach === 'winch' ? WS.R : null, L: WS.mach === 'ramp' ? WS.L : null, h: WS.mach === 'ramp' ? WS.h : null, thick: WS.mach === 'wedge' ? WS.thick : null,
   per: WS.mach === 'screw' ? WS.per : null, pitch: WS.mach === 'screw' ? WS.pitch : null, loadN: WS.load, loadName: WS.loadName, loadShort: WS.loadShort, world: WS.world, real: !!WS.real, cap: WS.cap,
-  liftSet: WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
+  liftSet: WS.mach === 'lever' && WS.cls === 3 ? WS.lift3 : WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
 
 /* ---------- the student's own runs (a question never forces a re-run) ---------- */
 const shopRuns = () => runsFor().filter(r => r.scene === 'shop' && !r.live);
@@ -74,11 +78,11 @@ function wsSetLoad(id) { const l = WS.loadOpts && WS.loadOpts.find(x => x.id ===
 function wsResetLoad() { WS.busy = false; WS.ph = 0; WS.pt = 0; WS.prog = 0; WS.reading = 0; WS.done = false; WS.msg = ''; WS.c = null; if (typeof RUN !== 'undefined' && RUN && RUN.scene === 'shop' && RUN.live) runEnd('reset'); }
 function wsSetup(o) {
   const d = { mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10, load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null,
-    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false };
+    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false };
   Object.assign(WS, d, o || {}); wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
 }
 function wsSetMach(m) {
-  if (!WS.allow.includes(m) || m === WS.mach) return; WS.mach = m; wsLoadFor(m); const d = WS.lim[m]; if (d) Object.assign(WS, d); WS.lift = ({ lever: 0.10, pulley: 1.0, winch: 1.0, ramp: WS.h, wedge: WS_WEDGE_OPEN, screw: 0.20 })[m] || WS.lift;
+  if (!WS.allow.includes(m) || m === WS.mach) return; WS.mach = m; wsLoadFor(m); const d = WS.lim[m]; if (d) Object.assign(WS, d); WS.lift = ({ hand: 0.10, lever: 0.10, pulley: 1.0, winch: 1.0, ramp: WS.h, wedge: WS_WEDGE_OPEN, screw: 0.20 })[m] || WS.lift;
   if (WS.lifts && WS.lifts[m] != null) WS.lift = WS.lifts[m];
   wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange();
 }
@@ -137,26 +141,27 @@ const wsLoadTxt = r => `${fmt(r.loadN, r.loadN % 1 ? 1 : 0)} N ${r.loadShort || 
 function wsText(r) {
   if (r.live && r.out === 'running') return `You are working the ${WS_MACH[r.mach].toLowerCase()}…`;
   const mk = wsMasked(r), hideE = mk.has('readE'), E = hideE ? 'hidden until you answer' : fmt(r.E, 1) + ' N', obj = r.loadShort || 'load', num = v => fmt(v, 2) + ' m';
-  const lev = r.mach === 'lever' ? `a class ${r.cls} lever (load arm ${fmt(r.la, 2)} m, effort arm ${fmt(r.ea, 2)} m)` : r.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes === 1 ? '' : 's'}` : r.mach === 'winch' ? `a winch with a handle radius of ${fmt(r.R, 2)} m` : r.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp that rises ${fmt(r.h, 1)} m` : r.mach === 'wedge' ? `a wedge ${r.thick} cm thick` : `a screw jack (${fmt(r.per, 0)} cm per turn, pitch ${fmt(r.pitch, 1)} cm)`;
+  const lev = r.mach === 'hand' ? 'your bare hands (no machine)' : r.mach === 'lever' ? `a lever with the ${WS_SETUP[r.cls]} (the ${obj} ${fmt(r.la, 2)} m from the fulcrum, your hand ${fmt(r.ea, 2)} m from it)` : r.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes === 1 ? '' : 's'}` : r.mach === 'winch' ? `a winch with a handle radius of ${fmt(r.R, 2)} m` : r.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp that rises ${fmt(r.h, 1)} m` : r.mach === 'wedge' ? `a wedge ${r.thick} cm thick` : `a screw jack (${fmt(r.per, 0)} cm per turn, threads ${fmt(r.pitch, 1)} cm apart)`;
   const verb = r.mach === 'wedge' ? `You pushed the ${wsLoadTxt(r)} apart with` : r.mach === 'ramp' ? `You pulled the ${wsLoadTxt(r)} up` : `You lifted the ${wsLoadTxt(r)} with`;
   const worldNote = r.world && r.world !== 'earth' ? ` (on ${WS_WORLDS[r.world].n})` : '';
   if (r.capped) return `With ${lev}, the load needed ${fmt(r.need, 1)} N, which is more than ${SMOOSHY.name}'s ${r.cap} N, so it didn't move.`;
-  const move = r.mach === 'ramp' ? ` The ${obj} rose ${num(r.rise)} and you pulled it ${num(r.eDist)} along the ramp.` : r.mach === 'pulley' ? ` The ${obj} rose ${num(r.rise)} and you pulled ${num(r.eDist)} of rope.` : r.mach === 'wedge' ? ` The halves opened ${fmt(r.rise * 100, 0)} cm and you pushed the wedge ${num(r.eDist)}.` : r.mach === 'screw' ? ` The ${obj} rose ${fmt(r.rise * 100, 0)} cm.${mk.has('turns') ? '' : ` It took ${fmt(r.turns, 0)} turns.`}` : ` The ${obj} rose ${num(r.rise)} and ${r.mach === 'lever' ? 'your end' : 'your hand'} moved ${num(r.eDist)}.`;
+  const handMove = r.mach === 'lever' ? ` The ${obj} rose ${num(r.rise)} and your hand moved ${num(r.eDist)}.` : r.mach === 'hand' ? ` The ${obj} rose ${num(r.rise)}.` : '';
+  const move = handMove ? handMove : r.mach === 'ramp' ? ` The ${obj} rose ${num(r.rise)} and you pulled it ${num(r.eDist)} along the ramp.` : r.mach === 'pulley' ? ` The ${obj} rose ${num(r.rise)} and you pulled ${num(r.eDist)} of rope.` : r.mach === 'wedge' ? ` The halves opened ${fmt(r.rise * 100, 0)} cm and you pushed the wedge ${num(r.eDist)}.` : r.mach === 'screw' ? ` The ${obj} rose ${fmt(r.rise * 100, 0)} cm.${mk.has('turns') ? '' : ` It took ${fmt(r.turns, 0)} turns.`}` : ` The ${obj} rose ${num(r.rise)} and ${r.mach === 'lever' ? 'your end' : 'your hand'} moved ${num(r.eDist)}.`;
   const sh = r.short ? ` The lever only lifted the load ${num(r.rise)} before your end hit the floor.` : '';
   return `${verb} ${lev}${worldNote}. The effort was ${E}.${sh || move}`.replace('.. ', '. ');
 }
 function wsChips(r) {
   const mk = wsMasked(r), c = [['Machine', WS_MACH[r.mach]]];
-  if (r.mach === 'lever') c.push(['Class', String(r.cls)], ['Load arm', fmt(r.la, 2) + ' m'], ['Effort arm', fmt(r.ea, 2) + ' m']);
+  if (r.mach === 'lever') c.push(['Set-up', WS_SETUP[r.cls]], ['Fulcrum to load', fmt(r.la, 2) + ' m'], ['Fulcrum to effort', fmt(r.ea, 2) + ' m']);
   if (r.mach === 'pulley') c.push(['Supporting ropes', String(r.ropes)]);
   if (r.mach === 'winch') c.push(['Handle radius', fmt(r.R, 2) + ' m']);
   if (r.mach === 'ramp') c.push(['Ramp length', fmt(r.L, 1) + ' m'], ['Height', fmt(r.h, 1) + ' m']);
   if (r.mach === 'wedge') c.push(['Thickness', r.thick + ' cm']);
-  if (r.mach === 'screw') { c.push(['Per turn', fmt(r.per, 0) + ' cm'], ['Pitch', fmt(r.pitch, 1) + ' cm']); if (r.turns != null && !mk.has('turns')) c.push(['Turns', fmt(r.turns, 0)]); }
+  if (r.mach === 'screw') { c.push(['Per turn', fmt(r.per, 0) + ' cm'], ['Thread gap', fmt(r.pitch, 1) + ' cm']); if (r.turns != null && !mk.has('turns')) c.push(['Turns', fmt(r.turns, 0)]); }
   c.push(['Load', fmt(r.loadN, r.loadN % 1 ? 1 : 0) + ' N']);
   if (!r.capped && !mk.has('readE')) c.push(['Effort', fmt(r.E, 1) + ' N']);
   if (r.capped) c.push(['Needed', fmt(r.need, 1) + ' N'], ['Result', 'too much']);
-  else { c.push([r.mach === 'wedge' ? 'Opened' : 'Load rise', fmt(r.rise, 2) + ' m'], ['Effort distance', fmt(r.eDist, 2) + ' m']); if (!mk.has('readMA') && wsHas('readMA')) c.push(['MA', fmt(r.ma, 2)]); if (!mk.has('readWork') && wsHas('readWork')) c.push(['Work in', fmt(r.workIn, 0) + ' J'], ['Work out', fmt(r.workOut, 0) + ' J']); }
+  else { c.push([r.mach === 'wedge' ? 'Opened' : 'Load rise', fmt(r.rise, 2) + ' m'], [r.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(r.eDist, 2) + ' m']); if (!mk.has('readMA') && wsHas('readMA')) c.push(['MA', fmt(r.ma, 2)]); if (!mk.has('readWork') && wsHas('readWork')) c.push(['Work in', fmt(r.workIn, 0) + ' J'], ['Work out', fmt(r.workOut, 0) + ' J']); }
   return c;
 }
 const wsHas = k => LAB.show.has(k) || VIEW === 'vExplore';
@@ -166,24 +171,24 @@ const wsFmt = (k, v) => k === 'ropes' ? String(v) : fmt(v, k === 'arm' || k === 
 function wsRenderControls() {
   if (!$('#wsMachs')) return;
   $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach); });   // only the controls of the machine on the bench
-  const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
+  const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0] + ':' + i[1]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
   const A = WS.allow; $('#wsMachs').className = 'seg ' + (A.length > 3 ? 'three' : A.length > 2 ? 'three' : 'two'); seg('#wsMachs', A.map(m => [m, `${WS_ICON[m]} ${WS_MACH[m].replace(' (winch)', '')}`]), WS.mach, 'data-mach');
   if (WS.loadOpts) seg('#wsLoads', WS.loadOpts.map(l => [l.id, l.name]), WS.loadId, 'data-load');
-  seg('#wsCls', [[1, 'Class 1'], [2, 'Class 2'], [3, 'Class 3']], WS.cls, 'data-cls');
+  seg('#wsCls', [1, 2, 3].map(n => [n, (WS.clsNames ? `Class ${n}: ` : '') + WS_SETUP[n].replace(/^./, ch => ch.toUpperCase())]), WS.cls, 'data-cls');
   seg('#wsThick', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick, 'data-thick');
   seg('#wsPer', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per, 'data-per'); seg('#wsPitch', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch, 'data-pitch');
   seg('#wsH', [[0.6, '0.6 m'], [0.8, '0.8 m'], [1.0, '1.0 m'], [1.2, '1.2 m']], WS.h, 'data-h');
   seg('#wsLift', [[1, '1 m'], [2, '2 m']], WS.lift, 'data-lift');
   const num = (id, v) => { const e = $(id); if (e && document.activeElement !== e) e.value = v; };
-  const al = wsLimits('arm'), lab = WS.cls === 3 ? 'Effort arm' : 'Load arm'; const t = $('#wsArmTitle'); if (t) t.textContent = lab; $('#wsArm').min = al.min; $('#wsArm').max = al.max; $('#wsArm').step = al.step; $('#wsArm').value = WS.arm; num('#wsArmNum', fmt(WS.arm, 2));
-  const arms = wsArms(), note = $('#wsArmNote'); if (note) note.textContent = `Load arm ${fmt(arms.la, 2)} m · effort arm ${fmt(arms.ea, 2)} m`;
+  const al = wsLimits('arm'), lab = WS.cls === 1 ? 'Move the fulcrum' : WS.cls === 2 ? 'Move the rock' : 'Move your hand'; const t = $('#wsArmTitle'); if (t) t.textContent = lab; $('#wsArm').min = al.min; $('#wsArm').max = al.max; $('#wsArm').step = al.step; $('#wsArm').value = WS.arm; num('#wsArmNum', fmt(WS.arm, 2));
+  const arms = wsArms(), note = $('#wsArmNote'); if (note) note.textContent = `${WS.loadShort.replace(/^./, ch => ch.toUpperCase())} to fulcrum: ${fmt(arms.la, 2)} m · your hand to fulcrum: ${fmt(arms.ea, 2)} m`;
   const rl = wsLimits('R'); [$('#wsR'), $('#wsRNum')].forEach(e => { e.min = rl.min; e.max = rl.max; }); $('#wsR').step = 0.05; $('#wsR').value = WS.R; num('#wsRNum', fmt(WS.R, 2));
   const ll = wsLimits('L'); [$('#wsL'), $('#wsLNum')].forEach(e => { e.min = ll.min; e.max = ll.max; }); $('#wsL').step = ll.step; $('#wsL').value = WS.L; num('#wsLNum', fmt(WS.L, 1));
   $('#wsRopesN').textContent = WS.ropes; $('#wsRopesDn').disabled = WS.ropes <= 1; $('#wsRopesUp').disabled = WS.ropes >= (WS.lim.ropesMax || 6);
   const ax = $('#wsAxleRow'); if (ax) { ax.hidden = !WS.axleEdit || WS.mach !== 'winch'; num('#wsAxleNum', fmt(WS.axle, 2)); }
   $('#wsClsRow').hidden = !WS.classPick || WS.mach !== 'lever'; $('#wsHRow').hidden = !WS.rampH || WS.mach !== 'ramp'; $('#wsLiftRow').hidden = !WS.lifts || WS.lifts.pick !== true || !['pulley'].includes(WS.mach);
   const pb = $('#wsPull'); if (pb) { pb.textContent = WS_VERB[WS.mach]; pb.disabled = WS.busy; }
-  const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and the screw ${fmt(WS.pitch, 1)} cm.` : '';
+  const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the jack ${fmt(WS.pitch, 1)} cm (the gap between threads).` : '';
 }
 function initShop() {
   if (!$('#wsMachs')) return;

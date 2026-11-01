@@ -92,7 +92,6 @@ const WS_DIALS = [100, 200, 500, 1000, 2000, 5000, 10000, 20000];
 function wsDialMax(need) { return WS_DIALS.find(v => v >= Math.max(need, 60) * 1.05) || WS_DIALS[WS_DIALS.length - 1]; }
 function wsNewtonmeter(c, cx, cy, M, val, hideVal, ex, ey) {
   const r = 50, a0 = Math.PI * 0.75, sw = Math.PI * 1.5, ang = v => a0 + clamp(v / M, 0, 1) * sw;
-  if (ex != null) { c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.setLineDash([5, 4]); c.beginPath(); c.moveTo(ex, ey); c.lineTo(cx, cy + r + 20); c.stroke(); c.setLineDash([]); }
   c.fillStyle = '#243038'; c.beginPath(); c.roundRect(cx - 62, cy - 62, 124, 148, 14); c.fill(); c.fillStyle = '#e9eef1'; c.beginPath(); c.arc(cx, cy, r + 4, 0, 7); c.fill();
   c.lineCap = 'butt'; c.lineWidth = 9; c.strokeStyle = '#cfd8dd'; c.beginPath(); c.arc(cx, cy, r - 10, a0, a0 + sw); c.stroke();
   c.strokeStyle = WSC.red; c.beginPath(); c.arc(cx, cy, r - 10, ang(Math.min(SMOOSHY.pull, M)), a0 + sw); c.stroke();
@@ -101,7 +100,7 @@ function wsNewtonmeter(c, cx, cy, M, val, hideVal, ex, ey) {
   if (!hideVal) { const a = ang(val); c.strokeStyle = WSC.ink; c.lineWidth = 3; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx, cy); c.lineTo(cx + Math.cos(a) * (r - 12), cy + Math.sin(a) * (r - 12)); c.stroke(); }
   c.fillStyle = WSC.ink; c.beginPath(); c.arc(cx, cy, 5, 0, 7); c.fill();
   c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx - 44, cy + 36, 88, 26, 5); c.fill(); txt(c, hideVal ? '? N' : fmt(val, 1) + ' N', cx, cy + 49.5, '#9ef0b2', `700 17px ${C.fn}`);
-  txt(c, 'NEWTONMETER', cx, cy + 74, '#cfd8dd', `800 9px ${C.fb}`);
+  txt(c, 'NEWTONMETER READING', cx, cy + 74, '#cfd8dd', `800 9px ${C.fb}`);
   c.fillStyle = WSC.red; c.fillRect(cx - 52, cy + 79, 7, 7); txt(c, 'Smooshy\'s limit: 60 N', cx - 42, cy + 82.5, '#cfd8dd', `700 8.5px ${C.fb}`, 'left');
 }
 
@@ -119,21 +118,50 @@ const wsHand = (c, x, y, down) => { c.fillStyle = '#e8b896'; c.beginPath(); c.ro
 function wsEffArrow(c, x, y, down) { const col = WSC.red; if (down) arrow(c, x, y - 54, x, y - 14, col, 4); else arrow(c, x, y + 54, x, y + 14, col, 4); }
 
 /* ---------- the machines. Each returns the effort point { x, y } so the newtonmeter can be joined to it ---------- */
+/* a spring-balance newtonmeter on the line from the machine (ax, ay) to the puller's hand (hx, hy): hook, body with a scale, ring and hand,
+   and a red arrow past the hand pointing the way the hand pulls. It always reads as a PULL (Tom, 1 Nov 2026). */
+function wsSpring(c, ax, ay, hx, hy, label) {
+  const dx = hx - ax, dy = hy - ay, L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, ang = Math.atan2(dy, dx);
+  const hook = Math.min(14, L * .18), body = Math.max(26, Math.min(58, L - hook - 22));
+  c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(ax + ux * hook, ay + uy * hook); c.stroke();
+  c.save(); c.translate(ax + ux * hook, ay + uy * hook); c.rotate(ang);
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.roundRect(0, -9, body, 18, 6); c.fill(); c.fillStyle = '#fff3cc'; c.fillRect(4, -4, body - 8, 8);
+  c.strokeStyle = WSC.ink; c.lineWidth = 1; for (let k = 6; k < body - 4; k += 5) { c.beginPath(); c.moveTo(k, -4); c.lineTo(k, k % 10 < 5 ? 1 : -1); c.stroke(); }
+  c.strokeStyle = WSC.steel2; c.lineWidth = 2.5; c.beginPath(); c.moveTo(body, 0); c.lineTo(L - hook - 10, 0); c.stroke(); c.beginPath(); c.arc(L - hook - 4, 0, 6, 0, 7); c.stroke();
+  c.restore();
+  wsHand(c, hx, hy, uy > 0);
+  arrow(c, hx + ux * 14, hy + uy * 14, hx + ux * 50, hy + uy * 50, WSC.red, 4);
+  if (label) { const mx = ax + ux * (hook + body / 2), my = ay + uy * (hook + body / 2); if (Math.abs(uy) > .7) txt(c, label, mx + 16, my, WSC.red, `800 11px ${C.fb}`, 'left'); else txt(c, label, mx - uy * 18, my + ux * 18 - 4, WSC.red, `800 11px ${C.fb}`, 'center'); }
+}
+/* the lever. A wider pivot height for each set-up keeps the bar, the spring balance and the hand above the floor at every slider setting:
+   fulcrum in the middle (class 1): your end goes DOWN, so the bar sits high and the newtonmeter hangs below it;
+   load or effort in the middle (classes 2 and 3): your hand pulls UP, so the bar sits low and the newtonmeter is above it. */
 function wsDrawLever(c, cur, riseNow) {
-  const k = 170, fy = 262, arms = { la: cur.la, ea: cur.ea }, X0 = 200, fx = WS.cls === 1 ? X0 + arms.la * k : X0;
+  const k = 120, arms = { la: cur.la, ea: cur.ea }, X0 = 214, fx = WS.cls === 1 ? X0 + arms.la * k : X0, fy = WS.cls === 1 ? 140 : 296;
   const th = WS.cls === 1 ? riseNow / arms.la : WS.cls === 2 ? -riseNow / arms.la : -riseNow / 2;
   const P = d => ({ x: fx + d * k * Math.cos(th), y: fy + d * k * Math.sin(th) });
   const d0 = WS.cls === 1 ? -arms.la : 0, d1 = WS.cls === 1 ? arms.ea : WS_BAR, dl = WS.cls === 1 ? -arms.la : WS.cls === 2 ? arms.la : WS_BAR, de = WS.cls === 1 ? arms.ea : WS.cls === 2 ? WS_BAR : arms.ea;
-  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(fx - 22, 350); c.lineTo(fx + 22, 350); c.lineTo(fx, fy + 9); c.closePath(); c.fill();
+  /* the fulcrum: a steel stand from the floor up to the pivot */
+  c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(fx - 26, 350); c.lineTo(fx + 26, 350); c.lineTo(fx + 5, fy + 9); c.lineTo(fx - 5, fy + 9); c.closePath(); c.fill();
   const a = P(d0), b = P(d1); c.strokeStyle = WSC.wood2; c.lineWidth = 14; c.lineCap = 'round'; c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.strokeStyle = WSC.wood; c.lineWidth = 8; c.beginPath(); c.moveTo(a.x, a.y - 1); c.lineTo(b.x, b.y - 1); c.stroke();
   c.fillStyle = WSC.steel; c.beginPath(); c.arc(fx, fy, 6, 0, 7); c.fill();
   const L = P(dl), E = P(de); wsLoadBlock(c, L.x, L.y - 7, 54, 40, WS.loadId === 'rock' ? 'rock' : WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
-  const down = WS.cls === 1; wsEffArrow(c, E.x, E.y - (down ? 8 : -8), down); wsHand(c, E.x, E.y + (down ? -62 : 62), down);
-  /* the two arms, measured along the floor of the bench */
-  const lx = fx + dl * k, ex = fx + de * k;
-  wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), 178, `load arm ${fmt(arms.la, 2)} m`, WSC.green, true); wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), 148, `effort arm ${fmt(arms.ea, 2)} m`, WSC.red, true);
-  c.fillStyle = '#fff'; c.font = `800 9px ${C.fb}`; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('fulcrum', fx, 336);
-  return { x: E.x + (down ? 0 : 0), y: down ? E.y - 62 : E.y + 62 };
+  /* the newtonmeter and the hand: below the bar for a pull down, above it for a pull up */
+  const down = WS.cls === 1, hy = down ? Math.min(E.y + 84, 330) : Math.max(E.y - 84, 52);
+  wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
+  /* labels: the three parts of a lever, then the two distances along the bar in plain words */
+  if (down) txt(c, 'fulcrum', fx, 342, '#fff', `800 10px ${C.fb}`); else txt(c, 'fulcrum', fx - 30, 334, WSC.steel2, `800 11px ${C.fb}`, 'right');
+  const lx = fx + dl * k, ex = fx + de * k, yb = down ? 58 : 318;
+  wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(arms.la, 2)} m`, WSC.green, true);
+  wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), yb, `hand to fulcrum ${fmt(arms.ea, 2)} m`, WSC.red, true);
+  return { x: E.x, y: hy };
+}
+/* lifting by hand: the newtonmeter hooks onto the rock and the hand pulls straight up */
+function wsDrawHand(c, cur, riseNow) {
+  const cx = 360, by = 350 - riseNow * 300;
+  wsLoadBlock(c, cx, by, 70, 52, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
+  wsSpring(c, cx, by - 52, cx, by - 150, 'pull up');
+  return { x: cx, y: by - 150 };
 }
 function wsDrawPulley(c, cur, riseNow, prog) {
   const N = WS.ropes, cx = 330, w = Math.max(40, N * 28), pxM = 70, bY = 250 - riseNow * pxM, top = 84;
@@ -148,9 +176,9 @@ function wsDrawPulley(c, cur, riseNow, prog) {
   c.fillStyle = WSC.steel; c.fillRect(cx - 2, bY - (N > 1 ? 0 : 4), 4, 14);
   wsLoadBlock(c, cx, bY + 62, 64, 50, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
   /* the free end comes down over the last wheel to the puller's hand */
-  const hx = 500, hy = 190 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, hy); c.stroke();
-  wsEffArrow(c, hx, hy + 52, false); wsHand(c, hx, hy + 6, false); txt(c, 'free end', hx + 10, 150, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, 'not counted', hx + 10, 162, WSC.ink, `700 10px ${C.fb}`, 'left');
-  return { x: hx, y: hy + 10 };
+  const hx = 500, ry = 150 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, ry); c.stroke();
+  wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); txt(c, 'the end you pull', hx + 10, 110, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, '(not counted)', hx + 10, 122, WSC.ink, `700 10px ${C.fb}`, 'left');
+  return { x: hx, y: ry + 66 };
 }
 function wsDrawWinch(c, cur, riseNow) {
   const ax = 330, ay = 165, pxm = 185, ar = Math.max(8, WS.axle * pxm), hr = WS.R * pxm, rot = riseNow / WS.axle;
@@ -173,10 +201,11 @@ function wsDrawRamp(c, cur, riseNow, prog) {
   const ang = Math.atan2(B.y - A.y, B.x - A.x), t = clamp(prog, 0, 1), px = A.x + (B.x - A.x) * t, py = A.y + (B.y - A.y) * t, cs = Math.cos(ang), sn = Math.sin(ang);
   c.save(); c.translate(px, py); c.rotate(ang); c.fillStyle = WSC.crate; c.beginPath(); c.roundRect(2, -36, 54, 28, 5); c.fill(); c.fillStyle = WSC.ink; [[13, -6], [45, -6]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 6, 0, 7); c.fill(); }); txt(c, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N', 29, -22, '#fffaf2', `800 11px ${C.fn}`); c.restore();
   /* the pull is up the slope, along a rope from the front of the cart to the puller's hand on the platform */
-  const fx = px + cs * 56 - sn * 20 * -1 * 0 + 0, fy = py + sn * 56 - cs * 20, hx = B.x + 28, hy = B.y - 36;
-  c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(px + cs * 54 + sn * 20, py + sn * 54 - cs * 20); c.lineTo(hx, hy + 8); c.stroke();
-  wsHand(c, hx, hy, false); arrow(c, px + cs * 58 + sn * 20, py + sn * 58 - cs * 20, px + cs * 100 + sn * 20, py + sn * 100 - cs * 20, WSC.red, 4);
-  return { x: hx + 8, y: hy };
+  const fx = px + cs * 56 - sn * 20 * -1 * 0 + 0, fy = py + sn * 56 - cs * 20, hx = Math.min(B.x + 120, 590), hy = B.y - 40;
+  const rx = px + cs * 54 + sn * 20, ry = py + sn * 54 - cs * 20, rl = Math.hypot(hx - rx, hy - ry), sx = hx - (hx - rx) / rl * 70, sy = hy - (hy - ry) / rl * 70;
+  c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(rx, ry); c.lineTo(sx, sy); c.stroke();
+  if (rl > 80) wsSpring(c, sx, sy, hx, hy, 'pull'); else wsHand(c, hx, hy, false);
+  return { x: hx, y: hy };
 }
 function wsDrawWedge(c, cur, riseNow, prog) {
   const cx = 330, sc = 5, wd = WS.thick * sc, ht = 20 * sc, open = riseNow / WS_WEDGE_OPEN * 14, ice = WS.loadId === 'ice', tip = 218 + prog * 82, top = tip - ht;
@@ -201,7 +230,7 @@ function wsDrawScrew(c, cur, riseNow, prog) {
   c.strokeStyle = WSC.wood2; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx + 18, hy); c.lineTo(hx, hy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(hx, hy, 9, 0, 7); c.fill();
   arrow(c, hx + 6, hy - 14, hx + 6, hy - 52, WSC.red, 4);
   const mk = wsMasked(), tn = Math.floor(turnsNow + 1e-6); c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx + 108, 280, 108, 40, 8); c.fill(); txt(c, 'TURNS', cx + 162, 291, '#cfd8dd', `800 9px ${C.fb}`); txt(c, mk.has('turns') ? '?' : String(tn), cx + 162, 308, '#9ef0b2', `700 18px ${C.fn}`);
-  txt(c, `pitch ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
+  txt(c, `thread gap ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
   return { x: hx + 8, y: hy - 52 };
 }
 
@@ -220,13 +249,13 @@ function wsRuler(c, x, y, w, dist, title, col) {
 function drawShopScene(c) {
   wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
-  if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow);
+  if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow);
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
   wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
   wsMonitor(c);
   /* readouts */
-  const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], ['Effort distance', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
+  const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], [WS.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
   if (wsHas('readMA')) rows.push(['Mechanical advantage', mk.has('readMA') ? '?' : fmt(cur.ma, 2)]);
   if (wsHas('readWork')) { const done = WS.done && !WS.c.capped; rows.push(['Work in', mk.has('readWork') ? '?' : done ? fmt(WS.c.workIn, 0) + ' J' : '–'], ['Work out', mk.has('readWork') ? '?' : done ? fmt(WS.c.workOut, 0) + ' J' : '–']); }
   rows.forEach(([l, v], i) => { const y = 24 + i * 46; c.fillStyle = C.panel; c.globalAlpha = .94; c.beginPath(); c.roundRect(728, y, 164, 40, 8); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.2; c.stroke(); txt(c, l, 738, y + 11, C.muted, `700 10.5px ${C.fb}`, 'left'); txt(c, v, 738, y + 28, C.ink, `700 15px ${C.fn}`, 'left'); });
@@ -237,6 +266,6 @@ function drawShopScene(c) {
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
-    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'EFFORT DISTANCE (m)', WSC.red);
+    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)', WSC.red);
   }
 }

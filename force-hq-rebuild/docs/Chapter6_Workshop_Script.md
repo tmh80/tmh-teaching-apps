@@ -1,14 +1,16 @@
 # Force HQ Chapter 6: The Workshop — Save Captain Smooshy! (script)
 
-Written 1 Nov 2026 by Claude (Opus), updated the same day with Tom's answers (blue Smooshy, the Part 5 efficiency extension and the build tasks) for **Claude Sonnet (medium effort)** to build from, in Claude Code on `tmh80/tmh-teaching-apps`, folder `force-hq-rebuild/`. **Audience: Grade 7 and 8.** Natural full sentences, enthusiastic and encouraging, everyday words, precise science words once they are taught.
+Written 1 Nov 2026 by Claude (Opus), updated the same day with Tom's answers (blue Smooshy, the Extension efficiency extension and the build tasks) for **Claude Sonnet (medium effort)** to build from, in Claude Code on `tmh80/tmh-teaching-apps`, folder `force-hq-rebuild/`. **Audience: Grade 7 and 8.** Natural full sentences, enthusiastic and encouraging, everyday words, precise science words once they are taught.
 
 **Read first:** `claude/Force_HQ_Handoff.md` (setup, rules, script format, delivery steps), `Force_HQ_Brief.md` (file map), `docs/Question_Types_Guide.md` (every question type, including `calcorder`), then this file. The number reference is `tools/workshop_model.py` (copy it from the project doc `claude/workshop_model.py`): **the JS must reproduce its numbers** (section C1). The repo's `.claude/skills/wab-science-sim-builder/SKILL.md` covers anything this script doesn't (voice, one-go questions, teacher code, testing).
+
+**Redesign, 1 Nov 2026 (after Tom's first playtest of Part 1):** "far too difficult for Grade 7s and 8s". The simple machines are now split over two Parts taught slowly (Part 1 Levers, Part 2 Pulleys, wheels and ramps), every later Part moves up one number, and section A2 sets pacing and vocabulary rules that apply to **every** Part still to build. Read A2 before writing any step.
 
 **If you change any wording** to fit the screen or to stop a readout giving an answer away, change it here too (copy this file to `docs/Chapter6_Workshop_Script.md` in the repo first), so the script and the app do not drift apart.
 
 **Tom is a teacher, not a programmer.** Explain what you did in plain language and handle all git work yourself.
 
-> **Build note (1 Nov 2026, Claude):** Part 5's step ids are `p5a` and `p5b` (the script first called them `e1` and `e2`), and its missions are `gb1`–`gb3` (first `g1`–`g3`), because `e1`, `e2`, `g1` and `g2` are already used by Chapters 3 and 4 and `STEPMIN` is shared by every chapter. Everything else in this script is unchanged.
+> **Build note (1 Nov 2026, Claude):** Extension's step ids are `p5a` and `p5b` (the script first called them `e1` and `e2`), and its missions are `gb1`–`gb3` (first `g1`–`g3`), because `e1`, `e2`, `g1` and `g2` are already used by Chapters 3 and 4 and `STEPMIN` is shared by every chapter. Everything else in this script is unchanged.
 
 ---
 
@@ -19,7 +21,25 @@ Written 1 Nov 2026 by Claude (Opus), updated the same day with Tom's answers (bl
 - **The goal must be clear from the very beginning.** A distress transmission opens the chapter, and a Rescue board stays on screen for the whole chapter.
 - The arc, in order: **learn and test simple machines → mechanical advantage and work → compound machines (learn and test, with MA and work) → a final test: save Captain Smooshy's spaceship from a crater using mechanical advantage.**
 - Not every Grade 7/8 student did the Grade 6 lab (new students), so the story is told in full and never assumes they remember it.
-- **Answers to the first questions (1 Nov):** Smooshy is **blue**. "The Gumdrop" and "Glimmer-9" are confirmed. **Efficiency** is an optional **Extension** (Part 5) with its own story: Glimmer-9's crystals turn out to be sugar, the gummies decide to terraform the planet, and students build Gummy Base One with real machines that waste energy. **Teacher build tasks** go in now (section W).
+- **Answers to the first questions (1 Nov):** Smooshy is **blue**. "The Gumdrop" and "Glimmer-9" are confirmed. **Efficiency** is an optional **Extension** (after Part 5) with its own story: Glimmer-9's crystals turn out to be sugar, the gummies decide to terraform the planet, and students build Gummy Base One with real machines that waste energy. **Teacher build tasks** go in now (section W).
+
+- **Playtest decisions (1 Nov, after Part 1):** the simple machines are split into **Part 1: Levers** and **Part 2: Pulleys, wheels and ramps**; the transmission is a **black box recording** from the crashed Gumdrop with Smooshy **trapped inside**; every effort in the Workshop is drawn as a **pull** with a spring-balance newtonmeter between the machine and a hand.
+
+---
+
+## A2. Pacing and vocabulary rules (Tom, 1 Nov 2026: apply to every Part)
+
+Tom's verdict on the first Part 1 build: far too difficult; much slower pace needed when introducing an idea; examples thrown out in contexts unfamiliar to students (fishing rod, wheelbarrow) with no pictures; far too much burden on vocabulary students don't know yet. So, for every step still to build:
+
+1. **One new word per card**, and no more than about three new words in a whole step. A word is only used to teach something else once students have practised it.
+2. **A labelled picture beside every new idea** (helpers in `src/js/4bb-shoppics.js`: `picLever`, `picThree`, `picSeesaw`, `picWheelbarrow`, `picChopsticks`, `picCatch`, `picClass3Anim`, `picFlagpole`, `picMovingPulley`, `picScrewdriver`, `picRamp`, `picWedge`, `picScrewIdea`). Colours match the scene: fulcrum grey, load green, effort red. Add new `pic*` helpers rather than describing things in words. Pictures go in cards, questions and worksheets.
+3. **Familiar examples only, one per idea, always with a picture.** Use things Grade 7/8 students in Beijing handle every day (seesaw, chopsticks, scissors, door handle, screwdriver, flagpole, wheelchair ramp, knife, jar lid, school crane on a building site if pictured). Never list several examples in one sentence. Avoid: fishing rod, nutcracker, bottle opener, crowbar, tweezers, forearm, pliers, ice tongs, claw hammer, stapler, can opener, tow truck (unless pictured and explained).
+4. **Try first, name afterwards.** Students use a thing in the Workshop and see what happens before it gets its scientific name (as lv4 then lv5 do for the classes of lever).
+5. **Plain words before technical terms.** On student screens: "rock to fulcrum" and "your hand to fulcrum" (never "load arm" or "effort arm"), "how far your hand moved" (never "effort distance"), "gap between threads" (never "pitch"). Code names can stay as they are. Mechanical advantage formulas from a machine's shape use the same plain words.
+6. **Pictures and cards never give away the prediction** that follows them.
+7. **Every effort is a pull you can see:** the spring balance (`wsSpring`) between the machine and a hand, with a red arrow.
+8. **Pace over coverage.** Each Part stays at about 30 minutes or less. If the slower pace pushes a Part over, split it into another Part (as Parts 1 and 2 were) rather than speeding up.
+9. Parts 3 to 6 below were written before this redesign. **Re-pitch each one against these rules before building it**, starting with Part 3 (mechanical advantage and work): cut examples to one familiar, pictured one, put a picture on every card that introduces a word, and replace any technical word a student hasn't met.
 
 ---
 
@@ -30,31 +50,33 @@ Written 1 Nov 2026 by Claude (Opus), updated the same day with Tom's answers (bl
 - His ship: **the Gumdrop**.
 - The planet: **Glimmer-9**, in a faraway galaxy. Gravitational field strength **g = 4.2 N/kg** (always given in the question, as Chapter 5 does for other worlds).
 - Smooshy's strongest pull: **60 N** ("my squishy gummy arms").
-- The gummy colonists (Part 5): gummy bears in other sweet colours (lime green, lemon yellow, orange), all with the same 60 N limit. Their new home: **Gummy Base One**.
+- The gummy colonists (Extension): gummy bears in other sweet colours (lime green, lemon yellow, orange), all with the same 60 N limit. Their new home: **Gummy Base One**.
 - Smooshy's voice: cheerful, brave, a bit dramatic, gummy jokes. Never babyish. One joke at most per message.
 
-### B2. The transmission (first time any Chapter 6 section opens; replayable)
-A draggable modal (`makeDraggable`) styled as an incoming video call: Smooshy's portrait in his helmet, a crackle animation (off with reduced motion), and this text:
+### B2. The transmission: a black box recording (first time any Chapter 6 section opens; replayable)
+Built 1 Nov 2026 (`openTransmission` and `txCrash` in `4d-rescue.js`). A draggable modal, "📡 Black box signal detected!". A short animation first: the Gumdrop streaks down across Glimmer-9's violet sky with a flame trail, crashes into a crater (dust puff, a small screen shake), and lands tipped over with **Smooshy trapped inside**, peeping out of the round window. The ship's orange **black box** blinks and sends radio rings, with the label "BLACK BOX SIGNAL · GUMDROP". Reduced motion shows the last frame only. Then:
 
-> 📡 **Incoming transmission from deep space!**
+> **Black box recording · the Gumdrop · Planet Glimmer-9**
 >
-> Captain Smooshy here, the bravest gummy bear in the universe! A while ago, the Grade 6 scientists at WAB tested Intergalactic Space Fluids to find the one that could carry me to a galaxy thousands of light years away. It worked! Then disaster struck. My ship, the Gumdrop, crash-landed at the bottom of a deep crater on Planet Glimmer-9, and it's stuck.
+> Captain Smooshy here, the bravest gummy bear in the universe! The Grade 6 scientists at WAB found the Intergalactic Space Fluid that carried me to a galaxy thousands of light years away. Then disaster struck: the Gumdrop crashed into a deep crater on Planet Glimmer-9. I'm trapped inside, and the ship won't budge.
 >
-> My squishy gummy arms can only pull with **60 N**, and the Gumdrop weighs thousands of newtons. Force HQ engineers, I need you to learn how machines work and build me a way out. Over and out!
+> My squishy gummy arms can only pull with **60 N**, and the Gumdrop weighs thousands of newtons. My black box is sending this message to Force HQ. Engineers, please learn how machines work and build me a way out. Over and out!
 
-Button: **Accept the mission!** The modal then shows the four parts as a short list (the same four as the Rescue board) and closes. Store `DB.ws.briefed = true`.
+Buttons: **↺ Watch the crash again** and **Accept the mission!**, which then lists the five Parts. Store `DB.ws.briefed = true`.
 
 ### B3. The Rescue board (top of every Chapter 6 page)
 A wide strip above the section tabs, drawn on a small canvas:
 - **Left:** the crater on Glimmer-9 (violet sky, two moons, glittering crystal rocks). The Gumdrop lies tipped over at the bottom, a boulder pinning one landing leg; Smooshy waves from the cockpit window.
-- **Right:** four mission slots, each lighting up (colour plus a ✓) when that Part's stamp is earned, and each adding something to the crater picture:
-  1. **Toolkit packed** (Part 1 done): a toolbox appears on the crater rim.
-  2. **Mission computer loaded** (Part 2 done): a glowing tablet appears beside the toolbox.
-  3. **Crane kit built** (Part 3 done): a folded crane appears on the rim.
-  4. **Smooshy saved!** (Part 4 done): the Gumdrop sits on the rim and Smooshy has his arms up.
-  5. **Extension: Gummy Base One** (a dashed slot labelled "Extension", shown once Part 4 is done): a sugar-crystal dome, a water tower and a sugar garden appear beside the crater, one for each Part 5 mission passed or attempted (gb1–gb3).
-- Buttons: **📡 Replay transmission** and, once Part 4 is done, **Watch the rescue again** (replays the ending animation).
-- One plain sentence under the slots that always says the next job, e.g. "Next: Part 2 teaches the maths the mission computer needs."
+- **Right:** five mission slots (`RB_SLOTS`), each lighting up (colour plus a ✓) when that Part's stamp is earned, and each adding something to the crater picture:
+  1. **Levers packed** (Part 1): a toolbox appears on the crater rim.
+  2. **Toolkit packed** (Part 2): a second tool case appears beside it.
+  3. **Mission computer loaded** (Part 3): a glowing tablet appears.
+  4. **Crane kit built** (Part 4): a folded crane appears on the rim.
+  5. **Smooshy saved!** (Part 5): the Gumdrop sits on the rim and Smooshy has his arms up.
+  6. **Extension: Gummy Base One** (a dashed slot labelled "Extension", shown once Part 5 is done): a sugar-crystal dome, a water tower and a sugar garden appear beside the crater, one for each Extension mission passed or attempted (gb1–gb3).
+- Until Part 5 is done, Smooshy is **inside** the tipped Gumdrop, seen through the window (`drawGumdropInside`), with the black box blinking beside it.
+- Buttons: **📡 Replay transmission** and, once Part 5 is done, **Watch the rescue again** (replays the ending animation).
+- One plain sentence under the slots that always says the next job, e.g. "Next: Part 3 teaches the maths the mission computer needs."
 
 ### B4. Smooshy in the Workshop
 A small monitor on the Workshop wall shows Smooshy on a video call, with a sticky note saying **"60 N max!"**. He reacts to each pull with a speech bubble (short, varied, never the same twice in a row):
@@ -69,7 +91,7 @@ When a Learn step completes, the existing completion message adds one short line
 - **Smooshy:** a gummy bear shape (round head with two round ears, chubby body, stubby arms and legs), a translucent jelly fill (one colour at about 85% opacity with a soft white highlight curve down the left side), a clear round bubble helmet with a glint, and a small white chest patch with a star. Dot eyes, a small curved smile. **Colour: blue** (Tom, 1 Nov): a bright jelly blue such as `#3b82f6` at about 85% opacity, a lighter blue highlight, and a slightly darker blue for the ears' inner circles. Check it reads well against the violet Glimmer-9 sky (keep a soft white rim glow if it doesn't) and in dark mode.
 - **The Gumdrop:** a dome-shaped ship like a gumdrop sweet, sugar-crystal dots on the hull, three stubby landing legs and a round window.
 - **Glimmer-9:** violet sky, two moons, pale lilac dust, glittering crystal rocks (which turn out to be sugar), a crater with sloping walls.
-- **Gummy colonists and Gummy Base One** (Part 5): the same gummy shape as Smooshy in other colours, with hard hats instead of helmets once the air is made breathable; rounded sugar-crystal domes, a water tower, terraced sugar gardens. In Part 4 the crater wall shows the four haul routes (straight up, steep, medium and gentle tracks).
+- **Gummy colonists and Gummy Base One** (Extension): the same gummy shape as Smooshy in other colours, with hard hats instead of helmets once the air is made breathable; rounded sugar-crystal domes, a water tower, terraced sugar gardens. In Part 5 the crater wall shows the four haul routes (straight up, steep, medium and gentle tracks).
 - **The Workshop:** a wooden workbench, a pegboard of tools, a hoist beam across the ceiling, the Force HQ hangar door, and Smooshy's monitor.
 - Draw each with helper functions in the scene module (`drawSmooshy(c, x, y, s, mood)`, `drawGumdrop(c, x, y, s, tilt)`). Moods: `wave`, `cheer`, `strain`, `worried`.
 
@@ -95,7 +117,7 @@ All Workshop machines are **ideal**: no friction, and the bars, pulleys and rope
 - **Effort** = load ÷ MA, rounded to 0.1 N. **Judge everything on the rounded numbers students see** (forces to 0.1 N, distances to 0.01 m, MA to 0.01), as the November update did for the Drop Zone. "At most" limits are inclusive (60.0 N passes "60 N or less").
 - **Work** = force × distance, in joules. Work in = effort × effort distance; work out = load × load rise. They are equal (ideal machines), apart from rounding: compute work in as `load ÷ MA × MA × rise` so the two always match exactly on screen.
 - **Weight** = mass × g. Earth g = 9.8 N/kg; Glimmer-9 g = 4.2 N/kg.
-- **Real machines (Part 5 and Explore only).** A **Perfect / Real** switch (`mfric`). With Real on, each part has an efficiency, and a compound machine's efficiency is the parts' efficiencies multiplied:
+- **Real machines (Extension and Explore only).** A **Perfect / Real** switch (`mfric`). With Real on, each part has an efficiency, and a compound machine's efficiency is the parts' efficiencies multiplied:
 
   | Part | Efficiency (Real) |
   |---|---|
@@ -113,7 +135,9 @@ All Workshop machines are **ideal**: no friction, and the bars, pulleys and rope
 - Add `tests/workshop_numbers.py`: run the JS through `__fhq.ev` and check every value the model prints (each step's numbers, each mission's pass/fail grid, each rescue stage's pass/fail grid) matches exactly.
 
 ### C2. The Workshop scene (`S.scene = 'shop'`)
-New modules (joined in name order after `49-heli.js`): `4a-workshop.js` (machine maths, scene state, pull animation, runs, masks), `4b-shopdraw.js` (drawing, including Smooshy, the Gumdrop and Glimmer-9), `4c-ch6.js` (steps, questions, sections data, `CHDATA` entries), `4d-rescue.js` (the machine builder, the rescue site and the rescue course). Challenge courses for Parts 2 and 3 go in `45-challenge.js` as `renderShopCourse`, following `renderDropCourse` / `renderOrdersCourse`.
+New modules (joined in name order after `49-heli.js`): `4a-workshop.js` (machine maths, scene state, pull animation, runs, masks), `4b-shopdraw.js` (drawing, including Smooshy, the Gumdrop and Glimmer-9), `4c-ch6.js` (steps, questions, sections data, `CHDATA` entries), `4d-rescue.js` (the machine builder, the rescue site and the rescue course). Challenge courses for Parts 3 and 4 go in `45-challenge.js` as `renderShopCourse`, following `renderDropCourse` / `renderOrdersCourse`.
+
+**Built 1 Nov 2026 additions:** a `hand` machine (lift the load straight up with the newtonmeter, MA 1) used in lv1; the lever's pivot sits high when the fulcrum is in the middle (your end goes down, the newtonmeter hangs below it) and low for the other two designs (your hand pulls up), so the bar, newtonmeter and hand stay above the floor at every slider setting; with the effort in the middle the rock rises **0.40 m** (`WS_LIFT3`) so the hand's 0.10 m is visible; the lever slider reads "Move the fulcrum / Move the rock / Move your hand" with "rock to fulcrum / your hand to fulcrum" underneath; the design buttons read "Fulcrum in the middle" etc., gaining "Class 1:" etc. only when a step sets `clsNames` (lv5 onwards); the big dial is now the **newtonmeter reading** panel and the spring balance at the hand is the newtonmeter itself.
 
 **Layout:** the machine in the middle of the Workshop, the load on the load side, the effort point on the other side, a **newtonmeter** at the effort point (reuse the Chapter 1 newtonmeter drawing; grep `newtonmeter` in `src/js/`), Smooshy's monitor top-left. The newtonmeter has a red band from 60 N upwards labelled "Smooshy's limit".
 
@@ -131,7 +155,7 @@ New modules (joined in name order after `49-heli.js`): `4a-workshop.js` (machine
 - `readMA` mechanical advantage readout
 - `readWork` Work in and Work out readouts
 - `mworld` world picker (Explore only: Earth, Moon, Mars, Glimmer-9; shows g)
-- `mfric` the **Perfect / Real** switch, and `readEff` (efficiency) and the Wasted (heat) readout (Part 5 and Explore)
+- `mfric` the **Perfect / Real** switch, and `readEff` (efficiency) and the Wasted (heat) readout (Extension and Explore)
 - `builder` the machine builder (C3)
 
 **Readouts** (always): Load (N) with its mass in brackets ("Load: 294 N (30 kg)"), Effort (the newtonmeter's digital window, 0.1 N), Load rise (m), Effort distance (m). `readMA` and `readWork` only where a step adds them.
@@ -146,7 +170,7 @@ No effort slider: the machine settings are the variables, and the newtonmeter me
 - Pressing Pull! again resets the load and runs again. Changing a setting resets the load.
 - Keyboard: Space or Enter on the button. Works with touch. A pull can't be started while one is running.
 
-### C4. The machine builder (`builder` panel, Part 3, the rescue and Explore)
+### C4. The machine builder (`builder` panel, Part 4, the rescue and Explore)
 Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild mDrawCrane mDrawPulley mDrawLever PARTS bJudge mCalc` (never Read the old file whole). Keep the old look where it fits; change it to these rules:
 - A chain of slots from left to right: **[the puller] → slot 1 → slot 2 → slot 3 → [the load]**. Each slot takes one part: **Route/ramp** (only in the last slot, because the ramp carries the load), **Pulley block** (1–4 supporting ropes), **Winch** (×2–×10). Each part type can be used once. An empty slot is skipped. Missions say which parts and routes are available.
 - Live readouts (each maskable): **Total MA** = the product of the parts' MAs; **Cable needed** = pulley ropes × route length (route length = the lift height when there's no ramp; 1 rope if there's no pulley block); **Hand travel** = total MA × lift height.
@@ -159,22 +183,22 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
   - "You lifted the 235.2 N crate with 4 supporting ropes. The effort was 58.8 N. The crate rose 1.00 m and you pulled 4.00 m of rope."
   - "Smooshy tried the crane (gentle track 75 m, 3 ropes, winch ×8). It needed 52.5 N, so it worked! The ship rose 15 m. Cable used: 225 m. Hand travel: 1,800 m."
   - A capped pull: "With winch ×6 and 2 ropes, the load needed 163.3 N, which is more than Smooshy's 60 N, so it didn't move."
-- Chips: machine, settings, load, effort, load rise, effort distance (and MA and work once Part 2 has taught them).
+- Chips: machine, settings, load, effort, load rise, effort distance (and MA and work once Part 3 has taught them).
 - Store per run: machine, settings, world, load (N), effort, MA, load rise, effort distance, work in, work out, capped (yes/no), cable, hand travel, turns. Helpers like Chapter 5's: `shopRun(f)` (latest run matching a filter object, e.g. `{mach:'lever', cls:1, la:0.4}`), `shopE(f)`, `shopDist(f)`.
 - **Students type every reading** (Tom: no passengers), checked against their own runs with `live:` as Chapter 5 does. Reading questions in the Do this list get an inline answer box (the d1 pattern), so nothing needs a trip to "Next: questions".
 - **Masks** (`shopMasked`, the `dzMasked` pattern): steps list `mask: [{ q, keys, when }]`. Keys: `readE` (the newtonmeter's digital window and needle show "?"), `readMA`, `readWork`, `turns`, `bTotMA`, `bCable`, `bTravel`. A masked readout appears once its question is answered.
 - **Calculation steps** use the 28 Oct pattern: a *calculate* task `['', () => hasAns('q2'), { q: 'q2' }]` and a short *check* task that ticks when the matching run exists. Leave a task's text empty when the question already holds the numbers.
 - **Target-finding** isn't needed (the newtonmeter measures the effort directly), so no `LAB.bmarks` here.
 
-### C6. The rescue site (`S.scene = 'rescue'`, Part 4)
+### C6. The rescue site (`S.scene = 'rescue'`, Part 5)
 - Glimmer-9's crater (B6), side-on. The Gumdrop at the bottom, tipped on its side, one leg under a boulder. The crater wall is **15 m** high, with an altitude scale.
 - Stage 1 shows the crowbar on a rock fulcrum under the boulder; stage 2 shows the screw jack under the ship's sunken side; stage 3 shows the four routes up the wall, a winch anchored on the rim, and the builder below the canvas.
 - **Smooshy is the puller in every stage** (`cap: 60`). He walks out of the ship in his suit and works the crowbar, the jack handle or the winch handle.
 - The mission computer panel (`mcomp`): before each try, the student types a prediction (C7); Smooshy only tries once a number is typed (any number counts).
-- When stage 3 succeeds: the ending animation. The Gumdrop rises up the chosen route onto the rim and Smooshy does a happy wobble-dance. He leans on a glittering crystal, licks it, and freezes: "Wait... these crystals are SUGAR!" He calls home on his wrist radio: "Gummies of the galaxy, I've found us a new home!" The Gumdrop does a victory loop above the crater with a blue exhaust trail, then a "Mission complete" card. If Part 5 exists, the card adds: "Extension unlocked: help the gummy colonists build Gummy Base One." Reduced motion: a still picture and the card.
+- When stage 3 succeeds: the ending animation. The Gumdrop rises up the chosen route onto the rim and Smooshy does a happy wobble-dance. He leans on a glittering crystal, licks it, and freezes: "Wait... these crystals are SUGAR!" He calls home on his wrist radio: "Gummies of the galaxy, I've found us a new home!" The Gumdrop does a victory loop above the crater with a blue exhaust trail, then a "Mission complete" card. If Extension exists, the card adds: "Extension unlocked: help the gummy colonists build Gummy Base One." Reduced motion: a still picture and the card.
 
 ### C7. Scoring
-- **Parts 2 and 3 Challenges** (y1–y3, h1–h3): the existing pattern. All objectives met on the 1st try = 4 points, 2nd = 3, 3rd = 2, later = 1; **Move on** after 3 misses scores 1. A pass is green and starts "Congratulations!". A miss lists each objective with its result, target and ✓/✗ in that order ("Effort: 61.3 N. Target: 60 N or less. ✗"). Each mission has a "Need a clue?" ladder.
+- **Parts 3 and 4 Challenges** (y1–y3, h1–h3): the existing pattern. All objectives met on the 1st try = 4 points, 2nd = 3, 3rd = 2, later = 1; **Move on** after 3 misses scores 1. A pass is green and starts "Congratulations!". A miss lists each objective with its result, target and ✓/✗ in that order ("Effort: 61.3 N. Target: 60 N or less. ✗"). Each mission has a "Need a clue?" ladder.
 - **The rescue** (sm1–sm3, Tom's rule for hard game challenges): score = **objectives met on the student's best try** in each stage (4 + 4 + 5 = 13 points). Easier objectives are included, so everyone scores. **Attempting all three stages is enough to finish the Challenge.** After 3 tries in a stage, a **Move on** button appears; moving on keeps the best score. Show the objectives as a checklist that ticks live.
 - **The ending always celebrates.** If stage 3 was never fully met, the ending says: "With your plan, Smooshy got the Gumdrop part of the way up. Force HQ's backup team used your numbers to finish the job. Want to perfect it? You can try the rescue again in Explore." and the sugar discovery and victory loop still play.
 
@@ -222,27 +246,28 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 4. The Archimedes screw, a screw turning inside a tube, has been lifting water for over 2,000 years, and some are still in use today.
 5. One of the world's strongest cranes, the Taisun in China, has lifted about 20,000 tonnes in one go.
 6. A car jack lets one person lift one side of a car by turning a handle, thanks to a screw with a very small pitch.
-7. (Part 5) A clean, oiled bicycle chain is one of the most efficient machines there is: well over 90% of the work you put in reaches the back wheel.
+7. (Extension) A clean, oiled bicycle chain is one of the most efficient machines there is: well over 90% of the work you put in reaches the back wheel.
 
-**Sections** (`55-sections.js`). Use ids `c6a`–`c6d` (grep first: section, step, mission and question ids must not clash with any existing id, including `m1`, `r1` and `q1`):
+**Sections** (`55-sections.js`). Use ids `c6a`–`c6e` (grep first: section, step, mission and question ids must not clash with any existing id, including `m1`, `r1` and `q1`):
 
 | id | title | part | stamp | steps | challenge | review | needs |
 |---|---|---|---|---|---|---|---|
-| `c6a` | Simple machines | Part 1 | Machine Spotter | w1–w5 | none | c6r1–c6r6 | |
-| `c6b` | Mechanical advantage and work | Part 2 | Advantage Ace | u1–u3 | y1–y3 | c6r7–c6r12 | c6a |
-| `c6c` | Compound machines | Part 3 | Master Builder | k1–k3 | h1–h3 | c6r13–c6r17 | c6b |
-| `c6d` | Rescue Captain Smooshy! | Part 4 | Smooshy Saver | v1 | sm1–sm3 | c6r18–c6r21 | c6c |
-| `c6e` | Real machines waste energy | Extension | Colony Engineer | p5a–p5b | gb1–gb3 | c6r22–c6r26 | c6d |
+| `c6a` | Levers | Part 1 | Lever Learner | lv1–lv5 | none | c6r1–c6r5 | |
+| `c6b` | Pulleys, wheels and ramps | Part 2 | Toolkit Packer | pl1–pl4 | none | c6r7–c6r11 | c6a |
+| `c6c` | Mechanical advantage and work | Part 3 | Advantage Ace | u1–u3 | y1–y3 | c6r12–c6r17 | c6b |
+| `c6d` | Compound machines | Part 4 | Master Builder | k1–k3 | h1–h3 | c6r18–c6r22 | c6c |
+| `c6e` | Rescue Captain Smooshy! | Part 5 | Smooshy Saver | v1 | sm1–sm3 | c6r23–c6r26 | c6d |
+| `c6f` | Real machines waste energy | Extension | Colony Engineer | p5a–p5b | gb1–gb3 | c6r27–c6r31 | c6e |
 
-- Blurbs: c6a "Levers, pulleys, wheels and axles, ramps, wedges and screws: the six simple machines, and the trade-off they all share." · c6b "Put numbers on it: mechanical advantage, the force–distance trade-off and work in joules, then load the rescue rocket." · c6c "Machines inside machines: build a crane, multiply mechanical advantages and assemble the rescue kit." · c6d "Fly to Glimmer-9 and plan the rescue in three stages. Can a 60 N gummy bear haul a spaceship out of a crater?" · c6e "Glimmer-9's crystals are sugar! Measure how real machines waste energy, then build Gummy Base One on a tight solar energy budget."
-- **Part labels:** the other chapters use "Foundation" / "Extension". Chapter 6 uses "Part 1" to "Part 4", then "Extension" for c6e. Grep for code that tests `part ===`, `'Foundation'` or `'Extension'` (stamp book, teacher page ticks, optional sections, `wsFileName`, the AI text) and make it work with these labels. File names become `Force HQ Ch6 Part 1 (Simple machines) - Alex Chen.pdf`. On the teacher page, Parts 1 to 4 are ticked like core sections; **c6e is optional and unticked by default** (the Brief's rule for efficiency), and its worksheet is labelled "Extension" with no MYP Crit A review role beyond its own Check.
+- Blurbs: c6a "Levers, pulleys, wheels and axles, ramps, wedges and screws: the six simple machines, and the trade-off they all share." · c6c "Put numbers on it: mechanical advantage, the force–distance trade-off and work in joules, then load the rescue rocket." · c6d "Machines inside machines: build a crane, multiply mechanical advantages and assemble the rescue kit." · c6e "Fly to Glimmer-9 and plan the rescue in three stages. Can a 60 N gummy bear haul a spaceship out of a crater?" · c6f "Glimmer-9's crystals are sugar! Measure how real machines waste energy, then build Gummy Base One on a tight solar energy budget."
+- **Part labels:** the other chapters use "Foundation" / "Extension". Chapter 6 uses "Part 1" to "Part 5", then "Extension" for c6f. Grep for code that tests `part ===`, `'Foundation'` or `'Extension'` (stamp book, teacher page ticks, optional sections, `wsFileName`, the AI text) and make it work with these labels. File names become `Force HQ Ch6 Part 1 (Simple machines) - Alex Chen.pdf`. On the teacher page, Parts 1 to 5 are ticked like core sections; **c6f is optional and unticked by default** (the Brief's rule for efficiency), and its worksheet is labelled "Extension" with no MYP Crit A review role beyond its own Check.
 - **Chapter view:** chapters so far have two sections. Check the chapter page, `openChapter`, the section tabs and the stamp book all handle four.
-- `STEPMIN`: w1 5, w2 3, w3 5, w4 4, w5 4, u1 5, u2 5, u3 6, k1 4, k2 5, k3 5, v1 4, p5a 6, p5b 5. **Target: every Part shows approx. 30 min or less** (`secMins`). If Part 1 comes out over 30, tell Tom and suggest cutting w2 q3 or c6r3. Count the rescue Challenge as about 15 minutes.
+- `STEPMIN`: lv1 5, lv2 5, lv3 4, lv4 5, lv5 4, pl1 6, pl2 4, pl3 4, pl4 5, u1 5, u2 5, u3 6, k1 4, k2 5, k3 5, v1 4, p5a 6, p5b 5. **Target: every Part shows approx. 30 min or less** (`secMins`). Parts 1 and 2 come out at about 30 and 27 minutes. Count the rescue Challenge as about 15 minutes.
 - **Chapter data:** `CHAPTERS` gets `{ id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: true, arena: 'Workshop', icon: 'gear' }` (draw a `gear` icon for `chIcon`, or reuse the Workshop card's pulley icon). `goal`: "Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn't reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue." `vocab`: machine, simple machine, compound machine, lever, fulcrum, effort, load, pulley, supporting rope, wheel and axle, inclined plane, wedge, screw, mechanical advantage, work, joule.
 - **Home:** the Workshop building on the home map opens Chapter 6 (replace the "being built" toast). Rewrite `#workshopCard` to "Chapter 6 · The Workshop: Save Captain Smooshy!". Add Chapter 6 to the chapter list in Chapter 1's overview card (`41-ch1.js`, around line 107). Remove "and the Workshop" from the teacher page's "More chapters…" note.
 - **Explore:** a **Workshop** card in Explore with every machine, the builder, any load, the world picker (Earth, Moon, Mars, Glimmer-9) and the Perfect / Real switch, plus **Try the rescue again** (the rescue site with every setting free and no scoring) and the four **build tasks** (section W).
-- **Worksheets:** add `c6a`–`c6e` to `SHEETS` in `tools/make_worksheets.py`. The Part 4 worksheet also prints a **Rescue report** (section K4). Add lever and pulley pictures for paper with small SVG helpers (`leverSVG({cls, ea, la, labels})`, `pulleySVG(ropes)`, `buildSVG(parts)`); the same helpers draw the pictures inside questions.
-- **MYP tags:** `obj` on every Check question, as listed. Run `python3 tests/strands.py`. Strands never go on student screens or sheets. Part 4's Check carries **D i, D ii and D iii**, which fills the D ii gap in the Backlog. The Part 5 Check carries D i and D iii.
+- **Worksheets:** add `c6a`–`c6f` to `SHEETS` in `tools/make_worksheets.py`. The Part 5 worksheet also prints a **Rescue report** (section K4). Add lever and pulley pictures for paper with small SVG helpers (`leverSVG({cls, ea, la, labels})`, `pulleySVG(ropes)`, `buildSVG(parts)`); the same helpers draw the pictures inside questions.
+- **MYP tags:** `obj` on every Check question, as listed. Run `python3 tests/strands.py`. Strands never go on student screens or sheets. Part 5's Check carries **D i, D ii and D iii**, which fills the D ii gap in the Backlog. The Extension Check carries D i and D iii.
 
 ---
 
@@ -250,251 +275,329 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 
 | Code | Misconception | Where it is challenged |
 |---|---|---|
-| M1 | A machine reduces the work you have to do | u3 q4, c6r9, c6r20 |
-| M2 | A bigger mechanical advantage is always better (no cost) | u3 q5, h-missions, sm3, c6r20 |
-| M3 | A single fixed pulley reduces the effort | w3 q3, u1 q4 |
-| M4 | Compound MAs add instead of multiply | k2 predict, k3 q3, c6r15 |
-| M5 | The rope you pull is the same length as the height lifted | w3 q2, u3 q1, c6r11 |
-| M6 | Moving the fulcrum closer to your hand makes the lever easier | w1 predict, c6r2 |
-| M7 | Class 3 levers are useless because the effort is bigger than the load | w2 q1, w2 q3 |
-| M8 | A steeper (shorter) ramp needs a smaller push | w4 predict, c6r5 |
-| M9 | MA has a unit (newtons) | u1 card 1, c6r7 |
-| M10 | Friction changes the distance you pull, as well as the force | p5a predict, c6r23 |
-| M11 | A machine can be more than 100% efficient | p5a q3, c6r25 |
+| M1 | A machine reduces the work you have to do | u3 q4, c6r14, c6r25 |
+| M2 | A bigger mechanical advantage is always better (no cost) | u3 q5, h-missions, sm3, c6r25 |
+| M3 | A single fixed pulley reduces the effort | pl1 q4, u1 q4 |
+| M4 | Compound MAs add instead of multiply | k2 predict, k3 q3, c6r20 |
+| M5 | The rope you pull is the same length as the height lifted | pl1 q2, u3 q1, c6r16 |
+| M6 | Moving the fulcrum closer to your hand makes the lever easier | lv2 predict, lv2 q3, c6r2 |
+| M7 | Class 3 levers are useless because the effort is bigger than the load | lv4 q3, lv5 q2 |
+| M8 | A steeper (shorter) ramp needs a smaller push | pl3 predict, c6r9 |
+| M9 | MA has a unit (newtons) | u1 card 1, c6r12 |
+| M10 | Friction changes the distance you pull, as well as the force | p5a predict, c6r28 |
+| M11 | A machine can be more than 100% efficient | p5a q3, c6r30 |
 | M12 | Friction is always bad | p5b q3 |
 
 ---
 
 ## E. Question plans
 
-- **Part 1 Learn:** w1 predict, reading, reading, pick, reading · w2 predict, reading, sort, mcq · w3 predict, reading, reading, reason (cartoon), pick · w4 predict, reading, reading, mcq, match · w5 predict, reading, pick, tick.
-- **Part 1 Check** (6): match → reason (+ sure) → sort → pick → fix → explain. Six types, no two the same in a row. Misconception: reason, fix. Produce: explain.
-- **Part 2 Learn:** u1 num, num, pick, mcq · u2 num, num, calcorder · u3 predict, reading, num, num, tap (key idea), reason (cartoon). **Challenge:** three missions.
-- **Part 2 Check** (6): num → fix → reason (+ sure) → num → pick → explain.
-- **Part 3 Learn:** k1 match, tick · k2 predict, reading, num, pick · k3 num, num, fix. **Challenge:** three build missions.
-- **Part 3 Check** (5): sort → num → reason (+ sure) → order → explain.
-- **Part 4 Learn:** v1 num, num, pick. **Challenge:** the rescue, three stages.
-- **Part 4 Check** (4): explain (D i) → num → reason (+ sure) → explain (D ii).
-- **Part 5 Learn:** p5a predict, reading, num, num, pick · p5b num, pick, reason (cartoon). **Challenge:** three base-building missions.
-- **Part 5 Check** (5): num → reason (+ sure) → calcorder → fix → explain.
+- **Part 1 Learn (levers):** lv1 reading, reading, pick (label the lever) · lv2 predict, reading, pick, mcq · lv3 reading, reading, pick · lv4 predict, reading, reading, pick · lv5 pick, mcq.
+- **Part 1 Check** (5): pick (label a lever) → reason (+ sure) → mcq (which class, from a labelled picture) → fix → explain.
+- **Part 2 Learn:** pl1 predict, reading, reading, pick, mcq · pl2 predict, reading, pick · pl3 predict, reading, mcq · pl4 predict, reading, pick, tick.
+- **Part 2 Check** (5): match → pick → fix → reason (+ sure) → explain.
+- **Part 3 Learn:** u1 num, num, pick, mcq · u2 num, num, calcorder · u3 predict, reading, num, num, tap (key idea), reason (cartoon). **Challenge:** three missions.
+- **Part 3 Check** (6): num → fix → reason (+ sure) → num → pick → explain.
+- **Part 4 Learn:** k1 match, tick · k2 predict, reading, num, pick · k3 num, num, fix. **Challenge:** three build missions.
+- **Part 4 Check** (5): sort → num → reason (+ sure) → order → explain.
+- **Part 5 Learn:** v1 num, num, pick. **Challenge:** the rescue, three stages.
+- **Part 5 Check** (4): explain (D i) → num → reason (+ sure) → explain (D ii).
+- **Extension Learn:** p5a predict, reading, num, num, pick · p5b num, pick, reason (cartoon). **Challenge:** three base-building missions.
+- **Extension Check** (5): num → reason (+ sure) → calcorder → fix → explain.
 
 ---
 
-## F. Part 1: Simple machines (c6a)
+## F. Part 1: Levers (c6a)
 
-### Step w1: Levers   (Part 1, about 5 min)
-Arena: the Workshop (`S.scene = 'shop'`), lever, class 1 only (class picker not added yet), bar 2 m, a 30 kg rock (294 N), lift height 0.10 m, `maxTravel` 1.5 m. Adds `mlever` (arm slider only), `pull`, `rulers`. Hides every Drop Zone and helicopter panel.
-Formulas glowing in the calculator: none yet.
+Rewritten 1 Nov 2026 after Tom's playtest, to the pacing rules in section A2. Generated from the built step data, so it matches the app; change both together.
+
+### Step lv1: Too heavy for Smooshy   (Part 1, about 5 min)
 
 CARDS
-1. Welcome to the Workshop! Before anyone flies to Glimmer-9, you need to master the six **simple machines**. A simple machine lets a small force, the **effort**, move a big force, the **load**. First up is the **lever**: a strong bar that turns around a pivot called the **fulcrum**.
-2. Press **Pull!** and watch the newtonmeter at your end of the bar. The reading climbs until the rock starts to rise, so that reading is the effort needed. Then slide the fulcrum and pull again. The red band on the newtonmeter shows Captain Smooshy's limit of 60 N.
+1. Welcome to the Workshop! Captain Smooshy's squishy gummy arms can only pull with **60 N**. A big rock is pinning his spaceship, so let's find out how hard a 30 kg rock is to lift. You'll lift it with a newtonmeter in your hand, and its reading tells you how hard you pulled.
+2. When a job is too hard, engineers use a machine: something that helps a small force do a big job. Your first machine is a lever. It is a strong bar resting on a pivot, and the pivot is called the fulcrum. [Picture: A lever: a strong bar resting on a pivot called the fulcrum]
+3. The thing a lever moves is called the load. In the Workshop, the load is the rock. [Picture: A lever with the fulcrum in the middle]
+4. Your pull on the other end of the bar is called the effort. So every lever has three parts: the fulcrum, the load and the effort. [Picture: A lever with the fulcrum in the middle]
+
+DO THIS
+- Choose **By hand** and press **Lift!**
+- (answer box) q1
+- Now choose the **Lever**. The fulcrum starts in the middle of the bar. Press **Pull!**
+- (answer box) q2
+
+YOUR TURN QUESTIONS
+q1 | reading | Lifting the rock by hand, what did the newtonmeter read? | unit N | tolerance 1
+   ok: Right, 294 N. That's nearly five times more than Smooshy's 60 N!
+q2 | reading | With the lever and the fulcrum in the middle, what did the newtonmeter read? | unit N | tolerance 1
+   ok: 294 N again! With the fulcrum in the middle, the lever doesn't make the job any easier yet. You'll change that in the next step.
+q3 | pick | Label the lever. [Picture: A lever with three parts marked A, B and C] Part A is the {0}, part B is the {1} and part C is the {2}.
+   {0}: fulcrum / load / effort → fulcrum · {1}: fulcrum / load / effort → load · {2}: fulcrum / load / effort → effort
+   after: The fulcrum is the pivot, the load is the rock, and the effort is your pull.
+Rescue log: Lever found. Time to put it to work!
+
+### Step lv2: Move the fulcrum   (Part 1, about 5 min)
+
+CARDS
+1. Here's where a lever gets clever. Use the slider to move the fulcrum along the bar. The labels above the bar show how far the rock is from the fulcrum, and how far your hand is from it. After each move, press **Pull!** and read the newtonmeter.
+2. Fun fact: The Greek scientist Archimedes, over 2,200 years ago, said that with a long enough lever and a place to stand, he could move the Earth.
 
 PREDICT FIRST
-Question: You slide the fulcrum closer to the rock. What happens to the effort you need?
-Options: It gets smaller, because more of the bar is on your side · It gets bigger, because the rock is now closer to the pivot · It stays the same, because the rock's weight hasn't changed · It drops to zero, because the fulcrum now carries the rock
-After: Test it! Lift the rock with the fulcrum in the middle, then with the fulcrum close to the rock.
+Question: You move the fulcrum closer to the rock. What will happen to the effort you need?
+Options: It gets smaller, because more of the bar is on your side · It gets bigger, because the rock is now closer to the fulcrum · It stays the same, because the rock's weight hasn't changed · It drops to zero, because the fulcrum now holds up the rock
+After: Test it! Move the fulcrum close to the rock and pull.
 
 DO THIS
 - Make your prediction in the box above.
-- Set the load arm to **1.0 m** (fulcrum in the middle) and press **Pull!**   (ticks on a lever run with la 1.0)
-- (inline answer box) q1
-- Set the load arm to **0.4 m** and pull again.   (ticks on la 0.4)
-- (inline answer box) q2
-- Find a fulcrum position where the effort is **60 N or less**.   (ticks on any lever run with E ≤ 60)
+- Move the fulcrum so the rock is **0.4 m** from it, then press **Pull!**
+- (answer box) q1
+- Find a fulcrum position where the effort is **60 N or less**.
 
 YOUR TURN QUESTIONS
-q1 | reading | With the fulcrum in the middle, what effort lifted the rock? | live: shopE({mach:'lever', cls:1, la:1}) | unit N | tolerance 1
-   needMsg: Lift the rock with the load arm at 1.0 m first. Your runs are in the Journal.
-   ok: Right! With the fulcrum in the middle, the effort equals the rock's weight, 294 N. The lever only changed the direction of your push.
-q2 | reading | With the load arm at 0.4 m, what effort lifted the rock? | live: shopE({mach:'lever', cls:1, la:0.4}) | unit N | tolerance 1
-   ok: Yes, 73.5 N. That's four times smaller than the rock's weight.
-q3 | pick | When the fulcrum moved closer to the rock, the effort {0} and your end of the bar had to move {1}.
+q1 | reading | With the rock 0.4 m from the fulcrum, what did the newtonmeter read? | unit N | tolerance 1
+   ok: Yes, 73.5 N. That's four times smaller than lifting the rock by hand.
+q2 | pick | Moving the fulcrum closer to the rock made the effort {0}.
    {0}: got bigger / stayed the same / got smaller → got smaller
-   {1}: less far / the same distance / further → further
-   after: Less force, more distance. Keep an eye on this trade-off: it turns up in every machine.
-q4 | reading | With the load arm at 0.4 m, the rock rose 0.10 m. Use the ruler beside your end of the bar. How far did your end move down? | live: shopDist({mach:'lever', cls:1, la:0.4}) | unit m | tolerance 0.02
-   ok: That's right, 0.40 m: four times further than the rock rose.
-Glossary words to underline: simple machine, effort, load, lever, fulcrum.
-Masked readouts: none (the newtonmeter is the reading).
-Rescue log: Levers packed in the toolkit.
+   after: The closer the fulcrum is to the rock, the smaller the effort you need.
+q3 | mcq | Captain Smooshy wants to lift a heavy rock with a lever and a small pull. Where should he put the fulcrum?
+   Options: Close to the rock, so his side of the bar is long · Close to his hand, so his side of the bar is short · Exactly in the middle, so both sides are the same · Anywhere, because the fulcrum doesn't change the pull | correct 0
+   ok: Spot on! A long side for his hand means a small pull.
+Rescue log: Fulcrum trick learned.
 
-### Step w2: Three classes of lever   (Part 1, about 3 min)
-Arena: as w1. Adds the class picker in `mlever`.
+### Step lv3: The catch   (Part 1, about 4 min)
 
 CARDS
-1. Levers come in three classes, depending on what sits in the middle. **Class 1:** the fulcrum is in the middle, like a seesaw or a crowbar. **Class 2:** the load is in the middle, like a wheelbarrow or a nutcracker. **Class 3:** the effort is in the middle, like tweezers, a fishing rod or your own forearm.
-2. A class 3 lever needs an effort **bigger** than the load! Engineers still love them, because the load end moves much further and faster than your hand. A small movement of your arm muscle swings your hand a long way.
+1. Is there a catch to this trick? Let's find out. After each pull, two rulers appear under the bench. The **green ruler** shows how far the rock rose. The **red ruler** shows how far your hand moved. Compare them carefully.
+
+DO THIS
+- Pull with the rock **0.4 m** from the fulcrum and look at both rulers.
+- (answer box) q1
+- Now move the fulcrum so the rock is **0.2 m** from it, and pull again.
+- (answer box) q2
+
+YOUR TURN QUESTIONS
+q1 | reading | With the rock 0.4 m from the fulcrum, the rock rose 0.10 m. How far did your hand move? Use the red ruler. | unit m | tolerance 0.02
+   ok: 0.40 m: four times further than the rock rose.
+q2 | reading | With the rock 0.2 m from the fulcrum, how far did your hand move? | unit m | tolerance 0.02
+   ok: 0.90 m! The effort was tiny, but your hand moved nine times further than the rock.
+q3 | pick | When the effort got smaller, your hand had to move {0} to lift the rock the same height.
+   {0}: a shorter distance / the same distance / a longer distance → a longer distance
+   after: That's the catch: a smaller effort always needs a bigger distance. Every machine in the Workshop works like this.
+Rescue log: The catch is noted in the mission log.
+
+### Step lv4: Three ways to build a lever   (Part 1, about 5 min)
+
+CARDS
+1. So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Use the new buttons to try each design. Pull, then check the newtonmeter and the two rulers. [Picture: Three ways to build a lever: fulcrum in the middle, load in the middle, or effort in the middle]
 
 PREDICT FIRST
-Question: In a class 3 lever, you push 0.5 m from the fulcrum and the rock sits at the far end, 2 m away. How will the effort compare with the rock's weight?
+Question: With the effort in the middle, your hand pulls up close to the fulcrum and the rock sits at the far end. How will the effort compare with the rock's weight?
 Options: The effort will be bigger than the rock's weight · The effort will be smaller than the rock's weight · The effort will be equal to the rock's weight · The effort will be zero, because the fulcrum holds it
-After: Try class 2 first, then class 3.
+After: Try the load in the middle first, then the effort in the middle.
 
 DO THIS
 - Make your prediction in the box above.
-- Switch to **class 2** and lift the rock with the load arm at **0.5 m**.   (ticks on cls 2, la 0.5)
-- Switch to **class 3**, set the effort arm to **0.5 m**, and lift the rock.   (ticks on cls 3, ea 0.5)
-- (inline answer box) q1
+- Choose **Load in the middle**. Put the rock **0.5 m** from the fulcrum and pull.
+- Choose **Effort in the middle**. Put your hand **0.5 m** from the fulcrum and pull.
+- (answer box) q1
+- (answer box) q2
 
 YOUR TURN QUESTIONS
-q1 | reading | With the class 3 lever, what effort lifted the rock? | live: shopE({mach:'lever', cls:3, ea:0.5}) | unit N | tolerance 2
-   ok: Whoa, 1,176 N! That's four times the rock's weight, but the rock moved four times further than your hand.
-q2 | sort | Sort these levers into their classes. | groups: Class 1: fulcrum in the middle · Class 2: load in the middle · Class 3: effort in the middle
-   items: Crowbar → 1 · Seesaw → 1 · Pair of scissors → 1 · Wheelbarrow → 2 · Nutcracker → 2 · Bottle opener → 2 · Tweezers → 3 · Fishing rod → 3 · Your forearm lifting a cup → 3
-q3 | mcq | Why would anyone use a class 3 lever, like a fishing rod?
-   Options: It makes the load end move further and faster than your hands · It makes the effort smaller than the load at the far end · It means the rod doesn't need a fulcrum at the handle end · It makes the weight of the fish smaller as it is lifted
-   correct 0
-   why: (1) In a class 3 lever the effort is bigger than the load. (2) Your back hand is the fulcrum. (3) The fish's weight is mass × g, which doesn't change.
-Glossary words to underline: lever, fulcrum, effort, load.
-Masked readouts: none.
-Rescue log: All three classes of lever logged.
+q1 | reading | With the effort in the middle, what did the newtonmeter read? | unit N | tolerance 2
+   ok: 1,176 N: four times the rock's weight!
+q2 | reading | With the effort in the middle, the rock rose 0.40 m. How far did your hand move? Use the red ruler. | unit m | tolerance 0.02
+   ok: Only 0.10 m. A small movement of your hand swung the rock four times as far.
+q3 | pick | With the effort in the middle, the effort was {0} the rock's weight, but the rock moved {1} your hand.
+   {0}: smaller than / the same as / bigger than → bigger than · {1}: less far than / the same distance as / further than → further than
+   after: It's the catch again, the other way round: a bigger effort, but a bigger distance at the load.
+Rescue log: Three lever designs tested.
 
-### Step w3: Pulleys   (Part 1, about 5 min)
-Arena: the Workshop, pulley rig under the hoist beam, a 24 kg crate (235.2 N), lift height 1.0 m. Adds `mropes` (1–6), `rulers`. Hides `mlever`.
+### Step lv5: The three classes of lever   (Part 1, about 4 min)
 
 CARDS
-1. A **pulley** is a wheel with a rope running round it. One fixed pulley at the top only changes the direction of your pull: you pull down and the crate goes up. Add pulleys that move up with the crate, and something amazing happens.
-2. Count the **supporting ropes**: the sections of rope that hold up the moving pulley block and the crate. Don't count the end you pull on when it comes down from a fixed pulley. Each extra supporting rope shares the crate's weight.
+1. Scientists give the three designs names. They are the three **classes** of lever, and you name each one by what is in the middle. [Picture: The three classes of lever: class 1 has the fulcrum in the middle, class 2 the load in the middle and class 3 the effort in the middle]
+2. Here's an everyday example of each one. A seesaw is a **class 1** lever: the fulcrum is in the middle. [Picture: A seesaw: the fulcrum is in the middle, a heavy box sits on one end and you push down on the other end]
+3. A wheelbarrow is a **class 2** lever. The wheel is the fulcrum, the heavy soil in the middle is the load, and you lift the handles at the end. [Picture: A wheelbarrow: the wheel is the fulcrum, the soil in the middle is the load, and you lift the handles at the end]
+4. Chopsticks are a **class 3** lever. They pivot where they rest in your hand, your fingers squeeze in the middle, and the food is at the tips. [Picture: A pair of chopsticks: they pivot where they rest in your hand, your fingers squeeze in the middle, and the dumpling is at the tips]
+5. Watch a class 3 lever in action. The effort is big, but your hand only moves a little, and the far end swings a long way. [Picture: Class 3 lever, animated: the hand near the fulcrum pulls up a little with a big force, and the rock at the far end swings up a long way]
+
+DO THIS
+- The buttons now show the class names. Build a **class 3** lever with your hand **1.0 m** from the fulcrum and pull. Watch the far end swing.
+
+YOUR TURN QUESTIONS
+q1 | pick | In a class 2 lever, the {0} is in the middle. In a class 3 lever, the {1} is in the middle.
+   {0}: fulcrum / load / effort → load · {1}: fulcrum / load / effort → effort
+q2 | mcq | Chopsticks are a class 3 lever. Why are they so useful?
+   Options: A small squeeze of your fingers moves the tips a long way · Your fingers squeeze with less force than the food's weight · The food gets lighter when you hold it at the tips · Class 3 levers can work without any fulcrum at all | correct 0
+   ok: Yes! Small finger movements open and close the tips wide.
+Rescue log: All three classes of lever logged. The lever kit is packed!
+
+
+---
+
+## G. Part 1 Check (c6r1–c6r5)
+
+c6r1 | pick | obj ['Ai'] | Label the parts of this lever. [Picture: A lever with three parts marked A, B and C] A is the {0}, B is the {1} and C is the {2}.
+   {0}: fulcrum / load / effort → load · {1}: fulcrum / load / effort → effort · {2}: fulcrum / load / effort → fulcrum
+
+c6r2 | reason | obj ['Aii'] | Mia uses a plank resting on a brick to lift a heavy box. The brick is the fulcrum. She moves the brick closer to her hand. What happens to the effort she needs?
+   Options: It gets bigger · It gets smaller · It stays the same · It drops to zero | correct 0
+   reasons: Her side of the plank gets shorter and the box's side gets longer · Her hand is closer to the brick, so the plank is easier to push · The box gets heavier when the brick moves towards her · The brick now holds up more of the box's weight for her | correct reason 0
+
+c6r3 | mcq | obj ['Aii'] | Which class of lever is this? [Picture: A lever with the load in the middle]
+   Options: Class 1 · Class 2 · Class 3 · It isn't a lever | correct 1
+
+c6r4 | fix | obj ['Aiii'] | Leo explains how he used a lever. One line has a mistake. Tap it, then choose the correct line.
+   lines: 1. Leo put the fulcrum close to the rock. · 2. That made his side of the bar much longer. · 3. So he needed a smaller effort to lift the rock. · 4. And his hand moved a shorter distance than before. | mistake: line 4
+   fix: And his hand moved a longer distance than before · And the rock rose a longer distance than before · And his hand did not need to move at all · And the rock became lighter than before → correct 0
+
+c6r5 | explain | obj ['Aii'] | Captain Smooshy needs to lift a heavy boulder off his spaceship's leg. He has a long bar and a small rock to use as the fulcrum, and he can only pull with 60 N. Explain where he should put the fulcrum, and what the catch is.
+   words: fulcrum, effort, load, distance
+   model: He should put the fulcrum close to the boulder, so his side of the bar is long. That makes the effort much smaller than the weight of the boulder (the load), so his 60 N pull can lift it. The catch is distance: his end of the bar has to move a long way to lift the boulder only a little.
+   checklist: Says the fulcrum should go close to the boulder (the load), so his side of the bar is long · Says this makes the effort smaller than the load · Says the catch: his hand has to move further than the boulder rises
+
+---
+
+## F2. Part 2: Pulleys, wheels and ramps (c6b)
+
+### Step pl1: Pulleys   (Part 2, about 6 min)
+
+CARDS
+1. Welcome to Part 2! Remember the catch from the lever: a smaller effort means your hand moves further. Look out for it in every new machine. [Picture: The catch: with the fulcrum close to the rock, your hand moves a long way and the rock only rises a little]
+2. A pulley is a wheel with a rope running round it. A flagpole has one at the top: you pull the rope down, and the flag goes up. [Picture: A flagpole: a pulley wheel at the top lets you pull the rope down to raise the flag up]
+3. Now hang the crate from a pulley that moves up with it. Count the supporting ropes: the pieces of rope that hold the crate up. Don't count the end you pull. [Picture: A pulley that moves with the crate: two supporting ropes hold it up, and the end you pull is not counted]
 
 PREDICT FIRST
-Question: You change from 1 supporting rope to 2. What happens to the effort?
+Question: You change from 1 supporting rope to 2. What will happen to the effort?
 Options: It halves, because two ropes share the crate's weight · It doubles, because there is twice as much rope to pull · It stays the same, because the crate's weight hasn't changed · It drops to zero, because the top pulley holds the crate
-After: Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter and the rope you pull.
+After: Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter.
 
 DO THIS
 - Make your prediction in the box above.
-- Lift the crate with **1, 2, 3 and 4** supporting ropes.   (ticks when runs with ropes 1, 2, 3 and 4 all exist; show which are done as four small chips)
-- (inline answer box) q1
-- (inline answer box) q2
+- Lift the crate with **1, 2, 3 and 4** supporting ropes.
+- (answer box) q1
+- (answer box) q2
 
 YOUR TURN QUESTIONS
-q1 | reading | With 4 supporting ropes, what effort lifted the 235.2 N crate? | live: shopE({mach:'pulley', ropes:4}) | unit N | tolerance 0.5
+q1 | reading | With 4 supporting ropes, what effort lifted the 235.2 N crate? | unit N | tolerance 0.5
    ok: Yes, 58.8 N, a quarter of the crate's weight. That's under Smooshy's limit!
-q2 | reading | With 4 supporting ropes, the crate rose 1.0 m. Use the ruler on the rope. How much rope did you pull? | live: shopDist({mach:'pulley', ropes:4}) | unit m | tolerance 0.05
+q2 | reading | With 4 supporting ropes, the crate rose 1.0 m. How much rope did you pull? Use the red ruler. | unit m | tolerance 0.05
    ok: 4 m of rope for a 1 m lift. Each of the 4 supporting ropes got 1 m shorter.
-q3 | reason (cartoon) | With 1 supporting rope (a single fixed pulley), the effort was 235.2 N, the same as lifting the crate by hand. Four friends argue about it. Who's right?
-   voices: Mia: "A single fixed pulley is useless. The effort didn't change at all." · Sam: "It still helps, because pulling down is easier than lifting up." · Leo: "It halves the effort, because the rope goes over a wheel." · Ana: "It makes the crate lighter while it hangs on the rope."
-   correct: Sam
-   reasons: You can pull down using your own weight, and lift a load high above your head · The wheel spins, and a spinning wheel always reduces the force you need · Two pieces of rope come out of the pulley, so each one carries half the load · The crate's mass gets smaller once the rope takes the strain
-   correct reason 0
-   why: (Mia) The force is the same, but its direction changes, which is useful. (Leo) The effort was 235.2 N, the full weight. (Ana) The crate's weight stays mass × g. Reasons: (2) the readings showed no change with 1 rope; (3) only the supporting ropes share the load, and there's just one; (4) mass never changes.
-q4 | pick | Each extra supporting rope makes the effort {0} and the length of rope you pull {1}.
-   {0}: bigger / the same / smaller → smaller
-   {1}: shorter / the same / longer → longer
-Glossary words to underline: pulley, supporting rope.
-Masked readouts: none.
+q3 | pick | Each extra supporting rope made the effort {0} and the length of rope you pulled {1}.
+   {0}: bigger / the same / smaller → smaller · {1}: shorter / the same / longer → longer
+   after: The catch again: less force, more rope.
+q4 | mcq | A flagpole has just one pulley, so the pull you need is the same as the flag's weight. Why is the pulley still useful?
+   Options: You can stand at the bottom and pull down to raise the flag to the top · It makes the flag lighter, so it is easier to lift to the top · It halves the pull you need to raise the flag to the top · It stops the flag from ever sliding back down the pole | correct 0
+   ok: Exactly. One pulley changes the direction of your pull, so you pull down and the flag goes up.
 Rescue log: Pulley blocks packed in the toolkit.
 
-### Step w4: Wheels, axles and ramps   (Part 1, about 4 min)
-Arena: the Workshop. Adds `mpick` (winch and ramp only), `mwinch` (axle 0.05 m), `mramp` (height fixed at 1.0 m; lengths 1–6 m). Loads: a 20 kg water bucket (196 N) on the winch; a 50 kg cart (490 N) on the ramp. Hides `mropes`.
+### Step pl2: Wheel and axle   (Part 2, about 4 min)
 
 CARDS
-1. A **wheel and axle** is a big wheel (or handle) fixed to a thin rod called the axle, so they turn together. Turn the big wheel with a small force and the axle turns with a big force. Doorknobs, steering wheels, screwdrivers and the **winch** on a well all use this idea.
-2. An **inclined plane** is a ramp. Pushing a load up a long, gentle ramp takes much less force than lifting it straight up, but you push it a much longer way. Truck loading ramps and wheelchair ramps work like this.
+1. A wheel and axle is a big wheel fixed to a thin rod, called the axle, so they turn together. A screwdriver is one: the fat handle is the wheel, and the thin metal shaft is the axle. [Picture: A screwdriver is a wheel and axle: the fat handle is the wheel and the thin metal shaft is the axle]
+2. The Workshop's winch is a wheel and axle too. You turn the handle, and the thin axle winds up the rope to lift the bucket. Try a short handle, then a long one.
 
 PREDICT FIRST
-Question: You pull a 490 N cart up onto a 1 m high platform. Which ramp needs the smallest pull?
-Options: The longest ramp, 5 m long and gentle · The shortest ramp, 2 m long and steep · Every ramp needs exactly the same pull · The middle ramp, 4 m long and medium
-After: Try the winch first, then the ramps.
+Question: You swap a short winch handle for a long one. What will happen to the effort?
+Options: It gets smaller, because your hand moves round a bigger circle · It gets bigger, because a long handle is heavier to turn · It stays the same, because the bucket weighs the same · It drops to zero, because the handle does all the work
+After: Lift the bucket with each handle and watch the newtonmeter.
 
 DO THIS
 - Make your prediction in the box above.
-- **Winch:** lift the bucket with a handle radius of **0.1 m**, then **0.25 m**.   (ticks when both runs exist)
-- (inline answer box) q1
-- **Ramp:** pull the cart up the **2 m** ramp, then the **5 m** ramp.   (ticks when both runs exist)
-- (inline answer box) q2
+- Lift the bucket with a handle radius of **0.1 m**, then **0.25 m**.
+- (answer box) q1
 
 YOUR TURN QUESTIONS
-q1 | reading | With a handle radius of 0.25 m, what effort lifted the 196 N bucket? | live: shopE({mach:'winch', R:0.25}) | unit N | tolerance 0.5
-   ok: Yes, 39.2 N. The big handle made your force five times bigger at the axle.
-q2 | reading | What pull got the 490 N cart up the 5 m ramp? | live: shopE({mach:'ramp', L:5, h:1}) | unit N | tolerance 0.5
-   ok: 98 N, a fifth of the cart's weight. You pulled it 5 m to raise it 1 m.
-q3 | mcq | Why does the 5 m ramp need a smaller pull than the 2 m ramp?
-   Options: The cart travels a longer distance, so each metre needs less force · The cart weighs less when it sits on a long, gentle ramp · The long ramp has less friction, so the cart rolls more easily · The steep ramp pushes back on the cart and makes it heavier
-   correct 0
-   why: (1) The cart's weight is mass × g on any ramp. (2) Workshop machines have no friction at all. (3) The cart's weight doesn't change with the slope.
-q4 | match | Match each everyday object to its simple machine.
-   rows: Doorknob → Wheel and axle · Wheelchair ramp → Inclined plane · Flagpole → Pulley · Crowbar → Lever
-   options: Wheel and axle · Inclined plane · Pulley · Lever
-Glossary words to underline: wheel and axle, winch, inclined plane.
-Masked readouts: none.
-Rescue log: A winch and a folding ramp packed in the toolkit.
+q1 | reading | With a handle radius of 0.25 m, what effort lifted the 196 N bucket? | unit N | tolerance 0.5
+   ok: Yes, 39.2 N. The long handle made your force five times bigger at the axle.
+q2 | pick | The longer handle made the effort {0}, and your hand moved {1} as it turned the handle.
+   {0}: bigger / the same / smaller → smaller · {1}: less far / the same distance / further → further
+   after: Your hand travels round a bigger circle, so a smaller force does the job.
+Rescue log: A winch packed in the toolkit.
 
-### Step w5: Wedges and screws   (Part 1, about 4 min)
-Arena: the Workshop. `mpick` shows wedge and screw. Adds `mwedge` (20 cm long; 10, 5, 4 or 2 cm thick), `mscrew` (jack under a car's corner, 3,000 N, lift 20 cm, 120 cm per turn, pitch 1.0 or 0.5 cm; turn counter on). The log on the chopping block needs **1,200 N** pushing its halves apart. Hides `mwinch`, `mramp`.
+### Step pl3: Ramps   (Part 2, about 4 min)
 
 CARDS
-1. A **wedge** is two ramps back to back. Push it into a log and its sloping sides push the two halves apart with a much bigger force. Axes, knives, doorstops and even your front teeth are wedges. A long, thin wedge needs the smallest push.
-2. A **screw** is a ramp wrapped round a rod, and the spiral ridge is called the **thread**. Each turn of the handle moves the screw forward by just a small distance, the **pitch**. A car jack uses a screw to lift one side of a car with one hand.
+1. A ramp lets you raise a load without lifting it straight up. You'll see ramps at school entrances, for wheelchairs and trolleys. Scientists call a ramp an inclined plane. [Picture: A cart on a ramp up to a platform, with the length of the ramp and the height of the platform marked]
 
 PREDICT FIRST
-Question: You split the same log with a fat wedge (5 cm thick) and a thin wedge (2 cm thick). Both are 20 cm long. Which needs the smaller push?
+Question: You pull a 490 N cart up onto a 1 m high platform. Which ramp will need the smallest pull?
+Options: The longest ramp, 5 m long and gentle · The shortest ramp, 2 m long and steep · Every ramp needs exactly the same pull · The middle ramp, 4 m long and medium
+After: Try the 2 m ramp, then the 5 m ramp.
+
+DO THIS
+- Make your prediction in the box above.
+- Pull the cart up the **2 m** ramp, then the **5 m** ramp.
+- (answer box) q1
+
+YOUR TURN QUESTIONS
+q1 | reading | What pull got the 490 N cart up the 5 m ramp? | unit N | tolerance 0.5
+   ok: 98 N, a fifth of the cart's weight. You pulled it 5 m to raise it 1 m.
+q2 | mcq | Why does the 5 m ramp need a smaller pull than the 2 m ramp?
+   Options: The cart travels a longer distance, so each metre needs less force · The cart weighs less when it sits on a long, gentle ramp · The long ramp has less friction, so the cart rolls more easily · The steep ramp pushes back on the cart and makes it heavier | correct 0
+   ok: Yes! Less force, more distance, again.
+Rescue log: A folding ramp packed in the toolkit.
+
+### Step pl4: Ramps in disguise   (Part 2, about 5 min)
+
+CARDS
+1. Two more simple machines are ramps in disguise. A wedge is two ramps back to back. Push it down into a log and its sloping sides push the two halves apart. A knife and a doorstop are wedges. [Picture: A wedge is two ramps back to back. Pushing it down into a log pushes the two halves apart]
+2. A screw is a ramp wrapped round a rod, and the spiral ramp is called the **thread**. A car jack uses a screw: each turn of the handle lifts the car by the small gap between two threads. [Picture: A screw is a ramp wrapped round a rod: wrap a paper triangle round a pencil and its sloping edge makes a spiral thread]
+
+PREDICT FIRST
+Question: You split the same log with a fat wedge (5 cm thick) and a thin wedge (2 cm thick). Both are 20 cm long. Which will need the smaller push?
 Options: The thin wedge needs the smaller push · The fat wedge needs the smaller push · Both wedges need the same push · Neither wedge can split the log
 After: Split the log with each wedge and watch the newtonmeter.
 
 DO THIS
 - Make your prediction in the box above.
-- Split the log with the **5 cm** wedge, then the **2 cm** wedge.   (ticks when both runs exist)
-- Lift the car with the screw jack, first with a **1.0 cm** pitch, then a **0.5 cm** pitch. Watch the turn counter.   (ticks when both runs exist)
-- (inline answer box) q1
-- **Toolbox job:** Smooshy's ice block needs **500 N** to split. Choose a wedge that splits it with **60 N or less**.   (load switches to the ice block when this task is reached; ticks on a wedge run on the ice with E ≤ 60, i.e. the 2 cm wedge)
+- Split the log with the **5 cm** wedge, then the **2 cm** wedge.
+- Lift the car with the screw jack, first with a **1.0 cm** gap between threads, then a **0.5 cm** gap. Watch the turn counter.
+- (answer box) q1
+- **Toolbox job:** Smooshy's ice block needs **500 N** to split. Choose a wedge that splits it with **60 N or less**.
 
 YOUR TURN QUESTIONS
-q1 | reading | How many turns of the handle lifted the car 20 cm with the 0.5 cm pitch? | live: shopRun({mach:'screw', pitch:0.5}).turns | unit turns | tolerance 0
-   ok: 40 turns! The finer thread needed half the effort, but twice as many turns.
-q2 | pick | With the finer thread (0.5 cm pitch), the effort was {0} and the number of turns was {1}.
-   {0}: bigger / the same / smaller → smaller
-   {1}: smaller / the same / bigger → bigger
+q1 | reading | How many turns of the handle lifted the car 20 cm with the 0.5 cm gap between threads? | unit turns | tolerance 0
+   ok: 40 turns! The closer threads needed half the effort, but twice as many turns.
+q2 | pick | With the threads closer together (0.5 cm), the effort was {0} and the number of turns was {1}.
+   {0}: bigger / the same / smaller → smaller · {1}: smaller / the same / bigger → bigger
 q3 | tick | Tick every object that uses a wedge.
-   Options: An axe · A kitchen knife · A doorstop · The point of a nail · A doorknob · A seesaw
-   correct: 0, 1, 2, 3
-Glossary words to underline: wedge, screw, pitch.
-Masked readouts: `turns` (the turn counter) until q1 is answered for the 0.5 cm run (show the needle-style dial moving, but the number reads "?").
+   Options: A kitchen knife · A doorstop · The point of a nail · Your front teeth · A doorknob · A seesaw | correct [0, 1, 2, 3]
+   ok: Yes! A doorknob is a wheel and axle, and a seesaw is a lever.
 Rescue log: Wedges and a screw jack packed. The toolkit is ready!
 
 ---
 
-## G. Part 1 Check (c6r1–c6r6)
+## G2. Part 2 Check (c6r7–c6r11; the id c6r6 is not used)
 
-c6r1 | match | obj ['Ai'] | Match each simple machine to an everyday example.
-   rows: Lever → Crowbar · Pulley → Flagpole · Wheel and axle → Steering wheel · Inclined plane → Wheelchair ramp · Wedge → Axe · Screw → Jar lid
-   options: the six examples, shuffled
+c6r7 | match | obj ['Ai'] | Match each everyday object to its simple machine.
+   rows: Flagpole → Pulley · Screwdriver → Wheel and axle · Wheelchair ramp → Ramp (inclined plane) · Doorstop → Wedge · Jar lid → Screw · Seesaw → Lever
 
-c6r2 | reason | sure: true | obj ['Aii'] | Mia moves the fulcrum of her crowbar closer to her hand. What happens to the effort she needs to lift the rock?
-   Options: It gets bigger · It gets smaller · It stays the same · It drops to zero
-   correct 0
-   reasons: The load arm gets longer and her effort arm gets shorter · Her hand is closer to the pivot, so the bar is easier to turn · The rock's weight increases as the fulcrum moves · The fulcrum now carries more of the rock's weight for her
-   correct reason 0
+c6r8 | pick | obj ['Aii'] | A crane lifts a load with 4 supporting ropes. Compared with lifting the load straight up, the effort is {0} and the rope pulled is {1}.
+   {0}: four times bigger / the same / a quarter as big → a quarter as big · {1}: a quarter as long / the same length / four times longer → four times longer
 
-c6r3 | sort | obj ['Aii'] | Sort these levers into their classes. | groups as w2 q2
-   items: Pliers → 1 · Claw hammer pulling out a nail → 1 · Door pushed open at the handle → 2 · Bottle opener → 2 · Broom swept with both hands → 3 · Ice tongs → 3
+c6r9 | fix | obj ['Aiii'] | Leo explains ramps. One line has a mistake. Tap it, then choose the correct line.
+   lines: 1. Ana needs to get a heavy box onto a 1 m high stage. · 2. She could pull it up a long ramp or a short, steep ramp. · 3. The long ramp needs a smaller pull, but she pulls it further. · 4. A steeper ramp would need a smaller pull, because it is shorter. | mistake: line 4
+   fix: A steeper ramp would need a bigger pull, but over a shorter distance · A steeper ramp would need the same pull, because the box weighs the same · A steeper ramp would need no pull at all, because the box slides down · A steeper ramp would need a smaller pull, because the box rises faster → correct 0
 
-c6r4 | pick | obj ['Aii'] | A crane lifts a load with 4 supporting ropes. Compared with lifting the load straight up, the effort is {0} and the rope pulled is {1}.
-   {0}: four times bigger / the same / a quarter as big → a quarter as big
-   {1}: a quarter as long / the same length / four times longer → four times longer
+c6r10 | reason | obj ['Aii'] | Ana swaps the handle on her winch for a longer one. What happens to the effort she needs to lift the same bucket?
+   Options: It gets smaller · It gets bigger · It stays the same · It drops to zero | correct 0
+   reasons: Her hand moves round a bigger circle, so a smaller force does the same job · A longer handle is heavier, so its weight helps to turn the axle · The axle gets bigger, so the rope winds in much faster · The bucket gets lighter when the handle is longer | correct reason 0
 
-c6r5 | fix | obj ['Aiii'] | Leo explains ramps and pulleys. One line has a mistake. Tap it, then choose the correct line.
-   lines: 1. Ana needs to get a heavy box onto a 1 m high stage. · 2. She could pull it up a long ramp or a short, steep ramp. · 3. The long ramp needs a smaller pull, but she pulls it further. · 4. A steeper ramp would need a smaller pull, because it is shorter.
-   mistake: line 4
-   fix (mcq): A steeper ramp would need a bigger pull, but over a shorter distance · A steeper ramp would need the same pull, because the box weighs the same · A steeper ramp would need no pull at all, because the box slides down · A steeper ramp would need a smaller pull, because the box rises faster → correct 0
-   why: Ramp MA = length ÷ height. A shorter ramp to the same height has a smaller MA, so the pull is bigger, over a shorter distance.
-
-c6r6 | explain | obj ['Aii'] | Captain Smooshy wants to split a block of space ice with a wedge. Explain how a wedge works, and which shape of wedge he should choose.
+c6r11 | explain | obj ['Aii'] | Captain Smooshy wants to split a block of space ice with a wedge. Explain how a wedge works, and which shape of wedge he should choose.
    words: wedge, force, thin, distance
    model: A wedge is two ramps back to back. When Smooshy pushes the wedge into the ice, its sloping sides push the two halves apart with a much bigger force than his push. He should choose a long, thin wedge, because it needs the smallest push. The catch is that he has to push it further into the ice.
-   checklist: Says the sloping sides push the ice apart with a bigger force than the push (the word "force" used for the push or the splitting force) · Says a long, thin wedge needs a smaller push than a short, fat one · Says the smaller push has to move further (the force–distance trade-off)
+   checklist: Says the sloping sides push the ice apart with a bigger force than the push · Says a long, thin wedge needs a smaller push than a short, fat one · Says the smaller push has to move further (the catch)
 
 ---
 
-## H. Part 2: Mechanical advantage and work (c6b)
+## H. Part 3: Mechanical advantage and work (c6c)
 
-### Step u1: Mechanical advantage   (Part 2, about 5 min)
+### Step u1: Mechanical advantage   (Part 3, about 5 min)
 Arena: the Workshop, pulley rig, a 30 kg crate (294 N), lift 1.0 m. Adds `mropes`, `readMA`. Formulas glowing: `ma`.
 
 CARDS
 1. 📡 *Smooshy:* "My mission computer doesn't understand 'easier'. It needs numbers!" Engineers measure how much a machine helps with its **mechanical advantage**: how many times bigger the load is than the effort. It has no unit, because it is newtons divided by newtons.
-   Worked example: In Part 1, the 235.2 N crate needed an effort of 58.8 N with 4 supporting ropes. Mechanical advantage = load ÷ effort = 235.2 ÷ 58.8 = **4**.
+   Worked example: In Part 2, the 235.2 N crate needed an effort of 58.8 N with 4 supporting ropes. Mechanical advantage = load ÷ effort = 235.2 ÷ 58.8 = **4**.
    Key idea: mechanical advantage = load ÷ effort.
 2. A mechanical advantage of 4 means the effort is 4 times smaller than the load. A mechanical advantage of 1 means no help with the force at all, like the single fixed pulley. A class 3 lever has a mechanical advantage smaller than 1.
 
@@ -521,7 +624,7 @@ Glossary words to underline: mechanical advantage, load, effort.
 Masked readouts: `readMA` until q1 is answered (for the 3-rope run) and until q2 is answered (for the 6-rope run).
 Rescue log: The mission computer has learned mechanical advantage.
 
-### Step u2: Mechanical advantage from the shape   (Part 2, about 5 min)
+### Step u2: Mechanical advantage from the shape   (Part 3, about 5 min)
 Arena: the Workshop. Adds `mpick` (lever, pulley, winch, ramp), `mramp` height picker (0.6, 0.8, 1.0, 1.2 m). Formulas glowing: `ma`, `effortq`, `maparts`.
 
 CARDS
@@ -552,7 +655,7 @@ Glossary words to underline: mechanical advantage, effort arm, load arm.
 Masked readouts: `readE` (the newtonmeter's number) on the winch until q1 is answered, and on the ramp until q2 is answered, so the check confirms the student's answer instead of giving it.
 Rescue log: The mission computer can predict the effort for any simple machine.
 
-### Step u3: Work and the catch   (Part 2, about 6 min)
+### Step u3: Work and the catch   (Part 3, about 6 min)
 Arena: the Workshop, pulley rig, 294 N crate. Lift height picker 1.0 or 2.0 m. Adds `readWork`, `rulers`. Formulas glowing: `edist`, `work`.
 
 CARDS
@@ -592,14 +695,14 @@ q5 | reason (cartoon) | Captain Smooshy says: "I'll build a machine with a mecha
    correct: Ana
    reasons: Effort distance = mechanical advantage × load distance · Big machines run out of pulley wheels, so the advantage stays small · Machines reduce the force and the distance at the same time · A bigger advantage makes the ship lighter, so it moves faster
    correct reason 0
-   why: (Mia) A huge MA means a huge pull distance, so it would take ages. (Leo) Compound machines easily go past 10: you'll build some in Part 3. (Sam) Less force always means more distance.
+   why: (Mia) A huge MA means a huge pull distance, so it would take ages. (Leo) Compound machines easily go past 10: you'll build some in Part 4. (Sam) Less force always means more distance.
 Glossary words to underline: work, joule.
 Masked readouts: `readWork` until q2 and q3 are answered.
 Rescue log: The mission computer now checks the work for every plan.
 
 ---
 
-## I. Part 2 Challenge: Launch-day loading (y1–y3)
+## I. Part 3 Challenge: Launch-day loading (y1–y3)
 
 Engine: `renderShopCourse` in `45-challenge.js` (C7 scoring), with `cap: 60` and Smooshy on the monitor. The student chooses one setting; everything else is locked.
 
@@ -623,46 +726,46 @@ y3 | Spare engine | winch, 50 kg engine (490 N), lift 2 m, axle 0.05 m; student 
    Clues: MA needed = 490 ÷ 60 = 8.2. · Winch MA = handle radius ÷ 0.05 m, so the handle must be at least 8.2 × 0.05 m. · That's at least 0.41 m. Which handles fit by the wall?
    Feasibility: 0.45 m (54.4 N) and 0.5 m (49.0 N) pass; 0.4 m needs 61.3 N; 0.55 m and 0.6 m hit the wall.
 
-After the last mission: "Gummy Rescue One is fully loaded! Next, Part 3: machines inside machines."
+After the last mission: "Gummy Rescue One is fully loaded! Next, Part 4: machines inside machines."
 
 ---
 
-## J. Part 2 Check (c6r7–c6r12)
+## J. Part 3 Check (c6r12–c6r17)
 
-c6r7 | num | obj ['Aii'] | A car jack lifts a 4,500 N car with an effort of 18 N. What is its mechanical advantage? | answer 250 | unit (no unit) | tolerance 0.5 | ladder
+c6r12 | num | obj ['Aii'] | A car jack lifts a 4,500 N car with an effort of 18 N. What is its mechanical advantage? | answer 250 | unit (no unit) | tolerance 0.5 | ladder
    Hints: MA = load ÷ effort. · 4,500 ÷ 18. · Remember: mechanical advantage has no unit.
    Working shown after: MA = 4,500 ÷ 18 = 250.
 
-c6r8 | fix | obj ['Aiii'] | Leo works out the work done pulling a sled. Spot his mistake. Tap it, then correct it.
+c6r13 | fix | obj ['Aiii'] | Leo works out the work done pulling a sled. Spot his mistake. Tap it, then correct it.
    lines: 1. The pull on the sled is 120 N. · 2. The sled moves 15 m. · 3. Work = force ÷ distance · 4. Work = 120 ÷ 15 = 8 J
    mistake: line 3
    fix (num): ask "What is the correct work done?" | answer 1800 | unit J | units picker | tolerance 1
    why: Work = force × distance, so the work is 120 × 15 = 1,800 J.
 
-c6r9 | reason | sure: true | obj ['Aii'] | A worker gets a crate onto a truck by pushing it up a long ramp instead of lifting it straight up. Ignoring friction, how does the work she does compare?
+c6r14 | reason | sure: true | obj ['Aii'] | A worker gets a crate onto a truck by pushing it up a long ramp instead of lifting it straight up. Ignoring friction, how does the work she does compare?
    Options: The work is the same either way · The ramp means she does less work · The ramp means she does more work · The ramp means she does no work at all
    correct 0
    reasons: She pushes with a smaller force over a longer distance, so force × distance is the same · Her push is smaller, so force × distance must be smaller as well · She moves the crate further, so force × distance must be bigger · The ramp holds up the crate, so she isn't raising it at all
    correct reason 0
 
-c6r10 | num | obj ['Aii'] | A winch has a handle radius of 0.36 m and an axle radius of 0.04 m. What effort lifts a 540 N bucket? | answer 60 | unit N | tolerance 0.5 | units picker | ladder
+c6r15 | num | obj ['Aii'] | A winch has a handle radius of 0.36 m and an axle radius of 0.04 m. What effort lifts a 540 N bucket? | answer 60 | unit N | tolerance 0.5 | units picker | ladder
    Hints: Find the MA first: handle radius ÷ axle radius. · 0.36 ÷ 0.04 = 9. · Effort = 540 ÷ 9.
    Working shown after: MA = 9, effort = 540 ÷ 9 = 60 N. Just right for Smooshy!
 
-c6r11 | pick | obj ['Aii'] | A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is {0} and the rope pulled is {1}.
+c6r16 | pick | obj ['Aii'] | A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is {0} and the rope pulled is {1}.
    {0}: 130 N / 650 N / 3,250 N → 130 N
    {1}: 0.6 m / 3 m / 15 m → 15 m
 
-c6r12 | explain | obj ['Aii'] | Captain Smooshy can only pull with 60 N, but he needs to lift a 600 N oxygen tank 2 m. Explain how a pulley system could help him, and what the catch is.
+c6r17 | explain | obj ['Aii'] | Captain Smooshy can only pull with 60 N, but he needs to lift a 600 N oxygen tank 2 m. Explain how a pulley system could help him, and what the catch is.
    words: mechanical advantage, effort, supporting ropes, distance, work
    model: He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank's weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J.
    checklist: Works out the mechanical advantage needed (600 ÷ 60 = 10) · Says the supporting ropes share the load, so the effort is smaller · Says he must pull a longer distance of rope (10 times the height, 20 m) · Says the work stays the same (force × distance)
 
 ---
 
-## K. Part 3: Compound machines (c6c)
+## K. Part 4: Compound machines (c6d)
 
-### Step k1: Machines inside machines   (Part 3, about 4 min)
+### Step k1: Machines inside machines   (Part 4, about 4 min)
 Arena: the Workshop with a **compound machine gallery** on the bench: a wheelbarrow, a pair of scissors, a can opener and a crane. Tapping one zooms in and highlights its simple machines one at a time, each labelled ("Lever", "Wedge", "Wheel and axle", …). Adds `gallery`. Hides the machine controls.
 
 CARDS
@@ -683,7 +786,7 @@ Glossary words to underline: compound machine, simple machine.
 Masked readouts: none.
 Rescue log: Compound machines spotted. Time to build one!
 
-### Step k2: Build a crane   (Part 3, about 5 min)
+### Step k2: Build a crane   (Part 4, about 5 min)
 Arena: the Workshop crane: a winch on the bench winds the rope of a pulley system under the hoist beam (port `mDrawCrane`). A 120 kg engine block (1,176 N), lift 2 m. Adds `mwinch` (×2–×10 as in C1), `mropes` (1–4), `readMA` (shows **Total MA**), `rulers`. Formulas glowing: `macomp`.
 
 CARDS
@@ -716,7 +819,7 @@ Glossary words to underline: compound machine, winch, pulley.
 Masked readouts: `readMA` and `readE` for the ×6, 4-rope set-up until q2 is answered.
 Rescue log: Crane design tested. Smooshy is impressed.
 
-### Step k3: The machine builder   (Part 3, about 5 min)
+### Step k3: The machine builder   (Part 4, about 5 min)
 Arena: the Workshop with the **machine builder** (C4). A 240 kg generator (2,352 N) on a 6 m ramp that rises 2 m. Parts available: ramp (fixed: 6 m, rising 2 m), pulley block, winch. Adds `builder` with `bTotMA`, `bCable`, `bTravel`.
 
 CARDS
@@ -745,7 +848,7 @@ Rescue log: Machine builder unlocked. The crane kit is almost ready!
 
 ---
 
-## L. Part 3 Challenge: Build the rescue kit (h1–h3)
+## L. Part 4 Challenge: Build the rescue kit (h1–h3)
 
 Engine: `renderShopCourse` with the builder (C4), C7 scoring. Each mission says which parts and routes are available and gives its limits; the builder's readouts are live (not masked) here. Effort cap = the mission's effort limit.
 
@@ -774,38 +877,38 @@ After the last mission: "The crane kit is built and packed. Next stop: Glimmer-9
 
 ---
 
-## M. Part 3 Check (c6r13–c6r17)
+## M. Part 4 Check (c6r18–c6r22)
 
-c6r13 | sort | obj ['Ai'] | Simple machine or compound machine? Sort each one. | groups: Simple machine · Compound machine
+c6r18 | sort | obj ['Ai'] | Simple machine or compound machine? Sort each one. | groups: Simple machine · Compound machine
    items: Crowbar → simple · Ramp → simple · Axe → simple · Single fixed pulley → simple · Scissors → compound · Bicycle → compound · Crane → compound · Can opener → compound
 
-c6r14 | num | obj ['Aii'] | A winch with a mechanical advantage of 6 drives a pulley system with 3 supporting ropes. What effort lifts a 2,700 N load? | answer 150 | unit N | tolerance 0.5 | units picker | ladder
+c6r19 | num | obj ['Aii'] | A winch with a mechanical advantage of 6 drives a pulley system with 3 supporting ropes. What effort lifts a 2,700 N load? | answer 150 | unit N | tolerance 0.5 | units picker | ladder
    Hints: Total MA = 6 × 3. · 18. · Effort = 2,700 ÷ 18.
    Working shown after: total MA = 18, effort = 2,700 ÷ 18 = 150 N.
 
-c6r15 | reason | sure: true | obj ['Aii'] | Two machines, each with a mechanical advantage of 5, are joined so the first one drives the second. What is the total mechanical advantage?
+c6r20 | reason | sure: true | obj ['Aii'] | Two machines, each with a mechanical advantage of 5, are joined so the first one drives the second. What is the total mechanical advantage?
    Options: 25 · 10 · 5 · 2.5
    correct 0
    reasons: The second machine multiplies a force the first machine has already made bigger · Each machine adds its own advantage on top of the other one · Only the stronger of the two machines sets the advantage · The force is shared between two machines, so the advantage halves
    correct reason 0
 
-c6r16 | order | obj ['Ai'] | Put the steps of a crane lift in order, from Smooshy's hand to the load. | first: Smooshy turns the handle | last: The load rises
+c6r21 | order | obj ['Ai'] | Put the steps of a crane lift in order, from Smooshy's hand to the load. | first: Smooshy turns the handle | last: The load rises
    items (correct order): The handle turns the winch's axle · The axle winds in the cable with a bigger force · The cable pulls on the pulley block · The supporting ropes share the load and lift it
 
-c6r17 | explain | obj ['Aii'] | A crane uses a winch and a pulley system to lift a heavy steel beam. Explain how the two machines together let a small effort lift the beam, and why the operator has to turn the handle so many times.
+c6r22 | explain | obj ['Aii'] | A crane uses a winch and a pulley system to lift a heavy steel beam. Explain how the two machines together let a small effort lift the beam, and why the operator has to turn the handle so many times.
    words: compound machine, mechanical advantage, multiply, distance
    model: The winch and the pulley system are two simple machines working together, so the crane is a compound machine. The winch makes the effort bigger, then the pulleys make it bigger again, so the total mechanical advantage is the two mechanical advantages multiplied together. That makes the effort much smaller than the beam's weight. The catch is distance: the operator's hand moves the total mechanical advantage times the height the beam rises, so the handle has to turn many times.
    checklist: Says the crane is a compound machine (two simple machines working together) · Says the total mechanical advantage is the two multiplied, so the effort is much smaller than the load · Says the hand must move much further than the beam rises (MA × load distance)
 
 ---
 
-## N. Part 4: Rescue Captain Smooshy! (c6d)
+## N. Part 5: Rescue Captain Smooshy! (c6e)
 
-### Step v1: Landing on Glimmer-9   (Part 4, about 4 min)
+### Step v1: Landing on Glimmer-9   (Part 5, about 4 min)
 Arena: the rescue site (C6), overview of the crater, no stage active. Adds `mcomp` (the mission computer panel, used here for the calculate tasks). Formulas glowing: `weight`, `ma`, `effortq`.
 
 CARDS
-1. You've landed on **Planet Glimmer-9**! Purple sky, two moons, and there's the Gumdrop, tipped over at the bottom of a **15 m** deep crater, with a boulder pinning one landing leg. Captain Smooshy waves from the cockpit. On Glimmer-9, **g = 4.2 N/kg**, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear.
+1. You've landed on **Planet Glimmer-9**! Purple sky, two moons, and there's the Gumdrop, tipped over at the bottom of a **15 m** deep crater, with a boulder pinning one landing leg. Captain Smooshy waves from the cockpit window, then squeezes out through the hatch (gummy bears are very squishy) to do the pulling. On Glimmer-9, **g = 4.2 N/kg**, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear.
 2. The rescue has three stages. **Stage 1:** lever the boulder off the landing leg. **Stage 2:** jack up the ship's sunken side so it sits level. **Stage 3:** build a compound machine to haul the Gumdrop up the crater wall. You plan each stage, and Smooshy does the pulling. The mission computer wants your numbers before every try.
 
 DO THIS
@@ -829,7 +932,7 @@ Rescue log: Landed on Glimmer-9. Rescue plan loaded!
 
 ---
 
-## O. Part 4 Challenge: Operation Gummy Lift (sm1–sm3)
+## O. Part 5 Challenge: Operation Gummy Lift (sm1–sm3)
 
 Engine: `renderRescueCourse` in `4d-rescue.js`, objective scoring (C7). Smooshy pulls (`cap: 60`). One stage at a time; the stage's settings are the only controls. **Before each try**, the mission computer asks for a prediction (a number box with a unit, under the controls); **Smooshy, try it!** is enabled once any number is typed. Objectives tick live; after each try, the result lines follow the November pattern (result, target, ✓/✗). Each stage has a "Need a clue?" ladder. After 3 tries, **Move on** appears.
 
@@ -858,36 +961,36 @@ sm3 | Haul out of the crater | the builder (C4); the 6,300 N Gumdrop rises **15 
 
 When all three stages are attempted: the ending (C6, C7), the stamp, and a pop-up nudging the student to the Check: "Mission complete! Do the debrief questions in the Check to get your completed worksheet, with your rescue report on it."
 
-### O1. Rescue report on the Part 4 worksheet
-The c6d worksheet prints, before the Check questions, a **Rescue report** with one row per stage: the student's settings, their prediction, what Smooshy needed, the result, and each objective with ✓ or ✗ (best try). Blank template: the same table, empty. Answer key: the passing settings from the feasibility notes. The marking scheme says the Rescue report isn't marked (Challenges are not marked), but the AI feedback may mention it in the strengths or next step.
+### O1. Rescue report on the Part 5 worksheet
+The c6e worksheet prints, before the Check questions, a **Rescue report** with one row per stage: the student's settings, their prediction, what Smooshy needed, the result, and each objective with ✓ or ✗ (best try). Blank template: the same table, empty. Answer key: the passing settings from the feasibility notes. The marking scheme says the Rescue report isn't marked (Challenges are not marked), but the AI feedback may mention it in the strengths or next step.
 
 ---
 
-## P. Part 4 Check: Mission debrief (c6r18–c6r21)
+## P. Part 5 Check: Mission debrief (c6r23–c6r26)
 
-c6r18 | explain | obj ['Aii', 'Di', 'Diii'] | Real rescue teams use compound machines too. A tow truck pulls a car out of a ditch with a winch and a pulley block. Describe how the tow truck's machine helps the rescuers.
+c6r23 | explain | obj ['Aii', 'Di', 'Diii'] | Real rescue teams use compound machines too. A tow truck pulls a car out of a ditch with a winch and a pulley block. Describe how the tow truck's machine helps the rescuers.
    words: winch, pulley, mechanical advantage, effort
    model: The winch is a wheel and axle that winds in the cable, and the pulley block adds supporting ropes. Together they make a compound machine, so their mechanical advantages multiply. That means a small effort from the winch's motor or handle can pull the heavy car out. The cable has to be wound in much further than the car moves.
    checklist: Names the winch (wheel and axle) and the pulley block as the two simple machines · Says the mechanical advantages multiply, so a small effort moves the heavy car · Says the cable moves much further than the car (the trade-off)
 
-c6r19 | num | obj ['Aii'] | The 6,300 N Gumdrop rose 15 m out of the crater. How much work did Smooshy do, whatever machine he used? | answer 94500 | unit J | tolerance 10 | units picker | ladder
+c6r24 | num | obj ['Aii'] | The 6,300 N Gumdrop rose 15 m out of the crater. How much work did Smooshy do, whatever machine he used? | answer 94500 | unit J | tolerance 10 | units picker | ladder
    Hints: In a perfect machine, work in = work out. · Work out = load × height = 6,300 × 15. · Type 6300 × 15.
    Working shown after: work = 6,300 × 15 = 94,500 J, for every machine that worked.
 
-c6r20 | reason | sure: true | obj ['Aiii'] | Ana says: "If Smooshy had built an even bigger mechanical advantage, he would have done less work." Is she right?
+c6r25 | reason | sure: true | obj ['Aiii'] | Ana says: "If Smooshy had built an even bigger mechanical advantage, he would have done less work." Is she right?
    Options: No, the work stays the same, but the effort gets smaller · Yes, a bigger advantage always means less work · No, a bigger advantage means he does more work · Yes, because the ship weighs less with a bigger machine
    correct 0
    reasons: He pulls with less force over a longer distance, so force × distance stays at 94,500 J · A smaller force always means a smaller amount of work done · He turns the handle further, so force × distance must be bigger · The machine carries part of the ship's weight for him
    correct reason 0
 
-c6r21 | explain | obj ['Dii', 'Diii'] | The rescue team had two plans. Plan A: dig the gentle 75 m track and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9's crater, then say which plan you would choose and why.
+c6r26 | explain | obj ['Dii', 'Diii'] | The rescue team had two plans. Plan A: dig the gentle 75 m track and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9's crater, then say which plan you would choose and why.
    words: mechanical advantage, distance, safety, cost
    model: Plan A uses the track as a ramp, which gives mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and digging a 75 m track takes time and damages more of the crater. Plan B moves the ship a much shorter distance, so it's quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.
    checklist: Gives an advantage of Plan A (the track's mechanical advantage means a smaller or cheaper crane, or a smaller effort) · Gives a disadvantage of Plan A (more cable or distance, more time, or more damage to the crater) · Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground) · Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails) · Makes a choice and gives a reason for it
 
-## P2. Part 5 (Extension): Real machines waste energy (c6e)
+## P2. Extension: Real machines waste energy (c6f)
 
-Optional, unticked by default on the teacher page. Opens once Part 4 is done (teacher mode unlocks it). Scene: the Workshop, re-dressed as **Base camp** on Glimmer-9 (the violet sky and two moons through the hangar door, sugar crystals by the door, gummy colonists in hard hats walking past). g = 4.2 N/kg, but loads are given in newtons, so students never need the mass.
+Optional, unticked by default on the teacher page. Opens once Part 5 is done (teacher mode unlocks it). Scene: the Workshop, re-dressed as **Base camp** on Glimmer-9 (the violet sky and two moons through the hangar door, sugar crystals by the door, gummy colonists in hard hats walking past). g = 4.2 N/kg, but loads are given in newtons, so students never need the mass.
 
 ### Step p5a: Real machines get warm   (Extension, about 6 min)
 Arena: Base camp, pulley rig, a **600 N** water tank, lift 2 m, 4 supporting ropes. Adds `mfric` (starts on Perfect), `readWork` (with Wasted (heat)), `readEff`, `rulers`. Formulas glowing: `work`, `eff`, `wasted`.
@@ -957,7 +1060,7 @@ Glossary words to underline: lubricant, efficiency, friction.
 Masked readouts: `readEff` for the 2-rope run until q1 is answered.
 Rescue log: The colonists know which machines waste the least. Let's build the base!
 
-## P3. Part 5 Challenge: Build Gummy Base One (gb1–gb3)
+## P3. Extension Challenge: Build Gummy Base One (gb1–gb3)
 
 Engine: `renderShopCourse` with the builder (C4) and `mfric` locked on **Real** (C1 efficiencies). C7 scoring (4/3/2/1 by try, Move on after 3 misses). The builder shows Total MA, Efficiency, Cable, Work in and the **energy budget** bar (green while work in ≤ budget, red above it). A colonist pulls, with the gummy limit of 60 N. Each mission passed or attempted adds a building to the Rescue board's fifth slot.
 
@@ -983,31 +1086,31 @@ gb3 | Night shift | 300 N supply crate, straight up 6 m; parts: pulley block (1�
 
 After the last mission: the Rescue board's fifth slot shows the finished base, and Smooshy: "Gummy Base One is open! Thank you, Force HQ engineers. Come and visit any time. We'll save you a sugar crystal."
 
-## P4. Part 5 Check (c6r22–c6r26)
+## P4. Extension Check (c6r27–c6r31)
 
-c6r22 | num | obj ['Aii'] | A colonists' pulley system takes 2,500 J of work in to do 2,000 J of useful work. What is its efficiency? | answer 80 | unit % | tolerance 0.5 | ladder
+c6r27 | num | obj ['Aii'] | A colonists' pulley system takes 2,500 J of work in to do 2,000 J of useful work. What is its efficiency? | answer 80 | unit % | tolerance 0.5 | ladder
    Hints: Efficiency = useful work out ÷ work in × 100%. · 2,000 ÷ 2,500. · Multiply by 100.
 
-c6r23 | reason | sure: true | obj ['Aii'] | Friction in a pulley system makes the effort bigger. What happens to the length of rope you pull to lift the load 1 m?
+c6r28 | reason | sure: true | obj ['Aii'] | Friction in a pulley system makes the effort bigger. What happens to the length of rope you pull to lift the load 1 m?
    Options: It stays the same · It gets longer · It gets shorter · It drops to zero
    correct 0
    reasons: The rope pulled depends only on the supporting ropes and the height lifted · Friction drags on the rope, so you have to pull more of it · Friction holds part of the load, so less rope is needed · A real machine can't lift anything once friction acts
    correct reason 0
 
-c6r24 | calcorder | obj ['Aii', 'Aiii'] | Each machine below does 1,200 J of useful work lifting a crate. Work out the efficiency of each one, then put them in order, most efficient first.
+c6r29 | calcorder | obj ['Aii', 'Aiii'] | Each machine below does 1,200 J of useful work lifting a crate. Work out the efficiency of each one, then put them in order, most efficient first.
    mass: 1200, f: (workIn, out) => out / workIn * 100, col0: 'Machine', given: 'Work in (J)', calc: 'Efficiency (%)', unit: '%', tol: 0.5
    items (in the CORRECT order): ['Lever', 1250] · ['Pulley system', 1500] · ['Dusty ramp', 1600] · ['Wedge', 3000] · ['Screw jack', 4000]
    first: Most efficient · last: Least efficient
    after: The efficiencies are 96%, 80%, 75%, 40% and 30%.
    (Check `calcorder` sorts lowest-first by default; this question needs **highest first**. Add an option `desc: true` if it doesn't support that.)
 
-c6r25 | fix | obj ['Aiii'] | Leo works out a machine's efficiency. Spot his mistake. Tap it, then correct it.
+c6r30 | fix | obj ['Aiii'] | Leo works out a machine's efficiency. Spot his mistake. Tap it, then correct it.
    lines: 1. Work in = 1,500 J · 2. Useful work out = 1,200 J · 3. Efficiency = work in ÷ work out × 100% · 4. Efficiency = 1,500 ÷ 1,200 × 100% = 125%
    mistake: line 3
    fix (num): ask "What is the correct efficiency?" | answer 80 | unit % | tolerance 0.5
    why: Efficiency = useful work out ÷ work in × 100% = 1,200 ÷ 1,500 × 100% = 80%. An efficiency over 100% is a warning sign: no machine gives out more work than you put in.
 
-c6r26 | explain | obj ['Aii', 'Di', 'Diii'] | The gummy colonists want their machines to waste as little energy as possible. Explain why friction wastes energy in a machine, and suggest two ways the colonists could make their machines more efficient.
+c6r31 | explain | obj ['Aii', 'Di', 'Diii'] | The gummy colonists want their machines to waste as little energy as possible. Explain why friction wastes energy in a machine, and suggest two ways the colonists could make their machines more efficient.
    words: friction, energy, heat, efficiency, lubricant
    model: When parts of a machine rub together, friction turns some of the work put in into heat, so the useful work out is less than the work in. The colonists could oil or grease the moving parts with a lubricant, keep the sugar dust out with covers, use smoother wheels and bearings, or choose machines with fewer moving parts, such as fewer pulley wheels, as long as the mechanical advantage is still big enough.
    checklist: Says friction between moving parts turns some of the work in into heat (wasted energy) · Gives one sensible way to cut friction (lubricant, cleaning or covering, smoother wheels or bearings) · Gives a second, different way (or fewer moving parts or pulley wheels)
@@ -1019,7 +1122,7 @@ c6r26 | explain | obj ['Aii', 'Di', 'Diii'] | The gummy colonists want their mac
 Follow the sim-builder skill, section 4e. **Port Sparks Through Time's build-task code** (`buildSheet` and the build-task rows on its teacher page, in `sparks-through-time/Sparks-Through-Time.html`; grep for `buildSheet`) and adapt it to Force HQ's names, as the November update did for the worksheet code. Build tasks use the machine builder (C4) with **perfect machines** (no friction), on Earth unless the task says otherwise. Each task has: `id`, `title`, `minutes`, `goal`, `brief`, 2–4 **live checks** (chips that turn green only when a real run passes), a **results table** filled from the student's runs, 1–3 questions about their own build (each with a model answer), a **rubric** `[[criterion, marks], …]`, a **model build** and **example results** for the answer key.
 
 - **Where:** a **Build tasks** tab on the Workshop card in Explore (each task opens the builder with its parts, load and limits set), and on the teacher page step 1 under "Build tasks" (tick boxes, kept clean as the skill says). They appear in the teacher prompt, step 5's AI feedback text and the marking schemes like any section. Toddle files: one folder per task.
-- **Unlock:** once Part 3 is done (they need the builder); teacher mode unlocks them all.
+- **Unlock:** once Part 4 is done (they need the builder); teacher mode unlocks them all.
 - **Build sheet:** "Make my build sheet" (named `<Task title> - Build sheet - <Student name>`): a snapshot of the student's build (`buildSVG`), the ticked checklist, the results table, their answers in blue, and a feedback page. Blank template and answer key as the skill describes. No name, no build sheet.
 - **MYP tags** on each task's questions (listed below). Check every task with `tools/workshop_model.py` (the passing builds below come from it).
 
@@ -1067,29 +1170,26 @@ bt4 | Lift it on three worlds | about 15 min | load 400 kg rover, up 2 m; worlds
 
 | Section | Tags by question | Sheet strands |
 |---|---|---|
-| c6a | c6r1 Ai · c6r2 Aii · c6r3 Aii · c6r4 Aii · c6r5 Aiii · c6r6 Aii | A i, ii, iii |
-| c6b | c6r7 Aii · c6r8 Aiii · c6r9 Aii · c6r10 Aii · c6r11 Aii · c6r12 Aii | A ii, iii |
-| c6c | c6r13 Ai · c6r14 Aii · c6r15 Aii · c6r16 Ai · c6r17 Aii | A i, ii |
-| c6d | c6r18 Aii, Di, Diii · c6r19 Aii · c6r20 Aiii · c6r21 Dii, Diii | A ii, iii · D i, ii, iii |
-| c6e | c6r22 Aii · c6r23 Aii · c6r24 Aii, Aiii · c6r25 Aiii · c6r26 Aii, Di, Diii | A ii, iii · D i, iii |
+| c6a | c6r1 Ai · c6r2 Aii · c6r3 Aii · c6r4 Aiii · c6r5 Aii | A i, ii, iii |
+| c6b | c6r7 Ai · c6r8 Aii · c6r9 Aiii · c6r10 Aii · c6r11 Aii | A i, ii, iii |
+| c6c | c6r12 Aii · c6r13 Aiii · c6r14 Aii · c6r15 Aii · c6r16 Aii · c6r17 Aii | A ii, iii |
+| c6d | c6r18 Ai · c6r19 Aii · c6r20 Aii · c6r21 Ai · c6r22 Aii | A i, ii |
+| c6e | c6r23 Aii, Di, Diii · c6r24 Aii · c6r25 Aiii · c6r26 Dii, Diii | A ii, iii · D i, ii, iii |
+| c6f | c6r27 Aii · c6r28 Aii · c6r29 Aii, Aiii · c6r30 Aiii · c6r31 Aii, Di, Diii | A ii, iii · D i, iii |
 | build tasks | bt1 Aii, Aii, Aiii · bt2 Aii, Aiii · bt3 Aiii, Aii · bt4 Aii, Aii | A ii, iii |
 
 ---
 
 ## R. Build order for the coding model
 
-Commit and deliver after each working step, as the Handoff says. **Stop after step 4 and ask Tom to play Part 1** before building the rest, so his feedback shapes Parts 2 to 4.
+Commit and deliver after each working step, as the Handoff says. **Done so far (1 Nov 2026):** the Workshop scene, Chapter 6 wiring, the black box transmission, the five-slot Rescue board, **Part 1 (Levers)** and **Part 2 (Pulleys, wheels and ramps)** with their Checks, worksheets and `tests/play_c6.py`. **Next: step 1 below. Stop after each Part and ask Tom to play it.**
 
-1. Copy `claude/workshop_model.py` to `tools/workshop_model.py` and this script to `docs/Chapter6_Workshop_Script.md`. Grep every id in this script for clashes (sections, steps, missions, questions, `TERMS`, `FORMULAS`).
-2. The Workshop scene (C2, C3, C5): every single machine, Pull!, the newtonmeter, rulers, runs, masks, Smooshy's monitor, and the art (B6). `tests/workshop_numbers.py` against the model.
-3. Chapter 6 wiring: `CHAPTERS`, sections (with the Part labels working everywhere), home map and card, the transmission (B2), the Rescue board (B3), the Rescue log lines (B5).
-4. Part 1 steps w1–w5 and the Part 1 Check. Worksheets for c6a. **Stop: ask Tom to play Part 1.**
-5. Part 2 steps u1–u3, `renderShopCourse` with y1–y3, and the Part 2 Check.
-6. The machine builder (C4) and the crane; Part 3 steps k1–k3, h1–h3 and the Part 3 Check.
-7. The rescue site (C6), Part 4 step v1, the rescue course sm1–sm3 with objective scoring and the ending, the Part 4 Check and the Rescue report on the worksheet.
-8. Part 5 (Extension): the Perfect / Real switch and efficiencies (C1), Base camp, steps p5a–p5b, gb1–gb3 with the energy budget bar, the Part 5 Check, and the fifth Rescue board slot.
-9. Build tasks bt1–bt4 (section W): port Sparks' `buildSheet` and teacher-page build-task rows, the Build tasks tab in Explore, live checks, results tables, build sheets in all three modes, and the Toddle files.
-10. Glossary, formulas, fun facts, Explore (Workshop and Try the rescue again), the teacher page, worksheets and Toddle files, MYP strands check, `tests/play_c6.py` (every Part, right and wrong answers, every mission, stage and build task passing and failing), the full test run, and the Brief, Backlog and Handoff updates.
+1. **Re-pitch Part 3 against section A2** (one new word per card, a labelled picture for every new idea, one familiar pictured example, plain words, no prediction given away), update section H to J of this script, then build Part 3: steps u1–u3, `renderShopCourse` with y1–y3, and the Part 3 Check. **Stop: ask Tom to play Part 3.**
+2. Re-pitch Part 4, then the machine builder (C4) and the crane; Part 4 steps k1–k3, h1–h3 and the Part 4 Check. (k1's gallery must use pictured, familiar machines: scissors and a building-site crane, not a can opener or a wheelbarrow without a picture.)
+3. Re-pitch Part 5, then the rescue site (C6), step v1, the rescue course sm1–sm3 with objective scoring and the ending, the Part 5 Check and the Rescue report on the worksheet. Smooshy climbs out of the Gumdrop's hatch at the start of v1.
+4. Extension: the Perfect / Real switch and efficiencies (C1), Base camp, steps p5a–p5b, gb1–gb3 with the energy budget bar, the Extension Check, and the sixth (Extension) Rescue board slot.
+5. Build tasks bt1–bt4 (section W): port Sparks' `buildSheet` and teacher-page build-task rows, the Build tasks tab in Explore, live checks, results tables, build sheets in all three modes, and the Toddle files.
+6. Glossary, formulas, fun facts, Explore (Workshop and Try the rescue again), the teacher page, worksheets and Toddle files, MYP strands check, `tests/play_c6.py` (every Part, right and wrong answers, every mission, stage and build task passing and failing), the full test run, and the Brief, Backlog and Handoff updates.
 
 Before shipping: play every Part and build task as a Grade 7 student with no teacher (the skill's independent-use check), check every number against `tools/workshop_model.py`, run the question-plan check (section E), check that no student screen uses W for work, check the worksheets as images, and check every Part shows approx. 30 min or less.
 
@@ -1099,7 +1199,9 @@ Before shipping: play every Part and build task as a Grade 7 student with no tea
 
 1. Names: **the Gumdrop** and **Glimmer-9** (g = 4.2 N/kg) are confirmed.
 2. Smooshy is **blue** (B6).
-3. Efficiency is an optional **Extension**, Part 5, with the terraforming story (P2–P4). Smooshy stays on Glimmer-9 as captain of the new gummy colony rather than flying home.
+3. Efficiency is an optional **Extension** after Part 5, with the terraforming story (P2–P4). Smooshy stays on Glimmer-9 as captain of the new gummy colony rather than flying home.
 4. Teacher **build tasks** go in now (section W).
 
-Nothing left to ask before building. Tom will want to play Part 1 at the step 4 stop.
+5. **After the first playtest (1 Nov):** the simple machines are split into Part 1 (Levers) and Part 2 (Pulleys, wheels and ramps), taught slowly with labelled pictures and familiar examples (section A2); the transmission is a black box recording with Smooshy trapped inside; every effort is drawn as a pull.
+
+Tom plays each Part before the next one is built.

@@ -1,6 +1,6 @@
 """Workshop numbers: the JS machine maths (4a-workshop.js, wsCalc) must reproduce tools/workshop_model.py.
 Run from force-hq-rebuild after build.py:  python3 tests/workshop_numbers.py
-Covers Part 1 (steps w1-w5). Later Parts add their cases as they are built."""
+Covers Parts 1 and 2 (levers lv1-lv5; pulleys, wheels and ramps pl1-pl4). Later Parts add their cases as they are built."""
 import json, pathlib, sys
 sys.path.insert(0, 'tools')
 import workshop_model as M
@@ -25,6 +25,10 @@ with sync_playwright() as p:
     c = calc(dict(mach='lever', cls=2, arm=0.5, load=294, lift=0.1)); chk('class 2 load 0.5 m', near(c['E'], 73.5), c['E'])
     c = calc(dict(mach='lever', cls=3, arm=0.5, load=294, lift=0.1)); chk('class 3 effort 0.5 m', near(c['E'], 1176.0), c['E'])
     chk('class 3 has MA below 1', c['ma'] < 1)
+    chk('class 3: the rock rises 0.40 m and the hand moves 0.10 m', near(c['rise'], 0.4) and near(c['eDist'], 0.1), (c['rise'], c['eDist']))
+    c = calc(dict(mach='lever', cls=3, arm=1.0, load=294, lift=0.1)); chk('class 3 hand 1.0 m: 588 N, hand moves 0.20 m', near(c['E'], 588.0) and near(c['eDist'], 0.2), (c['E'], c['eDist']))
+    # Part 1 lv1: lifting by hand needs the whole weight
+    c = calc(dict(mach='hand', load=294, lift=0.1)); chk('by hand: 294 N, hand moves 0.10 m', near(c['E'], 294.0) and near(c['eDist'], 0.1), (c['E'], c['eDist']))
     # lever travel limit
     c = calc(dict(mach='lever', cls=1, arm=0.2, load=294, lift=0.5)); chk('lever stops early', c['short'] and near(c['rise'], round(1.5 / 9, 2)), (c['short'], c['rise']))
     # w3: pulleys, 235.2 N, 1 m

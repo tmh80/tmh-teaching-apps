@@ -166,7 +166,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 
 /* info cards over the arena */
 .chunk{position:absolute;top:10px;left:10px;z-index:6;width:min(430px,calc(100% - 20px));background:var(--panel);border:2.5px solid var(--hazard);border-radius:12px;padding:12px 14px;box-shadow:0 10px 26px rgba(0,0,0,.28);display:flex;flex-direction:column;gap:8px}
-.chunk .gbody{font-size:16px;max-height:260px;overflow:auto} .chunk .gbody p{margin:0 0 6px}
+.chunk .gbody{font-size:16px;max-height:260px;overflow:auto} .chunk .gbody:has(.pic){max-height:330px} .chunk .gbody p{margin:0 0 6px}
 .chunk .chead{display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
 .chunk .chead .lbl{flex:1}
 .chunk.dragging .chead{cursor:grabbing}
@@ -805,6 +805,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 @media (max-width:760px){.rescueboard{grid-template-columns:1fr}.rbslots{grid-template-columns:1fr}}
 .txmodal{max-width:480px} .txmodal .tx-head{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;cursor:grab;padding:2px 0} .txmodal.dragging .tx-head{cursor:grabbing}
 .txmodal.placed{position:fixed;margin:0}
-.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/170}
+.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/200}
+.txrec{margin:8px 0 0;font-size:13px;letter-spacing:.02em;color:var(--muted)}
+.pic text{paint-order:stroke}
 .txlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .rlog{margin-top:6px;font-size:14px;font-weight:700;color:var(--muted)}

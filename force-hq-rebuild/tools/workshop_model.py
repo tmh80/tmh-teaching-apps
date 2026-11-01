@@ -59,7 +59,8 @@ if __name__ == '__main__':
     rock = 30 * G_EARTH
     show('w1 lever class 1, 30 kg rock = 294 N, bar 2 m, lift 0.10 m',
          [(f'load arm {la}', f'MA {ma_lever(1, la)[0]:.2f}', f'E {effort(rock, ma_lever(1, la)[0])} N', f'end moves {effort_dist(ma_lever(1, la)[0], 0.10)} m') for la in [1.0, 0.8, 0.5, 0.4, 0.3, 0.2]])
-    show('w2 classes 2 and 3', [('class 2, load 0.5 m', effort(rock, ma_lever(2, 0.5)[0])), ('class 3, effort 0.5 m', effort(rock, ma_lever(3, 0.5)[0]))])
+    show('lv1 by hand (MA 1)', [('by hand', effort(rock, 1), 'hand moves 0.10 m')])
+    show('lv4/lv5 classes 2 and 3 (the rock rises 0.40 m with the effort in the middle)', [('class 2, load 0.5 m', effort(rock, ma_lever(2, 0.5)[0])), ('class 3, effort 0.5 m', effort(rock, ma_lever(3, 0.5)[0]), f'hand moves {effort_dist(ma_lever(3, 0.5)[0], 0.40)} m'), ('class 3, effort 1.0 m', effort(rock, ma_lever(3, 1.0)[0]), f'hand moves {effort_dist(ma_lever(3, 1.0)[0], 0.40)} m')])
     crate = 24 * G_EARTH
     show('w3 pulleys, 24 kg crate = 235.2 N, lift 1.0 m', [(n, effort(crate, n), f'rope {n * 1.0} m') for n in range(1, 7)])
     show('w4 winch, 196 N bucket, axle 0.05 m', [(R, ma_winch(R), effort(196, ma_winch(R))) for R in [0.1, 0.25]])

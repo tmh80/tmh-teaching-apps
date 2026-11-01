@@ -17,7 +17,7 @@ with sync_playwright() as p:
     m = pg.locator('#modal #contAnyway')
     if m.count() and m.is_visible(): m.click(); pg.wait_for_timeout(200)
   opencalc(); allf = names('#calcForm .fcard'); print('home', allf)
-  assert len(allf) == 9 and not names('#calcForm .fcard.rel')
+  assert len(allf) == pg.evaluate("__fhq.ev('FORMULAS.length')") and len(allf) >= 9 and not names('#calcForm .fcard.rel')
   pg.click('#calcTabK'); pg.click('#calcX')
   goto('c1f', 6); opencalc(); print('chapter 1 glow', names('#calcForm .fcard.rel')); assert names('#calcForm .fcard.rel') == ['Weight', 'Resultant force']
   assert names('#calcForm .fcard')[:2] == ['Weight', 'Resultant force']
