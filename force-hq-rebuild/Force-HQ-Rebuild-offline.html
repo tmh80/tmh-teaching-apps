@@ -294,6 +294,16 @@ textarea.explain{font:inherit;font-size:15px;width:100%;min-height:90px;border:1
 .model{border:2px solid var(--good);border-radius:10px;padding:8px 12px;background:var(--okbg2);font-size:15px}
 .model .lbl{color:var(--good)}
 .checklist label{display:flex;gap:8px;align-items:flex-start;font-size:15px;margin:3px 0}
+.exck{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--panel)} .exck .lbl{color:var(--muted)}
+.revhint{margin:2px 0 4px}
+.finishrow{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:6px}
+.finmodal{max-width:560px} .finmodal .fin-head{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;cursor:grab;padding:2px 0} .finmodal.dragging .fin-head{cursor:grabbing} .finmodal.placed{position:fixed;margin:0}
+.finscore{display:flex;gap:16px;align-items:center;justify-content:space-between} .finscore h2{font-size:28px;line-height:1.15}
+.finstamp{display:flex;flex-direction:column;align-items:center;gap:4px;flex:none}
+.finlist{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px;max-height:34vh;overflow:auto}
+.finlist li{display:flex;justify-content:space-between;gap:10px;padding:5px 10px;border-radius:8px;border:1.5px solid var(--line);font-size:15px}
+.finlist li.full{border-color:var(--good);background:var(--okbg)} .finlist li.part{border-color:var(--hazard);background:var(--hazard-soft)} .finlist li.none{border-color:var(--bad)}
+.finneed{background:var(--hazard-soft);border:1.5px solid var(--hazard);border-radius:10px;padding:8px 12px}
 .chipsrow{display:flex;gap:6px;flex-wrap:wrap}
 .ck{font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;border:1.5px solid var(--line);background:var(--chip);color:var(--muted)}
 .ck.on{border-color:var(--good);background:var(--okbg);color:var(--okfg)}
@@ -2650,8 +2660,10 @@ function renderHome() {
 /* Explore opens once the Chapter 1 Foundation is finished (guided before Explore). Teachers, and anyone who chooses "Open it anyway", can go in sooner. */
 const EXPLORE_AFTER = 'c1f';
 const exploreOpen = () => isTeacher() || !!dbGet('stamps', {})[EXPLORE_AFTER] || !!dbGet('exploreAnyway', false);
+/* mark a section's stamp as earned without a pop-up (the Check's results pop-up shows the stamp itself); true the first time */
+function giveStamp(id) { const st = dbGet('stamps', {}); if (st[id]) return false; st[id] = Date.now(); dbSet('stamps', st); return true; }
 function awardStamp(id) {
-  const st = dbGet('stamps', {}); if (st[id]) return; st[id] = Date.now(); dbSet('stamps', st);
+  if (!giveStamp(id)) return;
   const sec = secOf(id), next = SECTIONS.find(s => s.needs === id);
   openModal(`<div class="modal" style="align-items:center;text-align:center"><div class="stamp on drop" style="width:130px;height:130px;font-size:20px">${sec.stamp}</div><h2>Stamp earned!</h2><p>You've finished every part of Chapter ${sec.n} ${sec.part}. Brilliant work. Your stamp is on the home page.</p><p class="scaleNote">Tip: press <b>💾 Save progress</b> at the top to keep a backup you can email to yourself.</p>${next ? `<p>Want to keep going? The <b>${next.part}</b> takes about ${secMins(next.id).total} minutes and has its own worksheet.</p>` : ''}${id === EXPLORE_AFTER ? `<p><b>Explore is now open!</b> Every control and readout is switched on, so you can test your own ideas in the Main Arena.</p>` : ''}<div class="row">${id === EXPLORE_AFTER ? `<button type="button" class="${next ? 'ghost' : 'go'}" data-act="explore">Open Explore →</button>` : ''}${next ? `<button type="button" class="go" data-close data-open="${next.id}">Try the ${next.part} →</button>` : ''}<button type="button" class="${next ? 'ghost' : 'go'}" data-close>${next ? 'Not now' : 'Thanks!'}</button></div></div>`);
 }
@@ -3403,15 +3415,16 @@ const FBDB = {
     board.addEventListener('pointerup', up); board.addEventListener('pointercancel', () => { dr = null; });
     $('.fundo', host).addEventListener('click', () => { if (!hist.length) return; st.arrows = JSON.parse(hist.pop()); closeMenu(); draw(); save(); });
     $('.fclear', host).addEventListener('click', () => { if (!st.arrows.length) return; hist.push(JSON.stringify(st.arrows)); st.arrows = []; st.lastRes = null; closeMenu(); draw(); save(); ffb.textContent = ''; ffb.className = 'fb ffb'; });
-    $('.fcheck', host).addEventListener('click', () => {
+    const doCheck = () => {
       closeMenu(); if (!st.arrows.length) { ffb.className = 'fb ffb no'; ffb.textContent = 'Draw at least one arrow first. Drag from the orange dot.'; return; }
       st.tries++; const res = FBDB.check(scen, st.arrows); st.lastRes = res; st.best = Math.max(st.best || 0, res.score);
       if (res.ok) { st.passed = true; ffb.className = 'fb ffb ok'; ffb.textContent = st.tries === 1 ? 'Perfect diagram, first time! Every check is green.' : 'Brilliant! Every check is green now.'; }
       else { st.hintLevel = (st.hintLevel || 0) + 1; ffb.className = 'fb ffb ' + (st.hintLevel >= 2 ? 'hint' : 'no'); ffb.textContent = FBDB.hint(scen, res, st.hintLevel); }
       draw(); save(); if (opts.onCheck) opts.onCheck(st, res);
-    });
+    };
+    $('.fcheck', host).addEventListener('click', doCheck);
     draw(); if (st.lastRes) { drawChips(st.lastRes); if (st.passed) { ffb.className = 'fb ffb ok'; ffb.textContent = 'Every check is green. Well done!'; } }
-    return { get state() { return st; } };
+    return { get state() { return st; }, check: doCheck };
   }
 };
 
@@ -3463,7 +3476,8 @@ const sureGet = el => { const b = $('.surebtn.on', el); return b ? b.dataset.sur
 const QT = {
   mcq: {
     html(q, s) { return `${sureHTML(q, s)}<div class="opts">${optOrder(q).map(i => `<button type="button" data-o="${i}">${q.opts[i]}</button>`).join('')}</div>`; },
-    bind(el, q, api) { el.addEventListener('click', e => { const b = e.target.closest('[data-o]'); if (!b || api.locked()) return; const i = +b.dataset.o, ok = i === q.a;
+    bind(el, q, api) { api.reg({ blank: () => true, check: () => { } });   // a pick is marked the moment it is tapped, so an unmarked mcq has no answer yet
+      el.addEventListener('click', e => { const b = e.target.closest('[data-o]'); if (!b || api.locked()) return; const i = +b.dataset.o, ok = i === q.a;
       if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first, then pick your answer.', 'no'); return; }
       api.answer(i, ok, ok ? (q.ok || 'That\'s right!') : `Whoops! The answer is ${qq(q.opts[q.a])}. ${(q.why && q.why[i]) || q.work || ''}`.trim(), { score: ok ? 1 : 0, sure: q.sure ? sureGet(el) : null }); }); },
     lock(el, q, s) { $$('[data-o]', el).forEach(b => { const i = +b.dataset.o; b.className = i === s.v ? (s.ok ? 'right' : 'wrong') : i === q.a ? 'answer' : ''; }); lockInputs(el); },
@@ -3484,12 +3498,13 @@ const QT = {
     bind(el, q, api) {
       const U = q.units && q.units.length;
       const lb = $('.cluebtn', el); if (lb) { let k = 0; lb.addEventListener('click', () => { if (api.locked()) return; const li = document.createElement('li'); li.innerHTML = q.hints[k]; $('.clist', el).appendChild(li); k++; if (k >= q.hints.length) { lb.disabled = true; lb.textContent = 'No more hints'; } else lb.textContent = 'Show another hint'; }); }
-      const go = () => { if (api.locked()) return; const raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v)) { api.say('Type your answer as a number.', 'no'); return; }
-        if (U && !u) { api.say('Choose a unit for your answer first.', 'no'); return; }
-        if (q.need && !q.need()) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
-        const ans = q.live ? q.live() : q.ans, numOk = near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
+      const go = () => { if (api.locked()) return; const au = api.auto, raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v) && !au) { api.say('Type your answer as a number.', 'no'); return; }
+        if (U && !u && !au) { api.say('Choose a unit for your answer first.', 'no'); return; }
+        if (q.need && !q.need() && !au) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
+        const ans = q.live ? q.live() : q.ans, numOk = !isNaN(v) && near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
+      api.reg({ blank: () => !$('.ansin', el).value.trim(), check: go });
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
       if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
     },
@@ -3500,11 +3515,12 @@ const QT = {
   gap: {
     html(q, s) { let k = 0; return `<div class="gl noglos">${q.p.replace(/___/g, () => `<input class="gapin" data-g="${k}" aria-label="Gap ${k + 1}" autocomplete="off" value="${s && s.v ? esc(s.v[k++] || '') : (k++, '')}">`)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) {
-      const go = () => { if (api.locked()) return; const v = $$('.gapin', el).map(i => i.value.trim()); if (v.some(x => !x)) { api.say('Fill in every gap first.', 'no'); return; }
+      const go = () => { if (api.locked()) return; const v = $$('.gapin', el).map(i => i.value.trim()); if (v.some(x => !x) && !api.auto) { api.say('Fill in every gap first.', 'no'); return; }
         let res = v.map((x, i) => gapOk(q.ans[i], x));
         if (q.swap && !res.every(Boolean)) { const [a, b] = q.swap, alt = v.slice(); alt[a] = v[b]; alt[b] = v[a]; const r2 = alt.map((x, i) => gapOk(q.ans[i], x)); if (r2.every(Boolean)) res = r2; }   // two gaps that can go in either order (a × b = b × a)
         const bad = res.map((r, i) => r ? -1 : i).filter(i => i >= 0);
         api.answer(v, !bad.length, !bad.length ? (q.ok || 'All correct!') : bad.length === 1 ? `Whoops! The missing word is ${qq(q.ans[bad[0]][0])}.` : `Whoops! ${bad.length} gaps weren't right. The right words are shown in green.`, { score: res.filter(Boolean).length }); };
+      api.reg({ blank: () => $$('.gapin', el).every(i => !i.value.trim()), check: go });
       $('.qchk', el).addEventListener('click', go); $$('.gapin', el).forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }));
     },
     lock(el, q, s) { $$('.gapin', el).forEach((inp, i) => { const ok = gapOk(q.ans[i], (s.v || [])[i]); inp.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr(inp, q.ans[i][0]); }); lockInputs(el); },
@@ -3512,50 +3528,64 @@ const QT = {
   },
   sort: {
     html(q, s) { return `<div class="sortgrid">${sortItems(q).map(i => `<div class="sortrow" data-i="${i}"><span>${q.items[i][0]}</span><select aria-label="Group for ${esc(plain(q.items[i][0]))}"><option value="">Choose…</option>${q.groups.map((g, gi) => `<option value="${gi}" ${s && s.v && s.v[i] === gi ? 'selected' : ''}>${g}</option>`).join('')}</select></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = q.items.map((_, i) => { const s = $(`.sortrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
-      if (v.some(x => x == null)) { api.say('Choose a group for every item first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.items.map((_, i) => { const s = $(`.sortrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
+      if (v.some(x => x == null) && !api.auto) { api.say('Choose a group for every item first.', 'no'); return; }
       const bad = q.items.map((it, i) => v[i] === it[1] ? -1 : i).filter(i => i >= 0);
-      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All sorted correctly!') : bad.length === 1 ? `Whoops! ${qq(q.items[bad[0]][0])} is ${art(plain(q.groups[q.items[bad[0]][1]]))}.` : `Whoops! ${bad.length} of these weren't right. Each red one now shows the group it belongs in.`, { score: q.items.length - bad.length }); }); },
+      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All sorted correctly!') : bad.length === 1 ? `Whoops! ${qq(q.items[bad[0]][0])} is ${art(plain(q.groups[q.items[bad[0]][1]]))}.` : `Whoops! ${bad.length} of these weren't right. Each red one now shows the group it belongs in.`, { score: q.items.length - bad.length }); };
+      api.reg({ blank: () => $$('.sortrow select', el).every(x => x.value === ''), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { $$('.sortrow', el).forEach(r => { const i = +r.dataset.i, ok = s.v && s.v[i] === q.items[i][1]; r.className = 'sortrow ' + (ok ? 'right' : 'wrong'); if (!ok) corr($('select', r), q.groups[q.items[i][1]]); }); lockInputs(el); },
     show(q, v) { return q.groups.map((g, gi) => `<b>${g}:</b> ${q.items.filter((_, i) => v && v[i] === gi).map(x => x[0]).join(', ') || '–'}`).join('<br>'); },
     model(q) { return q.groups.map((g, gi) => `<b>${g}:</b> ${q.items.filter(x => x[1] === gi).map(x => x[0]).join(', ')}`).join('<br>'); }
   },
   match: {
     html(q, s) { const ch = shuffled(q.rows.map((_, i) => i), hashStr(q.id) + 9); return `<div class="sortgrid">${q.rows.map((r, i) => `<div class="matchrow" data-i="${i}"><span>${r[0]}</span><select aria-label="Match for ${esc(plain(r[0]))}"><option value="">Choose…</option>${ch.map(j => `<option value="${j}" ${s && s.v && s.v[i] === j ? 'selected' : ''}>${q.rows[j][1]}</option>`).join('')}</select></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = q.rows.map((_, i) => { const s = $(`.matchrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
-      if (v.some(x => x == null)) { api.say('Choose a match for every row first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => { const s = $(`.matchrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
+      if (v.some(x => x == null) && !api.auto) { api.say('Choose a match for every row first.', 'no'); return; }
       const bad = v.map((x, i) => x === i ? -1 : i).filter(i => i >= 0);
-      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All matched!') : bad.length === 1 ? `Whoops! ${qq(q.rows[bad[0]][0])} goes with ${qq(q.rows[bad[0]][1])}.` : `Whoops! ${bad.length} matches weren't right. Each red one now shows the right match.`, { score: q.rows.length - bad.length }); }); },
+      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All matched!') : bad.length === 1 ? `Whoops! ${qq(q.rows[bad[0]][0])} goes with ${qq(q.rows[bad[0]][1])}.` : `Whoops! ${bad.length} matches weren't right. Each red one now shows the right match.`, { score: q.rows.length - bad.length }); };
+      api.reg({ blank: () => $$('.matchrow select', el).every(x => x.value === ''), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { $$('.matchrow', el).forEach(r => { const i = +r.dataset.i, ok = s.v && s.v[i] === i; r.className = 'matchrow ' + (ok ? 'right' : 'wrong'); if (!ok) corr($('select', r), q.rows[i][1]); }); lockInputs(el); },
     show(q, v) { return q.rows.map((r, i) => `${r[0]} → ${v && v[i] != null ? q.rows[v[i]][1] : '–'}`).join('<br>'); }, model(q) { return q.rows.map(r => `${r[0]} → ${r[1]}`).join('<br>'); }
   },
   table: { // q.cols, q.rows:[[label, [answerIndex per col]]], q.choices: per col list
     html(q, s) { return `<table class="tbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, i) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td data-c="${i}-${j}"><select aria-label="${esc(plain(r[0]))}, ${esc(plain(q.cols[j]))}"><option value="">Choose…</option>${q.choices[j].map((o, k) => `<option value="${k}" ${s && s.v && s.v[i] && s.v[i][j] === k ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</table><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = q.rows.map((_, i) => q.cols.map((_, j) => { const s = $(`td[data-c="${i}-${j}"] select`, el).value; return s === '' ? null : +s; }));
-      if (v.flat().some(x => x == null)) { api.say('Fill in every cell first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => q.cols.map((_, j) => { const s = $(`td[data-c="${i}-${j}"] select`, el).value; return s === '' ? null : +s; }));
+      if (v.flat().some(x => x == null) && !api.auto) { api.say('Fill in every cell first.', 'no'); return; }
       let wrong = 0; q.rows.forEach((r, i) => q.cols.forEach((_, j) => { if (v[i][j] !== r[1][j]) wrong++; }));
-      api.answer(v, !wrong, !wrong ? (q.ok || 'Table complete and correct!') : `Whoops! ${wrong} cell${wrong > 1 ? 's weren\'t' : ' wasn\'t'} right. The right answer${wrong > 1 ? 's are' : ' is'} shown in green.`, { score: q.rows.length * q.cols.length - wrong }); }); },
+      api.answer(v, !wrong, !wrong ? (q.ok || 'Table complete and correct!') : `Whoops! ${wrong} cell${wrong > 1 ? 's weren\'t' : ' wasn\'t'} right. The right answer${wrong > 1 ? 's are' : ' is'} shown in green.`, { score: q.rows.length * q.cols.length - wrong }); };
+      api.reg({ blank: () => $$('td select', el).every(x => x.value === ''), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { q.rows.forEach((r, i) => q.cols.forEach((_, j) => { const td = $(`td[data-c="${i}-${j}"]`, el), ok = s.v && s.v[i] && s.v[i][j] === r[1][j]; td.className = ok ? 'right' : 'wrong'; if (!ok) corr($('select', td), q.choices[j][r[1][j]]); })); lockInputs(el); },
     show(q, v) { return `<table class="wtbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, i) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td>${v && v[i] && v[i][j] != null ? q.choices[j][v[i][j]] : ''}</td>`).join('')}</tr>`).join('')}</table>`; },
     model(q) { return QT.table.show(q, q.rows.map(r => r[1])); }
   },
   tick: {
     html(q, s) { return `<div class="ticklist">${optOrder(q).map(i => `<label><input type="checkbox" data-o="${i}" ${s && s.v && s.v.includes(i) ? 'checked' : ''}> ${q.opts[i]}</label>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = $$('[data-o]', el).filter(c => c.checked).map(c => +c.dataset.o).sort((a, b) => a - b);
-      if (!v.length) { api.say('Tick at least one box first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = $$('[data-o]', el).filter(c => c.checked).map(c => +c.dataset.o).sort((a, b) => a - b);
+      if (!v.length && !api.auto) { api.say('Tick at least one box first.', 'no'); return; }
       const errs = v.filter(i => !q.a.includes(i)).length + q.a.filter(i => !v.includes(i)).length, ok = !errs;
-      api.answer(v, ok, ok ? (q.ok || 'All correct!') : `Whoops! The right answer${q.a.length > 1 ? 's are' : ' is'} ${q.a.map(i => qq(q.opts[i])).join(' and ')}. Green ticks were right, red ones were wrong, and amber ones were missed.`, { score: Math.max(0, 2 - errs) }); }); },
+      api.answer(v, ok, ok ? (q.ok || 'All correct!') : `Whoops! The right answer${q.a.length > 1 ? 's are' : ' is'} ${q.a.map(i => qq(q.opts[i])).join(' and ')}. Green ticks were right, red ones were wrong, and amber ones were missed.`, { score: Math.max(0, 2 - errs) }); };
+      api.reg({ blank: () => !$$('[data-o]', el).some(c => c.checked), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { $$('[data-o]', el).forEach(c => { const i = +c.dataset.o, should = q.a.includes(i), was = (s.v || []).includes(i); c.parentElement.className = was ? (should ? 'right' : 'wrong') : (should ? 'missed' : ''); }); lockInputs(el); },
     show(q, v) { return (v || []).map(i => '☑ ' + q.opts[i]).join('<br>') || '–'; }, model(q) { return q.a.map(i => '☑ ' + q.opts[i]).join('<br>'); }
   },
   explain: {
-    html(q, s) { return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${s && s.v ? esc(s.v.text || '') : ''}</textarea><button type="button" class="ghost sm qchk" style="align-self:flex-start">Show the model answer</button><div class="modelwrap"></div>`; },
+    /* The "Did you include…?" checklist is on screen from the start, so a student can tick as they write. Ticks are saved with the draft.
+       Check (or Finish) shows the model answer and scores one point per tick; ticks can still change afterwards. */
+    html(q, s) {
+      const v = (s && s.v) || {}, ticks = v.ticks || [], done = !!(s && s.done);
+      return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck"><div class="lbl exckhd">${done ? 'Did you include…? Tick what you included. You get a point for each one.' : 'Before you finish, tick what you included.'}</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
+    },
     bind(el, q, api) {
-      const showModel = (ticks) => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p><div class="lbl">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks && ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div>`;
-        $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const t = $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck); api.answer({ text: $('.explain', el).value, ticks: t }, null, null, { quiet: true, score: t.length }); })); };
-      $('.qchk', el).addEventListener('click', () => { const t = $('.explain', el).value.trim(); if (!t) { api.say('Write your answer first, then compare it with the model answer.', 'no'); return; } $('.qchk', el).hidden = true; api.answer({ text: t, ticks: [] }, null, 'Now compare your answer with the model answer and tick each point you included.', { score: 0 }); showModel([]); });
-      $('.explain', el).addEventListener('input', () => { const s = api.state(); if (s && s.v) { s.v.text = $('.explain', el).value; api.persist(); } });
-      const s = api.state(); if (s && s.done) { showModel(s.v.ticks); $('.qchk', el).hidden = true; }
+      const ticksNow = () => $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck), textNow = () => $('.explain', el).value;
+      const draft = () => { const cur = api.state() || {}; cur.v = { text: textNow(), ticks: ticksNow() }; api.setRaw(cur); };
+      const reveal = () => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p></div>`; $('.exckhd', el).textContent = 'Did you include…? Tick what you included. You get a point for each one.'; $('.qchk', el).hidden = true; };
+      const go = () => { const t = textNow().trim(); if (!t && !api.auto) { api.say('Write your answer first, then compare it with the model answer.', 'no'); return; }
+        const tk = ticksNow(); reveal(); api.answer({ text: t, ticks: tk }, null, 'Now compare your answer with the model answer. You can still change your ticks.', { score: tk.length }); };
+      api.reg({ blank: () => !textNow().trim() && !ticksNow().length, check: go, reveal, blankV: { text: '', ticks: [] } });
+      $('.qchk', el).addEventListener('click', go);
+      $('.explain', el).addEventListener('input', draft);
+      $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const st = api.state(); if (st && st.done) api.answer({ text: textNow(), ticks: ticksNow() }, null, null, { quiet: true, score: ticksNow().length }); else draft(); }));
+      const s = api.state(); if (s && s.done) reveal();
     },
     show(q, v) { return v ? esc(v.text || '').replace(/\n/g, '<br>') : ''; }, model(q) { return q.model; }
   },
@@ -3563,8 +3593,9 @@ const QT = {
     html(q, s) { return `<div class="fbdhost"></div>`; },
     bind(el, q, api) {
       const s = api.state(); if (s && s.done) return;
-      FBDB.mount($('.fbdhost', el), q.scen, { state: s && s.v, onChange: st => { const cur = api.state() || {}; cur.v = st; api.setRaw(cur); },
+      const M = FBDB.mount($('.fbdhost', el), q.scen, { state: s && s.v, onChange: st => { const cur = api.state() || {}; cur.v = st; api.setRaw(cur); },
         onCheck: (st, res) => api.answer(st, res.ok, res.ok ? 'Perfect diagram! Every check is green.' : `You scored ${res.score} of 6 points. Compare your diagram with the correct one to see what to change next time.`, { score: res.score }) });
+      api.reg({ blank: () => !M.state.arrows.length, check: () => M.check() });
     },
     lock(el, q, s) { el.innerHTML = fbdCompare(q.scen, s.v); },
     show(q, v) { return v && v.arrows && v.arrows.length ? FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true }) : ''; }, model(q) { return FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }); }
@@ -3587,7 +3618,10 @@ function renderQuestion(host, q, ctx) {
   host.appendChild(box);
   const body = $('.qbody', box), fbEl = $('.fb', box);
   const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
+  let reg = null;   // what the question type says about itself: { blank(), check(), reveal?, blankV? }, used by the Finish button
   const api = {
+    auto: false,       // true while the Finish button is checking this question: skip every "do this first" guard and mark what is there
+    reg: r => { reg = r; },
     storePath: ctx.store,
     draft: ctx.mode === 'learn' ? { key: ctx.store + '|' + q.id, get: () => draftOf(ctx.store, q.id), set: (part, val, src) => draftSave(ctx.store, q.id, part, val, src) } : null,
     state: () => dbGet(path, null),
@@ -3613,6 +3647,17 @@ function renderQuestion(host, q, ctx) {
   };
   body.innerHTML = QT[q.type].html(q, s, api);
   QT[q.type].bind(body, q, api);
+  /* the Finish button's hooks */
+  box.isDone = () => { const st = dbGet(path, null); return !!(st && st.done); };
+  box.isBlank = () => !box.isDone() && !!reg && !!reg.blank();
+  box.autoCheck = () => { if (box.isDone() || !reg) return; api.auto = true; try { reg.check(); } finally { api.auto = false; } };
+  box.blankDone = () => {   // a question left empty: stored as done with 0 points, and the right answer is shown
+    if (box.isDone()) return; const st = dbGet(path, null) || { tries: 0 };
+    st.ok = false; st.score = 0; st.max = simMax(q); st.done = true; st.blank = true; if (reg && reg.blankV) st.v = JSON.parse(JSON.stringify(reg.blankV));
+    dbSet(path, st); box.classList.add('locked'); box.classList.remove('ok');
+    if (QT[q.type].lock) QT[q.type].lock(body, q, st); else if (reg && reg.reveal) reg.reveal();
+    pts(st); api.say('Left blank: 0 points.', 'no'); if (ctx.onDone) ctx.onDone(q, st);
+  };
   if (q.sure) body.addEventListener('click', e => { const b = e.target.closest('.surebtn'); if (!b || api.locked()) return; $$('.surebtn', body).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); });
   if (s && s.done) {
     if (QT[q.type].lock) QT[q.type].lock(body, q, s);
@@ -3660,10 +3705,12 @@ QT.order = {
       $$('.ordcard', list).forEach((c, i) => { $('.ordn', c).textContent = i + 1; });
       const cur = api.state() || {}; cur.v = read(); api.setRaw(cur); b.focus();
     });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const v = read(), sc = orderScore(v), ok = sc === 2;
       api.answer(v, ok, ok ? (q.ok || 'Perfect order!') + afterTxt(q) : (sc === 1 ? 'Close! Two neighbours are the wrong way round. Each wrong card now shows where it belongs.' : 'Whoops! That order wasn\'t right. Each wrong card now shows where it belongs.') + afterTxt(q), { score: sc });
-    });
+    };
+    api.reg({ blank: () => { const st = api.state(); return !(st && Array.isArray(st.v)); }, check: go });   // the shuffled start order is not an answer: a card has to be moved
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     $$('.ordcard', el).forEach((c, pos) => { const it = +c.dataset.it, ok = it === pos; c.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr($('.ordt', c), 'goes ' + ORD(it + 1)); });
@@ -3709,14 +3756,16 @@ QT.calcorder = {
       $$('.ordcard', list).forEach((c, i) => { $('.ordn', c).textContent = i + 1; });
       save(); b.focus();
     });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const vals = readVals(), ord = readOrd();
-      if (q.items.some((_, i) => isNaN(parseNum(vals[i])))) { api.say('Type a number in every box first. If you are not sure, give your best answer.', 'no'); return; }
+      if (q.items.some((_, i) => isNaN(parseNum(vals[i]))) && !api.auto) { api.say('Type a number in every box first. If you are not sure, give your best answer.', 'no'); return; }
       const sc = coScore(q, vals, ord), n = q.items.length, ok = sc.total === 5;
       const part1 = sc.r === n ? 'All the calculations are right.' : `${sc.r} of ${n} calculations were right. The right values are shown in green.`;
       const part2 = sc.strict === 2 ? 'The order is right.' : sc.own ? 'Your order matches your own values, so you keep the order marks. Check the sums that were wrong.' : sc.strict === 1 ? 'Close! Two neighbours in the order are the wrong way round.' : 'The order wasn\'t right. The correct order is shown below.';
       api.answer({ vals, ord }, ok, (ok ? (q.ok || 'Every value and the order are right!') : 'Whoops! ' + part1 + ' ' + part2) + afterTxt(q), { score: sc.total });
-    });
+    };
+    api.reg({ blank: () => { const st = api.state(); return $$('.coin', el).every(i => !i.value.trim()) && !(st && st.v); }, check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const v = s.v || { vals: [], ord: [] }, sc = coScore(q, v.vals || [], v.ord || []);
@@ -3739,13 +3788,15 @@ QT.pick = {
     return `<div class="gl pickp">${pickSentence(q, k => `<select class="pickin" data-k="${k}" aria-label="Choice ${k + 1} of ${q.picks.length}"><option value="">choose…</option>${q.picks[k][0].map((o, j) => `<option value="${j}"${s && Array.isArray(s.v) && s.v[k] === j ? ' selected' : ''}>${o}</option>`).join('')}</select>`)}</div>${sureHTML(q, s)}<button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`;
   },
   bind(el, q, api) {
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const v = q.picks.map((_, k) => { const x = $(`.pickin[data-k="${k}"]`, el).value; return x === '' ? null : +x; });
-      if (v.some(x => x == null)) { api.say('Choose a word for every gap first.', 'no'); return; }
-      if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first.', 'no'); return; }
+      if (v.some(x => x == null) && !api.auto) { api.say('Choose a word for every gap first.', 'no'); return; }
+      if (q.sure && !sureGet(el) && !api.auto) { api.say('Choose how sure you are first.', 'no'); return; }
       const bad = v.map((x, k) => x === q.picks[k][1] ? -1 : k).filter(k => k >= 0);
       api.answer(v, !bad.length, (!bad.length ? (q.ok || 'All correct!') : bad.length === 1 ? `Whoops! The right choice is ${qq(q.picks[bad[0]][0][q.picks[bad[0]][1]])}.` : `Whoops! ${bad.length} choices weren't right. The right words are shown in green.`) + afterTxt(q), { score: q.picks.length - bad.length, sure: q.sure ? sureGet(el) : null });
-    });
+    };
+    api.reg({ blank: () => $$('.pickin', el).every(x => x.value === ''), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     $$('.pickin', el).forEach(sel => { const k = +sel.dataset.k, ok = s.v && s.v[k] === q.picks[k][1]; sel.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr(sel, q.picks[k][0][q.picks[k][1]]); });
@@ -3787,11 +3838,11 @@ QT.reason = {
       if (bo) { a = +bo.dataset.o; $$('.rA [data-o]', el).forEach(b => b.classList.toggle('picked', b === bo)); $('.rtier2', el).hidden = false; save(); }
       if (br) { r = +br.dataset.r; $$('.rR [data-r]', el).forEach(b => b.classList.toggle('picked', b === br)); save(); }
     });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return;
-      if (a == null) { api.say('Choose an answer first.', 'no'); return; }
-      if (r == null) { api.say('Now choose the best reason.', 'no'); return; }
-      if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first.', 'no'); return; }
+      if (a == null && !api.auto) { api.say('Choose an answer first.', 'no'); return; }
+      if (r == null && !api.auto) { api.say('Now choose the best reason.', 'no'); return; }
+      if (q.sure && !sureGet(el) && !api.auto) { api.say('Choose how sure you are first.', 'no'); return; }
       const okA = a === q.a, okR = r === q.r, ok = okA && okR, ro = rOpts(q), gen = rWhyAll(q), rea = qq(q.reasons[q.r]);
       const ans = q.voices ? `${q.voices[q.a].who} is right` : `The answer is ${qq(ro[q.a])}`;   // cartoon mode names the character instead of repeating the speech bubble
       const msg = ok ? `${q.ok || 'Spot on! Right answer and right reason.'} ${gen}`
@@ -3799,7 +3850,9 @@ QT.reason = {
         : okR ? `Whoops! ${ans}. The reason you chose is the right one, but it goes with a different answer. ${rWhy(q, 'a', a)} ${gen}`
         : `Whoops! ${ans}, because ${rea}. ${rWhy(q, 'a', a)} ${rWhy(q, 'r', r)} ${gen}`;
       api.answer({ a, r }, ok, msg.replace(/\s+/g, ' ').trim(), { score: (okA ? 1 : 0) + (okR ? 1 : 0), sure: q.sure ? sureGet(el) : null });
-    });
+    };
+    api.reg({ blank: () => a == null && r == null, check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const v = s.v || {}; $('.rtier2', el).hidden = false;
@@ -3846,12 +3899,13 @@ QT.fix = {
     if (f.kind === 'num') {
       const go = () => {
         if (api.locked() || line == null) return; const raw = $('.ansin', el).value, U = f.units && f.units.length, u = U ? $('.unitsel', el).value : null;
-        if (isNaN(parseNum(raw))) { api.say('Type your answer as a number.', 'no'); return; }
-        if (U && !u) { api.say('Choose a unit for your answer first.', 'no'); return; }
+        if (isNaN(parseNum(raw)) && !api.auto) { api.say('Type your answer as a number.', 'no'); return; }
+        if (U && !u && !api.auto) { api.say('Choose a unit for your answer first.', 'no'); return; }
         finish(raw, fixNumOk(q, raw, u), u);
       };
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
-    } else el.addEventListener('click', e => { const b = e.target.closest('.rF [data-o]'); if (!b || api.locked() || line == null) return; const i = +b.dataset.o; finish(i, i === f.a); });
+      api.reg({ blank: () => line == null, check: go });
+    } else { api.reg({ blank: () => line == null, check: () => { if (line != null) finish(null, false); } }); el.addEventListener('click', e => { const b = e.target.closest('.rF [data-o]'); if (!b || api.locked() || line == null) return; const i = +b.dataset.o; finish(i, i === f.a); }); }
   },
   lock(el, q, s) {
     const v = s.v || {}, f = q.fix;
@@ -3951,14 +4005,16 @@ QT.freeze = {
       if (typeof checkStep === 'function') checkStep();
     });
     $$('.frzrow', el).forEach((r, ri) => { if (frzState(q, api.state())[ri].snap) r.classList.add('has'); });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const rows = frzState(q, api.state());
-      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. ${plain(q.rows[noSnap].whenMsg || 'Pause the drop at that moment.')}`, 'no'); return; }
+      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0 && !api.auto) { api.say(`Row ${noSnap + 1} needs a moment first. ${plain(q.rows[noSnap].whenMsg || 'Pause the drop at that moment.')}`, 'no'); return; }
       let n = 0, good = 0, v = rows.map((r, ri) => { const vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: r.snap, vals }; });
-      for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
+      if (!api.auto) for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
       v.forEach(r => q.cols.forEach(([k]) => { n++; if (frzCellOk(k, r.vals[k], r.snap)) good++; }));
       api.answer({ rows: v }, good === n, (good === n ? (q.ok || 'All correct! Your readings match your paused moments.') : `Whoops! ${n - good} of ${n} boxes weren't right. The right readings from your moments are shown in green.`) + afterTxt(q), { score: good });
-    });
+    };
+    api.reg({ blank: () => frzState(q, api.state()).every(r => !r.snap) && $$('.frzin', el).every(i => i.value === ''), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const rows = frzState(q, s);
@@ -3975,7 +4031,7 @@ QT.freeze = {
   model(q) { return 'Example values (students\' will differ):<br>' + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('<br>'); }
 };
 function frzCellOk(k, raw, snap) {
-  if (raw === '' || raw == null) return false;
+  if (raw === '' || raw == null || !snap) return false;
   if (!frzIsNum(k)) return +raw === frzTruth(k, snap);
   const n = parseNum(raw); return !isNaN(n) && near(n, frzTruth(k, snap), frzTol(k));
 }
@@ -4012,12 +4068,14 @@ QT.spot = {
     svg.setAttribute('tabindex', '0'); svg.setAttribute('role', 'slider'); svg.setAttribute('aria-label', 'Graph. Tap to place the marker, or press the left and right arrow keys to move it.');
     svg.addEventListener('keydown', e => { if (api.locked() || !/^Arrow(Left|Right)$/.test(e.key)) return; e.preventDefault(); put((v[act] == null ? tMax / 2 : v[act]) + (e.key === 'ArrowLeft' ? -1 : 1) * tMax / 40); });
     redraw();
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const miss = v.findIndex(t => t == null);
-      if (miss >= 0) { act = miss; redraw(); api.say(q.targets.length > 1 ? `Tap the graph to place marker ${miss + 1} first.` : 'Tap the graph to place your marker first.', 'no'); return; }
-      const oks = v.map((t, i) => t >= q.targets[i].t[0] - 1e-9 && t <= q.targets[i].t[1] + 1e-9), n = oks.filter(Boolean).length, bad = oks.map((o, i) => o ? -1 : i).filter(i => i >= 0);
+      if (miss >= 0 && !api.auto) { act = miss; redraw(); api.say(q.targets.length > 1 ? `Tap the graph to place marker ${miss + 1} first.` : 'Tap the graph to place your marker first.', 'no'); return; }
+      const oks = v.map((t, i) => t != null && t >= q.targets[i].t[0] - 1e-9 && t <= q.targets[i].t[1] + 1e-9), n = oks.filter(Boolean).length, bad = oks.map((o, i) => o ? -1 : i).filter(i => i >= 0);
       api.answer(v.slice(), n === q.targets.length, (n === q.targets.length ? (q.ok || 'Spot on!') : `Whoops! ${bad.length === 1 && q.targets.length === 1 ? 'That' : bad.length === 1 ? 'Marker ' + (bad[0] + 1) : bad.length + ' markers'} wasn't in the right place. The green band${q.targets.length > 1 ? 's show' : ' shows'} where ${q.targets.length > 1 ? 'they were' : 'it was'}. ${bad.map(i => q.targets[i].why || '').join(' ')}`).replace(/\s+/g, ' ').trim() + afterTxt(q), { score: n });
-    });
+    };
+    api.reg({ blank: () => v.every(t => t == null), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) { const svg = $('svg', el); spotDraw(svg, q, spotSt(q, s), true); $$('.spotb', el).forEach(b => { b.disabled = true; }); svg.removeAttribute('tabindex'); lockInputs(el); },
   show(q, v) { return Array.isArray(v) ? v.map((t, i) => `Marker ${i + 1}: ${t == null ? '–' : fmt(t, 1) + ' s'}`).join('<br>') : ''; },
@@ -4075,7 +4133,7 @@ function sketchBind(host, q, get, set, locked) {
   draw();
 }
 const skDots = (q, s) => (s && Array.isArray(s.v) ? s.v : q.cols ? Array.from({ length: q.cols }, () => null) : []);
-const skChecks = (q, p) => q.checks.map(([label, f]) => { let ok = false; try { ok = !!f(p); } catch (e) { } return [label, ok]; });
+const skChecks = (q, p) => { const pp = p.map(x => x == null ? NaN : x); return q.checks.map(([label, f]) => { let ok = false; try { ok = !!f(pp); } catch (e) { } return [label, ok]; }); };   // a column with no dot is NaN, so every comparison with it is false
 const skChips = (q, p) => `<div class="skchips">${skChecks(q, p).map(([l, ok]) => `<span class="skchip ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'} ${l}</span>`).join('')}</div>`;
 QT.sketch = {
   html(q, s) { return `<div class="skhost"></div><div class="skhint">Tap a column to set its dot, or drag across the grid to draw. With a keyboard, use the arrow keys.</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check my sketch</button>`; },
@@ -4083,12 +4141,14 @@ QT.sketch = {
     const host = $('.skhost', el), get = () => skDots(q, api.state()), set = p => { const cur = api.state() || {}; cur.v = p; api.setRaw(cur); };
     if (api.locked()) { return; }
     sketchBind(host, q, get, set, () => api.locked());
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const p = get();
-      if (p.some(x => x == null)) { api.say(`Set a dot in every column first (${p.filter(x => x == null).length} to go).`, 'no'); return; }
+      if (p.some(x => x == null) && !api.auto) { api.say(`Set a dot in every column first (${p.filter(x => x == null).length} to go).`, 'no'); return; }
       const res = skChecks(q, p), n = res.filter(r => r[1]).length;
       api.answer(p.slice(), n === res.length, n === res.length ? (q.ok || 'Great sketch! Every check is right.') + afterTxt(q) : `Not quite: ${n} of ${res.length} checks are right. The green dashed line shows what the graph should look like.` + afterTxt(q), { score: n });
-    });
+    };
+    api.reg({ blank: () => get().every(x => x == null), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const p = skDots(q, s), host = $('.skhost', el), real = q.real ? q.real() : null;
@@ -4374,7 +4434,9 @@ function endTour() { if (tourEl) tourEl.remove(); tourEl = null; unhi(); }
 function maybeTour() { }
 
 /* ---------- stamps: every part of the chapter finished ---------- */
-function maybeStamp(id) { const L = learnProgress(id), R = reviewProgress(id); if (L.done === L.total && challengeDone(id) && R.done === R.total) awardStamp(id); }
+/* the stamp comes when the Check has been finished with the Finish button (never in the middle of a Check) and Learn and the Challenge are done.
+   Called when the last Learn step or the Challenge is completed; the Finish button's results pop-up gives the stamp itself when everything is already done. */
+function maybeStamp(id) { const L = learnProgress(id); if (L.done === L.total && challengeDone(id) && dbGet('review.' + id, {}).finished) awardStamp(id); }
 
 /* ---------- the diagram desk (FBD builder over the stage card) ---------- */
 function openDesk(q, store) {
@@ -6736,8 +6798,18 @@ function wsLoadBlock(c, x, y, w, h, id, label) {   // x,y = the middle of the bo
   c.fillStyle = ice ? WSC.ice2 : rock ? WSC.rock2 : WSC.crate2; if (!rock) { c.fillRect(x - w / 2 + 5, y - h + 5, w - 10, 4); c.fillRect(x - w / 2 + 5, y - 9, w - 10, 4); } else { c.beginPath(); c.ellipse(x - w * .18, y - h * .62, w * .18, h * .14, -.4, 0, 7); c.fill(); }
   if (label) txt(c, label, x, y - h / 2 + 0.5, '#fffaf2', `800 12px ${C.fn}`);
 }
+/* a label in a white text box with a coloured border (x, y = middle of the text; align 'left'/'right' puts the box's edge there).
+   An optional leader line runs from the box edge to a point and stops at the box edge, never through the text. */
+function wsLabel(c, text, x, y, col, align, pt) {
+  c.save(); c.font = `700 11px ${C.fn}`; const w = c.measureText(text).width + 12, h = 18;
+  let bx = align === 'left' ? x - 6 : align === 'right' ? x - w + 6 : x - w / 2; const by = y - h / 2; if (bx < 166 && y > 40) bx = 166;
+  if (pt) { const mx = bx + w / 2, my = by + h / 2, dx = pt[0] - mx, dy = pt[1] - my, t = Math.min(dx ? (w / 2) / Math.abs(dx) : 9e9, dy ? (h / 2) / Math.abs(dy) : 9e9);
+    if (t < 1) { c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(mx + dx * t, my + dy * t); c.lineTo(pt[0], pt[1]); c.stroke(); c.fillStyle = col; c.beginPath(); c.arc(pt[0], pt[1], 2.5, 0, 7); c.fill(); } }
+  c.fillStyle = '#fff'; c.beginPath(); c.roundRect(bx, by, w, h, 5); c.fill(); c.strokeStyle = col; c.lineWidth = 1.5; c.stroke();
+  c.fillStyle = col; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, bx + w / 2, y + 0.5); c.restore();
+}
 function wsBracket(c, x1, x2, y, label, col, above) {
-  c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke(); txt(c, label, (x1 + x2) / 2, above ? y - 10 : y + 12, col, `700 11px ${C.fn}`);
+  c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke(); if (label) wsLabel(c, label, (x1 + x2) / 2, above ? y - 14 : y + 14, col);
 }
 const wsHand = (c, x, y, down) => { c.fillStyle = '#e8b896'; c.beginPath(); c.roundRect(x - 11, y - 11, 22, 22, 9); c.fill(); c.fillStyle = '#b8916f'; c.fillRect(x - 11, y + (down ? 6 : -9), 22, 4); };
 function wsEffArrow(c, x, y, down) { const col = WSC.red; if (down) arrow(c, x, y - 54, x, y - 14, col, 4); else arrow(c, x, y + 54, x, y + 14, col, 4); }
@@ -6756,7 +6828,7 @@ function wsSpring(c, ax, ay, hx, hy, label) {
   c.restore();
   wsHand(c, hx, hy, uy > 0);
   arrow(c, hx + ux * 14, hy + uy * 14, hx + ux * 50, hy + uy * 50, WSC.red, 4);
-  if (label) { const mx = ax + ux * (hook + body / 2), my = ay + uy * (hook + body / 2); if (Math.abs(uy) > .7) txt(c, label, mx + 16, my, WSC.red, `800 11px ${C.fb}`, 'left'); else txt(c, label, mx - uy * 18, my + ux * 18 - 4, WSC.red, `800 11px ${C.fb}`, 'center'); }
+  if (label) { const mx = ax + ux * (hook + body / 2), my = ay + uy * (hook + body / 2); if (Math.abs(uy) > .7) wsLabel(c, label, mx + 16, my, WSC.red, 'left'); else wsLabel(c, label, mx - uy * 22, my + ux * 22 - 4, WSC.red); }
 }
 /* the lever. A wider pivot height for each set-up keeps the bar, the spring balance and the hand above the floor at every slider setting:
    fulcrum in the middle (class 1): your end goes DOWN, so the bar sits high and the newtonmeter hangs below it;
@@ -6779,7 +6851,7 @@ function wsDrawLever(c, cur, riseNow) {
   const down = WS.cls === 1, hy = down ? Math.min(E.y + 84, 330) : Math.max(E.y - 84, 52);
   wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
   /* labels: the three parts of a lever, then the two distances along the bar in plain words */
-  if (down) txt(c, 'fulcrum', fx, 342, '#fff', `800 10px ${C.fb}`); else txt(c, 'fulcrum', fx - 30, 334, WSC.steel2, `800 11px ${C.fb}`, 'right');
+  if (down) wsLabel(c, 'fulcrum', fx, 338, WSC.steel2, 'center', [fx, 322]); else wsLabel(c, 'fulcrum', fx - 34, 334, WSC.steel2, 'right', [fx - 14, 330]);
   return { x: E.x, y: hy };
 }
 /* lifting by hand: the newtonmeter hooks onto the rock and the hand pulls straight up */
@@ -6803,7 +6875,7 @@ function wsDrawPulley(c, cur, riseNow, prog) {
   wsLoadBlock(c, cx, bY + 62, 64, 50, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
   /* the free end comes down over the last wheel to the puller's hand */
   const hx = 500, ry = 150 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, ry); c.stroke();
-  wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); txt(c, 'the end you pull', hx + 10, 110, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, '(not counted)', hx + 10, 122, WSC.ink, `700 10px ${C.fb}`, 'left');
+  wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); wsLabel(c, 'the end you pull (not counted)', hx - 10, 52, WSC.ink, 'center', [hx, 78]);
   return { x: hx, y: ry + 66 };
 }
 function wsDrawWinch(c, cur, riseNow) {
@@ -6817,13 +6889,13 @@ function wsDrawWinch(c, cur, riseNow) {
   /* the crank handle turning */
   const a = rot, gx = ax + Math.cos(a) * hr, gy = ay + Math.sin(a) * hr; c.strokeStyle = WSC.wood2; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(gx, gy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(gx, gy, 9, 0, 7); c.fill();
   const tx = -Math.sin(a), ty = Math.cos(a); arrow(c, gx - tx * 4, gy - ty * 4, gx + tx * 42, gy + ty * 42, WSC.red, 4);
-  wsBracket(c, ax - hr, ax, ay, '', WSC.red); txt(c, `handle radius ${fmt(WS.R, 2)} m`, ax - hr - 10, ay, WSC.red, `700 11px ${C.fn}`, 'right'); txt(c, `axle radius ${fmt(WS.axle, 2)} m`, ax + hr + 14, ay + 4, WSC.green, `700 11px ${C.fn}`, 'left');
+  wsBracket(c, ax - hr, ax, ay, '', WSC.red); wsLabel(c, `handle radius ${fmt(WS.R, 2)} m`, ax - hr - 10, ay, WSC.red, 'right'); wsLabel(c, `axle radius ${fmt(WS.axle, 2)} m`, ax + hr + 14, ay + 4, WSC.green, 'left');
   return { x: gx, y: gy };
 }
 function wsDrawRamp(c, cur, riseNow, prog) {
   const run = Math.sqrt(Math.max(.01, WS.L * WS.L - WS.h * WS.h)), sc = Math.min(85, 440 / run, 200 / WS.h), A = { x: 50, y: 340 }, B = { x: 50 + run * sc, y: 340 - WS.h * sc };
   c.fillStyle = WSC.wood; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.lineTo(B.x, A.y); c.closePath(); c.fill(); c.fillStyle = WSC.wood2; c.fillRect(B.x, B.y, 60, A.y - B.y); c.fillStyle = WSC.steel; c.fillRect(B.x, B.y - 4, 60, 5);
-  wsBracket(c, A.x, B.x, 232, `ramp length ${fmt(WS.L, 1)} m`, WSC.red, true); txt(c, `height ${fmt(WS.h, 1)} m`, B.x + 30, (A.y + B.y) / 2 + 4, '#fffaf2', `700 10.5px ${C.fn}`);
+  wsBracket(c, A.x, B.x, 232, `ramp length ${fmt(WS.L, 1)} m`, WSC.red, true); wsLabel(c, `height ${fmt(WS.h, 1)} m`, B.x + 30, (A.y + B.y) / 2 + 4, WSC.green);
   const ang = Math.atan2(B.y - A.y, B.x - A.x), t = clamp(prog, 0, 1), px = A.x + (B.x - A.x) * t, py = A.y + (B.y - A.y) * t, cs = Math.cos(ang), sn = Math.sin(ang);
   c.save(); c.translate(px, py); c.rotate(ang); c.fillStyle = WSC.crate; c.beginPath(); c.roundRect(2, -36, 54, 28, 5); c.fill(); c.fillStyle = WSC.ink; [[13, -6], [45, -6]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 6, 0, 7); c.fill(); }); txt(c, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N', 29, -22, '#fffaf2', `800 11px ${C.fn}`); c.restore();
   /* the pull is up the slope, along a rope from the front of the cart to the puller's hand on the platform */
@@ -6841,7 +6913,7 @@ function wsDrawWedge(c, cur, riseNow, prog) {
   txt(c, (ice ? 'ice block' : 'log') + ' · needs ' + fmt(WS.load, 0) + ' N to split', cx, 336, '#fffaf2', `700 11px ${C.fn}`);
   c.fillStyle = WSC.steel; c.beginPath(); c.moveTo(cx - wd / 2, top); c.lineTo(cx + wd / 2, top); c.lineTo(cx, tip); c.closePath(); c.fill();
   c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(cx + wd / 2, top); c.lineTo(cx, tip); c.lineTo(cx + wd / 2 - 3, top); c.fill();
-  wsBracket(c, cx - wd / 2, cx + wd / 2, top - 8, '', WSC.red); txt(c, `thickness ${WS.thick} cm`, cx - wd / 2 - 10, top - 8, WSC.red, `700 11px ${C.fn}`, 'right'); txt(c, 'length 20 cm', cx + wd / 2 + 10, top + ht / 2, WSC.green, `700 11px ${C.fn}`, 'left');
+  wsBracket(c, cx - wd / 2, cx + wd / 2, top - 8, '', WSC.red); wsLabel(c, `thickness ${WS.thick} cm`, cx - wd / 2 - 10, top - 8, WSC.red, 'right'); wsLabel(c, 'length 20 cm', cx + wd / 2 + 10, top + ht / 2, WSC.green, 'left');
   const hy = top - 62; wsHand(c, cx, hy, true); arrow(c, cx, hy + 16, cx, hy + 50, WSC.red, 4);
   return { x: cx + 14, y: hy };
 }
@@ -6856,19 +6928,28 @@ function wsDrawScrew(c, cur, riseNow, prog) {
   c.strokeStyle = WSC.wood2; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx + 18, hy); c.lineTo(hx, hy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(hx, hy, 9, 0, 7); c.fill();
   arrow(c, hx + 6, hy - 14, hx + 6, hy - 52, WSC.red, 4);
   const mk = wsMasked(), tn = Math.floor(turnsNow + 1e-6); c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx + 108, 280, 108, 40, 8); c.fill(); txt(c, 'TURNS', cx + 162, 291, '#cfd8dd', `800 9px ${C.fb}`); txt(c, mk.has('turns') ? '?' : String(tn), cx + 162, 308, '#9ef0b2', `700 18px ${C.fn}`);
-  txt(c, `thread gap ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
+  wsLabel(c, `thread gap ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, 'right');
   return { x: hx + 8, y: hy - 52 };
 }
 
 /* ---------- the rulers (after a pull): the load's path and the effort's path, ticks every 0.05 m ---------- */
-function wsRuler(c, x, y, w, dist, title, col) {
-  const len = Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2), pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : 1, lab = pxm >= 150 ? 0.1 : pxm >= 60 ? 0.5 : len > 6 ? 2 : 1;
-  c.fillStyle = '#fbf3da'; c.beginPath(); c.roundRect(x, y, w, 42, 6); c.fill(); c.strokeStyle = '#8a7a50'; c.lineWidth = 1;
+function wsRuler(c, x, y, w, dist, title, col, len, zoom) {
+  len = len || Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2); const pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : 1, lab = pxm >= 300 ? 0.1 : pxm >= 150 ? 0.25 : pxm >= 60 ? 0.5 : len > 6 ? 2 : 1;
+  c.fillStyle = zoom ? '#fff6d6' : '#fbf3da'; c.beginPath(); c.roundRect(x, y, w, 42, 6); c.fill(); c.strokeStyle = '#8a7a50'; c.lineWidth = 1;
+  if (zoom) { c.setLineDash([4, 3]); c.stroke(); c.setLineDash([]); }
   c.fillStyle = col; c.globalAlpha = .45; c.fillRect(x + 10, y + 3, dist * pxm, 7); c.globalAlpha = 1;
   c.fillStyle = WSC.ink; c.font = `600 9px ${C.fn}`; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
   for (let v = 0; v <= len + 1e-9; v += minor) { const xx = x + 10 + v * pxm, major = Math.abs(v / lab - Math.round(v / lab)) < 1e-6, half = Math.abs(v * 10 - Math.round(v * 10)) < 1e-6; c.beginPath(); c.moveTo(xx, y + 10); c.lineTo(xx, y + 10 + (major ? 14 : half ? 9 : 5)); c.stroke(); if (major) c.fillText(String(Math.round(v * 100) / 100), xx, y + 36); }
   c.fillStyle = col; c.beginPath(); c.moveTo(x + 10 + dist * pxm, y + 2); c.lineTo(x + 6 + dist * pxm, y - 5); c.lineTo(x + 14 + dist * pxm, y - 5); c.closePath(); c.fill();
   txt(c, title, x + 6, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left');
+}
+/* both rulers use ONE scale, so a longer bar is a longer bar. A bar under 40 px gets an extra zoomed ruler above it. */
+function wsRulers(c, rise, eDist, t1, t2) {
+  const len = Math.max(0.5, Math.ceil(Math.max(rise, eDist) * 2 - 1e-9) / 2), W = 430, pxm = (W - 20) / len;
+  wsRuler(c, 14, 376, W, Math.max(rise, 0.01), t1, WSC.green, len); wsRuler(c, 456, 376, W, Math.max(eDist, 0.01), t2, WSC.red, len);
+  [[rise, 14, WSC.green], [eDist, 456, WSC.red]].forEach(([d, x, col]) => {
+    if (d > 0 && d * pxm < 40) { const zl = d <= 0.5 ? 0.5 : Math.ceil(d), zy = 312; wsRuler(c, x, zy, 200, d, `🔍 Zoomed in: 0 to ${zl} m`, col, zl, true); }
+  });
 }
 
 /* ---------- the whole scene ---------- */
@@ -6892,7 +6973,7 @@ function drawShopScene(c) {
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
-    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)', WSC.red);
+    wsRulers(c, WS.c.rise, WS.c.eDist, WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)');
   }
 }
 
@@ -6906,8 +6987,37 @@ const picArrow = (x1, y1, x2, y2, col, w) => { const a = Math.atan2(y2 - y1, x2 
 const picHand = (x, y) => `<rect x="${x - 10}" y="${y - 10}" width="20" height="20" rx="8" fill="${PIC_C.skin}"/>`;
 const picTri = (x, y, w, h, col) => `<polygon points="${x - w / 2},${y + h} ${x + w / 2},${y + h} ${x},${y}" fill="${col}"/>`;
 const picRock = (x, y, w, h, label) => `<rect x="${x - w / 2}" y="${y - h}" width="${w}" height="${h}" rx="${h / 2.2}" fill="${PIC_C.rock}"/>${label ? picTxt(x, y - h / 2 + 4, label, '#fff', 11) : ''}`;
-/* a label tag with a short leader line: name in its colour, optional plain words underneath */
-const picTag = (x, y, tx, ty, name, col, sub, dim) => `<g opacity="${dim ? .28 : 1}"><line x1="${x}" y1="${y}" x2="${tx}" y2="${ty + (ty > y ? -14 : 4)}" stroke="${col}" stroke-width="1.6" stroke-dasharray="3 3"/>${picTxt(tx, ty, name, col, 14)}${sub ? picTxt(tx, ty + 15, sub, PIC_C.ink, 11, 'middle', 600) : ''}</g>`;
+/* ---------- label boxes (Tom, 1 Nov 2026: labels sit in white text boxes, like a text box in Word, and the leader line stops at the box edge) ----------
+   picLabel(px, py, bx, by, lines, col, opts): (px, py) is the point on the drawing being labelled, (bx, by) is the CENTRE of the box, lines = [name, plain words (optional)].
+   It returns { line, box }: draw every label's line first and every box last with picLabs([...]), so boxes sit on top of lines and drawing parts.
+   picNote(bx, by, lines, col, opts) is a caption in the same kind of box with no leader line.
+   Box width is estimated (no DOM to measure while building a string): the longest line's characters x font size x PIC_CW, plus 12. opts.dim fades the label. */
+const PIC_CW = 0.58;
+const picTextW = (t, size) => String(t).replace(/<[^>]*>/g, '').replace(/&[a-z#0-9]+;/g, 'x').length * size * PIC_CW;
+function picBox(bx, by, rows, col, dim, W) {   // rows: [{ t, size, weight, col }]; W (optional) keeps the box inside a picture that is W wide
+  const lh = r => r.size + 3, w = Math.max(...rows.map(r => picTextW(r.t, r.size))) + 12, h = 10 + rows.reduce((a, r) => a + lh(r), 0);
+  if (W) bx = Math.min(Math.max(bx, w / 2 + 2), W - w / 2 - 2);
+  const x = bx - w / 2, y = by - h / 2;
+  let t = '', acc = y + 5;
+  rows.forEach(r => { t += `<text x="${bx}" y="${(acc + r.size * 0.9).toFixed(1)}" fill="${r.col}" font-size="${r.size}" font-weight="${r.weight}" text-anchor="middle" font-family="system-ui, sans-serif">${r.t}</text>`; acc += lh(r); });
+  return { w, h, x, y, bx, svg: `<g opacity="${dim ? .28 : 1}"><rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h}" rx="5" fill="#fff" stroke="${col}" stroke-width="1.5"/>${t}</g>` };
+}
+function picLabel(px, py, bx, by, lines, col, o) {
+  o = o || {}; const rows = [{ t: lines[0], size: 14, weight: 800, col }]; if (lines[1]) rows.push({ t: lines[1], size: 11, weight: 600, col: PIC_C.ink });
+  const B = picBox(bx, by, rows, col, o.dim, o.W); bx = B.bx; let line = '';
+  if (px != null) {
+    const vx = px - bx, vy = py - by, k = Math.min(vx ? (B.w / 2) / Math.abs(vx) : Infinity, vy ? (B.h / 2) / Math.abs(vy) : Infinity);   // where the line from the box centre to the labelled point crosses the box edge
+    const ex = bx + vx * k, ey = by + vy * k;
+    line = `<g opacity="${o.dim ? .28 : 1}">${k < 1 ? `<line x1="${px}" y1="${py}" x2="${ex.toFixed(1)}" y2="${ey.toFixed(1)}" stroke="${col}" stroke-width="1.5" stroke-linecap="round"/>` : ''}<circle cx="${px}" cy="${py}" r="3" fill="${col}"/></g>`;
+  }
+  return { line, box: B.svg, b: B };
+}
+function picNote(bx, by, lines, col, o) {
+  o = o || {}; const size = o.size || 12, B = picBox(bx, by, lines.map((t, i) => ({ t, size, weight: i === 0 ? 800 : 600, col: i === 0 || o.all ? col : PIC_C.ink })), col, o.dim, o.W);
+  return { line: '', box: B.svg, b: B };
+}
+const picLW = lines => Math.max(picTextW(lines[0], 14), lines[1] ? picTextW(lines[1], 11) : 0) + 12;   // the width picLabel will give a box
+const picLabs = arr => arr.map(l => l.line).join('') + arr.map(l => l.box).join('');
 
 /* ---------- a lever. o.mid = 'F' (fulcrum in the middle), 'L' (load in the middle) or 'E' (effort in the middle).
    o.show = which labels to show ('FLE' by default); o.focus = one letter to highlight while the others are dimmed;
@@ -6915,7 +7025,7 @@ const picTag = (x, y, tx, ty, name, col, sub, dim) => `<g opacity="${dim ? .28 :
    o.title = a caption above; o.flip = true mirrors it (load on the right). ---------- */
 function picLever(o) {
   o = Object.assign({ mid: 'F', show: 'FLE', focus: null, names: {}, letters: false, title: '', flip: false, w: 380 }, o || {});
-  const W = o.w, H = 196, y = 104, xa = 50, xm = W / 2, xb = W - 50;
+  const W = o.w, top = o.title ? 24 : 0, H = (o.letters ? 196 : 206) + top, y = 104 + top, xa = 50, xm = W / 2, xb = W - 50;
   const pos = o.mid === 'F' ? { L: xa, F: xm, E: xb } : o.mid === 'L' ? { F: xa, L: xm, E: xb } : { F: xa, E: xm, L: xb };
   if (o.flip) Object.keys(pos).forEach(k => pos[k] = W - pos[k]);
   const effDown = o.mid === 'F', dim = k => o.focus && o.focus !== k;
@@ -6931,18 +7041,24 @@ function picLever(o) {
     const at = { F: [pos.F, y + 64], L: [pos.L, y - 52], E: [pos.E + 24, effDown ? y + 40 : y - 36] };
     Object.keys(L).forEach(k => { const [x, yy] = at[k]; b += `<circle cx="${x}" cy="${yy - 5}" r="13" fill="#fff" stroke="${PIC_C.ink}" stroke-width="2"/>` + picTxt(x, yy, L[k], PIC_C.ink, 14); });
   } else {
-    if (o.show.includes('F')) b += picTag(pos.F, y + 40, pos.F, y + 72, nm.F, col.F, sub.F, dim('F'));
-    if (o.show.includes('L')) b += picTag(pos.L, y - 42, pos.L + (o.mid === 'L' ? 0 : 0), y - 60, nm.L, col.L, sub.L, dim('L'));
-    if (o.show.includes('E')) { const side = pos.E > W / 2 ? -1 : 1, hy = effDown ? y + 62 : y - 62; b += `<g opacity="${dim('E') ? .28 : 1}">${picTxt(pos.E + side * 22, hy, nm.E, col.E, 14, side < 0 ? 'end' : 'start')}${picTxt(pos.E + side * 22, hy + 14, sub.E, PIC_C.ink, 11, side < 0 ? 'end' : 'start', 600)}</g>`; }
+    const labs = [];
+    if (o.show.includes('F')) labs.push(picLabel(pos.F, y + 34, pos.F, y + 76, [nm.F, sub.F], col.F, { dim: dim('F'), W }));
+    if (o.show.includes('L')) labs.push(picLabel(pos.L, y - 34, pos.L, y - 70, [nm.L, sub.L], col.L, { dim: dim('L'), W }));
+    if (o.show.includes('E')) {   // beside the hand, on the side away from the other labels
+      const side = pos.E > W / 2 ? -1 : pos.E < W / 2 ? 1 : (pos.L > W / 2 ? -1 : 1), hy = effDown ? y + 62 : y - 62, w = picLW([nm.E, sub.E]);
+      labs.push(picLabel(pos.E + side * 10, hy, pos.E + side * (24 + w / 2), hy, [nm.E, sub.E], col.E, { dim: dim('E'), W }));
+    }
+    b += picLabs(labs);
   }
   const lab = o.letters ? 'A lever with three parts marked A, B and C' : `A lever with the ${o.mid === 'F' ? 'fulcrum' : o.mid === 'L' ? 'load' : 'effort'} in the middle`;
   return picWrap(W, H, lab, b);
 }
 /* just the bar and the pivot, for the very first card */
 function picBar() {
+  const W = 380;
   let b = `<rect x="40" y="88" width="300" height="12" rx="6" fill="${PIC_C.wood}"/>` + picTri(190, 100, 34, 38, PIC_C.F);
-  b += picTag(80, 86, 80, 52, 'Lever', PIC_C.wood2, 'a strong bar') + picTag(190, 132, 190, 160, 'Fulcrum', PIC_C.F, 'the pivot it turns on');
-  return picWrap(380, 186, 'A lever: a strong bar resting on a pivot called the fulcrum', b);
+  b += picLabs([picLabel(80, 92, 90, 42, ['Lever', 'a strong bar'], PIC_C.wood2, { W }), picLabel(190, 128, 190, 166, ['Fulcrum', 'the pivot it turns on'], PIC_C.F, { W })]);
+  return picWrap(W, 192, 'A lever: a strong bar resting on a pivot called the fulcrum', b);
 }
 /* the three set-ups side by side, each named by what is in the middle (o.classes = true adds Class 1, 2, 3) */
 function picThree(o) {
@@ -6954,101 +7070,109 @@ function picThree(o) {
     b += picTxt(cx, 140, (o.classes ? `Class ${n}` : (mid === 'F' ? 'Fulcrum' : mid === 'L' ? 'Load' : 'Effort')), mid === 'F' ? PIC_C.F : mid === 'L' ? PIC_C.L : PIC_C.E, 18) + picTxt(cx, 160, (o.classes ? (mid === 'F' ? 'fulcrum' : mid === 'L' ? 'load' : 'effort') + ' in the middle' : 'in the middle'), mid === 'F' ? PIC_C.F : mid === 'L' ? PIC_C.L : PIC_C.E, 15);
     return b; };
   let b = one('F', 92, 1) + one('L', 272, 2) + one('E', 452, 3);
-  b += picTxt(272, 192, 'F = fulcrum   ·   L = load   ·   E = effort', PIC_C.ink, 15, 'middle', 600);
-  return picWrap(544, 202, o.classes ? 'The three classes of lever: class 1 has the fulcrum in the middle, class 2 the load in the middle and class 3 the effort in the middle' : 'Three ways to build a lever: fulcrum in the middle, load in the middle, or effort in the middle', b, '', 420);
+  b += picNote(272, 192, ['F = fulcrum   ·   L = load   ·   E = effort'], PIC_C.ink, { size: 14, W: 544 }).box;
+  return picWrap(544, 210, o.classes ? 'The three classes of lever: class 1 has the fulcrum in the middle, class 2 the load in the middle and class 3 the effort in the middle' : 'Three ways to build a lever: fulcrum in the middle, load in the middle, or effort in the middle', b, '', 420);
 }
 /* ---------- everyday levers, each labelled ---------- */
 function picSeesaw() {
+  const W = 380;
   let b = `<rect x="30" y="96" width="320" height="12" rx="6" fill="${PIC_C.wood}" transform="rotate(-6 190 102)"/>` + picTri(190, 104, 40, 50, PIC_C.F);
   b += `<rect x="40" y="56" width="52" height="46" rx="8" fill="${PIC_C.rock}" transform="rotate(-6 190 102)"/>` + picTxt(64, 84, 'box', '#fff', 11);
   b += picArrow(318, 92, 318, 136, PIC_C.E, 4) + picHand(318, 146);
-  b += picTag(190, 150, 190, 176, 'Fulcrum', PIC_C.F, 'the middle of the seesaw') + picTag(64, 52, 92, 26, 'Load', PIC_C.L, 'a heavy box') + picTag(330, 146, 300, 182, 'Effort', PIC_C.E, 'you push down');
-  return picWrap(380, 206, 'A seesaw: the fulcrum is in the middle, a heavy box sits on one end and you push down on the other end', b);
+  b += picLabs([picLabel(190, 140, 150, 190, ['Fulcrum', 'the middle of the seesaw'], PIC_C.F, { W }), picLabel(64, 70, 70, 34, ['Load', 'a heavy box'], PIC_C.L, { W }), picLabel(318, 152, 322, 192, ['Effort', 'you push down'], PIC_C.E, { W })]);
+  return picWrap(W, 216, 'A seesaw: the fulcrum is in the middle, a heavy box sits on one end and you push down on the other end', b);
 }
 function picWheelbarrow() {
+  const W = 420;
   let b = `<circle cx="70" cy="140" r="26" fill="${PIC_C.ink}"/><circle cx="70" cy="140" r="8" fill="${PIC_C.steel}"/>`;
   b += `<polygon points="60,104 250,98 236,138 96,140" fill="#2f8f8a"/><path d="M84 104 q60 -34 150 -6 z" fill="#8a6a45"/>`;
   b += `<line x1="70" y1="140" x2="330" y2="96" stroke="${PIC_C.wood2}" stroke-width="8" stroke-linecap="round"/><line x1="200" y1="128" x2="196" y2="166" stroke="${PIC_C.wood2}" stroke-width="6" stroke-linecap="round"/>`;
   b += picArrow(330, 88, 330, 46, PIC_C.E, 4) + picHand(330, 38);
-  b += picTag(70, 168, 70, 192, 'Fulcrum', PIC_C.F, 'the wheel') + picTag(160, 84, 160, 30, 'Load', PIC_C.L, 'the soil in the middle') + picTag(318, 44, 262, 22, 'Effort', PIC_C.E, 'you lift the handles');
-  return picWrap(380, 214, 'A wheelbarrow: the wheel is the fulcrum, the soil in the middle is the load, and you lift the handles at the end', b);
+  b += picLabs([picLabel(70, 152, 96, 198, ['Fulcrum', 'the wheel'], PIC_C.F, { W }), picLabel(160, 90, 150, 34, ['Load', 'the soil in the middle'], PIC_C.L, { W }), picLabel(330, 101, 338, 152, ['Effort', 'you lift the handles'], PIC_C.E, { W })]);
+  return picWrap(W, 226, 'A wheelbarrow: the wheel is the fulcrum, the soil in the middle is the load, and you lift the handles at the end', b, '', 420);
 }
 function picChopsticks() {
+  const W = 380;
   let b = `<line x1="40" y1="70" x2="330" y2="96" stroke="${PIC_C.wood2}" stroke-width="7" stroke-linecap="round"/><line x1="40" y1="70" x2="330" y2="128" stroke="${PIC_C.wood}" stroke-width="7" stroke-linecap="round"/>`;
   b += `<ellipse cx="346" cy="112" rx="18" ry="14" fill="#f3e6c8"/><path d="M332 106 q14 -10 28 0" stroke="#d9c49a" stroke-width="2" fill="none"/>`;
   b += `<circle cx="40" cy="70" r="9" fill="${PIC_C.F}"/>` + picArrow(152, 128, 152, 98, PIC_C.E, 4) + `<ellipse cx="152" cy="138" rx="14" ry="10" fill="${PIC_C.skin}"/>`;
-  b += picTag(40, 80, 88, 118, 'Fulcrum', PIC_C.F, 'where they rest in your hand') + picTag(152, 148, 200, 172, 'Effort', PIC_C.E, 'your fingers squeeze') + picTag(346, 98, 316, 40, 'Load', PIC_C.L, 'the dumpling at the tips');
-  return picWrap(380, 196, 'A pair of chopsticks: they pivot where they rest in your hand, your fingers squeeze in the middle, and the dumpling is at the tips', b);
+  b += picLabs([picLabel(40, 70, 100, 28, ['Fulcrum', 'where they rest in your hand'], PIC_C.F, { W }), picLabel(346, 99, 285, 36, ['Load', 'the dumpling at the tips'], PIC_C.L, { W }), picLabel(152, 147, 200, 178, ['Effort', 'your fingers squeeze'], PIC_C.E, { W })]);
+  return picWrap(W, 206, 'A pair of chopsticks: they pivot where they rest in your hand, your fingers squeeze in the middle, and the dumpling is at the tips', b);
 }
 /* ---------- the trade-off on a lever: your end moves a long way, the rock only a little ---------- */
 function picCatch() {
+  const W = 380;
   let b = `<line x1="40" y1="100" x2="340" y2="100" stroke="${PIC_C.wood}" stroke-width="10" stroke-linecap="round" opacity=".25"/>`;
   b += `<line x1="40" y1="86" x2="340" y2="146" stroke="${PIC_C.wood}" stroke-width="10" stroke-linecap="round"/>` + picTri(110, 100, 30, 66, PIC_C.F) + picRock(40, 82, 40, 28, '');
-  b += picArrow(14, 100, 14, 78, PIC_C.L, 4) + picTxt(8, 40, 'the rock rises', PIC_C.L, 12, 'start') + picTxt(8, 54, 'a little', PIC_C.L, 12, 'start');
-  b += picArrow(358, 100, 358, 148, PIC_C.E, 4) + picTxt(372, 172, 'your hand moves', PIC_C.E, 12, 'end') + picTxt(372, 186, 'a long way', PIC_C.E, 12, 'end');
-  b += picTxt(170, 200, 'Smaller effort = bigger distance', PIC_C.ink, 14);
-  return picWrap(380, 210, 'The catch: with the fulcrum close to the rock, your hand moves a long way and the rock only rises a little', b);
+  b += picArrow(14, 100, 14, 78, PIC_C.L, 4) + picArrow(358, 100, 358, 148, PIC_C.E, 4);
+  b += picNote(66, 28, ['the rock rises', 'a little'], PIC_C.L, { all: true, W }).box + picNote(296, 174, ['your hand moves', 'a long way'], PIC_C.E, { all: true, W }).box;
+  b += picNote(190, 208, ['Smaller effort = bigger distance'], PIC_C.ink, { size: 14, W }).box;
+  return picWrap(W, 226, 'The catch: with the fulcrum close to the rock, your hand moves a long way and the rock only rises a little', b);
 }
 /* ---------- class 3, animated: a small movement of the hand swings the far end a long way, but the effort is bigger than the load.
    SMIL animateTransform, so it needs no <style>. Reduced motion: the "end" position is drawn as a faded ghost and nothing moves. ---------- */
 function picClass3Anim() {
-  const still = typeof RMOTION !== 'undefined' && RMOTION, y = 100, fx = 40, hx = 130, lx = 340;
+  const W = 380, still = typeof RMOTION !== 'undefined' && RMOTION, y = 100, fx = 40, hx = 130, lx = 340;
   const anim = still ? '' : `<animateTransform attributeName="transform" type="rotate" values="0 ${fx} ${y};-11 ${fx} ${y};-11 ${fx} ${y};0 ${fx} ${y};0 ${fx} ${y}" keyTimes="0;.35;.6;.95;1" dur="3.2s" repeatCount="indefinite"/>`;
   const bar = (op, rot) => `<g opacity="${op}" ${rot ? `transform="rotate(${rot} ${fx} ${y})"` : ''}>${rot == null ? anim : ''}<rect x="${fx - 6}" y="${y - 5}" width="${lx - fx + 12}" height="10" rx="5" fill="${PIC_C.wood}"/>${picRock(lx, y - 5, 34, 26, '')}${picArrow(lx, y + 34, lx, y + 8, PIC_C.L, 3)}${picArrow(hx, y + 66, hx, y + 8, PIC_C.E, 6)}${picHand(hx, y + 74)}</g>`;
   let b = picTri(fx, y + 4, 28, 30, PIC_C.F) + bar(.22, -11) + bar(1, null);
-  b += picTxt(fx, y + 52, 'Fulcrum', PIC_C.F, 12) + picTxt(hx + 14, y + 104, 'Effort: a BIG pull,', PIC_C.E, 12, 'start') + picTxt(hx + 14, y + 118, 'but your hand moves a little', PIC_C.E, 12, 'start');
-  b += picTxt(374, 30, 'Load: the rock swings', PIC_C.L, 12, 'end') + picTxt(374, 44, 'a long way', PIC_C.L, 12, 'end');
-  return picWrap(380, 230, 'Class 3 lever, animated: the hand near the fulcrum pulls up a little with a big force, and the rock at the far end swings up a long way', b);
+  b += picLabs([picLabel(fx, y + 28, fx, y + 58, ['Fulcrum'], PIC_C.F, { W }), picNote(250, 226, ['Effort: a BIG pull,', 'but your hand moves a little'], PIC_C.E, { all: true, W }), picNote(284, 170, ['Load: the rock swings', 'a long way'], PIC_C.L, { all: true, W })]);
+  return picWrap(W, 252, 'Class 3 lever, animated: the hand near the fulcrum pulls up a little with a big force, and the rock at the far end swings up a long way', b);
 }
 /* ---------- Part 2 pictures ---------- */
 function picFlagpole() {
+  const W = 340;
   let b = `<rect x="96" y="20" width="8" height="196" fill="${PIC_C.steel}"/><circle cx="100" cy="24" r="12" fill="${PIC_C.F}"/><circle cx="100" cy="24" r="4" fill="#fff"/>`;
   b += `<line x1="88" y1="24" x2="88" y2="170" stroke="${PIC_C.rope}" stroke-width="3"/><line x1="112" y1="24" x2="112" y2="96" stroke="${PIC_C.rope}" stroke-width="3"/>`;
   b += `<rect x="114" y="96" width="62" height="40" fill="#d6402c"/><rect x="114" y="112" width="62" height="8" fill="#fff"/>` + picArrow(146, 92, 146, 58, PIC_C.L, 3);
   b += picArrow(88, 176, 88, 206, PIC_C.E, 4) + picHand(88, 214);
-  b += picTag(112, 24, 200, 30, 'Pulley', PIC_C.F, 'a wheel at the top') + picTag(178, 116, 260, 110, 'Load', PIC_C.L, 'the flag goes up') + picTag(80, 210, 40, 200, 'Effort', PIC_C.E, 'pull down');
-  return picWrap(340, 236, 'A flagpole: a pulley wheel at the top lets you pull the rope down to raise the flag up', b);
+  b += picLabs([picLabel(112, 24, 222, 34, ['Pulley', 'a wheel at the top'], PIC_C.F, { W }), picLabel(176, 116, 262, 128, ['Load', 'the flag goes up'], PIC_C.L, { W }), picLabel(78, 214, 38, 196, ['Effort', 'pull down'], PIC_C.E, { W })]);
+  return picWrap(W, 236, 'A flagpole: a pulley wheel at the top lets you pull the rope down to raise the flag up', b);
 }
 function picMovingPulley() {
+  const W = 424;
   let b = `<rect x="80" y="14" width="200" height="10" rx="4" fill="${PIC_C.ink}"/><circle cx="140" cy="40" r="13" fill="${PIC_C.steel}"/><circle cx="140" cy="132" r="13" fill="${PIC_C.steel}"/>`;
   b += `<line x1="127" y1="24" x2="127" y2="132" stroke="${PIC_C.L}" stroke-width="3.5"/><line x1="153" y1="40" x2="153" y2="132" stroke="${PIC_C.L}" stroke-width="3.5"/>`;
   b += `<line x1="127" y1="40" x2="127" y2="40" stroke="${PIC_C.rope}"/><path d="M153 40 q0 -14 -13 -14 q-13 0 -13 14" stroke="${PIC_C.rope}" stroke-width="3" fill="none"/>`;
   b += `<line x1="230" y1="24" x2="230" y2="150" stroke="${PIC_C.rope}" stroke-width="3" stroke-dasharray="6 4"/>`;
   b += `<rect x="114" y="150" width="52" height="40" rx="6" fill="#c58a4a"/>` + picTxt(140, 175, 'crate', '#fff', 11) + picArrow(230, 156, 230, 196, PIC_C.E, 4) + picHand(230, 204);
-  b += picTxt(110, 92, '1', PIC_C.L, 15) + picTxt(170, 92, '2', PIC_C.L, 15) + picTxt(300, 70, '2 supporting ropes', PIC_C.L, 12, 'end') + picTxt(300, 84, 'hold up the crate', PIC_C.L, 11, 'end', 600);
-  b += picTxt(244, 132, 'the end you pull', PIC_C.E, 11, 'start', 700) + picTxt(244, 146, '(not counted)', PIC_C.E, 11, 'start', 600);
-  return picWrap(340, 220, 'A pulley that moves with the crate: two supporting ropes hold it up, and the end you pull is not counted', b);
+  b += picTxt(110, 92, '1', PIC_C.L, 15) + picTxt(170, 92, '2', PIC_C.L, 15) + picTxt(119, 107, 'holds half', PIC_C.L, 10, 'end', 700) + picTxt(161, 107, 'holds half', PIC_C.L, 10, 'start', 700);
+  b += picLabs([picNote(333, 56, ['2 supporting ropes', 'share the crate\'s weight'], PIC_C.L, { W }), picLabel(230, 118, 336, 130, ['the end you pull', '(not counted)'], PIC_C.E, { W })]);
+  return picWrap(W, 224, 'A pulley that moves with the crate: two supporting ropes hold it up and share its weight, and the end you pull is not counted', b, '', 424);
 }
 function picScrewdriver() {
+  const W = 380;
   let b = `<rect x="40" y="64" width="110" height="64" rx="26" fill="#e3a51c"/><rect x="150" y="88" width="170" height="16" rx="5" fill="${PIC_C.steel}"/><polygon points="320,88 344,96 320,104" fill="${PIC_C.steel}"/>`;
   b += `<ellipse cx="95" cy="96" rx="20" ry="36" fill="none" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="4 4"/>` + picArrow(80, 52, 112, 52, PIC_C.E, 3);
-  b += picTag(95, 132, 95, 160, 'Wheel', PIC_C.E, 'the fat handle: a small twist') + picTag(240, 106, 250, 150, 'Axle', PIC_C.L, 'the thin shaft: a strong turn');
-  return picWrap(380, 186, 'A screwdriver is a wheel and axle: the fat handle is the wheel and the thin metal shaft is the axle', b);
+  b += picLabs([picLabel(95, 124, 100, 170, ['Wheel', 'the fat handle: a small twist'], PIC_C.E, { W }), picLabel(240, 90, 256, 36, ['Axle', 'the thin shaft: a strong turn'], PIC_C.L, { W })]);
+  return picWrap(W, 202, 'A screwdriver is a wheel and axle: the fat handle is the wheel and the thin metal shaft is the axle', b);
 }
 function picRamp() {
+  const W = 440;
   let b = `<polygon points="30,170 330,170 330,110" fill="${PIC_C.wood}"/><rect x="330" y="110" width="30" height="60" fill="${PIC_C.wood2}"/>`;
-  b += `<line x1="30" y1="160" x2="330" y2="102" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="5 4"/>` + picTxt(170, 112, 'length of the ramp', PIC_C.E, 12);
-  b += `<line x1="372" y1="110" x2="372" y2="170" stroke="${PIC_C.L}" stroke-width="2"/>` + picTxt(380, 144, 'height', PIC_C.L, 12, 'start');
+  b += `<line x1="30" y1="160" x2="330" y2="102" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="5 4"/>`;
+  b += `<line x1="372" y1="110" x2="372" y2="170" stroke="${PIC_C.L}" stroke-width="2"/>`;
   b += `<g transform="rotate(-11.3 120 150)"><rect x="96" y="124" width="50" height="26" rx="5" fill="#c58a4a"/><circle cx="106" cy="154" r="5" fill="${PIC_C.ink}"/><circle cx="136" cy="154" r="5" fill="${PIC_C.ink}"/></g>`;
-  b += picTxt(200, 196, 'a cart pulled up a ramp onto a platform', PIC_C.ink, 12, 'middle', 600);
-  return picWrap(420, 206, 'A cart on a ramp up to a platform, with the length of the ramp and the height of the platform marked', b);
+  b += picNote(196, 90, ['length of the ramp'], PIC_C.E, { all: true, W }).box + picNote(405, 140, ['height'], PIC_C.L, { all: true, W }).box + picNote(226, 198, ['a cart pulled up a ramp onto a platform'], PIC_C.ink, { all: true, W }).box;
+  return picWrap(W, 216, 'A cart on a ramp up to a platform, with the length of the ramp and the height of the platform marked', b, '', 440);
 }
 function picWedge() {
-  const still = typeof RMOTION !== 'undefined' && RMOTION;
+  const W = 380, still = typeof RMOTION !== 'undefined' && RMOTION;
   const slide = (dx) => still ? '' : `<animateTransform attributeName="transform" type="translate" values="${dx} 0;0 0;0 0;${dx} 0" keyTimes="0;.4;.8;1" dur="3s" repeatCount="indefinite"/>`;
   let b = `<g>${slide(-26)}<polygon points="60,40 100,40 100,150" fill="${PIC_C.steel}"/></g><g>${slide(26)}<polygon points="140,40 100,40 100,150" fill="${PIC_C.F}"/></g>`;
-  b += picTxt(100, 176, 'two ramps back to back', PIC_C.ink, 12);
   b += `<polygon points="246,40 286,40 266,150" fill="${PIC_C.steel}"/><rect x="196" y="120" width="68" height="44" rx="6" fill="${PIC_C.wood}"/><rect x="268" y="120" width="68" height="44" rx="6" fill="${PIC_C.wood}"/>`;
-  b += picArrow(266, 14, 266, 36, PIC_C.E, 4) + picArrow(226, 142, 202, 142, PIC_C.L, 3) + picArrow(306, 142, 330, 142, PIC_C.L, 3) + picTxt(266, 182, 'a push down splits the wood apart', PIC_C.ink, 12);
-  return picWrap(380, 192, 'A wedge is two ramps back to back. Pushing it down into a log pushes the two halves apart', b);
+  b += picArrow(266, 14, 266, 36, PIC_C.E, 4) + picArrow(226, 142, 202, 142, PIC_C.L, 3) + picArrow(306, 142, 330, 142, PIC_C.L, 3);
+  b += picNote(100, 184, ['two ramps back to back'], PIC_C.ink, { all: true, W }).box + picNote(266, 192, ['a push down splits', 'the wood apart'], PIC_C.ink, { all: true, W }).box;
+  return picWrap(W, 218, 'A wedge is two ramps back to back. Pushing it down into a log pushes the two halves apart', b);
 }
 function picScrewIdea() {
-  let b = `<polygon points="30,150 150,150 150,60" fill="#fff3cc" stroke="${PIC_C.wood2}" stroke-width="2"/><line x1="30" y1="150" x2="150" y2="60" stroke="${PIC_C.E}" stroke-width="3"/>` + picTxt(90, 176, 'a paper ramp', PIC_C.ink, 12);
-  b += picArrow(170, 108, 214, 108, PIC_C.ink, 3) + picTxt(192, 96, 'wrap it', PIC_C.ink, 11);
+  const W = 410;
+  let b = `<polygon points="30,150 150,150 150,60" fill="#fff3cc" stroke="${PIC_C.wood2}" stroke-width="2"/><line x1="30" y1="150" x2="150" y2="60" stroke="${PIC_C.E}" stroke-width="3"/>`;
+  b += picArrow(170, 108, 214, 108, PIC_C.ink, 3);
   b += `<rect x="250" y="40" width="44" height="120" rx="6" fill="#e3a51c"/>`;
   for (let i = 0; i < 5; i++) b += `<path d="M250 ${54 + i * 22} q22 16 44 -8" stroke="${PIC_C.E}" stroke-width="3" fill="none"/>`;
-  b += picTxt(272, 176, 'round a pencil', PIC_C.ink, 12) + picTag(296, 76, 336, 60, 'Thread', PIC_C.E, 'the spiral ramp');
-  return picWrap(380, 190, 'A screw is a ramp wrapped round a rod: wrap a paper triangle round a pencil and its sloping edge makes a spiral thread', b);
+  b += picLabs([picLabel(294, 90, 356, 106, ['Thread', 'the spiral ramp'], PIC_C.E, { W }), picNote(90, 182, ['a paper ramp'], PIC_C.ink, { all: true, W }), picNote(192, 84, ['wrap it'], PIC_C.ink, { all: true, W }), picNote(272, 182, ['round a pencil'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, 200, 'A screw is a ramp wrapped round a rod: wrap a paper triangle round a pencil and its sloping edge makes a spiral thread', b, '', 410);
 }
 
 /* ===== Chapter 6: the Workshop (Save Captain Smooshy!) =====
@@ -7181,8 +7305,8 @@ CHDATA.c6 = {
       cards: [
         { html: `<p>Welcome to Part 2! Remember the big rule from the lever:</p><div class="law">A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it!</div><p>Every machine in Part 2 follows it. Watch for the catch: a smaller effort means your hand moves further.</p>${picCatch()}` },
         { hi: '#cvScene', html: `<p>A ${T('pulley', 'pulley')} is a wheel with a rope running round it. A flagpole has one at the top: you pull the rope down, and the flag goes up.</p>${picFlagpole()}` },
-        { hi: '[data-panel="wsctl"]', html: `<p>Now hang the crate from a pulley that moves up with it. Count the ${T('supporting', 'supporting ropes')}: the pieces of rope that hold the crate up. Don't count the end you pull.</p>${picMovingPulley()}` }],
-      predict: { q: 'You change from 1 supporting rope to 2. What will happen to the effort?', opts: ['It halves, because two ropes share the crate\'s weight', 'It doubles, because there is twice as much rope to pull', 'It stays the same, because the crate\'s weight hasn\'t changed', 'It drops to zero, because the top pulley holds the crate'], then: 'Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter.' },
+        { hi: '[data-panel="wsctl"]', html: `<p>Here's a trick to make the crate easier to lift: hang it from a pulley that moves up with it. Now there's more than one piece of rope holding the crate up, and the pieces <b>share</b> its weight. They're called ${T('supporting', 'supporting ropes')}. With 2 supporting ropes, each one holds up half of the crate. Count only the ropes that hold the crate up: the end you pull isn't holding the crate, so don't count it.</p>${picMovingPulley()}` }],
+      predict: { q: 'With 4 supporting ropes, how much rope will you have to pull to lift the crate 1 m?', opts: ['4 m of rope, because each of the 4 ropes gets 1 m shorter', '1 m of rope, because the crate only rises 1 m', '0.25 m of rope, because the 4 ropes share the job', '2 m of rope, because the pulley doubles the distance'], then: 'Lift the crate with 1, 2, 3 and 4 supporting ropes. Watch the newtonmeter and the red ruler.' },
       setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate }, lim: { ropesMax: 6 } }); }, adds: ['wsctl', 'wspull', 'rulers'], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to lift the crate',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
         ['Lift the crate with <b>1, 2, 3 and 4</b> supporting ropes.', () => [1, 2, 3, 4].every(n => shopHas({ mach: 'pulley', ropes: n }))], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
@@ -7396,19 +7520,76 @@ function renderReview(ch) {
   const body = h('div', { class: 'review', id: 'revBody' }); wrap.appendChild(body); body.hidden = !ready && !DB['revOpen_' + ch];
   const anyway = $('#revAnyway', wrap); if (anyway) anyway.addEventListener('click', () => { DB['revOpen_' + ch] = true; saveDB(); body.hidden = false; anyway.closest('.gate').remove(); });
   const bar = h('div', { class: 'revbar' }); body.appendChild(bar);
-  const drawBar = () => { const P = reviewProgress(ch), st = dbGet('review.' + ch, {}); bar.innerHTML = `<b>${P.done} of ${P.total} done</b><span class="scaleNote">Points so far: ${P.points} of ${P.maxPoints}</span>${R.map((q, i) => `<button type="button" class="chip ${st[q.id] && st[q.id].done ? 'done' : ''}" data-jump="${q.id}">${i + 1}</button>`).join('')}<span style="flex:1"></span><button type="button" class="go sm" id="mkWs">Make my worksheet</button><button type="button" class="ghost sm" id="blankWs">Blank copy</button>`; };
+  const drawBar = () => { const P = reviewProgress(ch), st = dbGet('review.' + ch, {}); bar.innerHTML = `<b>${P.done} of ${P.total} done</b><span class="scaleNote">Points so far: ${P.points} of ${P.maxPoints}</span>${R.map((q, i) => `<button type="button" class="chip ${st[q.id] && st[q.id].done ? 'done' : ''}" data-jump="${q.id}">${i + 1}</button>`).join('')}<span style="flex:1"></span><button type="button" class="go sm" id="finishCheckTop">${finLabel(ch, true)}</button><button type="button" class="ghost sm" id="mkWs">Make my worksheet</button><button type="button" class="ghost sm" id="blankWs">Blank copy</button>`; };
   drawBar();
+  body.appendChild(h('p', { class: 'scaleNote revhint' }, 'You can check each answer as you go, or answer everything and press <b>Finish</b> at the end to check them all at once.'));
+  const items = [];
   R.forEach((q, i) => {
     const card = h('section', { class: 'panel revq', id: 'rq-' + q.id }); body.appendChild(card);
     const st = dbGet('review.' + ch, {})[q.id];
-    card.innerHTML = `<div class="qhd"><span class="qno">Question ${i + 1}</span><span class="tlbl">${QLABEL[q.type]}</span><span class="state ${st && st.done ? 'done' : ''}">${st && st.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, st)) : 'To do'}</span></div><div class="qh"></div><p class="scaleNote">${q.type === 'explain' ? 'Write your answer, then compare it with the model answer. You get a point for each thing you included.' : q.type === 'fbd' ? 'You get one check. You score a point for each check your diagram passes.' : 'You get one go, so check your answer carefully before you press Check.'}</p>`;
-    renderQuestion($('.qh', card), q, { store: 'review.' + ch, mode: 'review', onDone: (qq, s) => { card.classList.toggle('done', !!s.done); $('.state', card).className = 'state ' + (s.done ? 'done' : ''); $('.state', card).textContent = s.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(qq, s)) : 'To do'; drawBar(); renderOnPage(); tabTicks(); if (s.done && reviewProgress(ch).done === reviewProgress(ch).total) maybeStamp(ch); } });
+    card.innerHTML = `<div class="qhd"><span class="qno">Question ${i + 1}</span><span class="tlbl">${QLABEL[q.type]}</span><span class="state ${st && st.done ? 'done' : ''}">${st && st.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, st)) : 'To do'}</span></div><div class="qh"></div><p class="scaleNote">${q.type === 'explain' ? 'Write your answer and tick what you included. Check shows the model answer. You get a point for each thing you included.' : q.type === 'fbd' ? 'You get one check. You score a point for each check your diagram passes.' : 'You get one go, so check your answer carefully before you press Check.'}</p>`;
+    const box = renderQuestion($('.qh', card), q, { store: 'review.' + ch, mode: 'review', onDone: (qq, s) => { card.classList.toggle('done', !!s.done); $('.state', card).className = 'state ' + (s.done ? 'done' : ''); $('.state', card).textContent = s.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(qq, s)) : 'To do'; drawBar(); renderOnPage(); tabTicks(); } });
+    items.push({ q, i, card, box });
     if (st && st.done) card.classList.add('done');
   });
+  body.appendChild(h('div', { class: 'finishrow' }, `<button type="button" class="go big" id="finishCheck">${finLabel(ch, false)}</button><span class="scaleNote">Finish checks every answer you have not checked yet, then shows your score${SECTIONS.find(x => x.id === ch) ? ' and your stamp' : ''}.</span>`));
   body.appendChild(h('div', { class: 'row' }, `<button type="button" class="go" id="mkWs2">Make my worksheet</button><button type="button" class="ghost" data-act="home">Back to the home page</button>`));
   const next = SECTIONS.find(s => s.needs === ch); if (next) body.appendChild(h('div', { class: 'keepgoing' }, `<b>Finished? You can stop here and upload your ${CH.part} worksheet.</b><span>Or, if you'd like to go further, try the <b>${next.part}</b>. It takes approx. ${secMins(next.id).total} minutes and makes its own worksheet that you can upload too.</span><button type="button" class="go sm" data-open="${next.id}" style="align-self:flex-start">Go to the ${next.part} →</button>`));
-  host.onclick = e => { const j = e.target.closest('[data-jump]'); if (j) $('#rq-' + j.dataset.jump).scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' });
+  host.onclick = e => { if (e.target.closest('#finishCheck, #finishCheckTop')) { revFinish(ch, items); return; } const j = e.target.closest('[data-jump]'); if (j) $('#rq-' + j.dataset.jump).scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' });
     if (e.target.id === 'mkWs' || e.target.id === 'mkWs2') makeWorksheet(ch); if (e.target.id === 'blankWs') openSheet(ch, 'blank'); };
+}
+
+/* ===== Finish: check everything, then show the score (and the stamp) ===== */
+const revFinished = ch => !!dbGet('review.' + ch, {}).finished;
+const finLabel = (ch, small) => revFinished(ch) ? 'See my score again' : small ? '✓ Finish: see my score' : '✓ I\'m finished: see my score and collect my stamp';
+function revRefreshFinish(ch) { $$('#finishCheck, #finishCheckTop').forEach(b => { b.textContent = finLabel(ch, b.id === 'finishCheckTop'); }); }
+function revGoto(id) { const el = $('#rq-' + id); if (el) { el.scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); el.style.outline = '3px solid var(--bad)'; setTimeout(() => el.style.outline = '', 2500); } }
+const finList = a => a.length < 3 ? a.join(' and ') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+function revFinish(ch, items) {
+  if (revFinished(ch)) { revResults(ch); return; }                        // already marked: just show the score again
+  const blanks = items.filter(it => it.box.isBlank());
+  if (!blanks.length) { revRun(ch, items); return; }
+  const names = blanks.map(it => 'Question ' + (it.i + 1));
+  openModal(`<div class="modal finmodal" role="dialog" aria-label="Some questions are blank"><div class="fin-head">Some questions are blank</div><p><b>${blanks.length} question${blanks.length > 1 ? 's are' : ' is'} still blank:</b> ${finList(names)}. A blank question scores 0.</p><div class="row">${blanks.map((it, k) => `<button type="button" class="ghost sm" data-fgo="${it.q.id}">Go to ${names[k]}</button>`).join('')}</div><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Go back</button><button type="button" class="go" id="finAnyway">Finish anyway</button></div></div>`);
+  makeDraggable($('#modal .finmodal'), '.fin-head', 'fin');
+  $$('#modal [data-fgo]').forEach(b => b.addEventListener('click', () => { closeModal(); revGoto(b.dataset.fgo); }));
+  $('#finAnyway').addEventListener('click', () => { closeModal(); revRun(ch, items); });
+}
+function revRun(ch, items) {
+  items.forEach(it => {                                                   // page order, the same marking as each question's own Check button
+    if (it.box.isDone()) return;
+    if (it.box.isBlank()) it.box.blankDone(); else it.box.autoCheck();
+    if (!it.box.isDone()) it.box.blankDone();                             // safety net: nothing is left unmarked
+  });
+  const st = dbGet('review.' + ch, {}); st.finished = true; dbSet('review.' + ch, st);
+  revRefreshFinish(ch); renderOnPage(); tabTicks();
+  revResults(ch);
+}
+function revResults(ch) {
+  const R = CHDATA[ch].review, st = dbGet('review.' + ch, {}), P = reviewProgress(ch), LP = learnProgress(ch), sec = secOf(ch), hasCh = !!CHDATA[ch].challenge;
+  const learnOk = LP.done === LP.total, chalOk = challengeDone(ch), ready = learnOk && chalOk;
+  const next = SECTIONS.find(s => s.needs === ch);
+  const fresh = ready && giveStamp(ch);                                   // the stamp arrives with the score
+  const stamped = !!dbGet('stamps', {})[ch];
+  const rows = R.map((q, i) => { const p = qPoints(q, st[q.id]), cls = p.score === p.max ? 'full' : p.score ? 'part' : 'none'; return `<li class="${cls}"><span>Question ${i + 1} · ${QLABEL[q.type]}${st[q.id] && st[q.id].blank ? ' · left blank' : ''}</span><b>${p.score} of ${p.max}${p.score === p.max ? ' ✓' : ''}</b></li>`; }).join('');
+  let need = '';
+  if (!stamped) {
+    if (!learnOk) need = `<p class="finneed">Your Check score is saved. Finish the <b>Learn steps</b> (${LP.total - LP.done} left) to collect your stamp.</p><div class="row"><button type="button" class="go sm" id="finToLearn">Go to Learn</button></div>`;
+    else if (!chalOk) { const c = challengeState(ch); need = `<p class="finneed">Your Check score is saved. Finish the <b>Challenge</b> (${c.total - c.tried} left) to collect your stamp.</p><div class="row"><button type="button" class="go sm" id="finToChal">Go to the Challenge</button></div>`; }
+  }
+  const stampHTML = stamped ? `<div class="finstamp"><div class="stamp on ${fresh ? 'drop' : ''}" style="width:110px;height:110px;font-size:17px">${sec.stamp}</div><b>Stamp earned!</b></div>` : '';
+  const stampNote = stamped ? `<p>You've finished every part of Chapter ${sec.n} ${sec.part}. Brilliant work. Your stamp is on the home page.</p>${ch === EXPLORE_AFTER ? '<p><b>Explore is now open!</b> Every control and readout is switched on, so you can test your own ideas in the Main Arena.</p>' : ''}` : '';
+  openModal(`<div class="modal finmodal" role="dialog" aria-label="Your Check score"><div class="fin-head">✓ Check finished</div>
+    <div class="finscore"><div><span class="lbl">Your Check score</span><h2 id="finTotal">You scored <b>${P.points} of ${P.maxPoints}</b> points</h2></div>${stampHTML}</div>
+    <ul class="finlist">${rows}</ul>${stampNote}${need}
+    <div class="row" style="flex-wrap:wrap"><button type="button" class="go" id="finWs">Make my worksheet</button><button type="button" class="ghost" id="finLook">Look at my answers</button>${next ? `<button type="button" class="ghost" id="finNext">Go on to ${next.part}</button>` : ''}</div></div>`);
+  makeDraggable($('#modal .finmodal'), '.fin-head', 'fin');
+  const on = (id, f) => { const b = $('#' + id); if (b) b.addEventListener('click', f); };
+  on('finWs', () => { closeModal(); makeWorksheet(ch); });
+  on('finLook', () => { closeModal(); const it = R.find(q => { const p = qPoints(q, st[q.id]); return p.score < p.max; }); revGoto(it ? it.id : R[0].id); });
+  on('finNext', () => { closeModal(); openChapter(next.id); });
+  on('finToLearn', () => { closeModal(); setCTab('learn'); });
+  on('finToChal', () => { closeModal(); setCTab('challenge'); });
 }
 
 /* ===== Sections: every chapter is split into self-contained chunks of about 20–30 minutes.
