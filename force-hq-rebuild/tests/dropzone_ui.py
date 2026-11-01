@@ -18,7 +18,7 @@ with sync_playwright() as p:
     chk('Drop button visible', pg.locator('#dzDrop').is_visible()); chk('pause visible', pg.locator('#dzPause').is_visible())
     chk('pause disabled before the drop', pg.locator('#dzPause').is_disabled())
     chk('tug-of-war panels hidden', not pg.locator('#reads').is_visible() and not pg.locator('#ptiles').is_visible())
-    chk('altitude readout 600', '600' in pg.locator('#dz-A-readH').inner_text(), pg.locator('#dz-A-readH').inner_text())
+    chk('altitude 600 and the readouts are drawn on the scene, not in the panel under it', ev('dzAt(DZ.lanes[0]).y') == 600 and not pg.locator('#dreads').is_visible(), ev('dzAt(DZ.lanes[0]).y'))
     # drop at fast-forward, then pause
     pg.locator('#warpBtn').click(); pg.locator('#dzDrop').click(); pg.wait_for_timeout(900)
     chk('running', ev('DZ.started && !DZ.ended && S.running'))

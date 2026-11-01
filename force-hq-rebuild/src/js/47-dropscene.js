@@ -86,6 +86,14 @@ function dzHeliRise(L, t) {
   const vt = Math.sqrt(m * g / (HE_K * f)), x = a0 * t / vt;
   return vt * vt / a0 * (x + Math.log1p(Math.exp(-2 * x)) - Math.LN2);
 }
+function dzAirFlow(c, ox, ay, half, f, tt, vel) {
+  c.save(); c.lineCap = 'round'; c.strokeStyle = C.res; c.lineWidth = 3; const span = 170, run = tt * (60 + vel * 2.5);
+  for (let i = 0; i < 12; i++) {
+    const side = i % 2 ? 1 : -1, k = Math.floor(i / 2), dx = side * (half + 8 + k * 10), u = ((i * 41.3 + run) % span) / span, y = ay + 70 - u * span, len = 10 + 30 * f;
+    c.globalAlpha = (0.3 + 0.6 * f) * Math.sin(Math.PI * u); c.beginPath(); c.moveTo(ox + dx, y); c.quadraticCurveTo(ox + dx * 1.04, y - len / 2, ox + dx, y - len); c.stroke();
+  }
+  c.restore();
+}
 /* things the object falls past, fixed at real heights so they slide by at the right speed: birds, skyscrapers, flood lights and crates on the floor */
 const DZ_TOWERS = [[.04, .11, 150], [.3, .1, 205], [.57, .12, 120]];   // [position across, width, roof height in m]
 function dzTowers(c, bx, bw, scr, gy, lo, hi) {
@@ -193,7 +201,12 @@ function dzLane(c, L, idx, x0, w, tt) {
     if (L.obj === 'para' && lv > 7) tilt = Math.min(1.5, since * 6);
     if (lv > 7 && since < 1.2 && !RMOTION) { c.save(); c.fillStyle = 'rgba(235,225,205,.8)'; for (let q = 0; q < 6; q++) { const u = since / 1.2, px = ox + (q - 2.5) * 16 * (0.6 + u), r = 6 + u * 14; c.globalAlpha = (1 - u) * .8; c.beginPath(); c.arc(px, objY - r * .4, r, 0, 7); c.fill(); } c.restore(); }
   }
+  /* air resistance: purple streaks (the colour of the air-resistance arrow) flow up past the object, longer and brighter as the drag grows */
+  const dragF = L.started && !v.landed && !RMOTION ? clamp(v.D / v.W, 0, 1) : 0;
+  if (dragF > 0.04) dzAirFlow(c, ox, ay, L.obj === 'para' && v.opened != null && dzCoef(L).has ? 70 : L.obj === 'crate' ? 34 : L.obj === 'basketball' ? 22 : L.obj === 'feather' ? 14 : 20, dragF, tt, v.v);
   c.save(); if (tilt) { c.translate(ox, ay); c.rotate(tilt); c.translate(-ox, -ay); }
+  /* the object blurs too: faint copies trail above it (and one just below), more as it speeds up */
+  if (sfx > 0.03 && !tilt) { const b = Math.max(3, sfx * 20); [[3, .16], [2, .24], [1, .34], [-1, .2]].forEach(([k, a]) => { c.globalAlpha = a; dzObject(c, L, v, ox, ay - b * k, 1); }); c.globalAlpha = 1 - 0.25 * sfx; }
   dzObject(c, L, v, ox, ay, 1);
   c.restore();
   if (v.opened == null || !dzCoef(L).has) pill(c, `${fmt(DZ_OBJ[L.obj].m, 3)} kg`, ox, ay - hgtObj - 16, C.ink, 12);
@@ -205,11 +218,25 @@ function dzLane(c, L, idx, x0, w, tt) {
   /* the live free-body diagram */
   if (LAB.show.has('dfbd')) dzFBD(c, L, v, x0, w, mk);
   /* headings */
+  if (!two && S.scene === 'drop') dzCanvasReads(c, L, v, x0, w, mk);
   hudBox(c, `${two ? L.id + ' · ' : ''}${fmt(Math.round(v.t * 10) / 10, 1)} s${S.warp > 1 && S.running ? ' (fast-forward)' : ''}`, x0 + 54, 22, DZ_LANECOL()[idx], 'left');
   hudBox(c, `${DZ_WORLDS[L.world].name} · ${DZ_OBJ[L.obj].name}`, x0 + w - 8, 22, C.line, 'right');
   c.restore();
 }
 
+/* height, velocity, acceleration and time, in the strip above the free-body diagram (one lane; two lanes use the panel under the scene) */
+function dzCanvasReads(c, L, v, x0, w, mk) {
+  const keys = ['readH', 'readV', 'readA', 'readT'].filter(k => LAB.show.has(k)); if (!keys.length) return;
+  const lab = { readH: 'Height', readV: 'Velocity ↓', readA: 'Acceleration', readT: 'Time' }, up = v.a < -0.005;
+  const val = { readH: fmt(Math.max(0, v.y), 0) + ' m', readT: fmt(Math.round(v.t * 10) / 10, 1) + ' s',
+    readV: mk.has('readV') ? '? work it out' : dz1(v.v) + ' m/s', readA: mk.has('readA') ? '? work it out' : (Math.abs(v.a) < 0.005 ? '0 m/s²' : fmt(Math.abs(v.a), 2) + ' m/s² ' + (up ? '↑' : '↓')) };
+  const px = x0 + 440, cw = 150, ch = 27, gap = 4, top = 29;
+  keys.forEach((k, i) => {
+    const cx = px + (i % 2) * (cw + gap), cy = top + Math.floor(i / 2) * (ch + gap);
+    c.save(); c.fillStyle = C.panel; c.globalAlpha = .93; c.beginPath(); c.roundRect(cx, cy, cw, ch, 7); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.5; c.stroke(); c.restore();
+    txt(c, lab[k], cx + 9, cy + 8, C.muted, `700 10px ${C.fb}`, 'left'); txt(c, val[k], cx + 9, cy + 19.5, C.ink, `700 14px ${C.fn}`, 'left');
+  });
+}
 /* the free-body diagram beside the object: weight down, air resistance up, dashed resultant. Arrows start at the centre of the object. */
 function dzFBD(c, L, v, x0, w, mk) {
   const two = DZ.two, px = x0 + (two ? 216 : 440), pw = w - (two ? 224 : 450), fcx = px + pw / 2 - 6, fcy = 372, kw = 56 / v.W, CAP = 224;
