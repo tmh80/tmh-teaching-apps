@@ -400,7 +400,7 @@ function initControls() {
 function applyPanels() {
   $$('#lab [data-panel]').forEach(el => { const ks = el.dataset.panel.split(' '); el.hidden = !ks.some(k => LAB.show.has(k)); });
   const kit = $('#lab .kit'); $('#lab .stagerow').classList.toggle('nokit', ![...kit.querySelectorAll('[data-panel]')].some(e => !e.hidden));
-  const dz = S.scene === 'drop' || S.scene === 'heli'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)) || (S.scene === 'drop' && !DZ.two);   // one-lane Drop Zone draws its readouts on the scene $('#lab .scenebar').classList.toggle('dzbar', dz);
+  const dz = S.scene === 'drop' || S.scene === 'heli'; $('#reads').hidden = dz; $('#dreads').hidden = !dz || !['readH', 'readV', 'readA', 'readT'].some(k => LAB.show.has(k)) || S.scene === 'drop';   // the Drop Zone draws its readouts on the scene $('#lab .scenebar').classList.toggle('dzbar', dz);
   const anyRead = [...$$('#reads .rd')].some(e => !e.hidden) || !$('#dreads').hidden;
   $('#lab .underrow').hidden = !anyRead && !LAB.show.has('fbd');
   $('#lab .fbdcol').hidden = !LAB.show.has('fbd');
