@@ -38,6 +38,7 @@ Tom's verdict on the first Part 1 build: far too difficult; much slower pace nee
 5. **Plain words before technical terms.** On student screens: "rock to fulcrum" and "your hand to fulcrum" (never "load arm" or "effort arm"), "how far your hand moved" (never "effort distance"), "gap between threads" (never "pitch"). Code names can stay as they are. Mechanical advantage formulas from a machine's shape use the same plain words.
 6. **Pictures and cards never give away the prediction** that follows them.
 7. **Every effort is a pull you can see:** the spring balance (`wsSpring`) between the machine and a hand, with a red arrow.
+7a. **Labels on pictures and in the scene sit in white text boxes with leader lines that stop at the box edge** (`picLabel`, `wsLabel`). **The Workshop rulers share one scale** (`wsRulers`; a bar under 40 px also gets a zoomed ruler).
 8. **Pace over coverage.** Each Part stays at about 30 minutes or less. If the slower pace pushes a Part over, split it into another Part (as Parts 1 and 2 were) rather than speeding up.
 9. **State the big rule explicitly after students have tried both ways** (Tom, 1 Nov): "A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it!" It is taught in lv3 (key-idea question) and shown in a highlighted box at the start of lv4 and Part 2. Later Parts refer back to it in those words.
 10. Parts 3 to 6 below were written before this redesign. **Re-pitch each one against these rules before building it**, starting with Part 3 (mechanical advantage and work): cut examples to one familiar, pictured one, put a picture on every card that introduces a word, and replace any technical word a student hasn't met.
@@ -472,12 +473,12 @@ c6r5 | explain | obj ['Aii'] | Captain Smooshy needs to lift a heavy boulder off
 CARDS
 1. Welcome to Part 2! Remember the catch from the lever: a smaller effort means your hand moves further. Look out for it in every new machine. [Picture: The catch: with the fulcrum close to the rock, your hand moves a long way and the rock only rises a little]
 2. A pulley is a wheel with a rope running round it. A flagpole has one at the top: you pull the rope down, and the flag goes up. [Picture: A flagpole: a pulley wheel at the top lets you pull the rope down to raise the flag up]
-3. Now hang the crate from a pulley that moves up with it. Count the supporting ropes: the pieces of rope that hold the crate up. Don't count the end you pull. [Picture: A pulley that moves with the crate: two supporting ropes hold it up, and the end you pull is not counted]
+3. Here's a trick to make the crate easier to lift: hang it from a pulley that moves up with it. Now there's more than one piece of rope holding the crate up, and the pieces **share** its weight. They're called supporting ropes. With 2 supporting ropes, each one holds up half of the crate. Count only the ropes that hold the crate up: the end you pull isn't holding the crate, so don't count it. [Picture: A pulley that moves with the crate: two supporting ropes hold it up, and the end you pull is not counted]
 
 PREDICT FIRST
-Question: You change from 1 supporting rope to 2. What will happen to the effort?
-Options: It halves, because two ropes share the crate's weight · It doubles, because there is twice as much rope to pull · It stays the same, because the crate's weight hasn't changed · It drops to zero, because the top pulley holds the crate
-After: Lift the crate with 1, 2, 3 and 4 supporting ropes and watch the newtonmeter.
+Question: With 4 supporting ropes, how much rope will you have to pull to lift the crate 1 m?
+Options: 4 m of rope, because each of the 4 ropes gets 1 m shorter · 1 m of rope, because the crate only rises 1 m · 0.25 m of rope, because the 4 ropes share the job · 2 m of rope, because the pulley doubles the distance
+After: Lift the crate with 1, 2, 3 and 4 supporting ropes. Watch the newtonmeter and the red ruler.
 
 DO THIS
 - Make your prediction in the box above.

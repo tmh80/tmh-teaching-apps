@@ -1,6 +1,8 @@
 """Chapter 6 (the Workshop) Parts 1 and 2: play Learn lv1-lv5 + Check c6r1-c6r5 (levers) and pl1-pl4 + Check c6r7-c6r11 (pulleys, wheels and ramps) with real clicks, as a Grade 7 student would.
 Run after build.py:  python3 tests/play_c6.py     Screenshots: /tmp/fhq-shots/c6/"""
-import json, pathlib, sys
+import json, pathlib, sys, os
+sys.path.insert(0, os.path.dirname(__file__))
+from fc_helper import finish_check
 from playwright.sync_api import sync_playwright
 F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/c6/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
 fails = []
@@ -153,12 +155,14 @@ with sync_playwright() as p:
     chk('check 1: every question answered', len(done) == 5 and all(v[0] for v in done.values()), done)
     chk('check 1: all right first time', all(v[1] for k, v in done.items() if k != 'c6r5'), done)
     if pg.locator('#modal').is_visible(): pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    chk('Part 1: no stamp before Finish', ev("!!dbGet('stamps',{}).c6a") is False)
+    res = finish_check(pg); chk('Part 1: Finish shows the score and the stamp', 'You scored' in res and 'Stamp earned' in res, res[:80])
     chk('Part 1 stamp earned', ev("!!dbGet('stamps',{}).c6a") is True)
 
     # ================= Part 2: pl1 pulleys =================
     ev("openChapter('c6b')"); pg.wait_for_timeout(500)
     if pg.locator('#modal').is_visible() and pg.locator('#modal [data-close]').count(): pg.locator('#modal [data-close]').first.click(); pg.wait_for_timeout(200)
-    cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200); pg.screenshot(path=OUT + 'pl1_start.png')
+    cards(); chk('pl1: card 3 says the supporting ropes share the weight', 'share' in pg.locator('#chunk').inner_text().lower()); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200); pg.screenshot(path=OUT + 'pl1_start.png')
     chk('pl1: the pulley rig, the ropes stepper, no lever controls', ev("WS.mach") == 'pulley' and pg.locator('#wsRopesUp').is_visible() and not pg.locator('#wsArm').is_visible() and not pg.locator('#wsCls').is_visible())
     predict(0)
     for n in (1, 2, 3, 4):
@@ -223,6 +227,7 @@ with sync_playwright() as p:
     print('check 2 state', done)
     chk('check 2: every question answered and right', len(done) == 5 and all(v[0] for v in done.values()) and all(v[1] for k, v in done.items() if k != 'c6r11'), done)
     if pg.locator('#modal').is_visible(): pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
+    res = finish_check(pg); chk('Part 2: Finish shows the score and the stamp', 'You scored' in res and 'Stamp earned' in res, res[:80])
     chk('Part 2 stamp earned', ev("!!dbGet('stamps',{}).c6b") is True)
     ev("show('vHome')"); pg.wait_for_timeout(200); ev("openChapter('c6a')"); pg.wait_for_timeout(300)
     chk('the Rescue board lights slots 1 and 2', pg.locator('#rescueBoard .rbslots li.on').count() == 2); pg.screenshot(path=OUT + 'board_done.png')
