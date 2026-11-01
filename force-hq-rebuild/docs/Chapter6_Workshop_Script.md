@@ -39,7 +39,8 @@ Tom's verdict on the first Part 1 build: far too difficult; much slower pace nee
 6. **Pictures and cards never give away the prediction** that follows them.
 7. **Every effort is a pull you can see:** the spring balance (`wsSpring`) between the machine and a hand, with a red arrow.
 8. **Pace over coverage.** Each Part stays at about 30 minutes or less. If the slower pace pushes a Part over, split it into another Part (as Parts 1 and 2 were) rather than speeding up.
-9. Parts 3 to 6 below were written before this redesign. **Re-pitch each one against these rules before building it**, starting with Part 3 (mechanical advantage and work): cut examples to one familiar, pictured one, put a picture on every card that introduces a word, and replace any technical word a student hasn't met.
+9. **State the big rule explicitly after students have tried both ways** (Tom, 1 Nov): "A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it!" It is taught in lv3 (key-idea question) and shown in a highlighted box at the start of lv4 and Part 2. Later Parts refer back to it in those words.
+10. Parts 3 to 6 below were written before this redesign. **Re-pitch each one against these rules before building it**, starting with Part 3 (mechanical advantage and work): cut examples to one familiar, pictured one, put a picture on every card that introduces a word, and replace any technical word a student hasn't met.
 
 ---
 
@@ -137,7 +138,7 @@ All Workshop machines are **ideal**: no friction, and the bars, pulleys and rope
 ### C2. The Workshop scene (`S.scene = 'shop'`)
 New modules (joined in name order after `49-heli.js`): `4a-workshop.js` (machine maths, scene state, pull animation, runs, masks), `4b-shopdraw.js` (drawing, including Smooshy, the Gumdrop and Glimmer-9), `4c-ch6.js` (steps, questions, sections data, `CHDATA` entries), `4d-rescue.js` (the machine builder, the rescue site and the rescue course). Challenge courses for Parts 3 and 4 go in `45-challenge.js` as `renderShopCourse`, following `renderDropCourse` / `renderOrdersCourse`.
 
-**Built 1 Nov 2026 additions:** a `hand` machine (lift the load straight up with the newtonmeter, MA 1) used in lv1; the lever's pivot sits high when the fulcrum is in the middle (your end goes down, the newtonmeter hangs below it) and low for the other two designs (your hand pulls up), so the bar, newtonmeter and hand stay above the floor at every slider setting; with the effort in the middle the rock rises **0.40 m** (`WS_LIFT3`) so the hand's 0.10 m is visible; the lever slider reads "Move the fulcrum / Move the rock / Move your hand" with "rock to fulcrum / your hand to fulcrum" underneath; the design buttons read "Fulcrum in the middle" etc., gaining "Class 1:" etc. only when a step sets `clsNames` (lv5 onwards); the big dial is now the **newtonmeter reading** panel and the spring balance at the hand is the newtonmeter itself.
+**Built 1 Nov 2026 additions:** a `hand` machine (lift the load straight up with the newtonmeter, MA 1) used in lv1; the lever's pivot sits high when the fulcrum is in the middle (your end goes down, the newtonmeter hangs below it) and low for the other two designs (your hand pulls up), so the bar, newtonmeter and hand stay above the floor at every slider setting; whenever a lever moves the load further than your hand (MA below 1: the effort in the middle, or the fulcrum close to your hand) the rock rises **0.40 m** (`WS_LIFT3`) so the hand's movement is visible; the lever slider reads "Move the fulcrum / Move the rock / Move your hand" with "rock to fulcrum / your hand to fulcrum" underneath; the design buttons read "Fulcrum in the middle" etc., gaining "Class 1:" etc. only when a step sets `clsNames` (lv5 onwards); the big dial is now the **newtonmeter reading** panel and the spring balance at the hand is the newtonmeter itself.
 
 **Layout:** the machine in the middle of the Workshop, the load on the load side, the effort point on the other side, a **newtonmeter** at the effort point (reuse the Chapter 1 newtonmeter drawing; grep `newtonmeter` in `src/js/`), Smooshy's monitor top-left. The newtonmeter has a red band from 60 N upwards labelled "Smooshy's limit".
 
@@ -262,7 +263,7 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 - Blurbs: c6a "Levers, pulleys, wheels and axles, ramps, wedges and screws: the six simple machines, and the trade-off they all share." · c6c "Put numbers on it: mechanical advantage, the force–distance trade-off and work in joules, then load the rescue rocket." · c6d "Machines inside machines: build a crane, multiply mechanical advantages and assemble the rescue kit." · c6e "Fly to Glimmer-9 and plan the rescue in three stages. Can a 60 N gummy bear haul a spaceship out of a crater?" · c6f "Glimmer-9's crystals are sugar! Measure how real machines waste energy, then build Gummy Base One on a tight solar energy budget."
 - **Part labels:** the other chapters use "Foundation" / "Extension". Chapter 6 uses "Part 1" to "Part 5", then "Extension" for c6f. Grep for code that tests `part ===`, `'Foundation'` or `'Extension'` (stamp book, teacher page ticks, optional sections, `wsFileName`, the AI text) and make it work with these labels. File names become `Force HQ Ch6 Part 1 (Simple machines) - Alex Chen.pdf`. On the teacher page, Parts 1 to 5 are ticked like core sections; **c6f is optional and unticked by default** (the Brief's rule for efficiency), and its worksheet is labelled "Extension" with no MYP Crit A review role beyond its own Check.
 - **Chapter view:** chapters so far have two sections. Check the chapter page, `openChapter`, the section tabs and the stamp book all handle four.
-- `STEPMIN`: lv1 5, lv2 5, lv3 4, lv4 5, lv5 4, pl1 6, pl2 4, pl3 4, pl4 5, u1 5, u2 5, u3 6, k1 4, k2 5, k3 5, v1 4, p5a 6, p5b 5. **Target: every Part shows approx. 30 min or less** (`secMins`). Parts 1 and 2 come out at about 30 and 27 minutes. Count the rescue Challenge as about 15 minutes.
+- `STEPMIN`: lv1 5, lv2 5, lv3 5, lv4 5, lv5 4, pl1 6, pl2 4, pl3 4, pl4 5, u1 5, u2 5, u3 6, k1 4, k2 5, k3 5, v1 4, p5a 6, p5b 5. **Target: every Part shows approx. 30 min or less** (`secMins`). Parts 1 and 2 come out at about 31 and 27 minutes. Count the rescue Challenge as about 15 minutes.
 - **Chapter data:** `CHAPTERS` gets `{ id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: true, arena: 'Workshop', icon: 'gear' }` (draw a `gear` icon for `chIcon`, or reuse the Workshop card's pulley icon). `goal`: "Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn't reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue." `vocab`: machine, simple machine, compound machine, lever, fulcrum, effort, load, pulley, supporting rope, wheel and axle, inclined plane, wedge, screw, mechanical advantage, work, joule.
 - **Home:** the Workshop building on the home map opens Chapter 6 (replace the "being built" toast). Rewrite `#workshopCard` to "Chapter 6 · The Workshop: Save Captain Smooshy!". Add Chapter 6 to the chapter list in Chapter 1's overview card (`41-ch1.js`, around line 107). Remove "and the Workshop" from the teacher page's "More chapters…" note.
 - **Explore:** a **Workshop** card in Explore with every machine, the builder, any load, the world picker (Earth, Moon, Mars, Glimmer-9) and the Perfect / Real switch, plus **Try the rescue again** (the rescue site with every setting free and no scoring) and the four **build tasks** (section W).
@@ -292,7 +293,7 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 
 ## E. Question plans
 
-- **Part 1 Learn (levers):** lv1 reading, reading, pick (label the lever) · lv2 predict, reading, pick, mcq · lv3 reading, reading, pick · lv4 predict, reading, reading, pick · lv5 pick, mcq.
+- **Part 1 Learn (levers):** lv1 reading, reading, pick (label the lever) · lv2 predict, reading, pick, mcq · lv3 reading, reading, reading, pick, tap (key idea: the big rule) · lv4 predict, reading, reading, pick · lv5 pick, mcq.
 - **Part 1 Check** (5): pick (label a lever) → reason (+ sure) → mcq (which class, from a labelled picture) → fix → explain.
 - **Part 2 Learn:** pl1 predict, reading, reading, pick, mcq · pl2 predict, reading, pick · pl3 predict, reading, mcq · pl4 predict, reading, pick, tick.
 - **Part 2 Check** (5): match → pick → fix → reason (+ sure) → explain.
@@ -363,31 +364,38 @@ q3 | mcq | Captain Smooshy wants to lift a heavy rock with a lever and a small p
    ok: Spot on! A long side for his hand means a small pull.
 Rescue log: Fulcrum trick learned.
 
-### Step lv3: The catch   (Part 1, about 4 min)
+### Step lv3: The catch   (Part 1, about 5 min)
 
 CARDS
-1. Is there a catch to this trick? Let's find out. After each pull, two rulers appear under the bench. The **green ruler** shows how far the rock rose. The **red ruler** shows how far your hand moved. Compare them carefully.
+1. Is there a catch to this trick? Let's find out. After each pull, two rulers appear under the bench. The **green ruler** shows how far the rock rose. The **red ruler** shows how far your hand moved. Compare them carefully. You'll try three fulcrum positions.
 
 DO THIS
 - Pull with the rock **0.4 m** from the fulcrum and look at both rulers.
 - (answer box) q1
 - Now move the fulcrum so the rock is **0.2 m** from it, and pull again.
 - (answer box) q2
+- Last one: move the fulcrum close to **your hand**, so the rock is **1.6 m** from it. Pull, and compare the rulers again.
+- (answer box) q3
 
 YOUR TURN QUESTIONS
 q1 | reading | With the rock 0.4 m from the fulcrum, the rock rose 0.10 m. How far did your hand move? Use the red ruler. | unit m | tolerance 0.02
    ok: 0.40 m: four times further than the rock rose.
 q2 | reading | With the rock 0.2 m from the fulcrum, how far did your hand move? | unit m | tolerance 0.02
    ok: 0.90 m! The effort was tiny, but your hand moved nine times further than the rock.
-q3 | pick | When the effort got smaller, your hand had to move {0} to lift the rock the same height.
-   {0}: a shorter distance / the same distance / a longer distance → a longer distance
-   after: That's the catch: a smaller effort always needs a bigger distance. Every machine in the Workshop works like this.
-Rescue log: The catch is noted in the mission log.
+q3 | reading | With the fulcrum close to your hand, the rock rose 0.40 m. How far did your hand move? Use the red ruler. | unit m | tolerance 0.02
+   ok: Only 0.10 m! This time the rock moved four times further than your hand, but the newtonmeter read a huge 1,176 N.
+q4 | pick | With the fulcrum close to the rock, the effort was {0} and your hand moved further. With the fulcrum close to your hand, the effort was {1} and the rock moved further.
+   {0}: small / the same as by hand / big → small · {1}: small / the same as by hand / big → big
+q5 | tap | **Key idea.** Tap the sentence that sums up what you found.
+   Options: A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it! · A machine always makes the effort smaller, however you use it. · A machine makes the load lighter, so it is easier to move. · A machine makes the effort and the distance smaller at the same time. | correct 0
+   ok: Yes! That's the big rule for every machine. You choose: a smaller effort (and your hand moves further), or a bigger distance for the load (and you pull harder).
+Rescue log: The big rule is in the mission log: a smaller effort, or a bigger distance.
 
 ### Step lv4: Three ways to build a lever   (Part 1, about 5 min)
 
 CARDS
-1. So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Use the new buttons to try each design. Pull, then check the newtonmeter and the two rulers. [Picture: Three ways to build a lever: fulcrum in the middle, load in the middle, or effort in the middle]
+1. Here's the big rule you found. Remember it: it works for every machine in the Workshop.A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it!Close to the rock, the fulcrum gives you a **smaller effort**. Close to your hand, it gives the rock a **bigger distance**. It can't do both at once.
+2. So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Use the new buttons to try each design. Pull, then check the newtonmeter and the two rulers. [Picture: Three ways to build a lever: fulcrum in the middle, load in the middle, or effort in the middle]
 
 PREDICT FIRST
 Question: With the effort in the middle, your hand pulls up close to the fulcrum and the rock sits at the far end. How will the effort compare with the rock's weight?

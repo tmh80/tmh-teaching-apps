@@ -13,7 +13,7 @@ const WS_DONE = { wedge: 'Split!' };
 const WS_BAR = 2, WS_T1 = 0.8, WS_WEDGE_OPEN = 0.05;
 /* Part 1 names the three lever set-ups by what sits in the middle; the class numbers are only shown once step lv5 has taught them (WS.clsNames). */
 const WS_SETUP = { 1: 'fulcrum in the middle', 2: 'load in the middle', 3: 'effort in the middle' };
-const WS_LIFT3 = 0.40;   // with the effort in the middle (class 3) the rock rises 0.40 m, so the hand moves a visible 0.10 m at an effort arm of 0.5 m
+const WS_LIFT3 = 0.40;   // whenever a lever moves the load further than your hand (MA below 1: the effort in the middle, or the fulcrum close to your hand), the rock rises 0.40 m so your hand's movement is big enough to see
 const wsR1 = x => Math.round((x + 1e-9) * 10) / 10, wsR2 = x => Math.round((x + 1e-9) * 100) / 100;
 const wsNear = (a, b) => typeof a === 'number' && typeof b === 'number' ? Math.abs(a - b) < 1e-6 : a === b;
 
@@ -33,7 +33,7 @@ function wsArms() {
 function wsParts(o) {   // machine settings -> { ma, eff, rise, ... } for the CURRENT settings (or the overrides in o)
   const s = Object.assign({}, WS, o || {}), m = s.mach; let ma, eff = 1, rise = s.lift, ex = {};
   if (m === 'hand') { ma = 1; }
-  else if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; if (s.cls === 3) rise = s.lift3 != null ? s.lift3 : WS_LIFT3; }
+  else if (m === 'lever') { const a = s.cls === 1 ? { la: s.arm, ea: WS_BAR - s.arm } : s.cls === 2 ? { la: s.arm, ea: WS_BAR } : { la: WS_BAR, ea: s.arm }; ma = a.ea / a.la; eff = WS_EFF.lever; ex = a; if (ma < 1 - 1e-9) rise = s.lift3 != null ? s.lift3 : WS_LIFT3; }
   else if (m === 'pulley') { ma = s.ropes; eff = WS_PEFF[s.ropes] || .7; }
   else if (m === 'winch') { ma = Math.round(s.R / s.axle * 1e6) / 1e6; eff = WS_EFF.winch; }
   else if (m === 'ramp') { ma = Math.round(s.L / s.h * 1e6) / 1e6; eff = WS_EFF.ramp; rise = s.h; }
@@ -52,7 +52,7 @@ function wsCalc(o) {
 const wsRecord = c => ({ mach: WS.mach, cls: WS.mach === 'lever' ? WS.cls : null, la: c.la != null ? wsR2(c.la) : null, ea: c.ea != null ? wsR2(c.ea) : null, ropes: WS.mach === 'pulley' ? WS.ropes : null,
   R: WS.mach === 'winch' ? WS.R : null, L: WS.mach === 'ramp' ? WS.L : null, h: WS.mach === 'ramp' ? WS.h : null, thick: WS.mach === 'wedge' ? WS.thick : null,
   per: WS.mach === 'screw' ? WS.per : null, pitch: WS.mach === 'screw' ? WS.pitch : null, loadN: WS.load, loadName: WS.loadName, loadShort: WS.loadShort, world: WS.world, real: !!WS.real, cap: WS.cap,
-  liftSet: WS.mach === 'lever' && WS.cls === 3 ? WS.lift3 : WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
+  liftSet: WS.mach === 'lever' && c.ma < 1 - 1e-9 ? WS.lift3 : WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
 
 /* ---------- the student's own runs (a question never forces a re-run) ---------- */
 const shopRuns = () => runsFor().filter(r => r.scene === 'shop' && !r.live);

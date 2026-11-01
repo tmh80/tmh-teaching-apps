@@ -141,6 +141,10 @@ function wsDrawLever(c, cur, riseNow) {
   const th = WS.cls === 1 ? riseNow / arms.la : WS.cls === 2 ? -riseNow / arms.la : -riseNow / 2;
   const P = d => ({ x: fx + d * k * Math.cos(th), y: fy + d * k * Math.sin(th) });
   const d0 = WS.cls === 1 ? -arms.la : 0, d1 = WS.cls === 1 ? arms.ea : WS_BAR, dl = WS.cls === 1 ? -arms.la : WS.cls === 2 ? arms.la : WS_BAR, de = WS.cls === 1 ? arms.ea : WS.cls === 2 ? WS_BAR : arms.ea;
+  /* the two distances along the bar, in plain words (drawn first, so a rising rock passes in front of them) */
+  { const lx = fx + dl * k, ex = fx + de * k, yb = WS.cls === 1 ? 58 : 318;
+    wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(arms.la, 2)} m`, WSC.green, true);
+    wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), yb, `hand to fulcrum ${fmt(arms.ea, 2)} m`, WSC.red, true); }
   /* the fulcrum: a steel stand from the floor up to the pivot */
   c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(fx - 26, 350); c.lineTo(fx + 26, 350); c.lineTo(fx + 5, fy + 9); c.lineTo(fx - 5, fy + 9); c.closePath(); c.fill();
   const a = P(d0), b = P(d1); c.strokeStyle = WSC.wood2; c.lineWidth = 14; c.lineCap = 'round'; c.beginPath(); c.moveTo(a.x, a.y); c.lineTo(b.x, b.y); c.stroke(); c.strokeStyle = WSC.wood; c.lineWidth = 8; c.beginPath(); c.moveTo(a.x, a.y - 1); c.lineTo(b.x, b.y - 1); c.stroke();
@@ -151,9 +155,6 @@ function wsDrawLever(c, cur, riseNow) {
   wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
   /* labels: the three parts of a lever, then the two distances along the bar in plain words */
   if (down) txt(c, 'fulcrum', fx, 342, '#fff', `800 10px ${C.fb}`); else txt(c, 'fulcrum', fx - 30, 334, WSC.steel2, `800 11px ${C.fb}`, 'right');
-  const lx = fx + dl * k, ex = fx + de * k, yb = down ? 58 : 318;
-  wsBracket(c, Math.min(lx, fx), Math.max(lx, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(arms.la, 2)} m`, WSC.green, true);
-  wsBracket(c, Math.min(fx, ex), Math.max(fx, ex), yb, `hand to fulcrum ${fmt(arms.ea, 2)} m`, WSC.red, true);
   return { x: E.x, y: hy };
 }
 /* lifting by hand: the newtonmeter hooks onto the rock and the hand pulls straight up */

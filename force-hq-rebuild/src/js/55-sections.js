@@ -55,7 +55,7 @@ const SECTIONS = [
   { id: 'c6a', ch: 'c6', n: 6, title: 'Levers', part: 'Part 1', stamp: 'Lever Learner',
     blurb: 'Lift a heavy rock by hand, then with a lever. Move the fulcrum, find the catch, and meet the three classes of lever.',
     steps: ['lv1', 'lv2', 'lv3', 'lv4', 'lv5'], challenge: null, review: ['c6r1', 'c6r2', 'c6r3', 'c6r4', 'c6r5'],
-    goal: 'Name the three parts of a lever (fulcrum, load and effort); explain how moving the fulcrum changes the effort; describe the catch that a smaller effort needs a bigger distance; name the three classes of lever by what is in the middle.',
+    goal: 'Name the three parts of a lever (fulcrum, load and effort); explain how moving the fulcrum changes the effort; state the rule that a machine can make the effort smaller or move the load a bigger distance, depending on how it is used; name the three classes of lever by what is in the middle.',
     vocab: ['machine', 'lever', 'fulcrum', 'load', 'effort'] },
   { id: 'c6b', ch: 'c6', n: 6, title: 'Pulleys, wheels and ramps', part: 'Part 2', stamp: 'Toolkit Packer',
     blurb: 'Pulleys, a winch, ramps, and wedges and screws (ramps in disguise): the rest of the simple machines, each with the same catch.',
@@ -63,7 +63,7 @@ const SECTIONS = [
     goal: 'Describe how pulleys, a wheel and axle, ramps, wedges and screws each let a small effort move a big load; find out how adding supporting ropes, lengthening a handle or a ramp, or thinning a wedge changes the effort; explain the catch that a smaller effort needs a bigger distance.',
     vocab: ['pulley', 'supporting rope', 'wheel and axle', 'winch', 'inclined plane', 'wedge', 'screw'] }
 ];
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 4, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
 CHDATA.c1.review.push({ id: 'r12', obj: ['Aii'], seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

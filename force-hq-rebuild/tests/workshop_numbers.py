@@ -27,6 +27,8 @@ with sync_playwright() as p:
     chk('class 3 has MA below 1', c['ma'] < 1)
     chk('class 3: the rock rises 0.40 m and the hand moves 0.10 m', near(c['rise'], 0.4) and near(c['eDist'], 0.1), (c['rise'], c['eDist']))
     c = calc(dict(mach='lever', cls=3, arm=1.0, load=294, lift=0.1)); chk('class 3 hand 1.0 m: 588 N, hand moves 0.20 m', near(c['E'], 588.0) and near(c['eDist'], 0.2), (c['E'], c['eDist']))
+    c = calc(dict(mach='lever', cls=1, arm=1.6, load=294, lift=0.1)); chk('class 1, fulcrum near the hand (rock 1.6 m): 1176 N, rock up 0.40 m, hand 0.10 m', near(c['E'], 1176.0) and near(c['rise'], 0.4) and near(c['eDist'], 0.1), (c['E'], c['rise'], c['eDist']))
+    c = calc(dict(mach='lever', cls=1, arm=1.0, load=294, lift=0.1)); chk('class 1 in the middle (MA 1) still lifts 0.10 m', near(c['rise'], 0.1), c['rise'])
     # Part 1 lv1: lifting by hand needs the whole weight
     c = calc(dict(mach='hand', load=294, lift=0.1)); chk('by hand: 294 N, hand moves 0.10 m', near(c['E'], 294.0) and near(c['eDist'], 0.1), (c['E'], c['eDist']))
     # lever travel limit

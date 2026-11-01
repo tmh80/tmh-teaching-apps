@@ -97,10 +97,16 @@ with sync_playwright() as p:
     setnum('#wsArmNum', 0.2); pull(); pg.screenshot(path=OUT + 'lv3_02.png')
     chk('lv3: at 0.2 m the hand moved 0.90 m', abs(ev("shopDist({mach:'lever',cls:1,la:0.2})") - 0.9) < 1e-6)
     chk('lv3 q2', '0.90 m' in tkans('q2', 0.9))
-    dock(); pick('q3', 2); chk('lv3 q3', ptsq('q3').startswith('1 of 1'), ptsq('q3'))
+    setnum('#wsArmNum', 1.6); pull(); pg.screenshot(path=OUT + 'lv3_16.png')
+    chk('lv3: fulcrum close to the hand: 1176 N, the rock rises 0.40 m and the hand moves 0.10 m', abs(ev("shopE({mach:'lever',cls:1,la:1.6})") - 1176) < 1e-6 and abs(ev("shopRun({mach:'lever',cls:1,la:1.6}).rise") - 0.4) < 1e-6 and abs(ev("shopDist({mach:'lever',cls:1,la:1.6})") - 0.1) < 1e-6)
+    chk('lv3 q3', 'Only 0.10 m' in tkans('q3', 0.1))
+    dock(); pick('q4', 0, 2); chk('lv3 q4', ptsq('q4') == '2 of 2 points', ptsq('q4'))
+    q('q5').locator('[data-o="0"]').first.click(); pg.wait_for_timeout(100); chk('lv3 q5: the big rule (key idea)', ptsq('q5').startswith('1 of 1') and 'bigger distance' in q('q5').inner_text(), ptsq('q5'))
     finish('lv3')
 
     # ================= lv4: three ways to build a lever =================
+    chk('lv4: the first card states the big rule', 'bigger distance' in pg.locator('#chunk').inner_text() and pg.locator('#chunk .law').count() == 1, pg.locator('#chunk').inner_text()[:200])
+    pg.locator('#chunk').screenshot(path=OUT + 'lv4_rule.png')
     cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200)
     chk('lv4: the design buttons name what is in the middle, with no class numbers yet', pg.locator('#wsCls').is_visible() and 'Load in the middle' in pg.locator('#wsCls').inner_text() and 'Class' not in pg.locator('#wsCls').inner_text(), pg.locator('#wsCls').inner_text())
     predict(0)
