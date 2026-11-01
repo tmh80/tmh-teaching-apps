@@ -129,3 +129,5 @@ Voice and terminology rules for the script are in section 3 (velocity, not speed
 - MYP tags: add `obj: ['Aii']` to every new Check question. Run `python3 tests/strands.py`. Strands never go on student screens or sheets.
 - AI feedback text: `aiFeedbackText(secIds, optIds)` and `answerKeyText(chId)` in `58-myp.js`; `markingRules` is shared with the printable scheme. The prompt in step 4 never contains the answer key.
 - Teacher code: `FORCE`. g = 9.8 N/kg. Students say "velocity", not "speed".
+- **Finish the Check (1 Nov 2026):** each question type registers `api.reg({blank, check, reveal?, blankV?})`. `box.autoCheck` runs the check for an unchecked question, and `revFinish` in `50-review.js` shows the results pop-up and the stamp. New question types must call `api.reg`, and `tests/finish_types.py` should cover them.
+- **Labels and rulers:** use `picLabel` for labels in SVG pictures and `wsLabel` for labels on the Workshop canvas (white boxes, leader lines stop at the box edge). Rulers come from `wsRulers`, one shared scale.

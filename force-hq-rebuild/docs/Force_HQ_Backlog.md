@@ -57,3 +57,9 @@
 - Open: no Check question covers MYP D ii (safety, cost, environmental effects). Tom to decide whether to rewrite one explain question.
 - Open: Toddle's real limit for the AI feedback box (the page warns above 10,000 characters). Tom to report.
 - Open: test the Download PDF button on a real student account in Toddle, on a laptop and an iPad. Toddle's viewer may block downloads; the print menu is the backup.
+
+## Done: Finish button, label boxes, shared rulers (1 Nov 2026)
+- One Finish button checks the whole Check, shows the score pop-up and gives the stamp. Explain checklists stay visible while writing.
+- `picLabel` and `wsLabel` put labels in white boxes. The Workshop rulers share one scale, with a zoomed ruler for short bars.
+- Pulley step pl1 explains why students count supporting ropes.
+- Open: Tom to play Part 2 pl1 and the Finish pop-up with a class.
