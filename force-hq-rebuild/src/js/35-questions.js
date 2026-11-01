@@ -46,7 +46,8 @@ const sureGet = el => { const b = $('.surebtn.on', el); return b ? b.dataset.sur
 const QT = {
   mcq: {
     html(q, s) { return `${sureHTML(q, s)}<div class="opts">${optOrder(q).map(i => `<button type="button" data-o="${i}">${q.opts[i]}</button>`).join('')}</div>`; },
-    bind(el, q, api) { el.addEventListener('click', e => { const b = e.target.closest('[data-o]'); if (!b || api.locked()) return; const i = +b.dataset.o, ok = i === q.a;
+    bind(el, q, api) { api.reg({ blank: () => true, check: () => { } });   // a pick is marked the moment it is tapped, so an unmarked mcq has no answer yet
+      el.addEventListener('click', e => { const b = e.target.closest('[data-o]'); if (!b || api.locked()) return; const i = +b.dataset.o, ok = i === q.a;
       if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first, then pick your answer.', 'no'); return; }
       api.answer(i, ok, ok ? (q.ok || 'That\'s right!') : `Whoops! The answer is ${qq(q.opts[q.a])}. ${(q.why && q.why[i]) || q.work || ''}`.trim(), { score: ok ? 1 : 0, sure: q.sure ? sureGet(el) : null }); }); },
     lock(el, q, s) { $$('[data-o]', el).forEach(b => { const i = +b.dataset.o; b.className = i === s.v ? (s.ok ? 'right' : 'wrong') : i === q.a ? 'answer' : ''; }); lockInputs(el); },
@@ -67,12 +68,13 @@ const QT = {
     bind(el, q, api) {
       const U = q.units && q.units.length;
       const lb = $('.cluebtn', el); if (lb) { let k = 0; lb.addEventListener('click', () => { if (api.locked()) return; const li = document.createElement('li'); li.innerHTML = q.hints[k]; $('.clist', el).appendChild(li); k++; if (k >= q.hints.length) { lb.disabled = true; lb.textContent = 'No more hints'; } else lb.textContent = 'Show another hint'; }); }
-      const go = () => { if (api.locked()) return; const raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v)) { api.say('Type your answer as a number.', 'no'); return; }
-        if (U && !u) { api.say('Choose a unit for your answer first.', 'no'); return; }
-        if (q.need && !q.need()) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
-        const ans = q.live ? q.live() : q.ans, numOk = near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
+      const go = () => { if (api.locked()) return; const au = api.auto, raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v) && !au) { api.say('Type your answer as a number.', 'no'); return; }
+        if (U && !u && !au) { api.say('Choose a unit for your answer first.', 'no'); return; }
+        if (q.need && !q.need() && !au) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
+        const ans = q.live ? q.live() : q.ans, numOk = !isNaN(v) && near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
+      api.reg({ blank: () => !$('.ansin', el).value.trim(), check: go });
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
       if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
     },
@@ -83,11 +85,12 @@ const QT = {
   gap: {
     html(q, s) { let k = 0; return `<div class="gl noglos">${q.p.replace(/___/g, () => `<input class="gapin" data-g="${k}" aria-label="Gap ${k + 1}" autocomplete="off" value="${s && s.v ? esc(s.v[k++] || '') : (k++, '')}">`)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) {
-      const go = () => { if (api.locked()) return; const v = $$('.gapin', el).map(i => i.value.trim()); if (v.some(x => !x)) { api.say('Fill in every gap first.', 'no'); return; }
+      const go = () => { if (api.locked()) return; const v = $$('.gapin', el).map(i => i.value.trim()); if (v.some(x => !x) && !api.auto) { api.say('Fill in every gap first.', 'no'); return; }
         let res = v.map((x, i) => gapOk(q.ans[i], x));
         if (q.swap && !res.every(Boolean)) { const [a, b] = q.swap, alt = v.slice(); alt[a] = v[b]; alt[b] = v[a]; const r2 = alt.map((x, i) => gapOk(q.ans[i], x)); if (r2.every(Boolean)) res = r2; }   // two gaps that can go in either order (a × b = b × a)
         const bad = res.map((r, i) => r ? -1 : i).filter(i => i >= 0);
         api.answer(v, !bad.length, !bad.length ? (q.ok || 'All correct!') : bad.length === 1 ? `Whoops! The missing word is ${qq(q.ans[bad[0]][0])}.` : `Whoops! ${bad.length} gaps weren't right. The right words are shown in green.`, { score: res.filter(Boolean).length }); };
+      api.reg({ blank: () => $$('.gapin', el).every(i => !i.value.trim()), check: go });
       $('.qchk', el).addEventListener('click', go); $$('.gapin', el).forEach(i => i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } }));
     },
     lock(el, q, s) { $$('.gapin', el).forEach((inp, i) => { const ok = gapOk(q.ans[i], (s.v || [])[i]); inp.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr(inp, q.ans[i][0]); }); lockInputs(el); },
@@ -95,50 +98,64 @@ const QT = {
   },
   sort: {
     html(q, s) { return `<div class="sortgrid">${sortItems(q).map(i => `<div class="sortrow" data-i="${i}"><span>${q.items[i][0]}</span><select aria-label="Group for ${esc(plain(q.items[i][0]))}"><option value="">Choose…</option>${q.groups.map((g, gi) => `<option value="${gi}" ${s && s.v && s.v[i] === gi ? 'selected' : ''}>${g}</option>`).join('')}</select></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = q.items.map((_, i) => { const s = $(`.sortrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
-      if (v.some(x => x == null)) { api.say('Choose a group for every item first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.items.map((_, i) => { const s = $(`.sortrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
+      if (v.some(x => x == null) && !api.auto) { api.say('Choose a group for every item first.', 'no'); return; }
       const bad = q.items.map((it, i) => v[i] === it[1] ? -1 : i).filter(i => i >= 0);
-      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All sorted correctly!') : bad.length === 1 ? `Whoops! ${qq(q.items[bad[0]][0])} is ${art(plain(q.groups[q.items[bad[0]][1]]))}.` : `Whoops! ${bad.length} of these weren't right. Each red one now shows the group it belongs in.`, { score: q.items.length - bad.length }); }); },
+      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All sorted correctly!') : bad.length === 1 ? `Whoops! ${qq(q.items[bad[0]][0])} is ${art(plain(q.groups[q.items[bad[0]][1]]))}.` : `Whoops! ${bad.length} of these weren't right. Each red one now shows the group it belongs in.`, { score: q.items.length - bad.length }); };
+      api.reg({ blank: () => $$('.sortrow select', el).every(x => x.value === ''), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { $$('.sortrow', el).forEach(r => { const i = +r.dataset.i, ok = s.v && s.v[i] === q.items[i][1]; r.className = 'sortrow ' + (ok ? 'right' : 'wrong'); if (!ok) corr($('select', r), q.groups[q.items[i][1]]); }); lockInputs(el); },
     show(q, v) { return q.groups.map((g, gi) => `<b>${g}:</b> ${q.items.filter((_, i) => v && v[i] === gi).map(x => x[0]).join(', ') || '–'}`).join('<br>'); },
     model(q) { return q.groups.map((g, gi) => `<b>${g}:</b> ${q.items.filter(x => x[1] === gi).map(x => x[0]).join(', ')}`).join('<br>'); }
   },
   match: {
     html(q, s) { const ch = shuffled(q.rows.map((_, i) => i), hashStr(q.id) + 9); return `<div class="sortgrid">${q.rows.map((r, i) => `<div class="matchrow" data-i="${i}"><span>${r[0]}</span><select aria-label="Match for ${esc(plain(r[0]))}"><option value="">Choose…</option>${ch.map(j => `<option value="${j}" ${s && s.v && s.v[i] === j ? 'selected' : ''}>${q.rows[j][1]}</option>`).join('')}</select></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = q.rows.map((_, i) => { const s = $(`.matchrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
-      if (v.some(x => x == null)) { api.say('Choose a match for every row first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => { const s = $(`.matchrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
+      if (v.some(x => x == null) && !api.auto) { api.say('Choose a match for every row first.', 'no'); return; }
       const bad = v.map((x, i) => x === i ? -1 : i).filter(i => i >= 0);
-      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All matched!') : bad.length === 1 ? `Whoops! ${qq(q.rows[bad[0]][0])} goes with ${qq(q.rows[bad[0]][1])}.` : `Whoops! ${bad.length} matches weren't right. Each red one now shows the right match.`, { score: q.rows.length - bad.length }); }); },
+      api.answer(v, !bad.length, !bad.length ? (q.ok || 'All matched!') : bad.length === 1 ? `Whoops! ${qq(q.rows[bad[0]][0])} goes with ${qq(q.rows[bad[0]][1])}.` : `Whoops! ${bad.length} matches weren't right. Each red one now shows the right match.`, { score: q.rows.length - bad.length }); };
+      api.reg({ blank: () => $$('.matchrow select', el).every(x => x.value === ''), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { $$('.matchrow', el).forEach(r => { const i = +r.dataset.i, ok = s.v && s.v[i] === i; r.className = 'matchrow ' + (ok ? 'right' : 'wrong'); if (!ok) corr($('select', r), q.rows[i][1]); }); lockInputs(el); },
     show(q, v) { return q.rows.map((r, i) => `${r[0]} → ${v && v[i] != null ? q.rows[v[i]][1] : '–'}`).join('<br>'); }, model(q) { return q.rows.map(r => `${r[0]} → ${r[1]}`).join('<br>'); }
   },
   table: { // q.cols, q.rows:[[label, [answerIndex per col]]], q.choices: per col list
     html(q, s) { return `<table class="tbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, i) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td data-c="${i}-${j}"><select aria-label="${esc(plain(r[0]))}, ${esc(plain(q.cols[j]))}"><option value="">Choose…</option>${q.choices[j].map((o, k) => `<option value="${k}" ${s && s.v && s.v[i] && s.v[i][j] === k ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</table><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = q.rows.map((_, i) => q.cols.map((_, j) => { const s = $(`td[data-c="${i}-${j}"] select`, el).value; return s === '' ? null : +s; }));
-      if (v.flat().some(x => x == null)) { api.say('Fill in every cell first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => q.cols.map((_, j) => { const s = $(`td[data-c="${i}-${j}"] select`, el).value; return s === '' ? null : +s; }));
+      if (v.flat().some(x => x == null) && !api.auto) { api.say('Fill in every cell first.', 'no'); return; }
       let wrong = 0; q.rows.forEach((r, i) => q.cols.forEach((_, j) => { if (v[i][j] !== r[1][j]) wrong++; }));
-      api.answer(v, !wrong, !wrong ? (q.ok || 'Table complete and correct!') : `Whoops! ${wrong} cell${wrong > 1 ? 's weren\'t' : ' wasn\'t'} right. The right answer${wrong > 1 ? 's are' : ' is'} shown in green.`, { score: q.rows.length * q.cols.length - wrong }); }); },
+      api.answer(v, !wrong, !wrong ? (q.ok || 'Table complete and correct!') : `Whoops! ${wrong} cell${wrong > 1 ? 's weren\'t' : ' wasn\'t'} right. The right answer${wrong > 1 ? 's are' : ' is'} shown in green.`, { score: q.rows.length * q.cols.length - wrong }); };
+      api.reg({ blank: () => $$('td select', el).every(x => x.value === ''), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { q.rows.forEach((r, i) => q.cols.forEach((_, j) => { const td = $(`td[data-c="${i}-${j}"]`, el), ok = s.v && s.v[i] && s.v[i][j] === r[1][j]; td.className = ok ? 'right' : 'wrong'; if (!ok) corr($('select', td), q.choices[j][r[1][j]]); })); lockInputs(el); },
     show(q, v) { return `<table class="wtbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, i) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td>${v && v[i] && v[i][j] != null ? q.choices[j][v[i][j]] : ''}</td>`).join('')}</tr>`).join('')}</table>`; },
     model(q) { return QT.table.show(q, q.rows.map(r => r[1])); }
   },
   tick: {
     html(q, s) { return `<div class="ticklist">${optOrder(q).map(i => `<label><input type="checkbox" data-o="${i}" ${s && s.v && s.v.includes(i) ? 'checked' : ''}> ${q.opts[i]}</label>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
-    bind(el, q, api) { $('.qchk', el).addEventListener('click', () => { if (api.locked()) return; const v = $$('[data-o]', el).filter(c => c.checked).map(c => +c.dataset.o).sort((a, b) => a - b);
-      if (!v.length) { api.say('Tick at least one box first.', 'no'); return; }
+    bind(el, q, api) { const go = () => { if (api.locked()) return; const v = $$('[data-o]', el).filter(c => c.checked).map(c => +c.dataset.o).sort((a, b) => a - b);
+      if (!v.length && !api.auto) { api.say('Tick at least one box first.', 'no'); return; }
       const errs = v.filter(i => !q.a.includes(i)).length + q.a.filter(i => !v.includes(i)).length, ok = !errs;
-      api.answer(v, ok, ok ? (q.ok || 'All correct!') : `Whoops! The right answer${q.a.length > 1 ? 's are' : ' is'} ${q.a.map(i => qq(q.opts[i])).join(' and ')}. Green ticks were right, red ones were wrong, and amber ones were missed.`, { score: Math.max(0, 2 - errs) }); }); },
+      api.answer(v, ok, ok ? (q.ok || 'All correct!') : `Whoops! The right answer${q.a.length > 1 ? 's are' : ' is'} ${q.a.map(i => qq(q.opts[i])).join(' and ')}. Green ticks were right, red ones were wrong, and amber ones were missed.`, { score: Math.max(0, 2 - errs) }); };
+      api.reg({ blank: () => !$$('[data-o]', el).some(c => c.checked), check: go }); $('.qchk', el).addEventListener('click', go); },
     lock(el, q, s) { $$('[data-o]', el).forEach(c => { const i = +c.dataset.o, should = q.a.includes(i), was = (s.v || []).includes(i); c.parentElement.className = was ? (should ? 'right' : 'wrong') : (should ? 'missed' : ''); }); lockInputs(el); },
     show(q, v) { return (v || []).map(i => '☑ ' + q.opts[i]).join('<br>') || '–'; }, model(q) { return q.a.map(i => '☑ ' + q.opts[i]).join('<br>'); }
   },
   explain: {
-    html(q, s) { return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${s && s.v ? esc(s.v.text || '') : ''}</textarea><button type="button" class="ghost sm qchk" style="align-self:flex-start">Show the model answer</button><div class="modelwrap"></div>`; },
+    /* The "Did you include…?" checklist is on screen from the start, so a student can tick as they write. Ticks are saved with the draft.
+       Check (or Finish) shows the model answer and scores one point per tick; ticks can still change afterwards. */
+    html(q, s) {
+      const v = (s && s.v) || {}, ticks = v.ticks || [], done = !!(s && s.done);
+      return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck"><div class="lbl exckhd">${done ? 'Did you include…? Tick what you included. You get a point for each one.' : 'Before you finish, tick what you included.'}</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
+    },
     bind(el, q, api) {
-      const showModel = (ticks) => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p><div class="lbl">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks && ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div>`;
-        $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const t = $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck); api.answer({ text: $('.explain', el).value, ticks: t }, null, null, { quiet: true, score: t.length }); })); };
-      $('.qchk', el).addEventListener('click', () => { const t = $('.explain', el).value.trim(); if (!t) { api.say('Write your answer first, then compare it with the model answer.', 'no'); return; } $('.qchk', el).hidden = true; api.answer({ text: t, ticks: [] }, null, 'Now compare your answer with the model answer and tick each point you included.', { score: 0 }); showModel([]); });
-      $('.explain', el).addEventListener('input', () => { const s = api.state(); if (s && s.v) { s.v.text = $('.explain', el).value; api.persist(); } });
-      const s = api.state(); if (s && s.done) { showModel(s.v.ticks); $('.qchk', el).hidden = true; }
+      const ticksNow = () => $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck), textNow = () => $('.explain', el).value;
+      const draft = () => { const cur = api.state() || {}; cur.v = { text: textNow(), ticks: ticksNow() }; api.setRaw(cur); };
+      const reveal = () => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p></div>`; $('.exckhd', el).textContent = 'Did you include…? Tick what you included. You get a point for each one.'; $('.qchk', el).hidden = true; };
+      const go = () => { const t = textNow().trim(); if (!t && !api.auto) { api.say('Write your answer first, then compare it with the model answer.', 'no'); return; }
+        const tk = ticksNow(); reveal(); api.answer({ text: t, ticks: tk }, null, 'Now compare your answer with the model answer. You can still change your ticks.', { score: tk.length }); };
+      api.reg({ blank: () => !textNow().trim() && !ticksNow().length, check: go, reveal, blankV: { text: '', ticks: [] } });
+      $('.qchk', el).addEventListener('click', go);
+      $('.explain', el).addEventListener('input', draft);
+      $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const st = api.state(); if (st && st.done) api.answer({ text: textNow(), ticks: ticksNow() }, null, null, { quiet: true, score: ticksNow().length }); else draft(); }));
+      const s = api.state(); if (s && s.done) reveal();
     },
     show(q, v) { return v ? esc(v.text || '').replace(/\n/g, '<br>') : ''; }, model(q) { return q.model; }
   },
@@ -146,8 +163,9 @@ const QT = {
     html(q, s) { return `<div class="fbdhost"></div>`; },
     bind(el, q, api) {
       const s = api.state(); if (s && s.done) return;
-      FBDB.mount($('.fbdhost', el), q.scen, { state: s && s.v, onChange: st => { const cur = api.state() || {}; cur.v = st; api.setRaw(cur); },
+      const M = FBDB.mount($('.fbdhost', el), q.scen, { state: s && s.v, onChange: st => { const cur = api.state() || {}; cur.v = st; api.setRaw(cur); },
         onCheck: (st, res) => api.answer(st, res.ok, res.ok ? 'Perfect diagram! Every check is green.' : `You scored ${res.score} of 6 points. Compare your diagram with the correct one to see what to change next time.`, { score: res.score }) });
+      api.reg({ blank: () => !M.state.arrows.length, check: () => M.check() });
     },
     lock(el, q, s) { el.innerHTML = fbdCompare(q.scen, s.v); },
     show(q, v) { return v && v.arrows && v.arrows.length ? FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true }) : ''; }, model(q) { return FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }); }
@@ -170,7 +188,10 @@ function renderQuestion(host, q, ctx) {
   host.appendChild(box);
   const body = $('.qbody', box), fbEl = $('.fb', box);
   const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
+  let reg = null;   // what the question type says about itself: { blank(), check(), reveal?, blankV? }, used by the Finish button
   const api = {
+    auto: false,       // true while the Finish button is checking this question: skip every "do this first" guard and mark what is there
+    reg: r => { reg = r; },
     storePath: ctx.store,
     draft: ctx.mode === 'learn' ? { key: ctx.store + '|' + q.id, get: () => draftOf(ctx.store, q.id), set: (part, val, src) => draftSave(ctx.store, q.id, part, val, src) } : null,
     state: () => dbGet(path, null),
@@ -196,6 +217,17 @@ function renderQuestion(host, q, ctx) {
   };
   body.innerHTML = QT[q.type].html(q, s, api);
   QT[q.type].bind(body, q, api);
+  /* the Finish button's hooks */
+  box.isDone = () => { const st = dbGet(path, null); return !!(st && st.done); };
+  box.isBlank = () => !box.isDone() && !!reg && !!reg.blank();
+  box.autoCheck = () => { if (box.isDone() || !reg) return; api.auto = true; try { reg.check(); } finally { api.auto = false; } };
+  box.blankDone = () => {   // a question left empty: stored as done with 0 points, and the right answer is shown
+    if (box.isDone()) return; const st = dbGet(path, null) || { tries: 0 };
+    st.ok = false; st.score = 0; st.max = simMax(q); st.done = true; st.blank = true; if (reg && reg.blankV) st.v = JSON.parse(JSON.stringify(reg.blankV));
+    dbSet(path, st); box.classList.add('locked'); box.classList.remove('ok');
+    if (QT[q.type].lock) QT[q.type].lock(body, q, st); else if (reg && reg.reveal) reg.reveal();
+    pts(st); api.say('Left blank: 0 points.', 'no'); if (ctx.onDone) ctx.onDone(q, st);
+  };
   if (q.sure) body.addEventListener('click', e => { const b = e.target.closest('.surebtn'); if (!b || api.locked()) return; $$('.surebtn', body).forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); });
   if (s && s.done) {
     if (QT[q.type].lock) QT[q.type].lock(body, q, s);

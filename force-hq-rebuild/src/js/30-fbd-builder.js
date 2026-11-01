@@ -153,14 +153,15 @@ const FBDB = {
     board.addEventListener('pointerup', up); board.addEventListener('pointercancel', () => { dr = null; });
     $('.fundo', host).addEventListener('click', () => { if (!hist.length) return; st.arrows = JSON.parse(hist.pop()); closeMenu(); draw(); save(); });
     $('.fclear', host).addEventListener('click', () => { if (!st.arrows.length) return; hist.push(JSON.stringify(st.arrows)); st.arrows = []; st.lastRes = null; closeMenu(); draw(); save(); ffb.textContent = ''; ffb.className = 'fb ffb'; });
-    $('.fcheck', host).addEventListener('click', () => {
+    const doCheck = () => {
       closeMenu(); if (!st.arrows.length) { ffb.className = 'fb ffb no'; ffb.textContent = 'Draw at least one arrow first. Drag from the orange dot.'; return; }
       st.tries++; const res = FBDB.check(scen, st.arrows); st.lastRes = res; st.best = Math.max(st.best || 0, res.score);
       if (res.ok) { st.passed = true; ffb.className = 'fb ffb ok'; ffb.textContent = st.tries === 1 ? 'Perfect diagram, first time! Every check is green.' : 'Brilliant! Every check is green now.'; }
       else { st.hintLevel = (st.hintLevel || 0) + 1; ffb.className = 'fb ffb ' + (st.hintLevel >= 2 ? 'hint' : 'no'); ffb.textContent = FBDB.hint(scen, res, st.hintLevel); }
       draw(); save(); if (opts.onCheck) opts.onCheck(st, res);
-    });
+    };
+    $('.fcheck', host).addEventListener('click', doCheck);
     draw(); if (st.lastRes) { drawChips(st.lastRes); if (st.passed) { ffb.className = 'fb ffb ok'; ffb.textContent = 'Every check is green. Well done!'; } }
-    return { get state() { return st; } };
+    return { get state() { return st; }, check: doCheck };
   }
 };

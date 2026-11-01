@@ -253,7 +253,9 @@ function endTour() { if (tourEl) tourEl.remove(); tourEl = null; unhi(); }
 function maybeTour() { }
 
 /* ---------- stamps: every part of the chapter finished ---------- */
-function maybeStamp(id) { const L = learnProgress(id), R = reviewProgress(id); if (L.done === L.total && challengeDone(id) && R.done === R.total) awardStamp(id); }
+/* the stamp comes when the Check has been finished with the Finish button (never in the middle of a Check) and Learn and the Challenge are done.
+   Called when the last Learn step or the Challenge is completed; the Finish button's results pop-up gives the stamp itself when everything is already done. */
+function maybeStamp(id) { const L = learnProgress(id); if (L.done === L.total && challengeDone(id) && dbGet('review.' + id, {}).finished) awardStamp(id); }
 
 /* ---------- the diagram desk (FBD builder over the stage card) ---------- */
 function openDesk(q, store) {

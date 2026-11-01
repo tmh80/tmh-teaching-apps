@@ -77,14 +77,16 @@ QT.freeze = {
       if (typeof checkStep === 'function') checkStep();
     });
     $$('.frzrow', el).forEach((r, ri) => { if (frzState(q, api.state())[ri].snap) r.classList.add('has'); });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const rows = frzState(q, api.state());
-      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0) { api.say(`Row ${noSnap + 1} needs a moment first. ${plain(q.rows[noSnap].whenMsg || 'Pause the drop at that moment.')}`, 'no'); return; }
+      const noSnap = rows.findIndex(r => !r.snap); if (noSnap >= 0 && !api.auto) { api.say(`Row ${noSnap + 1} needs a moment first. ${plain(q.rows[noSnap].whenMsg || 'Pause the drop at that moment.')}`, 'no'); return; }
       let n = 0, good = 0, v = rows.map((r, ri) => { const vals = {}; $$(`.frzin[data-ri="${ri}"]`, el).forEach(i => { vals[i.dataset.k] = i.value; }); return { snap: r.snap, vals }; });
-      for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
+      if (!api.auto) for (const r of v) for (const [k] of q.cols) if (r.vals[k] === '' || r.vals[k] == null) { api.say('Fill in every box first.', 'no'); return; }
       v.forEach(r => q.cols.forEach(([k]) => { n++; if (frzCellOk(k, r.vals[k], r.snap)) good++; }));
       api.answer({ rows: v }, good === n, (good === n ? (q.ok || 'All correct! Your readings match your paused moments.') : `Whoops! ${n - good} of ${n} boxes weren't right. The right readings from your moments are shown in green.`) + afterTxt(q), { score: good });
-    });
+    };
+    api.reg({ blank: () => frzState(q, api.state()).every(r => !r.snap) && $$('.frzin', el).every(i => i.value === ''), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const rows = frzState(q, s);
@@ -101,7 +103,7 @@ QT.freeze = {
   model(q) { return 'Example values (students\' will differ):<br>' + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('<br>'); }
 };
 function frzCellOk(k, raw, snap) {
-  if (raw === '' || raw == null) return false;
+  if (raw === '' || raw == null || !snap) return false;
   if (!frzIsNum(k)) return +raw === frzTruth(k, snap);
   const n = parseNum(raw); return !isNaN(n) && near(n, frzTruth(k, snap), frzTol(k));
 }
@@ -138,12 +140,14 @@ QT.spot = {
     svg.setAttribute('tabindex', '0'); svg.setAttribute('role', 'slider'); svg.setAttribute('aria-label', 'Graph. Tap to place the marker, or press the left and right arrow keys to move it.');
     svg.addEventListener('keydown', e => { if (api.locked() || !/^Arrow(Left|Right)$/.test(e.key)) return; e.preventDefault(); put((v[act] == null ? tMax / 2 : v[act]) + (e.key === 'ArrowLeft' ? -1 : 1) * tMax / 40); });
     redraw();
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const miss = v.findIndex(t => t == null);
-      if (miss >= 0) { act = miss; redraw(); api.say(q.targets.length > 1 ? `Tap the graph to place marker ${miss + 1} first.` : 'Tap the graph to place your marker first.', 'no'); return; }
-      const oks = v.map((t, i) => t >= q.targets[i].t[0] - 1e-9 && t <= q.targets[i].t[1] + 1e-9), n = oks.filter(Boolean).length, bad = oks.map((o, i) => o ? -1 : i).filter(i => i >= 0);
+      if (miss >= 0 && !api.auto) { act = miss; redraw(); api.say(q.targets.length > 1 ? `Tap the graph to place marker ${miss + 1} first.` : 'Tap the graph to place your marker first.', 'no'); return; }
+      const oks = v.map((t, i) => t != null && t >= q.targets[i].t[0] - 1e-9 && t <= q.targets[i].t[1] + 1e-9), n = oks.filter(Boolean).length, bad = oks.map((o, i) => o ? -1 : i).filter(i => i >= 0);
       api.answer(v.slice(), n === q.targets.length, (n === q.targets.length ? (q.ok || 'Spot on!') : `Whoops! ${bad.length === 1 && q.targets.length === 1 ? 'That' : bad.length === 1 ? 'Marker ' + (bad[0] + 1) : bad.length + ' markers'} wasn't in the right place. The green band${q.targets.length > 1 ? 's show' : ' shows'} where ${q.targets.length > 1 ? 'they were' : 'it was'}. ${bad.map(i => q.targets[i].why || '').join(' ')}`).replace(/\s+/g, ' ').trim() + afterTxt(q), { score: n });
-    });
+    };
+    api.reg({ blank: () => v.every(t => t == null), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) { const svg = $('svg', el); spotDraw(svg, q, spotSt(q, s), true); $$('.spotb', el).forEach(b => { b.disabled = true; }); svg.removeAttribute('tabindex'); lockInputs(el); },
   show(q, v) { return Array.isArray(v) ? v.map((t, i) => `Marker ${i + 1}: ${t == null ? '–' : fmt(t, 1) + ' s'}`).join('<br>') : ''; },
@@ -201,7 +205,7 @@ function sketchBind(host, q, get, set, locked) {
   draw();
 }
 const skDots = (q, s) => (s && Array.isArray(s.v) ? s.v : q.cols ? Array.from({ length: q.cols }, () => null) : []);
-const skChecks = (q, p) => q.checks.map(([label, f]) => { let ok = false; try { ok = !!f(p); } catch (e) { } return [label, ok]; });
+const skChecks = (q, p) => { const pp = p.map(x => x == null ? NaN : x); return q.checks.map(([label, f]) => { let ok = false; try { ok = !!f(pp); } catch (e) { } return [label, ok]; }); };   // a column with no dot is NaN, so every comparison with it is false
 const skChips = (q, p) => `<div class="skchips">${skChecks(q, p).map(([l, ok]) => `<span class="skchip ${ok ? 'ok' : 'no'}">${ok ? '✓' : '✗'} ${l}</span>`).join('')}</div>`;
 QT.sketch = {
   html(q, s) { return `<div class="skhost"></div><div class="skhint">Tap a column to set its dot, or drag across the grid to draw. With a keyboard, use the arrow keys.</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check my sketch</button>`; },
@@ -209,12 +213,14 @@ QT.sketch = {
     const host = $('.skhost', el), get = () => skDots(q, api.state()), set = p => { const cur = api.state() || {}; cur.v = p; api.setRaw(cur); };
     if (api.locked()) { return; }
     sketchBind(host, q, get, set, () => api.locked());
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const p = get();
-      if (p.some(x => x == null)) { api.say(`Set a dot in every column first (${p.filter(x => x == null).length} to go).`, 'no'); return; }
+      if (p.some(x => x == null) && !api.auto) { api.say(`Set a dot in every column first (${p.filter(x => x == null).length} to go).`, 'no'); return; }
       const res = skChecks(q, p), n = res.filter(r => r[1]).length;
       api.answer(p.slice(), n === res.length, n === res.length ? (q.ok || 'Great sketch! Every check is right.') + afterTxt(q) : `Not quite: ${n} of ${res.length} checks are right. The green dashed line shows what the graph should look like.` + afterTxt(q), { score: n });
-    });
+    };
+    api.reg({ blank: () => get().every(x => x == null), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const p = skDots(q, s), host = $('.skhost', el), real = q.real ? q.real() : null;

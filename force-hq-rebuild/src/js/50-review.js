@@ -26,17 +26,74 @@ function renderReview(ch) {
   const body = h('div', { class: 'review', id: 'revBody' }); wrap.appendChild(body); body.hidden = !ready && !DB['revOpen_' + ch];
   const anyway = $('#revAnyway', wrap); if (anyway) anyway.addEventListener('click', () => { DB['revOpen_' + ch] = true; saveDB(); body.hidden = false; anyway.closest('.gate').remove(); });
   const bar = h('div', { class: 'revbar' }); body.appendChild(bar);
-  const drawBar = () => { const P = reviewProgress(ch), st = dbGet('review.' + ch, {}); bar.innerHTML = `<b>${P.done} of ${P.total} done</b><span class="scaleNote">Points so far: ${P.points} of ${P.maxPoints}</span>${R.map((q, i) => `<button type="button" class="chip ${st[q.id] && st[q.id].done ? 'done' : ''}" data-jump="${q.id}">${i + 1}</button>`).join('')}<span style="flex:1"></span><button type="button" class="go sm" id="mkWs">Make my worksheet</button><button type="button" class="ghost sm" id="blankWs">Blank copy</button>`; };
+  const drawBar = () => { const P = reviewProgress(ch), st = dbGet('review.' + ch, {}); bar.innerHTML = `<b>${P.done} of ${P.total} done</b><span class="scaleNote">Points so far: ${P.points} of ${P.maxPoints}</span>${R.map((q, i) => `<button type="button" class="chip ${st[q.id] && st[q.id].done ? 'done' : ''}" data-jump="${q.id}">${i + 1}</button>`).join('')}<span style="flex:1"></span><button type="button" class="go sm" id="finishCheckTop">${finLabel(ch, true)}</button><button type="button" class="ghost sm" id="mkWs">Make my worksheet</button><button type="button" class="ghost sm" id="blankWs">Blank copy</button>`; };
   drawBar();
+  body.appendChild(h('p', { class: 'scaleNote revhint' }, 'You can check each answer as you go, or answer everything and press <b>Finish</b> at the end to check them all at once.'));
+  const items = [];
   R.forEach((q, i) => {
     const card = h('section', { class: 'panel revq', id: 'rq-' + q.id }); body.appendChild(card);
     const st = dbGet('review.' + ch, {})[q.id];
-    card.innerHTML = `<div class="qhd"><span class="qno">Question ${i + 1}</span><span class="tlbl">${QLABEL[q.type]}</span><span class="state ${st && st.done ? 'done' : ''}">${st && st.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, st)) : 'To do'}</span></div><div class="qh"></div><p class="scaleNote">${q.type === 'explain' ? 'Write your answer, then compare it with the model answer. You get a point for each thing you included.' : q.type === 'fbd' ? 'You get one check. You score a point for each check your diagram passes.' : 'You get one go, so check your answer carefully before you press Check.'}</p>`;
-    renderQuestion($('.qh', card), q, { store: 'review.' + ch, mode: 'review', onDone: (qq, s) => { card.classList.toggle('done', !!s.done); $('.state', card).className = 'state ' + (s.done ? 'done' : ''); $('.state', card).textContent = s.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(qq, s)) : 'To do'; drawBar(); renderOnPage(); tabTicks(); if (s.done && reviewProgress(ch).done === reviewProgress(ch).total) maybeStamp(ch); } });
+    card.innerHTML = `<div class="qhd"><span class="qno">Question ${i + 1}</span><span class="tlbl">${QLABEL[q.type]}</span><span class="state ${st && st.done ? 'done' : ''}">${st && st.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, st)) : 'To do'}</span></div><div class="qh"></div><p class="scaleNote">${q.type === 'explain' ? 'Write your answer and tick what you included. Check shows the model answer. You get a point for each thing you included.' : q.type === 'fbd' ? 'You get one check. You score a point for each check your diagram passes.' : 'You get one go, so check your answer carefully before you press Check.'}</p>`;
+    const box = renderQuestion($('.qh', card), q, { store: 'review.' + ch, mode: 'review', onDone: (qq, s) => { card.classList.toggle('done', !!s.done); $('.state', card).className = 'state ' + (s.done ? 'done' : ''); $('.state', card).textContent = s.done ? (p => `${p.score === p.max ? "✓ " : ""}${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(qq, s)) : 'To do'; drawBar(); renderOnPage(); tabTicks(); } });
+    items.push({ q, i, card, box });
     if (st && st.done) card.classList.add('done');
   });
+  body.appendChild(h('div', { class: 'finishrow' }, `<button type="button" class="go big" id="finishCheck">${finLabel(ch, false)}</button><span class="scaleNote">Finish checks every answer you have not checked yet, then shows your score${SECTIONS.find(x => x.id === ch) ? ' and your stamp' : ''}.</span>`));
   body.appendChild(h('div', { class: 'row' }, `<button type="button" class="go" id="mkWs2">Make my worksheet</button><button type="button" class="ghost" data-act="home">Back to the home page</button>`));
   const next = SECTIONS.find(s => s.needs === ch); if (next) body.appendChild(h('div', { class: 'keepgoing' }, `<b>Finished? You can stop here and upload your ${CH.part} worksheet.</b><span>Or, if you'd like to go further, try the <b>${next.part}</b>. It takes approx. ${secMins(next.id).total} minutes and makes its own worksheet that you can upload too.</span><button type="button" class="go sm" data-open="${next.id}" style="align-self:flex-start">Go to the ${next.part} →</button>`));
-  host.onclick = e => { const j = e.target.closest('[data-jump]'); if (j) $('#rq-' + j.dataset.jump).scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' });
+  host.onclick = e => { if (e.target.closest('#finishCheck, #finishCheckTop')) { revFinish(ch, items); return; } const j = e.target.closest('[data-jump]'); if (j) $('#rq-' + j.dataset.jump).scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' });
     if (e.target.id === 'mkWs' || e.target.id === 'mkWs2') makeWorksheet(ch); if (e.target.id === 'blankWs') openSheet(ch, 'blank'); };
+}
+
+/* ===== Finish: check everything, then show the score (and the stamp) ===== */
+const revFinished = ch => !!dbGet('review.' + ch, {}).finished;
+const finLabel = (ch, small) => revFinished(ch) ? 'See my score again' : small ? '✓ Finish: see my score' : '✓ I\'m finished: see my score and collect my stamp';
+function revRefreshFinish(ch) { $$('#finishCheck, #finishCheckTop').forEach(b => { b.textContent = finLabel(ch, b.id === 'finishCheckTop'); }); }
+function revGoto(id) { const el = $('#rq-' + id); if (el) { el.scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); el.style.outline = '3px solid var(--bad)'; setTimeout(() => el.style.outline = '', 2500); } }
+const finList = a => a.length < 3 ? a.join(' and ') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+function revFinish(ch, items) {
+  if (revFinished(ch)) { revResults(ch); return; }                        // already marked: just show the score again
+  const blanks = items.filter(it => it.box.isBlank());
+  if (!blanks.length) { revRun(ch, items); return; }
+  const names = blanks.map(it => 'Question ' + (it.i + 1));
+  openModal(`<div class="modal finmodal" role="dialog" aria-label="Some questions are blank"><div class="fin-head">Some questions are blank</div><p><b>${blanks.length} question${blanks.length > 1 ? 's are' : ' is'} still blank:</b> ${finList(names)}. A blank question scores 0.</p><div class="row">${blanks.map((it, k) => `<button type="button" class="ghost sm" data-fgo="${it.q.id}">Go to ${names[k]}</button>`).join('')}</div><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Go back</button><button type="button" class="go" id="finAnyway">Finish anyway</button></div></div>`);
+  makeDraggable($('#modal .finmodal'), '.fin-head', 'fin');
+  $$('#modal [data-fgo]').forEach(b => b.addEventListener('click', () => { closeModal(); revGoto(b.dataset.fgo); }));
+  $('#finAnyway').addEventListener('click', () => { closeModal(); revRun(ch, items); });
+}
+function revRun(ch, items) {
+  items.forEach(it => {                                                   // page order, the same marking as each question's own Check button
+    if (it.box.isDone()) return;
+    if (it.box.isBlank()) it.box.blankDone(); else it.box.autoCheck();
+    if (!it.box.isDone()) it.box.blankDone();                             // safety net: nothing is left unmarked
+  });
+  const st = dbGet('review.' + ch, {}); st.finished = true; dbSet('review.' + ch, st);
+  revRefreshFinish(ch); renderOnPage(); tabTicks();
+  revResults(ch);
+}
+function revResults(ch) {
+  const R = CHDATA[ch].review, st = dbGet('review.' + ch, {}), P = reviewProgress(ch), LP = learnProgress(ch), sec = secOf(ch), hasCh = !!CHDATA[ch].challenge;
+  const learnOk = LP.done === LP.total, chalOk = challengeDone(ch), ready = learnOk && chalOk;
+  const next = SECTIONS.find(s => s.needs === ch);
+  const fresh = ready && giveStamp(ch);                                   // the stamp arrives with the score
+  const stamped = !!dbGet('stamps', {})[ch];
+  const rows = R.map((q, i) => { const p = qPoints(q, st[q.id]), cls = p.score === p.max ? 'full' : p.score ? 'part' : 'none'; return `<li class="${cls}"><span>Question ${i + 1} · ${QLABEL[q.type]}${st[q.id] && st[q.id].blank ? ' · left blank' : ''}</span><b>${p.score} of ${p.max}${p.score === p.max ? ' ✓' : ''}</b></li>`; }).join('');
+  let need = '';
+  if (!stamped) {
+    if (!learnOk) need = `<p class="finneed">Your Check score is saved. Finish the <b>Learn steps</b> (${LP.total - LP.done} left) to collect your stamp.</p><div class="row"><button type="button" class="go sm" id="finToLearn">Go to Learn</button></div>`;
+    else if (!chalOk) { const c = challengeState(ch); need = `<p class="finneed">Your Check score is saved. Finish the <b>Challenge</b> (${c.total - c.tried} left) to collect your stamp.</p><div class="row"><button type="button" class="go sm" id="finToChal">Go to the Challenge</button></div>`; }
+  }
+  const stampHTML = stamped ? `<div class="finstamp"><div class="stamp on ${fresh ? 'drop' : ''}" style="width:110px;height:110px;font-size:17px">${sec.stamp}</div><b>Stamp earned!</b></div>` : '';
+  const stampNote = stamped ? `<p>You've finished every part of Chapter ${sec.n} ${sec.part}. Brilliant work. Your stamp is on the home page.</p>${ch === EXPLORE_AFTER ? '<p><b>Explore is now open!</b> Every control and readout is switched on, so you can test your own ideas in the Main Arena.</p>' : ''}` : '';
+  openModal(`<div class="modal finmodal" role="dialog" aria-label="Your Check score"><div class="fin-head">✓ Check finished</div>
+    <div class="finscore"><div><span class="lbl">Your Check score</span><h2 id="finTotal">You scored <b>${P.points} of ${P.maxPoints}</b> points</h2></div>${stampHTML}</div>
+    <ul class="finlist">${rows}</ul>${stampNote}${need}
+    <div class="row" style="flex-wrap:wrap"><button type="button" class="go" id="finWs">Make my worksheet</button><button type="button" class="ghost" id="finLook">Look at my answers</button>${next ? `<button type="button" class="ghost" id="finNext">Go on to ${next.part}</button>` : ''}</div></div>`);
+  makeDraggable($('#modal .finmodal'), '.fin-head', 'fin');
+  const on = (id, f) => { const b = $('#' + id); if (b) b.addEventListener('click', f); };
+  on('finWs', () => { closeModal(); makeWorksheet(ch); });
+  on('finLook', () => { closeModal(); const it = R.find(q => { const p = qPoints(q, st[q.id]); return p.score < p.max; }); revGoto(it ? it.id : R[0].id); });
+  on('finNext', () => { closeModal(); openChapter(next.id); });
+  on('finToLearn', () => { closeModal(); setCTab('learn'); });
+  on('finToChal', () => { closeModal(); setCTab('challenge'); });
 }

@@ -90,8 +90,10 @@ function renderHome() {
 /* Explore opens once the Chapter 1 Foundation is finished (guided before Explore). Teachers, and anyone who chooses "Open it anyway", can go in sooner. */
 const EXPLORE_AFTER = 'c1f';
 const exploreOpen = () => isTeacher() || !!dbGet('stamps', {})[EXPLORE_AFTER] || !!dbGet('exploreAnyway', false);
+/* mark a section's stamp as earned without a pop-up (the Check's results pop-up shows the stamp itself); true the first time */
+function giveStamp(id) { const st = dbGet('stamps', {}); if (st[id]) return false; st[id] = Date.now(); dbSet('stamps', st); return true; }
 function awardStamp(id) {
-  const st = dbGet('stamps', {}); if (st[id]) return; st[id] = Date.now(); dbSet('stamps', st);
+  if (!giveStamp(id)) return;
   const sec = secOf(id), next = SECTIONS.find(s => s.needs === id);
   openModal(`<div class="modal" style="align-items:center;text-align:center"><div class="stamp on drop" style="width:130px;height:130px;font-size:20px">${sec.stamp}</div><h2>Stamp earned!</h2><p>You've finished every part of Chapter ${sec.n} ${sec.part}. Brilliant work. Your stamp is on the home page.</p><p class="scaleNote">Tip: press <b>💾 Save progress</b> at the top to keep a backup you can email to yourself.</p>${next ? `<p>Want to keep going? The <b>${next.part}</b> takes about ${secMins(next.id).total} minutes and has its own worksheet.</p>` : ''}${id === EXPLORE_AFTER ? `<p><b>Explore is now open!</b> Every control and readout is switched on, so you can test your own ideas in the Main Arena.</p>` : ''}<div class="row">${id === EXPLORE_AFTER ? `<button type="button" class="${next ? 'ghost' : 'go'}" data-act="explore">Open Explore →</button>` : ''}${next ? `<button type="button" class="go" data-close data-open="${next.id}">Try the ${next.part} →</button>` : ''}<button type="button" class="${next ? 'ghost' : 'go'}" data-close>${next ? 'Not now' : 'Thanks!'}</button></div></div>`);
 }

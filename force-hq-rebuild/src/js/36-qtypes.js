@@ -33,10 +33,12 @@ QT.order = {
       $$('.ordcard', list).forEach((c, i) => { $('.ordn', c).textContent = i + 1; });
       const cur = api.state() || {}; cur.v = read(); api.setRaw(cur); b.focus();
     });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const v = read(), sc = orderScore(v), ok = sc === 2;
       api.answer(v, ok, ok ? (q.ok || 'Perfect order!') + afterTxt(q) : (sc === 1 ? 'Close! Two neighbours are the wrong way round. Each wrong card now shows where it belongs.' : 'Whoops! That order wasn\'t right. Each wrong card now shows where it belongs.') + afterTxt(q), { score: sc });
-    });
+    };
+    api.reg({ blank: () => { const st = api.state(); return !(st && Array.isArray(st.v)); }, check: go });   // the shuffled start order is not an answer: a card has to be moved
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     $$('.ordcard', el).forEach((c, pos) => { const it = +c.dataset.it, ok = it === pos; c.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr($('.ordt', c), 'goes ' + ORD(it + 1)); });
@@ -82,14 +84,16 @@ QT.calcorder = {
       $$('.ordcard', list).forEach((c, i) => { $('.ordn', c).textContent = i + 1; });
       save(); b.focus();
     });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const vals = readVals(), ord = readOrd();
-      if (q.items.some((_, i) => isNaN(parseNum(vals[i])))) { api.say('Type a number in every box first. If you are not sure, give your best answer.', 'no'); return; }
+      if (q.items.some((_, i) => isNaN(parseNum(vals[i]))) && !api.auto) { api.say('Type a number in every box first. If you are not sure, give your best answer.', 'no'); return; }
       const sc = coScore(q, vals, ord), n = q.items.length, ok = sc.total === 5;
       const part1 = sc.r === n ? 'All the calculations are right.' : `${sc.r} of ${n} calculations were right. The right values are shown in green.`;
       const part2 = sc.strict === 2 ? 'The order is right.' : sc.own ? 'Your order matches your own values, so you keep the order marks. Check the sums that were wrong.' : sc.strict === 1 ? 'Close! Two neighbours in the order are the wrong way round.' : 'The order wasn\'t right. The correct order is shown below.';
       api.answer({ vals, ord }, ok, (ok ? (q.ok || 'Every value and the order are right!') : 'Whoops! ' + part1 + ' ' + part2) + afterTxt(q), { score: sc.total });
-    });
+    };
+    api.reg({ blank: () => { const st = api.state(); return $$('.coin', el).every(i => !i.value.trim()) && !(st && st.v); }, check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const v = s.v || { vals: [], ord: [] }, sc = coScore(q, v.vals || [], v.ord || []);
@@ -112,13 +116,15 @@ QT.pick = {
     return `<div class="gl pickp">${pickSentence(q, k => `<select class="pickin" data-k="${k}" aria-label="Choice ${k + 1} of ${q.picks.length}"><option value="">choose…</option>${q.picks[k][0].map((o, j) => `<option value="${j}"${s && Array.isArray(s.v) && s.v[k] === j ? ' selected' : ''}>${o}</option>`).join('')}</select>`)}</div>${sureHTML(q, s)}<button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`;
   },
   bind(el, q, api) {
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return; const v = q.picks.map((_, k) => { const x = $(`.pickin[data-k="${k}"]`, el).value; return x === '' ? null : +x; });
-      if (v.some(x => x == null)) { api.say('Choose a word for every gap first.', 'no'); return; }
-      if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first.', 'no'); return; }
+      if (v.some(x => x == null) && !api.auto) { api.say('Choose a word for every gap first.', 'no'); return; }
+      if (q.sure && !sureGet(el) && !api.auto) { api.say('Choose how sure you are first.', 'no'); return; }
       const bad = v.map((x, k) => x === q.picks[k][1] ? -1 : k).filter(k => k >= 0);
       api.answer(v, !bad.length, (!bad.length ? (q.ok || 'All correct!') : bad.length === 1 ? `Whoops! The right choice is ${qq(q.picks[bad[0]][0][q.picks[bad[0]][1]])}.` : `Whoops! ${bad.length} choices weren't right. The right words are shown in green.`) + afterTxt(q), { score: q.picks.length - bad.length, sure: q.sure ? sureGet(el) : null });
-    });
+    };
+    api.reg({ blank: () => $$('.pickin', el).every(x => x.value === ''), check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     $$('.pickin', el).forEach(sel => { const k = +sel.dataset.k, ok = s.v && s.v[k] === q.picks[k][1]; sel.classList.add(ok ? 'right' : 'wrong'); if (!ok) corr(sel, q.picks[k][0][q.picks[k][1]]); });
@@ -160,11 +166,11 @@ QT.reason = {
       if (bo) { a = +bo.dataset.o; $$('.rA [data-o]', el).forEach(b => b.classList.toggle('picked', b === bo)); $('.rtier2', el).hidden = false; save(); }
       if (br) { r = +br.dataset.r; $$('.rR [data-r]', el).forEach(b => b.classList.toggle('picked', b === br)); save(); }
     });
-    $('.qchk', el).addEventListener('click', () => {
+    const go = () => {
       if (api.locked()) return;
-      if (a == null) { api.say('Choose an answer first.', 'no'); return; }
-      if (r == null) { api.say('Now choose the best reason.', 'no'); return; }
-      if (q.sure && !sureGet(el)) { api.say('Choose how sure you are first.', 'no'); return; }
+      if (a == null && !api.auto) { api.say('Choose an answer first.', 'no'); return; }
+      if (r == null && !api.auto) { api.say('Now choose the best reason.', 'no'); return; }
+      if (q.sure && !sureGet(el) && !api.auto) { api.say('Choose how sure you are first.', 'no'); return; }
       const okA = a === q.a, okR = r === q.r, ok = okA && okR, ro = rOpts(q), gen = rWhyAll(q), rea = qq(q.reasons[q.r]);
       const ans = q.voices ? `${q.voices[q.a].who} is right` : `The answer is ${qq(ro[q.a])}`;   // cartoon mode names the character instead of repeating the speech bubble
       const msg = ok ? `${q.ok || 'Spot on! Right answer and right reason.'} ${gen}`
@@ -172,7 +178,9 @@ QT.reason = {
         : okR ? `Whoops! ${ans}. The reason you chose is the right one, but it goes with a different answer. ${rWhy(q, 'a', a)} ${gen}`
         : `Whoops! ${ans}, because ${rea}. ${rWhy(q, 'a', a)} ${rWhy(q, 'r', r)} ${gen}`;
       api.answer({ a, r }, ok, msg.replace(/\s+/g, ' ').trim(), { score: (okA ? 1 : 0) + (okR ? 1 : 0), sure: q.sure ? sureGet(el) : null });
-    });
+    };
+    api.reg({ blank: () => a == null && r == null, check: go });
+    $('.qchk', el).addEventListener('click', go);
   },
   lock(el, q, s) {
     const v = s.v || {}; $('.rtier2', el).hidden = false;
@@ -219,12 +227,13 @@ QT.fix = {
     if (f.kind === 'num') {
       const go = () => {
         if (api.locked() || line == null) return; const raw = $('.ansin', el).value, U = f.units && f.units.length, u = U ? $('.unitsel', el).value : null;
-        if (isNaN(parseNum(raw))) { api.say('Type your answer as a number.', 'no'); return; }
-        if (U && !u) { api.say('Choose a unit for your answer first.', 'no'); return; }
+        if (isNaN(parseNum(raw)) && !api.auto) { api.say('Type your answer as a number.', 'no'); return; }
+        if (U && !u && !api.auto) { api.say('Choose a unit for your answer first.', 'no'); return; }
         finish(raw, fixNumOk(q, raw, u), u);
       };
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
-    } else el.addEventListener('click', e => { const b = e.target.closest('.rF [data-o]'); if (!b || api.locked() || line == null) return; const i = +b.dataset.o; finish(i, i === f.a); });
+      api.reg({ blank: () => line == null, check: go });
+    } else { api.reg({ blank: () => line == null, check: () => { if (line != null) finish(null, false); } }); el.addEventListener('click', e => { const b = e.target.closest('.rF [data-o]'); if (!b || api.locked() || line == null) return; const i = +b.dataset.o; finish(i, i === f.a); }); }
   },
   lock(el, q, s) {
     const v = s.v || {}, f = q.fix;
