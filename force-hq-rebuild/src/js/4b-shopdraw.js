@@ -111,8 +111,18 @@ function wsLoadBlock(c, x, y, w, h, id, label) {   // x,y = the middle of the bo
   c.fillStyle = ice ? WSC.ice2 : rock ? WSC.rock2 : WSC.crate2; if (!rock) { c.fillRect(x - w / 2 + 5, y - h + 5, w - 10, 4); c.fillRect(x - w / 2 + 5, y - 9, w - 10, 4); } else { c.beginPath(); c.ellipse(x - w * .18, y - h * .62, w * .18, h * .14, -.4, 0, 7); c.fill(); }
   if (label) txt(c, label, x, y - h / 2 + 0.5, '#fffaf2', `800 12px ${C.fn}`);
 }
+/* a label in a white text box with a coloured border (x, y = middle of the text; align 'left'/'right' puts the box's edge there).
+   An optional leader line runs from the box edge to a point and stops at the box edge, never through the text. */
+function wsLabel(c, text, x, y, col, align, pt) {
+  c.save(); c.font = `700 11px ${C.fn}`; const w = c.measureText(text).width + 12, h = 18;
+  let bx = align === 'left' ? x - 6 : align === 'right' ? x - w + 6 : x - w / 2; const by = y - h / 2; if (bx < 166 && y > 40) bx = 166;
+  if (pt) { const mx = bx + w / 2, my = by + h / 2, dx = pt[0] - mx, dy = pt[1] - my, t = Math.min(dx ? (w / 2) / Math.abs(dx) : 9e9, dy ? (h / 2) / Math.abs(dy) : 9e9);
+    if (t < 1) { c.strokeStyle = col; c.lineWidth = 1.5; c.beginPath(); c.moveTo(mx + dx * t, my + dy * t); c.lineTo(pt[0], pt[1]); c.stroke(); c.fillStyle = col; c.beginPath(); c.arc(pt[0], pt[1], 2.5, 0, 7); c.fill(); } }
+  c.fillStyle = '#fff'; c.beginPath(); c.roundRect(bx, by, w, h, 5); c.fill(); c.strokeStyle = col; c.lineWidth = 1.5; c.stroke();
+  c.fillStyle = col; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, bx + w / 2, y + 0.5); c.restore();
+}
 function wsBracket(c, x1, x2, y, label, col, above) {
-  c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke(); txt(c, label, (x1 + x2) / 2, above ? y - 10 : y + 12, col, `700 11px ${C.fn}`);
+  c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke(); if (label) wsLabel(c, label, (x1 + x2) / 2, above ? y - 14 : y + 14, col);
 }
 const wsHand = (c, x, y, down) => { c.fillStyle = '#e8b896'; c.beginPath(); c.roundRect(x - 11, y - 11, 22, 22, 9); c.fill(); c.fillStyle = '#b8916f'; c.fillRect(x - 11, y + (down ? 6 : -9), 22, 4); };
 function wsEffArrow(c, x, y, down) { const col = WSC.red; if (down) arrow(c, x, y - 54, x, y - 14, col, 4); else arrow(c, x, y + 54, x, y + 14, col, 4); }
@@ -131,7 +141,7 @@ function wsSpring(c, ax, ay, hx, hy, label) {
   c.restore();
   wsHand(c, hx, hy, uy > 0);
   arrow(c, hx + ux * 14, hy + uy * 14, hx + ux * 50, hy + uy * 50, WSC.red, 4);
-  if (label) { const mx = ax + ux * (hook + body / 2), my = ay + uy * (hook + body / 2); if (Math.abs(uy) > .7) txt(c, label, mx + 16, my, WSC.red, `800 11px ${C.fb}`, 'left'); else txt(c, label, mx - uy * 18, my + ux * 18 - 4, WSC.red, `800 11px ${C.fb}`, 'center'); }
+  if (label) { const mx = ax + ux * (hook + body / 2), my = ay + uy * (hook + body / 2); if (Math.abs(uy) > .7) wsLabel(c, label, mx + 16, my, WSC.red, 'left'); else wsLabel(c, label, mx - uy * 22, my + ux * 22 - 4, WSC.red); }
 }
 /* the lever. A wider pivot height for each set-up keeps the bar, the spring balance and the hand above the floor at every slider setting:
    fulcrum in the middle (class 1): your end goes DOWN, so the bar sits high and the newtonmeter hangs below it;
@@ -154,7 +164,7 @@ function wsDrawLever(c, cur, riseNow) {
   const down = WS.cls === 1, hy = down ? Math.min(E.y + 84, 330) : Math.max(E.y - 84, 52);
   wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
   /* labels: the three parts of a lever, then the two distances along the bar in plain words */
-  if (down) txt(c, 'fulcrum', fx, 342, '#fff', `800 10px ${C.fb}`); else txt(c, 'fulcrum', fx - 30, 334, WSC.steel2, `800 11px ${C.fb}`, 'right');
+  if (down) wsLabel(c, 'fulcrum', fx, 338, WSC.steel2, 'center', [fx, 322]); else wsLabel(c, 'fulcrum', fx - 34, 334, WSC.steel2, 'right', [fx - 14, 330]);
   return { x: E.x, y: hy };
 }
 /* lifting by hand: the newtonmeter hooks onto the rock and the hand pulls straight up */
@@ -178,7 +188,7 @@ function wsDrawPulley(c, cur, riseNow, prog) {
   wsLoadBlock(c, cx, bY + 62, 64, 50, WS.loadId, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N');
   /* the free end comes down over the last wheel to the puller's hand */
   const hx = 500, ry = 150 + prog * 110; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1], 70); c.quadraticCurveTo(xs[N - 1] + 18, 62, xs[N - 1] + 26, 78); c.lineTo(xs[N - 1] + 26, 78); c.lineTo(hx, 78); c.lineTo(hx, ry); c.stroke();
-  wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); txt(c, 'the end you pull', hx + 10, 110, WSC.ink, `700 10px ${C.fb}`, 'left'); txt(c, '(not counted)', hx + 10, 122, WSC.ink, `700 10px ${C.fb}`, 'left');
+  wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); wsLabel(c, 'the end you pull (not counted)', hx - 10, 52, WSC.ink, 'center', [hx, 78]);
   return { x: hx, y: ry + 66 };
 }
 function wsDrawWinch(c, cur, riseNow) {
@@ -192,13 +202,13 @@ function wsDrawWinch(c, cur, riseNow) {
   /* the crank handle turning */
   const a = rot, gx = ax + Math.cos(a) * hr, gy = ay + Math.sin(a) * hr; c.strokeStyle = WSC.wood2; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(gx, gy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(gx, gy, 9, 0, 7); c.fill();
   const tx = -Math.sin(a), ty = Math.cos(a); arrow(c, gx - tx * 4, gy - ty * 4, gx + tx * 42, gy + ty * 42, WSC.red, 4);
-  wsBracket(c, ax - hr, ax, ay, '', WSC.red); txt(c, `handle radius ${fmt(WS.R, 2)} m`, ax - hr - 10, ay, WSC.red, `700 11px ${C.fn}`, 'right'); txt(c, `axle radius ${fmt(WS.axle, 2)} m`, ax + hr + 14, ay + 4, WSC.green, `700 11px ${C.fn}`, 'left');
+  wsBracket(c, ax - hr, ax, ay, '', WSC.red); wsLabel(c, `handle radius ${fmt(WS.R, 2)} m`, ax - hr - 10, ay, WSC.red, 'right'); wsLabel(c, `axle radius ${fmt(WS.axle, 2)} m`, ax + hr + 14, ay + 4, WSC.green, 'left');
   return { x: gx, y: gy };
 }
 function wsDrawRamp(c, cur, riseNow, prog) {
   const run = Math.sqrt(Math.max(.01, WS.L * WS.L - WS.h * WS.h)), sc = Math.min(85, 440 / run, 200 / WS.h), A = { x: 50, y: 340 }, B = { x: 50 + run * sc, y: 340 - WS.h * sc };
   c.fillStyle = WSC.wood; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.lineTo(B.x, A.y); c.closePath(); c.fill(); c.fillStyle = WSC.wood2; c.fillRect(B.x, B.y, 60, A.y - B.y); c.fillStyle = WSC.steel; c.fillRect(B.x, B.y - 4, 60, 5);
-  wsBracket(c, A.x, B.x, 232, `ramp length ${fmt(WS.L, 1)} m`, WSC.red, true); txt(c, `height ${fmt(WS.h, 1)} m`, B.x + 30, (A.y + B.y) / 2 + 4, '#fffaf2', `700 10.5px ${C.fn}`);
+  wsBracket(c, A.x, B.x, 232, `ramp length ${fmt(WS.L, 1)} m`, WSC.red, true); wsLabel(c, `height ${fmt(WS.h, 1)} m`, B.x + 30, (A.y + B.y) / 2 + 4, WSC.green);
   const ang = Math.atan2(B.y - A.y, B.x - A.x), t = clamp(prog, 0, 1), px = A.x + (B.x - A.x) * t, py = A.y + (B.y - A.y) * t, cs = Math.cos(ang), sn = Math.sin(ang);
   c.save(); c.translate(px, py); c.rotate(ang); c.fillStyle = WSC.crate; c.beginPath(); c.roundRect(2, -36, 54, 28, 5); c.fill(); c.fillStyle = WSC.ink; [[13, -6], [45, -6]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 6, 0, 7); c.fill(); }); txt(c, fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N', 29, -22, '#fffaf2', `800 11px ${C.fn}`); c.restore();
   /* the pull is up the slope, along a rope from the front of the cart to the puller's hand on the platform */
@@ -216,7 +226,7 @@ function wsDrawWedge(c, cur, riseNow, prog) {
   txt(c, (ice ? 'ice block' : 'log') + ' · needs ' + fmt(WS.load, 0) + ' N to split', cx, 336, '#fffaf2', `700 11px ${C.fn}`);
   c.fillStyle = WSC.steel; c.beginPath(); c.moveTo(cx - wd / 2, top); c.lineTo(cx + wd / 2, top); c.lineTo(cx, tip); c.closePath(); c.fill();
   c.fillStyle = WSC.steel2; c.beginPath(); c.moveTo(cx + wd / 2, top); c.lineTo(cx, tip); c.lineTo(cx + wd / 2 - 3, top); c.fill();
-  wsBracket(c, cx - wd / 2, cx + wd / 2, top - 8, '', WSC.red); txt(c, `thickness ${WS.thick} cm`, cx - wd / 2 - 10, top - 8, WSC.red, `700 11px ${C.fn}`, 'right'); txt(c, 'length 20 cm', cx + wd / 2 + 10, top + ht / 2, WSC.green, `700 11px ${C.fn}`, 'left');
+  wsBracket(c, cx - wd / 2, cx + wd / 2, top - 8, '', WSC.red); wsLabel(c, `thickness ${WS.thick} cm`, cx - wd / 2 - 10, top - 8, WSC.red, 'right'); wsLabel(c, 'length 20 cm', cx + wd / 2 + 10, top + ht / 2, WSC.green, 'left');
   const hy = top - 62; wsHand(c, cx, hy, true); arrow(c, cx, hy + 16, cx, hy + 50, WSC.red, 4);
   return { x: cx + 14, y: hy };
 }
@@ -231,19 +241,28 @@ function wsDrawScrew(c, cur, riseNow, prog) {
   c.strokeStyle = WSC.wood2; c.lineWidth = 8; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx + 18, hy); c.lineTo(hx, hy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(hx, hy, 9, 0, 7); c.fill();
   arrow(c, hx + 6, hy - 14, hx + 6, hy - 52, WSC.red, 4);
   const mk = wsMasked(), tn = Math.floor(turnsNow + 1e-6); c.fillStyle = '#0d171d'; c.beginPath(); c.roundRect(cx + 108, 280, 108, 40, 8); c.fill(); txt(c, 'TURNS', cx + 162, 291, '#cfd8dd', `800 9px ${C.fb}`); txt(c, mk.has('turns') ? '?' : String(tn), cx + 162, 308, '#9ef0b2', `700 18px ${C.fn}`);
-  txt(c, `thread gap ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, `700 11px ${C.fn}`, 'right');
+  wsLabel(c, `thread gap ${fmt(WS.pitch, 1)} cm`, cx - 98, 322, WSC.green, 'right');
   return { x: hx + 8, y: hy - 52 };
 }
 
 /* ---------- the rulers (after a pull): the load's path and the effort's path, ticks every 0.05 m ---------- */
-function wsRuler(c, x, y, w, dist, title, col) {
-  const len = Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2), pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : 1, lab = pxm >= 150 ? 0.1 : pxm >= 60 ? 0.5 : len > 6 ? 2 : 1;
-  c.fillStyle = '#fbf3da'; c.beginPath(); c.roundRect(x, y, w, 42, 6); c.fill(); c.strokeStyle = '#8a7a50'; c.lineWidth = 1;
+function wsRuler(c, x, y, w, dist, title, col, len, zoom) {
+  len = len || Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2); const pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : 1, lab = pxm >= 300 ? 0.1 : pxm >= 150 ? 0.25 : pxm >= 60 ? 0.5 : len > 6 ? 2 : 1;
+  c.fillStyle = zoom ? '#fff6d6' : '#fbf3da'; c.beginPath(); c.roundRect(x, y, w, 42, 6); c.fill(); c.strokeStyle = '#8a7a50'; c.lineWidth = 1;
+  if (zoom) { c.setLineDash([4, 3]); c.stroke(); c.setLineDash([]); }
   c.fillStyle = col; c.globalAlpha = .45; c.fillRect(x + 10, y + 3, dist * pxm, 7); c.globalAlpha = 1;
   c.fillStyle = WSC.ink; c.font = `600 9px ${C.fn}`; c.textAlign = 'center'; c.textBaseline = 'alphabetic';
   for (let v = 0; v <= len + 1e-9; v += minor) { const xx = x + 10 + v * pxm, major = Math.abs(v / lab - Math.round(v / lab)) < 1e-6, half = Math.abs(v * 10 - Math.round(v * 10)) < 1e-6; c.beginPath(); c.moveTo(xx, y + 10); c.lineTo(xx, y + 10 + (major ? 14 : half ? 9 : 5)); c.stroke(); if (major) c.fillText(String(Math.round(v * 100) / 100), xx, y + 36); }
   c.fillStyle = col; c.beginPath(); c.moveTo(x + 10 + dist * pxm, y + 2); c.lineTo(x + 6 + dist * pxm, y - 5); c.lineTo(x + 14 + dist * pxm, y - 5); c.closePath(); c.fill();
   txt(c, title, x + 6, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left');
+}
+/* both rulers use ONE scale, so a longer bar is a longer bar. A bar under 40 px gets an extra zoomed ruler above it. */
+function wsRulers(c, rise, eDist, t1, t2) {
+  const len = Math.max(0.5, Math.ceil(Math.max(rise, eDist) * 2 - 1e-9) / 2), W = 430, pxm = (W - 20) / len;
+  wsRuler(c, 14, 376, W, Math.max(rise, 0.01), t1, WSC.green, len); wsRuler(c, 456, 376, W, Math.max(eDist, 0.01), t2, WSC.red, len);
+  [[rise, 14, WSC.green], [eDist, 456, WSC.red]].forEach(([d, x, col]) => {
+    if (d > 0 && d * pxm < 40) { const zl = d <= 0.5 ? 0.5 : Math.ceil(d), zy = 312; wsRuler(c, x, zy, 200, d, `🔍 Zoomed in: 0 to ${zl} m`, col, zl, true); }
+  });
 }
 
 /* ---------- the whole scene ---------- */
@@ -267,6 +286,6 @@ function drawShopScene(c) {
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
-    wsRuler(c, 14, 376, 410, Math.max(WS.c.rise, 0.01), WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WSC.green); wsRuler(c, 440, 376, 450, Math.max(WS.c.eDist, 0.01), WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)', WSC.red);
+    wsRulers(c, WS.c.rise, WS.c.eDist, WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)');
   }
 }
