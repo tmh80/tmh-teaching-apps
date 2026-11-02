@@ -87,33 +87,33 @@ function dzHeliRise(L, t) {
   return vt * vt / a0 * (x + Math.log1p(Math.exp(-2 * x)) - Math.LN2);
 }
 /* things the object falls past, fixed at real heights so they slide by at the right speed: birds, skyscrapers, flood lights and crates on the floor */
-const DZ_TOWERS = [[.04, .11, 150], [.3, .1, 205], [.57, .12, 120]];   // [position across, width, roof height in m]
-function dzTowers(c, bx, bw, scr, gy, lo, hi) {
-  DZ_TOWERS.forEach(([u, ww, top], k) => {
+const DZ_TOWERS = [[.04, .11, 150], [.3, .1, 205], [.57, .12, 120]], DZ_TOWERS_B = [[.02, .13, 95], [.24, .09, 175], [.5, .14, 230], [.8, .08, 130]];   // lane B has its own skyline   // [position across, width, roof height in m]
+function dzTowers(c, bx, bw, scr, gy, lo, hi, idx) {
+  (idx ? DZ_TOWERS_B : DZ_TOWERS).forEach(([u, ww, top], k) => {
     const x = bx + u * bw, w = Math.max(24, ww * bw), y0 = scr(top); if (y0 > DZ_H || gy < 0) return;
-    c.fillStyle = k % 2 ? '#8fa9be' : '#7f9bb2'; c.fillRect(x, y0, w, gy - y0); c.fillStyle = '#a3bacc'; c.fillRect(x, y0, w, 4); c.fillStyle = '#6d879c'; c.fillRect(x + w / 2 - 1.5, y0 - 14, 3, 14);
+    c.fillStyle = idx ? (k % 2 ? '#b8a48c' : '#a8957e') : (k % 2 ? '#8fa9be' : '#7f9bb2'); c.fillRect(x, y0, w, gy - y0); c.fillStyle = idx ? '#cdbba4' : '#a3bacc'; c.fillRect(x, y0, w, 4); c.fillStyle = idx ? '#8f7d68' : '#6d879c'; c.fillRect(x + w / 2 - 1.5, y0 - 14, 3, 14);
     const rows = Math.floor(top / 7), cols = Math.max(2, Math.floor(w / 9));
-    for (let r = 1; r < rows; r++) { const ry = scr(r * 7); if (ry < -10 || ry > DZ_H) continue; for (let q = 0; q < cols; q++) { c.fillStyle = dzHash(r * 9 + k, q + 3) > .55 ? 'rgba(255,240,180,.8)' : 'rgba(55,80,104,.4)'; c.fillRect(x + 4 + q * ((w - 8) / cols), ry - 14, ((w - 8) / cols) - 3, 9); } }
+    for (let r = 1; r < rows; r++) { const ry = scr(r * 7); if (ry < -10 || ry > DZ_H) continue; for (let q = 0; q < cols; q++) { c.fillStyle = dzHash(r * 9 + k + (idx ? 50 : 0), q + 3) > .55 ? 'rgba(255,240,180,.8)' : 'rgba(55,80,104,.4)'; c.fillRect(x + 4 + q * ((w - 8) / cols), ry - 14, ((w - 8) / cols) - 3, 9); } }
   });
 }
-function dzBirds(c, bx, bw, scr, lo, hi, tt) {
+function dzBirds(c, bx, bw, scr, lo, hi, tt, idx) {
   const sp = 110, i0 = Math.max(0, Math.floor(lo / sp)), i1 = Math.min(Math.ceil(hi / sp), 4);
   for (let i = i0; i <= i1; i++) {
-    const a = i * sp + 40 + dzHash(i, 41) * 40, y = scr(a), dir = dzHash(i, 42) > .5 ? 1 : -1, x = bx + ((dzHash(i, 43) + dir * (RMOTION ? 0 : tt * 0.02)) % 1 + 1) % 1 * bw, fl = RMOTION ? 0.3 : Math.sin(tt * 9 + i * 2);
+    const o = idx ? 60 : 0, a = i * sp + 40 + dzHash(i, 41 + o) * 40, y = scr(a), dir = dzHash(i, 42 + o) > .5 ? 1 : -1, x = bx + ((dzHash(i, 43 + o) + dir * (RMOTION ? 0 : tt * 0.02)) % 1 + 1) % 1 * bw, fl = RMOTION ? 0.3 : Math.sin(tt * 9 + i * 2);
     if (y < -20 || y > DZ_H) continue;
     c.save(); c.translate(x, y); c.scale(dir, 1); c.strokeStyle = '#2d3b48'; c.lineWidth = 2.4; c.lineCap = 'round'; c.lineJoin = 'round'; c.beginPath(); c.moveTo(-13, -4 - 6 * fl); c.quadraticCurveTo(-6, -8 - 5 * fl, 0, 0); c.quadraticCurveTo(6, -8 - 5 * fl, 13, -4 - 6 * fl); c.stroke(); c.fillStyle = '#2d3b48'; c.beginPath(); c.arc(0, 0, 2.6, 0, 7); c.fill(); c.restore();
   }
 }
-function dzFloods(c, x0, two, scr, gy) {
-  (two ? [58, 200] : [58, 250]).forEach(dx => {
+function dzFloods(c, x0, two, scr, gy, idx) {
+  (two ? (idx ? [74, 188] : [58, 200]) : [58, 250]).forEach(dx => {
     const x = x0 + dx, top = scr(24); if (top > DZ_H) return;
     c.strokeStyle = '#4b5560'; c.lineWidth = 4; c.beginPath(); c.moveTo(x, gy); c.lineTo(x, top); c.stroke();
     c.fillStyle = '#3a4650'; c.fillRect(x - 17, top - 9, 34, 10); c.fillStyle = '#fff6c4'; [-11, 0, 11].forEach(d => { c.beginPath(); c.arc(x + d, top - 4, 3.6, 0, 7); c.fill(); });
     c.fillStyle = 'rgba(255,246,196,.16)'; c.beginPath(); c.moveTo(x - 15, top + 1); c.lineTo(x + 15, top + 1); c.lineTo(x + 46, gy); c.lineTo(x - 46, gy); c.closePath(); c.fill();
   });
 }
-function dzFloorCrates(c, x0, two, gy) {
-  (two ? [[84, 2], [112, 1]] : [[96, 3], [176, 2]]).forEach(([dx, n]) => { const x = x0 + dx; for (let r = 0; r < n; r++) for (let q = 0; q < n - r; q++) dzCrate(c, x + (q - (n - r - 1) / 2) * 33, gy + 2 - r * 27, 0.7); });
+function dzFloorCrates(c, x0, two, gy, idx) {
+  (two ? (idx ? [[100, 1], [140, 2]] : [[84, 2], [112, 1]]) : [[96, 3], [176, 2]]).forEach(([dx, n]) => { const x = x0 + dx; for (let r = 0; r < n; r++) for (let q = 0; q < n - r; q++) dzCrate(c, x + (q - (n - r - 1) / 2) * 33, gy + 2 - r * 27, 0.7); });
 }
 
 /* a small rounded note that wraps its text to fit (state and landing messages) */
@@ -143,7 +143,7 @@ function dzLane(c, L, idx, x0, w, tt) {
   } else if (L.world !== 'moon') dzBlur(c, blurPx, () => {   // cloud puffs, haze streaks or dust that slide past as you fall
     const sp = L.world === 'earth' ? 45 : 60, i0 = Math.floor(lo / sp), i1 = Math.ceil(hi / sp);
     for (let i = i0; i <= i1; i++) {
-      const cx = x0 + 40 + dzHash(i, 5) * (w - 80), cy = scr(i * sp + dzHash(i, 6) * sp), r = 16 + dzHash(i, 7) * 22;
+      const o = idx ? 70 : 0, cx = x0 + 40 + dzHash(i, 5 + o) * (w - 80), cy = scr(i * sp + dzHash(i, 6 + o) * sp), r = 16 + dzHash(i, 7 + o) * 22;
       if (L.world === 'earth') { c.fillStyle = 'rgba(255,255,255,.88)'; c.beginPath(); c.arc(cx, cy, r, 0, 7); c.arc(cx + r * .9, cy + 4, r * .75, 0, 7); c.arc(cx - r * .9, cy + 5, r * .65, 0, 7); c.fill(); }
       else { c.fillStyle = L.world === 'venus' ? 'rgba(255,238,170,.42)' : L.world === 'titan' ? 'rgba(255,214,150,.36)' : 'rgba(255,225,190,.3)'; c.beginPath(); c.roundRect(cx - r * 1.6, cy - 5, r * 3.2, 11, 6); c.fill(); }
     }
@@ -151,8 +151,8 @@ function dzLane(c, L, idx, x0, w, tt) {
   /* ground, or the cloud-top platform */
   const gy = scr(0);
   if (gy > 0) dzBlur(c, blurPx, () => {   // the things the object drops past (they blur with the clouds)
-    if (L.world === 'earth') { dzBirds(c, bx0, bwid, scr, lo, hi, tt); dzTowers(c, bx0, bwid, scr, gy, lo, hi); }
-    if (gy < DZ_H + 80) dzFloods(c, x0, two, scr, gy);
+    if (L.world === 'earth') { dzBirds(c, bx0, bwid, scr, lo, hi, tt, idx); dzTowers(c, bx0, bwid, scr, gy, lo, hi, idx); }
+    if (gy < DZ_H + 80) dzFloods(c, x0, two, scr, gy, idx);
   });
   if (gy < DZ_H) {
     if (L.world === 'jupiter') {
@@ -164,7 +164,7 @@ function dzLane(c, L, idx, x0, w, tt) {
       c.fillStyle = '#5b6164'; c.beginPath(); c.roundRect(x0 + (two ? 70 : 280), gy - 3, two ? 150 : 150, 10, 4); c.fill(); c.fillStyle = '#f3d66a'; for (let q = 0; q < 6; q++) c.fillRect(x0 + (two ? 70 : 280) + 10 + q * 24, gy + 0.5, 12, 3);
     }
   }
-  if (gy < DZ_H && L.world !== 'jupiter') dzBlur(c, blurPx * 0.6, () => dzFloorCrates(c, x0, two, gy));
+  if (gy < DZ_H && L.world !== 'jupiter') dzBlur(c, blurPx * 0.6, () => dzFloorCrates(c, x0, two, gy, idx));
   /* speed lines: they sit at fixed heights in the air, so they slide up past the object, and they get longer and more numerous the faster it goes */
   if (sl > 0.03) {
     const sp = 12, i0 = Math.floor(lo / sp), i1 = Math.ceil(hi / sp), ln = clamp(v.v * 1.6, 10, 150); c.save(); c.lineCap = 'round';
