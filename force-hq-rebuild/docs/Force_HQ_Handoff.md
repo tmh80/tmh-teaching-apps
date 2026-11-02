@@ -1,8 +1,9 @@
-# Force HQ rebuild: handoff for a new chat (updated 28 Oct 2026, evening)
+# Force HQ rebuild: handoff for a new chat (updated 2 Nov 2026)
 
 Start here. Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. For Chapter 5 also read `docs/Chapter5_Script.md` (the full script and engine spec) and `docs/Question_Types_Guide.md` (new question types and the pause/snapshot tools). Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
 ## 0. Where things stand
+- **2 Nov 2026: Check and Workshop fixes are done and delivered** (one-button Finish with `box.autoCheck`, label boxes `picLabel`/`wsLabel`, shared ruler scale, pl1 supporting-ropes wording). Offline file: `Force-HQ-Rebuild-offline.html`. **Next stage: Part 3 (Mechanical advantage and work, `c6c`).** Section R step 1 of the Chapter 6 script: re-pitch Part 3 against section A2, update sections H to J, build steps u1–u3, the Launch-day loading challenge y1–y3 and the Part 3 Check (c6r12–c6r17), then stop and ask Tom to play it. Every new Check question must register with `api.reg` (see section 9) and be covered by `tests/finish_types.py`.
 - **Built, tested and pushed:** Chapters 1 to 4, each with a Foundation and an Extension section (`c1f`, `c1x`, `c2f`, `c2x`, `c3f`, `c3x`, `c4f`, `c4x`), each section with Learn, Challenge and Check. Also progress save and load, Toddle worksheets (blank, key, marking scheme) and a preview artifact.
   - Chapter 1: tug-of-war, balanced and unbalanced forces, weight and mass, free-body diagrams.
   - Chapter 2: inertia, Newton's first law, velocity–time graph, brake challenge.

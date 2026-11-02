@@ -1,6 +1,8 @@
 # Force HQ (rebuild): backlog
 
 ## Next milestones (from the rebuild brief)
+**Now (2 Nov 2026): Part 3 of the Workshop (`c6c`, mechanical advantage and work).** Re-pitch against section A2 of the Chapter 6 script, build, then Tom plays it.
+
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.
 2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Tom confirmed (25 Oct): the Space Dome stays in Chapter 4 with the docking orders as its challenge.
 3. ~~Chapter 3, F = ma~~ (built 25 Oct 2026, all in the Snow Arena).

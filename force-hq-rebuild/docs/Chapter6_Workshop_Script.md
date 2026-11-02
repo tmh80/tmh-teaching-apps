@@ -1191,7 +1191,7 @@ bt4 | Lift it on three worlds | about 15 min | load 400 kg rover, up 2 m; worlds
 
 ## R. Build order for the coding model
 
-Commit and deliver after each working step, as the Handoff says. **Done so far (1 Nov 2026):** the Workshop scene, Chapter 6 wiring, the black box transmission, the five-slot Rescue board, **Part 1 (Levers)** and **Part 2 (Pulleys, wheels and ramps)** with their Checks, worksheets and `tests/play_c6.py`. **Next: step 1 below. Stop after each Part and ask Tom to play it.**
+Commit and deliver after each working step, as the Handoff says. **Done so far (1 Nov 2026):** the Workshop scene, Chapter 6 wiring, the black box transmission, the five-slot Rescue board, **Part 1 (Levers)** and **Part 2 (Pulleys, wheels and ramps)** with their Checks, worksheets and `tests/play_c6.py`. **Also done (2 Nov 2026):** the one-button Finish for every Check, label boxes on pictures and in the scene, shared Workshop ruler scale, pl1 wording. **Next: step 1 below (Part 3). Stop after each Part and ask Tom to play it.**
 
 1. **Re-pitch Part 3 against section A2** (one new word per card, a labelled picture for every new idea, one familiar pictured example, plain words, no prediction given away), update section H to J of this script, then build Part 3: steps u1–u3, `renderShopCourse` with y1–y3, and the Part 3 Check. **Stop: ask Tom to play Part 3.**
 2. Re-pitch Part 4, then the machine builder (C4) and the crane; Part 4 steps k1–k3, h1–h3 and the Part 4 Check. (k1's gallery must use pictured, familiar machines: scissors and a building-site crane, not a can opener or a wheelbarrow without a picture.)
