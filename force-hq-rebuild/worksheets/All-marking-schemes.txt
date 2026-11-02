@@ -290,3 +290,28 @@ Q3 (2 marks): 1 mark for the line with the mistake: line 4 (A steeper ramp would
 Q4 (2 marks): 1 mark for the answer: It gets smaller. 1 mark for the reason: Her hand moves round a bigger circle, so a smaller force does the same job. Confidence is not marked. MYP: A ii
 Q5 (3 marks, 1 per point): The question gives the words to use (wedge, force, thin, distance); each point is about using one of them correctly. • Says the sloping sides push the ice apart with a bigger force than the push • Says a long, thin wedge needs a smaller push than a short, fat one • Says the smaller push has to move further (the catch) Model answer: A wedge is two ramps back to back. When Smooshy pushes the wedge into the ice, its sloping sides push the two halves apart with a much bigger force than his push. He should choose a long, thin wedge, because it needs the smallest push. The catch is that he has to push it further into the ice. MYP: A ii
 Total: 15 marks.
+
+MYP strands on this sheet: A ii, A iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Part 3: Mechanical advantage and work". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 14 marks.
+
+Mark scheme
+Q1 (2 marks): 250  (accept 249.5 to 250.5). 1 mark for the answer, 1 for correct working: Mechanical advantage = 4,500 ÷ 18 = 250. There is no unit.. MYP: A ii
+Q2 (2 marks): 1 mark for the line with the mistake: line 3 (Work = force ÷ distance). 1 mark for the correction: 1800 J (accept 1799 to 1801, with the unit). Work = force × distance, so the work is 120 × 15 = 1,800 J. MYP: A iii
+Q3 (2 marks): 1 mark for the answer: The work is the same either way. 1 mark for the reason: She pushes with a smaller force over a longer distance, so force × distance is the same. Confidence is not marked. MYP: A ii
+Q4 (2 marks): 60 N (accept 59.5 to 60.5). 1 mark for the answer with its unit (N), 1 for correct working: Mechanical advantage = 9, so the effort is 540 ÷ 9 = 60 N. Just right for Smooshy!. MYP: A ii
+Q5 (2 marks, 1 per choice): A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is [130 N] and the rope pulled is [15 m].. 1 mark for each right choice. MYP: A ii
+Q6 (4 marks, 1 per point): The question gives the words to use (mechanical advantage, effort, supporting ropes, distance, work); each point is about using one of them correctly. • Works out the mechanical advantage needed (600 ÷ 60 = 10) • Says the supporting ropes share the load, so the effort is smaller • Says he must pull a longer distance of rope (10 times the height, 20 m) • Says the work stays the same (force × distance) Model answer: He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank's weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J. MYP: A ii
+Total: 14 marks.
