@@ -815,7 +815,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 @media (max-width:760px){.rescueboard{grid-template-columns:1fr}.rbslots{grid-template-columns:1fr}}
 .txmodal{max-width:480px} .txmodal .tx-head{font-family:var(--f-display);font-weight:800;letter-spacing:.04em;cursor:grab;padding:2px 0} .txmodal.dragging .tx-head{cursor:grabbing}
 .txmodal.placed{position:fixed;margin:0}
-.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx{display:block;width:100%;aspect-ratio:360/200}
+.tx-screen{border-radius:12px;overflow:hidden;border:3px solid #1f2a30} #cvTx,#cvEnd{display:block;width:100%;aspect-ratio:360/200}
 .txrec{margin:8px 0 0;font-size:13px;letter-spacing:.02em;color:var(--muted)}
 .pic text{paint-order:stroke}
 .txlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}

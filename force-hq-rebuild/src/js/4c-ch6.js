@@ -48,9 +48,10 @@ const WL = {
   crate30: { id: 'crate', N: 294, name: '30 kg crate', short: 'crate' }, tank: { id: 'tank', N: 245, name: '25 kg oxygen tank', short: 'tank' },
   engineb: { id: 'engineb', N: 1176, name: '120 kg engine block', short: 'engine block' }, gen: { id: 'gen', N: 2352, name: '240 kg generator', short: 'generator' },
   cone: { id: 'cone', N: 1960, name: '200 kg nose cone', short: 'nose cone' }, rover: { id: 'rover', N: 3920, name: '400 kg Gummy Rover', short: 'rover' }, blockg: { id: 'blockg', N: 1260, name: '300 kg engine block on Glimmer-9', short: 'engine block' },
+  gumdrop: { id: 'gumdrop', N: 6300, name: '1,500 kg Gumdrop', short: 'Gumdrop' }, boulder: { id: 'boulder', N: 252, name: '60 kg boulder', short: 'boulder' }, sunk: { id: 'sunk', N: 3780, name: 'the Gumdrop\'s sunken side', short: 'ship' },
   barrel: { id: 'barrel', N: 784, name: '80 kg fuel barrel', short: 'barrel' }, engine: { id: 'engine', N: 490, name: '50 kg spare engine', short: 'engine' }
 };
-const shopStage = o => { clearCh2(); S.scene = 'shop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; S.running = false; wsSetup(o); };
+const shopStage = o => { LAB.pullGate = null; clearCh2(); S.scene = 'shop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; S.running = false; wsSetup(o); };
 const UNITS_W = ['N', 'J', 'm', 'kg'];
 const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
 
@@ -274,6 +275,18 @@ CHDATA.c6 = {
           lines: ['Pulley block: mechanical advantage = 4', 'Winch: mechanical advantage = 5', 'Total mechanical advantage = 4 + 5 = 9', 'Effort = 1,800 ÷ 9 = 200 N'], bad: 2,
           fix: { kind: 'num', ask: 'What effort does his machine really need for the 1,800 N load?', ans: 90, unit: 'N', units: UNITS_W, tol: 0.5 },
           why: 'Mechanical advantages multiply: 4 × 5 = 20, so the effort is 1,800 ÷ 20 = 90 N.' }] },
+
+    /* ================= Part 5: Rescue Captain Smooshy! (c6e) ================= */
+    { id: 'v1', title: 'Landing on Glimmer-9', rescue: 'Landed on Glimmer-9. Rescue plan loaded!',
+      cards: [
+        { hi: '#cvScene', html: `<p>You've landed on <b>Planet Glimmer-9</b>! Purple sky, two moons, and there is the Gumdrop, tipped over at the bottom of a <b>15 m</b> deep crater with a boulder pinning one landing leg. Captain Smooshy squeezes out through the hatch (gummy bears are very squishy) to do the pulling.</p>` },
+        { html: `<p>On Glimmer-9, ${T('gfs', 'g')} = <b>4.2 N/kg</b>, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear. The rescue has three stages, and you plan each one while Smooshy does the pulling.</p>${picCraterPlan()}` }],
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', hatch: 1, cap: 60, bRoutes: [[0, 'Straight up'], [30, 'Steep track'], [45, 'Medium track'], [75, 'Gentle track']] }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Watch Smooshy climb out, then answer the questions',
+      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
+      qs: [
+        { id: 'q1', type: 'num', p: 'The Gumdrop has a mass of 1,500 kg. On Glimmer-9, g = 4.2 N/kg. What does the Gumdrop weigh there?', unit: 'N', units: UNITS_W, ans: 6300, tol: 1, ladder: true, hints: ['Weight = mass × g.', 'Use the mass, 1,500 kg, and Glimmer-9\'s g, 4.2 N/kg.', 'Type 1500 × 4.2 into the calculator.'], work: 'Weight = 1,500 × 4.2 = 6,300 N.', ok: 'Yes, 6,300 N.' },
+        { id: 'q2', type: 'num', p: 'Smooshy can pull with 60 N. What mechanical advantage would he need to lift the 6,300 N Gumdrop straight up?', unit: '', ans: 105, tol: 0.5, ladder: true, hints: ['Mechanical advantage = load ÷ effort.', 'The load is 6,300 N and the effort is 60 N.', 'Type 6300 ÷ 60 into the calculator.'], work: 'Mechanical advantage = 6,300 ÷ 60 = 105. No single Workshop machine comes close, so stage 3 needs a compound machine.', ok: 'Yes, 105. No single machine reaches that, so stage 3 needs a compound machine.' },
+        { id: 'q3', type: 'pick', p: 'If the Gumdrop had crashed on Earth instead, its mass would be {0} and its weight would be {1}.', picks: [[['smaller', 'the same', 'bigger'], 1], [['smaller', 'the same', 'bigger'], 2]], after: 'On Earth it would weigh 1,500 × 9.8 = 14,700 N, so the rescue would need an even bigger mechanical advantage. Lucky Smooshy!' }] }
   ],
   review: [
     /* ---------- Part 1 Check (levers) ---------- */
@@ -330,7 +343,19 @@ CHDATA.c6 = {
       items: ['The handle turns the winch\'s axle', 'The axle winds in the cable with a bigger force', 'The cable pulls on the pulley block', 'The supporting ropes share the load and lift it'] },
     { id: 'c6r22', obj: ['Aii'], type: 'explain', p: 'A crane uses a winch and a pulley system to lift a heavy steel beam. Explain how the two machines together let a small effort lift the beam, and why the operator has to turn the handle so many times.', words: ['compound machine', 'mechanical advantage', 'multiply', 'distance'],
       model: 'The winch and the pulley system are two simple machines working together, so the crane is a compound machine. The winch makes the effort bigger, then the pulleys make it bigger again, so the total mechanical advantage is the two mechanical advantages multiplied together. That makes the effort much smaller than the beam\'s weight. The catch is distance: the operator\'s hand moves the total mechanical advantage times the height the beam rises, so the handle has to turn many times.',
-      check: ['Says the crane is a compound machine (two simple machines working together)', 'Says the total mechanical advantage is the two multiplied, so the effort is much smaller than the load', 'Says the hand must move much further than the beam rises (mechanical advantage × the load\'s distance)'] }
+      check: ['Says the crane is a compound machine (two simple machines working together)', 'Says the total mechanical advantage is the two multiplied, so the effort is much smaller than the load', 'Says the hand must move much further than the beam rises (mechanical advantage × the load\'s distance)'] },
+    /* ---------- Part 5 Check: Mission debrief ---------- */
+    { id: 'c6r23', obj: ['Aii', 'Di', 'Diii'], type: 'explain', p: 'Real rescue teams use compound machines too. A tow truck pulls a car out of a ditch with a winch and a pulley block. Describe how the tow truck\'s machine helps the rescuers.', words: ['winch', 'pulley', 'mechanical advantage', 'effort'],
+      model: 'The winch is a wheel and axle that winds in the cable, and the pulley block adds supporting ropes. Together they make a compound machine, so their mechanical advantages multiply. That means a small effort from the winch\'s motor or handle can pull the heavy car out. The cable has to be wound in much further than the car moves.',
+      check: ['Names the winch (wheel and axle) and the pulley block as the two simple machines', 'Says the mechanical advantages multiply, so a small effort moves the heavy car', 'Says the cable moves much further than the car (the trade-off)'] },
+    { id: 'c6r24', obj: ['Aii'], type: 'num', p: 'The 6,300 N Gumdrop rose 15 m out of the crater. How much work did Smooshy do, whatever machine he used?', unit: 'J', units: UNITS_W, ans: 94500, tol: 10, ladder: true, hints: ['In a perfect machine, work in = work out.', 'Work out = load × height = 6,300 × 15.', 'Type 6300 × 15 into the calculator.'], work: 'Work = 6,300 × 15 = 94,500 J, for every machine that worked.' },
+    { id: 'c6r25', obj: ['Aiii'], type: 'reason', sure: true, p: 'Ana says: "If Smooshy had built an even bigger mechanical advantage, he would have done less work." Is she right?',
+      opts: ['No, the work stays the same, but the effort gets smaller', 'Yes, a bigger advantage always means less work', 'No, a bigger advantage means he does more work', 'Yes, because the ship weighs less with a bigger machine'], a: 0,
+      reasons: ['He pulls with less force over a longer distance, so force × distance stays at 94,500 J', 'A smaller force always means a smaller amount of work done', 'He turns the handle further, so force × distance must be bigger', 'The machine carries part of the ship\'s weight for him'], r: 0,
+      why: { a: { 1: 'A smaller effort is paid for with a longer distance, so the work is the same.', 2: 'A bigger advantage makes the effort smaller, and the work stays the same.', 3: 'The ship\'s weight never changes.' }, r: { 1: 'The force is smaller, but the distance is longer, so the work does not shrink.', 2: 'The distance is longer, but the force is smaller, so the work does not grow.', 3: 'The machine changes the effort, not the ship\'s weight.' } } },
+    { id: 'c6r26', obj: ['Dii', 'Diii'], type: 'explain', p: 'The rescue team had two plans. Plan A: dig the gentle 75 m track and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9\'s crater, then say which plan you would choose and why.', words: ['mechanical advantage', 'distance', 'safety', 'cost'],
+      model: 'Plan A uses the track as a ramp, which gives mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and digging a 75 m track takes time and damages more of the crater. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.',
+      check: ['Gives an advantage of Plan A (the track\'s mechanical advantage means a smaller or cheaper crane, or a smaller effort)', 'Gives a disadvantage of Plan A (more cable or distance, more time, or more damage to the crater)', 'Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground)', 'Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails)', 'Makes a choice and gives a reason for it'] }
   ]
 };
 
@@ -391,3 +416,42 @@ CHDATA.c6.challenge = {
       after: 'The crane kit is built and packed. Next stop: Glimmer-9!' }
   ]
 };
+
+/* ---------- Part 5 Challenge: Operation Gummy Lift (sm1 to sm3), judged by renderRescueCourse in 45-challenge.js ---------- */
+{
+  const tick = ok => ok ? '✓' : '✗', f1 = v => fmt(v, 1);
+  const predOk = (r, v, tol, unit) => r.pred != null && Math.abs(r.pred - v) <= tol + 1e-9;
+  const predSay = (r, v, tol, unit, noun) => r.pred == null ? 'You did not type a prediction. ✗' : `Your prediction: ${fmt(r.pred, 1)}${unit}. ${noun}: ${f1(v)}${unit}. Target: within ${tol}${unit}. ${tick(predOk(r, v, tol))}`;
+  const pushOk = r => !r.capped, pushSay = r => r.capped ? `Smooshy's push would need ${f1(r.need)} N. Target: 60 N or less. ✗` : `Smooshy's push: ${f1(r.E)} N. Target: 60 N or less. ✓`;
+  const planned = { planned: true, label: 'Planned: you typed a prediction', ok: r => r.pred != null, say: r => r.pred != null ? 'Planned ✓.' : 'No prediction typed. ✗' };
+  CHDATA.c6.challenge.missions.push(
+    { id: 'sm1', kind: 'rescue', title: 'Stage 1: Free the landing leg', max: 4,
+      setup: { mach: 'lever', allow: ['lever'], cls: 1, arm: 0.5, lift: 0.25, loads: { lever: WL.boulder }, maxTravel: 1.5, site: 'rescue', world: 'glim', lim: { arm: [0.2, 1.0] } }, show: ['wsctl', 'wspull'],
+      brief: 'A <b>60 kg</b> boulder is pinning the landing leg (g = 4.2 N/kg). Smooshy has a 2 m crowbar and a rock to use as a fulcrum. He can push down with <b>60 N at most</b>, and he can push his end down <b>1.5 m</b> before it hits the ground. The boulder must rise <b>0.25 m</b> to free the leg.',
+      goal: 'Move the fulcrum, type your prediction for the effort, then press Smooshy, try it!',
+      pred: { q: 'What effort will Smooshy need with your fulcrum position?', unit: 'N' },
+      objs: [planned, { label: 'Prediction within 1 N of the effort Smooshy needed', ok: r => predOk(r, r.need, 1), say: r => predSay(r, r.need, 1, ' N', 'Smooshy needed') }, { label: 'Smooshy\'s push is 60 N or less', ok: pushOk, say: pushSay },
+        { label: 'The boulder rises at least 0.25 m', ok: r => !r.capped && r.rise >= 0.25 - 1e-9, say: r => r.capped ? 'The boulder did not move. ✗' : `The boulder rose ${fmt(r.rise, 2)} m. Target: 0.25 m or more. ${tick(r.rise >= 0.25 - 1e-9)}` }],
+      desc: r => `the boulder ${fmt(r.la, 2)} m from the fulcrum`, win: 'The landing leg is free!',
+      clues: ['The boulder weighs 60 × 4.2 = 252 N, so the lever\'s mechanical advantage must be at least 252 ÷ 60 = 4.2.', 'But a big mechanical advantage means the boulder rises only a little: rise = 1.5 m ÷ mechanical advantage. For a 0.25 m rise, the mechanical advantage can be 6 at most.', 'Find a load arm that gives a mechanical advantage between 4.2 and 6. (Mechanical advantage = effort arm ÷ load arm, and effort arm = 2 − load arm.)'] },
+    { id: 'sm2', kind: 'rescue', title: 'Stage 2: Level the ship', max: 4,
+      setup: { mach: 'screw', allow: ['screw'], per: 120, pitch: 1.0, lift: 0.40, loads: { screw: WL.sunk }, site: 'rescue', world: 'glim' }, show: ['wsctl', 'wspull'],
+      brief: 'The Gumdrop\'s sunken side presses down with <b>3,780 N</b>. Smooshy must jack it up <b>40 cm</b>. He can push the handle with <b>60 N at most</b>, and after <b>50 turns</b> his gummy arms go floppy.',
+      goal: 'Choose how far the handle moves in one turn and the gap between threads, type your prediction, then press Smooshy, try it!',
+      pred: { q: 'What effort will Smooshy need on the jack handle?', unit: 'N' },
+      objs: [planned, { label: 'Prediction within 1 N of the effort Smooshy needed', ok: r => predOk(r, r.need, 1), say: r => predSay(r, r.need, 1, ' N', 'Smooshy needed') }, { label: 'Smooshy\'s push is 60 N or less', ok: pushOk, say: pushSay },
+        { label: '50 turns or fewer', ok: r => r.turns <= 50 + 1e-9, say: r => `Turns needed: ${fmt(r.turns, 0)}. Target: 50 or fewer. ${tick(r.turns <= 50 + 1e-9)}` }],
+      desc: r => `${fmt(r.per, 0)} cm per turn and a ${fmt(r.pitch, 1)} cm gap between threads`, win: 'The ship is level!',
+      clues: ['Turns = 40 cm ÷ the gap between threads. Which gaps need 50 turns or fewer?', 'Screw mechanical advantage = distance per turn ÷ gap between threads (use the same unit: 1.2 m = 120 cm).', 'With a 1.0 cm gap, which handle gets the effort to 60 N or less? Effort = 3,780 ÷ mechanical advantage.'] },
+    { id: 'sm3', kind: 'rescue', title: 'Stage 3: Haul out of the crater', max: 5,
+      setup: { mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', world: 'glim', bRoutes: [[0, 'Straight up (15 m)'], [30, 'Steep track (30 m)'], [45, 'Medium track (45 m)'], [75, 'Gentle track (75 m)']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
+      brief: 'Time for the big one! Haul the <b>6,300 N</b> Gumdrop <b>15 m</b> up and out of the crater. Smooshy can pull <b>60 N at most</b>. The winch drum holds <b>240 m of cable</b>, and Smooshy has oxygen for <b>2,400 m of hand travel</b> (about 40 minutes of turning). Choose a route, a pulley block and a winch.',
+      goal: 'Build your machine, type its total mechanical advantage, then press Smooshy, try it!',
+      pred: { q: 'What is the total mechanical advantage of your machine?', unit: '' },
+      objs: [{ label: 'Used a compound machine (two or more parts)', ok: r => r.parts >= 2, say: r => `Parts used: ${r.parts}. Target: 2 or more. ${tick(r.parts >= 2)}` }, { label: 'Total mechanical advantage typed correctly (within 0.5)', ok: r => predOk(r, r.ma, 0.5), say: r => predSay(r, r.ma, 0.5, '', 'The total mechanical advantage was') }, { label: 'Smooshy\'s pull is 60 N or less', ok: pushOk, say: pushSay },
+        { label: 'Cable 240 m or less', ok: r => r.cable <= 240 + 1e-9, say: r => r.cable <= 240 + 1e-9 ? `Cable used: ${fmt(r.cable, 0)} m. Target: 240 m or less. ✓` : `Not enough cable! You would need ${fmt(r.cable, 0)} m. Target: 240 m or less. ✗` },
+        { label: 'Hand travel 2,400 m or less', ok: r => r.dist <= 2400 + 1e-9, say: r => r.dist <= 2400 + 1e-9 ? `Hand travel: ${fmt(r.dist, 0)} m. Target: 2,400 m or less. ✓` : `Smooshy's oxygen would run out after 2,400 m of turning. You would need ${fmt(r.dist, 0)} m. ✗` }],
+      desc: r => `${r.br ? 'the ' + r.br + ' m track' : 'straight up'}, ${r.bn ? r.bn + ' ropes' : 'no block'}, ${r.bw ? 'winch ×' + r.bw : 'no winch'}`, win: 'The Gumdrop is out of the crater!',
+      clues: ['The mechanical advantage you need is 6,300 ÷ 60 = 105. Hand travel = mechanical advantage × 15 m, so the mechanical advantage can be 160 at most.', 'Cable = supporting ropes × route length. The gentle track (75 m) can only take 3 ropes.', 'Each track is a ramp: its mechanical advantage = length ÷ 15 m. The gentle track gives 5, the medium track 3. What must the pulley block and the winch multiply to?'] }
+  );
+}

@@ -267,3 +267,13 @@ function picCompoundChain(A, B) {
   b += picNote(210, 132, ['Multiply the mechanical advantages.', 'Do not add them.'], PIC_C.E, { all: true, W }).box;
   return picWrap(W, 160, `Two machines with mechanical advantages ${A} and ${B} give a total of ${A * B} when you multiply`, b, '', 420);
 }
+
+/* ---------- Part 5 picture: the three rescue stages ---------- */
+function picCraterPlan() {
+  const W = 420;
+  let b = `<rect x="0" y="0" width="${W}" height="236" rx="10" fill="#6f55b3"/><polygon points="0,60 90,60 150,196 270,196 330,60 420,60 420,236 0,236" fill="#b9a2e4"/>`;
+  b += `<g transform="rotate(-24 210 170)"><path d="M180 190 Q180 130 210 130 Q240 130 240 190 Z" fill="#e8639b"/><circle cx="210" cy="158" r="8" fill="#bfe6f5"/></g><ellipse cx="258" cy="186" rx="14" ry="10" fill="#8b8f93"/>`;
+  b += `<line x1="330" y1="60" x2="330" y2="196" stroke="#fffaf2" stroke-width="2" stroke-dasharray="4 4"/>` + picArrow(150, 184, 112, 116, '#fffaf2', 3);
+  b += picLabs([picLabel(258, 186, 330, 214, ['Stage 1', 'lever the boulder off'], PIC_C.E, { W }), picLabel(205, 176, 120, 214, ['Stage 2', 'jack the ship level'], PIC_C.L, { W }), picLabel(130, 150, 76, 100, ['Stage 3', 'haul it out'], PIC_C.F, { W }), picNote(372, 108, ['15 m', 'crater wall'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, 236, 'A cross-section of the crater: the Gumdrop tipped at the bottom with a boulder on its leg, and three stages: lever the boulder off, jack the ship level, and haul it up the 15 m wall', b, '', 420);
+}

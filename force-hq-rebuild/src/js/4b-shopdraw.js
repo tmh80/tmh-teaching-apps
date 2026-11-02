@@ -51,8 +51,32 @@ function drawGumdrop(c, x, y, s, tilt) {
   c.restore();
 }
 
+/* ---------- the outdoor backdrops: the rescue site in Glimmer-9's crater (Part 5) and Base camp (Extension) ---------- */
+function wsSite(c) {
+  const base = WS.site === 'base', sk = c.createLinearGradient(0, 0, 0, 350); sk.addColorStop(0, base ? '#4a2f8f' : '#3d2a78'); sk.addColorStop(1, base ? '#b79af0' : '#8e6fd6'); c.fillStyle = sk; c.fillRect(0, 0, 900, 350);
+  c.fillStyle = 'rgba(255,255,255,.8)'; [[40, 30], [120, 70], [230, 24], [330, 58], [430, 20], [520, 64], [610, 30], [700, 18], [790, 70], [860, 36]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 1.6, 0, 7); c.fill(); });
+  c.fillStyle = '#f3e9ff'; c.beginPath(); c.arc(610, 70, 24, 0, 7); c.fill(); c.fillStyle = '#d9c5f5'; c.beginPath(); c.arc(603, 64, 6, 0, 7); c.fill(); c.fillStyle = '#ffd6f0'; c.beginPath(); c.arc(700, 104, 12, 0, 7); c.fill();
+  /* the crater walls and the ground */
+  c.fillStyle = '#b9a2e4'; c.beginPath(); c.moveTo(0, 350); c.lineTo(0, 150); c.lineTo(110, 190); c.lineTo(210, 350); c.closePath(); c.fill(); c.beginPath(); c.moveTo(900, 350); c.lineTo(900, 120); c.lineTo(810, 130); c.lineTo(730, 350); c.closePath(); c.fill();
+  c.fillStyle = '#a58bd8'; c.beginPath(); c.moveTo(0, 350); c.lineTo(0, 250); c.lineTo(90, 350); c.closePath(); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.85)'; [[24, 146], [58, 164], [850, 120], [880, 118], [820, 128]].forEach(([x, y]) => { c.beginPath(); c.moveTo(x, y - 12); c.lineTo(x + 5, y); c.lineTo(x, y + 4); c.lineTo(x - 5, y); c.closePath(); c.fill(); });
+  c.fillStyle = '#8a70c4'; c.fillRect(0, 350, 900, WS_H - 350); c.fillStyle = '#7358ad'; c.fillRect(0, 350, 900, 6);
+  if (base) {   // Base camp: gummy colonists' hard-hat huts and sugar crystals by the door
+    c.fillStyle = '#6c7b84'; c.beginPath(); c.roundRect(18, 300, 70, 50, 8); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(30, 312, 18, 16); c.fillStyle = '#ffd24d'; c.beginPath(); c.arc(120, 338, 9, Math.PI, 0); c.fill();
+    c.fillStyle = 'rgba(255,255,255,.9)'; [[820, 336], [846, 340], [872, 334]].forEach(([x, y]) => { c.beginPath(); c.moveTo(x, y - 24); c.lineTo(x + 8, y); c.lineTo(x - 8, y); c.closePath(); c.fill(); });
+  } else {   // the rescue site: the Gumdrop tipped over on the left, a 15 m scale on the right
+    const t = performance.now() / 1000 - (WS.siteT0 || 0), hatch = WS.hatch, out = hatch ? (RMOTION ? 1 : clamp((t - 0.4) / 2.4, 0, 1)) : (WS.noShip ? 0 : 1);
+    drawGumdrop(c, 96, 340, .62, -0.5);
+    if (!WS.noShip) drawSmooshy(c, 96 + 74 * out, 318 - (hatch ? Math.sin(out * Math.PI) * 30 : 0) + 6 * (1 - out), .27, out >= 1 ? 'wave' : 'worried');
+    c.strokeStyle = '#fffaf2'; c.lineWidth = 2; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(868, 350); c.lineTo(868, 130); c.stroke(); c.setLineDash([]);
+    [0, 5, 10, 15].forEach(m => { const y = 350 - m * 14.67; c.beginPath(); c.moveTo(860, y); c.lineTo(876, y); c.stroke(); txt(c, m + ' m', 856, y, '#fffaf2', `700 11px ${C.fb}`, 'right'); });
+  }
+  txt(c, base ? 'BASE CAMP · GLIMMER-9' : 'RESCUE SITE · GLIMMER-9', 14, 418, '#fffaf2', `800 11px ${C.fb}`, 'left');
+}
+
 /* ---------- the Workshop room ---------- */
 function wsRoom(c) {
+  if (WS.site === 'rescue' || WS.site === 'base') { wsSite(c); return; }
   c.fillStyle = WSC.wall; c.fillRect(0, 0, 900, WS_H); c.fillStyle = WSC.wall2; for (let i = 0; i < 900; i += 60) c.fillRect(i, 0, 2, 350);
   c.fillStyle = WSC.floor; c.fillRect(0, 350, 900, WS_H - 350); c.fillStyle = WSC.floor2; c.fillRect(0, 350, 900, 6);
   /* the hoist beam across the ceiling */

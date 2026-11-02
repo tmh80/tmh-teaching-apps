@@ -81,8 +81,8 @@ function wsSetLoad(id) { const l = WS.loadOpts && WS.loadOpts.find(x => x.id ===
 function wsResetLoad() { WS.busy = false; WS.ph = 0; WS.pt = 0; WS.prog = 0; WS.reading = 0; WS.done = false; WS.msg = ''; WS.c = null; if (typeof RUN !== 'undefined' && RUN && RUN.scene === 'shop' && RUN.live) runEnd('reset'); }
 function wsSetup(o) {
   const d = { mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10, load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null,
-    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false, bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null };
-  Object.assign(WS, d, o || {}); wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
+    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false, bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null, pullLabel: null, hatch: 0, noShip: false };
+  Object.assign(WS, d, o || {}); WS.siteT0 = performance.now() / 1000; wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
 }
 function wsSetMach(m) {
   if (!WS.allow.includes(m) || m === WS.mach) return; WS.mach = m; wsLoadFor(m); const d = WS.lim[m]; if (d) Object.assign(WS, d); WS.lift = ({ hand: 0.10, lever: 0.10, pulley: 1.0, winch: 1.0, ramp: WS.h, wedge: WS_WEDGE_OPEN, screw: 0.20 })[m] || WS.lift;
@@ -96,7 +96,7 @@ function wsSet(k, v) {
   wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange();
 }
 function wsLimits(k) {
-  if (k === 'arm') return { min: 0.2, max: 1.8, step: 0.05 };
+  if (k === 'arm') return WS.lim.arm ? { min: WS.lim.arm[0], max: WS.lim.arm[1], step: 0.05 } : { min: 0.2, max: 1.8, step: 0.05 };
   if (k === 'R') return { min: WS.lim.winchR ? WS.lim.winchR[0] : 0.1, max: WS.lim.winchR ? WS.lim.winchR[1] : 0.6, step: 0.05 };
   if (k === 'axle') return { min: 0.04, max: 0.10, step: 0.01 };
   if (k === 'L') return WS.lim.rampL ? { min: WS.lim.rampL[0], max: WS.lim.rampL[1], step: WS.lim.rampL[2] } : { min: 1, max: 6, step: 0.5 };
@@ -108,7 +108,7 @@ function wsLimits(k) {
 
 /* ---------- Pull! ---------- */
 function wsPull() {
-  if (WS.busy) return false; wsResetLoad(); const c = wsCalc(); WS.c = c; WS.busy = true; WS.ph = 1; WS.pt = 0; WS.done = false; WS.msg = ''; WS.prog = 0; WS.reading = 0;
+  if (WS.busy || (LAB.pullGate && !LAB.pullGate())) return false; wsResetLoad(); const c = wsCalc(); WS.c = c; WS.busy = true; WS.ph = 1; WS.pt = 0; WS.done = false; WS.msg = ''; WS.prog = 0; WS.reading = 0;
   WS.T2 = RMOTION ? 0.3 : clamp(1.6 + Math.min(c.rise || 1, 3) * 0.4, 1.8, 3.4);
   S.running = false; runMark('pull'); if (RUN) Object.assign(RUN, wsRecord(c), { scene: 'shop' });
   S.flags.shopRan = true; WS.shown = true; return true;
@@ -194,7 +194,7 @@ function wsRenderControls() {
   $('#wsRopesN').textContent = WS.ropes; $('#wsRopesDn').disabled = WS.ropes <= 1; $('#wsRopesUp').disabled = WS.ropes >= (WS.lim.ropesMax || 6);
   const ax = $('#wsAxleRow'); if (ax) { ax.hidden = !WS.axleEdit || WS.mach !== 'winch'; num('#wsAxleNum', fmt(WS.axle, 2)); }
   $('#wsClsRow').hidden = !WS.classPick || WS.mach !== 'lever'; $('#wsHRow').hidden = !WS.rampH || WS.mach !== 'ramp'; $('#wsLiftRow').hidden = !WS.lifts || WS.lifts.pick !== true || !['pulley'].includes(WS.mach);
-  const pb = $('#wsPull'); if (pb) { pb.textContent = WS_VERB[WS.mach]; pb.disabled = WS.busy; }
+  const pb = $('#wsPull'); if (pb) { pb.textContent = WS.pullLabel || WS_VERB[WS.mach]; pb.disabled = WS.busy || !!(LAB.pullGate && !LAB.pullGate()); }
   const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the jack ${fmt(WS.pitch, 1)} cm (the gap between threads).` : '';
 }
 function initShop() {
