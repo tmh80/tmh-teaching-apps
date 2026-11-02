@@ -195,3 +195,49 @@ function picScrewIdea() {
   b += picLabs([picLabel(294, 90, 356, 106, ['Thread', 'the spiral ramp'], PIC_C.E, { W }), picNote(90, 182, ['a paper ramp'], PIC_C.ink, { all: true, W }), picNote(192, 84, ['wrap it'], PIC_C.ink, { all: true, W }), picNote(272, 182, ['round a pencil'], PIC_C.ink, { all: true, W })]);
   return picWrap(W, 200, 'A screw is a ramp wrapped round a rod: wrap a paper triangle round a pencil and its sloping edge makes a spiral thread', b, '', 410);
 }
+/* ---------- Part 3 pictures (c6c): mechanical advantage, the shape rules, work ---------- */
+/* mechanical advantage as a picture: the load bar is made of 4 effort-sized pieces (the Part 2 crate: 235.2 N load, 58.8 N effort) */
+function picMA() {
+  const W = 420;
+  let b = `<rect x="40" y="30" width="240" height="26" rx="5" fill="${PIC_C.L}"/><rect x="40" y="116" width="60" height="26" rx="5" fill="${PIC_C.E}"/>`;
+  [100, 160, 220].forEach(x => { b += `<line x1="${x}" y1="30" x2="${x}" y2="56" stroke="#fff" stroke-width="2.5"/>`; });
+  b += `<line x1="100" y1="60" x2="100" y2="112" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="4 3"/>`;
+  b += picLabs([picLabel(280, 43, 352, 43, ['Load', '235.2 N'], PIC_C.L, { W }), picNote(240, 86, ['the effort fits into the load 4 times'], PIC_C.ink, { all: true, W }), picLabel(100, 129, 172, 164, ['Effort', '58.8 N'], PIC_C.E, { W }), picNote(332, 136, ['235.2 ÷ 58.8 = 4', 'mechanical advantage = 4'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, 192, 'Bars showing a 235.2 newton load and a 58.8 newton effort: the effort fits into the load 4 times, so the mechanical advantage is 4', b, '', 420);
+}
+/* the lever's shape rule: rock 0.4 m from the fulcrum, hand 1.6 m from it. o.calc adds the effort sum */
+function picLeverDims(o) {
+  o = o || {}; const W = 420, k = 180, x0 = 40, fx = x0 + 0.4 * k, hx = fx + 1.6 * k;
+  let b = `<polygon points="${fx - 22},176 ${fx + 22},176 ${fx},112" fill="${PIC_C.F}"/><rect x="${x0}" y="104" width="${hx - x0 + 8}" height="12" rx="6" fill="${PIC_C.wood}"/>`;
+  b += picRock(x0 + 16, 104, 34, 26, '') + picArrow(hx, 54, hx, 98, PIC_C.E, 4) + picHand(hx, 44);
+  b += `<line x1="${x0 + 16}" y1="190" x2="${fx}" y2="190" stroke="${PIC_C.L}" stroke-width="2.5"/><line x1="${fx}" y1="206" x2="${hx}" y2="206" stroke="${PIC_C.E}" stroke-width="2.5"/>`;
+  [[x0 + 16, 190, PIC_C.L], [fx, 190, PIC_C.L], [fx, 206, PIC_C.E], [hx, 206, PIC_C.E]].forEach(([x, y, c]) => { b += `<line x1="${x}" y1="${y - 5}" x2="${x}" y2="${y + 5}" stroke="${c}" stroke-width="2.5"/>`; });
+  const labs = [picLabel(x0 + 16, 100, 70, 40, ['Rock', '294 N'], PIC_C.L, { W }), picLabel(fx, 190, 120, 238, ['rock to fulcrum', '0.4 m'], PIC_C.L, { W }), picLabel((fx + hx) / 2, 206, 300, 238, ['your hand to fulcrum', '1.6 m'], PIC_C.E, { W }), picLabel(fx, 160, 160, 72, ['Fulcrum'], PIC_C.F, { W })];
+  labs.push(o.calc ? picNote(330, 60, ['effort = 294 ÷ 4', '= 73.5 N'], PIC_C.E, { all: true, W }) : picNote(330, 60, ['MA = 1.6 ÷ 0.4', '= 4'], PIC_C.ink, { all: true, W }));
+  return picWrap(W, 262, 'A lever with the rock 0.4 metres from the fulcrum and your hand 1.6 metres from it, so the mechanical advantage is 4', b + picLabs(labs), '', 420);
+}
+/* the winch's shape rule: handle radius and axle radius (no numbers, so the question is not answered for the student) */
+function picWinchDims() {
+  const W = 400, cx = 190, cy = 104;
+  let b = `<circle cx="${cx}" cy="${cy}" r="78" fill="none" stroke="${PIC_C.E}" stroke-width="2" stroke-dasharray="5 4"/><circle cx="${cx}" cy="${cy}" r="16" fill="${PIC_C.L}"/><circle cx="${cx}" cy="${cy}" r="3" fill="#fff"/>`;
+  b += `<line x1="${cx}" y1="${cy}" x2="${cx + 78}" y2="${cy}" stroke="${PIC_C.wood2}" stroke-width="7" stroke-linecap="round"/><circle cx="${cx + 78}" cy="${cy}" r="9" fill="${PIC_C.E}"/>`;
+  b += `<line x1="${cx - 16}" y1="${cy}" x2="${cx - 16}" y2="176" stroke="${PIC_C.rope}" stroke-width="3"/><rect x="${cx - 38}" y="176" width="44" height="30" rx="5" fill="${PIC_C.rock}"/>`;
+  b += picLabs([picLabel(cx + 40, cy, 330, 44, ['Handle radius', 'the wheel'], PIC_C.E, { W }), picLabel(cx + 8, cy - 12, 82, 36, ['Axle radius', 'the thin rod'], PIC_C.L, { W }), picNote(300, 176, ['turn the handle:', 'the axle winds the rope'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, 220, 'A winch seen end-on: a handle on a big circle fixed to a thin axle that winds the rope lifting a bucket. The handle radius and the axle radius are marked', b, '', 400);
+}
+/* work: a force moving a crate a distance. o.unit adds the unit */
+function picWork(o) {
+  o = o || {}; const W = 420;
+  let b = `<rect x="46" y="150" width="70" height="46" rx="6" fill="none" stroke="#8a98a1" stroke-width="1.5" stroke-dasharray="5 4"/><rect x="46" y="50" width="70" height="46" rx="6" fill="#c58a4a"/>`;
+  b += picArrow(81, 142, 81, 104, PIC_C.E, 5) + `<line x1="150" y1="96" x2="150" y2="196" stroke="${PIC_C.L}" stroke-width="2.5"/><line x1="142" y1="96" x2="158" y2="96" stroke="${PIC_C.L}" stroke-width="2.5"/><line x1="142" y1="196" x2="158" y2="196" stroke="${PIC_C.L}" stroke-width="2.5"/>`;
+  b += `<line x1="20" y1="198" x2="130" y2="198" stroke="#8a98a1" stroke-width="2"/>`;
+  b += picLabs([picLabel(81, 124, 30, 124, ['force', '294 N'], PIC_C.E, { W }), picLabel(150, 146, 238, 150, ['distance', '1 m'], PIC_C.L, { W }), picNote(318, 62, o.unit ? ['work = force × distance', '294 × 1 = 294 J', 'J is short for joules'] : ['work = force × distance', '294 × 1 = 294'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, 214, 'A 294 newton force lifts a crate 1 metre: work = force times distance = 294' + (o.unit ? ' joules' : ''), b, '', 420);
+}
+/* work in and work out, side by side (no distances drawn, so the prediction is not answered) */
+function picWorkInOut() {
+  const W = 420;
+  let b = `<rect x="150" y="50" width="120" height="70" rx="14" fill="${PIC_C.soft}" stroke="${PIC_C.F}" stroke-width="2"/>` + picTxt(210, 91, 'machine', PIC_C.F, 15) + picArrow(70, 85, 144, 85, PIC_C.E, 5) + picArrow(276, 85, 350, 85, PIC_C.L, 5);
+  b += picLabs([picNote(70, 36, ['Effort', 'you pull'], PIC_C.E, { W }), picNote(352, 36, ['Load', 'it is moved'], PIC_C.L, { W }), picNote(110, 162, ['Work in', 'effort × how far', 'your hand moved'], PIC_C.E, { all: true, W }), picNote(318, 162, ['Work out', 'load × how high', 'the load rose'], PIC_C.L, { all: true, W })]);
+  return picWrap(W, 214, 'A machine with the effort going in and the load coming out. Work in is effort times how far your hand moved. Work out is load times how high the load rose', b, '', 420);
+}

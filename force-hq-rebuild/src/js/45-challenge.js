@@ -33,7 +33,8 @@ function renderChallenge(ch) {
   const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);
   const om = C1.missions.filter(m => m.kind === 'orders'); if (om.length) renderOrdersCourse(ch, om, host, save);
   const zm = C1.missions.filter(m => m.kind === 'drop'); if (zm.length) renderDropCourse(ch, zm, host, save);
-  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders' && m.kind !== 'drop').forEach(m => {
+  const wm = C1.missions.filter(m => m.kind === 'shop'); if (wm.length) renderShopCourse(ch, wm, host, save);
+  C1.missions.filter(m => m.kind !== 'brake' && m.kind !== 'sled' && m.kind !== 'orders' && m.kind !== 'drop' && m.kind !== 'shop').forEach(m => {
     const st = (dbGet('chal.' + ch, {})[m.id]) || {};
     const card = h('section', { class: 'panel mission', id: 'mi-' + m.id }); host.appendChild(card);
     if (m.kind === 'fbd') {
@@ -233,6 +234,51 @@ function renderDropCourse(ch, zm, host, save) {
     const log = (s.log || []).concat([{ canopy: r.canopy, openH: r.openH, landV: r.landV, time: r.time, hit }]);
     const sayAll = m.objs.map(o => o.say(r)).join(' ');
     save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! On target after ${n} drop${n > 1 ? 's' : ''}! ${sayAll} You scored ${best} of 4 points.${m.after ? ' ' + m.after : ''}` : `Not quite. ${sayAll} Change the canopy or the opening height, then drop again.` });
+    paint();
+  };
+  load(cur);
+}
+
+/* Chapter 6 Challenge: Workshop loading jobs (Part 3, y1 to y3). The mission fixes the load, the machine and a 60 N cap; the student chooses ONE setting
+   (ropes, ramp length or handle radius) and presses Pull!. Every pull counts: all objectives met on the 1st pull = 4 points, 2nd = 3, 3rd = 2, later = 1.
+   "Move on" after 3 misses scores 1. A pull that needs more than the cap is a miss. */
+function renderShopCourse(ch, wm, host, save) {
+  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
+  let cur = Math.max(0, wm.findIndex(m => !get(m.id).done)), judged = null;
+  const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
+  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
+    <div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
+  LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
+  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
+  const paint = () => {
+    const m = wm[cur], s = get(m.id), nc = Math.min(s.clues || 0, m.clues.length);
+    $('.mtabs', card).innerHTML = wm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-sr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
+    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal}</p>`;
+    $('#shClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
+    const nx = $('#shNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
+    $('#shLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Pull ${i + 1}: ${r.desc}, ${r.capped ? 'needs ' + r.need.toFixed(1) + ' N (too much)' : 'pull ' + r.E.toFixed(1) + ' N'}${r.hit ? ' ✓ loaded!' : ''}</li>`).join('');
+    const fb = $('#shFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.hit ? 'ok' : 'hint') : 'no'); fb.innerHTML = s.msg || '';
+    $('[data-o]', card).innerHTML = [['Make a pull (every pull counts)', s.tried]].concat(m.objs.map(o => [o.label, s.done && s.hit]), [['Do it on your first pull', s.best === 4]]).map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
+    $('#shMore', card).innerHTML = s.done ? (cur < wm.length - 1 ? `<button type="button" class="go" data-sr="${cur + 1}">Next job →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="shGive">Move on (1 point)</button>` : '');
+    const gv = $('#shGive', card); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} pulls. ${m.give} You scored 1 of 4 points.${m.after ? ' ' + m.after : ''}` }); paint(); });
+  };
+  const load = i => {
+    cur = i; const m = wm[cur];
+    shopStage(Object.assign({}, m.setup, { cap: m.cap })); S.flags = newFlags(); resetSim(); judged = null;
+    LAB.show = new Set(m.show); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Choose your setting, then press the button';
+    applyPanels(); labChanged(); paint();
+  };
+  card.addEventListener('click', e => { const b = e.target.closest('[data-sr]'); if (b) load(+b.dataset.sr); });
+  $('#shNext', card).addEventListener('click', () => { const m = wm[cur], s = get(m.id); save(m, { clues: Math.min(m.clues.length, (s.clues || 0) + 1) }); paint(); });
+  LAB.tick = () => {
+    if (!WS.done || !WS.last || WS.last === judged) return; judged = WS.last;
+    const m = wm[cur], s = get(m.id), c = WS.last; if (s.done) { paint(); return; }
+    const r = { E: c.E, need: c.need, capped: c.capped, dist: wsR2(c.ma * WS.lift), ropes: WS.ropes, L: WS.L, R: WS.R };
+    const desc = WS.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes > 1 ? 's' : ''}` : WS.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp` : `a ${fmt(r.R, 2)} m handle`;
+    const n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
+    const log = (s.log || []).concat([{ desc, E: r.E, need: r.need, capped: r.capped, hit }]), sayAll = m.objs.map(o => o.say(r)).join(' ');
+    save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! Loaded after ${n} pull${n > 1 ? 's' : ''}! ${sayAll} You scored ${best} of 4 points.${m.after ? ' ' + m.after : ''}` : `Not quite. ${sayAll} Change your setting, then pull again.` });
     paint();
   };
   load(cur);

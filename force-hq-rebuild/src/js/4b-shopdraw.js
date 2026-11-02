@@ -175,7 +175,7 @@ function wsDrawHand(c, cur, riseNow) {
   return { x: cx, y: by - 150 };
 }
 function wsDrawPulley(c, cur, riseNow, prog) {
-  const N = WS.ropes, cx = 330, w = Math.max(40, N * 28), pxM = 70, bY = 250 - riseNow * pxM, top = 84;
+  const N = WS.ropes, cx = 330, w = Math.max(40, N * 28), pxM = Math.min(70, 130 / Math.max(WS.lift, 1)), bY = 250 - riseNow * pxM, top = 84;
   c.fillStyle = WSC.beam; c.fillRect(190, 22, 400, 8); c.fillStyle = WSC.steel2; c.fillRect(cx - 3, 30, 6, 40);
   c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 6, 68, w + 12, 18, 6); c.fill();
   const xs = []; for (let i = 0; i < N; i++) xs.push(cx - w / 2 + (i + .5) * w / N);

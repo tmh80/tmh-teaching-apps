@@ -44,9 +44,12 @@ FORMULAS.push(
 const WL = {
   rock: { id: 'rock', N: 294, name: '30 kg rock', short: 'rock' }, crate: { id: 'crate', N: 235.2, name: '24 kg crate', short: 'crate' },
   bucket: { id: 'bucket', N: 196, name: '20 kg water bucket', short: 'bucket' }, cart: { id: 'cart', N: 490, name: '50 kg cart', short: 'cart' },
-  log: { id: 'log', N: 1200, name: 'log', short: 'log' }, ice: { id: 'ice', N: 500, name: 'ice block', short: 'ice block' }, car: { id: 'car', N: 3000, name: 'car', short: 'car' }
+  log: { id: 'log', N: 1200, name: 'log', short: 'log' }, ice: { id: 'ice', N: 500, name: 'ice block', short: 'ice block' }, car: { id: 'car', N: 3000, name: 'car', short: 'car' },
+  crate30: { id: 'crate', N: 294, name: '30 kg crate', short: 'crate' }, tank: { id: 'tank', N: 245, name: '25 kg oxygen tank', short: 'tank' },
+  barrel: { id: 'barrel', N: 784, name: '80 kg fuel barrel', short: 'barrel' }, engine: { id: 'engine', N: 490, name: '50 kg spare engine', short: 'engine' }
 };
 const shopStage = o => { clearCh2(); S.scene = 'shop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; S.running = false; wsSetup(o); };
+const UNITS_W = ['N', 'J', 'm', 'kg'];
 const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
 
 CHDATA.c6 = {
@@ -177,7 +180,53 @@ CHDATA.c6 = {
       qs: [
         { id: 'q1', type: 'reading', p: 'How many turns of the handle lifted the car 20 cm with the 0.5 cm gap between threads?', unit: 'turns', tol: 0, live: () => { const r = shopRun({ mach: 'screw', pitch: 0.5 }); return r ? r.turns : null; }, need: () => shopHas({ mach: 'screw', pitch: 0.5 }), needMsg: 'Lift the car with the 0.5 cm gap first. Your runs are in the Journal.', ok: '40 turns! The closer threads needed half the effort, but twice as many turns.' },
         { id: 'q2', type: 'pick', p: 'With the threads closer together (0.5 cm), the effort was {0} and the number of turns was {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['smaller', 'the same', 'bigger'], 2]] },
-        { id: 'q3', type: 'tick', p: 'Tick every object that uses a wedge.', opts: ['A kitchen knife', 'A doorstop', 'The point of a nail', 'Your front teeth', 'A doorknob', 'A seesaw'], a: [0, 1, 2, 3], ok: 'Yes! A doorknob is a wheel and axle, and a seesaw is a lever.' }] }
+        { id: 'q3', type: 'tick', p: 'Tick every object that uses a wedge.', opts: ['A kitchen knife', 'A doorstop', 'The point of a nail', 'Your front teeth', 'A doorknob', 'A seesaw'], a: [0, 1, 2, 3], ok: 'Yes! A doorknob is a wheel and axle, and a seesaw is a lever.' }] },
+
+    /* ================= Part 3: Mechanical advantage and work (c6c) =================
+       Re-pitched 2 Nov 2026 against the pacing rules (script section A2): one new word per card, a labelled picture for each new idea, plain words, nothing in a card gives a prediction away. */
+    { id: 'u1', title: 'Mechanical advantage', rescue: 'The mission computer has learned mechanical advantage.',
+      cards: [
+        { hi: '#cvScene', html: `<p>📡 ${SMOOSHY.name}: "My mission computer can't understand 'easier'. It needs a <b>number</b>!"</p><p>Engineers use ${T('mechadv', 'mechanical advantage')}: how many times bigger the load is than the effort. In Part 2, the crate needed an effort of 58.8 N with 4 supporting ropes. The load, 235.2 N, is 4 times bigger than the effort, so the mechanical advantage is 4.</p>${picMA()}<div class="law">mechanical advantage = load ÷ effort</div><p>Newtons divided by newtons leaves a plain number, so mechanical advantage has no unit.</p>` },
+        { html: `<p>A flagpole has just one pulley, and the effort is the same as the flag's weight. The load is not bigger than the effort at all, so the mechanical advantage is 1. That means no help with the force.</p>${picFlagpole()}` }],
+      setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 } }); }, adds: ['wsctl', 'wspull', 'readMA'], hide: ['wsmach', 'rulers'], sides: [], pullers: [], idle: 'Press Pull! to lift the crate',
+      mask: [{ q: 'q1', keys: ['readMA'], when: r => r.mach === 'pulley' && r.ropes === 3 }, { q: 'q2', keys: ['readMA'], when: r => r.mach === 'pulley' && r.ropes === 6 }],
+      tasks: [['Lift the 294 N crate with <b>3</b> supporting ropes. Read the newtonmeter.', () => shopHas({ mach: 'pulley', ropes: 3 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Now lift it with <b>6</b> supporting ropes.', () => shopHas({ mach: 'pulley', ropes: 6 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'num', p: 'Use your newtonmeter reading for 3 supporting ropes. What is the mechanical advantage?', unit: '', ans: 3, tol: 0.05, need: () => shopHas({ mach: 'pulley', ropes: 3 }), needMsg: 'Lift the crate with 3 supporting ropes first. Your runs are in the Journal.', ladder: true, hints: ['Mechanical advantage = load ÷ effort.', 'The load is 294 N. The effort is your newtonmeter reading.', 'Type 294 ÷ (your reading) into the calculator.'], work: '294 ÷ 98 = 3. There is no unit.', ok: 'Yes, 3. It matches the 3 supporting ropes. The mechanical advantage readout now shows.' },
+        { id: 'q2', type: 'num', p: 'Use your newtonmeter reading for 6 supporting ropes. What is the mechanical advantage?', unit: '', ans: 6, tol: 0.1, need: () => shopHas({ mach: 'pulley', ropes: 6 }), needMsg: 'Lift the crate with 6 supporting ropes first. Your runs are in the Journal.', ladder: true, hints: ['Find your effort reading for 6 ropes in the Journal.', 'Divide the load, 294 N, by that effort.', 'Type 294 ÷ 49 into the calculator.'], work: '294 ÷ 49 = 6.', ok: 'Yes, 6. For a pulley system, the mechanical advantage is the number of supporting ropes.' },
+        { id: 'q3', type: 'pick', p: 'A machine with a mechanical advantage of 1 needs an effort {0} the load. A machine with a mechanical advantage of 5 needs an effort {1} the load.', picks: [[['smaller than', 'the same as', 'bigger than'], 1], [['5 times smaller than', 'the same as', '5 times bigger than'], 0]], after: 'Mechanical advantage = load ÷ effort, so a mechanical advantage of 5 means the effort is 5 times smaller than the load.' }] },
+
+    { id: 'u2', title: 'Mechanical advantage from the shape', rescue: 'The mission computer can predict the effort for any simple machine.',
+      cards: [
+        { html: `<p>You can find a machine's mechanical advantage from its shape, before you lift anything. For a lever, divide your hand's distance from the fulcrum by the rock's distance from the fulcrum.</p>${picLeverDims()}<div class="law">lever: mechanical advantage = (your hand to fulcrum) ÷ (rock to fulcrum)</div>` },
+        { html: `<p>Once you know the mechanical advantage, you can work out the effort before you pull. In Part 1, the 294 N rock needed 73.5 N with this lever. That is the same number!</p>${picLeverDims({ calc: true })}<div class="law">effort = load ÷ mechanical advantage</div>` },
+        { hi: '#cvScene', html: `<p>A winch is a wheel and axle. Its mechanical advantage is the handle radius divided by the axle radius. Use the same unit for both.</p>${picWinchDims()}<div class="law">winch: mechanical advantage = handle radius ÷ axle radius</div>` },
+        { html: `<p>A ramp is the last one. Its mechanical advantage is the length of the ramp divided by its height.</p>${picRamp()}<div class="law">ramp: mechanical advantage = length ÷ height</div>` }],
+      setup() { shopStage({ mach: 'winch', allow: ['winch', 'ramp'], R: 0.1, axle: 0.05, L: 2, h: 1, lift: 1.0, rampH: true, loads: { winch: WL.bucket, ramp: WL.cart } }); }, adds: ['wsmach', 'readMA'], hide: ['rulers'], sides: [], pullers: [], idle: 'Choose a machine, then press the button to lift',
+      mask: [{ q: 'q1', keys: ['readE'], when: r => r.mach === 'winch' && r.R === 0.4 }, { q: 'q2', keys: ['readE'], when: r => r.mach === 'ramp' && r.L === 4 && r.h === 0.8 }],
+      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['Check it: choose the <b>Wheel and axle</b>, set the handle radius to <b>0.4 m</b> and press <b>Turn!</b>', () => shopHas({ mach: 'winch', R: 0.4 })],
+        ['', () => hasAns('q2'), { q: 'q2' }], ['Check it: choose the <b>Ramp</b>, set it <b>4 m</b> long and <b>0.8 m</b> high, and pull the cart.', () => shopHas({ mach: 'ramp', L: 4, h: 0.8 })]],
+      qs: [
+        { id: 'q1', type: 'num', p: 'A winch has a handle radius of 0.4 m and an axle radius of 0.05 m. It lifts the 196 N bucket. What effort should it need?', unit: 'N', units: UNITS_W, ans: 24.5, tol: 0.5, ladder: true, hints: ['Find the mechanical advantage first: handle radius ÷ axle radius.', '0.4 ÷ 0.05 = 8. Then effort = load ÷ mechanical advantage.', 'Type 196 ÷ 8 into the calculator.'], work: 'Mechanical advantage = 0.4 ÷ 0.05 = 8, so the effort is 196 ÷ 8 = 24.5 N.', ok: 'Yes, 24.5 N. Now check it with the newtonmeter.' },
+        { id: 'q2', type: 'num', p: 'A ramp is 4 m long and 0.8 m high. What pull does the 490 N cart need?', unit: 'N', units: UNITS_W, ans: 98, tol: 0.5, ladder: true, hints: ['Find the mechanical advantage first: length of the ramp ÷ height.', '4 ÷ 0.8 = 5. Then effort = load ÷ mechanical advantage.', 'Type 490 ÷ 5 into the calculator.'], work: 'Mechanical advantage = 4 ÷ 0.8 = 5, so the pull is 490 ÷ 5 = 98 N.', ok: 'Yes, 98 N. Now check it with the newtonmeter.' },
+        { id: 'q3', type: 'pick', p: 'To find the mechanical advantage of a pulley system, count the {0}. A ramp 6 m long and 1.5 m high has a mechanical advantage of {1}.', picks: [[['supporting ropes', 'pulley wheels', 'metres of rope'], 0], [['4', '9', '0.25'], 0]], after: 'A pulley system\'s mechanical advantage is its number of supporting ropes. The ramp is 6 ÷ 1.5 = 4.' }] },
+
+    { id: 'u3', title: 'Work and the catch', rescue: 'The mission computer now checks the work for every plan.',
+      cards: [
+        { hi: '#cvScene', html: `<p>You know that a smaller effort means your hand moves further. In this step you will measure exactly how much further, and add it up like a scientist.</p>` },
+        { html: `<p>When a force moves something, scientists say the force does ${T('work', 'work')}. You find it by multiplying the force by the distance.</p>${picWork()}<div class="law">work = force × distance</div>` },
+        { html: `<p>Work is measured in ${T('joule', 'joules')}, written J. Lifting the 294 N crate 1 m takes 294 J.</p>${picWork({ unit: true })}` },
+        { html: `<p>A machine has two ends. You put work in at your hand, and the machine does work on the load.</p>${picWorkInOut()}` }],
+      predict: { q: 'A pulley system with 6 supporting ropes lifts the 294 N crate 2 m. How much rope will you pull?', opts: ['12 m of rope', '3 m of rope', '8 m of rope', '2 m of rope'], then: 'Lift the crate 2 m and measure the rope with the red ruler.' },
+      setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 6, lift: 1.0, lifts: { pick: true }, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 } }); }, adds: ['wsctl', 'wspull', 'readMA', 'readWork', 'rulers'], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to lift the crate',
+      mask: [{ q: 'q2', keys: ['readWork'], when: r => r.mach === 'pulley' }, { q: 'q3', keys: ['readWork'], when: r => r.mach === 'pulley' }],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose a lift height of <b>2 m</b>, set <b>6</b> supporting ropes and lift the crate.', () => shopHas({ mach: 'pulley', ropes: 6, rise: 2 })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'How much rope did you pull to lift the crate 2 m with 6 supporting ropes? Use the red ruler.', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 6, rise: 2 }), need: () => shopHas({ mach: 'pulley', ropes: 6, rise: 2 }), needMsg: 'Lift the crate 2 m with 6 supporting ropes first.', ok: '12 m: six times the 2 m the crate rose. Your hand\'s distance = mechanical advantage × the load\'s distance.' },
+        { id: 'q2', type: 'num', p: 'Your effort was 49 N, and you pulled 12 m of rope. How much work did you put in? (Force × distance.)', unit: 'J', units: UNITS_W, ans: 588, tol: 1, ladder: true, hints: ['Work = force × distance.', 'The force is your effort, 49 N, and the distance is the rope you pulled, 12 m.', 'Type 49 × 12 into the calculator.'], work: 'Work in = 49 × 12 = 588 J.', ok: 'Yes, 588 J of work in.' },
+        { id: 'q3', type: 'num', p: 'The 294 N crate rose 2 m. How much work did the machine do on the crate?', unit: 'J', units: UNITS_W, ans: 588, tol: 1, ladder: true, hints: ['Work = force × distance.', 'Use the load, 294 N, and the height it rose, 2 m.', 'Type 294 × 2 into the calculator.'], work: 'Work out = 294 × 2 = 588 J, exactly the same as the work in.', ok: 'Yes, 588 J. That is exactly the same as the work in. The work readouts now show.' },
+        { id: 'q4', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true for a perfect machine.', opts: ['The work in equals the work out, spread over a longer distance', 'The work in is smaller than the work out, so the machine saves work', 'The work in is bigger than the work out, so the machine makes force', 'The work in and the work out are both zero, because nothing is wasted'], a: 0, ok: 'Yes! A machine spreads the same work over a longer distance, so the force can be smaller.', why: { 1: 'A machine cannot give out more work than you put in.', 2: 'Machines do not make force from nothing: a smaller force moves further.', 3: 'Both were 588 J, not zero.' } }] }
   ],
   review: [
     /* ---------- Part 1 Check (levers) ---------- */
@@ -207,6 +256,53 @@ CHDATA.c6 = {
       why: { a: { 1: 'A longer handle makes the job easier, not harder.', 2: 'In the Workshop, the longer handle needed a much smaller effort.', 3: 'She still has to lift the bucket.' }, r: { 1: 'Workshop handles weigh nothing: the help comes from the bigger circle.', 2: 'The axle stays the same size.', 3: 'The bucket\'s weight never changes.' } } },
     { id: 'c6r11', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy wants to split a block of space ice with a wedge. Explain how a wedge works, and which shape of wedge he should choose.', words: ['wedge', 'force', 'thin', 'distance'],
       model: 'A wedge is two ramps back to back. When Smooshy pushes the wedge into the ice, its sloping sides push the two halves apart with a much bigger force than his push. He should choose a long, thin wedge, because it needs the smallest push. The catch is that he has to push it further into the ice.',
-      check: ['Says the sloping sides push the ice apart with a bigger force than the push', 'Says a long, thin wedge needs a smaller push than a short, fat one', 'Says the smaller push has to move further (the catch)'] }
+      check: ['Says the sloping sides push the ice apart with a bigger force than the push', 'Says a long, thin wedge needs a smaller push than a short, fat one', 'Says the smaller push has to move further (the catch)'] },
+    /* ---------- Part 3 Check (mechanical advantage and work) ---------- */
+    { id: 'c6r12', obj: ['Aii'], type: 'num', p: 'A car jack lifts a 4,500 N car with an effort of 18 N. What is its mechanical advantage?', unit: '', ans: 250, tol: 0.5, ladder: true, hints: ['Mechanical advantage = load ÷ effort.', 'Type 4500 ÷ 18 into the calculator.', 'Mechanical advantage has no unit.'], work: 'Mechanical advantage = 4,500 ÷ 18 = 250. There is no unit.' },
+    { id: 'c6r13', obj: ['Aiii'], type: 'fix', p: 'Leo works out the work done pulling a sled. One line has a mistake. Tap it, then correct the answer.', who: 'Leo',
+      lines: ['The pull on the sled is 120 N.', 'The sled moves 15 m.', 'Work = force ÷ distance', 'Work = 120 ÷ 15 = 8 J'], bad: 2,
+      fix: { kind: 'num', ask: 'What is the correct work done?', ans: 1800, unit: 'J', units: UNITS_W, tol: 1 },
+      why: 'Work = force × distance, so the work is 120 × 15 = 1,800 J.' },
+    { id: 'c6r14', obj: ['Aii'], type: 'reason', sure: true, p: 'A worker gets a crate onto a truck by pushing it up a long ramp instead of lifting it straight up. Ignoring friction, how does the work she does compare?',
+      opts: ['The work is the same either way', 'The ramp means she does less work', 'The ramp means she does more work', 'The ramp means she does no work at all'], a: 0,
+      reasons: ['She pushes with a smaller force over a longer distance, so force × distance is the same', 'Her push is smaller, so force × distance must be smaller as well', 'She moves the crate further, so force × distance must be bigger', 'The ramp holds up the crate, so she is not raising it at all'], r: 0,
+      why: { a: { 1: 'Her push is smaller, but she pushes it further. The two changes cancel out.', 2: 'The ramp does not add any work. It spreads the same work over a longer distance.', 3: 'She still raises the crate to the height of the truck.' }, r: { 1: 'A smaller force alone does not make the work smaller: the distance is longer too.', 2: 'A longer distance alone does not make the work bigger: the force is smaller too.', 3: 'The crate rises to the truck, so work is done on it.' } } },
+    { id: 'c6r15', obj: ['Aii'], type: 'num', p: 'A winch has a handle radius of 0.36 m and an axle radius of 0.04 m. What effort lifts a 540 N bucket?', unit: 'N', units: UNITS_W, ans: 60, tol: 0.5, ladder: true, hints: ['Find the mechanical advantage first: handle radius ÷ axle radius.', '0.36 ÷ 0.04 = 9. Then effort = load ÷ mechanical advantage.', 'Type 540 ÷ 9 into the calculator.'], work: 'Mechanical advantage = 9, so the effort is 540 ÷ 9 = 60 N. Just right for Smooshy!' },
+    { id: 'c6r16', obj: ['Aii'], type: 'pick', p: 'A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is {0} and the rope pulled is {1}.', picks: [[['130 N', '650 N', '3,250 N'], 0], [['0.6 m', '3 m', '15 m'], 2]] },
+    { id: 'c6r17', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy can only pull with 60 N, but he needs to lift a 600 N oxygen tank 2 m. Explain how a pulley system could help him, and what the catch is.', words: ['mechanical advantage', 'effort', 'supporting ropes', 'distance', 'work'],
+      model: 'He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank\'s weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J.',
+      check: ['Works out the mechanical advantage needed (600 ÷ 60 = 10)', 'Says the supporting ropes share the load, so the effort is smaller', 'Says he must pull a longer distance of rope (10 times the height, 20 m)', 'Says the work stays the same (force × distance)'] }
+  ]
+};
+
+/* ---------- Part 3 Challenge: Launch-day loading (y1 to y3). renderShopCourse in 45-challenge.js judges each Pull! ---------- */
+const shMark = ok => ok ? '✓' : '✗';
+const shObjE = lim => ({ label: `Pull with ${lim} N or less`, ok: r => !r.capped && r.E <= lim, say: r => r.capped ? `Your pull would need ${r.need.toFixed(1)} N. Target: ${lim} N or less. ✗` : `Your pull: ${r.E.toFixed(1)} N. Target: ${lim} N or less. ${shMark(r.E <= lim)}` });
+CHDATA.c6.challenge = {
+  title: 'Launch-day loading',
+  intro: 'Smooshy\'s rescue rocket, <b>Gummy Rescue One</b>, is on the launch pad at Force HQ, and it needs loading! Practise like Smooshy: no pull may be more than <b>60 N</b>. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!',
+  missions: [
+    { id: 'y1', kind: 'shop', title: 'Mission 1: Oxygen tank', cap: 60,
+      setup: { mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 3, loads: { pulley: WL.tank }, lim: { ropesMax: 6 } }, show: ['wsctl', 'wspull', 'readMA'],
+      brief: 'Lift the 25 kg oxygen tank (245 N) <b>3 m</b> up into the rocket\'s hatch. Your pull must be <b>60 N or less</b>, and there are only <b>15 m of rope</b>.',
+      goal: 'Choose the number of supporting ropes, then press Pull!',
+      objs: [shObjE(60), { label: 'Pull 15 m of rope or less', ok: r => r.dist <= 15, say: r => `Rope pulled: ${fmt(r.dist, 1)} m. Target: 15 m or less. ${shMark(r.dist <= 15)}` }],
+      clues: ['What mechanical advantage gets the effort under 60 N? 245 ÷ 60 = 4.08.', 'Each choice also needs rope: the rope pulled = supporting ropes × 3 m.', '4 ropes need 61.3 N, and 6 ropes need 18 m of rope. Which number is left?'],
+      give: '5 supporting ropes work: 49.0 N and 15 m of rope.' },
+    { id: 'y2', kind: 'shop', title: 'Mission 2: Fuel barrel', cap: 60,
+      setup: { mach: 'ramp', allow: ['ramp'], L: 3, h: 1.2, lift: 1.2, loads: { ramp: WL.barrel }, lim: { rampL: [3, 21, 1.5] } }, show: ['wsctl', 'wspull', 'readMA'],
+      brief: 'Pull the 80 kg fuel barrel (784 N) up onto the <b>1.2 m</b> high loading bay. Your pull must be <b>60 N or less</b>, and the hangar only has room for a ramp <b>up to 18 m long</b>.',
+      goal: 'Choose the length of the ramp, then press Pull!',
+      objs: [shObjE(60), { label: 'Use a ramp up to 18 m long', ok: r => r.L <= 18, say: r => `Ramp length: ${fmt(r.L, 1)} m. Target: 18 m or less. ${shMark(r.L <= 18)}` }],
+      clues: ['The mechanical advantage you need is 784 ÷ 60 = 13.1.', 'For a ramp, mechanical advantage = length ÷ height, so the length must be at least 13.1 × 1.2 m.', 'That is at least 15.7 m. Which lengths fit in the hangar?'],
+      give: 'A 16.5 m ramp (57.0 N) or an 18 m ramp (52.3 N) works.' },
+    { id: 'y3', kind: 'shop', title: 'Mission 3: Spare engine', cap: 60,
+      setup: { mach: 'winch', allow: ['winch'], R: 0.1, axle: 0.05, lift: 2, loads: { winch: WL.engine } }, show: ['wsctl', 'wspull', 'readMA'],
+      brief: 'Winch the 50 kg spare engine (490 N) <b>2 m</b> up into the cargo bay. Your pull must be <b>60 N or less</b>. The winch is bolted next to a wall, so the handle radius can be <b>0.5 m at most</b>.',
+      goal: 'Choose the handle radius, then press Turn!',
+      objs: [shObjE(60), { label: 'Use a handle radius of 0.5 m or less', ok: r => r.R <= 0.5 + 1e-9, say: r => `Handle radius: ${fmt(r.R, 2)} m. Target: 0.5 m or less. ${shMark(r.R <= 0.5 + 1e-9)}` }],
+      clues: ['The mechanical advantage you need is 490 ÷ 60 = 8.2.', 'For a winch, mechanical advantage = handle radius ÷ 0.05 m, so the handle must be at least 8.2 × 0.05 m.', 'That is at least 0.41 m. Which handles fit by the wall?'],
+      give: 'A 0.45 m handle (54.4 N) or a 0.5 m handle (49.0 N) works.',
+      after: 'Gummy Rescue One is fully loaded! Next, Part 4: machines inside machines.' }
   ]
 };

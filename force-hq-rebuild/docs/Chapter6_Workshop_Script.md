@@ -601,138 +601,111 @@ c6r11 | explain | obj ['Aii'] | Captain Smooshy wants to split a block of space 
 
 ## H. Part 3: Mechanical advantage and work (c6c)
 
-### Step u1: Mechanical advantage   (Part 3, about 5 min)
-Arena: the Workshop, pulley rig, a 30 kg crate (294 N), lift 1.0 m. Adds `mropes`, `readMA`. Formulas glowing: `ma`.
+**Re-pitched 2 Nov 2026 against section A2 before building.** What changed from the first draft:
+- Banned or unpictured examples gone: "crowbar" and "fishing rod" are out (the lever example is the Part 1 rock lever, pictured). The six-formula card is split: the lever, winch and ramp rules each get their own card and picture, one at a time. The pulley rule (count the supporting ropes) is seen in u1 and checked in u2 q3. The wedge and screw rules wait for Part 4, where students use them.
+- Plain words: "rock to fulcrum", "your hand to fulcrum", "handle radius", "axle radius", "length of the ramp", "how far your hand moved". No "effort arm", "load arm", "effort distance" or "pitch" on any student screen.
+- "Class 3 lever with a mechanical advantage below 1" is cut from u1 (it comes back in Part 4's compound-machine work).
+- u2 loses the `calcorder` question (3 minutes of sorting) and u3 loses the cartoon `reason` (the Check's explain question c6r17 covers the same idea). Without them Part 3 comes to about 30 minutes (Learn 13, Challenge 9, Check about 8).
+- New words per step: u1 one (mechanical advantage); u2 none (rules only); u3 two (work, joule), each on its own card with its own picture.
+- Pictures (new helpers in `4bb-shoppics.js`): `picMA` (the Part 2 crate as two bars: the load is 4 effort-sized pieces), `picLeverDims` (rock 0.4 m and hand 1.6 m from the fulcrum, with a `calc` version), `picWinchDims` (handle radius and axle radius, no numbers), `picWork` (294 N moving a crate 1 m; `unit` version adds joules), `picWorkInOut` (a machine with effort in and load out; no distances drawn, so the u3 prediction is not given away). u1 reuses `picFlagpole`; u2 reuses `picRamp`.
+- Nothing before a prediction gives it away: the u3 cards never say how much rope; the first time students see "12 m" is on the ruler.
+- Masks: the mechanical advantage readout is hidden until the matching u1 question is answered; the effort readout is hidden in u2 for the 0.4 m winch and the 4 m ramp until the matching question is answered (so the check confirms the student's answer); the work readouts are hidden in u3 until both work questions are answered.
+- "W" is not used for work anywhere. The word "work" is first used for the force × distance meaning in u3 (the glossary entry says so).
+
+### Step u1: Mechanical advantage   (Part 3, about 4 min)
+Arena: the Workshop, pulley rig, 30 kg crate (294 N, load id `crate`), lift 1.0 m, 1 to 6 supporting ropes. Adds `readMA`; hides the machine picker and the rulers. Formulas glowing: `ma`.
 
 CARDS
-1. 📡 *Smooshy:* "My mission computer doesn't understand 'easier'. It needs numbers!" Engineers measure how much a machine helps with its **mechanical advantage**: how many times bigger the load is than the effort. It has no unit, because it is newtons divided by newtons.
-   Worked example: In Part 2, the 235.2 N crate needed an effort of 58.8 N with 4 supporting ropes. Mechanical advantage = load ÷ effort = 235.2 ÷ 58.8 = **4**.
-   Key idea: mechanical advantage = load ÷ effort.
-2. A mechanical advantage of 4 means the effort is 4 times smaller than the load. A mechanical advantage of 1 means no help with the force at all, like the single fixed pulley. A class 3 lever has a mechanical advantage smaller than 1.
+1. 📡 Smooshy: "My mission computer can't understand 'easier'. It needs a number!" Mechanical advantage: how many times bigger the load is than the effort. Worked example from Part 2: the 235.2 N crate needed 58.8 N with 4 supporting ropes, so the load is 4 times bigger, mechanical advantage 4. Picture `picMA`. Key idea box: mechanical advantage = load ÷ effort. It has no unit (newtons ÷ newtons).
+2. A flagpole has one pulley, so the effort is the same as the flag's weight: mechanical advantage 1, no help with the force. Picture `picFlagpole`.
 
 DO THIS
-- Lift the 294 N crate with **3** supporting ropes.   (ticks on ropes 3)
-- (calculate task) q1
-- Lift it with **6** supporting ropes.   (ticks on ropes 6)
-- (calculate task) q2
+- Lift the 294 N crate with **3** supporting ropes. Read the newtonmeter. (`shopHas({mach:'pulley', ropes:3})`)
+- q1 (inline answer box)
+- Now lift it with **6** supporting ropes.
+- q2 (inline answer box)
 
 YOUR TURN QUESTIONS
-q1 | num | The 294 N crate needed an effort of 98 N with 3 supporting ropes. What is the mechanical advantage? | answer 3 | unit (no unit) | tolerance 0.05 | ladder
-   Hints: Mechanical advantage = load ÷ effort. · The load is 294 N and the effort is 98 N. · Type 294 ÷ 98 into the calculator.
-   Working shown after: MA = 294 ÷ 98 = 3. It has no unit.
-q2 | num | With 6 supporting ropes, what was the mechanical advantage? Use your newtonmeter reading. | answer 6 (from the run: 294 ÷ shopE({mach:'pulley', ropes:6, load:294})) | unit (no unit) | tolerance 0.1 | ladder
-   Hints: Find your effort reading for 6 ropes in the Journal. · Divide the load, 294 N, by that effort. · 294 ÷ 49 = ?
-q3 | pick | For a pulley system, the mechanical advantage is equal to the number of {0}. A mechanical advantage {1} 1 means the machine needs an effort bigger than the load.
-   {0}: pulley wheels / supporting ropes / metres of rope → supporting ropes
-   {1}: bigger than / equal to / smaller than → smaller than
-q4 | mcq | A machine has a mechanical advantage of 1. What does that tell you?
-   Options: The effort is the same size as the load · The effort is one newton smaller than the load · The machine lifts one newton for every metre · The machine can't lift the load at all
-   correct 0
-   why: (1) MA is a ratio: load ÷ effort = 1 means they're equal. (2) MA has no unit and isn't about distance. (3) It lifts the load fine, with an effort equal to the load, like the single fixed pulley.
-Glossary words to underline: mechanical advantage, load, effort.
-Masked readouts: `readMA` until q1 is answered (for the 3-rope run) and until q2 is answered (for the 6-rope run).
+q1 | num | Use your newtonmeter reading for 3 supporting ropes. What is the mechanical advantage? | answer 3 | no unit | tolerance 0.05 | ladder
+   Hints: Mechanical advantage = load ÷ effort. · The load is 294 N. The effort is your newtonmeter reading. · Type 294 ÷ (your reading) into the calculator.
+q2 | num | Same, for 6 supporting ropes | answer 6 | tolerance 0.1 | ladder. After: for a pulley system, the mechanical advantage is the number of supporting ropes.
+q3 | pick | A machine with a mechanical advantage of 1 needs an effort {0} the load [smaller than / the same as / bigger than → the same as]. A machine with a mechanical advantage of 5 needs an effort {1} the load [5 times smaller than / the same as / 5 times bigger than → 5 times smaller than].
+Masked readouts: `readMA` for the 3-rope run until q1 is answered, and for the 6-rope run until q2 is answered.
 Rescue log: The mission computer has learned mechanical advantage.
 
-### Step u2: Mechanical advantage from the shape   (Part 3, about 5 min)
-Arena: the Workshop. Adds `mpick` (lever, pulley, winch, ramp), `mramp` height picker (0.6, 0.8, 1.0, 1.2 m). Formulas glowing: `ma`, `effortq`, `maparts`.
+### Step u2: Mechanical advantage from the shape   (Part 3, about 4 min)
+Arena: the Workshop with the winch (196 N bucket) and the ramp (490 N cart); the ramp height picker is on. Adds `wsmach`; hides the rulers. Formulas glowing: `ma`, `effortq`, `maparts`.
 
-CARDS
-1. You can predict a machine's mechanical advantage from its shape, before lifting anything. **Pulley:** number of supporting ropes. **Lever:** effort arm ÷ load arm. **Wheel and axle:** wheel radius ÷ axle radius. **Ramp:** length ÷ height. **Wedge:** length ÷ thickness. **Screw:** distance the handle moves in one turn ÷ pitch.
-2. Once you know the mechanical advantage, you can work out the effort before you pull.
-   Worked example: A crowbar has an effort arm of 1.6 m and a load arm of 0.4 m. MA = 1.6 ÷ 0.4 = 4. A 294 N rock needs an effort of 294 ÷ 4 = **73.5 N**, just as you measured in Part 1.
-   Key idea: effort = load ÷ mechanical advantage.
+CARDS (one rule each, each with a labelled picture)
+1. Lever: mechanical advantage = (your hand to fulcrum) ÷ (rock to fulcrum). Worked example `picLeverDims`: rock 0.4 m and hand 1.6 m from the fulcrum, 1.6 ÷ 0.4 = 4.
+2. Effort needed: effort = load ÷ mechanical advantage. The 294 N rock needed 73.5 N in Part 1: 294 ÷ 4. Same picture with the sum.
+3. Winch: mechanical advantage = handle radius ÷ axle radius (same unit). Picture `picWinchDims`, no numbers.
+4. Ramp: mechanical advantage = length ÷ height. Picture `picRamp`.
 
 DO THIS
-- (calculate task) q1
-- Check it: lift the bucket with a **0.4 m** handle and see whether the newtonmeter agrees.   (ticks on winch R 0.4 with the 196 N bucket)
-- (calculate task) q2
-- Check it: pull the cart up a **4 m** ramp that rises **0.8 m**.   (ticks on ramp L 4, h 0.8 with the 490 N cart)
+- q1 (inline answer box, before lifting): the effort a winch with a 0.4 m handle and a 0.05 m axle needs for the 196 N bucket.
+- Check it: choose the Wheel and axle, set the handle radius to 0.4 m and press Turn!
+- q2 (inline): the pull the 490 N cart needs on a 4 m ramp that is 0.8 m high.
+- Check it: choose the Ramp, set it 4 m long and 0.8 m high, and pull the cart.
 
 YOUR TURN QUESTIONS
-q1 | num | A winch has a handle radius of 0.4 m and an axle radius of 0.05 m. What is its mechanical advantage? | answer 8 | unit (no unit) | tolerance 0.05 | ladder
-   Hints: Wheel and axle: MA = wheel radius ÷ axle radius. · The handle is the wheel: 0.4 m. · Type 0.4 ÷ 0.05 into the calculator.
-   Working shown after: MA = 0.4 ÷ 0.05 = 8, so the 196 N bucket needs 196 ÷ 8 = 24.5 N.
-q2 | num | A ramp is 4 m long and rises 0.8 m. What pull does the 490 N cart need? | answer 98 | unit N | tolerance 0.5 | units picker | ladder
-   Hints: Find the mechanical advantage first: ramp length ÷ height. · 4 ÷ 0.8 = 5. · Effort = load ÷ MA = 490 ÷ 5.
-   Working shown after: MA = 4 ÷ 0.8 = 5, so effort = 490 ÷ 5 = 98 N.
-q3 | calcorder | Each machine below lifts a 600 N load. Use effort = load ÷ mechanical advantage to work out the effort each one needs, then put them in order, smallest effort first.
-   mass: 600, f: (MA, load) => load / MA, col0: 'Machine', given: 'Mechanical advantage', calc: 'Effort (N)', unit: 'N', tol: 0.5
-   items (in the CORRECT order): ['Winch', 8] · ['Crowbar', 6] · ['Ramp', 5] · ['Pulley system', 3] · ['Fishing rod (class 3 lever)', 0.5]
-   first: Smallest effort · last: Biggest effort
-   after: The efforts are 75 N, 100 N, 120 N, 200 N and 1,200 N. The fishing rod needs twice the load, because its MA is smaller than 1.
-Glossary words to underline: mechanical advantage, effort arm, load arm.
-Masked readouts: `readE` (the newtonmeter's number) on the winch until q1 is answered, and on the ramp until q2 is answered, so the check confirms the student's answer instead of giving it.
+q1 | num | answer 24.5 | unit N | units picker | tolerance 0.5 | ladder. Working: 0.4 ÷ 0.05 = 8, 196 ÷ 8 = 24.5 N.
+q2 | num | answer 98 | unit N | units picker | tolerance 0.5 | ladder. Working: 4 ÷ 0.8 = 5, 490 ÷ 5 = 98 N.
+q3 | pick | To find the mechanical advantage of a pulley system, count the {0} [supporting ropes]. A ramp 6 m long and 1.5 m high has a mechanical advantage of {1} [4].
+Masked readouts: `readE` on the 0.4 m winch until q1 is answered, and on the 4 m, 0.8 m ramp until q2 is answered.
 Rescue log: The mission computer can predict the effort for any simple machine.
 
-### Step u3: Work and the catch   (Part 3, about 6 min)
-Arena: the Workshop, pulley rig, 294 N crate. Lift height picker 1.0 or 2.0 m. Adds `readWork`, `rulers`. Formulas glowing: `edist`, `work`.
+### Step u3: Work and the catch   (Part 3, about 5 min)
+Arena: the Workshop, pulley rig, 294 N crate, 6 supporting ropes, lift height picker (1 m or 2 m). Adds `readWork`, `rulers`. Formulas glowing: `edist`, `work`.
 
 CARDS
-1. Machines don't give you something for nothing. A smaller effort always has to move further. With 6 supporting ropes, the effort is 6 times smaller, and you pull 6 times as much rope.
-   Key idea: effort distance = mechanical advantage × load distance.
-2. Scientists call force × distance **work**. It is measured in **joules (J)**: 1 joule of work is done when a force of 1 N moves something 1 m. (This "work" is force × distance, not homework!)
-   Worked example: Lifting the 294 N crate straight up 1 m takes 294 × 1 = **294 J** of work.
-   Key idea: work = force × distance.
-3. Compare both ends of a machine. **Work in** = effort × effort distance. **Work out** = load × the height it rises. In our perfect Workshop machines they're equal! A machine spreads the same work over a longer distance, so the force can be smaller.
+1. You know a smaller effort means your hand moves further. Now you will measure exactly how much further.
+2. **Work** (first new word): when a force moves something it does work. work = force × distance. Picture `picWork`: 294 N moves a crate 1 m, 294 × 1 = 294.
+3. **Joule** (second new word, own card): work is measured in joules, J. Lifting the 294 N crate 1 m takes 294 J. Same picture with the unit.
+4. A machine has two ends: you put work in at your hand, and the machine does work on the load. Picture `picWorkInOut` (no distances drawn).
 
-PREDICT FIRST
-Question: A pulley system with 6 supporting ropes lifts the crate 2 m. How much rope will you pull?
+PREDICT FIRST (after the cards)
+Question: A pulley system with 6 supporting ropes lifts the 294 N crate 2 m. How much rope will you pull?
 Options: 12 m of rope · 3 m of rope · 8 m of rope · 2 m of rope
-After: Lift it and measure the rope with the ruler.
+After: Lift the crate 2 m and measure the rope with the red ruler.
 
 DO THIS
 - Make your prediction in the box above.
-- Lift the crate **2 m** with **6** supporting ropes.   (ticks on ropes 6, rise 2)
-- (inline answer box) q1
-- (calculate task) q2
-- (calculate task) q3
+- Choose a lift height of **2 m**, set **6** supporting ropes and lift the crate. (`shopHas({mach:'pulley', ropes:6, rise:2})`)
+- q1, q2, q3 (inline answer boxes)
 
 YOUR TURN QUESTIONS
-q1 | reading | How much rope did you pull to lift the crate 2 m with 6 supporting ropes? | live: shopDist({mach:'pulley', ropes:6, rise:2}) | unit m | tolerance 0.05
-   ok: 12 m: six times the 2 m the crate rose.
-q2 | num | Your effort was 49 N, and you pulled 12 m of rope. How much work did you do (the work in)? | answer 588 | unit J | tolerance 1 | units picker | ladder
-   Hints: Work = force × distance. · The force is your effort, 49 N, and the distance is the rope you pulled, 12 m. · Type 49 × 12 into the calculator.
-q3 | num | The 294 N crate rose 2 m. How much work was done on the crate (the work out)? | answer 588 | unit J | tolerance 1 | units picker | ladder
-   Hints: Work = force × distance. · Use the load, 294 N, and the height it rose, 2 m. · Type 294 × 2.
-   Working shown after: 294 × 2 = 588 J, exactly the same as the work in.
-q4 | tap | **Key idea.** Tap the sentence that is true for a perfect machine.
-   Options: The work in equals the work out, spread over a longer distance · The work in is smaller than the work out, so the machine saves work · The work in is bigger than the work out, so the machine makes force · The work in and the work out are both zero, because nothing is wasted
-   correct 0
-   why: (1) A machine can't give out more work than you put in. (2) Machines don't make force from nothing: a smaller force moves further. (3) Both are 588 J here, not zero.
-q5 | reason (cartoon) | Captain Smooshy says: "I'll build a machine with a mechanical advantage of 1,000, so the ship feels as light as a feather!" Who's right?
-   voices: Mia: "Great plan. The bigger the mechanical advantage, the better." · Ana: "It would work, but he'd pull 1,000 m of rope for every metre the ship rises." · Leo: "It can't work. No machine can have a mechanical advantage over 10." · Sam: "It would work, and he'd pull less rope as well as using less force."
-   correct: Ana
-   reasons: Effort distance = mechanical advantage × load distance · Big machines run out of pulley wheels, so the advantage stays small · Machines reduce the force and the distance at the same time · A bigger advantage makes the ship lighter, so it moves faster
-   correct reason 0
-   why: (Mia) A huge MA means a huge pull distance, so it would take ages. (Leo) Compound machines easily go past 10: you'll build some in Part 4. (Sam) Less force always means more distance.
-Glossary words to underline: work, joule.
-Masked readouts: `readWork` until q2 and q3 are answered.
+q1 | reading | How much rope did you pull to lift the crate 2 m with 6 supporting ropes? Use the red ruler. | live `shopDist({mach:'pulley', ropes:6, rise:2})` | unit m | tolerance 0.05. After: 12 m, six times the 2 m the crate rose; your hand's distance = mechanical advantage × the load's distance.
+q2 | num | Your effort was 49 N and you pulled 12 m of rope. How much work did you put in? | answer 588 | unit J | units picker | tolerance 1 | ladder
+q3 | num | The 294 N crate rose 2 m. How much work did the machine do on the crate? | answer 588 | unit J | units picker | tolerance 1 | ladder. After: exactly the same as the work in.
+q4 | tap | **Key idea.** Tap the sentence that is true for a perfect machine. Correct: "The work in equals the work out, spread over a longer distance". Wrong options: work in smaller than work out; work in bigger than work out; both zero.
+Masked readouts: `readWork` until q2 and q3 are both answered.
 Rescue log: The mission computer now checks the work for every plan.
 
 ---
 
 ## I. Part 3 Challenge: Launch-day loading (y1–y3)
 
-Engine: `renderShopCourse` in `45-challenge.js` (C7 scoring), with `cap: 60` and Smooshy on the monitor. The student chooses one setting; everything else is locked.
+Engine: `renderShopCourse` in `45-challenge.js` (scoring as in C7: all objectives met on the 1st pull = 4 points, 2nd = 3, 3rd = 2, later = 1; "Move on (1 point)" appears after 3 misses). `cap: 60`: a set-up that needs more than 60 N is a miss ("needs 61.3 N (too much)" in the log). The student chooses one setting; everything else is locked; no machine picker, no rulers; the mechanical advantage readout stays on. The section carries its own title and intro (`chalInfo` in the `c6c` section entry).
 
-Intro: Smooshy's rescue rocket, **Gummy Rescue One**, is on the launch pad at Force HQ, and it needs loading. Practise like Smooshy: no pull may be more than **60 N**. Work out the mechanical advantage you need first, then choose the setting. Try to get each one right first time!
+Intro: Smooshy's rescue rocket, **Gummy Rescue One**, is on the launch pad at Force HQ, and it needs loading! Practise like Smooshy: no pull may be more than **60 N**. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!
 
-y1 | Oxygen tank | pulley, 25 kg tank (245 N), lift 3 m into the hatch; student chooses supporting ropes 1–6
-   Brief: Lift the oxygen tank 3 m into the rocket's hatch. Your pull must be **60 N or less**, and there are only **15 m of rope**.
-   Objectives: effort ≤ 60 N · rope pulled ≤ 15 m
-   Clues: What mechanical advantage gets the effort under 60 N? 245 ÷ 60 = 4.08. · Each choice also needs rope: rope = supporting ropes × 3 m. · 4 ropes need 61.3 N, and 6 ropes need 18 m of rope.
-   Feasibility (model): only 5 ropes passes (49.0 N, 15 m).
+y1 | Oxygen tank | pulley, 25 kg tank (245 N), lift 3 m; the student chooses supporting ropes 1 to 6
+   Brief: Lift the oxygen tank 3 m up into the rocket's hatch. Your pull must be **60 N or less**, and there are only **15 m of rope**.
+   Objectives: pull 60 N or less · pull 15 m of rope or less
+   Clues: What mechanical advantage gets the effort under 60 N? 245 ÷ 60 = 4.08. · Each choice also needs rope: the rope pulled = supporting ropes × 3 m. · 4 ropes need 61.3 N, and 6 ropes need 18 m of rope. Which number is left?
+   Feasibility (model): only 5 ropes passes (49.0 N, 15 m). (The pulley picture scales so a 3 m lift stays under the top pulley.)
 
-y2 | Fuel barrel | ramp, 80 kg barrel (784 N), up a 1.2 m loading bay; student chooses ramp length 3–21 m in 1.5 m steps
+y2 | Fuel barrel | ramp, 80 kg barrel (784 N), up a 1.2 m loading bay; the student chooses ramp length 3 to 21 m in 1.5 m steps
    Brief: Pull the fuel barrel up onto the 1.2 m loading bay. Your pull must be **60 N or less**, and the hangar only has room for a ramp **up to 18 m long**.
-   Objectives: effort ≤ 60 N · ramp ≤ 18 m
-   Clues: MA needed = 784 ÷ 60 = 13.1. · Ramp MA = length ÷ height, so the length must be at least 13.1 × 1.2 m. · That's at least 15.7 m. Which lengths fit in the hangar?
-   Feasibility: 16.5 m (57.0 N) and 18 m (52.3 N) pass; 15 m needs 62.7 N; 19.5 m and 21 m don't fit.
+   Objectives: pull 60 N or less · use a ramp up to 18 m long
+   Clues: The mechanical advantage you need is 784 ÷ 60 = 13.1. · For a ramp, mechanical advantage = length ÷ height, so the length must be at least 13.1 × 1.2 m. · That is at least 15.7 m. Which lengths fit in the hangar?
+   Feasibility: 16.5 m (57.0 N) and 18 m (52.3 N) pass; 15 m needs 62.7 N; 19.5 m and 21 m do not fit.
 
-y3 | Spare engine | winch, 50 kg engine (490 N), lift 2 m, axle 0.05 m; student chooses handle radius 0.10–0.60 m in 0.05 steps
-   Brief: Winch the spare engine 2 m up into the cargo bay. Your pull must be **60 N or less**, and the winch is bolted beside a wall, so the handle radius can be **0.5 m at most**.
-   Objectives: effort ≤ 60 N · handle radius ≤ 0.5 m
-   Clues: MA needed = 490 ÷ 60 = 8.2. · Winch MA = handle radius ÷ 0.05 m, so the handle must be at least 8.2 × 0.05 m. · That's at least 0.41 m. Which handles fit by the wall?
+y3 | Spare engine | winch, 50 kg engine (490 N), lift 2 m, axle 0.05 m; the student chooses handle radius 0.10 to 0.60 m in 0.05 steps
+   Brief: Winch the spare engine 2 m up into the cargo bay. Your pull must be **60 N or less**, and the winch is bolted next to a wall, so the handle radius can be **0.5 m at most**.
+   Objectives: pull 60 N or less · use a handle radius of 0.5 m or less
+   Clues: The mechanical advantage you need is 490 ÷ 60 = 8.2. · For a winch, mechanical advantage = handle radius ÷ 0.05 m, so the handle must be at least 8.2 × 0.05 m. · That is at least 0.41 m. Which handles fit by the wall?
    Feasibility: 0.45 m (54.4 N) and 0.5 m (49.0 N) pass; 0.4 m needs 61.3 N; 0.55 m and 0.6 m hit the wall.
 
 After the last mission: "Gummy Rescue One is fully loaded! Next, Part 4: machines inside machines."
@@ -741,34 +714,30 @@ After the last mission: "Gummy Rescue One is fully loaded! Next, Part 4: machine
 
 ## J. Part 3 Check (c6r12–c6r17)
 
-c6r12 | num | obj ['Aii'] | A car jack lifts a 4,500 N car with an effort of 18 N. What is its mechanical advantage? | answer 250 | unit (no unit) | tolerance 0.5 | ladder
-   Hints: MA = load ÷ effort. · 4,500 ÷ 18. · Remember: mechanical advantage has no unit.
-   Working shown after: MA = 4,500 ÷ 18 = 250.
+c6r12 | num | obj ['Aii'] | A car jack lifts a 4,500 N car with an effort of 18 N. What is its mechanical advantage? | answer 250 | no unit | tolerance 0.5 | ladder
+   Hints: Mechanical advantage = load ÷ effort. · Type 4500 ÷ 18 into the calculator. · Mechanical advantage has no unit.
 
-c6r13 | fix | obj ['Aiii'] | Leo works out the work done pulling a sled. Spot his mistake. Tap it, then correct it.
+c6r13 | fix | obj ['Aiii'] | Leo works out the work done pulling a sled. Spot his mistake. Tap it, then correct the answer.
    lines: 1. The pull on the sled is 120 N. · 2. The sled moves 15 m. · 3. Work = force ÷ distance · 4. Work = 120 ÷ 15 = 8 J
    mistake: line 3
-   fix (num): ask "What is the correct work done?" | answer 1800 | unit J | units picker | tolerance 1
+   fix (num): "What is the correct work done?" | answer 1800 | unit J | units picker | tolerance 1
    why: Work = force × distance, so the work is 120 × 15 = 1,800 J.
 
 c6r14 | reason | sure: true | obj ['Aii'] | A worker gets a crate onto a truck by pushing it up a long ramp instead of lifting it straight up. Ignoring friction, how does the work she does compare?
-   Options: The work is the same either way · The ramp means she does less work · The ramp means she does more work · The ramp means she does no work at all
-   correct 0
-   reasons: She pushes with a smaller force over a longer distance, so force × distance is the same · Her push is smaller, so force × distance must be smaller as well · She moves the crate further, so force × distance must be bigger · The ramp holds up the crate, so she isn't raising it at all
-   correct reason 0
+   Options: The work is the same either way · The ramp means she does less work · The ramp means she does more work · The ramp means she does no work at all (correct: the first)
+   Reasons: She pushes with a smaller force over a longer distance, so force × distance is the same (correct) · Her push is smaller, so force × distance must be smaller as well · She moves the crate further, so force × distance must be bigger · The ramp holds up the crate, so she is not raising it at all
 
-c6r15 | num | obj ['Aii'] | A winch has a handle radius of 0.36 m and an axle radius of 0.04 m. What effort lifts a 540 N bucket? | answer 60 | unit N | tolerance 0.5 | units picker | ladder
-   Hints: Find the MA first: handle radius ÷ axle radius. · 0.36 ÷ 0.04 = 9. · Effort = 540 ÷ 9.
-   Working shown after: MA = 9, effort = 540 ÷ 9 = 60 N. Just right for Smooshy!
+c6r15 | num | obj ['Aii'] | A winch has a handle radius of 0.36 m and an axle radius of 0.04 m. What effort lifts a 540 N bucket? | answer 60 | unit N | units picker | tolerance 0.5 | ladder
+   Working: mechanical advantage 0.36 ÷ 0.04 = 9, effort 540 ÷ 9 = 60 N. Just right for Smooshy!
 
-c6r16 | pick | obj ['Aii'] | A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is {0} and the rope pulled is {1}.
-   {0}: 130 N / 650 N / 3,250 N → 130 N
-   {1}: 0.6 m / 3 m / 15 m → 15 m
+c6r16 | pick | obj ['Aii'] | A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is {0} [130 N] and the rope pulled is {1} [15 m].
 
 c6r17 | explain | obj ['Aii'] | Captain Smooshy can only pull with 60 N, but he needs to lift a 600 N oxygen tank 2 m. Explain how a pulley system could help him, and what the catch is.
    words: mechanical advantage, effort, supporting ropes, distance, work
    model: He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank's weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J.
    checklist: Works out the mechanical advantage needed (600 ÷ 60 = 10) · Says the supporting ropes share the load, so the effort is smaller · Says he must pull a longer distance of rope (10 times the height, 20 m) · Says the work stays the same (force × distance)
+
+Strands for the sheet: A ii, iii (`tests/strands.py`).
 
 ---
 

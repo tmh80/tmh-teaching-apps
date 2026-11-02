@@ -1,6 +1,6 @@
 """Workshop numbers: the JS machine maths (4a-workshop.js, wsCalc) must reproduce tools/workshop_model.py.
 Run from force-hq-rebuild after build.py:  python3 tests/workshop_numbers.py
-Covers Parts 1 and 2 (levers lv1-lv5; pulleys, wheels and ramps pl1-pl4). Later Parts add their cases as they are built."""
+Covers Parts 1 to 3 (levers lv1-lv5; pulleys, wheels and ramps pl1-pl4; mechanical advantage and work u1-u3, loading jobs y1-y3, Check c6r12-c6r17). Later Parts add their cases as they are built."""
 import json, pathlib, sys
 sys.path.insert(0, 'tools')
 import workshop_model as M
@@ -50,6 +50,53 @@ with sync_playwright() as p:
         c = calc(dict(mach='wedge', thick=t, load=500)); chk(f'ice wedge {t} cm', near(c['E'], E) and (c['E'] <= 60) == ok, c['E'])
     # a cap: Smooshy's 60 N
     c = calc(dict(mach='pulley', ropes=3, load=235.2, lift=1.0, cap=60)); chk('cap 60 N is not hit by 78.4 N? it is', c['capped'] and c['rise'] == 0)
+    # ---------- Part 3 (c6c): u1 to u3, y1 to y3, Check c6r12 to c6r17 ----------
+    c294 = 30 * M.G_EARTH
+    for r_, E in ((3, 98.0), (6, 49.0)):
+        c = calc(dict(mach='pulley', ropes=r_, load=294, lift=1.0)); chk(f'u1 {r_} ropes: effort', near(c['E'], E) and near(c['E'], M.effort(c294, r_)), c['E']); chk(f'u1 {r_} ropes: MA = load / effort', near(294 / c['E'], r_, 0.05), 294 / c['E'])
+    c = calc(dict(mach='winch', R=0.4, axle=0.05, load=196, lift=1.0)); chk('u2 winch 0.4/0.05: MA 8, effort 24.5 N', near(c['ma'], 8) and near(c['E'], 24.5) and near(c['E'], M.effort(196, M.ma_winch(0.4))), (c['ma'], c['E']))
+    c = calc(dict(mach='ramp', L=4, h=0.8, load=490)); chk('u2 ramp 4 m / 0.8 m: MA 5, effort 98 N', near(c['ma'], 5) and near(c['E'], 98.0) and near(c['E'], M.effort(490, M.ma_ramp(4, 0.8))), (c['ma'], c['E']))
+    c = calc(dict(mach='lever', cls=1, arm=0.4, load=294, lift=0.1)); chk('u2 lever worked example: 0.4 m / 1.6 m: MA 4, effort 73.5 N', near(c['ma'], 4) and near(c['E'], 73.5), (c['ma'], c['E']))
+    c = calc(dict(mach='pulley', ropes=6, load=294, lift=2.0)); chk('u3 6 ropes, 2 m: 49 N, 12 m of rope', near(c['E'], 49.0) and near(c['eDist'], 12.0), (c['E'], c['eDist']))
+    chk('u3 work in = work out = 588 J', near(c['workIn'], 588) and near(c['workOut'], 588) and near(49.0 * 12.0, 588) and near(294 * 2, 588), (c['workIn'], c['workOut']))
+    c = calc(dict(mach='pulley', ropes=6, load=294, lift=1.0)); chk('u3 worked example: 294 N lifted 1 m is 294 J', near(c['workOut'], 294), c['workOut'])
+    # the pictures use the Part 2 crate: 235.2 N with 4 ropes needs 58.8 N, MA 4
+    c = calc(dict(mach='pulley', ropes=4, load=235.2, lift=1.0)); chk('picture: 235.2 / 58.8 = 4', near(c['E'], 58.8) and near(235.2 / c['E'], 4, 1e-6), c['E'])
+    # y1: oxygen tank, 245 N, 3 m, at most 60 N and 15 m of rope: only 5 ropes passes
+    ok1 = []
+    for r_ in range(1, 7):
+        c = calc(dict(mach='pulley', ropes=r_, load=245, lift=3.0, cap=60)); good = (not c['capped']) and r_ * 3.0 <= 15
+        ok1.append(r_ if good else None)
+        if r_ == 4: chk('y1 4 ropes need 61.3 N (capped)', c['capped'] and near(c['need'], 61.3), c['need'])
+        if r_ == 5: chk('y1 5 ropes: 49.0 N, 15 m', near(c['E'], 49.0) and near(r_ * 3.0, 15.0), (c['E'],))
+        if r_ == 6: chk('y1 6 ropes: 40.8 N but 18 m of rope', near(c['E'], 40.8) and near(r_ * 3.0, 18.0), c['E'])
+    chk('y1: only 5 ropes passes', [x for x in ok1 if x] == [5], ok1)
+    # y2: fuel barrel, 784 N, 1.2 m high, ramp 3 to 21 m in 1.5 m steps, at most 60 N and 18 m
+    good2 = []
+    for i in range(13):
+        L_ = 3 + 1.5 * i; c = calc(dict(mach='ramp', L=L_, h=1.2, load=784, cap=60))
+        if (not c['capped']) and L_ <= 18: good2.append(L_)
+        if L_ == 15: chk('y2 15 m needs 62.7 N (capped)', c['capped'] and near(c['need'], 62.7), c['need'])
+        if L_ == 16.5: chk('y2 16.5 m: 57.0 N', near(c['E'], 57.0), c['E'])
+        if L_ == 18: chk('y2 18 m: 52.3 N', near(c['E'], 52.3), c['E'])
+    chk('y2: 16.5 m and 18 m pass; nothing else', good2 == [16.5, 18.0], good2)
+    # y3: spare engine, 490 N, winch handle 0.10 to 0.60 m in 0.05 steps, at most 60 N and 0.5 m
+    good3 = []
+    for i in range(11):
+        R_ = round(0.10 + 0.05 * i, 2); c = calc(dict(mach='winch', R=R_, axle=0.05, load=490, lift=2.0, cap=60))
+        if (not c['capped']) and R_ <= 0.5 + 1e-9: good3.append(R_)
+        if R_ == 0.4: chk('y3 0.40 m needs 61.3 N (capped)', c['capped'] and near(c['need'], 61.3), c['need'])
+        if R_ == 0.45: chk('y3 0.45 m: 54.4 N', near(c['E'], 54.4), c['E'])
+        if R_ == 0.5: chk('y3 0.50 m: 49.0 N', near(c['E'], 49.0), c['E'])
+    chk('y3: 0.45 m and 0.5 m pass; nothing else', good3 == [0.45, 0.5], good3)
+    # Check numbers
+    chk('c6r12: 4500 / 18 = 250', near(4500 / 18, 250)); chk('c6r13: 120 x 15 = 1800 J (Leo wrote 8 J)', near(120 * 15, 1800) and near(120 / 15, 8))
+    chk('c6r15: handle 0.36 / axle 0.04 = 9, 540 / 9 = 60 N', near(0.36 / 0.04, 9) and near(M.effort(540, 9), 60.0))
+    c = calc(dict(mach='winch', R=0.36, axle=0.04, load=540, lift=1.0)); chk('c6r15 in the engine too: 60.0 N', near(c['ma'], 9) and near(c['E'], 60.0), (c['ma'], c['E']))
+    chk('c6r16: 5 ropes, 650 N, 3 m: 130 N and 15 m of rope', near(M.effort(650, 5), 130.0) and near(5 * 3, 15))
+    c = calc(dict(mach='pulley', ropes=5, load=650, lift=3.0)); chk('c6r16 in the engine too', near(c['E'], 130.0) and near(c['eDist'], 15.0), (c['E'], c['eDist']))
+    chk('c6r17: 600 / 60 = 10 ropes, 20 m of rope, 60 x 20 = 600 x 2 = 1200 J', near(600 / 60, 10) and near(10 * 2, 20) and near(60 * 20, 1200) and near(600 * 2, 1200))
+    chk('u2 q3: ramp 6 m / 1.5 m = 4', near(6 / 1.5, 4))
     chk('no page errors', not errs, errs[:3])
     b.close()
 print(f'{n} checks, {len(fails)} failed'); sys.exit(1 if fails else 0)

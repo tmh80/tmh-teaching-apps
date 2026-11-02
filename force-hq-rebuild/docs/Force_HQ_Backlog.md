@@ -1,7 +1,7 @@
 # Force HQ (rebuild): backlog
 
 ## Next milestones (from the rebuild brief)
-**Now (2 Nov 2026): Part 3 of the Workshop (`c6c`, mechanical advantage and work).** Re-pitch against section A2 of the Chapter 6 script, build, then Tom plays it.
+**Now (2 Nov 2026): Part 3 of the Workshop (`c6c`, mechanical advantage and work) is built and delivered. Tom to play it** (about 32 minutes by the app's estimate). Then Part 4 (compound machines and the builder), after re-pitching it against section A2 first.
 
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.
 2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Tom confirmed (25 Oct): the Space Dome stays in Chapter 4 with the docking orders as its challenge.
@@ -19,7 +19,7 @@
      - **Compare drops side by side**: two lanes, each with its own planet, object and air setting, so students can race them (for example the same crate on Earth and the Moon, or with and without air).
    - **Observation and question variety (Tom, 28 Oct):** live FBD next to the drop, an obvious Pause button so students can check the forces at a chosen moment, questions on the trends in the arrow sizes, and a wider range of question types. Plan: `docs/Question_Types_Guide.md`.
    - **Drag model (explained to Tom 28 Oct, he has not objected):** weight = m × g pulls down. Air resistance pushes up, starts at zero and grows with velocity squared, with the area facing the air, and with how thick the air is. When air resistance equals the weight the forces are balanced and the object falls at a steady terminal velocity. Students never calculate drag: they watch the arrows, read velocities and type them in.
-6. **Workshop (Chapter 6).** Parts 1 (Levers) and 2 (Pulleys, wheels and ramps) are built and were redesigned after Tom's first playtest (1 Nov 2026): slower pace, one new word per card, labelled pictures, familiar examples, black box transmission. Next: Tom plays Parts 1 and 2, then Part 3 (mechanical advantage and work), re-pitched to the script's section A2 first. Then Part 4 (compound machines and the builder), Part 5 (the rescue), the Extension (efficiency, Gummy Base One) and the build tasks.
+6. **Workshop (Chapter 6).** Parts 1 (Levers), 2 (Pulleys, wheels and ramps) and 3 (Mechanical advantage and work) are built and were redesigned after Tom's first playtest (1 Nov 2026): slower pace, one new word per card, labelled pictures, familiar examples, black box transmission. Part 3 (mechanical advantage and work) was built 2 Nov 2026, re-pitched to section A2 first. Next: Tom plays Parts 1 to 3. Then Part 4 (compound machines and the builder), Part 5 (the rescue), the Extension (efficiency, Gummy Base One) and the build tasks.
 7. **Explore.** "Draw what's happening now", which checks a student's FBD against the live forces.
 
 ## Banked ideas
