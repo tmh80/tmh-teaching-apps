@@ -743,6 +743,8 @@ Strands for the sheet: A ii, iii (`tests/strands.py`).
 
 ## K. Part 4: Compound machines (c6d)
 
+**As built (3 Nov 2026), where it differs from the plan below:** the machine builder is `mach:'build'` in the Workshop scene (button pickers for Winch ×2–×10, Pulley block None/2/3/4 ropes and Route, not drag-and-drop; "no block" means 1 rope). k1 has no tap-gallery: three cards with labelled pictures (scissors, building-site crane, the multiply chain), then a pick question and a tick question, so only pictured familiar machines appear. The crane in k2 uses the builder with the winch and block only (no route). k3's route is a 6 m ramp, chosen with the route picker. Mission h3 has a calculate box that locks the builder until it is answered. About 14 min Learn, 9 min Challenge, 9 min Check.
+
 ### Step k1: Machines inside machines   (Part 4, about 4 min)
 Arena: the Workshop with a **compound machine gallery** on the bench: a wheelbarrow, a pair of scissors, a can opener and a crane. Tapping one zooms in and highlights its simple machines one at a time, each labelled ("Lever", "Wedge", "Wheel and axle", …). Adds `gallery`. Hides the machine controls.
 

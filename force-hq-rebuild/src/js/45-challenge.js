@@ -248,7 +248,7 @@ function renderShopCourse(ch, wm, host, save) {
   const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
     <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
-    <div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
+    <div class="gl" id="shCalc" hidden></div><div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
   const paint = () => {
@@ -256,9 +256,14 @@ function renderShopCourse(ch, wm, host, save) {
     $('.mtabs', card).innerHTML = wm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-sr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
     $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal}</p>`;
     $('#shClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
+    const cb = $('#shCalc', card), lh = $('.labhost', card), needCalc = !!m.calc && !s.calcDone; cb.hidden = !needCalc; lh.hidden = needCalc;
+    if (needCalc) {
+      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><p class="scaleNote">${m.calc.hints}</p><div class="row"><input type="number" step="any" id="shCalcIn" aria-label="Your answer" style="width:7em"> <b>${m.calc.unit}</b> <button type="button" class="go" id="shCalcGo">Check</button></div><div class="fb" id="shCalcFb" hidden></div>`;
+      $('#shCalcGo', card).addEventListener('click', () => { const v = parseFloat($('#shCalcIn', card).value); if (isNaN(v)) return; const ok = Math.abs(v - m.calc.ans) <= m.calc.tol; save(m, { calcDone: true, calcMsg: ok ? `Yes, ${fmt(m.calc.ans, 0)} ${m.calc.unit}. The builder is unlocked.` : `The weight is ${fmt(m.calc.ans, 0)} ${m.calc.unit} (mass × g). The builder is unlocked.` }); paint(); });
+    }
     const nx = $('#shNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
     $('#shLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Pull ${i + 1}: ${r.desc}, ${r.capped ? 'needs ' + r.need.toFixed(1) + ' N (too much)' : 'pull ' + r.E.toFixed(1) + ' N'}${r.hit ? ' ✓ loaded!' : ''}</li>`).join('');
-    const fb = $('#shFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.hit ? 'ok' : 'hint') : 'no'); fb.innerHTML = s.msg || '';
+    const fb = $('#shFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.done ? (s.hit ? 'ok' : 'hint') : 'no'); fb.innerHTML = s.msg || s.calcMsg || ''; if (!s.msg && s.calcMsg) { fb.hidden = false; fb.className = 'fb ok'; }
     $('[data-o]', card).innerHTML = [['Make a pull (every pull counts)', s.tried]].concat(m.objs.map(o => [o.label, s.done && s.hit]), [['Do it on your first pull', s.best === 4]]).map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('');
     $('#shMore', card).innerHTML = s.done ? (cur < wm.length - 1 ? `<button type="button" class="go" data-sr="${cur + 1}">Next job →</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`) : (s.n >= 3 ? `<button type="button" class="ghost" id="shGive">Move on (1 point)</button>` : '');
     const gv = $('#shGive', card); if (gv) gv.addEventListener('click', () => { save(m, { done: true, best: 1, msg: `You moved on after ${s.n} pulls. ${m.give} You scored 1 of 4 points.${m.after ? ' ' + m.after : ''}` }); paint(); });
@@ -274,8 +279,8 @@ function renderShopCourse(ch, wm, host, save) {
   LAB.tick = () => {
     if (!WS.done || !WS.last || WS.last === judged) return; judged = WS.last;
     const m = wm[cur], s = get(m.id), c = WS.last; if (s.done) { paint(); return; }
-    const r = { E: c.E, need: c.need, capped: c.capped, dist: wsR2(c.ma * WS.lift), ropes: WS.ropes, L: WS.L, R: WS.R };
-    const desc = WS.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes > 1 ? 's' : ''}` : WS.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp` : `a ${fmt(r.R, 2)} m handle`;
+    const r = { E: c.E, need: c.need, capped: c.capped, dist: wsR2(c.ma * WS.lift), ropes: WS.ropes, L: WS.L, R: WS.R, ma: c.ma, cable: c.cable, bw: WS.bw, bn: WS.bn, br: WS.br, parts: c.parts };
+    const desc = WS.mach === 'build' ? [WS.bw ? `winch ×${WS.bw}` : '', WS.bn ? `${WS.bn} ropes` : '', WS.br ? `${WS.br} m ramp` : ''].filter(Boolean).join(' + ') || 'no machines' : WS.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes > 1 ? 's' : ''}` : WS.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp` : `a ${fmt(r.R, 2)} m handle`;
     const n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
     const log = (s.log || []).concat([{ desc, E: r.E, need: r.need, capped: r.capped, hit }]), sayAll = m.objs.map(o => o.say(r)).join(' ');
     save(m, { tried: true, n, log, hit, done: hit, best, msg: hit ? `Congratulations! Loaded after ${n} pull${n > 1 ? 's' : ''}! ${sayAll} You scored ${best} of 4 points.${m.after ? ' ' + m.after : ''}` : `Not quite. ${sayAll} Change your setting, then pull again.` });

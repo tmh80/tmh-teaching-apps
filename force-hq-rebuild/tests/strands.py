@@ -3,7 +3,7 @@ import pathlib, sys, json
 from playwright.sync_api import sync_playwright
 F = pathlib.Path(__file__).resolve().parent.parent / 'dist' / 'test.html'
 EXPECT = {'c1f': 'A i, ii', 'c1x': 'A i, ii', 'c2f': 'A i, ii, iii', 'c2x': 'A i, ii, iii · D i, iii', 'c3f': 'A i, ii',
-          'c3x': 'A ii, iii', 'c4f': 'A i, ii', 'c4x': 'A ii, iii · D i, iii', 'c5f': 'A i, ii, iii', 'c5x': 'A ii, iii · D i, iii', 'c6a': 'A i, ii, iii', 'c6b': 'A i, ii, iii', 'c6c': 'A ii, iii'}
+          'c3x': 'A ii, iii', 'c4f': 'A i, ii', 'c4x': 'A ii, iii · D i, iii', 'c5f': 'A i, ii, iii', 'c5x': 'A ii, iii · D i, iii', 'c6a': 'A i, ii, iii', 'c6b': 'A i, ii, iii', 'c6c': 'A ii, iii', 'c6d': 'A i, ii'}
 bad = []
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(); errs = []

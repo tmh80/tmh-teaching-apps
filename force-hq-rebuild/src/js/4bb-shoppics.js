@@ -241,3 +241,29 @@ function picWorkInOut() {
   b += picLabs([picNote(70, 36, ['Effort', 'you pull'], PIC_C.E, { W }), picNote(352, 36, ['Load', 'it is moved'], PIC_C.L, { W }), picNote(110, 162, ['Work in', 'effort × how far', 'your hand moved'], PIC_C.E, { all: true, W }), picNote(318, 162, ['Work out', 'load × how high', 'the load rose'], PIC_C.L, { all: true, W })]);
   return picWrap(W, 214, 'A machine with the effort going in and the load coming out. Work in is effort times how far your hand moved. Work out is load times how high the load rose', b, '', 420);
 }
+
+/* ---------- Part 4 pictures: compound machines ---------- */
+function picScissors() {
+  const W = 400;
+  let b = `<line x1="150" y1="104" x2="330" y2="40" stroke="${PIC_C.steel}" stroke-width="12" stroke-linecap="round"/><line x1="150" y1="104" x2="330" y2="168" stroke="${PIC_C.F}" stroke-width="12" stroke-linecap="round"/>`;
+  b += `<path d="M150 104 L60 66" stroke="${PIC_C.steel}" stroke-width="9" stroke-linecap="round"/><path d="M150 104 L60 142" stroke="${PIC_C.F}" stroke-width="9" stroke-linecap="round"/><ellipse cx="46" cy="62" rx="26" ry="18" fill="none" stroke="${PIC_C.E}" stroke-width="7"/><ellipse cx="46" cy="146" rx="26" ry="18" fill="none" stroke="${PIC_C.E}" stroke-width="7"/>`;
+  b += `<circle cx="150" cy="104" r="8" fill="#fff" stroke="${PIC_C.ink}" stroke-width="3"/>` + picArrow(22, 94, 22, 80, PIC_C.E, 3) + picArrow(22, 114, 22, 128, PIC_C.E, 3);
+  b += picLabs([picLabel(150, 104, 196, 196, ['Fulcrum', 'the pivot: a lever'], PIC_C.F, { W }), picLabel(300, 52, 330, 108, ['Blades', 'each one is a wedge'], PIC_C.L, { W }), picLabel(60, 66, 84, 14, ['Effort', 'you squeeze'], PIC_C.E, { W })]);
+  return picWrap(W, 226, 'Scissors: two levers joined at a pivot, with blades that are wedges', b);
+}
+function picSiteCrane() {
+  const W = 420;
+  let b = `<rect x="60" y="214" width="120" height="10" rx="3" fill="${PIC_C.wood2}"/><rect x="104" y="46" width="12" height="168" fill="#e3a51c"/><rect x="50" y="36" width="260" height="10" rx="3" fill="#e3a51c"/><rect x="50" y="46" width="30" height="26" fill="${PIC_C.F}"/>`;
+  b += `<line x1="250" y1="46" x2="250" y2="128" stroke="${PIC_C.rope}" stroke-width="3"/><circle cx="250" cy="134" r="10" fill="${PIC_C.steel}" stroke="${PIC_C.ink}" stroke-width="2"/><line x1="250" y1="144" x2="250" y2="168" stroke="${PIC_C.rope}" stroke-width="3"/><rect x="224" y="168" width="52" height="38" rx="4" fill="#c58a4a"/><line x1="224" y1="187" x2="276" y2="187" stroke="${PIC_C.wood2}" stroke-width="3"/>`;
+  b += `<rect x="124" y="170" width="40" height="30" rx="5" fill="${PIC_C.F}"/><circle cx="144" cy="185" r="9" fill="${PIC_C.steel}"/><line x1="144" y1="185" x2="162" y2="177" stroke="${PIC_C.ink}" stroke-width="3" stroke-linecap="round"/>`;
+  b += picLabs([picLabel(144, 185, 168, 238, ['Winch', 'a wheel and axle'], PIC_C.E, { W }), picLabel(250, 134, 350, 100, ['Pulley block', 'supporting ropes'], PIC_C.L, { W }), picLabel(180, 41, 180, 12, ['Crane arm', 'a lever'], PIC_C.F, { W }), picLabel(250, 187, 360, 188, ['Load', 'bricks'], PIC_C.L, { W })]);
+  return picWrap(W, 262, 'A building-site crane: a winch, a pulley block and an arm that is a lever, all working together', b, '', 420);
+}
+function picCompoundChain(A, B) {
+  A = A || 2; B = B || 3; const W = 420;
+  let b = '';
+  [['Machine 1', '× ' + A, 40], ['Machine 2', '× ' + B, 170], ['Total', '× ' + A * B, 300]].forEach(([n, v, x], i) => { b += `<rect x="${x}" y="40" width="90" height="56" rx="10" fill="${i == 2 ? '#fff6d6' : PIC_C.soft}" stroke="${i == 2 ? PIC_C.L : PIC_C.F}" stroke-width="2"/>` + picTxt(x + 45, 64, n, PIC_C.ink, 13) + picTxt(x + 45, 86, v, i == 2 ? PIC_C.L : PIC_C.F, 17); });
+  b += picTxt(150, 74, '×', PIC_C.E, 24) + picTxt(280, 74, '=', PIC_C.E, 24);
+  b += picNote(210, 132, ['Multiply the mechanical advantages.', 'Do not add them.'], PIC_C.E, { all: true, W }).box;
+  return picWrap(W, 160, `Two machines with mechanical advantages ${A} and ${B} give a total of ${A * B} when you multiply`, b, '', 420);
+}

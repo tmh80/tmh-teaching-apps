@@ -46,6 +46,8 @@ const WL = {
   bucket: { id: 'bucket', N: 196, name: '20 kg water bucket', short: 'bucket' }, cart: { id: 'cart', N: 490, name: '50 kg cart', short: 'cart' },
   log: { id: 'log', N: 1200, name: 'log', short: 'log' }, ice: { id: 'ice', N: 500, name: 'ice block', short: 'ice block' }, car: { id: 'car', N: 3000, name: 'car', short: 'car' },
   crate30: { id: 'crate', N: 294, name: '30 kg crate', short: 'crate' }, tank: { id: 'tank', N: 245, name: '25 kg oxygen tank', short: 'tank' },
+  engineb: { id: 'engineb', N: 1176, name: '120 kg engine block', short: 'engine block' }, gen: { id: 'gen', N: 2352, name: '240 kg generator', short: 'generator' },
+  cone: { id: 'cone', N: 1960, name: '200 kg nose cone', short: 'nose cone' }, rover: { id: 'rover', N: 3920, name: '400 kg Gummy Rover', short: 'rover' }, blockg: { id: 'blockg', N: 1260, name: '300 kg engine block on Glimmer-9', short: 'engine block' },
   barrel: { id: 'barrel', N: 784, name: '80 kg fuel barrel', short: 'barrel' }, engine: { id: 'engine', N: 490, name: '50 kg spare engine', short: 'engine' }
 };
 const shopStage = o => { clearCh2(); S.scene = 'shop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; S.running = false; wsSetup(o); };
@@ -226,7 +228,52 @@ CHDATA.c6 = {
         { id: 'q1', type: 'reading', p: 'How much rope did you pull to lift the crate 2 m with 6 supporting ropes? Use the red ruler.', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 6, rise: 2 }), need: () => shopHas({ mach: 'pulley', ropes: 6, rise: 2 }), needMsg: 'Lift the crate 2 m with 6 supporting ropes first.', ok: '12 m: six times the 2 m the crate rose. Your hand\'s distance = mechanical advantage × the load\'s distance.' },
         { id: 'q2', type: 'num', p: 'Your effort was 49 N, and you pulled 12 m of rope. How much work did you put in? (Force × distance.)', unit: 'J', units: UNITS_W, ans: 588, tol: 1, ladder: true, hints: ['Work = force × distance.', 'The force is your effort, 49 N, and the distance is the rope you pulled, 12 m.', 'Type 49 × 12 into the calculator.'], work: 'Work in = 49 × 12 = 588 J.', ok: 'Yes, 588 J of work in.' },
         { id: 'q3', type: 'num', p: 'The 294 N crate rose 2 m. How much work did the machine do on the crate?', unit: 'J', units: UNITS_W, ans: 588, tol: 1, ladder: true, hints: ['Work = force × distance.', 'Use the load, 294 N, and the height it rose, 2 m.', 'Type 294 × 2 into the calculator.'], work: 'Work out = 294 × 2 = 588 J, exactly the same as the work in.', ok: 'Yes, 588 J. That is exactly the same as the work in. The work readouts now show.' },
-        { id: 'q4', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true for a perfect machine.', opts: ['The work in equals the work out, spread over a longer distance', 'The work in is smaller than the work out, so the machine saves work', 'The work in is bigger than the work out, so the machine makes force', 'The work in and the work out are both zero, because nothing is wasted'], a: 0, ok: 'Yes! A machine spreads the same work over a longer distance, so the force can be smaller.', why: { 1: 'A machine cannot give out more work than you put in.', 2: 'Machines do not make force from nothing: a smaller force moves further.', 3: 'Both were 588 J, not zero.' } }] }
+        { id: 'q4', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that is true for a perfect machine.', opts: ['The work in equals the work out, spread over a longer distance', 'The work in is smaller than the work out, so the machine saves work', 'The work in is bigger than the work out, so the machine makes force', 'The work in and the work out are both zero, because nothing is wasted'], a: 0, ok: 'Yes! A machine spreads the same work over a longer distance, so the force can be smaller.', why: { 1: 'A machine cannot give out more work than you put in.', 2: 'Machines do not make force from nothing: a smaller force moves further.', 3: 'Both were 588 J, not zero.' } }] },
+
+    /* ================= Part 4: Compound machines (c6d) =================
+       Pitched against script section A2 (3 Nov 2026): one new word per card, a labelled picture for each new idea, pictured familiar machines only (scissors, a building-site crane). */
+    { id: 'k1', title: 'Machines inside machines', rescue: 'Compound machines spotted. Time to build one!',
+      cards: [
+        { html: `<p>📡 ${SMOOSHY.name}: "Even the best single machine can't lift the Gumdrop with my 60 N. We need teamwork!"</p><p>A ${T('compound', 'compound machine')} is two or more simple machines working together. Scissors are one: two levers joined at a pivot, with a wedge on each blade.</p>${picScissors()}` },
+        { html: `<p>A building-site crane is a compound machine too. A winch winds in the cable, and the cable runs through a pulley block. The arm is a lever.</p>${picSiteCrane()}` },
+        { html: `<p>When one machine drives another, their mechanical advantages <b>multiply</b>. A machine with a mechanical advantage of 2 driving a machine with a mechanical advantage of 3 gives a total of 2 × 3 = 6.</p>${picCompoundChain(2, 3)}<div class="law">total mechanical advantage = MA₁ × MA₂</div>` }],
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb } }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Read the cards, then answer the questions',
+      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
+      qs: [
+        { id: 'q1', type: 'pick', p: 'Scissors are two {0} joined at a pivot, and each blade is a {1}. A crane\'s winch is a {2}.', picks: [[['levers', 'pulleys', 'ramps'], 0], [['wedge', 'screw', 'pulley'], 0], [['wheel and axle', 'wedge', 'lever'], 0]], after: 'A compound machine is simple machines working together.' },
+        { id: 'q2', type: 'tick', p: 'Tick every compound machine.', opts: ['A pair of scissors', 'A building-site crane', 'A crowbar', 'A ramp', 'A flagpole', 'A screwdriver'], a: [0, 1], ok: 'Yes! A crowbar is a lever, a ramp is an inclined plane, a flagpole has one pulley and a screwdriver is a wheel and axle: each is a single simple machine.' }] },
+
+    { id: 'k2', title: 'Build a crane', rescue: 'Crane design tested. Smooshy is impressed.',
+      cards: [
+        { hi: '[data-panel="builder"]', html: `<p>The Workshop crane has two simple machines. You turn the ${T('winch', 'winch')} handle, and the winch winds in the rope of a pulley block. The winch makes your force bigger, then the pulley block makes it bigger again.</p>` },
+        { html: `<p>To find the total mechanical advantage, multiply. Here is a worked example with different numbers: a winch of ×2 and a pulley block with 2 supporting ropes give 2 × 2 = 4. A 400 N load needs an effort of 400 ÷ 4 = 100 N.</p>${picCompoundChain(2, 2)}` }],
+      predict: { q: 'A winch with a mechanical advantage of 4 drives a pulley block with 3 supporting ropes. What is the total mechanical advantage?', opts: ['12, because the advantages multiply', '7, because the advantages add up', '4, because only the biggest one counts', '3, because the last machine decides'], then: 'Set up the crane and check with the newtonmeter.' },
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb }, bRoutes: [[0, 'Straight up']] }); }, adds: ['builder', 'wspull', 'rulers', 'bTotMA', 'bTravel', 'readMA'], hide: ['wsctl', 'wsmach', 'bCable'], sides: [], pullers: [], idle: 'Choose a winch and a pulley block, then press Turn!',
+      mask: [{ q: 'q2', keys: ['readE', 'readMA', 'bTotMA'], when: r => r.mach === 'build' && r.bw === 6 && r.bn === 4 }],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+        ['Set the winch to <b>×4</b> and use <b>3</b> supporting ropes. Press <b>Turn!</b> to lift the 1,176 N engine block.', () => shopHas({ mach: 'build', bw: 4, bn: 3 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['', () => hasAns('q2'), { q: 'q2' }],
+        ['Check it: set the winch to <b>×6</b> with <b>4</b> supporting ropes and turn the handle.', () => shopHas({ mach: 'build', bw: 6, bn: 4 })], ['', () => hasAns('q3'), { q: 'q3' }]],
+      qs: [
+        { id: 'q1', type: 'reading', p: 'With the winch at ×4 and 3 supporting ropes, what effort lifted the 1,176 N engine block?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'build', bw: 4, bn: 3 }), need: () => shopHas({ mach: 'build', bw: 4, bn: 3 }), needMsg: 'Lift the engine block with the winch at ×4 and 3 supporting ropes first. Your runs are in the Journal.', ok: '98 N: twelve times smaller than the load, just as 4 × 3 predicted.' },
+        { id: 'q2', type: 'num', p: 'With the winch at ×6 and 4 supporting ropes, what effort should lift the 1,176 N engine block?', unit: 'N', units: UNITS_W, ans: 49, tol: 0.5, ladder: true, hints: ['Multiply the two mechanical advantages to get the total.', '6 × 4 = 24. Then effort = load ÷ total mechanical advantage.', 'Type 1176 ÷ 24 into the calculator.'], work: 'Total mechanical advantage = 6 × 4 = 24, so the effort is 1,176 ÷ 24 = 49 N.', ok: 'Yes, 49 N. Now check it with the newtonmeter.' },
+        { id: 'q3', type: 'pick', p: 'With a total mechanical advantage of 24, the engine block rose 2 m, so your hand moved {0} on the handle. The work you did was {1} the work done on the block.', picks: [[['2 m', '24 m', '48 m'], 2], [['less than', 'equal to', 'more than'], 1]], after: '24 × 2 = 48 m. The catch is the same as ever: less force, more distance, and the same work.' }] },
+
+    { id: 'k3', title: 'The machine builder', rescue: 'Machine builder unlocked. The crane kit is almost ready!',
+      cards: [
+        { hi: '[data-panel="builder"]', html: `<p>Welcome to the <b>machine builder</b>! Choose up to three machines: a winch, a pulley block and a route for the load. Your pull goes in at the winch, and each machine drives the next one. The builder shows how much cable each set-up needs and how far your hand has to travel.</p>` },
+        { html: `<p>Remember the catch: every extra bit of mechanical advantage means a longer pull. Real rescues have limits, such as only so much cable and only so much time. Your job is to build a machine that is strong enough, without being so slow that it takes forever.</p>${picCompoundChain(3, 4)}` }],
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.gen }, bRoutes: [[0, 'Straight up'], [6, '6 m ramp']] }); }, adds: ['builder', 'wspull', 'rulers', 'bTotMA', 'bCable', 'bTravel', 'readMA'], hide: ['wsctl', 'wsmach'], sides: [], pullers: [], idle: 'Build your machine, then press Turn!',
+      mask: [{ q: 'q1', keys: ['bTotMA', 'readMA'], when: r => r.mach === 'build' && r.bw === 4 && r.bn === 2 && r.br === 6 }, { q: 'q2', keys: ['bTravel'], when: r => r.mach === 'build' && r.bw === 4 && r.bn === 2 && r.br === 6 }],
+      tasks: [['Build <b>winch ×4</b>, <b>2 supporting ropes</b> and the <b>6 m ramp</b>. The 240 kg generator (2,352 N) rises 2 m up the ramp.', () => S.flags.k3built || (WS.mach === 'build' && WS.bw === 4 && WS.bn === 2 && WS.br === 6 && (S.flags.k3built = true))], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Turn the handle and watch the generator roll up the ramp.', () => shopHas({ mach: 'build', bw: 4, bn: 2, br: 6 })], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
+      qs: [
+        { id: 'q1', type: 'num', p: 'Your machine has a winch ×4, a pulley block with 2 supporting ropes and a ramp 6 m long that rises 2 m. What is its total mechanical advantage?', unit: '', ans: 24, tol: 0.05, ladder: true, hints: ['Find each machine\'s mechanical advantage. The ramp\'s is length ÷ height.', 'The ramp: 6 ÷ 2 = 3. The pulley block: 2. The winch: 4.', 'Multiply: 4 × 2 × 3.'], work: 'Ramp = 6 ÷ 2 = 3. Total = 4 × 2 × 3 = 24. There is no unit.', ok: 'Yes, 24. The total mechanical advantage readout now shows.' },
+        { id: 'q2', type: 'num', p: 'The generator rose 2 m. How far did your hand travel on the winch handle?', unit: 'm', units: UNITS_W, ans: 48, tol: 0.5, ladder: true, hints: ['Your hand\'s distance = total mechanical advantage × the load\'s distance.', 'The total mechanical advantage is 24, and the load rose 2 m.', 'Type 24 × 2 into the calculator.'], work: 'Your hand moved 24 × 2 = 48 m.', ok: 'Yes, 48 m. The hand travel readout now shows.' },
+        { id: 'q3', type: 'fix', p: 'Leo works out the effort for his compound machine. One line has a mistake. Tap it, then correct the answer.', who: 'Leo',
+          lines: ['Pulley block: mechanical advantage = 4', 'Winch: mechanical advantage = 5', 'Total mechanical advantage = 4 + 5 = 9', 'Effort = 1,800 ÷ 9 = 200 N'], bad: 2,
+          fix: { kind: 'num', ask: 'What effort does his machine really need for the 1,800 N load?', ans: 90, unit: 'N', units: UNITS_W, tol: 0.5 },
+          why: 'Mechanical advantages multiply: 4 × 5 = 20, so the effort is 1,800 ÷ 20 = 90 N.' }] },
   ],
   review: [
     /* ---------- Part 1 Check (levers) ---------- */
@@ -271,13 +318,27 @@ CHDATA.c6 = {
     { id: 'c6r16', obj: ['Aii'], type: 'pick', p: 'A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is {0} and the rope pulled is {1}.', picks: [[['130 N', '650 N', '3,250 N'], 0], [['0.6 m', '3 m', '15 m'], 2]] },
     { id: 'c6r17', obj: ['Aii'], type: 'explain', p: 'Captain Smooshy can only pull with 60 N, but he needs to lift a 600 N oxygen tank 2 m. Explain how a pulley system could help him, and what the catch is.', words: ['mechanical advantage', 'effort', 'supporting ropes', 'distance', 'work'],
       model: 'He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank\'s weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J.',
-      check: ['Works out the mechanical advantage needed (600 ÷ 60 = 10)', 'Says the supporting ropes share the load, so the effort is smaller', 'Says he must pull a longer distance of rope (10 times the height, 20 m)', 'Says the work stays the same (force × distance)'] }
+      check: ['Works out the mechanical advantage needed (600 ÷ 60 = 10)', 'Says the supporting ropes share the load, so the effort is smaller', 'Says he must pull a longer distance of rope (10 times the height, 20 m)', 'Says the work stays the same (force × distance)'] },
+    /* ---------- Part 4 Check (compound machines) ---------- */
+    { id: 'c6r18', obj: ['Ai'], type: 'sort', p: 'Is each of these a simple machine or a compound machine? Sort them.', groups: ['Simple machine', 'Compound machine'], items: [['A crowbar', 0], ['A ramp', 0], ['An axe', 0], ['A single flagpole pulley', 0], ['A pair of scissors', 1], ['A building-site crane', 1], ['A bicycle', 1], ['A car jack with a handle', 1]] },
+    { id: 'c6r19', obj: ['Aii'], type: 'num', p: 'A winch with a mechanical advantage of 6 drives a pulley system with 3 supporting ropes. What effort lifts a 2,700 N load?', unit: 'N', units: UNITS_W, ans: 150, tol: 0.5, ladder: true, hints: ['Total mechanical advantage = 6 × 3.', 'That is 18. Then effort = load ÷ total mechanical advantage.', 'Type 2700 ÷ 18 into the calculator.'], work: 'Total mechanical advantage = 6 × 3 = 18, so the effort is 2,700 ÷ 18 = 150 N.' },
+    { id: 'c6r20', obj: ['Aii'], type: 'reason', sure: true, p: 'Two machines, each with a mechanical advantage of 5, are joined so the first one drives the second. What is the total mechanical advantage?',
+      opts: ['25', '10', '5', '2.5'], a: 0,
+      reasons: ['The second machine multiplies a force the first machine has already made bigger', 'Each machine adds its own advantage on top of the other one', 'Only the stronger of the two machines sets the advantage', 'The force is shared between two machines, so the advantage halves'], r: 0,
+      why: { a: { 1: 'Mechanical advantages multiply, not add: 5 + 5 would be 10.', 2: 'Both machines count, and they multiply.', 3: 'Joining machines never makes the advantage smaller.' }, r: { 1: 'Adding would give 10, but the second machine acts on a force that is already bigger.', 2: 'Both machines count.', 3: 'Joining machines does not share the force out and halve it.' } } },
+    { id: 'c6r21', obj: ['Ai'], type: 'order', p: 'Put the steps of a crane lift in order, from Smooshy\'s hand to the load.', first: 'Smooshy turns the handle', last: 'The load rises',
+      items: ['The handle turns the winch\'s axle', 'The axle winds in the cable with a bigger force', 'The cable pulls on the pulley block', 'The supporting ropes share the load and lift it'] },
+    { id: 'c6r22', obj: ['Aii'], type: 'explain', p: 'A crane uses a winch and a pulley system to lift a heavy steel beam. Explain how the two machines together let a small effort lift the beam, and why the operator has to turn the handle so many times.', words: ['compound machine', 'mechanical advantage', 'multiply', 'distance'],
+      model: 'The winch and the pulley system are two simple machines working together, so the crane is a compound machine. The winch makes the effort bigger, then the pulleys make it bigger again, so the total mechanical advantage is the two mechanical advantages multiplied together. That makes the effort much smaller than the beam\'s weight. The catch is distance: the operator\'s hand moves the total mechanical advantage times the height the beam rises, so the handle has to turn many times.',
+      check: ['Says the crane is a compound machine (two simple machines working together)', 'Says the total mechanical advantage is the two multiplied, so the effort is much smaller than the load', 'Says the hand must move much further than the beam rises (mechanical advantage × the load\'s distance)'] }
   ]
 };
 
 /* ---------- Part 3 Challenge: Launch-day loading (y1 to y3). renderShopCourse in 45-challenge.js judges each Pull! ---------- */
 const shMark = ok => ok ? '✓' : '✗';
 const shObjE = lim => ({ label: `Pull with ${lim} N or less`, ok: r => !r.capped && r.E <= lim, say: r => r.capped ? `Your pull would need ${r.need.toFixed(1)} N. Target: ${lim} N or less. ✗` : `Your pull: ${r.E.toFixed(1)} N. Target: ${lim} N or less. ${shMark(r.E <= lim)}` });
+const shObjC = lim => ({ label: `Use ${lim} m of cable or less`, ok: r => r.cable <= lim + 1e-9, say: r => `Cable used: ${fmt(r.cable, 1)} m. Target: ${lim} m or less. ${shMark(r.cable <= lim + 1e-9)}` });
+const shObjT = lim => ({ label: `Move your hand ${lim} m or less`, ok: r => r.dist <= lim + 1e-9, say: r => `Hand travel: ${fmt(r.dist, 1)} m. Target: ${lim} m or less. ${shMark(r.dist <= lim + 1e-9)}` });
 CHDATA.c6.challenge = {
   title: 'Launch-day loading',
   intro: 'Smooshy\'s rescue rocket, <b>Gummy Rescue One</b>, is on the launch pad at Force HQ, and it needs loading! Practise like Smooshy: no pull may be more than <b>60 N</b>. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!',
@@ -303,6 +364,30 @@ CHDATA.c6.challenge = {
       objs: [shObjE(60), { label: 'Use a handle radius of 0.5 m or less', ok: r => r.R <= 0.5 + 1e-9, say: r => `Handle radius: ${fmt(r.R, 2)} m. Target: 0.5 m or less. ${shMark(r.R <= 0.5 + 1e-9)}` }],
       clues: ['The mechanical advantage you need is 490 ÷ 60 = 8.2.', 'For a winch, mechanical advantage = handle radius ÷ 0.05 m, so the handle must be at least 8.2 × 0.05 m.', 'That is at least 0.41 m. Which handles fit by the wall?'],
       give: 'A 0.45 m handle (54.4 N) or a 0.5 m handle (49.0 N) works.',
-      after: 'Gummy Rescue One is fully loaded! Next, Part 4: machines inside machines.' }
+      after: 'Gummy Rescue One is fully loaded! Next, Part 4: machines inside machines.' },
+    /* ---- Part 4 Challenge: Build the rescue kit (h1 to h3). The student builds a compound machine with the builder; every pull counts (same scoring as y1 to y3). ---- */
+    { id: 'h1', kind: 'shop', title: 'Mission 1: Hoist the nose cone', cap: 100,
+      setup: { mach: 'build', allow: ['build'], lift: 6, loads: { build: WL.cone }, bRoutes: [[0, 'Straight up']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
+      brief: 'Hoist the rocket\'s 200 kg nose cone (1,960 N) <b>6 m</b> up. The crane operator can pull <b>100 N at most</b>. There is <b>30 m of cable</b>, and the job must take <b>150 m of hand travel or less</b>.',
+      goal: 'Choose a winch and a pulley block, then press Turn!',
+      objs: [shObjE(100), shObjC(30), shObjT(150)],
+      clues: ['The mechanical advantage you need is 1,960 ÷ 100 = 19.6. Hand travel = mechanical advantage × 6 m, so the mechanical advantage must be 25 or less.', 'No single machine here reaches 19.6. Which pairs multiply to between 19.6 and 25?', 'Try 2 ropes with winch ×10, or 3 ropes with winch ×8.'],
+      give: '2 ropes with winch ×10 (98 N, 12 m of cable, 120 m of travel) works.' },
+    { id: 'h2', kind: 'shop', title: 'Mission 2: Load the Gummy Rover', cap: 80,
+      setup: { mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.rover }, bRoutes: [[0, 'Straight up'], [4, '4 m ramp'], [6, '6 m ramp'], [10, '10 m ramp']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
+      brief: 'Get the 400 kg Gummy Rover (3,920 N) onto the rocket\'s deck, <b>2 m</b> up. The pull must be <b>80 N or less</b>, there is <b>40 m of cable</b>, and the job must take <b>120 m of hand travel or less</b>.',
+      goal: 'Choose a route, a pulley block and a winch, then press Turn!',
+      objs: [shObjE(80), shObjC(40), shObjT(120)],
+      clues: ['The mechanical advantage you need is 3,920 ÷ 80 = 49, and at most 120 ÷ 2 = 60.', 'Cable = supporting ropes × route length, so long ramps and lots of ropes use cable fast.', 'The 10 m ramp has a mechanical advantage of 5. What do the pulley block and the winch need to multiply to?'],
+      give: 'The 10 m ramp with no pulley block and winch ×10 (78.4 N, 10 m of cable, 100 m of travel) works.' },
+    { id: 'h3', kind: 'shop', title: 'Mission 3: Practise for Glimmer-9', cap: 60,
+      setup: { mach: 'build', allow: ['build'], lift: 10, world: 'glim', loads: { build: WL.blockg }, bRoutes: [[0, 'Straight up']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
+      calc: { p: 'What does the 300 kg block weigh on Glimmer-9? (g = 4.2 N/kg)', unit: 'N', ans: 1260, tol: 1, hints: 'Weight = mass × g. Type 300 × 4.2 into the calculator.' },
+      brief: 'Smooshy\'s engineers want a test run in Glimmer-9\'s gravity. Lift a <b>300 kg</b> engine block <b>10 m</b>. On Glimmer-9, <b>g = 4.2 N/kg</b>. Smooshy can pull <b>60 N at most</b>, there is <b>40 m of cable</b>, and he has oxygen for <b>250 m of hand travel</b>.',
+      goal: 'Work out the weight first. Then choose a winch and a pulley block, and press Turn!',
+      objs: [shObjE(60), shObjC(40), shObjT(250)],
+      clues: ['Weight = 300 × 4.2 = 1,260 N, so the mechanical advantage you need is 1,260 ÷ 60 = 21, and at most 250 ÷ 10 = 25.', 'Cable = supporting ropes × 10 m, so 4 ropes at most.', 'Which ropes and winch multiply to between 21 and 25?'],
+      give: '3 ropes with winch ×8 (52.5 N, 30 m of cable, 240 m of travel) works.',
+      after: 'The crane kit is built and packed. Next stop: Glimmer-9!' }
   ]
 };

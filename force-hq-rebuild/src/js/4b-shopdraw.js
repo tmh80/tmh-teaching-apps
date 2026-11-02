@@ -245,9 +245,65 @@ function wsDrawScrew(c, cur, riseNow, prog) {
   return { x: hx + 8, y: hy - 52 };
 }
 
+
+/* ---------- the compound machine builder: a chain of slots on top, then the machine (winch -> pulley block -> route -> load) ---------- */
+function wsBuildChain(c) {
+  const H = WS.lift, parts = [[WS.bw > 0, WS.bw ? `Winch ×${WS.bw}` : 'Winch', WS.bw ? 'MA ' + WS.bw : '', 1], [WS.bn > 0, WS.bn ? `Pulley block` : 'Pulley block', WS.bn ? 'MA ' + WS.bn : '', 2], [WS.br > 0, WS.br ? `${fmt(WS.br, 0)} m ${WS.site === 'rescue' ? 'track' : 'ramp'}` : 'Route', WS.br ? 'MA ' + fmt(WS.br / H, 2) : '', 3]];
+  const x0 = 176, y = 32, w = 112, gap = 18; wsLabelTiny(c, 'YOUR PULL', x0, y - 6);
+  parts.forEach(([on, t, sub, k], i) => { const x = x0 + i * (w + gap); c.fillStyle = on ? '#fffaf2' : 'rgba(255,255,255,.35)'; c.beginPath(); c.roundRect(x, y, w, 34, 7); c.fill(); c.setLineDash(on ? [] : [4, 3]); c.strokeStyle = on ? WSC.green : WSC.steel2; c.lineWidth = 1.6; c.stroke(); c.setLineDash([]);
+    txt(c, on ? t : `Slot ${k}: empty`, x + w / 2, y + (on ? 12 : 17), on ? WSC.ink : WSC.steel2, `800 11px ${C.fb}`); if (on) txt(c, sub, x + w / 2, y + 26, WSC.green, `700 10.5px ${C.fb}`);
+    if (i < 2) arrow(c, x + w + 2, y + 17, x + w + gap - 2, y + 17, WSC.red, 2.5); });
+  arrow(c, x0 + 3 * w + 2 * gap + 2, y + 17, x0 + 3 * w + 2 * gap + 14, y + 17, WSC.red, 2.5);
+}
+const wsLabelTiny = (c, t, x, y) => txt(c, t, x, y, WSC.ink, `800 9px ${C.fb}`, 'left');
+function wsDrawBuild(c, cur, riseNow, prog) {
+  const H = WS.lift, ramp = WS.br > 0, hasW = WS.bw > 0, N = WS.bn || 1, hasB = WS.bn > 0, ld = fmt(WS.load, WS.load % 1 ? 1 : 0) + ' N';
+  wsBuildChain(c); const hr = hasW ? 14 + WS.bw * 4.2 : 0, ar = 9;
+  let ep;
+  if (!ramp) {
+    const cx = 290, pxM = Math.min(70, 130 / Math.max(H, 1)), bY = 255 - riseNow * pxM, top = 112, w = Math.max(40, N * 26);
+    c.fillStyle = WSC.beam; c.fillRect(190, 76, 330, 8); c.fillStyle = WSC.steel2; c.fillRect(cx - 3, 84, 6, 20);
+    c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 6, 102, w + 12, 18, 6); c.fill();
+    const xs = []; for (let i = 0; i < N; i++) xs.push(cx - w / 2 + (i + .5) * w / N);
+    xs.forEach(x => { c.fillStyle = WSC.steel; c.beginPath(); c.arc(x, 111, 7.5, 0, 7); c.fill(); c.fillStyle = WSC.steel2; c.beginPath(); c.arc(x, 111, 2.5, 0, 7); c.fill(); });
+    if (N > 1) { c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 6, bY - 14, w + 12, 18, 6); c.fill(); xs.forEach(x => { c.fillStyle = WSC.steel; c.beginPath(); c.arc(x, bY - 5, 7.5, 0, 7); c.fill(); c.fillStyle = WSC.steel2; c.beginPath(); c.arc(x, bY - 5, 2.5, 0, 7); c.fill(); }); }
+    c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.lineCap = 'round'; xs.forEach((x, i) => { c.beginPath(); c.moveTo(x, 120); c.lineTo(x, bY - (N > 1 ? 14 : 4)); c.stroke(); if (N > 1) txt(c, String(i + 1), x + 11, (120 + bY) / 2 - (i % 2 ? 14 : 0), WSC.green, `800 12px ${C.fn}`); });
+    c.fillStyle = WSC.steel; c.fillRect(cx - 2, bY - (N > 1 ? 0 : 4), 4, 14); wsLoadBlock(c, cx, bY + 62, 64, 50, WS.loadId, ld);
+    const ax = 500, ay = 222;
+    if (hasW) {
+      /* the cable runs from the last wheel to the winch drum; the drum winds it in */
+      c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1] + 7, 106); c.quadraticCurveTo(xs[N - 1] + 20, 98, xs[N - 1] + 26, 112); c.lineTo(xs[N - 1] + 26, 112); c.lineTo(ax, 112); c.lineTo(ax, ay - ar); c.stroke();
+      c.fillStyle = WSC.beam; c.fillRect(ax - 5, ay, 10, 128); c.setLineDash([6, 5]); c.strokeStyle = WSC.steel2; c.lineWidth = 2; c.beginPath(); c.arc(ax, ay, hr, 0, 7); c.stroke(); c.setLineDash([]);
+      c.fillStyle = WSC.steel; c.beginPath(); c.arc(ax, ay, ar, 0, 7); c.fill();
+      const a = (cur.travel || 0) * prog / Math.max(.05, WS.bw * .05) * .5, gx = ax + Math.cos(a) * hr, gy = ay + Math.sin(a) * hr; c.strokeStyle = WSC.wood2; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(gx, gy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(gx, gy, 9, 0, 7); c.fill();
+      const tx = -Math.sin(a), ty = Math.cos(a); arrow(c, gx - tx * 4, gy - ty * 4, gx + tx * 42, gy + ty * 42, WSC.red, 4);
+      wsLabel(c, `winch ×${WS.bw}`, ax - hr - 8, ay + 6, WSC.red, 'right'); ep = { x: gx, y: gy };
+    } else {
+      const hx = 480, ry = 160 + prog * 100; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(xs[N - 1] + 7, 106); c.quadraticCurveTo(xs[N - 1] + 20, 98, xs[N - 1] + 26, 112); c.lineTo(xs[N - 1] + 26, 112); c.lineTo(hx, 112); c.lineTo(hx, ry); c.stroke();
+      wsSpring(c, hx, ry, hx, ry + 66, 'pull down'); ep = { x: hx, y: ry + 66 };
+    }
+  } else {
+    const run = Math.sqrt(Math.max(.01, WS.br * WS.br - H * H)), sc = Math.min(300 / run, 170 / H), A = { x: 190, y: 342 }, B = { x: 190 + run * sc, y: 342 - H * sc };
+    c.fillStyle = WSC.wood; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.lineTo(B.x, A.y); c.closePath(); c.fill(); c.fillStyle = WSC.wood2; c.fillRect(B.x, B.y, 100, A.y - B.y); c.fillStyle = WSC.steel; c.fillRect(B.x, B.y - 4, 100, 5);
+    wsLabel(c, `${WS.site === 'rescue' ? 'track' : 'ramp'} ${fmt(WS.br, 0)} m`, (A.x + B.x) / 2 - 30, (A.y + B.y) / 2 - 36, WSC.red, 'center'); wsLabel(c, `height ${fmt(H, 0)} m`, B.x + 50, (A.y + B.y) / 2 + 40, WSC.green);
+    const ang = Math.atan2(B.y - A.y, B.x - A.x), t = clamp(prog, 0, 1), cs = Math.cos(ang), sn = Math.sin(ang), span = Math.hypot(B.x - A.x, B.y - A.y), cl = 60, d = (span - cl - 8) * t, px = A.x + cs * d, py = A.y + sn * d;
+    c.save(); c.translate(px, py); c.rotate(ang); c.fillStyle = WSC.crate; c.beginPath(); c.roundRect(2, -38, 56, 30, 5); c.fill(); c.fillStyle = WSC.ink; [[14, -6], [46, -6]].forEach(([a2, b2]) => { c.beginPath(); c.arc(a2, b2, 6, 0, 7); c.fill(); }); txt(c, ld, 30, -23, '#fffaf2', `800 11px ${C.fn}`); c.restore();
+    const fx = px + cs * 60 + sn * 22, fy = py + sn * 60 - cs * 22, ax = B.x + 56, ay = B.y - 64;
+    c.strokeStyle = '#d9c28a'; c.lineWidth = 3; for (let i = 0; i < N; i++) { const o = (i - (N - 1) / 2) * 5; c.beginPath(); c.moveTo(fx + sn * o, fy - cs * o); c.lineTo(B.x - 8 + sn * o, B.y - 26 - cs * o); c.stroke(); }
+    if (hasB) { c.fillStyle = WSC.steel2; c.beginPath(); c.roundRect(B.x - 18, B.y - 36, 22, 18, 5); c.fill(); wsLabel(c, `${N} ropes`, B.x - 26, B.y - 62, WSC.green, 'center', [B.x - 12, B.y - 30]); }
+    if (hasW) {
+      c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(B.x - 8, B.y - 26); c.lineTo(ax - ar, ay + 2); c.stroke(); c.fillStyle = WSC.beam; c.fillRect(ax - 5, ay, 10, B.y - ay);
+      c.setLineDash([6, 5]); c.strokeStyle = WSC.steel2; c.lineWidth = 2; c.beginPath(); c.arc(ax, ay, hr, 0, 7); c.stroke(); c.setLineDash([]); c.fillStyle = WSC.steel; c.beginPath(); c.arc(ax, ay, ar, 0, 7); c.fill();
+      const a = prog * 6, gx = ax + Math.cos(a) * hr, gy = ay + Math.sin(a) * hr; c.strokeStyle = WSC.wood2; c.lineWidth = 7; c.lineCap = 'round'; c.beginPath(); c.moveTo(ax, ay); c.lineTo(gx, gy); c.stroke(); c.fillStyle = WSC.red; c.beginPath(); c.arc(gx, gy, 9, 0, 7); c.fill();
+      arrow(c, gx + Math.sin(a) * 4, gy - Math.cos(a) * 4, gx - Math.sin(a) * 42, gy + Math.cos(a) * 42, WSC.red, 4); ep = { x: gx, y: gy };
+    } else { const hx = Math.min(B.x + 70, 560), hy = B.y - 44; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(B.x - 8, B.y - 26); c.lineTo(hx, hy); c.stroke(); wsSpring(c, hx - 60, hy - 6, hx, hy, 'pull'); ep = { x: hx, y: hy }; }
+  }
+  return ep;
+}
+
 /* ---------- the rulers (after a pull): the load's path and the effort's path, ticks every 0.05 m ---------- */
 function wsRuler(c, x, y, w, dist, title, col, len, zoom) {
-  len = len || Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2); const pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : 1, lab = pxm >= 300 ? 0.1 : pxm >= 150 ? 0.25 : pxm >= 60 ? 0.5 : len > 6 ? 2 : 1;
+  len = len || Math.max(0.5, Math.ceil(dist * 2 - 1e-9) / 2); const pxm = (w - 20) / len, minor = pxm * 0.05 >= 4 ? 0.05 : pxm * 0.5 >= 8 ? 0.5 : pxm >= 8 ? 1 : [2, 5, 10, 20, 50].find(s => pxm * s >= 8) || 100, lab = pxm >= 300 ? 0.1 : pxm >= 150 ? 0.25 : pxm >= 60 ? 0.5 : pxm >= 8 ? (len > 6 ? 2 : 1) : minor * 5;
   c.fillStyle = zoom ? '#fff6d6' : '#fbf3da'; c.beginPath(); c.roundRect(x, y, w, 42, 6); c.fill(); c.strokeStyle = '#8a7a50'; c.lineWidth = 1;
   if (zoom) { c.setLineDash([4, 3]); c.stroke(); c.setLineDash([]); }
   c.fillStyle = col; c.globalAlpha = .45; c.fillRect(x + 10, y + 3, dist * pxm, 7); c.globalAlpha = 1;
@@ -269,14 +325,15 @@ function wsRulers(c, rise, eDist, t1, t2) {
 function drawShopScene(c) {
   wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
-  if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow);
+  if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
   wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
   wsMonitor(c);
   /* readouts */
   const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], [WS.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
-  if (wsHas('readMA')) rows.push(['Mechanical advantage', mk.has('readMA') ? '?' : fmt(cur.ma, 2)]);
+  if (WS.mach === 'build') { rows[2] = ['Your hand moved', mk.has('bTravel') ? '?' : fmt(wsR2(cur.ma * riseNow), 2) + ' m']; if (wsHas('bTotMA') || wsHas('readMA')) rows.push(['Total mechanical advantage', mk.has('bTotMA') || mk.has('readMA') ? '?' : fmt(cur.ma, 2)]); if (wsHas('bCable')) rows.push(['Cable needed', mk.has('bCable') ? '?' : fmt(cur.cable, 0) + ' m']); }
+  else if (wsHas('readMA')) rows.push(['Mechanical advantage', mk.has('readMA') ? '?' : fmt(cur.ma, 2)]);
   if (wsHas('readWork')) { const done = WS.done && !WS.c.capped; rows.push(['Work in', mk.has('readWork') ? '?' : done ? fmt(WS.c.workIn, 0) + ' J' : '–'], ['Work out', mk.has('readWork') ? '?' : done ? fmt(WS.c.workOut, 0) + ' J' : '–']); }
   rows.forEach(([l, v], i) => { const y = 24 + i * 46; c.fillStyle = C.panel; c.globalAlpha = .94; c.beginPath(); c.roundRect(728, y, 164, 40, 8); c.fill(); c.globalAlpha = 1; c.strokeStyle = C.line; c.lineWidth = 1.2; c.stroke(); txt(c, l, 738, y + 11, C.muted, `700 10.5px ${C.fb}`, 'left'); txt(c, v, 738, y + 28, C.ink, `700 15px ${C.fn}`, 'left'); });
   /* messages */

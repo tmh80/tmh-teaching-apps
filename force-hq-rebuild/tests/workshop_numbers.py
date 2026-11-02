@@ -1,6 +1,6 @@
 """Workshop numbers: the JS machine maths (4a-workshop.js, wsCalc) must reproduce tools/workshop_model.py.
 Run from force-hq-rebuild after build.py:  python3 tests/workshop_numbers.py
-Covers Parts 1 to 3 (levers lv1-lv5; pulleys, wheels and ramps pl1-pl4; mechanical advantage and work u1-u3, loading jobs y1-y3, Check c6r12-c6r17). Later Parts add their cases as they are built."""
+Covers Parts 1 to 4 (levers lv1-lv5; pulleys, wheels and ramps pl1-pl4; mechanical advantage and work u1-u3, loading jobs y1-y3, Check c6r12-c6r17). Later Parts add their cases as they are built."""
 import json, pathlib, sys
 sys.path.insert(0, 'tools')
 import workshop_model as M
@@ -97,6 +97,30 @@ with sync_playwright() as p:
     c = calc(dict(mach='pulley', ropes=5, load=650, lift=3.0)); chk('c6r16 in the engine too', near(c['E'], 130.0) and near(c['eDist'], 15.0), (c['E'], c['eDist']))
     chk('c6r17: 600 / 60 = 10 ropes, 20 m of rope, 60 x 20 = 600 x 2 = 1200 J', near(600 / 60, 10) and near(10 * 2, 20) and near(60 * 20, 1200) and near(600 * 2, 1200))
     chk('u2 q3: ramp 6 m / 1.5 m = 4', near(6 / 1.5, 4))
+    # ---------- Part 4 (c6d): k2, k3 and the builder missions h1 to h3 ----------
+    def bcheck(name, load, rise, route, ropes, w, **kw):
+        m = M.builder(load, rise, route or None, ropes, w); c = calc(dict(mach='build', load=load, lift=rise, br=route or 0, bn=ropes, bw=w, **kw))
+        chk(f'{name}: MA', near(c['ma'], m['MA'], 1e-6), (c['ma'], m['MA'])); chk(f'{name}: effort', near(c['E'], m['E'], 1e-6), (c['E'], m['E']))
+        chk(f'{name}: cable', near(c['cable'], m['cable'], 1e-6), (c['cable'], m['cable'])); chk(f'{name}: hand travel', near(c['eDist'], round(m['travel'], 2), 1e-6), (c['eDist'], m['travel']))
+        return m
+    m = bcheck('k2 winch x4, 3 ropes', 1176, 2, 0, 3, 4); chk('k2: MA 12, 98 N, 24 m of hand travel', near(m['MA'], 12) and near(m['E'], 98.0) and near(m['travel'], 24))
+    m = bcheck('k2 check winch x6, 4 ropes', 1176, 2, 0, 4, 6); chk('k2: MA 24, 49 N, 48 m', near(m['MA'], 24) and near(m['E'], 49.0) and near(m['travel'], 48))
+    m = bcheck('k3 winch x4, 2 ropes, 6 m ramp', 2352, 2, 6, 2, 4); chk('k3: MA 24, 98 N, 48 m of hand travel, 12 m of cable', near(m['MA'], 24) and near(m['E'], 98.0) and near(m['travel'], 48) and near(m['cable'], 12))
+    chk('k3 q3: 4 x 5 = 20, 1800 / 20 = 90 N (Leo added)', near(4 * 5, 20) and near(1800 / 20, 90))
+    chk('c6r19: 6 x 3 = 18, 2700 / 18 = 150 N', near(6 * 3, 18) and near(2700 / 18, 150))
+    def grid(load, rise, routes, cap, cable_max, travel_max):
+        ok = []
+        for r_ in routes:
+            for n_ in (0, 2, 3, 4):
+                for w_ in (0, 2, 4, 6, 8, 10):
+                    m = M.builder(load, rise, r_ or None, n_, w_)
+                    if m['E'] <= cap and m['cable'] <= cable_max and m['travel'] <= travel_max: ok.append((r_, n_, w_))
+        return ok
+    g1 = grid(1960, 6, [0], 100, 30, 150); chk('h1: 2 ropes x10, 3 ropes x8 and 4 ropes x6 pass', set(g1) == {(0, 2, 10), (0, 3, 8), (0, 4, 6)}, g1)
+    g2 = grid(3920, 2, [0, 4, 6, 10], 80, 40, 120); print('h2 passing builds:', g2); chk('h2: at least four builds pass, including the 10 m ramp with winch x10 and no block', len(g2) >= 4 and (10, 0, 10) in g2 and (0, 2, 10) not in g2, g2)
+    g3 = grid(1260, 10, [0], 60, 40, 250); chk('h3: 3 ropes x8 and 4 ropes x6 pass', set(g3) == {(0, 3, 8), (0, 4, 6)}, g3)
+    chk('h3: weight on Glimmer-9 is 300 x 4.2 = 1260 N', near(300 * 4.2, 1260))
+    c = calc(dict(mach='build', load=1960, lift=6, br=0, bn=2, bw=4, cap=100)); chk('h1: 2 ropes x4 (MA 8) needs 245 N: capped', c['capped'] and near(c['need'], 245.0), c['need'])
     chk('no page errors', not errs, errs[:3])
     b.close()
 print(f'{n} checks, {len(fails)} failed'); sys.exit(1 if fails else 0)
