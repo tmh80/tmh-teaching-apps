@@ -45,7 +45,7 @@ function wsHeader(ch, title, mode) {
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
-  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; }
+  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'build': return q.marks; default: return 1; }
 }
 /* a line under questions that ask "How sure are you?": blank on the template, the student's choice in blue, not marked */
 const sureLine = (q, mode, s) => !q.sure || mode === 'key' ? '' : mode === 'student' ? `<p class="note" style="margin:4px 0 0">How sure I was: ${s && s.done && s.sure ? `<span class="stu">${SURE_LABEL[s.sure]}</span>` : '–'}</p>` : '<p class="note" style="margin:4px 0 0">How sure were you? ☐ Guessing &nbsp; ☐ Fairly sure &nbsp; ☐ Certain</p>';
@@ -111,6 +111,7 @@ function stepsSummary(chId, mode) {
   return `<div class="stepsum"><h2>Steps completed in the sim</h2><p class="note">${stu ? 'A blue tick means the sim recorded this step as done.' : mode === 'key' ? 'Students tick these in the sim. Not marked: they show the work done before the questions.' : 'The sim ticks each step the student finished before answering the questions.'}</p><ul>${rows.join('')}</ul></div>`;
 }
 function buildWorksheet(chId, mode) {
+  if (isBT(chId)) return btWorksheet(chId, mode);
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
   const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
@@ -150,6 +151,7 @@ function markItem(q, i) {
     case 'freeze': return `Q${n} (${m} marks, 1 per box): every student's moments are different, so mark for consistency. The weight is the same in every row (mass × g). Resultant = weight − air resistance in each row (accept 1.5 N either way). The velocity choice matches the resultant: downwards = speeding up, zero = steady, upwards = slowing down. Example values (students' will differ): ` + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('; ') + '.';
     case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
     case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
+    case 'build': return `Build marks (${m} mark${m > 1 ? 's' : ''}): ${q.p}. ${q.how}`;
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
   }
   return '';

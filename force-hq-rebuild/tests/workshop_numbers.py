@@ -146,6 +146,25 @@ with sync_playwright() as p:
     c = calc(dict(mach='build', load=300, lift=6, br=0, bn=0, bw=6, real=True)); chk('gb3 edge: winch x6 needs 55.6 N and exactly 2,000 J', near(c['E'], 55.6) and c['workIn'] <= 2000, (c['E'], c['workIn']))
     chk('c6r27: 2000/2500 = 80%', near(2000 / 2500 * 100, 80)); chk('c6r29: efficiencies 96, 80, 75, 40, 30', [round(1200 / w * 100) for w in (1250, 1500, 1600, 3000, 4000)] == [96, 80, 75, 40, 30])
     chk('c6r30: 1200/1500 = 80%', near(1200 / 1500 * 100, 80))
+    # ---------- Build tasks bt1 to bt4 (the model grids, matched to the JS) ----------
+    W_, N_ = [0, 2, 4, 6, 8, 10], [0, 2, 3, 4]
+    def btgrid(load, rise, routes):
+        for br in routes:
+            for n_ in N_:
+                for w_ in W_: yield br, n_, w_, M.builder(load, rise, br or None, n_, w_)
+    price = lambda br, n_, w_: {0: 0, 6: 10, 9: 20, 15: 40}[br] + 15 * n_ + 5 * w_
+    g = [(br, n_, w_) for br, n_, w_, m in btgrid(1960, 4, [0]) if m['E'] < 300 and m['cable'] <= 16 and m['travel'] <= 40]; print('bt1 passing builds:', g)
+    chk('bt1: exactly winch x8, x10, 2 ropes + x4 and 4 ropes + x2 pass; the model build is winch x4 + 2 ropes', set(g) == {(0, 0, 8), (0, 0, 10), (0, 2, 4), (0, 4, 2)}, g)
+    g = sorted((price(br, n_, w_), br, n_, w_) for br, n_, w_, m in btgrid(4900, 3, [0, 6, 9, 15]) if m['E'] <= 100 and m['cable'] <= 60 and price(br, n_, w_) <= 120); print('bt2 passing builds:', len(g), g[:3])
+    chk('bt2: 16 builds pass; the cheapest is the 15 m ramp + winch x10 at 90 credits, then 95', len(g) == 16 and g[0] == (90, 15, 0, 10) and g[1][0] == 95, g[:3])
+    g = [(br, n_, w_) for br, n_, w_, m in btgrid(1176, 2, [0, 4, 6, 10]) if abs(m['MA'] - 24) < 1e-9]; print('bt3 MA-24 builds:', g)
+    chk('bt3: seven MA-24 builds; four of them use three parts; 49 N and 48 m for all', len(g) == 7 and sum((br > 0) + (n_ > 0) + (w_ > 0) == 3 for br, n_, w_ in g) == 4 and all(near(M.builder(1176, 2, br or None, n_, w_)['E'], 49) and near(M.builder(1176, 2, br or None, n_, w_)['travel'], 48) for br, n_, w_ in g), g)
+    for world, gg, mn in (('earth', 9.8, 72), ('mars', 3.7, 30), ('moon', 1.6, 12)):
+        L_ = round(400 * gg, 1); ok = sorted((m['MA'], br, n_, w_) for br, n_, w_, m in btgrid(L_, 2, [0, 4, 6, 10]) if m['E'] <= 60 and m['cable'] <= 40)
+        chk(f'bt4 {world}: weight {L_} N, the smallest working MA is {mn}', ok and near(ok[0][0], mn), ok[:2])
+    for nm, load, rise, br, bn, bw in (('bt1 model', 1960, 4, 0, 2, 4), ('bt2 model', 4900, 3, 15, 0, 10), ('bt3 model', 1176, 2, 6, 2, 4), ('bt4 Earth model', 3920, 2, 6, 3, 8), ('bt4 Mars model', 1480, 2, 0, 3, 10), ('bt4 Moon model', 640, 2, 0, 2, 6)):
+        m = M.builder(load, rise, br or None, bn, bw); c = calc(dict(mach='build', load=load, lift=rise, br=br, bn=bn, bw=bw)); chk(f'{nm}: JS = model (effort, cable, hand travel)', near(c['E'], m['E'], 1e-6) and near(c['cable'], m['cable']) and near(c['eDist'], m['travel']), (c['E'], m['E']))
+    chk('bt4 typed answers: 400 x 9.8, 3.7, 1.6 and the MAs needed 65.3, 24.7, 10.7', [400 * x for x in (9.8, 3.7, 1.6)] == [3920.0, 1480.0, 640.0] or all(near(a, b, 1e-6) for a, b in zip([400 * x for x in (9.8, 3.7, 1.6)], (3920, 1480, 640))) and [round(w_ / 60, 1) for w_ in (3920, 1480, 640)] == [65.3, 24.7, 10.7])
     chk('no page errors', not errs, errs[:3])
     b.close()
 print(f'{n} checks, {len(fails)} failed'); sys.exit(1 if fails else 0)

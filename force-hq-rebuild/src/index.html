@@ -136,7 +136,7 @@
           <div class="nudge lf"><button type="button" class="mini" data-lf="-100">−100</button><button type="button" class="mini" data-lf="-10">−10</button><button type="button" class="mini" data-lf="-1">−1</button><button type="button" class="mini" data-lf="1">+1</button><button type="button" class="mini" data-lf="10">+10</button><button type="button" class="mini" data-lf="100">+100</button></div>
           <p class="palhint">Too fast? Lower the lift a little to slow down, then match it to the weight.</p></div>
         <!-- Chapter 6: the Workshop controls (shown only when S.scene = 'shop') -->
-        <div class="wsctl" data-panel="builder">
+        <div class="wsctl" data-panel="builder" data-wsm="build">
           <div class="ctlh"><h3>The machine builder</h3></div><p class="palhint">Your pull goes into slot 1. Each part drives the next one.</p>
           <div id="bWinchRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="winch">Slot 1 · Winch</button></h3></div><div class="seg three" id="bWinch"></div></div>
           <div id="bRopesRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="pulley">Slot 2 · Pulley block</button></h3></div><div class="seg two" id="bRopes"></div></div>
@@ -145,6 +145,7 @@
         <div data-panel="mfric"><div class="ctlh"><h3><button type="button" class="term tl" data-t="efficiency">Perfect or real?</button></h3></div><div class="seg two" id="wsReal"></div><p class="palhint" id="wsRealNote"></p></div>
         <div data-panel="wsmach"><div class="ctlh"><h3>Machine</h3></div><div class="seg two" id="wsMachs"></div></div>
         <div data-panel="wsload"><div class="ctlh"><h3>Load</h3></div><div class="seg two" id="wsLoads"></div></div>
+        <div data-panel="wsworld"><div class="ctlh"><h3><button type="button" class="term tl" data-t="gfs">World</button></h3></div><div class="seg two" id="wsWorlds"></div></div>
         <div class="wsctl" data-panel="wsctl">
           <div id="wsClsRow"><div class="ctlh"><h3><button type="button" class="term tl" data-t="lever">How the lever is built</button></h3></div><div class="seg three" id="wsCls"></div></div>
           <div data-wsm="lever"><div class="ctlh"><h3 id="wsArmTitle">Load arm</h3><span class="numbox"><input type="number" id="wsArmNum" min="0.2" max="1.8" step="0.05" value="1" inputmode="decimal" aria-label="Arm length in metres: type a number"><span>m</span></span></div>

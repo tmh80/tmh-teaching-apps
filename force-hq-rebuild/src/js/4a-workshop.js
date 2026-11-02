@@ -22,7 +22,7 @@ const WS = {
   mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10,
   load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null, world: 'earth', real: false, cap: null, maxTravel: 1.5,
   lim: {}, classPick: false, rampH: false, axleEdit: false, lift3: WS_LIFT3, clsNames: false,
-  bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null,
+  bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null, mass: null, massOpts: null, worldPick: false, worldOpts: null,
   busy: false, ph: 0, pt: 0, T2: 2.2, c: null, done: false, msg: '', reading: 0, prog: 0, effort: 0, last: null, bubble: null, bubbleAt: 0, lastBub: -1, shown: false
 };
 /* ---------- the maths ---------- */
@@ -53,7 +53,7 @@ function wsCalc(o) {
 }
 const wsRecord = c => ({ mach: WS.mach, cls: WS.mach === 'lever' ? WS.cls : null, la: c.la != null ? wsR2(c.la) : null, ea: c.ea != null ? wsR2(c.ea) : null, ropes: WS.mach === 'pulley' ? WS.ropes : null,
   R: WS.mach === 'winch' ? WS.R : null, L: WS.mach === 'ramp' ? WS.L : null, h: WS.mach === 'ramp' ? WS.h : null, thick: WS.mach === 'wedge' ? WS.thick : null,
-  per: WS.mach === 'screw' ? WS.per : null, pitch: WS.mach === 'screw' ? WS.pitch : null, loadN: WS.load, loadName: WS.loadName, loadShort: WS.loadShort, world: WS.world, real: !!WS.real, cap: WS.cap,
+  per: WS.mach === 'screw' ? WS.per : null, pitch: WS.mach === 'screw' ? WS.pitch : null, loadN: WS.load, loadName: WS.loadName, loadShort: WS.loadShort, world: WS.world, real: !!WS.real, cap: WS.cap, bt: typeof BT_CUR !== 'undefined' && VIEW === 'vExplore' ? BT_CUR : null,
   bw: WS.mach === 'build' ? WS.bw : null, bn: WS.mach === 'build' ? WS.bn : null, br: WS.mach === 'build' ? WS.br : null, cable: WS.mach === 'build' ? c.cable : null, parts: WS.mach === 'build' ? c.parts : null, site: WS.site,
   liftSet: WS.mach === 'lever' && c.ma < 1 - 1e-9 ? WS.lift3 : WS.lift, E: c.E, need: c.need, capped: c.capped, short: c.short, ma: wsR2(c.ma), rise: c.rise, eDist: c.eDist, workIn: c.workIn, workOut: c.workOut, wasted: c.wasted, effPct: c.effPct, turns: c.turns });
 
@@ -78,10 +78,12 @@ function wsMasked(rec) {
 /* ---------- state changes ---------- */
 function wsLoadFor(m) { const l = WS.loads[m]; if (l) { WS.load = l.N; WS.loadName = l.name; WS.loadShort = l.short; WS.loadId = l.id; } }
 function wsSetLoad(id) { const l = WS.loadOpts && WS.loadOpts.find(x => x.id === id); if (!l) return; WS.load = l.N; WS.loadName = l.name; WS.loadShort = l.short; WS.loadId = l.id; wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange(); }
+function wsSetWorld(w) { if (!WS_WORLDS[w] || w === WS.world) return; WS.world = w; if (WS.mass != null) WS.load = Math.round(WS.mass * WS_WORLDS[w].g * 10) / 10; wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange(); }
+function wsSetMass(kg) { WS.mass = kg; WS.load = Math.round(kg * WS_WORLDS[WS.world].g * 10) / 10; if (WS.massOpts) { WS.loadName = kg + ' kg load'; WS.loadShort = 'load'; WS.loadId = 'mass' + kg; } wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange(); }
 function wsResetLoad() { WS.busy = false; WS.ph = 0; WS.pt = 0; WS.prog = 0; WS.reading = 0; WS.done = false; WS.msg = ''; WS.c = null; if (typeof RUN !== 'undefined' && RUN && RUN.scene === 'shop' && RUN.live) runEnd('reset'); }
 function wsSetup(o) {
   const d = { mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10, load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null,
-    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false, bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null, pullLabel: null, hatch: 0, noShip: false, budget: null };
+    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, worldOpts: null, mass: null, massOpts: null, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false, bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null, pullLabel: null, hatch: 0, noShip: false, budget: null };
   Object.assign(WS, d, o || {}); WS.siteT0 = performance.now() / 1000; wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
 }
 function wsSetMach(m) {
@@ -179,6 +181,8 @@ function wsRenderControls() {
   const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0] + ':' + i[1]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
   const A = WS.allow; $('#wsMachs').className = 'seg ' + (A.length > 3 ? 'three' : A.length > 2 ? 'three' : 'two'); seg('#wsMachs', A.map(m => [m, `${WS_ICON[m]} ${WS_MACH[m].replace(' (winch)', '')}`]), WS.mach, 'data-mach');
   if (WS.loadOpts) seg('#wsLoads', WS.loadOpts.map(l => [l.id, l.name]), WS.loadId, 'data-load');
+  else if (WS.massOpts) seg('#wsLoads', WS.massOpts.map(k => [k, k + ' kg']), WS.mass, 'data-mass');
+  seg('#wsWorlds', Object.keys(WS_WORLDS).filter(k => !WS.worldOpts || WS.worldOpts.includes(k)).map(k => [k, WS_WORLDS[k].n.replace(/^the /, '').replace(/^./, ch => ch.toUpperCase())]), WS.world, 'data-world');
   seg('#wsCls', [1, 2, 3].map(n => [n, (WS.clsNames ? `Class ${n}: ` : '') + WS_SETUP[n].replace(/^./, ch => ch.toUpperCase())]), WS.cls, 'data-cls');
   seg('#wsThick', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick, 'data-thick');
   seg('#wsPer', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per, 'data-per'); seg('#wsPitch', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch, 'data-pitch');
@@ -201,7 +205,7 @@ function wsRenderControls() {
 function initShop() {
   if (!$('#wsMachs')) return;
   const dl = (sel, attr, fn) => document.addEventListener('click', e => { const b = e.target.closest(sel); if (b && $('#lab').contains(b)) fn(b.getAttribute(attr), b); });
-  dl('#wsMachs [data-mach]', 'data-mach', v => wsSetMach(v)); dl('#wsLoads [data-load]', 'data-load', v => wsSetLoad(v)); dl('#wsCls [data-cls]', 'data-cls', v => wsSet('cls', +v));
+  dl('#wsMachs [data-mach]', 'data-mach', v => wsSetMach(v)); dl('#wsWorlds [data-world]', 'data-world', v => wsSetWorld(v)); dl('#wsLoads [data-mass]', 'data-mass', v => wsSetMass(+v)); dl('#wsLoads [data-load]', 'data-load', v => wsSetLoad(v)); dl('#wsCls [data-cls]', 'data-cls', v => wsSet('cls', +v));
   dl('#wsThick [data-thick]', 'data-thick', v => wsSet('thick', +v)); dl('#wsPer [data-per]', 'data-per', v => wsSet('per', +v)); dl('#wsPitch [data-pitch]', 'data-pitch', v => wsSet('pitch', +v));
   dl('#wsReal [data-real]', 'data-real', v => wsSet('real', +v)); dl('#wsH [data-h]', 'data-h', v => wsSet('h', +v)); dl('#bWinch [data-bw]', 'data-bw', v => wsSet('bw', +v)); dl('#bRopes [data-bn]', 'data-bn', v => wsSet('bn', +v)); dl('#bRoute [data-br]', 'data-br', v => wsSet('br', +v)); dl('#wsLift [data-lift]', 'data-lift', v => wsSet('lift', +v));
   const pair = (r, n, k) => { $(r).addEventListener('input', () => wsSet(k, +$(r).value)); const go = () => { const v = parseNum($(n).value); if (isNaN(v)) { wsRenderControls(); return; } wsSet(k, v); }; $(n).addEventListener('change', go); $(n).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); $(n).blur(); } }); };

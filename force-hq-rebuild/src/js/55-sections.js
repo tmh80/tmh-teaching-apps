@@ -103,4 +103,4 @@ function secMins(id) {
   const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);
   return { learn: Math.round(learn), challenge: Math.round(chal), review: Math.round(rev), total: Math.round(learn + chal + rev) };
 }
-const secOf = id => SECTIONS.find(s => s.id === id);
+const secOf = id => SECTIONS.find(s => s.id === id) || (typeof BT_SEC !== 'undefined' ? BT_SEC[id] : undefined);
