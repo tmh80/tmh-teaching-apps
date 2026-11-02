@@ -1,6 +1,6 @@
-# Force HQ rebuild: handoff for the next chat (written 2 Nov 2026)
+# Force HQ rebuild: handoff for the next chat (updated 3 Nov 2026)
 
-**Job for this chat: build every remaining stage of Chapter 6 in one go, then deliver once.** Tom wants bigger batches because stopping after each Part to hear feedback is slow for him. So this chat does Parts 4 and 5, the Extension, the build tasks and the final wiring, and does **not** stop between them. Tom plays everything afterwards and gives feedback in one round.
+**Chapter 6 is finished (3 Nov 2026).** The previous chat built Part 4, Part 5, the Extension, the Build tasks and the final wiring and delivered them. **Next job: Explore "Draw what's happening now"** (a free-body-diagram check against the live forces; Backlog item 7), then the jobs in section 5. Wait for Tom's playtest feedback on Parts 4 and 5, the Extension and the Build tasks and fix what he finds first.
 
 Tom is a British science teacher (Head of MS Sciences at WAB), **a teacher, not a programmer**. Explain in plain words and do all git work yourself. Read first, in this order:
 1. `docs/Force_HQ_Handoff.md` (setup, rules, delivery steps, patterns). Its "Getting set up" and "Rules every new step must follow" sections apply unchanged.
@@ -8,26 +8,14 @@ Tom is a British science teacher (Head of MS Sciences at WAB), **a teacher, not 
 3. `docs/Chapter6_Workshop_Script.md`, section **A2 (pacing and vocabulary rules)** before writing any step, then the section for each Part as you reach it. Repo and project copies are `claude/Force_HQ_*.md` and `claude/Force_HQ_Chapter6_Workshop_Script.md`.
 4. `docs/Force_HQ_Backlog.md`.
 
-## 0. Where things stand (2 Nov 2026)
-- Chapters 1 to 5 are built. **Chapter 6 (the Workshop, "Save Captain Smooshy!"): Parts 1 (Levers, `c6a`), 2 (Pulleys, wheels and ramps, `c6b`) and 3 (Mechanical advantage and work, `c6c`) are built, tested and pushed.** Part 3 was pushed in commit `2beae91`; Tom has not played it yet.
-- Latest changes (all pushed, full suite clean): the Drop Zone's second lane has its own scenery; the Explain checklist ("Did you include…?") stays hidden until the student presses Check or Finish; every calculation (`num`) question in a Check has an optional, unmarked **Working** box (`.numworkin`, saved as `s.w`, printed in blue on the worksheet).
-- Part 3 came out at about 32 minutes by the app's estimate (Learn 13, Challenge 9, Check 10). Tom's target is about 30 or less. Mention it; offer to trim one Challenge job if his class finds it long.
+## 0. Where things stand (3 Nov 2026)
+- Chapters 1 to 6 are built. Chapter 6 (the Workshop, "Save Captain Smooshy!"): Parts 1 to 5 (`c6a` to `c6e`), the optional Extension `c6f`, the Build tasks bt1 to bt4 (Explore > Workshop > Build tasks), fun facts, the Rescue report on the Part 5 worksheet, worksheets and Toddle files for every Part and build task. All tests pass.
+- Minutes (app estimate): Part 1 31, Part 2 27, Part 3 32, Part 4 32, Part 5 25, Extension 30; build tasks 12 to 15 each. Tom's target is about 30 or less per Part: offer to trim a Challenge job in Parts 3 and 4 if his class finds them long.
+- Tom has not yet played Parts 4 and 5, the Extension or the Build tasks.
+- The Brief's "Chapter 6 Parts 4 and 5, the Extension and the Build tasks: build log" lists the files, the engine rules and the tests. The script (`docs/Chapter6_Workshop_Script.md`) has an "As built" note under sections K, N, O1, P2 and W.
 
-## 1. Stages to build (do them all in this chat, in this order)
-Section R of the script lists them. **Re-pitch each Part against section A2 first** (one new word per card, a labelled picture for every new idea, one familiar pictured example, plain words, no prediction given away, about 30 minutes or less). Update the script's sections for that Part to match what you build (as Part 3 did), then build.
-
-| # | Stage | Script sections | What to build |
-|---|---|---|---|
-| 1 | **Part 4: Compound machines** (`c6d`, stamp "Master Builder") | K, L, M, C4 | steps k1 to k3, the machine builder (C4: slots, ramp/pulley/winch, live Total MA, Cable, Hand travel, maskable), the crane scene, Challenge h1 to h3 (`renderShopCourse` with the builder), Check c6r18 to c6r22. k1's gallery must use pictured familiar machines (scissors, a building-site crane), not a can opener or an unpictured wheelbarrow. |
-| 2 | **Part 5: Rescue Captain Smooshy!** (`c6e`, stamp "Smooshy Saver") | N, O, P, C6, C7 | the rescue site scene (`S.scene='rescue'`), step v1 (Smooshy climbs out of the Gumdrop hatch), `renderRescueCourse` sm1 to sm3 with objective scoring (4 + 4 + 5 points, attempting all three is enough), the mission computer prediction box, the ending animation, the Part 5 Check c6r23 to c6r26 (carries D i, D ii, D iii), the **Rescue report** on the worksheet. Rescue board slot 5 lights, and the Gumdrop reaches the rim. |
-| 3 | **Extension: Real machines waste energy** (`c6f`, stamp "Colony Engineer") | P2, P3, P4, C1 | the Perfect / Real switch and efficiencies, Base camp scene, steps p5a and p5b, gb1 to gb3 with the energy-budget bar, Check c6r27 to c6r31, the sixth Rescue board slot. Optional and unticked by default on the teacher page. `calcorder` needs a highest-first option (`desc: true`) for c6r29. |
-| 4 | **Build tasks bt1 to bt4** | W | port Sparks Through Time's `buildSheet` and the teacher-page build-task rows (grep `buildSheet` in `sparks-through-time/Sparks-Through-Time.html`; never Read it whole), a Build tasks tab in Explore, live checks, results tables, build sheets in three modes (blank, student, key), Toddle files, `tests` for each passing and failing build. Add `bt4` grid to `tests/workshop_numbers.py`. |
-| 5 | **Final wiring** | C8, Q | Explore Workshop card (every machine, the builder, any load, world picker, Perfect/Real) and **Try the rescue again**; glossary terms and formulas not yet added (check `22-glossary.js` and `21-calc.js`); fun facts (Chapter 6 has no fun-fact engine, so use the last example card of a step, as Chapter 5 did); teacher page ticks (Parts 1 to 5 core, `c6f` optional); worksheets and Toddle files for `c6d`, `c6e`, `c6f` and the build tasks (`SHEETS` in `tools/make_worksheets.py`); `tests/strands.py` tags; home card and chapter overview. |
-| 6 | **Explore: "Draw what's happening now"** | Backlog item 7 | checks a student's free-body diagram against the live forces. Do it if time allows, otherwise list it as the next job. |
-
-**Count: 5 build stages (Part 4, Part 5, the Extension, build tasks, final wiring), plus the optional Explore draw task.** Do not stop after each one for Tom. Commit after each working stage, run its tests, and keep going. Send one progress message when each stage is committed (short, plain words), and deliver everything once at the end (section 4).
-
-If the context runs out mid-way, finish the stage you are on, commit, push, update this file's section 0 with what is done, and say plainly what is left.
+## 1. Next job
+**Explore "Draw what's happening now".** In Explore the student draws a free-body diagram for the live scene and the sim checks it against the live forces (reuse `FBDB` and the `fbd` question machinery in `30-fbd-builder.js` and `35-questions.js`). Start by asking Tom which Explore scenes first (Tug-of-war, Drop Zone, Helicopter, Workshop). If he asks for something else after his playtest, do that first.
 
 ## 2. Tom's feedback so far that applies to the new Parts (do not repeat these mistakes)
 - **Pacing (section A2).** Tom found the first Part 1 far too hard. One new word per card, a picture for every new idea, one familiar example, plain words ("rock to fulcrum", never "load arm"), try before naming, no prediction given away.

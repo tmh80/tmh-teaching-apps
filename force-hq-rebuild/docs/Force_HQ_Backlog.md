@@ -1,7 +1,7 @@
 # Force HQ (rebuild): backlog
 
 ## Next milestones (from the rebuild brief)
-**Now (2 Nov 2026): Part 3 of the Workshop (`c6c`, mechanical advantage and work) is built and delivered. Tom to play it** (about 32 minutes by the app's estimate). Then Part 4 (compound machines and the builder), after re-pitching it against section A2 first.
+**Now (3 Nov 2026): Chapter 6 is built in full: Parts 1 to 5, the optional Extension (`c6f`) and Build tasks bt1 to bt4, with the Explore Workshop scene. Tom to play Parts 4 and 5, the Extension and the Build tasks.** Next job: Explore "Draw what's happening now" (item 7 below).
 
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.
 2. ~~Chapter 2, Inertia~~ (built 24 Oct 2026). Tom confirmed (25 Oct): the Space Dome stays in Chapter 4 with the docking orders as its challenge.
@@ -74,3 +74,7 @@
 ## Done: Check fixes (2 Nov 2026)
 - The "Did you include…?" checklist on Explain questions stays hidden until the student presses Check or Finish, so the ticks come after the model answer is shown. This applies to every Check (`explain` in `35-questions.js`).
 - Every calculation (`num`) question in a Check has an optional "Working" box. It is saved with the answer (`s.w`), is never marked, and prints in blue in the Working box on the student's worksheet. Learn questions keep the answer box in the Do this list and the Journal's Working tab.
+
+## Done: Chapter 6 completed (3 Nov 2026)
+- Parts 4 and 5, the Extension, the Build tasks, the Explore Workshop scene (free workshop with every machine, any load in kg, a world picker and Perfect / Real; Try the rescue again), fun facts, the Rescue report, worksheets and Toddle files for every Part and build task. See the Brief's Chapter 6 build log.
+- Not built (banked): Explore "Draw what's happening now" (checks a free-body diagram against the live forces), the work triangle on the calculator, a 1-rope option in the builder.
