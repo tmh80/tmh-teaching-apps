@@ -47,6 +47,7 @@ function answerKeyText(chId) {
     const m = plain(markItem(q, i)), mm = m.match(/^Q\d+ \(([^)]*)\): ([\s\S]*)$/), tag = strandsTag(q);
     out.push(mm ? `Q${i + 1} ${QLABEL[q.type]}, ${mm[1]}${tag ? ' [' + tag + ']' : ''}: ${mm[2]}` : m);
   });
+  if (chId === 'c6e') out.push('Rescue report (not marked): The worksheet has a Rescue report (a table of the student\'s three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.');
   return out.join('\n');
 }
 

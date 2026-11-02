@@ -530,3 +530,11 @@ CHDATA.c6.challenge.missions.push(
     give: 'The winch on its own at ×6 (55.6 N, 2,000 J), ×8 or ×10 works.',
     after: 'Gummy Base One is open! Smooshy: "Thank you, Force HQ engineers. Come and visit any time. We\'ll save you a sugar crystal."' }
 );
+
+/* ---------- Fun facts: the last card of the step where the idea comes up (each one checked, 2 Nov 2026; the Archimedes fact sits in lv2) ---------- */
+const c6s = id => CHDATA.c6.steps.find(s => s.id === id);
+c6s('lv4').cards.push(CFACT('Your forearm is a class 3 lever. To hold a 1 kg bag in your hand, your biceps has to pull with several times the bag\'s weight.'));
+c6s('pl3').cards.push(CFACT('Ancient Egyptian builders probably used ramps to haul huge stone blocks up the pyramids.'));
+c6s('pl4').cards.push(CFACT('The Archimedes screw, a screw turning inside a tube, has been lifting water for over 2,000 years, and some are still in use today.', 'A car jack lets one person lift one side of a car by turning a handle, thanks to a screw with a very small pitch.'));
+c6s('k1').cards.push(CFACT('One of the world\'s strongest cranes, the Taisun in China, has lifted about 20,000 tonnes in one go.'));
+c6s('p5b').cards.push(CFACT('A clean, oiled bicycle chain is one of the most efficient machines there is: well over 90% of the work you put in reaches the back wheel.'));

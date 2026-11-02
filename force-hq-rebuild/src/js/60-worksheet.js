@@ -115,7 +115,7 @@ function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
   const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
-  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}${chId === 'c6e' ? rescueReportHTML(mode) : ''}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -158,7 +158,7 @@ function markItem(q, i) {
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>The worksheet has a Rescue report (a table of the student\'s three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 

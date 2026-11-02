@@ -339,7 +339,7 @@ function renderRescueCourse(ch, wm, host, save) {
     const m = wm[cur], s = get(m.id), c = WS.last, pred = predVal();
     const r = { E: c.E, need: c.need, capped: c.capped, rise: c.rise, ma: c.ma, parts: c.parts || 0, cable: c.cable, dist: wsR2(c.ma * WS.lift), turns: WS.mach === 'screw' ? wsR2(WS.lift * 100 / WS.pitch) : null, pred, la: WS.arm, per: WS.per, pitch: WS.pitch, bw: WS.bw, bn: WS.bn, br: WS.br };
     const oks = m.objs.map(o => !!o.ok(r)), met = oks.filter(Boolean).length, n = (s.n || 0) + 1, better = met > (s.best || 0), best = Math.max(s.best || 0, met), desc = m.desc(r);
-    const log = (s.log || []).concat([{ desc, met }]), sayAll = m.objs.map(o => o.say(r)).join(' ');
+    const log = (s.log || []).concat([{ desc, met, pred, need: c.need, ma: c.ma, E: c.E, capped: !!c.capped, oks }]), sayAll = m.objs.map(o => o.say(r)).join(' ');
     save(m, { tried: true, n, log, best, bestOks: better || !s.bestOks ? oks : s.bestOks, done: best === m.max, msg: (met === m.objs.length ? `Congratulations! ${m.win} ` : 'Not quite. ') + sayAll + ` You met ${met} of ${m.objs.length} objectives${met === m.objs.length ? '.' : '. Change your plan and try again, or move on: your best score is kept.'}` });
     $('#rsPred', card).value = ''; wsRenderControls(); paint();
     if (allTried() && !get('sm3').ended) { save(wm[wm.length - 1], { ended: true }); setTimeout(() => openEnding(wm.every(x => get(x.id).best === x.max)), 1400); }

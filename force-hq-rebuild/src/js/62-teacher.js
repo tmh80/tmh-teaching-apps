@@ -40,7 +40,7 @@ function renderTeacher() {
       $('#tAiCount').textContent = n.toLocaleString('en-GB') + ' characters'; $('#tAiLong').hidden = n <= 10000;
     }
   };
-  $('#vTeacher').oninput = update; $('#vTeacher').onchange = update;
+  $('#vTeacher').oninput = update; $('#vTeacher').onchange = e => { const sc = e.target.dataset && e.target.dataset.sec && secOf(e.target.dataset.sec); if (sc && sc.optional && e.target.checked) { const o = $(`[data-opt="${sc.id}"]`); if (o) o.checked = true; } update(); };   // an Extension is optional when first ticked
   $('#vTeacher').onclick = e => {
     const f = e.target.closest('[data-file]'); if (f) { const [s, m] = f.dataset.file.split(':'); openSheet(s, m); return; }
     if (e.target.id === 'tCopy') { const t = $('#tPrompt'); try { navigator.clipboard.writeText(t.value).then(() => $('#tCopied').textContent = 'Copied!', () => { t.select(); $('#tCopied').textContent = 'Press Ctrl+C (or ⌘+C) to copy.'; }); } catch (err) { t.select(); $('#tCopied').textContent = 'Press Ctrl+C (or ⌘+C) to copy.'; } }

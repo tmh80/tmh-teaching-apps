@@ -81,6 +81,13 @@ with sync_playwright() as p:
     box = pg.locator('#btQs .qitem[data-q=bt4q2]'); box.scroll_into_view_if_needed(); box.locator('input').first.fill('10.7'); box.locator('.qchk').first.click(); pg.wait_for_timeout(200); chk('bt4 q2: 10.7', '1 of 1 point' in box.inner_text(), box.inner_text()[:200])
     pg.screenshot(path=OUT + 'bt4.png')
     st = ev("btWorksheet('bt4','student')"); chk('bt4 sheet: weights, MAs and builds are printed', '3,920' in st or '3920' in st and '65.3' in st and 'Mars' in st and 'Winch ×6' in st, st[:200])
+    # ---- the Rescue report on the Part 5 worksheet ----
+    ev("dbSet('chal.c6e',{sm1:{tried:true,n:2,best:4,log:[{desc:'the boulder 0.80 m from the fulcrum',met:2,pred:10,need:19.2,oks:[true,false,false,false]},{desc:'the boulder 0.30 m from the fulcrum',met:4,pred:44.5,need:44.5,oks:[true,true,true,true]}]}})"); 
+    rr = ev("buildWorksheet('c6e','student')"); chk('Rescue report (student): stage 1 best try with prediction, need and ticks', 'Rescue report' in rr and '0.30 m from the fulcrum' in rr and '44.5 N' in rr and '4 of 4 points (2 tries)' in rr and '✓' in rr, rr[rr.find('Rescue report'):][:300])
+    chk('Rescue report (student): the untried stages are blank rows', 'Stage 2: Level the ship' in rr and 'Stage 3: Haul out of the crater' in rr)
+    chk('Rescue report (blank): empty boxes, no answers', 'Rescue report' in ev("buildWorksheet('c6e','blank')") and '44.5' not in ev("buildWorksheet('c6e','blank')"))
+    ky = ev("buildWorksheet('c6e','key')"); chk('Rescue report (key): passing settings for all three stages', 'Medium track (45 m), 4 ropes, winch ×10' in ky and '120 cm per turn' in ky and '0.30 m' in ky)
+    chk('c6e marking scheme and AI text say the Rescue report is not marked', 'Rescue report' in ev("schemeText('c6e')") and 'not marked' in ev("answerKeyText('c6e')"))
     # ---- the teacher page ----
     ev("dbSet('user',{name:'Teacher',teacher:true}); dbSet('unlocked',true)"); ev("show('vTeacher'); renderTeacher()"); pg.wait_for_timeout(300)
     pg.locator('[data-bt=bt1]').check(); pg.locator('[data-bt=bt4]').check(); pg.wait_for_timeout(300)
