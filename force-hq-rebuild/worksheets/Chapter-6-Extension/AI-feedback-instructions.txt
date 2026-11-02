@@ -1,0 +1,35 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+- A iii: analyse information to make scientifically supported judgments
+- D i: describe the ways in which science is applied and used to address a specific problem or issue
+- D iii: apply scientific language effectively
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch6 Extension (Real machines waste energy) worksheet (14 marks) · MYP: A ii, A iii, D i, D iii ===
+Q1 Calculate, 2 marks [A ii]: 80 % (accept 79.5 to 80.5). 1 mark for the answer, 1 for correct working: Efficiency = 2,000 ÷ 2,500 × 100% = 80%..
+Q2 Answer and reason, 2 marks [A ii]: 1 mark for the answer: It stays the same. 1 mark for the reason: The rope pulled depends only on the supporting ropes and the height lifted. Confidence is not marked.
+Q3 Work it out, then order, 5 marks [A ii, A iii]: Lever 96 %; Pulley system 80 %; Dusty ramp 75 %; Wedge 40 %; Screw jack 30 % (accept within 0.5 %). Correct order: 1st D (Lever), 2nd A (Pulley system), 3rd C (Dusty ramp), 4th E (Wedge), 5th B (Screw jack). Calculations, 3 marks: all 5 right = 3; 4 or more = 2; 2 or more = 1; otherwise 0. Order, 2 marks: 2 if every letter is right; 1 if only two neighbouring letters are swapped. Error carried forward: also give the 2 order marks if the student's order matches their own calculated values, even when one calculation was wrong.
+Q4 Spot the mistake, 2 marks [A iii]: 1 mark for the line with the mistake: line 3 (Efficiency = work in ÷ work out × 100%). 1 mark for the correction: 80 % (accept 79.5 to 80.5). Efficiency = useful work out ÷ work in × 100% = 1,200 ÷ 1,500 × 100% = 80%. An efficiency over 100% is a warning sign: no machine gives out more work than you put in.
+Q5 Explain it, 3 marks, 1 per point [A ii, D i, D iii]: The question gives the words to use (friction, energy, heat, efficiency, lubricant); each point is about using one of them correctly. • Says friction between moving parts turns some of the work in into heat (wasted energy) • Gives one sensible way to cut friction (lubricant, cleaning or covering, smoother wheels or bearings) • Gives a second, different way (or fewer moving parts or pulley wheels) Model answer: When parts of a machine rub together, friction turns some of the work put in into heat, so the useful work out is less than the work in. The colonists could oil or grease the moving parts with a lubricant, keep the sugar dust out with covers, use smoother wheels and bearings, or choose machines with fewer moving parts, such as fewer pulley wheels, as long as the mechanical advantage is still big enough.
+
+TOTALS
+Total marks for this task: 14.
+Criterion A: 14 marks available; Criterion D: 3 marks available.

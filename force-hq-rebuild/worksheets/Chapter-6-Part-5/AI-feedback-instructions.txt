@@ -1,0 +1,36 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+- A iii: analyse information to make scientifically supported judgments
+- D i: describe the ways in which science is applied and used to address a specific problem or issue
+- D ii: discuss and analyse the various implications of using science and its application in solving a specific problem or issue
+- D iii: apply scientific language effectively
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch6 Part 5 (Rescue Captain Smooshy!) worksheet (12 marks) · MYP: A ii, A iii, D i, D ii, D iii ===
+Q1 Explain it, 3 marks, 1 per point [A ii, D i, D iii]: The question gives the words to use (winch, pulley, mechanical advantage, effort); each point is about using one of them correctly. • Names the winch (wheel and axle) and the pulley block as the two simple machines • Says the mechanical advantages multiply, so a small effort moves the heavy car • Says the cable moves much further than the car (the trade-off) Model answer: The winch is a wheel and axle that winds in the cable, and the pulley block adds supporting ropes. Together they make a compound machine, so their mechanical advantages multiply. That means a small effort from the winch's motor or handle can pull the heavy car out. The cable has to be wound in much further than the car moves.
+Q2 Calculate, 2 marks [A ii]: 94,500 J (accept 94,490 to 94,510). 1 mark for the answer with its unit (J), 1 for correct working: Work = 6,300 × 15 = 94,500 J, for every machine that worked..
+Q3 Answer and reason, 2 marks [A iii]: 1 mark for the answer: No, the work stays the same, but the effort gets smaller. 1 mark for the reason: He pulls with less force over a longer distance, so force × distance stays at 94,500 J. Confidence is not marked.
+Q4 Explain it, 5 marks, 1 per point [D ii, D iii]: The question gives the words to use (mechanical advantage, distance, safety, cost); each point is about using one of them correctly. • Gives an advantage of Plan A (the track's mechanical advantage means a smaller or cheaper crane, or a smaller effort) • Gives a disadvantage of Plan A (more cable or distance, more time, or more damage to the crater) • Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground) • Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails) • Makes a choice and gives a reason for it Model answer: Plan A uses the track as a ramp, which gives mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and digging a 75 m track takes time and damages more of the crater. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.
+Rescue report (not marked): The worksheet has a Rescue report (a table of the student's three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.
+
+TOTALS
+Total marks for this task: 12.
+Criterion A: 7 marks available; Criterion D: 8 marks available.

@@ -1,0 +1,32 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+- A iii: analyse information to make scientifically supported judgments
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch6 Build task 2 (The cheapest crane) worksheet (10 marks) · MYP: A ii, A iii ===
+Q1 Explain it, 2 marks, 1 per point [A ii]: • Gives the total mechanical advantage of their cheapest machine (ramp × ropes × winch) • Works out the effort as 4,900 ÷ the mechanical advantage, and it matches the sim Model answer: 15 m ramp (MA 5) with winch ×10: total MA = 50, effort = 4,900 ÷ 50 = 98 N.
+Q2 Explain it, 2 marks, 1 per point [A iii]: The question gives the words to use (mechanical advantage, cost, credits); each point is about using one of them correctly. • Compares mechanical advantage with price (how much mechanical advantage each credit buys) • Says which parts were good value (the long ramp and the winch) and which were expensive (each pulley rope costs 15 credits) Model answer: The long ramp gives a mechanical advantage of 5 for 40 credits, and the winch ×10 adds 10 more for 50 credits. Pulley blocks cost 15 credits for every rope, so they were the expensive way to get mechanical advantage here.
+Build marks (3 marks): Build meets all three checks. The checklist is all ticked and the table shows a build with "Yes".
+Build marks (2 marks): Results table compares at least three builds with their costs. Three or more builds with costs are in the table (1 mark for two).
+Build marks (1 mark): Found the cheapest build (90 credits). The table or the picture shows a 90-credit build that works.
+
+TOTALS
+Total marks for this task: 10.
+Criterion A: 4 marks available.

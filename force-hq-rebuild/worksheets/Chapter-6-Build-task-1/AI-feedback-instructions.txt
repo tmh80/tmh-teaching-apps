@@ -1,0 +1,32 @@
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- A ii: apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations
+- A iii: analyse information to make scientifically supported judgments
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch6 Build task 1 (Lift 200 kg with less than 300 N) worksheet (11 marks) · MYP: A ii, A iii ===
+Q1 Explain it, 2 marks, 1 per point [A ii]: • Gives the total mechanical advantage of their machine (the winch multiplied by the supporting ropes) • Works out the effort as 1,960 ÷ the mechanical advantage, and it matches the effort in the sim Model answer: Winch ×4 and 2 supporting ropes: total mechanical advantage = 4 × 2 = 8, so the effort is 1,960 ÷ 8 = 245 N.
+Q2 Calculate, 2 marks [A ii]: 7840 J (accept 7839 to 7841). 1 mark for the answer with its unit (J), 1 for correct working: Work = force × distance = 1,960 N × 4 m = 7,840 J.
+Q3 Explain it, 2 marks, 1 per point [A iii]: The question gives the words to use (mechanical advantage, hand travel, cable); each point is about using one of them correctly. • Says that hand travel = mechanical advantage × the 4 m lift, so a bigger mechanical advantage means a longer hand travel • Uses a limit: the 40 m of hand travel allows a mechanical advantage of 10 at most, or 16 m of cable allows 4 supporting ropes at most Model answer: Hand travel = mechanical advantage × 4 m, so a mechanical advantage over 10 would need more than 40 m of hand travel. The cable limit also means at most 4 supporting ropes.
+Build marks (3 marks): Build meets all three checks. The checklist on the sheet is all ticked and the table shows a build with "Yes" in the last column.
+Build marks (2 marks): Results table has at least two different builds. Two or more different builds are in the table (1 mark for one build).
+
+TOTALS
+Total marks for this task: 11.
+Criterion A: 6 marks available.

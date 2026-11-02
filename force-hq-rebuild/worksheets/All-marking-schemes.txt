@@ -315,3 +315,166 @@ Q4 (2 marks): 60 N (accept 59.5 to 60.5). 1 mark for the answer with its unit (N
 Q5 (2 marks, 1 per choice): A pulley system with 5 supporting ropes lifts a 650 N load 3 m. The effort is [130 N] and the rope pulled is [15 m].. 1 mark for each right choice. MYP: A ii
 Q6 (4 marks, 1 per point): The question gives the words to use (mechanical advantage, effort, supporting ropes, distance, work); each point is about using one of them correctly. • Works out the mechanical advantage needed (600 ÷ 60 = 10) • Says the supporting ropes share the load, so the effort is smaller • Says he must pull a longer distance of rope (10 times the height, 20 m) • Says the work stays the same (force × distance) Model answer: He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank's weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J. MYP: A ii
 Total: 14 marks.
+
+MYP strands on this sheet: A i, A ii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Part 4: Compound machines". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 17 marks.
+
+Mark scheme
+Q1 (8 marks, 1 per item): Simple machine: A crowbar, A ramp, An axe, A single flagpole pulley. Compound machine: A pair of scissors, A building-site crane, A bicycle, A car jack with a handle. MYP: A i
+Q2 (2 marks): 150 N (accept 149.5 to 150.5). 1 mark for the answer with its unit (N), 1 for correct working: Total mechanical advantage = 6 × 3 = 18, so the effort is 2,700 ÷ 18 = 150 N.. MYP: A ii
+Q3 (2 marks): 1 mark for the answer: 25. 1 mark for the reason: The second machine multiplies a force the first machine has already made bigger. Confidence is not marked. MYP: A ii
+Q4 (2 marks): The correct order is 1st D (The handle turns the winch's axle), 2nd A (The axle winds in the cable with a bigger force), 3rd B (The cable pulls on the pulley block), 4th C (The supporting ropes share the load and lift it). 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0. MYP: A i
+Q5 (3 marks, 1 per point): The question gives the words to use (compound machine, mechanical advantage, multiply, distance); each point is about using one of them correctly. • Says the crane is a compound machine (two simple machines working together) • Says the total mechanical advantage is the two multiplied, so the effort is much smaller than the load • Says the hand must move much further than the beam rises (mechanical advantage × the load's distance) Model answer: The winch and the pulley system are two simple machines working together, so the crane is a compound machine. The winch makes the effort bigger, then the pulleys make it bigger again, so the total mechanical advantage is the two mechanical advantages multiplied together. That makes the effort much smaller than the beam's weight. The catch is distance: the operator's hand moves the total mechanical advantage times the height the beam rises, so the handle has to turn many times. MYP: A ii
+Total: 17 marks.
+
+MYP strands on this sheet: A ii, A iii, D i, D ii, D iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Part 5: Rescue Captain Smooshy!". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 12 marks.
+
+Mark scheme
+Q1 (3 marks, 1 per point): The question gives the words to use (winch, pulley, mechanical advantage, effort); each point is about using one of them correctly. • Names the winch (wheel and axle) and the pulley block as the two simple machines • Says the mechanical advantages multiply, so a small effort moves the heavy car • Says the cable moves much further than the car (the trade-off) Model answer: The winch is a wheel and axle that winds in the cable, and the pulley block adds supporting ropes. Together they make a compound machine, so their mechanical advantages multiply. That means a small effort from the winch's motor or handle can pull the heavy car out. The cable has to be wound in much further than the car moves. MYP: A ii, D i, D iii
+Q2 (2 marks): 94,500 J (accept 94,490 to 94,510). 1 mark for the answer with its unit (J), 1 for correct working: Work = 6,300 × 15 = 94,500 J, for every machine that worked.. MYP: A ii
+Q3 (2 marks): 1 mark for the answer: No, the work stays the same, but the effort gets smaller. 1 mark for the reason: He pulls with less force over a longer distance, so force × distance stays at 94,500 J. Confidence is not marked. MYP: A iii
+Q4 (5 marks, 1 per point): The question gives the words to use (mechanical advantage, distance, safety, cost); each point is about using one of them correctly. • Gives an advantage of Plan A (the track's mechanical advantage means a smaller or cheaper crane, or a smaller effort) • Gives a disadvantage of Plan A (more cable or distance, more time, or more damage to the crater) • Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground) • Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails) • Makes a choice and gives a reason for it Model answer: Plan A uses the track as a ramp, which gives mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and digging a 75 m track takes time and damages more of the crater. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer. MYP: D ii, D iii
+The worksheet has a Rescue report (a table of the student's three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.
+Total: 12 marks.
+
+MYP strands on this sheet: A ii, A iii, D i, D iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Extension: Real machines waste energy". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 14 marks.
+
+Mark scheme
+Q1 (2 marks): 80 % (accept 79.5 to 80.5). 1 mark for the answer, 1 for correct working: Efficiency = 2,000 ÷ 2,500 × 100% = 80%.. MYP: A ii
+Q2 (2 marks): 1 mark for the answer: It stays the same. 1 mark for the reason: The rope pulled depends only on the supporting ropes and the height lifted. Confidence is not marked. MYP: A ii
+Q3 (5 marks): Lever 96 %; Pulley system 80 %; Dusty ramp 75 %; Wedge 40 %; Screw jack 30 % (accept within 0.5 %). Correct order: 1st D (Lever), 2nd A (Pulley system), 3rd C (Dusty ramp), 4th E (Wedge), 5th B (Screw jack). Calculations, 3 marks: all 5 right = 3; 4 or more = 2; 2 or more = 1; otherwise 0. Order, 2 marks: 2 if every letter is right; 1 if only two neighbouring letters are swapped. Error carried forward: also give the 2 order marks if the student's order matches their own calculated values, even when one calculation was wrong. MYP: A ii, A iii
+Q4 (2 marks): 1 mark for the line with the mistake: line 3 (Efficiency = work in ÷ work out × 100%). 1 mark for the correction: 80 % (accept 79.5 to 80.5). Efficiency = useful work out ÷ work in × 100% = 1,200 ÷ 1,500 × 100% = 80%. An efficiency over 100% is a warning sign: no machine gives out more work than you put in. MYP: A iii
+Q5 (3 marks, 1 per point): The question gives the words to use (friction, energy, heat, efficiency, lubricant); each point is about using one of them correctly. • Says friction between moving parts turns some of the work in into heat (wasted energy) • Gives one sensible way to cut friction (lubricant, cleaning or covering, smoother wheels or bearings) • Gives a second, different way (or fewer moving parts or pulley wheels) Model answer: When parts of a machine rub together, friction turns some of the work put in into heat, so the useful work out is less than the work in. The colonists could oil or grease the moving parts with a lubricant, keep the sugar dust out with covers, use smoother wheels and bearings, or choose machines with fewer moving parts, such as fewer pulley wheels, as long as the mechanical advantage is still big enough. MYP: A ii, D i, D iii
+Total: 14 marks.
+
+MYP strands on this sheet: A ii, A iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Build task 1: Lift 200 kg with less than 300 N". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 11 marks.
+
+Mark scheme
+Q1 (2 marks, 1 per point): • Gives the total mechanical advantage of their machine (the winch multiplied by the supporting ropes) • Works out the effort as 1,960 ÷ the mechanical advantage, and it matches the effort in the sim Model answer: Winch ×4 and 2 supporting ropes: total mechanical advantage = 4 × 2 = 8, so the effort is 1,960 ÷ 8 = 245 N. MYP: A ii
+Q2 (2 marks): 7840 J (accept 7839 to 7841). 1 mark for the answer with its unit (J), 1 for correct working: Work = force × distance = 1,960 N × 4 m = 7,840 J. MYP: A ii
+Q3 (2 marks, 1 per point): The question gives the words to use (mechanical advantage, hand travel, cable); each point is about using one of them correctly. • Says that hand travel = mechanical advantage × the 4 m lift, so a bigger mechanical advantage means a longer hand travel • Uses a limit: the 40 m of hand travel allows a mechanical advantage of 10 at most, or 16 m of cable allows 4 supporting ropes at most Model answer: Hand travel = mechanical advantage × 4 m, so a mechanical advantage over 10 would need more than 40 m of hand travel. The cable limit also means at most 4 supporting ropes. MYP: A iii
+Build marks (3 marks): Build meets all three checks. The checklist on the sheet is all ticked and the table shows a build with "Yes" in the last column. 
+Build marks (2 marks): Results table has at least two different builds. Two or more different builds are in the table (1 mark for one build). 
+Total: 11 marks.
+
+MYP strands on this sheet: A ii, A iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Build task 2: The cheapest crane". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 10 marks.
+
+Mark scheme
+Q1 (2 marks, 1 per point): • Gives the total mechanical advantage of their cheapest machine (ramp × ropes × winch) • Works out the effort as 4,900 ÷ the mechanical advantage, and it matches the sim Model answer: 15 m ramp (MA 5) with winch ×10: total MA = 50, effort = 4,900 ÷ 50 = 98 N. MYP: A ii
+Q2 (2 marks, 1 per point): The question gives the words to use (mechanical advantage, cost, credits); each point is about using one of them correctly. • Compares mechanical advantage with price (how much mechanical advantage each credit buys) • Says which parts were good value (the long ramp and the winch) and which were expensive (each pulley rope costs 15 credits) Model answer: The long ramp gives a mechanical advantage of 5 for 40 credits, and the winch ×10 adds 10 more for 50 credits. Pulley blocks cost 15 credits for every rope, so they were the expensive way to get mechanical advantage here. MYP: A iii
+Build marks (3 marks): Build meets all three checks. The checklist is all ticked and the table shows a build with "Yes". 
+Build marks (2 marks): Results table compares at least three builds with their costs. Three or more builds with costs are in the table (1 mark for two). 
+Build marks (1 mark): Found the cheapest build (90 credits). The table or the picture shows a 90-credit build that works. 
+Total: 10 marks.
+
+MYP strands on this sheet: A ii, A iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Build task 3: Same MA, three ways". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 9 marks.
+
+Mark scheme
+Q1 (2 marks, 1 per point): The question gives the words to use (mechanical advantage, effort, hand travel); each point is about using one of them correctly. • Says the effort (49 N) was the same for all three machines, and so was the hand travel (48 m) • Explains it using the mechanical advantage: effort = load ÷ MA and hand travel = MA × 2 m, and the MA was 24 each time Model answer: They were the same every time: 49 N and 48 m. The effort is the load ÷ the mechanical advantage and the hand travel is the mechanical advantage × 2 m, and the mechanical advantage was 24 each time. Only the cable changed. MYP: A iii
+Q2 (2 marks, 1 per point): • Says cable = the number of supporting ropes × the route length • Says builds with more ropes or a longer ramp need more cable, even with the same mechanical advantage Model answer: Cable = supporting ropes × route length, so builds with more ropes or a longer ramp need more cable, even when the mechanical advantage is the same. MYP: A ii
+Build marks (3 marks): Three different builds with MA 24. The table shows three different builds, each with a total MA of 24 (1 mark for each build). 
+Build marks (1 mark): One build uses three parts. One of the three builds has a winch, a pulley block and a ramp. 
+Build marks (1 mark): Results table complete. The table has all three builds with effort, cable and hand travel filled in. 
+Total: 9 marks.
+
+MYP strands on this sheet: A ii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 6 Build task 4: Lift it on three worlds". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 10 marks.
+
+Mark scheme
+Q1 (2 marks, 1 per point): The question gives the words to use (weight, mass, gravity); each point is about using one of them correctly. • Says Earth needed the biggest mechanical advantage • Explains with weight = mass × g: the mass is the same on every world but Earth's g is the biggest, so the rover weighs the most there Model answer: Earth. The rover's mass is 400 kg everywhere, but Earth's g is the biggest, so its weight is 400 × 9.8 = 3,920 N, and it needs a mechanical advantage of at least 3,920 ÷ 60 = 65.3. MYP: A ii
+Q2 (2 marks): 10.7  (accept 10.6 to 10.8). 1 mark for the answer, 1 for correct working: Weight = 400 × 1.6 = 640 N, so the mechanical advantage must be at least 640 ÷ 60 = 10.7. MYP: A ii
+Build marks (3 marks): Working build on all three worlds. The table shows a build on each world with an effort of 60 N or less (1 mark for each world). 
+Build marks (3 marks): Weights and MAs needed typed correctly in the table. Weights 3,920 N, 1,480 N and 640 N, and MAs needed 65.3, 24.7 and 10.7 (accept within 0.2). 1 mark for each world with both right. 
+Total: 10 marks.
