@@ -65,3 +65,12 @@
 - `picLabel` and `wsLabel` put labels in white boxes. The Workshop rulers share one scale, with a zoomed ruler for short bars.
 - Pulley step pl1 explains why students count supporting ropes.
 - Open: Tom to play Part 2 pl1 and the Finish pop-up with a class.
+
+## Jobs to do after the chapters are finished (Tom, 2 Nov 2026)
+1. **Open-ended Workshop.** Once Chapter 6 is done, the Workshop home card should become an open-ended workshop: a place to take on challenges that save different things, not only Captain Smooshy. Not needed now. The Chapter 6 card wording stays as it is until then.
+2. **Vocabulary and flashcards.** The Journal's Vocab tab exists (`DB.vocab`). The flashcards with spaced repetition are still banked, not built (see Banked ideas). Review how the two fit together.
+3. **CER paragraph writing review (needs Opus).** Review how Force HQ introduces claim, evidence and reasoning (CER) paragraph writing and builds it up slowly across the chapters: where students first meet it, how the scaffolds fade, and how the Explain questions and checklists support it. Tom needs Opus's help for this specifically, so plan it as an Opus job (a review and a proposed sequence of scaffolds), then Sonnet builds from it.
+
+## Done: Check fixes (2 Nov 2026)
+- The "Did you include…?" checklist on Explain questions stays hidden until the student presses Check or Finish, so the ticks come after the model answer is shown. This applies to every Check (`explain` in `35-questions.js`).
+- Every calculation (`num`) question in a Check has an optional "Working" box. It is saved with the answer (`s.w`), is never marked, and prints in blue in the Working box on the student's worksheet. Learn questions keep the answer box in the Do this list and the Journal's Working tab.

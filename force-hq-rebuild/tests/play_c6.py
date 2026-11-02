@@ -145,7 +145,8 @@ with sync_playwright() as p:
     R(2).locator('.qchk').click(); pg.wait_for_timeout(100)
     R(3).scroll_into_view_if_needed(); R(3).locator('[data-o="1"]').first.click(); pg.wait_for_timeout(100)
     R(4).scroll_into_view_if_needed(); R(4).locator('.fixline').nth(3).click(); pg.wait_for_timeout(100); R(4).locator('.rF [data-o="0"]').click(); pg.wait_for_timeout(120)
-    R(5).scroll_into_view_if_needed(); R(5).locator('.explain, textarea').first.fill('He should put the fulcrum close to the boulder so his side of the bar is long. Then the effort is smaller than the load. The catch is his hand moves a long distance and the boulder only rises a little.'); R(5).locator('.qchk').click(); pg.wait_for_timeout(150)
+    R(5).scroll_into_view_if_needed(); R(5).locator('.explain, textarea').first.fill('He should put the fulcrum close to the boulder so his side of the bar is long. Then the effort is smaller than the load. The catch is his hand moves a long distance and the boulder only rises a little.'); (R(5).locator('.qchk').click() if R(5).locator('.qchk').is_visible() else None); pg.wait_for_timeout(150)
+    (R(5).locator('.qchk').click() if R(5).locator('.qchk').is_visible() else None); pg.wait_for_timeout(200)
     for k in (0, 1, 2):
         if pg.locator('#modal').is_visible(): pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
         R(5).locator(f'[data-ck="{k}"]').check(); pg.wait_for_timeout(150)
@@ -218,7 +219,8 @@ with sync_playwright() as p:
     R(10).scroll_into_view_if_needed(); R(10).locator('[data-o="0"]').click(); R(10).locator('.rR [data-r="0"], [data-r="0"]').first.click(); pg.wait_for_timeout(100)
     if R(10).locator('.surebtn').count(): R(10).locator('.surebtn').first.click()
     R(10).locator('.qchk').click(); pg.wait_for_timeout(100)
-    R(11).scroll_into_view_if_needed(); R(11).locator('.explain, textarea').first.fill('A wedge is two ramps back to back. The sloping sides push the halves apart with a bigger force than his push. A long thin wedge needs a smaller push, but he has to push it further.'); R(11).locator('.qchk').click(); pg.wait_for_timeout(150)
+    R(11).scroll_into_view_if_needed(); R(11).locator('.explain, textarea').first.fill('A wedge is two ramps back to back. The sloping sides push the halves apart with a bigger force than his push. A long thin wedge needs a smaller push, but he has to push it further.'); (R(11).locator('.qchk').click() if R(11).locator('.qchk').is_visible() else None); pg.wait_for_timeout(150)
+    (R(11).locator('.qchk').click() if R(11).locator('.qchk').is_visible() else None); pg.wait_for_timeout(200)
     for k in (0, 1, 2):
         if pg.locator('#modal').is_visible(): pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
         R(11).locator(f'[data-ck="{k}"]').check(); pg.wait_for_timeout(150)
@@ -323,6 +325,9 @@ with sync_playwright() as p:
         R(i).scroll_into_view_if_needed(); R(i).locator('.ansin').fill(str(v))
         if unit: R(i).locator('.unitsel').select_option(unit)
         R(i).locator('.qchk').click(); pg.wait_for_timeout(100)
+    chk('check 3: c6r12 has an optional Working box', R(12).locator('.numworkin').count() == 1)
+    chk('check 3: the explain checklist is hidden until Check', not R(17).locator('.exck').is_visible())
+    R(12).locator('.numworkin').fill('4500 divided by 25')
     rnum(12, 25)                                  # wrong on purpose: 250 expected
     R(13).scroll_into_view_if_needed(); R(13).locator('.fixline').nth(3).click(); pg.wait_for_timeout(100)   # wrong line on purpose
     R(13).locator('.fix2 .ansin').fill('1800'); R(13).locator('.fix2 .unitsel').select_option('J'); R(13).locator('.qchk').click(); pg.wait_for_timeout(120)
@@ -331,7 +336,8 @@ with sync_playwright() as p:
     R(14).locator('.qchk').click(); pg.wait_for_timeout(100)
     rnum(15, 60, 'N')
     pick(None, 0, 2, R=R(16))
-    R(17).scroll_into_view_if_needed(); R(17).locator('.explain, textarea').first.fill('He needs a mechanical advantage of 600 divided by 60 which is 10. The supporting ropes share the load so the effort is smaller. The catch is he has to pull 20 m of rope for a 2 m lift, a longer distance, and the work stays the same.'); R(17).locator('.qchk').click(); pg.wait_for_timeout(150)
+    R(17).scroll_into_view_if_needed(); R(17).locator('.explain, textarea').first.fill('He needs a mechanical advantage of 600 divided by 60 which is 10. The supporting ropes share the load so the effort is smaller. The catch is he has to pull 20 m of rope for a 2 m lift, a longer distance, and the work stays the same.'); (R(17).locator('.qchk').click() if R(17).locator('.qchk').is_visible() else None); pg.wait_for_timeout(150)
+    (R(17).locator('.qchk').click() if R(17).locator('.qchk').is_visible() else None); pg.wait_for_timeout(200)
     for k in (0, 1, 2, 3):
         if pg.locator('#modal').is_visible(): pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
         R(17).locator(f'[data-ck="{k}"]').check(); pg.wait_for_timeout(150)
@@ -340,6 +346,7 @@ with sync_playwright() as p:
     print('check 3 state', done)
     chk('check 3: every question answered', len(done) == 6 and all(v[0] for v in done.values()), done)
     chk('check 3: the wrong answers are marked wrong and the right ones right', done.get('c6r12', [0, 1])[1] is False and done.get('c6r13', [0, 1])[1] is False and all(done[k][1] for k in ('c6r14', 'c6r15', 'c6r16')), done)
+    chk('check 3: the working is saved and prints on the student worksheet', '4500 divided by 25' in pg.evaluate("__fhq.buildWorksheet('c6c','student')"))
     chk('check 3: c6r12 explains the right answer', '250' in R(12).inner_text(), R(12).inner_text()[:200])
     if pg.locator('#modal').is_visible(): pg.keyboard.press('Escape'); pg.wait_for_timeout(200)
     res = finish_check(pg); chk('Part 3: Finish shows the score and the stamp', 'You scored' in res and 'Stamp earned' in res, res[:80])

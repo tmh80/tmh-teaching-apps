@@ -133,7 +133,7 @@ with sync_playwright() as p:
         for t in ['Weight', 'Normal force', 'Tension']: q('r6').locator('label', has_text=t).first.locator('input').check()   # three of the four: partly right
         q('r12').locator('button[data-o]', has_text='1 cm').click()
         q('r11').locator('textarea').fill('Friction acts against the pull on concrete and balances it so the crate stays still. The air floor has no friction.')
-        if tick_explain:
+        if False:   # the checklist is hidden until Check or Finish
             for k in [0, 1, 3]: q('r11').locator(f'[data-ck="{k}"]').check()
         if not blank_fbd:
             svg = q('r8').locator('.board svg'); svg.scroll_into_view_if_needed(); bb = svg.bounding_box(); k = bb['width'] / 520
@@ -145,13 +145,16 @@ with sync_playwright() as p:
             draw(0, 140, 'weight', 490); draw(0, -140, 'normal', 490); draw(-60, 0, 'pull', 130)    # three of the five arrows: partly right
     ctx, pg = fresh('c1x'); answer_c1x(pg)
     ex = pg.locator('#rq-r11')
-    chk('c1x explain: the checklist is on screen while writing, before any Check', ex.locator('[data-ck]').count() == 4 and ex.locator('.model').count() == 0 and 'before you finish, tick what you included' in ex.inner_text().lower())
-    chk('c1x explain: ticks are saved as a draft (not done)', json.loads(ev(pg, "JSON.stringify(dbGet('review.c1x.r11',{}))")).get('done') is None and json.loads(ev(pg, "JSON.stringify(dbGet('review.c1x.r11',{}))"))['v']['ticks'] == [0, 1, 3])
+    chk('c1x explain: the checklist and model answer stay hidden until Check or Finish', ex.locator('[data-ck]').count() == 4 and not ex.locator('.exck').is_visible() and ex.locator('.model').count() == 0 and 'did you include' not in ex.inner_text().lower(), (ex.locator('[data-ck]').count(), ex.locator('.exck').is_visible(), ex.inner_text()[-200:]))
+    chk('c1x explain: nothing is saved as done yet', json.loads(ev(pg, "JSON.stringify(dbGet('review.c1x.r11',{}))")).get('done') is None)
     pg.screenshot(path=OUT + 'c1x_before_finish.png', full_page=True)
     txt = finish_check(pg)
     chk('c1x: results pop-up after Finish', 'You scored' in txt, txt[:100])
     st = json.loads(ev(pg, "JSON.stringify(dbGet('review.c1x.r11',{}))"))
-    chk('c1x explain: scored by its ticks (3 of 4)', st.get('done') and st.get('score') == 3, st)
+    chk('c1x explain: a tick-free explain scores 0 on Finish', st.get('done') and st.get('score') == 0, st)
+    chk('c1x explain: the checklist appears after Finish', pg.locator('#rq-r11 .exck').is_visible())
+    for k in [0, 1, 3]: pg.locator(f'#rq-r11 [data-ck="{k}"]').check(); pg.wait_for_timeout(120)
+    chk('c1x explain: scored by its ticks (3 of 4)', json.loads(ev(pg, "JSON.stringify(dbGet('review.c1x.r11',{}))")).get('score') == 3)
     chk('c1x explain: the model answer is shown after Finish', pg.locator('#rq-r11 .model').count() == 1)
     chk('c1x explain: the heading changes after checking', 'did you include' in pg.locator('#rq-r11').inner_text().lower() and 'before you finish' not in pg.locator('#rq-r11').inner_text().lower())
     sc = scores(pg, 'c1x'); chk('c1x: tick, num, mcq, fbd and explain all marked', all(sc[k] is not None for k in sc) and sc['r4'] == 1 and sc['r6'] == 1 and sc['r12'] == 1 and 0 < sc['r8'] < 6, sc)

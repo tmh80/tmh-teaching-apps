@@ -63,7 +63,7 @@ const QT = {
     html(q, s, api) {
       const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length, D = api && api.draft ? api.draft.get() || {} : {}, dk = api && api.draft ? ` data-draft="${api.draft.key}"` : '';
       const v0 = s && s.v != null ? s.v : D.v || '', u0 = s && s.u ? s.u : D.u || '';
-      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${api && api.draft ? '' : `<label class="numwork"><span class="lbl">Working (optional, not marked)</span><textarea class="numworkin" rows="2" aria-label="Your working" placeholder="Show how you worked it out, for example 4,500 ÷ 18 = 250">${esc((s && s.w) || '')}</textarea></label>`}${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
     },
     bind(el, q, api) {
       const U = q.units && q.units.length;
@@ -73,7 +73,7 @@ const QT = {
         if (q.need && !q.need() && !au) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
         const ans = q.live ? q.live() : q.ans, numOk = !isNaN(v) && near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
-        api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u }); };
+        api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u, w: ($('.numworkin', el) || {}).value || '' }); };
       api.reg({ blank: () => !$('.ansin', el).value.trim(), check: go });
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
       if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
@@ -139,16 +139,15 @@ const QT = {
     show(q, v) { return (v || []).map(i => '☑ ' + q.opts[i]).join('<br>') || '–'; }, model(q) { return q.a.map(i => '☑ ' + q.opts[i]).join('<br>'); }
   },
   explain: {
-    /* The "Did you include…?" checklist is on screen from the start, so a student can tick as they write. Ticks are saved with the draft.
-       Check (or Finish) shows the model answer and scores one point per tick; ticks can still change afterwards. */
+    /* The "Did you include…?" checklist stays hidden until the student has pressed Check (or Finish), which shows the model answer and the checklist together; one point per tick, and ticks can still change afterwards. */
     html(q, s) {
       const v = (s && s.v) || {}, ticks = v.ticks || [], done = !!(s && s.done);
-      return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck"><div class="lbl exckhd">${done ? 'Did you include…? Tick what you included. You get a point for each one.' : 'Before you finish, tick what you included.'}</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
+      return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck" ${done ? '' : 'hidden'}><div class="lbl exckhd">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
     },
     bind(el, q, api) {
       const ticksNow = () => $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck), textNow = () => $('.explain', el).value;
       const draft = () => { const cur = api.state() || {}; cur.v = { text: textNow(), ticks: ticksNow() }; api.setRaw(cur); };
-      const reveal = () => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p></div>`; $('.exckhd', el).textContent = 'Did you include…? Tick what you included. You get a point for each one.'; $('.qchk', el).hidden = true; };
+      const reveal = () => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${q.model}</p></div>`; $('.exck', el).hidden = false; $('.qchk', el).hidden = true; };
       const go = () => { const t = textNow().trim(); if (!t && !api.auto) { api.say('Write your answer first, then compare it with the model answer.', 'no'); return; }
         const tk = ticksNow(); reveal(); api.answer({ text: t, ticks: tk }, null, 'Now compare your answer with the model answer. You can still change your ticks.', { score: tk.length }); };
       api.reg({ blank: () => !textNow().trim() && !ticksNow().length, check: go, reveal, blankV: { text: '', ticks: [] } });
@@ -204,7 +203,7 @@ function renderQuestion(host, q, ctx) {
       const st = dbGet(path, null) || { tries: 0 }; st.v = v;
       if (!x.quiet) st.tries = (st.tries || 0) + 1;
       if (ok != null) st.ok = ok; if (ok && st.tries === 1) st.first = true;
-      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (x.u != null) st.u = x.u; if (x.sure != null) st.sure = x.sure; if (msg) st.msg = msg;
+      st.max = simMax(q); if (x.score != null) st.score = x.score; if (x.ans != null) st.ans = x.ans; if (x.u != null) st.u = x.u; if (x.w != null) st.w = x.w; if (x.sure != null) st.sure = x.sure; if (msg) st.msg = msg;
       const wasDone = st.done; st.done = true;
       dbSet(path, st);
       if (msg) api.say(msg, ok ? 'ok' : ok === false ? (st.score ? 'hint' : 'no') : 'hint');

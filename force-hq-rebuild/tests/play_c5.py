@@ -174,8 +174,10 @@ with sync_playwright() as p:
     R('c5r6').scroll_into_view_if_needed(); R('c5r6').locator('.fixline').nth(4).click(); pg.wait_for_timeout(100); R('c5r6').locator('.rF [data-o="0"]').click(); pg.wait_for_timeout(120)
     chk('c5r6: fix 2 of 2', rpts('c5r6') == '2 of 2 points', (rpts('c5r6'), R('c5r6').locator('.fb').inner_text()))
     # c5r7 explain
-    R('c5r7').scroll_into_view_if_needed(); R('c5r7').locator('.explain').fill('At first the weight is bigger than the air resistance so the skydiver speeds up. The air resistance grows as they go faster. When it equals the weight the forces are balanced, the resultant force is zero and the velocity is steady.'); R('c5r7').locator('.qchk').click(); pg.wait_for_timeout(300)
+    R('c5r7').scroll_into_view_if_needed(); R('c5r7').locator('.explain').fill('At first the weight is bigger than the air resistance so the skydiver speeds up. The air resistance grows as they go faster. When it equals the weight the forces are balanced, the resultant force is zero and the velocity is steady.'); (R('c5r7').locator('.qchk').click() if R('c5r7').locator('.qchk').is_visible() else None); pg.wait_for_timeout(300)
     # finishing the last question earns the stamp, which opens a pop-up; close it before ticking the self-check boxes
+    if pg.locator('#modal [data-close]').count() and not pg.evaluate("document.querySelector('#modal').hidden"): pg.locator('#modal [data-close]').last.click(); pg.wait_for_timeout(200)
+    (R('c5r7').locator('.qchk').click() if R('c5r7').locator('.qchk').is_visible() else None); pg.wait_for_timeout(200)
     if pg.locator('#modal [data-close]').count() and not pg.evaluate("document.querySelector('#modal').hidden"): pg.locator('#modal [data-close]').last.click(); pg.wait_for_timeout(200)
     for i in range(3): R('c5r7').locator(f'[data-ck="{i}"]').check()
     pg.wait_for_timeout(100); chk('c5r7: explain 3 of 3', '3 of 3' in rpts('c5r7'), rpts('c5r7'))

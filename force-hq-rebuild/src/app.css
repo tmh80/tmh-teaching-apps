@@ -820,3 +820,4 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .pic text{paint-order:stroke}
 .txlist{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px}
 .rlog{margin-top:6px;font-size:14px;font-weight:700;color:var(--muted)}
+.numwork{display:flex;flex-direction:column;gap:4px;margin-top:8px}.numwork .lbl{color:var(--muted)}.numworkin{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;background:var(--panel);color:var(--ink);resize:vertical}
