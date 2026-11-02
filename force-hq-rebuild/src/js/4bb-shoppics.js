@@ -277,3 +277,19 @@ function picCraterPlan() {
   b += picLabs([picLabel(258, 186, 330, 214, ['Stage 1', 'lever the boulder off'], PIC_C.E, { W }), picLabel(205, 176, 120, 214, ['Stage 2', 'jack the ship level'], PIC_C.L, { W }), picLabel(130, 150, 76, 100, ['Stage 3', 'haul it out'], PIC_C.F, { W }), picNote(372, 108, ['15 m', 'crater wall'], PIC_C.ink, { all: true, W })]);
   return picWrap(W, 236, 'A cross-section of the crater: the Gumdrop tipped at the bottom with a boulder on its leg, and three stages: lever the boulder off, jack the ship level, and haul it up the 15 m wall', b, '', 420);
 }
+
+/* ---------- Extension pictures: friction, wasted energy and efficiency ---------- */
+function picEff(o) {
+  o = o || {}; const W = 420;
+  let b = `<rect x="150" y="56" width="120" height="64" rx="14" fill="${PIC_C.soft}" stroke="${PIC_C.F}" stroke-width="2"/>` + picTxt(210, 94, 'real machine', PIC_C.F, 14) + picArrow(70, 88, 144, 88, PIC_C.E, 5) + picArrow(276, 88, 350, 88, PIC_C.L, 5) + picArrow(210, 52, 210, 18, '#d6402c', 3);
+  b += picLabs([picNote(60, 128, ['Work in', o.calc ? '1,500 J' : 'what you put in'], PIC_C.E, { all: true, W }), picNote(364, 128, ['Useful work out', o.calc ? '1,200 J' : 'what the load gets'], PIC_C.L, { all: true, W }), picNote(210, 150, ['Wasted energy: friction turns it into heat', o.calc ? '1,500 − 1,200 = 300 J' : ''].filter(Boolean), PIC_C.E, { W })]);
+  return picWrap(W, 184, 'A real machine: work goes in, most of it comes out as useful work, and the rest is wasted as heat because of friction', b, '', 420);
+}
+function picLube() {
+  const W = 400;
+  let b = `<rect x="60" y="80" width="110" height="26" rx="6" fill="${PIC_C.steel}"/><rect x="60" y="112" width="110" height="26" rx="6" fill="${PIC_C.F}"/><path d="M85 108 Q115 112 145 108" stroke="#e3a51c" stroke-width="5" fill="none" stroke-linecap="round"/>`;
+  b += `<path d="M268 60 l34 -18 l8 16 l-30 14 z" fill="${PIC_C.steel}"/><rect x="236" y="70" width="58" height="34" rx="6" fill="#e3a51c"/><path d="M262 106 q-2 14 0 20" stroke="#e3a51c" stroke-width="4" fill="none" stroke-linecap="round"/><circle cx="262" cy="130" r="4" fill="#e3a51c"/>`;
+  b += picArrow(70, 160, 160, 160, PIC_C.E, 3);
+  b += picLabs([picLabel(115, 109, 100, 40, ['Lubricant', 'a thin layer of oil or grease'], '#b07d00', { W }), picNote(115, 186, ['Moving parts slide past each other', 'with less friction'], PIC_C.E, { W }), picNote(300, 164, ['an oil can'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, 206, 'A layer of oil between two metal parts rubbing past each other, and an oil can, show how a lubricant reduces friction', b, '', 400);
+}

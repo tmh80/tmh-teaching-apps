@@ -121,6 +121,31 @@ with sync_playwright() as p:
     g3 = grid(1260, 10, [0], 60, 40, 250); chk('h3: 3 ropes x8 and 4 ropes x6 pass', set(g3) == {(0, 3, 8), (0, 4, 6)}, g3)
     chk('h3: weight on Glimmer-9 is 300 x 4.2 = 1260 N', near(300 * 4.2, 1260))
     c = calc(dict(mach='build', load=1960, lift=6, br=0, bn=2, bw=4, cap=100)); chk('h1: 2 ropes x4 (MA 8) needs 245 N: capped', c['capped'] and near(c['need'], 245.0), c['need'])
+    # ---------- Extension (c6f): real machines, efficiency and the energy budget ----------
+    c = calc(dict(mach='pulley', ropes=4, load=600, lift=2.0, real=True)); chk('p5a real 4 ropes: 187.5 N, work in 1500 J, efficiency 80%', near(c['E'], 187.5) and near(c['workIn'], 1500) and near(c['effPct'], 80.0) and near(c['eDist'], 8.0), (c['E'], c['workIn'], c['effPct']))
+    c = calc(dict(mach='pulley', ropes=4, load=600, lift=2.0)); chk('p5a perfect 4 ropes: 150 N', near(c['E'], 150.0))
+    c = calc(dict(mach='pulley', ropes=2, load=600, lift=2.0, real=True)); chk('p5b real 2 ropes: 333.3 N, 90%', near(c['E'], 333.3) and near(c['effPct'], 90.0), (c['E'], c['effPct']))
+    c = calc(dict(mach='winch', R=0.25, axle=0.05, load=600, lift=2.0, real=True)); chk('p5b real winch 0.25 m: 133.3 N, 90%', near(c['E'], 133.3) and near(c['effPct'], 90.0), (c['E'], c['effPct']))
+    c = calc(dict(mach='screw', per=120, pitch=1.0, load=3000, lift=0.2, real=True)); chk('p5b real screw jack: 30%', near(c['effPct'], 30.0), c['effPct'])
+    def rgrid(load, rise, routes, cap, budget):
+        ok = []
+        for r_ in routes:
+            for n_ in (0, 2, 3, 4):
+                for w_ in (0, 2, 4, 6, 8, 10):
+                    m = M.builder(load, rise, r_ or None, n_, w_, True)
+                    if m['E'] <= cap and m['workIn'] <= budget: ok.append((r_, n_, w_))
+        return ok
+    def rchk(name, load, rise, br, bn, bw):
+        m = M.builder(load, rise, br or None, bn, bw, True); c = calc(dict(mach='build', load=load, lift=rise, br=br, bn=bn, bw=bw, real=True))
+        chk(f'{name}: JS = model (effort, work in)', near(c['E'], m['E'], 1e-6) and near(c['workIn'], m['workIn'], 1), (c['E'], m['E'], c['workIn'], m['workIn']))
+    g = rgrid(600, 5, [0], 60, 3800); print('gb1 passing builds:', g); chk('gb1: 2 ropes x8 and x10 pass; 3 ropes and a lone winch do not', (0, 2, 8) in g and (0, 2, 10) in g and not any(x[1] == 3 for x in g) and not any(x[1] == 0 for x in g), g)
+    rchk('gb1 2 ropes x8', 600, 5, 0, 2, 8)
+    g = rgrid(2000, 3, [0, 6, 9, 15], 60, 10000); print('gb2 passing builds:', g); chk('gb2: 15 m track + winch x10 passes; 15 m track + 2 ropes + x8 passes', (15, 0, 10) in g and (15, 2, 8) in g and (9, 2, 10) in g, g)
+    rchk('gb2 15 m track + winch x10', 2000, 3, 15, 0, 10)
+    g = rgrid(300, 6, [0], 60, 2000); print('gb3 passing builds:', g); chk('gb3: only the winch alone (x6, x8, x10) passes', set(g) == {(0, 0, 6), (0, 0, 8), (0, 0, 10)}, g)
+    c = calc(dict(mach='build', load=300, lift=6, br=0, bn=0, bw=6, real=True)); chk('gb3 edge: winch x6 needs 55.6 N and exactly 2,000 J', near(c['E'], 55.6) and c['workIn'] <= 2000, (c['E'], c['workIn']))
+    chk('c6r27: 2000/2500 = 80%', near(2000 / 2500 * 100, 80)); chk('c6r29: efficiencies 96, 80, 75, 40, 30', [round(1200 / w * 100) for w in (1250, 1500, 1600, 3000, 4000)] == [96, 80, 75, 40, 30])
+    chk('c6r30: 1200/1500 = 80%', near(1200 / 1500 * 100, 80))
     chk('no page errors', not errs, errs[:3])
     b.close()
 print(f'{n} checks, {len(fails)} failed'); sys.exit(1 if fails else 0)

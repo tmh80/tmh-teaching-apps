@@ -5,7 +5,8 @@ const RB_SLOTS = [
   { sec: 'c6b', title: 'Toolkit packed', part: 'Part 2', next: 'Next: Part 2 packs pulleys, a winch, ramps, wedges and a screw jack.' },
   { sec: 'c6c', title: 'Mission computer loaded', part: 'Part 3', next: 'Next: Part 3 teaches the maths the mission computer needs.' },
   { sec: 'c6d', title: 'Crane kit built', part: 'Part 4', next: 'Next: Part 4 builds the crane kit.' },
-  { sec: 'c6e', title: 'Smooshy saved!', part: 'Part 5', next: 'Next: Part 5 is the rescue itself.' }
+  { sec: 'c6e', title: 'Smooshy saved!', part: 'Part 5', next: 'Next: Part 5 is the rescue itself.' },
+  { sec: 'c6f', title: 'Gummy Base One built', part: 'Extension', ext: true, next: 'Optional: the Extension helps the gummy colonists build Gummy Base One.' }
 ];
 const rbDone = id => !!dbGet('stamps', {})[id];
 /* the Gumdrop with Captain Smooshy trapped inside, peeping out of the round window (Tom, 1 Nov 2026: he's stuck in his ship) */
@@ -31,6 +32,7 @@ function drawCrater(c, w, h, st) {
   if (st.c) { c.fillStyle = '#1d2a35'; c.beginPath(); c.roundRect(w * .13, h * .5 - 22, 24, 18, 3); c.fill(); c.fillStyle = '#7ef0a8'; c.fillRect(w * .13 + 3, h * .5 - 19, 18, 12); }
   if (st.d) { c.strokeStyle = '#e3a51c'; c.lineWidth = 4; c.beginPath(); c.moveTo(w * .9, h * .5); c.lineTo(w * .9, h * .5 - 34); c.lineTo(w * .96, h * .5 - 40); c.stroke(); c.strokeStyle = '#fff'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(w * .96, h * .5 - 40); c.lineTo(w * .96, h * .5 - 20); c.stroke(); }
   if (st.b) { c.fillStyle = '#6c7b84'; c.beginPath(); c.roundRect(w * .2, h * .5 - 16, 28, 16, 3); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(w * .2 + 4, h * .5 - 12, 20, 3); }
+  if (st.f) { c.fillStyle = 'rgba(191,230,245,.85)'; c.beginPath(); c.arc(w * .78, h * .5, 26, Math.PI, 0); c.fill(); c.fillStyle = '#6c7b84'; c.fillRect(w * .78 - 26, h * .5 - 3, 52, 6); }
   if (st.custom) st.custom(c, w, h);
   else if (st.e) { drawGumdrop(c, w * .5, h * .5, .52, 0); drawSmooshy(c, w * .62, h * .5 - 22, .34, 'cheer'); }
   else { drawGumdropInside(c, w * .5, h * .86, .62, .5, 'worried');
@@ -50,7 +52,7 @@ function renderRescue() {
 }
 function rbDraw() {
   const cv = $('#cvRescue'); if (!cv || !cv.offsetParent) return; readColors(); const W = 520, H = 190, c = fit(cv, W, H);
-  drawCrater(c, W, H, { a: rbDone('c6a'), b: rbDone('c6b'), c: rbDone('c6c'), d: rbDone('c6d'), e: rbDone('c6e') });
+  drawCrater(c, W, H, { a: rbDone('c6a'), b: rbDone('c6b'), c: rbDone('c6c'), d: rbDone('c6d'), e: rbDone('c6e'), f: rbDone('c6f') });
 }
 /* ---------- the transmission: the Gumdrop crashes into a crater, and its black box sends Smooshy's recorded message (Tom, 1 Nov 2026) ---------- */
 let TXRAF = 0;
@@ -99,7 +101,7 @@ function openTransmission() {
   $('#txAgain').addEventListener('click', () => { t0 = performance.now(); });
   $('#txGo').addEventListener('click', () => {
     cancelAnimationFrame(TXRAF); dbSet('ws.briefed', true);
-    box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>${RB_SLOTS.length} jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.map(s => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
+    box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>${RB_SLOTS.filter(s => !s.ext).length} jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.filter(s => !s.ext).map(s => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
   });
 }
 

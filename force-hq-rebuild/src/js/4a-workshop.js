@@ -81,7 +81,7 @@ function wsSetLoad(id) { const l = WS.loadOpts && WS.loadOpts.find(x => x.id ===
 function wsResetLoad() { WS.busy = false; WS.ph = 0; WS.pt = 0; WS.prog = 0; WS.reading = 0; WS.done = false; WS.msg = ''; WS.c = null; if (typeof RUN !== 'undefined' && RUN && RUN.scene === 'shop' && RUN.live) runEnd('reset'); }
 function wsSetup(o) {
   const d = { mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, ropes: 1, R: 0.1, axle: 0.05, L: 2, h: 1, thick: 10, per: 120, pitch: 1.0, lift: 0.10, load: 294, loadName: '30 kg rock', loadShort: 'rock', loadId: 'rock', loads: {}, loadOpts: null,
-    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false, bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null, pullLabel: null, hatch: 0, noShip: false };
+    world: 'earth', real: false, cap: null, maxTravel: 1.5, lim: {}, classPick: false, rampH: false, axleEdit: false, realPick: false, worldPick: false, lifts: null, loadFree: false, lift3: WS_LIFT3, clsNames: false, bw: 0, bn: 0, br: 0, bWinches: [2, 4, 6, 8, 10], bRopes: [0, 2, 3, 4], bRoutes: [[0, 'Straight up']], site: 'shop', who: null, pullLabel: null, hatch: 0, noShip: false, budget: null };
   Object.assign(WS, d, o || {}); WS.siteT0 = performance.now() / 1000; wsLoadFor(WS.mach); if (o && o.load != null) { WS.load = o.load; } wsResetLoad(); WS.last = null; WS.bubble = null;
 }
 function wsSetMach(m) {
@@ -182,6 +182,7 @@ function wsRenderControls() {
   seg('#wsCls', [1, 2, 3].map(n => [n, (WS.clsNames ? `Class ${n}: ` : '') + WS_SETUP[n].replace(/^./, ch => ch.toUpperCase())]), WS.cls, 'data-cls');
   seg('#wsThick', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick, 'data-thick');
   seg('#wsPer', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per, 'data-per'); seg('#wsPitch', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch, 'data-pitch');
+  seg('#wsReal', [[0, 'Perfect machine'], [1, 'Real machine']], WS.real ? 1 : 0, 'data-real'); { const rn = $('#wsRealNote'); if (rn) rn.textContent = WS.real ? 'Friction turns some of your work into heat.' : 'No friction at all: every joule you put in comes out.'; }
   seg('#bWinch', [[0, 'No winch']].concat(WS.bWinches.map(v => [v, '×' + v])), WS.bw, 'data-bw'); seg('#bRopes', WS.bRopes.map(v => [v, v ? v + ' ropes' : 'No block']), WS.bn, 'data-bn'); seg('#bRoute', WS.bRoutes.map(([v, l]) => [v, l]), WS.br, 'data-br');
   const bp = $('#bWinchRow'); if (bp) { bp.hidden = !WS.bWinches.length; $('#bRopesRow').hidden = WS.bRopes.length < 2; $('#bRouteRow').hidden = WS.bRoutes.length < 2; }
   seg('#wsH', [[0.6, '0.6 m'], [0.8, '0.8 m'], [1.0, '1.0 m'], [1.2, '1.2 m']], WS.h, 'data-h');
@@ -202,7 +203,7 @@ function initShop() {
   const dl = (sel, attr, fn) => document.addEventListener('click', e => { const b = e.target.closest(sel); if (b && $('#lab').contains(b)) fn(b.getAttribute(attr), b); });
   dl('#wsMachs [data-mach]', 'data-mach', v => wsSetMach(v)); dl('#wsLoads [data-load]', 'data-load', v => wsSetLoad(v)); dl('#wsCls [data-cls]', 'data-cls', v => wsSet('cls', +v));
   dl('#wsThick [data-thick]', 'data-thick', v => wsSet('thick', +v)); dl('#wsPer [data-per]', 'data-per', v => wsSet('per', +v)); dl('#wsPitch [data-pitch]', 'data-pitch', v => wsSet('pitch', +v));
-  dl('#wsH [data-h]', 'data-h', v => wsSet('h', +v)); dl('#bWinch [data-bw]', 'data-bw', v => wsSet('bw', +v)); dl('#bRopes [data-bn]', 'data-bn', v => wsSet('bn', +v)); dl('#bRoute [data-br]', 'data-br', v => wsSet('br', +v)); dl('#wsLift [data-lift]', 'data-lift', v => wsSet('lift', +v));
+  dl('#wsReal [data-real]', 'data-real', v => wsSet('real', +v)); dl('#wsH [data-h]', 'data-h', v => wsSet('h', +v)); dl('#bWinch [data-bw]', 'data-bw', v => wsSet('bw', +v)); dl('#bRopes [data-bn]', 'data-bn', v => wsSet('bn', +v)); dl('#bRoute [data-br]', 'data-br', v => wsSet('br', +v)); dl('#wsLift [data-lift]', 'data-lift', v => wsSet('lift', +v));
   const pair = (r, n, k) => { $(r).addEventListener('input', () => wsSet(k, +$(r).value)); const go = () => { const v = parseNum($(n).value); if (isNaN(v)) { wsRenderControls(); return; } wsSet(k, v); }; $(n).addEventListener('change', go); $(n).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); $(n).blur(); } }); };
   pair('#wsArm', '#wsArmNum', 'arm'); pair('#wsR', '#wsRNum', 'R'); pair('#wsL', '#wsLNum', 'L');
   const ax = $('#wsAxleNum'); if (ax) { const go = () => { const v = parseNum(ax.value); if (!isNaN(v)) wsSet('axle', v); else wsRenderControls(); }; ax.addEventListener('change', go); }

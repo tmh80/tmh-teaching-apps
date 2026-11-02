@@ -280,7 +280,7 @@ function renderShopCourse(ch, wm, host, save) {
   LAB.tick = () => {
     if (!WS.done || !WS.last || WS.last === judged) return; judged = WS.last;
     const m = wm[cur], s = get(m.id), c = WS.last; if (s.done) { paint(); return; }
-    const r = { E: c.E, need: c.need, capped: c.capped, dist: wsR2(c.ma * WS.lift), ropes: WS.ropes, L: WS.L, R: WS.R, ma: c.ma, cable: c.cable, bw: WS.bw, bn: WS.bn, br: WS.br, parts: c.parts };
+    const r = { E: c.E, need: c.need, capped: c.capped, dist: wsR2(c.ma * WS.lift), ropes: WS.ropes, L: WS.L, R: WS.R, ma: c.ma, cable: c.cable, bw: WS.bw, bn: WS.bn, br: WS.br, parts: c.parts, workIn: c.workIn };
     const desc = WS.mach === 'build' ? [WS.bw ? `winch ×${WS.bw}` : '', WS.bn ? `${WS.bn} ropes` : '', WS.br ? `${WS.br} m ramp` : ''].filter(Boolean).join(' + ') || 'no machines' : WS.mach === 'pulley' ? `${r.ropes} supporting rope${r.ropes > 1 ? 's' : ''}` : WS.mach === 'ramp' ? `a ${fmt(r.L, 1)} m ramp` : `a ${fmt(r.R, 2)} m handle`;
     const n = (s.n || 0) + 1, oks = m.objs.map(o => o.ok(r)), hit = oks.every(Boolean), best = hit ? Math.max(1, 5 - n) : 0;
     const log = (s.log || []).concat([{ desc, E: r.E, need: r.need, capped: r.capped, hit }]), sayAll = m.objs.map(o => o.say(r)).join(' ');

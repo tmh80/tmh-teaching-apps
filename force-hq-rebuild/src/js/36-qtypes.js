@@ -59,7 +59,7 @@ Object.assign(QLABEL, { calcorder: 'Work it out, then order' });
 const coVal = (q, i) => q.f ? q.f(q.items[i][1], q.mass) : q.mass * q.items[i][1];
 function coOwnOrderOk(q, vals, ord) {   // does the card order follow the student's own numbers (lowest first)? Needs a number in every box, and not all the same.
   const n = vals.map(parseNum); if (n.some(isNaN) || Math.max(...n) === Math.min(...n)) return false;
-  return ord.every((it, k) => k === 0 || n[ord[k - 1]] <= n[it]);
+  return ord.every((it, k) => k === 0 || (q.desc ? n[ord[k - 1]] >= n[it] : n[ord[k - 1]] <= n[it]));
 }
 function coScore(q, vals, ord) {
   const n = q.items.length, right = q.items.map((_, i) => { const x = parseNum(vals[i]); return !isNaN(x) && near(x, coVal(q, i), q.tol != null ? q.tol : 0.5); });
