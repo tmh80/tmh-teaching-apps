@@ -177,7 +177,7 @@ const wsHas = k => LAB.show.has(k) || VIEW === 'vExplore';
 const wsFmt = (k, v) => k === 'ropes' ? String(v) : fmt(v, k === 'arm' || k === 'R' || k === 'axle' ? 2 : 1);
 function wsRenderControls() {
   if (!$('#wsMachs')) return;
-  $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach); });   // only the controls of the machine on the bench
+  $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach) || (!!el.dataset.panel && !el.dataset.panel.split(' ').some(k => LAB.show.has(k))); });   /* a panel the step has not switched on stays hidden even when its machine is on the bench (Part 4 step 1 showed an empty builder; Tom, 3 Nov 2026) */   // only the controls of the machine on the bench
   const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0] + ':' + i[1]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
   const A = WS.allow; $('#wsMachs').className = 'seg ' + (A.length > 3 ? 'three' : A.length > 2 ? 'three' : 'two'); seg('#wsMachs', A.map(m => [m, `${WS_ICON[m]} ${WS_MACH[m].replace(' (winch)', '')}`]), WS.mach, 'data-mach');
   if (WS.loadOpts) seg('#wsLoads', WS.loadOpts.map(l => [l.id, l.name]), WS.loadId, 'data-load');

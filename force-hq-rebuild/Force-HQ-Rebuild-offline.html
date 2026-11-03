@@ -4264,7 +4264,11 @@ function cardsDone() {
 /* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)
    and a number-and-unit box sits under it. What is typed there is copied into the matching "Your turn" question (draftSave in 35-questions.js). */
 const taskQ = t => (t[2] && t[2].q) ? ((CHDATA[CH.id].steps[GI].qs || []).find(q => q.id === t[2].q) || null) : null;
-const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<span class="tkq">${q.p}</span>` : '') + (t[0] ? `<span class="tkdo">${t[0]}</span>` : ''); };
+/* The number box only suits a typed number. A pick, tick, fix or reason question has real answer controls that live in "Your turn", so its task shows the sentence with ___ for each gap and says where to answer (Tom, 3 Nov 2026: the {0} gaps and an empty tick list were confusing). */
+const taskNum = q => !!q && (q.type === 'num' || q.type === 'reading');
+const taskHTML = t => { const q = taskQ(t); if (!q) return t[0] ? `<span class="tkdo">${t[0]}</span>` : '';
+  const p = taskNum(q) ? q.p : String(q.p).replace(/\{\d+\}/g, '___');
+  return (t[2].ask !== false ? `<span class="tkq">${p}</span>` : '') + (t[0] ? `<span class="tkdo">${t[0]}</span>` : '') + (!taskNum(q) && t[2].ask !== false ? `<span class="tkdo">${q.type === 'pick' ? 'Choose the words' : q.type === 'tick' ? 'Tick your answers' : 'Answer it'} in <b>Your turn</b>: press <b>Next: questions</b>.</span>` : ''); };
 const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
 function hasAns(id) {
   const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === id), store = stepKey(CH.id, GI), s = dbGet(store + '.' + id, null);
@@ -4295,7 +4299,7 @@ function bindTkAns() {
 /* after a question is checked, re-draw the answer boxes in the task list (they lock and show the result) */
 function refreshTkAns() {
   const st = CHDATA[CH.id].steps[GI];
-  (st.tasks || []).forEach((t, i) => { const q = taskQ(t); const li = $('#tk' + i); if (!q || !li || t[2].box === false) return; const old = $('.tkans', li); if (old) old.outerHTML = tkAnsHTML(q); });
+  (st.tasks || []).forEach((t, i) => { const q = taskQ(t); const li = $('#tk' + i); if (!q || !li || t[2].box === false || !taskNum(q)) return; const old = $('.tkans', li); if (old) old.outerHTML = tkAnsHTML(q); });
   bindTkAns();
 }
 function renderRail() {
@@ -4304,7 +4308,7 @@ function renderRail() {
     <h2>${st.title}</h2>
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
-    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
+    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
@@ -6779,7 +6783,7 @@ const wsHas = k => LAB.show.has(k) || VIEW === 'vExplore';
 const wsFmt = (k, v) => k === 'ropes' ? String(v) : fmt(v, k === 'arm' || k === 'R' || k === 'axle' ? 2 : 1);
 function wsRenderControls() {
   if (!$('#wsMachs')) return;
-  $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach); });   // only the controls of the machine on the bench
+  $$('#lab [data-wsm]').forEach(el => { el.hidden = !el.dataset.wsm.split(' ').includes(WS.mach) || (!!el.dataset.panel && !el.dataset.panel.split(' ').some(k => LAB.show.has(k))); });   /* a panel the step has not switched on stays hidden even when its machine is on the bench (Part 4 step 1 showed an empty builder; Tom, 3 Nov 2026) */   // only the controls of the machine on the bench
   const seg = (id, items, cur, attr) => { const el = $(id); if (!el) return; const sig = items.map(i => i[0] + ':' + i[1]).join('|') + cur; if (el.dataset.sig === sig) return; el.dataset.sig = sig; el.innerHTML = items.map(([v, l]) => `<button type="button" ${attr}="${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join(''); };
   const A = WS.allow; $('#wsMachs').className = 'seg ' + (A.length > 3 ? 'three' : A.length > 2 ? 'three' : 'two'); seg('#wsMachs', A.map(m => [m, `${WS_ICON[m]} ${WS_MACH[m].replace(' (winch)', '')}`]), WS.mach, 'data-mach');
   if (WS.loadOpts) seg('#wsLoads', WS.loadOpts.map(l => [l.id, l.name]), WS.loadId, 'data-load');
@@ -6919,7 +6923,7 @@ function wsMonitor(c) {
   if (!RMOTION && !bub) { c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(x + 6, y + ((tt * 40) % (h - 12)) + 6, w - 12, 3); }
   /* the sticky note */
   c.save(); c.translate(x + w - 12, y + h - 6); c.rotate(.12); c.fillStyle = '#f6e27a'; c.fillRect(-52, -22, 56, 30); txt(c, '60 N max!', -24, -7, '#5a4a10', `800 11px ${C.fb}`); c.restore();
-  txt(c, 'CAPTAIN SMOOSHY · LIVE', x + 6, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left');
+  { c.font = `800 10px ${C.fb}`; const lw = c.measureText('CAPTAIN SMOOSHY · LIVE').width + 12; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(x + 2, y - 20, lw, 15, 7); c.fill(); txt(c, 'CAPTAIN SMOOSHY · LIVE', x + 8, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left'); }   /* on a light pill: the ceiling beam behind it is dark (Tom, 3 Nov 2026) */
   if (bub) wsBubbleDraw(c, WS.bubble, x, y + h + 10, w);
 }
 function wsBubbleDraw(c, s, x, y, w) {
@@ -7187,7 +7191,7 @@ function drawShopScene(c) {
     c.fillStyle = '#d5dde2'; c.beginPath(); c.roundRect(bx, by, bw, 12, 6); c.fill(); if (done) { c.fillStyle = over ? WSC.red : WSC.green; c.beginPath(); c.roundRect(bx, by, Math.max(10, bw * fr), 12, 6); c.fill(); } }
   /* messages */
   if (WS.done && WS.msg) { const bad = WS.c && (WS.c.capped || WS.c.short); const w = Math.min(560, c.measureText(WS.msg).width + 40); c.font = `700 14px ${C.fb}`; const ww = clamp(c.measureText(WS.msg).width + 36, 110, 520); c.fillStyle = bad ? WSC.amber : WSC.green; c.beginPath(); c.roundRect(450 - ww / 2 + 30, 6, ww, 30, 8); c.fill(); txt(c, WS.msg, 450 + 30, 21.5, '#fff', `700 14px ${C.fb}`, 'center'); }
-  else if (!WS.busy && !WS.shown) txt(c, `Press ${WS_VERB[WS.mach]} to work the machine`, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`);
+  else if (!WS.busy && !WS.shown) { const m = `Press ${WS_VERB[WS.mach]} to work the machine`; c.font = `700 13px ${C.fb}`; const iw = c.measureText(m).width + 28; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(450 + 30 - iw / 2, 6, iw, 28, 8); c.fill(); txt(c, m, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`); }   /* light pill: the beam behind is dark */
   if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, 418, C.line, 'right');
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   /* rulers */
@@ -7733,7 +7737,7 @@ CHDATA.c6 = {
         { html: `<p>📡 ${SMOOSHY.name}: "Even the best single machine can't lift the Gumdrop with my 60 N. We need teamwork!"</p><p>A ${T('compound', 'compound machine')} is two or more simple machines working together. Scissors are one: two levers joined at a pivot, with a wedge on each blade.</p>${picScissors()}` },
         { html: `<p>A building-site crane is a compound machine too. A winch winds in the cable, and the cable runs through a pulley block. The arm is a lever.</p>${picSiteCrane()}` },
         { html: `<p>When one machine drives another, their mechanical advantages <b>multiply</b>. A machine with a mechanical advantage of 2 driving a machine with a mechanical advantage of 3 gives a total of 2 × 3 = 6.</p>${picCompoundChain(2, 3)}<div class="law">total mechanical advantage = MA₁ × MA₂</div>` }],
-      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb } }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Read the cards, then answer the questions',
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb } }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Read the cards, then answer the questions',
       tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'pick', p: 'Scissors are two {0} joined at a pivot, and each blade is a {1}. A crane\'s winch is a {2}.', picks: [[['levers', 'pulleys', 'ramps'], 0], [['wedge', 'screw', 'pulley'], 0], [['wheel and axle', 'wedge', 'lever'], 0]], after: 'A compound machine is simple machines working together.' },

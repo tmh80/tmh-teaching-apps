@@ -239,7 +239,7 @@ CHDATA.c6 = {
         { html: `<p>📡 ${SMOOSHY.name}: "Even the best single machine can't lift the Gumdrop with my 60 N. We need teamwork!"</p><p>A ${T('compound', 'compound machine')} is two or more simple machines working together. Scissors are one: two levers joined at a pivot, with a wedge on each blade.</p>${picScissors()}` },
         { html: `<p>A building-site crane is a compound machine too. A winch winds in the cable, and the cable runs through a pulley block. The arm is a lever.</p>${picSiteCrane()}` },
         { html: `<p>When one machine drives another, their mechanical advantages <b>multiply</b>. A machine with a mechanical advantage of 2 driving a machine with a mechanical advantage of 3 gives a total of 2 × 3 = 6.</p>${picCompoundChain(2, 3)}<div class="law">total mechanical advantage = MA₁ × MA₂</div>` }],
-      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb } }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Read the cards, then answer the questions',
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb } }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Read the cards, then answer the questions',
       tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'pick', p: 'Scissors are two {0} joined at a pivot, and each blade is a {1}. A crane\'s winch is a {2}.', picks: [[['levers', 'pulleys', 'ramps'], 0], [['wedge', 'screw', 'pulley'], 0], [['wheel and axle', 'wedge', 'lever'], 0]], after: 'A compound machine is simple machines working together.' },

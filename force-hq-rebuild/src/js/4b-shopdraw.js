@@ -100,7 +100,7 @@ function wsMonitor(c) {
   if (!RMOTION && !bub) { c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(x + 6, y + ((tt * 40) % (h - 12)) + 6, w - 12, 3); }
   /* the sticky note */
   c.save(); c.translate(x + w - 12, y + h - 6); c.rotate(.12); c.fillStyle = '#f6e27a'; c.fillRect(-52, -22, 56, 30); txt(c, '60 N max!', -24, -7, '#5a4a10', `800 11px ${C.fb}`); c.restore();
-  txt(c, 'CAPTAIN SMOOSHY · LIVE', x + 6, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left');
+  { c.font = `800 10px ${C.fb}`; const lw = c.measureText('CAPTAIN SMOOSHY · LIVE').width + 12; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(x + 2, y - 20, lw, 15, 7); c.fill(); txt(c, 'CAPTAIN SMOOSHY · LIVE', x + 8, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left'); }   /* on a light pill: the ceiling beam behind it is dark (Tom, 3 Nov 2026) */
   if (bub) wsBubbleDraw(c, WS.bubble, x, y + h + 10, w);
 }
 function wsBubbleDraw(c, s, x, y, w) {
@@ -368,7 +368,7 @@ function drawShopScene(c) {
     c.fillStyle = '#d5dde2'; c.beginPath(); c.roundRect(bx, by, bw, 12, 6); c.fill(); if (done) { c.fillStyle = over ? WSC.red : WSC.green; c.beginPath(); c.roundRect(bx, by, Math.max(10, bw * fr), 12, 6); c.fill(); } }
   /* messages */
   if (WS.done && WS.msg) { const bad = WS.c && (WS.c.capped || WS.c.short); const w = Math.min(560, c.measureText(WS.msg).width + 40); c.font = `700 14px ${C.fb}`; const ww = clamp(c.measureText(WS.msg).width + 36, 110, 520); c.fillStyle = bad ? WSC.amber : WSC.green; c.beginPath(); c.roundRect(450 - ww / 2 + 30, 6, ww, 30, 8); c.fill(); txt(c, WS.msg, 450 + 30, 21.5, '#fff', `700 14px ${C.fb}`, 'center'); }
-  else if (!WS.busy && !WS.shown) txt(c, `Press ${WS_VERB[WS.mach]} to work the machine`, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`);
+  else if (!WS.busy && !WS.shown) { const m = `Press ${WS_VERB[WS.mach]} to work the machine`; c.font = `700 13px ${C.fb}`; const iw = c.measureText(m).width + 28; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(450 + 30 - iw / 2, 6, iw, 28, 8); c.fill(); txt(c, m, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`); }   /* light pill: the beam behind is dark */
   if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, 418, C.line, 'right');
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   /* rulers */

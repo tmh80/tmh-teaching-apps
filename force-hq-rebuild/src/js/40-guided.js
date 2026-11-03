@@ -72,7 +72,11 @@ function cardsDone() {
 /* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)
    and a number-and-unit box sits under it. What is typed there is copied into the matching "Your turn" question (draftSave in 35-questions.js). */
 const taskQ = t => (t[2] && t[2].q) ? ((CHDATA[CH.id].steps[GI].qs || []).find(q => q.id === t[2].q) || null) : null;
-const taskHTML = t => { const q = taskQ(t); return (q && t[2].ask !== false ? `<span class="tkq">${q.p}</span>` : '') + (t[0] ? `<span class="tkdo">${t[0]}</span>` : ''); };
+/* The number box only suits a typed number. A pick, tick, fix or reason question has real answer controls that live in "Your turn", so its task shows the sentence with ___ for each gap and says where to answer (Tom, 3 Nov 2026: the {0} gaps and an empty tick list were confusing). */
+const taskNum = q => !!q && (q.type === 'num' || q.type === 'reading');
+const taskHTML = t => { const q = taskQ(t); if (!q) return t[0] ? `<span class="tkdo">${t[0]}</span>` : '';
+  const p = taskNum(q) ? q.p : String(q.p).replace(/\{\d+\}/g, '___');
+  return (t[2].ask !== false ? `<span class="tkq">${p}</span>` : '') + (t[0] ? `<span class="tkdo">${t[0]}</span>` : '') + (!taskNum(q) && t[2].ask !== false ? `<span class="tkdo">${q.type === 'pick' ? 'Choose the words' : q.type === 'tick' ? 'Tick your answers' : 'Answer it'} in <b>Your turn</b>: press <b>Next: questions</b>.</span>` : ''); };
 const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
 function hasAns(id) {
   const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === id), store = stepKey(CH.id, GI), s = dbGet(store + '.' + id, null);
@@ -103,7 +107,7 @@ function bindTkAns() {
 /* after a question is checked, re-draw the answer boxes in the task list (they lock and show the result) */
 function refreshTkAns() {
   const st = CHDATA[CH.id].steps[GI];
-  (st.tasks || []).forEach((t, i) => { const q = taskQ(t); const li = $('#tk' + i); if (!q || !li || t[2].box === false) return; const old = $('.tkans', li); if (old) old.outerHTML = tkAnsHTML(q); });
+  (st.tasks || []).forEach((t, i) => { const q = taskQ(t); const li = $('#tk' + i); if (!q || !li || t[2].box === false || !taskNum(q)) return; const old = $('.tkans', li); if (old) old.outerHTML = tkAnsHTML(q); });
   bindTkAns();
 }
 function renderRail() {
@@ -112,7 +116,7 @@ function renderRail() {
     <h2>${st.title}</h2>
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
-    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
+    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
