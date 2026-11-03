@@ -72,7 +72,7 @@ function aiFeedbackText(secIds, optIds) {
   optIds = optIds || [];
   const ids = [...secIds, ...optIds.filter(x => !secIds.includes(x))];
   if (!ids.length) return 'Tick at least one section to build the AI feedback instructions.';
-  const L = [];
+  const L = [`All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.`, ''];   /* first line of every AI feedback text (Tom, 3 Nov 2026) */
   L.push('HOW TO MARK');
   markingRules(ids.some(c => CHDATA[c].review.some(q => q.sure))).forEach(r => L.push('- ' + r));
   L.push(''); L.push('FEEDBACK STYLE'); L.push(FEEDBACK_STYLE);

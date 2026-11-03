@@ -7192,7 +7192,7 @@ function mypLevelLines(strands){
   return L;
 }
 function aiFeedbackText(sheets, tasks){
-  sheets = asSheets(sheets); const L = ['AI FEEDBACK INSTRUCTIONS FOR SPARKS THROUGH TIME', ''];
+  sheets = asSheets(sheets); const L = ['All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.', '', 'AI FEEDBACK INSTRUCTIONS FOR SPARKS THROUGH TIME', ''];
   L.push(...howToMarkLines(), '', ...feedbackStyleLines(), '');
   const entries = sheets.flatMap(({stop, part})=>sheetEntries(stop, part)).concat(tasks.flatMap(({t})=>taskEntries(t)));
   const strands = strandsOf(sheets.map(({stop, part})=>sheetStrands(stop, part)).concat(tasks.map(({t})=>taskStrands(t))));
@@ -7251,7 +7251,7 @@ function renderTeacher(){
   });
   const scheme = h('textarea',{class:'hw-out ai-out', rows:16, readonly:true, 'aria-label':'AI feedback instructions to paste into Toddle'});
   const aiCount = h('span',{class:'legend ai-count', role:'status'}); const aiLong = h('p',{class:'feedback hint ai-long', hidden:true}, 'This is long. If Toddle cuts it off, set fewer stops in one task.');
-  const refreshCount = ()=>{ const n = scheme.value.length; const real = /^AI FEEDBACK/.test(scheme.value); aiCount.textContent = real ? `${n.toLocaleString('en-US')} characters` : ''; aiLong.hidden = !(real && n>10000); };
+  const refreshCount = ()=>{ const n = scheme.value.length; const real = /AI FEEDBACK INSTRUCTIONS/.test(scheme.value); aiCount.textContent = real ? `${n.toLocaleString('en-US')} characters` : ''; aiLong.hidden = !(real && n>10000); };
   const codeIn = h('input',{type:'password', id:uid('code'), placeholder:'Teacher code', autocomplete:'off'});
   const lockBox = h('div',{class:'hw-col'});
   const schemeCopy = h('button',{class:'btn primary', type:'button', onclick:()=>{ const done = ()=>{ schemeCopy.textContent = 'Copied!'; setTimeout(()=>schemeCopy.textContent = 'Copy', 1800); };

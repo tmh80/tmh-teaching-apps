@@ -31,6 +31,7 @@ with sync_playwright() as p:
     txt = pg.input_value('#tAi')
     n = len(txt); shown = pg.inner_text('#tAiCount')
     chk(shown.replace(',', '') == f'{n} characters', f'count {shown} vs {n}')
+    chk('AI text: first line is the Grade 7-8 style line', txt.split('\n')[0] == 'All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.')
     for needle in ['HOW TO MARK', 'FEEDBACK STYLE', 'MYP LEVELS', 'WRITTEN ANSWER KEY', 'TOTALS', 'A ii: apply scientific knowledge', 'D iii: apply scientific language',
                    '1–12% = level 1', '88–100% = level 8', '1–2 limited', 'only if it raises the level',
                    '=== Force HQ Ch3 Foundation', '=== Force HQ Ch5 Extension', '=== Force HQ Ch4 Extension', '[A ii]']:
