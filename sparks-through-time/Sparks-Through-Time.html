@@ -7192,7 +7192,7 @@ function mypLevelLines(strands){
   return L;
 }
 function aiFeedbackText(sheets, tasks){
-  sheets = asSheets(sheets); const L = ['All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.', '', 'AI FEEDBACK INSTRUCTIONS FOR SPARKS THROUGH TIME', ''];
+  sheets = asSheets(sheets); const L = ['All written feedback should be grade 6 appropriate language: very short, simple words, to-the-point, and enthusiastic.', '', 'AI FEEDBACK INSTRUCTIONS FOR SPARKS THROUGH TIME', ''];
   L.push(...howToMarkLines(), '', ...feedbackStyleLines(), '');
   const entries = sheets.flatMap(({stop, part})=>sheetEntries(stop, part)).concat(tasks.flatMap(({t})=>taskEntries(t)));
   const strands = strandsOf(sheets.map(({stop, part})=>sheetStrands(stop, part)).concat(tasks.map(({t})=>taskStrands(t))));
