@@ -824,3 +824,5 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 /* Build tasks */
 .bttab{border-collapse:collapse;width:100%;font-size:13px}.bttab th,.bttab td{border:1px solid var(--line);padding:3px 5px;text-align:left;vertical-align:middle}.bttab th{background:var(--panel2,var(--panel))}
 .bttab td.okc{background:rgba(40,160,90,.18)}.bttab td.badc{background:rgba(220,70,70,.18)}
+.tkwork{display:flex;flex-direction:column;gap:3px;margin-top:6px}.tkwork span{font-size:.78rem;font-weight:700;color:var(--muted)}.tkwk{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:.85rem;background:var(--panel);color:var(--ink);resize:vertical}
+.remind{margin-top:8px}.remind .rmgrid{display:grid;gap:4px;font-size:.88rem;line-height:1.45}.remind .rmgrid b{color:var(--ink)}

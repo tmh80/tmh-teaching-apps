@@ -875,6 +875,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 /* Build tasks */
 .bttab{border-collapse:collapse;width:100%;font-size:13px}.bttab th,.bttab td{border:1px solid var(--line);padding:3px 5px;text-align:left;vertical-align:middle}.bttab th{background:var(--panel2,var(--panel))}
 .bttab td.okc{background:rgba(40,160,90,.18)}.bttab td.badc{background:rgba(220,70,70,.18)}
+.tkwork{display:flex;flex-direction:column;gap:3px;margin-top:6px}.tkwork span{font-size:.78rem;font-weight:700;color:var(--muted)}.tkwk{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:.85rem;background:var(--panel);color:var(--ink);resize:vertical}
+.remind{margin-top:8px}.remind .rmgrid{display:grid;gap:4px;font-size:.88rem;line-height:1.45}.remind .rmgrid b{color:var(--ink)}
 
 </style>
 <header class="top">
@@ -3505,7 +3507,7 @@ const QT = {
     html(q, s, api) {
       const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length, D = api && api.draft ? api.draft.get() || {} : {}, dk = api && api.draft ? ` data-draft="${api.draft.key}"` : '';
       const v0 = s && s.v != null ? s.v : D.v || '', u0 = s && s.u ? s.u : D.u || '';
-      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${api && api.draft ? '' : `<label class="numwork"><span class="lbl">Working (optional, not marked)</span><textarea class="numworkin" rows="2" aria-label="Your working" placeholder="Show how you worked it out, for example 4,500 ÷ 18 = 250">${esc((s && s.w) || '')}</textarea></label>`}${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div><label class="numwork"><span class="lbl">Working (optional, not marked)</span><textarea class="numworkin" rows="3" aria-label="Your working"${dk} data-dk="w" placeholder="Show how you worked it out, for example 4,500 ÷ 18 = 250">${esc((s && s.w != null) ? s.w : D.w || '')}</textarea></label>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
     },
     bind(el, q, api) {
       const U = q.units && q.units.length;
@@ -3518,7 +3520,7 @@ const QT = {
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u, w: ($('.numworkin', el) || {}).value || '' }); };
       api.reg({ blank: () => !$('.ansin', el).value.trim(), check: go });
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
-      if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
+      if (api.draft) { const D = api.draft; $('.ansin', el).addEventListener('input', e => { if (!api.locked()) D.set('v', e.target.value, e.target); }); const wk = $('.numworkin', el); if (wk) wk.addEventListener('input', e => { if (!api.locked()) D.set('w', e.target.value, e.target); }); const sel = $('.unitsel', el); if (sel) sel.addEventListener('change', e => { if (!api.locked()) D.set('u', e.target.value, e.target); }); }
     },
     lock(el, q, s) { const i = $('.ansin', el); i.classList.add(s.ok ? 'right' : 'wrong'); const sel = $('.unitsel', el); if (sel) { sel.value = s.u || ''; sel.classList.add(s.u === q.unit ? 'right' : 'wrong'); }
       if (!s.ok && s.ans != null) corr($('.unit', el), fmt(s.ans, 2) + ' ' + (q.unit || '')); lockInputs(el); },
@@ -4277,7 +4279,7 @@ function hasAns(id) {
 function tkAnsHTML(q) {
   const store = stepKey(CH.id, GI), s = dbGet(store + '.' + q.id, null), d = draftOf(store, q.id) || {}, U = q.units && q.units.length, done = !!(s && s.done);
   const v = done ? s.v : (d.v || ''), u = done ? (s.u || '') : (d.u || ''), dk = ` data-draft="${store}|${q.id}"`, dis = done ? ' disabled' : '';
-  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${done ? `<small class="tkmsg ${s.ok ? 'ok' : 'no'}">${s.ok ? '✓ ' : ''}${esc(s.msg || (s.ok ? 'Correct!' : 'Checked.'))}</small>` : `<button type="button" class="mini tkchk" data-chkq="${q.id}">Check</button><small class="tkmsg" aria-live="polite"></small>`}</span>`;
+  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${/^c6/.test(CH.id) && q.type === 'num' ? `<label class="tkwork"><span>Working (not marked)</span><textarea class="numworkin tkwk" rows="3" aria-label="Your working"${dk} data-dk="w"${dis} placeholder="Step 1: find each mechanical advantage. Step 2: multiply them. Then check with the calculator.">${esc(done ? (s.w || d.w || '') : (d.w || ''))}</textarea></label>` : ''}${done ? `<small class="tkmsg ${s.ok ? 'ok' : 'no'}">${s.ok ? '✓ ' : ''}${esc(s.msg || (s.ok ? 'Correct!' : 'Checked.'))}</small>` : `<button type="button" class="mini tkchk" data-chkq="${q.id}">Check</button><small class="tkmsg" aria-live="polite"></small>`}</span>`;
 }
 function bindTkAns() {
   const st = CHDATA[CH.id].steps[GI], store = stepKey(CH.id, GI);
@@ -4285,6 +4287,7 @@ function bindTkAns() {
     const q = (st.qs || []).find(x => x.id === box.dataset.qid); if (!q) return;
     const inp = $('.tkin', box), sel = $('.tksel', box), cb = $('[data-chkq]', box);
     if (inp) inp.addEventListener('input', e => draftSave(store, q.id, 'v', e.target.value, e.target));
+    const wk = $('.tkwk', box); if (wk) wk.addEventListener('input', e => draftSave(store, q.id, 'w', e.target.value, e.target));
     if (sel) sel.addEventListener('change', e => draftSave(store, q.id, 'u', e.target.value, e.target));
     if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter' && cb) { e.preventDefault(); cb.click(); } });
     /* Check here: press the matching question's own Check button (its answer is already copied in), so Your turn shows it done. Any problem message comes back to this box. */
@@ -4309,6 +4312,7 @@ function renderRail() {
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
+    ${/^c6/.test(CH.id) && (st.qs || []).some(q => q.type === 'num') ? remindersHTML() : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
@@ -4414,7 +4418,7 @@ function tryNext() {
   const go = () => { if (last) setCTab(chd.challenge ? 'challenge' : 'review'); else setStep(GI + 1); };
   if (stepDone(CH.id, GI)) { go(); return; }
   if (hasQs() && !qsDone() && QSTATE !== 'pop') {
-    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) left.push(taskPlain(chd.steps[GI].tasks[i])); });
+    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok && !taskQ(chd.steps[GI].tasks[i])) left.push(taskPlain(chd.steps[GI].tasks[i])); });   // a task that is a question is answered in Your turn, which Next opens, so it is not nagged about (Tom, 3 Nov 2026)
     if (!left.length) { qPlace('pop'); return; }
     openModal(`<div class="modal"><h2>Have you finished the Do this list?</h2><p>The questions are about what you see in the arena, so it helps to finish these first:</p><ul>${left.map(t => `<li>${esc(t)}</li>`).join('')}</ul><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Go back to the arena</button><button type="button" class="go" id="contAnyway">Continue anyway →</button></div></div>`);
     $('#contAnyway').addEventListener('click', () => { closeModal(); qPlace('pop'); });
@@ -5419,7 +5423,7 @@ function renderShopCourse(ch, wm, host, save) {
   let cur = Math.max(0, wm.findIndex(m => !get(m.id).done)), judged = null;
   const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>${remindersHTML()}
     <div class="gl" id="shCalc" hidden></div><div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
@@ -5428,10 +5432,13 @@ function renderShopCourse(ch, wm, host, save) {
     $('.mtabs', card).innerHTML = wm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-sr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
     $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal}</p>`;
     $('#shClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
-    const cb = $('#shCalc', card), lh = $('.labhost', card), needCalc = !!m.calc && !s.calcDone; cb.hidden = !needCalc; lh.hidden = needCalc;
-    if (needCalc) {
-      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><p class="scaleNote">${m.calc.hints}</p><div class="row"><input type="number" step="any" id="shCalcIn" aria-label="Your answer" style="width:7em"> <b>${m.calc.unit}</b> <button type="button" class="go" id="shCalcGo">Check</button></div><div class="fb" id="shCalcFb" hidden></div>`;
-      $('#shCalcGo', card).addEventListener('click', () => { const v = parseFloat($('#shCalcIn', card).value); if (isNaN(v)) return; const ok = Math.abs(v - m.calc.ans) <= m.calc.tol; save(m, { calcDone: true, calcMsg: ok ? `Yes, ${fmt(m.calc.ans, 0)} ${m.calc.unit}. The builder is unlocked.` : `The weight is ${fmt(m.calc.ans, 0)} ${m.calc.unit} (mass × g). The builder is unlocked.` }); paint(); });
+    const cb = $('#shCalc', card), lh = $('.labhost', card), needCalc = !!m.calc && !s.calcSeen; cb.hidden = !needCalc; lh.hidden = needCalc;
+    if (needCalc && s.calcDone) {
+      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><div class="fb ok">${s.calcMsg}</div><p class="scaleNote">Why it matters: the weight is the load. Mechanical advantage = load ÷ effort, and Smooshy can pull ${m.cap} N at most, so the weight tells you how big your mechanical advantage must be.</p><div class="row"><button type="button" class="go" id="shCalcOpen">Open the builder →</button></div>`;
+      $('#shCalcOpen', card).addEventListener('click', () => { save(m, { calcSeen: true }); paint(); });
+    } else if (needCalc) {
+      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><p class="scaleNote">${m.calc.hints}</p><p class="scaleNote">Why: you need the weight to work out the mechanical advantage the job needs. The builder opens after you check.</p><div class="row"><input type="number" step="any" id="shCalcIn" aria-label="Your answer" style="width:7em"> <b>${m.calc.unit}</b> <button type="button" class="go" id="shCalcGo">Check</button></div><div class="fb" id="shCalcFb" hidden></div>`;
+      $('#shCalcGo', card).addEventListener('click', () => { const v = parseFloat($('#shCalcIn', card).value); if (isNaN(v)) return; const ok = Math.abs(v - m.calc.ans) <= m.calc.tol; save(m, { calcDone: true, calcMsg: ok ? `Yes, ${fmt(m.calc.ans, 0)} ${m.calc.unit}. Well done!` : `The weight is ${fmt(m.calc.ans, 0)} ${m.calc.unit} (mass × g). Your answer was ${fmt(v, 1)} ${m.calc.unit}.` }); paint(); });
     }
     const nx = $('#shNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
     $('#shLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Pull ${i + 1}: ${r.desc}, ${r.capped ? 'needs ' + r.need.toFixed(1) + ' N (too much)' : 'pull ' + r.E.toFixed(1) + ' N'}${r.hit ? ' ✓ loaded!' : ''}</li>`).join('');
@@ -5469,7 +5476,7 @@ function renderRescueCourse(ch, wm, host, save) {
   if (cur < 0) cur = 0;
   const card = h('section', { class: 'panel mission', id: 'mi-rescue' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a rescue stage"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="rsClues"></div><div class="row"><button type="button" class="ghost sm" id="rsNext">Show a clue</button></div></details>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="rsClues"></div><div class="row"><button type="button" class="ghost sm" id="rsNext">Show a clue</button></div></details>${remindersHTML()}
     <div class="labhost"></div>
     <div class="mcomp" id="rsComp"><label for="rsPred"><b>🖥️ Mission computer:</b> <span id="rsQ"></span></label> <input type="number" step="any" id="rsPred" style="width:7em" aria-label="Your prediction"> <b id="rsUnit"></b><p class="scaleNote">Type any number and Smooshy can try it.</p></div>
     <div class="fb" id="rsFb" hidden></div><ol class="blog" id="rsLog"></ol><ul class="objs" data-o></ul><div class="row" id="rsMore"></div>`;
@@ -7865,7 +7872,7 @@ CHDATA.c6 = {
       model: 'He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank\'s weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J.',
       check: ['Works out the mechanical advantage needed (600 ÷ 60 = 10)', 'Says the supporting ropes share the load, so the effort is smaller', 'Says he must pull a longer distance of rope (10 times the height, 20 m)', 'Says the work stays the same (force × distance)'] },
     /* ---------- Part 4 Check (compound machines) ---------- */
-    { id: 'c6r18', obj: ['Ai'], type: 'sort', p: 'Is each of these a simple machine or a compound machine? Sort them.', groups: ['Simple machine', 'Compound machine'], items: [['A crowbar', 0], ['A ramp', 0], ['An axe', 0], ['A single flagpole pulley', 0], ['A pair of scissors', 1], ['A building-site crane', 1], ['A bicycle', 1], ['A car jack with a handle', 1]] },
+    { id: 'c6r18', obj: ['Ai'], type: 'sort', p: 'Is each of these a simple machine or a compound machine? Sort them.', groups: ['Simple machine', 'Compound machine'], items: [['A crowbar', 0], ['A ramp', 0], ['A doorstop', 0], ['A single flagpole pulley', 0], ['A pair of scissors', 1], ['A building-site crane', 1], ['A bicycle', 1], ['A car jack with a handle', 1]] },
     { id: 'c6r19', obj: ['Aii'], type: 'num', p: 'A winch with a mechanical advantage of 6 drives a pulley system with 3 supporting ropes. What effort lifts a 2,700 N load?', unit: 'N', units: UNITS_W, ans: 150, tol: 0.5, ladder: true, hints: ['Total mechanical advantage = 6 × 3.', 'That is 18. Then effort = load ÷ total mechanical advantage.', 'Type 2700 ÷ 18 into the calculator.'], work: 'Total mechanical advantage = 6 × 3 = 18, so the effort is 2,700 ÷ 18 = 150 N.' },
     { id: 'c6r20', obj: ['Aii'], type: 'reason', sure: true, p: 'Two machines, each with a mechanical advantage of 5, are joined so the first one drives the second. What is the total mechanical advantage?',
       opts: ['25', '10', '5', '2.5'], a: 0,
@@ -8036,6 +8043,17 @@ c6s('pl3').cards.push(CFACT('Ancient Egyptian builders probably used ramps to ha
 c6s('pl4').cards.push(CFACT('The Archimedes screw, a screw turning inside a tube, has been lifting water for over 2,000 years, and some are still in use today.', 'A car jack lets one person lift one side of a car by turning a handle, thanks to a screw with a very small pitch.'));
 c6s('k1').cards.push(CFACT('One of the world\'s strongest cranes, the Taisun in China, has lifted about 20,000 tonnes in one go.'));
 c6s('p5b').cards.push(CFACT('A clean, oiled bicycle chain is one of the most efficient machines there is: well over 90% of the work you put in reaches the back wheel.'));
+
+/* A "Reminders" fold-out for every Chapter 6 page where students calculate: how to find each mechanical advantage and what working to show (Tom, 3 Nov 2026). */
+function remindersHTML() {
+  return `<details class="clue remind"><summary>📌 Reminders: how to find mechanical advantage</summary><div class="rmgrid gl">
+    <div><b>Weight (the load)</b> = mass × g. g is 9.8 N/kg on Earth, 3.7 on Mars, 1.6 on the Moon and 4.2 on Glimmer-9.</div>
+    <div><b>Mechanical advantage (MA)</b> = load ÷ effort. So the effort = load ÷ MA.</div>
+    <div><b>Lever:</b> MA = effort arm ÷ load arm. <b>Pulley:</b> MA = number of supporting ropes. <b>Ramp:</b> MA = length ÷ height. <b>Winch:</b> MA = handle radius ÷ axle radius.</div>
+    <div><b>Compound machine:</b> find the MA of each part, then <b>multiply</b> them: total MA = MA₁ × MA₂ × MA₃.</div>
+    <div><b>Distances:</b> hand travel = MA × the height lifted. Cable = ropes × ramp length. Work = force × distance.</div>
+    <div><b>Working to show:</b> 1. Write the MA of each part. 2. Multiply them. 3. Work out the effort or the distance. 4. Check it against the limits in the job.</div></div></details>`;
+}
 
 /* ===== Chapter 6: the story. The transmission (B2) and the Rescue board (B3), drawn from the script in docs/Chapter6_Workshop_Script.md =====
    The board sits at the top of every Chapter 6 page. A slot lights up when that Part's stamp is earned. Names live in the SMOOSHY constant (4a-workshop.js). */

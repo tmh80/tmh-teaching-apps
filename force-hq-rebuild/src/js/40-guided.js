@@ -85,7 +85,7 @@ function hasAns(id) {
 function tkAnsHTML(q) {
   const store = stepKey(CH.id, GI), s = dbGet(store + '.' + q.id, null), d = draftOf(store, q.id) || {}, U = q.units && q.units.length, done = !!(s && s.done);
   const v = done ? s.v : (d.v || ''), u = done ? (s.u || '') : (d.u || ''), dk = ` data-draft="${store}|${q.id}"`, dis = done ? ' disabled' : '';
-  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${done ? `<small class="tkmsg ${s.ok ? 'ok' : 'no'}">${s.ok ? '✓ ' : ''}${esc(s.msg || (s.ok ? 'Correct!' : 'Checked.'))}</small>` : `<button type="button" class="mini tkchk" data-chkq="${q.id}">Check</button><small class="tkmsg" aria-live="polite"></small>`}</span>`;
+  return `<span class="tkans${done ? ' locked ' + (s.ok ? 'ok' : 'no') : ''}" data-qid="${q.id}"><label>Your answer</label><span class="tkrow"><input class="tkin" inputmode="decimal" autocomplete="off" aria-label="Your answer to this puzzle" placeholder="number"${dk} data-dk="v" value="${esc(v)}"${dis}>${U ? `<select class="tksel" aria-label="Unit"${dk} data-dk="u"${dis}><option value="">unit?</option>${q.units.map(x => `<option value="${esc(x)}"${u === x ? ' selected' : ''}>${x}</option>`).join('')}</select>` : `<span class="unit">${q.unit || ''}</span>`}</span>${/^c6/.test(CH.id) && q.type === 'num' ? `<label class="tkwork"><span>Working (not marked)</span><textarea class="numworkin tkwk" rows="3" aria-label="Your working"${dk} data-dk="w"${dis} placeholder="Step 1: find each mechanical advantage. Step 2: multiply them. Then check with the calculator.">${esc(done ? (s.w || d.w || '') : (d.w || ''))}</textarea></label>` : ''}${done ? `<small class="tkmsg ${s.ok ? 'ok' : 'no'}">${s.ok ? '✓ ' : ''}${esc(s.msg || (s.ok ? 'Correct!' : 'Checked.'))}</small>` : `<button type="button" class="mini tkchk" data-chkq="${q.id}">Check</button><small class="tkmsg" aria-live="polite"></small>`}</span>`;
 }
 function bindTkAns() {
   const st = CHDATA[CH.id].steps[GI], store = stepKey(CH.id, GI);
@@ -93,6 +93,7 @@ function bindTkAns() {
     const q = (st.qs || []).find(x => x.id === box.dataset.qid); if (!q) return;
     const inp = $('.tkin', box), sel = $('.tksel', box), cb = $('[data-chkq]', box);
     if (inp) inp.addEventListener('input', e => draftSave(store, q.id, 'v', e.target.value, e.target));
+    const wk = $('.tkwk', box); if (wk) wk.addEventListener('input', e => draftSave(store, q.id, 'w', e.target.value, e.target));
     if (sel) sel.addEventListener('change', e => draftSave(store, q.id, 'u', e.target.value, e.target));
     if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter' && cb) { e.preventDefault(); cb.click(); } });
     /* Check here: press the matching question's own Check button (its answer is already copied in), so Your turn shows it done. Any problem message comes back to this box. */
@@ -117,6 +118,7 @@ function renderRail() {
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
+    ${/^c6/.test(CH.id) && (st.qs || []).some(q => q.type === 'num') ? remindersHTML() : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
@@ -222,7 +224,7 @@ function tryNext() {
   const go = () => { if (last) setCTab(chd.challenge ? 'challenge' : 'review'); else setStep(GI + 1); };
   if (stepDone(CH.id, GI)) { go(); return; }
   if (hasQs() && !qsDone() && QSTATE !== 'pop') {
-    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok) left.push(taskPlain(chd.steps[GI].tasks[i])); });
+    const left = []; if (!CARDS_SEEN) left.push('read the information cards'); taskState().forEach((ok, i) => { if (!ok && !taskQ(chd.steps[GI].tasks[i])) left.push(taskPlain(chd.steps[GI].tasks[i])); });   // a task that is a question is answered in Your turn, which Next opens, so it is not nagged about (Tom, 3 Nov 2026)
     if (!left.length) { qPlace('pop'); return; }
     openModal(`<div class="modal"><h2>Have you finished the Do this list?</h2><p>The questions are about what you see in the arena, so it helps to finish these first:</p><ul>${left.map(t => `<li>${esc(t)}</li>`).join('')}</ul><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Go back to the arena</button><button type="button" class="go" id="contAnyway">Continue anyway →</button></div></div>`);
     $('#contAnyway').addEventListener('click', () => { closeModal(); qPlace('pop'); });

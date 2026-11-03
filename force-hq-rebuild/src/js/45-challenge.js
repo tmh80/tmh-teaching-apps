@@ -248,7 +248,7 @@ function renderShopCourse(ch, wm, host, save) {
   let cur = Math.max(0, wm.findIndex(m => !get(m.id).done)), judged = null;
   const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>${remindersHTML()}
     <div class="gl" id="shCalc" hidden></div><div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
@@ -257,10 +257,13 @@ function renderShopCourse(ch, wm, host, save) {
     $('.mtabs', card).innerHTML = wm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-sr="${i}" class="${g.done ? 'done' : ''}">${g.done ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
     $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal}</p>`;
     $('#shClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
-    const cb = $('#shCalc', card), lh = $('.labhost', card), needCalc = !!m.calc && !s.calcDone; cb.hidden = !needCalc; lh.hidden = needCalc;
-    if (needCalc) {
-      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><p class="scaleNote">${m.calc.hints}</p><div class="row"><input type="number" step="any" id="shCalcIn" aria-label="Your answer" style="width:7em"> <b>${m.calc.unit}</b> <button type="button" class="go" id="shCalcGo">Check</button></div><div class="fb" id="shCalcFb" hidden></div>`;
-      $('#shCalcGo', card).addEventListener('click', () => { const v = parseFloat($('#shCalcIn', card).value); if (isNaN(v)) return; const ok = Math.abs(v - m.calc.ans) <= m.calc.tol; save(m, { calcDone: true, calcMsg: ok ? `Yes, ${fmt(m.calc.ans, 0)} ${m.calc.unit}. The builder is unlocked.` : `The weight is ${fmt(m.calc.ans, 0)} ${m.calc.unit} (mass × g). The builder is unlocked.` }); paint(); });
+    const cb = $('#shCalc', card), lh = $('.labhost', card), needCalc = !!m.calc && !s.calcSeen; cb.hidden = !needCalc; lh.hidden = needCalc;
+    if (needCalc && s.calcDone) {
+      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><div class="fb ok">${s.calcMsg}</div><p class="scaleNote">Why it matters: the weight is the load. Mechanical advantage = load ÷ effort, and Smooshy can pull ${m.cap} N at most, so the weight tells you how big your mechanical advantage must be.</p><div class="row"><button type="button" class="go" id="shCalcOpen">Open the builder →</button></div>`;
+      $('#shCalcOpen', card).addEventListener('click', () => { save(m, { calcSeen: true }); paint(); });
+    } else if (needCalc) {
+      cb.innerHTML = `<p><b>Calculate first:</b> ${m.calc.p}</p><p class="scaleNote">${m.calc.hints}</p><p class="scaleNote">Why: you need the weight to work out the mechanical advantage the job needs. The builder opens after you check.</p><div class="row"><input type="number" step="any" id="shCalcIn" aria-label="Your answer" style="width:7em"> <b>${m.calc.unit}</b> <button type="button" class="go" id="shCalcGo">Check</button></div><div class="fb" id="shCalcFb" hidden></div>`;
+      $('#shCalcGo', card).addEventListener('click', () => { const v = parseFloat($('#shCalcIn', card).value); if (isNaN(v)) return; const ok = Math.abs(v - m.calc.ans) <= m.calc.tol; save(m, { calcDone: true, calcMsg: ok ? `Yes, ${fmt(m.calc.ans, 0)} ${m.calc.unit}. Well done!` : `The weight is ${fmt(m.calc.ans, 0)} ${m.calc.unit} (mass × g). Your answer was ${fmt(v, 1)} ${m.calc.unit}.` }); paint(); });
     }
     const nx = $('#shNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
     $('#shLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.hit ? 'ok' : ''}">Pull ${i + 1}: ${r.desc}, ${r.capped ? 'needs ' + r.need.toFixed(1) + ' N (too much)' : 'pull ' + r.E.toFixed(1) + ' N'}${r.hit ? ' ✓ loaded!' : ''}</li>`).join('');
@@ -298,7 +301,7 @@ function renderRescueCourse(ch, wm, host, save) {
   if (cur < 0) cur = 0;
   const card = h('section', { class: 'panel mission', id: 'mi-rescue' }); host.appendChild(card);
   card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a rescue stage"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="rsClues"></div><div class="row"><button type="button" class="ghost sm" id="rsNext">Show a clue</button></div></details>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="rsClues"></div><div class="row"><button type="button" class="ghost sm" id="rsNext">Show a clue</button></div></details>${remindersHTML()}
     <div class="labhost"></div>
     <div class="mcomp" id="rsComp"><label for="rsPred"><b>🖥️ Mission computer:</b> <span id="rsQ"></span></label> <input type="number" step="any" id="rsPred" style="width:7em" aria-label="Your prediction"> <b id="rsUnit"></b><p class="scaleNote">Type any number and Smooshy can try it.</p></div>
     <div class="fb" id="rsFb" hidden></div><ol class="blog" id="rsLog"></ol><ul class="objs" data-o></ul><div class="row" id="rsMore"></div>`;

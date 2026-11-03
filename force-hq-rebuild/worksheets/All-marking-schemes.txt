@@ -333,7 +333,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Part 4: Compound ma
 Total: 17 marks.
 
 Mark scheme
-Q1 (8 marks, 1 per item): Simple machine: A crowbar, A ramp, An axe, A single flagpole pulley. Compound machine: A pair of scissors, A building-site crane, A bicycle, A car jack with a handle. MYP: A i
+Q1 (8 marks, 1 per item): Simple machine: A crowbar, A ramp, A doorstop, A single flagpole pulley. Compound machine: A pair of scissors, A building-site crane, A bicycle, A car jack with a handle. MYP: A i
 Q2 (2 marks): 150 N (accept 149.5 to 150.5). 1 mark for the answer with its unit (N), 1 for correct working: Total mechanical advantage = 6 × 3 = 18, so the effort is 2,700 ÷ 18 = 150 N.. MYP: A ii
 Q3 (2 marks): 1 mark for the answer: 25. 1 mark for the reason: The second machine multiplies a force the first machine has already made bigger. Confidence is not marked. MYP: A ii
 Q4 (2 marks): The correct order is 1st D (The handle turns the winch's axle), 2nd A (The axle winds in the cable with a bigger force), 3rd B (The cable pulls on the pulley block), 4th C (The supporting ropes share the load and lift it). 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0. MYP: A i

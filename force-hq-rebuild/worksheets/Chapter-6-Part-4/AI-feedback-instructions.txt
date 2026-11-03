@@ -24,7 +24,7 @@ Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 subst
 WRITTEN ANSWER KEY
 
 === Force HQ Ch6 Part 4 (Compound machines) worksheet (17 marks) · MYP: A i, A ii ===
-Q1 Sort it, 8 marks, 1 per item [A i]: Simple machine: A crowbar, A ramp, An axe, A single flagpole pulley. Compound machine: A pair of scissors, A building-site crane, A bicycle, A car jack with a handle.
+Q1 Sort it, 8 marks, 1 per item [A i]: Simple machine: A crowbar, A ramp, A doorstop, A single flagpole pulley. Compound machine: A pair of scissors, A building-site crane, A bicycle, A car jack with a handle.
 Q2 Calculate, 2 marks [A ii]: 150 N (accept 149.5 to 150.5). 1 mark for the answer with its unit (N), 1 for correct working: Total mechanical advantage = 6 × 3 = 18, so the effort is 2,700 ÷ 18 = 150 N..
 Q3 Answer and reason, 2 marks [A ii]: 1 mark for the answer: 25. 1 mark for the reason: The second machine multiplies a force the first machine has already made bigger. Confidence is not marked.
 Q4 Put in order, 2 marks [A i]: The correct order is 1st D (The handle turns the winch's axle), 2nd A (The axle winds in the cable with a bigger force), 3rd B (The cable pulls on the pulley block), 4th C (The supporting ropes share the load and lift it). 2 marks if every letter is right; 1 mark if only two neighbouring letters are swapped; otherwise 0.

@@ -367,7 +367,7 @@ CHDATA.c6 = {
       model: 'He needs a mechanical advantage of 600 ÷ 60 = 10. The supporting ropes share the tank\'s weight, so with 10 supporting ropes his effort is 10 times smaller than the load, 60 N. The catch is that he has to pull 10 times as much rope as the height the tank rises: 20 m of rope for a 2 m lift. The work he does stays the same: 60 × 20 = 600 × 2 = 1,200 J.',
       check: ['Works out the mechanical advantage needed (600 ÷ 60 = 10)', 'Says the supporting ropes share the load, so the effort is smaller', 'Says he must pull a longer distance of rope (10 times the height, 20 m)', 'Says the work stays the same (force × distance)'] },
     /* ---------- Part 4 Check (compound machines) ---------- */
-    { id: 'c6r18', obj: ['Ai'], type: 'sort', p: 'Is each of these a simple machine or a compound machine? Sort them.', groups: ['Simple machine', 'Compound machine'], items: [['A crowbar', 0], ['A ramp', 0], ['An axe', 0], ['A single flagpole pulley', 0], ['A pair of scissors', 1], ['A building-site crane', 1], ['A bicycle', 1], ['A car jack with a handle', 1]] },
+    { id: 'c6r18', obj: ['Ai'], type: 'sort', p: 'Is each of these a simple machine or a compound machine? Sort them.', groups: ['Simple machine', 'Compound machine'], items: [['A crowbar', 0], ['A ramp', 0], ['A doorstop', 0], ['A single flagpole pulley', 0], ['A pair of scissors', 1], ['A building-site crane', 1], ['A bicycle', 1], ['A car jack with a handle', 1]] },
     { id: 'c6r19', obj: ['Aii'], type: 'num', p: 'A winch with a mechanical advantage of 6 drives a pulley system with 3 supporting ropes. What effort lifts a 2,700 N load?', unit: 'N', units: UNITS_W, ans: 150, tol: 0.5, ladder: true, hints: ['Total mechanical advantage = 6 × 3.', 'That is 18. Then effort = load ÷ total mechanical advantage.', 'Type 2700 ÷ 18 into the calculator.'], work: 'Total mechanical advantage = 6 × 3 = 18, so the effort is 2,700 ÷ 18 = 150 N.' },
     { id: 'c6r20', obj: ['Aii'], type: 'reason', sure: true, p: 'Two machines, each with a mechanical advantage of 5, are joined so the first one drives the second. What is the total mechanical advantage?',
       opts: ['25', '10', '5', '2.5'], a: 0,
@@ -538,3 +538,14 @@ c6s('pl3').cards.push(CFACT('Ancient Egyptian builders probably used ramps to ha
 c6s('pl4').cards.push(CFACT('The Archimedes screw, a screw turning inside a tube, has been lifting water for over 2,000 years, and some are still in use today.', 'A car jack lets one person lift one side of a car by turning a handle, thanks to a screw with a very small pitch.'));
 c6s('k1').cards.push(CFACT('One of the world\'s strongest cranes, the Taisun in China, has lifted about 20,000 tonnes in one go.'));
 c6s('p5b').cards.push(CFACT('A clean, oiled bicycle chain is one of the most efficient machines there is: well over 90% of the work you put in reaches the back wheel.'));
+
+/* A "Reminders" fold-out for every Chapter 6 page where students calculate: how to find each mechanical advantage and what working to show (Tom, 3 Nov 2026). */
+function remindersHTML() {
+  return `<details class="clue remind"><summary>📌 Reminders: how to find mechanical advantage</summary><div class="rmgrid gl">
+    <div><b>Weight (the load)</b> = mass × g. g is 9.8 N/kg on Earth, 3.7 on Mars, 1.6 on the Moon and 4.2 on Glimmer-9.</div>
+    <div><b>Mechanical advantage (MA)</b> = load ÷ effort. So the effort = load ÷ MA.</div>
+    <div><b>Lever:</b> MA = effort arm ÷ load arm. <b>Pulley:</b> MA = number of supporting ropes. <b>Ramp:</b> MA = length ÷ height. <b>Winch:</b> MA = handle radius ÷ axle radius.</div>
+    <div><b>Compound machine:</b> find the MA of each part, then <b>multiply</b> them: total MA = MA₁ × MA₂ × MA₃.</div>
+    <div><b>Distances:</b> hand travel = MA × the height lifted. Cable = ropes × ramp length. Work = force × distance.</div>
+    <div><b>Working to show:</b> 1. Write the MA of each part. 2. Multiply them. 3. Work out the effort or the distance. 4. Check it against the limits in the job.</div></div></details>`;
+}

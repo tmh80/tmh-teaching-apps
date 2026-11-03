@@ -44,10 +44,10 @@ with sync_playwright() as p:
   check('task box locked after checking', pg.locator('#rail .tkans').first.locator('.tkin').is_disabled())
   check('task box shows the answer and a tick', pg.locator('#rail .tkans').first.locator('.tkin').input_value() == '0.6' and '✓' in pg.locator('#rail .tkans').first.locator('.tkmsg').inner_text())
   check('f5 has separate check tasks', 'Check puzzle 1' in pg.locator('#rail .tasks').inner_text())
-  # 5. the unfinished-tasks modal names the question
+  # 5. a task that is a question is answered in Your turn (Next opens it), so the unfinished-tasks modal no longer nags about it (Tom, 3 Nov 2026)
   ev("qPlace('dock')"); pg.wait_for_timeout(100); pg.click('#gNext'); pg.wait_for_timeout(300)
-  m = pg.locator('.modal').inner_text()
-  check('modal names the question', 'What velocity does the astronaut reach?' in m and "What is the pod's mass?" in m)
+  m = pg.locator('.modal').inner_text() if pg.locator('.modal').count() else ''
+  check('modal does not nag about question tasks', 'What velocity does the astronaut reach?' not in m and "What is the pod's mass?" not in m)
   check('modal lists the Space Dome check for puzzle 1', 'Check puzzle 1' in m and 'rescue pod' not in m)
   pg.click('.modal [data-close]'); pg.wait_for_timeout(100)
   # 6. a calculate task ticks once the answer has been checked, and the "Check it" reading completes itself in the simulation
