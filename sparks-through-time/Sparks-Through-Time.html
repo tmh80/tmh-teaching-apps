@@ -429,6 +429,8 @@ table.data th{background:var(--panel-2)}
 .hw-stop small, .hw-part small{display:block; color:var(--muted); font-size:.82rem}
 .hw-yr{font-family:var(--font-display); font-weight:800; color:hsl(var(--hue) 60% var(--hue-l))}
 .hw-part{display:flex; gap:10px; align-items:flex-start; padding:6px 0}
+.hw-chal{display:grid; gap:8px; padding:12px; border:2px solid var(--accent); border-radius:12px; min-width:0}
+.hw-chal .seg{max-width:100%}
 .hw-stop input, .hw-part input{width:18px; height:18px; accent-color:var(--accent); margin-top:3px}
 .hw-col label input[type=text], .hw-col textarea{font:inherit; width:100%; padding:7px 10px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
 .hw-out{width:100%; font-family:var(--font-mono); font-size:.82rem; line-height:1.5; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink); white-space:pre-wrap}
@@ -7282,12 +7284,14 @@ function renderTeacher(){
     if (noReview) filesBox.append(h('p',{class:'legend'}, 'The stops you ticked have no worksheet because no review + worksheet part is ticked.'));
   }
   const partBox = h('div',{class:'hw-parts'}), partCb = {}, isChal = k=>k==='challenge' || k==='creview';
-  const optCb = h('input',{type:'checkbox', id:uid('ho'), checked: !!saved.challengeOpt, style:{flex:'none'}});
-  Object.entries(PARTS_HW).forEach(([k,p])=>{ const id = uid('hp'); const cb = partCb[k] = h('input',{type:'checkbox', id, checked: saved.parts.includes(k)}); cb.addEventListener('change', ()=>{ const had = saved.parts.some(isChal); saved.parts = PART_ORDER.filter(x=>x===k ? cb.checked : saved.parts.includes(x)); if (isChal(k)){ const has = saved.parts.some(isChal); if (has && !had) saved.challengeOpt = true; if (!has) saved.challengeOpt = false; optCb.checked = !!saved.challengeOpt; } save(); }); partBox.append(h('label',{for:id, class:'hw-part'}, cb, h('span',{}, h('b',{}, p.label), h('small',{}, p.desc)))); });
-  /* like Force HQ's Optional tick: a Challenge is optional when first ticked, and ticking Optional ticks the Challenge */
-  optCb.addEventListener('change', ()=>{ saved.challengeOpt = optCb.checked; if (optCb.checked && !saved.parts.some(isChal)){ saved.parts = PART_ORDER.filter(x=>isChal(x) || saved.parts.includes(x)); partCb.challenge.checked = partCb.creview.checked = true; } save(); });
-  const optNote = h('p',{class:'feedback hint', hidden:true}, 'Only the Challenge is ticked, so it is the whole task and can\u2019t be optional. Tick a Foundation part or a build task as well.');
-  partBox.append(h('label',{for:optCb.id, class:'hw-part'}, optCb, h('span',{}, h('b',{}, 'Make the \u2b50 Challenge optional'), h('small',{}, 'Everyone does the other parts, then keen students can carry on into the Challenge. It adds a separate optional worksheet.'))), optNote);
+  const chalTicks = h('div',{class:'hw-parts'}), chalSeg = h('div',{}), chalWhat = h('p',{class:'legend'});
+  const chalMode = ()=>!saved.parts.some(isChal) ? 'off' : saved.challengeOpt ? 'opt' : 'req';
+  const setChal = v=>{ saved.challengeOpt = v==='opt'; saved.parts = PART_ORDER.filter(x=>isChal(x) ? (v==='off' ? false : saved.parts.includes(x) || !saved.parts.some(isChal)) : saved.parts.includes(x)); partCb.challenge.checked = saved.parts.includes('challenge'); partCb.creview.checked = saved.parts.includes('creview'); drawChal(); save(); };
+  const drawChal = ()=>{ const m = chalMode(); chalSeg.innerHTML = ''; chalSeg.append(seg([['off','Leave it out'],['opt','Optional'],['req','Everyone does it']], m, setChal, 'Should students do the Challenge?'));
+    chalWhat.textContent = {off:'The Challenge isn’t part of this task.', opt:'Everyone does the parts above. Students who want to stretch themselves can carry on into the Challenge. It has its own worksheet, and it’s fine if they don’t hand it in.', req:'Every student does the Challenge as part of this task.'}[m]; chalTicks.hidden = m==='off'; };
+  Object.entries(PARTS_HW).forEach(([k,p])=>{ const id = uid('hp'); const cb = partCb[k] = h('input',{type:'checkbox', id, checked: saved.parts.includes(k)}); cb.addEventListener('change', ()=>{ saved.parts = PART_ORDER.filter(x=>x===k ? cb.checked : saved.parts.includes(x)); if (isChal(k)){ if (!saved.parts.some(isChal)) saved.challengeOpt = false; drawChal(); } save(); }); (isChal(k) ? chalTicks : partBox).append(h('label',{for:id, class:'hw-part'}, cb, h('span',{}, h('b',{}, p.label), h('small',{}, p.desc)))); });
+  const optNote = h('p',{class:'feedback hint', hidden:true}, 'Only the Challenge is set, so it is the whole task and can’t be optional. Tick a Foundation part or a build task as well.');
+  const chalBlock = h('div',{class:'hw-chal'}, h('b',{}, '⭐ Should students do the Challenge?'), chalSeg, chalWhat, chalTicks, optNote); drawChal();
   const extra = (key, label)=>{ const id = uid('hx'); const cb = h('input',{type:'checkbox', id, checked: !!saved[key]}); cb.addEventListener('change', ()=>{ saved[key] = cb.checked; save(); }); return h('label',{for:id, class:'hw-part'}, cb, h('span',{}, label)); };
   const grade = h('input',{type:'text', id:uid('gr'), value:saved.grade}); grade.addEventListener('input', ()=>{ saved.grade = grade.value; save(); });
   const note = h('textarea',{id:uid('nt'), rows:2, placeholder:'Optional extra message for students'}, saved.note); note.addEventListener('input', ()=>{ saved.note = note.value; save(); });
@@ -7340,7 +7344,7 @@ function renderTeacher(){
     if (saved.timeTest) L.push('Complete the Time Test and note your score');
     if (saved.passport && stops.length) L.push('Take a screenshot of your Time Passport');
     if (uploads.length) L.push(`Upload ${uploads.length>1 ? 'your files' : /worksheet/.test(uploads[0]) ? 'the worksheet' : /build sheet/.test(uploads[0]) ? 'the build sheet' : 'the screenshot'} to Toddle`);
-    if (optParts.length){ L.push('OPTIONAL:'); stops.forEach(s=>L.push(...stopTask(s, optParts, optNamed))); }
+    if (optParts.length){ L.push('OPTIONAL (if you want to stretch yourself):'); stops.forEach(s=>L.push(...stopTask(s, optParts, optNamed))); }
     const optFiles = optParts.length ? stops.flatMap(s=>stopFiles(s, optParts, optNamed)) : [];
     L.push('');
     L.push('Submission');
@@ -7377,7 +7381,7 @@ function renderTeacher(){
     h('div',{class:'hw-grid'},
       h('div',{class:'card hw-col'}, h('h3',{}, '1. Choose the stops'), h('p',{class:'legend'}, 'Pick as many as you like.'), h('div',{class:'row'}, h('button',{class:'btn small', type:'button', onclick:()=>{ saved.stops = STOPS.map(s=>s.id); Store.save(); renderTeacher(); }}, 'Select all'), h('button',{class:'btn small', type:'button', onclick:()=>{ saved.stops = []; Store.save(); renderTeacher(); }}, 'Clear')), stopBox, h('h3',{style:{marginTop:'14px'}}, 'Builder\u2019s Workshop tasks'), h('p',{class:'legend'}, 'Open-ended builds (circuits, atoms, power grids). Each one ends with a build sheet PDF.'), taskBox),
       h('div',{class:'hw-col'},
-        h('div',{class:'card hw-col'}, h('h3',{}, '2. Choose what they do'), h('p',{class:'legend'}, 'Tip: to let keen students choose the \u2b50 Challenge, tick \u201cMake the Challenge optional\u201d below. To set it only for particular students, make two Toddle tasks: one with the Foundation parts ticked, one with the Challenge parts ticked.'), partBox, extra('timeTest', h('span',{}, h('b',{}, 'Finish with the Time Test'), h('small',{}, 'Mixed questions from every stop'))), extra('passport', h('span',{}, h('b',{}, 'Ask for a Time Passport screenshot'), h('small',{}, 'Shows which stamps they earned')))),
+        h('div',{class:'card hw-col'}, h('h3',{}, '2. Choose what they do'), h('p',{class:'legend'}, 'Tip: to set the \u2b50 Challenge for particular students only, make two Toddle tasks: one with the Foundation parts ticked, one with the Challenge parts ticked.'), partBox, chalBlock, extra('timeTest', h('span',{}, h('b',{}, 'Finish with the Time Test'), h('small',{}, 'Mixed questions from every stop'))), extra('passport', h('span',{}, h('b',{}, 'Ask for a Time Passport screenshot'), h('small',{}, 'Shows which stamps they earned')))),
         h('div',{class:'card hw-col'}, h('h3',{}, '3. Details'), h('label',{for:grade.id}, 'Class: ', grade), h('div',{class:'ctrl'}, h('label',{}, 'Where will students do it?'), seg([['classwork','In class'],['homework','At home'],['either','Both']], saved.mode||'homework', v=>{ saved.mode = v; save(); }, 'Classwork or homework')), h('label',{for:note.id}, 'Message for students: '), note),
         h('div',{class:'card hw-col'}, h('div',{class:'row between'}, h('h3',{}, '4. Copy into Toddle'), h('span',{}, 'Time: ', mins)), out, h('div',{class:'row'}, copyBtn), h('p',{class:'legend'}, 'Paste this prompt into Toddle\u2019s AI task maker. Then paste the step 5 text into the task\u2019s AI feedback settings.')),
         h('div',{class:'card hw-col'}, h('h3',{}, '5. AI feedback instructions (paste into Toddle\u2019s AI feedback box)'), lockBox),
