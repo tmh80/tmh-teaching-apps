@@ -54,3 +54,6 @@ Tom is a British science teacher (Head of MS Sciences at WAB), **a teacher, not 
 - **Vocabulary and flashcards.** The Journal Vocab tab exists. Spaced-repetition flashcards are banked, not built. Review how they fit together.
 - **CER paragraph review (needs Opus).** Review how claim, evidence and reasoning writing is introduced and built up slowly across the chapters. Tom needs Opus for this specifically: plan it as an Opus job (a review and a proposed scaffold sequence), then Sonnet builds from it.
 - Other open items: Tom to class-test Chapters 1 to 4; Chapter 1's table question `r10` overflows a 390 px phone by about 46 px; Chapter 1 information-overload test with a colleague; MYP D ii has no Check question outside Part 5 (Part 5's c6r26 will cover it); Toddle's real limit for the AI feedback box; testing the Download PDF button on a real student account.
+
+## Top priority next: rebuild the final rescue mission (Part 5)
+Tom playtested Parts 4 and 5 on 3 Nov 2026 and wants the final mission redone as a free-form, creative rescue builder with quality-based scoring, a spend-a-hint tree and a clearer ending. Full brief for Opus: `docs/Force_HQ_Rescue_Rebuild_Brief.md`.
