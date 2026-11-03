@@ -7306,7 +7306,7 @@ function renderTeacher(){
     let total = 0, optTotal = 0; const L = [];
     const titles = stops.map(s=>s.title).concat(tasks.map(x=>x.t.title));
     const kind = saved.mode==='classwork' ? 'classwork' : saved.mode==='either' ? 'classwork or homework' : 'homework';
-    L.push(`Create a ${kind} task on Toddle for my ${saved.grade||'Grade 6'} science class, using the Sparks Through Time electricity simulation (an HTML file I will attach to the task).`);
+    L.push(`Create a ${kind} task on Toddle for my ${saved.grade||'Grade 6'} science class, using the Sparks Through Time electricity simulation (an HTML file students open from the course flow).`);
     L.push('');
     L.push(`Task title: Sparks Through Time – ${titles.length>2 ? titles.length + ' activities' : titles.join(' and ')}`);
     stops.forEach(s=>{ reqParts.forEach(p=>{ total += PARTS_HW[p].mins(s); }); optParts.forEach(p=>{ optTotal += PARTS_HW[p].mins(s); }); });
@@ -7315,39 +7315,42 @@ function renderTeacher(){
     L.push(`Estimated time for students: approx. ${total} minutes${total>60 ? (saved.mode==='classwork' ? ' (it can be split across more than one lesson)' : saved.mode==='either' ? ' (it can be split across lessons or evenings)' : ' (it can be split across more than one evening)') : ''}.${optTotal ? ` There is also an optional \u2b50 Challenge of approx. ${optTotal} minutes for students who want to go further.` : ''}`);
     if (saved.mode==='either') L.push('Students can work on this in lessons and finish anything left over at home.');
     L.push('');
-    L.push('About the resource (for the task description): Sparks Through Time is a time-travelling electricity lab. Each stop visits a moment in history and has two parts. Foundation: Learn steps, Explore free play and a Foundation review with its own worksheet. Challenge (an extension): hands-on missions and a harder Challenge review with its own worksheet. Progress saves automatically on the student’s own device, so students should use the same device and browser each time.');
+    L.push('About the resource (background for you, not for the student instructions): Sparks Through Time is a time-travelling electricity lab. Each stop visits a moment in history and has two parts. Foundation: Learn steps, Explore free play and a Foundation review with its own worksheet. Challenge (an extension): hands-on missions and a harder Challenge review with its own worksheet. Progress saves automatically on the student’s own device, so students should use the same device and browser each time.');
     L.push('');
-    L.push('Student instructions (please keep these as numbered steps, in friendly language):');
-    let n = 1;
-    L.push(`${n++}. Download and open the Sparks Through Time file that comes with this task. Use the same device and browser every time so your progress is saved.`);
-    if (saved.mode==='either') L.push(`   (If you switch between a school device and a home device, your answers won\u2019t move with you, so make your worksheet before you switch.)`);
-    const stopSteps = (s, ps)=>{
-      L.push(`${n++}. Travel to the stop “${s.yearLabel}: ${s.title}” (${s.topic}).`);
-      if (ps.includes('learn')) L.push(`   • Work through all ${s.learn.length} Learn steps. Make your prediction before each test, then read the explanation. You’ll collect the Learn stamp at the end.`);
-      if (ps.includes('explore')) L.push(`   • Spend about 10 minutes in the Explore tab trying your own experiments.`);
-      if (ps.includes('review')) L.push(`   • Foundation review: answer all ${(s.review||[]).length} questions. Every card turns green when it’s done. Then press “Make my Foundation worksheet”, type your name, choose “Save as PDF” and save the file.`);
-      if (ps.includes('challenge')) L.push(`   • Challenge: complete every mission on the ⭐ Missions tab to earn the Challenge stamp.`);
-      if (ps.includes('creview') && !ps.includes('challenge')) L.push(`   \u2022 The Challenge review opens after the missions. You don\u2019t need to do the missions this time, so on the Challenge review tab press \u201cContinue to the Challenge review anyway\u201d.`);
-      if (ps.includes('creview')) L.push(`   • Challenge review: answer all ${(s.creview||[]).length} questions. Then press “Make my Challenge worksheet”, type your name, choose “Save as PDF” and save the file.`);
-    };
-    if (reqParts.length) stops.forEach(s=>stopSteps(s, reqParts));
-    tasks.forEach(({ws, t})=>{
-      L.push(`${n++}. Builder\u2019s Workshop: open \u201c${ws.title}\u201d on the home page and choose the build task \u201c${t.title}\u201d.`);
-      L.push(`   \u2022 The task: ${plain(t.brief)}`);
-      if (t.steps) t.steps.slice(1).forEach(x=>L.push(`   \u2022 ${x}`));
-      L.push(`   \u2022 Keep going until every check turns green: ${t.checks.join('; ')}.`);
-      if (!t.steps) L.push(`   \u2022 Answer the ${t.questions.length} questions about your build, then press \u201cMake my build sheet\u201d, type your name and class, choose \u201cSave as PDF\u201d and save the file.`);
-      if (ws.id==='grid') L.push('   \u2022 Your build sheet includes your scorecard, showing the positives and the hidden costs of the power grid you designed.');
-    });
-    if (saved.timeTest) L.push(`${n++}. Finish with the Time Test on the home page (two questions from every stop) and note your score.`);
-    if (optParts.length){ L.push(''); L.push('Optional extra (for students who want to go further):'); n = 1; stops.forEach(s=>stopSteps(s, optParts)); if (optParts.includes('creview')) L.push(`This makes ${stops.length>1 ? 'an extra Challenge worksheet PDF for each stop' : 'a second worksheet PDF'}. Upload ${stops.length>1 ? 'them' : 'it'} too if you do it.`); }
+    /* student-facing text stays short: the sim gives students all the guidance they need */
+    const q = s=>`“${s.title}” `;
+    const foundName = ps=>ps.includes('learn') && ps.includes('review') ? 'Foundation section' : ps.includes('learn') ? 'Foundation Learn steps' : 'Foundation review';
+    const chalName = ps=>ps.includes('challenge') && ps.includes('creview') ? 'Challenge missions and review' : ps.includes('challenge') ? 'Challenge missions' : 'Challenge review';
+    const stopTask = (s, ps, named)=>{ const tag = named ? q(s) : '', the = named ? '' : 'the ', out = [];
+      if (ps.includes('learn') || ps.includes('review')) out.push(`Complete ${the}${tag}${foundName(ps)}`);
+      if (ps.includes('explore')) out.push(`Try your own experiments in ${named ? `the ${tag}` : 'the '}Explore tab`);
+      if (ps.includes('review')) out.push(`Save ${named ? `the ${tag}` : 'the '}Foundation worksheet`);
+      if (ps.includes('challenge') || ps.includes('creview')) out.push(`Complete ${the}${tag}${chalName(ps)}`);
+      if (ps.includes('creview')) out.push(`Save ${named ? `the ${tag}` : 'the '}${chalName(ps)} worksheet`);
+      return out; };
+    const stopFiles = (s, ps, named)=>{ const tag = named ? q(s) : ''; return [ps.includes('review') ? `${tag}Foundation worksheet PDF` : null, ps.includes('creview') ? `${tag}${chalName(ps)} worksheet PDF` : null].filter(Boolean); };
+    const reqStops = reqParts.length ? stops : [], optNamed = stops.length>1;
+    const uploads = reqStops.flatMap(s=>stopFiles(s, reqParts, true)).concat(tasks.map(x=>`${q(x.t)}build sheet PDF`), saved.passport && stops.length ? ['Time Passport screenshot'] : []);
+    L.push('Student instructions: please use exactly the wording between the lines below as the student instructions on the task. Don’t add any steps or detail, because the app itself gives students all the guidance they need. Everything else in this prompt is for you, not for the students.');
+    L.push('---');
+    L.push('Your Task:');
+    L.push('Open Sparks Through Time in the course flow');
+    reqStops.forEach(s=>L.push(...stopTask(s, reqParts, true)));
+    tasks.forEach(({t})=>L.push(`Complete the ${q(t)}build task in the Builder’s Workshop`, `Save the ${q(t)}build sheet`));
+    if (saved.timeTest) L.push('Complete the Time Test and note your score');
+    if (saved.passport && stops.length) L.push('Take a screenshot of your Time Passport');
+    if (uploads.length) L.push(`Upload ${uploads.length>1 ? 'your files' : /worksheet/.test(uploads[0]) ? 'the worksheet' : /build sheet/.test(uploads[0]) ? 'the build sheet' : 'the screenshot'} to Toddle`);
+    if (optParts.length){ L.push('OPTIONAL:'); stops.forEach(s=>L.push(...stopTask(s, optParts, optNamed))); }
+    const optFiles = optParts.length ? stops.flatMap(s=>stopFiles(s, optParts, optNamed)) : [];
     L.push('');
-    L.push('What students submit:');
-    if (parts.includes('review')) L.push(`• ${stops.length>1 ? 'One Foundation worksheet PDF for each stop' : 'The Foundation worksheet PDF'} (${stops.map(s=>s.title).join(', ')}). The last page of each worksheet is a feedback page showing the auto-marked score.`);
-    if (parts.includes('creview')) L.push(`• ${optParts.length ? 'Optional: ' : ''}${stops.length>1 ? `${optParts.length ? 'one' : 'One'} Challenge worksheet PDF for each stop` : `${optParts.length ? 'the' : 'The'} Challenge worksheet PDF`} (${stops.map(s=>s.title).join(', ')})${optParts.length ? ', if they did the optional Challenge' : ''}.`);
-    if (tasks.length) L.push(`\u2022 ${tasks.length>1 ? 'One build sheet PDF for each build task' : 'The build sheet PDF'} (${tasks.map(x=>x.t.title).join(', ')}). It includes a picture of their build, the build checklist, their results and a feedback page.`);
-    if (saved.passport && stops.length) L.push('• A screenshot of the Time Passport on the home page showing the stamps collected.');
-    if (saved.timeTest) L.push('• Their Time Test score.');
+    L.push('Submission');
+    if (uploads.length || saved.timeTest || optFiles.length){
+      L.push('You should attach the following files to this task:');
+      L.push(...uploads);
+      if (saved.timeTest) L.push('Your Time Test score');
+      if (optFiles.length) L.push('OPTIONAL:', ...optFiles);
+    } else L.push('There is nothing to attach to this task.');
+    L.push('---');
     L.push('');
     L.push('Learning goals:');
     stops.forEach(s=>L.push(`• ${s.title}: ${goalFor(s)}`));
@@ -7370,7 +7373,7 @@ function renderTeacher(){
   root.append(
     h('button',{class:'btn small back', type:'button', onclick:renderHome}, '← Back to the time machine'),
     h('section',{class:'stop-hero', style:{'--hue':220}}, h('span',{class:'eyebrow'}, 'For teachers'), h('h2',{}, 'Set classwork or homework'),
-      h('p',{}, 'Tick the stops and the parts you want students to do, in class, at home or both. The instructions below update as you go. Copy them into the Toddle AI task maker, then attach the Sparks Through Time HTML file to the task.')),
+      h('p',{}, 'Tick the stops and the parts you want students to do, in class, at home or both. The instructions below update as you go. Copy them into the Toddle AI task maker, and make sure the Sparks Through Time HTML file is in the course flow.')),
     h('div',{class:'hw-grid'},
       h('div',{class:'card hw-col'}, h('h3',{}, '1. Choose the stops'), h('p',{class:'legend'}, 'Pick as many as you like.'), h('div',{class:'row'}, h('button',{class:'btn small', type:'button', onclick:()=>{ saved.stops = STOPS.map(s=>s.id); Store.save(); renderTeacher(); }}, 'Select all'), h('button',{class:'btn small', type:'button', onclick:()=>{ saved.stops = []; Store.save(); renderTeacher(); }}, 'Clear')), stopBox, h('h3',{style:{marginTop:'14px'}}, 'Builder\u2019s Workshop tasks'), h('p',{class:'legend'}, 'Open-ended builds (circuits, atoms, power grids). Each one ends with a build sheet PDF.'), taskBox),
       h('div',{class:'hw-col'},
