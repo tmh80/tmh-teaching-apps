@@ -1,5 +1,7 @@
 # Force HQ: rebuild brief for the final rescue mission (Chapter 6, Part 5, "Operation Gummy Lift")
 
+> **Workshop closed to students (4 Nov 2026).** Tom's live file has the Workshop switched off until the rescue is finished. The switch is the line `const WORKSHOP_OPEN = false;` near the top of `src/js/20-shell.js`. `dist/test.html` is always built with it open, so tests are unaffected; `dist/test-closed.html` and `tests/workshop_closed.py` cover the closed version. On the `rescue-rebuild` branch, set it to `true` first so the preview shows the Workshop. It stays `true` when merged to `main` at the final step, and only then does Tom's Toddle file open the Workshop.
+
 For: Opus, in a fresh chat. From: Tom (teacher, not a programmer: explain changes in plain words, do all git work, commit after each working stage, tell Tom which file to upload to Toddle).
 Written 3 Nov 2026 after Tom playtested Parts 4 and 5. Repo `tmh80/tmh-teaching-apps`, folder `force-hq-rebuild/`. Read `CLAUDE.md`, `README.md`, `.claude/skills/wab-science-sim-builder/SKILL.md` and `docs/Force_HQ_Next_Chat_Handoff.md` first.
 

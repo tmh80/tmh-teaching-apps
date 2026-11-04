@@ -1,11 +1,15 @@
 /* ===== Shell: views, home, name and class, teacher mode ===== */
+/* The Workshop (Chapter 6) stays closed to students until the rescue rebuild is finished. To open it, change false to true: this one line
+   brings back its chapter card, home page entry, stamps, teacher page rows, Explore Workshop and Build tasks. Students' saved Workshop work is
+   never deleted while it is closed. dist/test.html is always built with it open, so the Workshop tests keep working (see build.py). */
+const WORKSHOP_OPEN = false;
 const CHAPTERS = [
   { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
   { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: true, arena: 'Space Dome', icon: 'pair' },
   { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' },
-  { id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: true, arena: 'Workshop', icon: 'gear' }
+  { id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: WORKSHOP_OPEN, arena: 'Workshop', icon: 'gear' }
 ];
 /* "Start Part 1" / "Start the Extension": Chapter 6 uses Part 1 to Part 4 and an Extension instead of Foundation and Extension */
 const startWord = p => /^Part \d/.test(p) ? p : 'the ' + p;
@@ -80,7 +84,8 @@ function renderHome() {
   $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
     ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
-  { const w = nextSection() && SECTIONS.some(x => x.ch === 'c6'); const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
+  $('#workshopCard').hidden = !WORKSHOP_OPEN; $('#workshopCard').parentElement.style.gridTemplateColumns = WORKSHOP_OPEN ? '' : 'minmax(0,1fr)';
+  if (WORKSHOP_OPEN) { const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
     $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop</span><h3>Save Captain Smooshy!</h3><p>A gummy bear astronaut is stuck in a crater and only has 60 N of pull. Learn how levers, pulleys, ramps, wedges and screws work, then use them to rescue his spaceship.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
   $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
     + SECTIONS.map(s => `<div class="sbitem"><div class="stamp ${stamps[s.id] ? 'on' : 'ghoststamp'}" title="${s.stamp}">${s.stamp}</div><span>${stamps[s.id] ? s.stamp : `Chapter ${s.n} ${s.part}`}</span></div>`).join('')
@@ -110,8 +115,8 @@ function homeClick(e) {
   if (hit.id === 'main') { $('#chapterCards').scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); return; }
   if (hit.id === 'snow' && CHDATA.c3f) { openChapter('c3f'); return; }
   if (hit.id === 'space' && CHDATA.c4f) { openChapter('c4f'); return; }
-  if (hit.id === 'workshop' && CHDATA.c6a) { openChapter('c6a'); return; }
-  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.' }[hit.id]);
+  if (hit.id === 'workshop' && WORKSHOP_OPEN) { openChapter('c6a'); return; }
+  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is still being built, and it will open soon!' }[hit.id]);
 }
 
 /* ---------- modal helpers ---------- */

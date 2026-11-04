@@ -1,5 +1,7 @@
 # Force HQ rebuild: handoff for a new chat (updated 2 Nov 2026)
 
+> **Workshop closed to students (4 Nov 2026).** Tom's live file has the Workshop switched off until the rescue is finished. The switch is the line `const WORKSHOP_OPEN = false;` near the top of `src/js/20-shell.js`. `dist/test.html` is always built with it open, so tests are unaffected; `dist/test-closed.html` and `tests/workshop_closed.py` cover the closed version. On the `rescue-rebuild` branch, set it to `true` first so the preview shows the Workshop. It stays `true` when merged to `main` at the final step, and only then does Tom's Toddle file open the Workshop.
+
 Start here. **If you are the chat that builds the remaining Chapter 6 stages, read `docs/Force_HQ_Next_Chat_Handoff.md` first.** Read this file, then `Force_HQ_Brief.md` (file map and design notes) and `Force_HQ_Backlog.md`. For Chapter 5 also read `docs/Chapter5_Script.md` (the full script and engine spec) and `docs/Question_Types_Guide.md` (new question types and the pause/snapshot tools). Tom is a teacher, not a programmer: explain in plain language and handle all git work yourself.
 
 ## 0. Where things stand

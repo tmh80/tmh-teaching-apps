@@ -155,8 +155,8 @@ function makeBtSheet(id) {
 }
 
 /* ---------- Explore > Workshop ---------- */
-const exploreShopOpen = () => isTeacher() || !!dbGet('stamps', {}).c6a;
-const btOpen = () => isTeacher() || !!dbGet('stamps', {}).c6d;
+const exploreShopOpen = () => WORKSHOP_OPEN && (isTeacher() || !!dbGet('stamps', {}).c6a);
+const btOpen = () => WORKSHOP_OPEN && (isTeacher() || !!dbGet('stamps', {}).c6d);
 const BT_FREE = { mach: 'lever', allow: ['lever', 'pulley', 'winch', 'ramp', 'wedge', 'screw', 'build'], classPick: true, rampH: true, load: 294, mass: 30, massOpts: [10, 30, 60, 120, 200, 400, 1000], loadName: '30 kg load', loadShort: 'load', loadId: 'mass30', worldPick: true, lifts: { build: 2 }, maxTravel: 1.5,
   bRoutes: [[0, 'Straight up'], [4, '4 m ramp'], [6, '6 m ramp'], [10, '10 m ramp'], [15, '15 m ramp']] };
 const BT_FREE_SHOW = ['wsmach', 'wsload', 'wsworld', 'wsctl', 'wspull', 'readMA', 'readWork', 'rulers', 'builder', 'mfric', 'readEff', 'bTotMA', 'bCable', 'bTravel'];
