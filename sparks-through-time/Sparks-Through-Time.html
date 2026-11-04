@@ -3700,7 +3700,7 @@ registerStop({
 });
 
 /* ================= Electromagnet rigs: paperclip bench and crane (Stop 5) ================= */
-const CORES = {iron:{name:'Iron nail', f:1, col:'#7d8494'}, steel:{name:'Steel rod', f:.7, col:'#aeb6c4'}, aluminium:{name:'Aluminium rod', f:.04, col:'#d9dde5'}, wood:{name:'Wooden dowel', f:.03, col:'#b98a52'}, none:{name:'No core (air)', f:.1, col:null}};
+const CORES = {iron:{name:'Iron nail', f:1, col:'#7d8494'}, steel:{name:'Steel rod', f:.7, col:'#aeb6c4'}, aluminium:{name:'Aluminium rod', f:.1, col:'#d9dde5'}, wood:{name:'Wooden dowel', f:.1, col:'#b98a52'}, none:{name:'No core (air)', f:.1, col:null}};
 function clipsFor(s, noise){ if (!s.on) return 0; let v = (s.coils/10)*s.cells*2*CORES[s.core].f; if (noise) v += (Math.random()*2-1)*Math.max(.6, v*.07); return clamp(Math.round(v), 0, 40); }
 const CLIP_D = 'M2 6.5 a4 4 0 0 1 8 0 V19 a4 4 0 0 1 -8 0 V9 M4.6 9.5 V18 a1.4 1.4 0 0 0 2.8 0 V8';
 function svgPt(svg, ev){ const p = svg.createSVGPoint(); p.x = ev.clientX; p.y = ev.clientY; const m = svg.getScreenCTM(); return m ? p.matrixTransform(m.inverse()) : {x:0, y:0}; }
@@ -3917,7 +3917,7 @@ function craneRig(el, opts){
       if (!L.mag){ if (!L.told){ L.told = true; say(`The <b>aluminium</b> cans didn’t move at all. Aluminium isn’t a magnetic metal, so even a strong electromagnet can’t pick it up.`); } return; }
       if (strength <= 0){ say(`Nothing moved. This electromagnet is too weak to lift anything${s.core!=='iron' && CORES[s.core].f<.5 ? `. ${/^[aeiou]/i.test(CORES[s.core].name) ? 'An' : 'A'} ${CORES[s.core].name.toLowerCase()} isn’t magnetic, so it hardly helps` : ''}. What could you change?`); return; }
       if (heldW() + L.w <= strength){ L.st = 'fly'; L.hitRim = false; changed = true; }
-      else { L.shake = 30; say(heldW() ? `It can’t lift that one as well. It’s already holding ${heldW()*KG} kg.` : `The ${L.kind==='car' ? 'car' : L.kind==='beam' ? 'beam' : 'bale'} wobbled, but it’s too heavy! It weighs <b>${L.w*KG} kg</b> and this magnet can only lift <b>${strength*KG} kg</b>.`); }
+      else { L.shake = 30; say(heldW() ? `It can’t lift that one as well. It’s already holding ${heldW()*KG} kg.` : `The ${L.kind==='car' ? 'car' : L.kind==='beam' ? 'beam' : 'bale'} wobbled, but it’s too heavy! Its mass is <b>${L.w*KG} kg</b> and this magnet can only lift <b>${strength*KG} kg</b>.`); }
     });
     if (changed){ say('Lifted! Now move the crane and switch off to drop it.'); if (opts.onLift) opts.onLift(loads.filter(L=>L.st==='held' || L.st==='fly')); emit(); }
   }
@@ -4135,7 +4135,7 @@ registerStop({
     drawLog();
   },
   challenge: makeChallenge('<p>Sturgeon’s idea soon went to work. Today, giant electromagnets sort rubbish, move scrap cars and load steel. Take the controls of a real <b>electromagnet crane</b>: tap the switch in the cabin, drag the crane, and switch off to drop the load.</p>', ()=>[
-    {id:'e1', title:'The recycling plant', text:'Recycling plants use electromagnets to pull <b>steel</b> cans out of the rubbish. Move all <b>3 bales of steel cans</b> into the steel skip. Each bale weighs <b>400 kg</b>.',
+    {id:'e1', title:'The recycling plant', text:'Recycling plants use electromagnets to pull <b>steel</b> cans out of the rubbish. Move all <b>3 bales of steel cans</b> into the steel skip. Each bale has a mass of <b>400 kg</b>.',
       build(area, m){ let asked = false; craneRig(area, {controls:['coils','cells'], start:{coils:10, cells:1}, startX:330, belt:[255, 535], label:'Recycling crane over a belt of steel and aluminium cans',
         loads:[{kind:'bale', mag:true, w:8, x:280}, {kind:'bale', mag:false, w:8, x:337}, {kind:'bale', mag:true, w:8, x:394}, {kind:'bale', mag:false, w:8, x:451}, {kind:'bale', mag:true, w:8, x:508}],
         target:{kind:'skip', name:'Steel skip', x1:570, x2:642, floor:330, wallH:112},
@@ -5654,7 +5654,7 @@ circuits:[
 ],
 electromagnets:[
   {t:'mcq', obj:['Di'], q:'At the recycling plant, the electromagnet lifted the steel cans but not the aluminium cans. Why?', options:['Steel is a magnetic metal, but aluminium is not','Aluminium cans are much heavier than steel cans','The magnet was always switched off over the aluminium','Aluminium is a magnetic metal, but steel is not'], answer:0, explain:'Magnets only attract magnetic materials such as iron and steel. That is how recycling plants sort steel from aluminium.'},
-  {t:'num', obj:['Aii'], q:'A crane’s electromagnet can lift <b>1,200 kg</b>. Each bale of steel cans weighs <b>400 kg</b>. How many bales can it lift at once?', answer:3, unit:'bales', tol:0, explain:'1,200 ÷ 400 = 3 bales.'},
+  {t:'num', obj:['Aii'], q:'A crane’s electromagnet can lift <b>1,200 kg</b>. Each bale of steel cans has a mass of <b>400 kg</b>. How many bales can it lift at once?', answer:3, unit:'bales', tol:0, explain:'1,200 ÷ 400 = 3 bales.'},
   {t:'num', obj:['Aii'], q:'With 50 coils, each cell adds <b>500 kg</b> of lifting power. What is the fewest number of cells needed to lift a <b>1,800 kg</b> van?', answer:4, unit:'cells', tol:0, explain:'3 cells lift 1,500 kg, which isn’t enough. 4 cells lift 2,000 kg, so you need 4.'},
   {t:'table', obj:['Ai'], q:'How good is each material as the core of an electromagnet?', rowHead:'Core', cols:[{name:'How good is it?', options:['The strongest','Works, but weaker than iron','Hardly helps at all']}], rows:[{label:'Iron', ans:['The strongest']},{label:'Steel', ans:['Works, but weaker than iron']},{label:'Aluminium', ans:['Hardly helps at all']},{label:'Wood', ans:['Hardly helps at all']}], explain:'Iron and steel are magnetic materials. Aluminium and wood are not, so they don’t make the magnet stronger.'},
   {t:'mcq', obj:['Aii'], q:'The car was hanging from the crane over the <b>ground</b>, not the crusher, when the operator switched off. What happened?', options:['It fell straight down onto the ground below','It floated across to the crusher on its own','It stayed stuck because the coil was still a magnet','It slid sideways towards the control cabin'], answer:0, explain:'Switching off stops the current, so the coil stops being a magnet. The load falls straight down from wherever it is.'},
@@ -5752,7 +5752,7 @@ const MISSION_QS = {
     MQ('Why must the cells face the same way?', ['So their pushes add together instead of cancelling','So the current can flow both ways at once','So the bulb can rest between each push','So the electrons go round more slowly'], 'Cells facing opposite ways push against each other.')],
   'circuits:twoswitch':[MQ('Why does the bulb need <b>both</b> switches closed?', ['Both switches are in the same single loop, so either one can break it','Each switch carries exactly half of the current','The two switches are on separate branches','One switch gives energy and the other gives current'], 'Switches in series must all be closed.'),
     MQ('Where could a circuit like this be useful?', ['A machine that only starts when two buttons are pressed','A house where each light has its own switch','A flashlight with a single on-off button','A string of fairy lights that flash'], 'Two switches in series make a safety lock.')],
-  'electromagnets:e2':[MQ('Why did 2 cells fail to lift the car, even with 50 coils?', ['With 50 coils, 2 cells only lift 1,000 kg, but the car weighs 1,500 kg','2 cells push the current the wrong way round the coil','The car is made of aluminium, so it isn’t magnetic','50 coils is too many coils for only 2 cells'], 'Each cell added about 500 kg of lifting power.'),
+  'electromagnets:e2':[MQ('Why did 2 cells fail to lift the car, even with 50 coils?', ['With 50 coils, 2 cells only lift 1,000 kg, but the car has a mass of 1,500 kg','2 cells push the current the wrong way round the coil','The car is made of aluminium, so it isn’t magnetic','50 coils is too many coils for only 2 cells'], 'Each cell added about 500 kg of lifting power.'),
     MQ('Why use the fewest cells that will do the job?', ['Cells cost money, so extra strength is wasted','More cells always make the magnet weaker','Fewer cells make the car lighter to lift','The crusher only works with exactly 3 cells'], 'Engineers make a magnet strong enough for the job, not stronger.')],
   'electromagnets:e3':[MQ('Why did you need lots of coils and cells with a steel core?', ['Steel is magnetic but weaker than iron, so you needed more to make up for it','Steel is not a magnetic material at all','A steel core makes the beam heavier','Steel cores only work with exactly 4 cells'], 'Steel works as a core, just not as well as iron.'),
     MQ('Why didn’t the aluminium core work?', ['Aluminium isn’t a magnetic material','Aluminium is too heavy for the crane','Aluminium blocks the current in the coil','Aluminium makes the magnet far too strong'], 'Only magnetic materials like iron and steel make the magnet stronger.')],
