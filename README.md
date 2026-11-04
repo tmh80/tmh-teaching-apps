@@ -19,6 +19,7 @@ Interactive science sims and labs for WAB MS Science (Grade 6–8). Each app is 
 
 - `shared/`: the reusable lab shell (journal, info cards, question box, calculator, worksheet export, tour). Planned; see `shared/README.md`.
 - `.claude/skills/wab-science-sim-builder/`: how Claude builds simulations (free play, discovery, extension).
+- `.claude/skills/wab-sim-review-questions/`, `wab-sim-toddle-outputs/` and `wab-sim-open-builders/`: companions to the sim builder, covering questions, Toddle outputs and open builders.
 - `.claude/skills/wab-virtual-lab-builder/`: how Claude builds formative virtual labs with a lab report and feedback sheet (Paper Plane Lab is the template).
 
 Both load automatically in Claude Code.
