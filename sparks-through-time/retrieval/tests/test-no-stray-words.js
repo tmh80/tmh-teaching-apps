@@ -15,6 +15,7 @@ const BAD=/\bnull\b|\bundefined\b|\bNaN\b|\[object/;
  await pg.evaluate(()=>renderRtReview()); await look('review pick'); await click('start|begin|go'); await pg.waitForTimeout(200); await look('review');
  await pg.evaluate(()=>renderRtTimeTest()); await look('tt start'); await click('^Start'); await pg.waitForTimeout(200); await look('tt');
  for(const s of RTCODES()) { await pg.evaluate(c=>renderRtClassSet(c),s); await pg.waitForTimeout(40); await look('set '+s); }
+ for(const id of await pg.evaluate(()=>STOPS.map(s=>s.id))) for(const tab of ['learn','review','challenge','creview']){ await pg.evaluate(([i,t])=>{ const s=STOPS.find(x=>x.id===i); prog(i).learn=true; prog(i).challenge=true; renderStop(s,t); },[id,tab]); await pg.waitForTimeout(120); await look(id+' '+tab); }
  await pg.evaluate(()=>renderTeacher()); await pg.waitForTimeout(200); await look('teacher');
  console.log(n+' screens checked; '+bad.length+' with stray words; page errors '+errs.length); [...new Set(bad)].slice(0,12).forEach(x=>console.log(x)); errs.slice(0,3).forEach(x=>console.log(x));
  await b.close(); process.exit(bad.length||errs.length?1:0);

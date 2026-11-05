@@ -5487,7 +5487,7 @@ function renderReview(panel, stop, part){
     const pts = items.reduce((a,_,i)=>a + (st[i] && st[i].done ? (st[i].pts||0) : 0), 0), maxp = items.reduce((a,_,i)=>a + (st[i] && st[i].done ? (st[i].max||0) : 0), 0);
     bar.append(h('div',{class:'rv-bar-top'}, h('b',{}, `${done} of ${items.length} done`), h('span',{class:'legend'}, `Points so far: ${pts} of ${maxp}`)),
       h('div',{class:'chip-row'}, items.map((it,i)=>h('button',{class:'chip rv-chip ' + (st[i] && st[i].done ? 'ok' : ''), type:'button', onclick:()=>scrollToEl(document.getElementById(A + i))}, `${i+1}`))),
-      done===items.length ? h('div',{class:'rv-complete', role:'status'}, `✓ Complete! All ${items.length} questions are done.`) : null,
+      done===items.length ? h('div',{class:'rv-complete', role:'status'}, `✓ Complete! All ${items.length} questions are done.`) : '',
       h('div',{class:'row'}, done===items.length ? h('button',{class:'btn primary', type:'button', onclick:()=>showWorksheet(stop, 'student', part)}, `📄 Make my ${PN} worksheet`) : h('button',{class:'btn primary', type:'button', onclick:()=>preExport()}, '✓ Complete my review'), h('button',{class:'btn small', type:'button', onclick:()=>showWorksheet(stop, 'blank', part)}, 'Blank copy (for printing)')));
   }
   function preExport(){
