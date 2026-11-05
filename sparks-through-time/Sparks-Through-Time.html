@@ -9567,9 +9567,9 @@ function rtFcRun(ids, kind, cards){
       card.innerHTML = ''; card.classList.toggle('back', flipped);
       const long = s => s.length > 70 ? ' long' : '';
       if (!flipped){
-        card.append(h('span', {class: 'tag'}, f.tag + (retry ? ' · another go' : '')), h('div', {class: 'big' + long(f.front)}, f.front), f.ask ? h('div', {class: 'ask'}, f.ask) : null, h('span', {class: 'tap'}, 'Think of your answer, then flip'));
+        card.append(h('span', {class: 'tag'}, f.tag + (retry ? ' · another go' : '')), h('div', {class: 'big' + long(f.front)}, f.front), f.ask ? h('div', {class: 'ask'}, f.ask) : '', h('span', {class: 'tap'}, 'Think of your answer, then flip'));
       } else {
-        card.append(h('span', {class: 'tag'}, 'Answer'), h('div', {class: 'big' + long(f.back)}, f.back), h('div', {class: 'small'}, f.front), typed.trim() ? h('div', {class: 'mine'}, 'You wrote: ' + typed.trim()) : null);
+        card.append(h('span', {class: 'tag'}, 'Answer'), h('div', {class: 'big' + long(f.back)}, f.back), h('div', {class: 'small'}, f.front), typed.trim() ? h('div', {class: 'mine'}, 'You wrote: ' + typed.trim()) : '');
       }
     }
     function flip(){
