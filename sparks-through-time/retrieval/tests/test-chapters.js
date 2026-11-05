@@ -22,7 +22,7 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
     return {id, n: it.length, arch: (s.reviewArchive || []).length, key: rvKey(s, 'f'), keys: (s.learnKeys || []).length, steps: s.learn.length, tagged: it.every(x => x.obj && x.obj.length), types: it.map(x => x.t).join(), strands: strandsLabel(sheetStrands(s, 'f')), noMyp: !/MYP|objective|criteri|strand/i.test(JSON.stringify(s.learn.map(l => [l.title, l.say])))}; }), [IDS]);
   shape.forEach(s => {
     ok(s.n === 6 && s.arch > 6, s.id + ' Check has 6 items and the old list is archived');
-    ok(s.key === s.id + '~f2', s.id + ' new review key'); ok(s.keys === s.steps, s.id + ' learnKeys match steps');
+    ok(s.key === s.id + (s.id === 'electromagnets' || s.id === 'generators' ? '~f3' : '~f2'), s.id + ' new review key'); ok(s.keys === s.steps, s.id + ' learnKeys match steps');
     ok(s.tagged, s.id + ' items tagged'); ok(/mark,write$/.test(s.types), s.id + ' ends mark, write'); ok(s.noMyp, s.id + ' no MYP words in Learn text');
   });
   ok(shape[0].steps === 7 && shape[1].steps === 8 && shape[2].steps === 7 && shape[3].steps === 5, 'step counts');
@@ -45,7 +45,8 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   await teacher(true);
   const goStep = async (id, idx) => { await open(id, 'learn'); await page.waitForSelector('.learn-card'); for (let k = 0; k < idx; k++){ await page.locator('.learn-card .btn.primary:has-text("Next step")').click(); } };
   const complete = async (m) => { await page.waitForSelector('.learn-card.step-done', {timeout: 4000}).then(() => ok(true, m), () => ok(false, m + ' (step did not complete)')); };
-  const markAll = async (labelIdx) => { const sents = page.locator('.mk-sent'); for (let i = 0; i < labelIdx.length; i++){ if (labelIdx[i] < 0) continue; await page.locator('.mk-lab').nth(labelIdx[i]).click(); await sents.nth(i).click(); } };
+  const markAll = async (labelIdx) => { const sents = page.locator('.mk-sent'); for (let i = 0; i < labelIdx.length; i++) for (let k = 0; k <= labelIdx[i]; k++) await sents.nth(i).click(); };
+  const gotIt = async (title) => { ok(await page.locator('.rw-teach').count() === 1 && await page.locator('.mk-sent, .rv-grid, .ask').count() === 0, title + ' teaches first, task hidden'); await page.locator('button:has-text("Got it")').click(); };
   const model = async () => { await page.locator('.rw-typed').last().fill('A sentence I wrote myself.'); await page.locator('button:has-text("Show me a model")').click(); };
 
   // 1A
@@ -62,9 +63,13 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   await page.locator('.ask .opt:has-text("With 10 coils it picked up 4 clips")').click(); await complete('1B Mark your evidence');
   // 1C
   await goStep('electromagnets', 6);
+  await gotIt('1C');
+  ok(/CER/.test(await page.locator('.rw-teach').innerText()) && /Dark shirts/.test(await page.locator('.rw-teach').innerText()), '1C names CER and gives an example');
+  ok((await page.locator('.mk-lab').allInnerTexts()).join() === 'Claim,Evidence,Reasoning', '1C uses the real labels from the start');
+  { const s0 = page.locator('.mk-sent').nth(0), tag = page.locator('.mk-tag').nth(0), seen = [await tag.innerText()]; for (let k = 0; k < 4; k++){ await s0.click(); seen.push(await tag.innerText()); } ok(seen.join() === 'No label,Claim,Evidence,Reasoning,No label', 'tap cycles through every label: ' + seen.join()); }
   await markAll([0, 1, 2]); await page.locator('.mk-check').click();
-  ok((await page.locator('.mk-lab').allInnerTexts()).join() === 'Claim,Evidence,Reasoning', '1C labels rename after Check');
-  ok(await page.locator('.rw-side .mk-tag').count() === 3, '1C evidence beside the box'); ok(await page.locator('.rw-strip .rw-w.on').innerText() === 'Write it', '1C strip moves to Write it');
+  ok(await page.locator('.rw-side .rw-graph').count() === 1 && /number of coils/.test(await page.locator('.learn-card, body').first().innerText()), '1C graph and question beside the box');
+  ok(!/My evidence/.test(await page.locator('body').innerText()), '1C no My evidence label on the model'); ok(await page.locator('.rw-strip .rw-w.on').innerText() === 'Write it', '1C strip moves to Write it');
   await page.locator('.rw-typed').fill('My results show that more coils make a stronger electromagnet.'); await page.locator('button:has-text("Show me a model")').click(); await complete('1C Take apart');
   // 2A
   await goStep('generators', 3);
@@ -82,22 +87,22 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   await page.locator('.rv-num-in').fill('2'); await page.locator('.ask, .rv-num-in').first(); await page.locator('button:has-text("Check")').last().click(); await complete('2B Test the hypothesis');
   // 2C
   await goStep('generators', 5);
-  await page.locator('.ask .opt:has-text("At 2 turns each second")').click(); await page.locator('.rw-cards .opt:has-text("It says support or contradict")').click(); await page.locator('.rw-cards .opt:has-text("It uses two numbers")').click(); await page.locator('.rw-cards .opt:has-text("It explains the science")').click();
+  await gotIt('2C'); await page.locator('.ask .opt:has-text("At 2 turns each second")').click(); await page.locator('.rw-cards .opt:has-text("It says support or contradict")').click(); await page.locator('.rw-cards .opt:has-text("It uses two numbers")').click(); await page.locator('.rw-cards .opt:has-text("It explains the science")').click();
   await page.locator('button:has-text("Check my cards")').click(); await complete('2C Weak or strong');
   ok((await page.locator('.rw-key-txt').allInnerTexts()).some(t => /Say support or contradict/.test(t)), '2C key idea');
   ok((await page.evaluate(() => STOPS.find(s => s.id === 'generators').learn.map(l => l.title))).indexOf('Read the wave') < 0, 'Read the wave removed');
   // 3A, 3B, 3C
   await goStep('acdc', 4);
-  await markAll([0, 1, 1, 2]); await page.locator('.mk-check').click(); ok((await page.locator('.mk-lab').allInnerTexts()).join() === 'Problem,Science,Solution', '3A rename'); await complete('3A Spot the structure');
+  await gotIt('3A'); ok((await page.locator('.mk-lab').allInnerTexts()).join() === 'Problem,Science,Solution', '3A real labels'); await markAll([0, 1, 1, 2]); await page.locator('.mk-check').click(); await complete('3A Spot the structure');
   await goStep('acdc', 5); await page.locator('button:has-text("Check my order")').click(); await complete('3B Put the cards in order');
   await goStep('acdc', 6);
   for (const t of ['The problem', 'The science idea', 'A number from the text']) await page.locator('.rw-plain .opt', {hasText: t}).click();
   await page.locator('.rw-plain button:has-text("Check")').click(); await model(); await complete('3C Fix a weak paragraph');
   // 4A, 4B
   await goStep('power', 3);
-  const vals = ['Fact', 'Opinion', 'Fact', 'Opinion']; for (let i = 0; i < 4; i++) await page.locator('.rv-grid select').nth(i).selectOption(vals[i]);
+  await gotIt('4A'); const vals = ['Fact', 'Opinion', 'Fact', 'Opinion']; for (let i = 0; i < 4; i++) await page.locator('.rv-grid select').nth(i).selectOption(vals[i]);
   await page.locator('.rw-plain button:has-text("Check")').click(); await model(); await complete('4A Fact or opinion');
-  await goStep('power', 4); await markAll([0, 0, 1]); await page.locator('.mk-check').click(); await model(); await complete('4B Sum it up');
+  await goStep('power', 4); await gotIt('4B'); await markAll([0, 0, 1]); await page.locator('.mk-check').click(); await model(); await complete('4B Sum it up');
   // saved after reload (Learn mark)
   await page.waitForTimeout(700); await page.waitForTimeout(1200); await page.reload(); await page.waitForTimeout(500); await teacher(true); await open('power', 'learn'); await page.waitForSelector('.learn-card');
   for (let k = 0; k < 4; k++) await page.locator('.learn-card .btn.primary:has-text("Next step")').click();
@@ -111,8 +116,8 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
     const idxs = await rightIdx(id); const card = page.locator('.rv-card').nth(4);
     ok((await card.locator('.rv-type').innerText()).toLowerCase() === 'mark it', id + ' type label');
     const wrong = id === 'power' || id === 'acdc';
-    for (let i = 0; i < idxs.length; i++){ let want = idxs[i]; if (wrong && i === 0) want = idxs[0] === 0 ? 1 : 0; if (want < 0) continue; await card.locator('.mk-lab').nth(want).click(); await card.locator('.mk-sent').nth(i).click(); }
-    if (id === 'electromagnets'){ await card.locator('.mk-sent').nth(0).click(); await card.locator('.mk-sent').nth(0).click(); await card.locator('.mk-sent').nth(0).click(); } // cycle back through labels
+    for (let i = 0; i < idxs.length; i++){ let want = idxs[i]; if (wrong && i === 0) want = idxs[0] === 0 ? 1 : 0; for (let k = 0; k <= want; k++) await card.locator('.mk-sent').nth(i).click(); }
+    if (id === 'electromagnets'){ for (let k = 0; k < 4; k++) await card.locator('.mk-sent').nth(0).click(); } // four taps go all the way round
     await card.locator('.mk-sent').nth(1).focus(); await page.keyboard.press('Enter');
     await card.locator('.mk-check').click();
     const pill = await card.locator('.rv-pill').innerText(); const n = idxs.length;
@@ -127,8 +132,9 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
     const needsPick = (id === 'electromagnets' || id === 'generators');
     if (needsPick){
       ok(await para.locator('textarea').evaluate(t => t.readOnly), id + ' box locked until points are tapped');
-      const pick = id === 'electromagnets' ? para.locator('tr.rw-row') : para.locator('.rw-graph g[data-i]');
-      await pick.nth(0).click(); await pick.nth(4).click();
+      const pick = para.locator('.rw-graph g[data-i]'); ok(await pick.count() === 4, id + ' new graph has four points');
+      ok(!/your own results|your graph/i.test(await para.innerText()), id + ' paragraph is a new context');
+      await pick.nth(0).click(); await pick.nth(1).click();
       ok(await para.locator('.rw-side li').count() === 2, id + ' tapped evidence beside the box');
     } else ok(await para.locator('.rw-side .mk-tag').count() === idxs.filter(a => a >= 0).length, id + ' marked evidence with right labels beside the box');
     const starters = await para.locator('.rw-starters .chip').count(); ok(starters === {electromagnets: 3, generators: 2, acdc: 1, power: 0}[id], id + ' starters fade: ' + starters);
@@ -144,6 +150,8 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   }
 
   /* ---------- worksheets ---------- */
+  for (const id of ['electromagnets', 'generators']){ const r = await page.evaluate(id => { const st = STOPS.find(x => x.id === id); showWorksheet(st, 'blank', 'f'); const el = document.querySelector('#ws-root .ws'); const res = {graphs: el.querySelectorAll('.rw-graph').length, white: /\bwhite\b/i.test(el.innerText)}; document.getElementById('ws-root').remove(); return res; }, id); ok(r.graphs === 1, id + ' blank sheet prints the graph'); ok(!r.white, id + ' no white on the sheet'); }
+  { const r = await page.evaluate(() => { const keep = Store.data.rv; Store.data.rv = {'electromagnets~f2': {0: {done: 1}, 4: {done: 1}, 5: {done: 1, text: 'old'}}}; const k = Object.keys(rvStore('electromagnets~f3')).join(); Store.data.rv = keep; return k; }); ok(r === '0,4', 'old Check answers kept, old paragraph cleared: ' + r); }
   await teacher(true);
   const ws = await page.evaluate(() => IDS_ => IDS_, 0);
   for (const id of IDS){

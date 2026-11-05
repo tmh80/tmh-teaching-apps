@@ -4,13 +4,15 @@ Quoted text is exact student text. *Teacher* items stay off student screens.
 
 ## Shared rules
 
+**Teach first (Tom, Nov 2026):** every skill is taught with a worked example before students use it (`rwTeach`). Learn teaches the skill; the Check applies it in a new context and never repeats Learn.
+
 **Routine:** a "Read it, Mark it, Write it" strip sits above each new step and paragraph, current word lit.
 
 **Fading:** three starters in Ch 1, two in Ch 2, one in Ch 3, none in Ch 4. The reminder fold-out is open in Ch 1, closed in Ch 2 and 3, hidden in Ch 4.
 
 **Key idea:** the largest text on its step.
 
-**Mark it (`mark`):** pick a coloured label, tap sentences to paint them. Some stay white. One go; one point per sentence. After Check, wrong sentences show the right label, and each shows its reason. Prints as numbered sentences with label boxes. Unscored in Learn.
+**Mark it (`mark`):** tap a sentence to label it; each tap moves to the next label, then back to no label. Some sentences need no label. One go; one point per sentence. After Check, wrong sentences show the right label, and each shows its reason. Prints as numbered sentences with label boxes. Unscored in Learn.
 
 **Paragraph card:** the `write` type with four ticks, titled "Data paragraph" or "Reading paragraph". Marked evidence sits beside the box, with corrected labels. In Ch 1 and 2 the student taps two rows or points first. Ticks below name a catalogue section 3 row.
 
@@ -45,34 +47,36 @@ Rig: coils only, 2 cells, iron core, no wobble. Table on screen at once.
 
 ### 1C Take apart a good paragraph
 
-**say:** "Here is a different test, with 1 to 4 cells and 30 coils each time. What is each sentence doing? Have a go before I tell you the names."  
-**Do this:** "Mark each sentence. Then write a claim for your results."  
-**Labels:** "Answers the question", "Gives the numbers", "Explains why". After Check they rename to Claim, Evidence, Reasoning.
+**say:** "Scientists share their results in a paragraph called a CER. Let's learn the three parts first. Then you will find them in a real paragraph."  
+**Teach card, "CER: Claim, Evidence, Reasoning":** "A good science paragraph does three jobs, in this order." Example question: "Do dark shirts get hotter in the sun than light shirts?" Claim (answers the question): "Dark shirts get hotter in the sun than light shirts." Evidence (gives numbers from the test, with units): "After 10 minutes the dark shirt was 38 °C, and the light shirt was 30 °C." Reasoning (explains why, using science): "Dark colours absorb more light energy, so the shirt heats up more." Button: "Got it. Let me try".  
+**Do this:** "Here is a different test, with 1 to 4 cells and 30 coils each time. Mark each sentence as Claim, Evidence or Reasoning."  
+**Labels:** Claim, Evidence, Reasoning.
   1. "The results show that more cells make a stronger electromagnet." Claim
   2. "With 1 cell it picked up 6 clips, and with 4 cells it picked up 24 clips." Evidence
   3. "More cells push a bigger current through the coil, so the magnetic field gets stronger." Reasoning
 **Key idea (after marking):** "Claim, Evidence, Reasoning. Say it, show it, explain it."  
-**Claim:** any text counts. Model: "My results show that more coils make a stronger electromagnet."  
+**Write:** "Your question was: does the number of coils change how strong an electromagnet is? Look at your results. Write one claim that answers this question." A graph of the coil results sits beside the box, headed "My results". Any text counts. Model: "My results show that more coils make a stronger electromagnet."  
 **Hint:** "Try starting with: My results show that…"
 
 ### Check
 
 Keep Q1 table (Aii), Q2 num (Aiii), Q3 multi (Ai), Q6 sort (Di).
 
-**Mark it** (*Teacher*: Cii). "Mia tested different cores, with 30 coils and 2 cells each time. Mark each sentence. Leave it white if it doesn't belong." Labels: Claim, Evidence, Reasoning.
+**Mark it** (*Teacher*: Cii). "Mia tested different cores, with 30 coils and 2 cells each time. Mark each sentence. Leave it with no label if it doesn't belong." Labels: Claim, Evidence, Reasoning.
 
 1. "The results show that an iron core makes the strongest electromagnet." Claim: "It answers the question."
 2. "With an iron core it picked up 12 clips." Evidence: "A number with a unit."
-3. "I enjoyed using the iron nail the most." White: "A feeling is no help here."
+3. "I enjoyed using the iron nail the most." No label: "A feeling is no help here."
 4. "With an aluminium core it picked up 1 clip." Evidence: "A second number to compare."
 5. "Iron becomes a strong magnet inside the coil, so the magnetic field is much stronger." Reasoning: "It explains why."
 
 **Data paragraph** (*Teacher*: Cii).
 
-**Prompt:** "Your question was: does the number of coils change how strong an electromagnet is? Tap two rows, then answer using your own results."  
-**Words to use:** coils, clips, magnetic field, stronger  
-**Starters:** "My results show that…"; "With … coils it picked up … clips, and with … coils…"; "This happens because…"  
-**Model (numbers from the rows tapped):** "My results show that more coils make a stronger electromagnet. With 10 coils it picked up 4 clips, and with 50 coils it picked up 20 clips. This happens because each coil adds to the magnetic field, so the electromagnet can hold more clips."  
+**Prompt:** "A scrapyard crane uses an electromagnet to lift old cars and scrap steel. The workers kept the coils the same and changed the number of cells. Their question: does the number of cells change how strong the crane's electromagnet is? Tap two points on the graph, then answer the question."  
+**Graph:** 1 cell 500 kg, 2 cells 1,000 kg, 3 cells 1,500 kg, 4 cells 2,000 kg. Prints on the worksheet.  
+**Words to use:** cells, mass, magnetic field, stronger  
+**Starters:** "The results show that…"; "With … cells it lifted…"; "This happens because…"  
+**Model (numbers from the points tapped):** "The results show that more cells make the crane's electromagnet stronger. With 1 cell it lifted a mass of 500 kg, and with 4 cells it lifted 2,000 kg. This happens because more cells push a bigger current through the coils, so the magnetic field gets stronger and holds more steel."  
 **Ticks:** data "what do the results show?" row; science tick "I explained the pattern using the magnetic field."
 
 ## Chapter 2: generators
@@ -103,10 +107,11 @@ Rig: turns of wire only, 60%, weak magnet. Empty graph beside it: "Turns of wire
 
 ### 2C Weak or strong?
 
-**say:** "Two students tested this hypothesis: faster spinning makes the peak voltage smaller. Which paragraph would convince you?"  
+**say:** "Let's learn how to write about a hypothesis. Then you will judge two students' paragraphs."  
+**Teach card, "A strong hypothesis paragraph":** "It works like a CER, but the claim says if the data support or contradict the hypothesis." Example hypothesis: "Dark shirts get hotter in the sun than light shirts." Say support or contradict: "The data support this hypothesis." Show two numbers: "After 10 minutes the dark shirt was 38 °C, and the light shirt was 30 °C." Explain the science: "Dark colours absorb more light energy, so the shirt heats up more."  
 **A:** "The data contradict the hypothesis. The line on the graph goes up. It was a really good generator."  
 **B:** "The data contradict the hypothesis. At 2 turns each second the peak was 1.0 V, but at 10 turns each second it was 5.0 V. The magnet moves past the coil faster, so it makes a bigger voltage."  
-**Do this:** "Tap the stronger paragraph. Then pick the three cards that make it strong."  
+**Do this:** "Two students tested this hypothesis: faster spinning makes the peak voltage smaller. Tap the stronger paragraph. Then pick the three cards that make it strong."  
 **Answer:** B. ✔ "It says support or contradict"; ✔ "It uses two numbers with units"; ✔ "It explains the science"; "It uses very long words"; "It tells us what the student liked"  
 **Hint:** "What does B add?"  
 **Key idea (the student's cards):** "Say support or contradict. Show two numbers. Explain the science." These fill the Ch 2 fold-out.
@@ -121,17 +126,18 @@ Q6 fix: "in step with the turns each second" and "at 7 turns each second". Answe
 
 1. "With a weak magnet the peak voltage was 1.2 V." Evidence: "A number with a unit."
 2. "With a strong magnet it was 3.6 V." Evidence: "A second number to compare."
-3. "We used a red generator." White: "True, but colour doesn't test the hypothesis."
+3. "We used a red generator." No label: "True, but colour doesn't test the hypothesis."
 4. "A stronger magnet makes a bigger voltage in the coil as it moves past." Reasoning: "It explains why."
 5. "So the data support the hypothesis." Claim: "It says support or contradict."
 
 **Data paragraph** (*Teacher*: Cii, Ciii).
 
-**Prompt:** "A student says: 'Twice the turns of wire gives twice the peak voltage.' Tap two points on your graph. Do the data support or contradict this?"  
-**Words to use:** turns of wire, moving magnet, peak voltage, twice  
-**Starters:** "The data…"; "At … turns of wire the peak voltage was…"  
-**Model:** "The data support this hypothesis. At 200 turns of wire the peak voltage was 2.4 V, and at 400 turns of wire it was 4.8 V. That is twice the turns and twice the peak voltage. The moving magnet makes a voltage in every turn of wire, so more turns add up to a bigger voltage."  
-**Ticks:** data "support or contradict?" row; science tick "I explained the pattern using a magnet moving past more wire."
+**Prompt:** "A bike dynamo is a small generator. The wheel spins a magnet next to a coil of wire. A cyclist says: 'If my wheel turns twice as fast, the dynamo makes twice the peak voltage.' Tap two points on the graph that test this. Do the data support or contradict it?"  
+**Graph:** 2 turns each second 1.6 V, 4 turns 3.2 V, 6 turns 4.8 V, 8 turns 6.4 V. Prints on the worksheet.  
+**Words to use:** turns each second, moving magnet, peak voltage, twice  
+**Starters:** "The data…"; "At … turns each second the peak voltage was…"  
+**Model:** "The data support this hypothesis. At 2 turns each second the peak voltage was 1.6 V, and at 4 turns each second it was 3.2 V. That is twice as fast and twice the peak voltage. The moving magnet passes the coil faster, so it makes a bigger voltage."  
+**Ticks:** data "support or contradict?" row; science tick "I explained the pattern using a magnet moving past the coil faster."
 
 ## Chapter 3: acdc
 
@@ -139,9 +145,10 @@ Q6 fix: "in step with the turns each second" and "at 7 turns each second". Answe
 
 ### 3A Spot the structure
 
-**say:** "Science texts often have three parts. Read this text about your phone charger. What job does each sentence do?"  
-**Do this:** "Mark each sentence."  
-**Labels:** "What's the trouble?", "How does it work?", "What's better now?" After Check they rename to Problem, Science, Solution.
+**say:** "Science texts often have three parts. Let's learn them first. Then you will find them in a text about your phone charger."  
+**Teach card, "Problem, Science, Solution":** "Many science texts do three jobs. Find the jobs and the text gets easier to read." Example text: keeping a hospital running. Problem (what is going wrong?): "A storm can cut the power to a hospital." Science (how does it work?): "A backup generator spins a magnet inside coils of wire, and this makes electricity." Solution (what is better now?): "The lights and machines keep running until the power comes back."  
+**Do this:** "Mark each sentence as Problem, Science or Solution."  
+**Labels:** Problem, Science, Solution.
   1. "A phone battery needs about 5 V of DC, but a socket in Beijing gives 220 V of AC." Problem
   2. "A transformer inside the charger lowers the voltage." Science
   3. "Another part changes the AC to DC." Science
@@ -170,16 +177,16 @@ Q6 fix: "in step with the turns each second" and "at 7 turns each second". Answe
 
 Keep Q2 num (Aii), Q4 sort (Ai), Q5 order (Di), Q6 mcq (Di).
 
-**Mark it, "The Waterfall and the City"** (*Teacher*: Di). "Read the question first: how did engineers get electricity from Niagara Falls to Buffalo? Mark each sentence. Leave it white if it doesn't help." Labels: Problem, Science, Solution. Glossary pop-up, epoch: "a long period of time".
+**Mark it, "The Waterfall and the City"** (*Teacher*: Di). "Read the question first: how did engineers get electricity from Niagara Falls to Buffalo? Mark each sentence. Leave it with no label if it doesn't help." Labels: Problem, Science, Solution. Glossary pop-up, epoch: "a long period of time".
 
 1. "Niagara Falls could make enough electricity for a whole city, but Buffalo was about 40 km away." Problem: "The power was far from the city."
 2. "Edison's low-voltage DC wasted so much energy as heat that customers had to live less than 2 km from a power station." Problem: "It shows what stopped DC."
-3. "In 1889 he wrote that he had 'always consistently opposed' high-voltage AC." White: "This is his view."
+3. "In 1889 he wrote that he had 'always consistently opposed' high-voltage AC." No label: "This is his view."
 4. "A transformer can raise the voltage of AC." Science: "How the machine works."
 5. "When the voltage goes up, the current goes down, so the wires waste far less energy." Science: "Why less energy is wasted."
 6. "In November 1896, engineers used transformers to send AC from the falls to Buffalo at 11,000 V." Solution: "What they did."
 7. "Buffalo's electric trams could now run on power from the falls." Solution: "What was better afterwards."
-8. "Nikola Tesla called this 'a new and glorious epoch in the history of humanity.'" White: "This is praise."
+8. "Nikola Tesla called this 'a new and glorious epoch in the history of humanity.'" No label: "This is praise."
 
 After marking, keep the "Who won?" DC note, with 1896.
 
@@ -197,7 +204,8 @@ After marking, keep the "Who won?" DC note, with 1896.
 
 ### 4A Fact or opinion?
 
-**say:** "Some sentences can be checked, and some tell you what a person thinks. Try sorting these before I give you the rule."  
+**say:** "Some sentences can be checked, and some tell you what a person thinks. Let's learn the rule first. Then you will sort some sentences."  
+**Teach card, "Fact or opinion?":** "Good readers check which sentences they can trust." Fact (can be checked with a measurement, a chart or a record): "Water boils at 100 °C at sea level." Opinion (tells you what someone thinks; words like should, best and ugly are clues): "Everyone should drink more tea."  
 **Do this:** "Sort each sentence. Then write one fact and one opinion about coal."  
 **Fact:** "Coal releases about 820 g of CO₂ for each kWh."; "A hydro dam needs a river."  
 **Opinion:** "Solar panels look ugly on old roofs."; "Every town should ban coal."  
@@ -207,8 +215,9 @@ After marking, keep the "Who won?" DC note, with 1896.
 
 ### 4B Sum it up
 
-**say:** "Good readers see both sides. Read the question first: should our school put solar panels on its roof? Then mark the text."  
-**Do this:** "Mark each sentence. Then sum it up in one sentence."  
+**say:** "Good readers see both sides. Let's learn how to sum up both sides. Then you will try it with solar panels."  
+**Teach card, "Sum up both sides":** "A good summary gives a benefit and a drawback in one sentence." Example question: should our school buy electric buses? Benefit: "Electric buses release no fumes on the road." Drawback: "They need hours to charge." Sum it up (join both sides with the word but): "Electric buses release no fumes on the road, but they need hours to charge."  
+**Do this:** "Read the question first: should our school put solar panels on its roof? Mark each sentence. Then sum it up in one sentence."  
 **Labels:** Benefit, Drawback.
   1. "For each kWh, solar panels release about 48 g of CO₂, and coal releases about 820 g." Benefit
   2. "Sunlight is free, and it will not run out." Benefit
