@@ -490,10 +490,10 @@ table.data th{background:var(--panel-2)}
 .rw-opt{display:block; width:100%; text-align:left; margin:6px 0}
 .rw-plain .rv-pill,.rw-plain .rv-num{display:none}
 .rw-cards{display:grid; gap:8px; margin:8px 0}
-.mk{display:grid; gap:10px; --mk0:#3b82f6; --mk1:#e08a1e; --mk2:#22a06b; --mk3:#a855f7}
+:root{--mk0:#3b82f6; --mk1:#e08a1e; --mk2:#22a06b; --mk3:#a855f7}
+.mk{display:grid; gap:10px}
 .mk-labels{display:flex; flex-wrap:wrap; gap:8px}
-.mk-lab{font:inherit; font-weight:700; padding:6px 14px; border-radius:999px; border:3px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
-.mk-lab.on{box-shadow:0 0 0 3px var(--ink)}
+.mk-lab{font:inherit; font-weight:700; padding:6px 14px; border-radius:999px; border:3px solid var(--line); background:var(--panel); color:var(--ink)}
 .mk-list{list-style:decimal; margin:0; padding-left:26px; display:grid; gap:10px}
 .mk-item{padding-left:4px}
 .mk-sent{padding:8px 12px; border-radius:10px; border:3px solid var(--line); background:var(--panel); cursor:pointer; line-height:1.4}
@@ -506,8 +506,12 @@ table.data th{background:var(--panel-2)}
 .mk-lab.mk-c0,.mk-lab.mk-c1,.mk-lab.mk-c2,.mk-lab.mk-c3{border-color:var(--c); background:color-mix(in srgb, var(--c) 22%, var(--panel))}
 .mk-sent.mk-c0,.mk-sent.mk-c1,.mk-sent.mk-c2,.mk-sent.mk-c3{border-color:var(--c); background:color-mix(in srgb, var(--c) 25%, var(--panel))}
 .mk-tag.mk-c0,.mk-tag.mk-c1,.mk-tag.mk-c2,.mk-tag.mk-c3{border-color:var(--c); background:color-mix(in srgb, var(--c) 30%, var(--panel))}
+.rw-teach{border:2px solid var(--line); border-radius:14px; background:var(--panel-2); padding:12px 16px; margin:8px 0; display:grid; gap:8px} .rw-teach h3,.rw-teach p{margin:0} .rw-teach>.btn{justify-self:start}
+.rw-teach-list{display:grid; gap:8px}
+.rw-teach-row{display:grid; grid-template-columns:minmax(96px,150px) minmax(0,1fr); gap:10px; align-items:center; border:3px solid var(--c); border-radius:10px; padding:8px 12px; background:color-mix(in srgb, var(--c) 20%, var(--panel))}
+.rw-teach-name{font-weight:800} .rw-teach-job{font-size:.9rem; color:var(--muted)} .rw-teach-eg{font-weight:600}
 .ws-mark th,.ws-mark td{font-size:.85em; vertical-align:top} .ws-mark .ws-markc{text-align:center; width:14%}
-@media (max-width:640px){ .rw-pair,.rw-twin{grid-template-columns:minmax(0,1fr)} .rw-side{order:-1} }
+@media (max-width:640px){ .rw-pair,.rw-twin{grid-template-columns:minmax(0,1fr)} .rw-side{order:-1} .rw-teach-row{grid-template-columns:minmax(0,1fr)} }
 
 .ws-info{font-size:.9rem; color:#1a2140; flex:1 1 100%} .ws-info.good{color:#1b7f46} .ws-info.bad{color:#b83434; font-weight:700} .ws-info:empty{display:none}
 .ws-toolbar .btn.ghost{background:transparent; text-decoration:underline}
@@ -4179,18 +4183,22 @@ registerStop({
         rwPick(stage, {kind:'table', head:['Coils of wire','Paperclips held'], rows:[[10,4],[20,8],[30,12],[40,16],[50,20]], say:r=>`${r[0]} coils, ${r[1]} clips`, need:2}, {saved:slot.saved, onChange:s=>{ slot.put(s); if (s.length===2) ask(); }});
         stage.append(qHost); if (slot.saved && slot.saved.length===2) ask();
       }},
-    { title:'Take apart a good paragraph', say:`<p>Here is a different test, with 1 to 4 cells and 30 coils each time. What is each sentence doing? Have a go before I tell you the names.</p>`,
-      build(stage, api){
+    { title:'Take apart a good paragraph', say:`<p>Scientists share their results in a paragraph called a <b>CER</b>. Let’s learn the three parts first. Then you will find them in a real paragraph.</p>`,
+      build(stage0, api){ rwTeach(stage0, {title:'CER: Claim, Evidence, Reasoning', intro:'A good science paragraph does three jobs, in this order. Read this example.', eg:'<b>Example question:</b> do dark shirts get hotter in the sun than light shirts?', parts:[
+          {name:'Claim', job:'Answers the question.', eg:'Dark shirts get hotter in the sun than light shirts.'},
+          {name:'Evidence', job:'Gives numbers from the test, with units.', eg:'After 10 minutes the dark shirt was 38 °C, and the light shirt was 30 °C.'},
+          {name:'Reasoning', job:'Explains why, using science.', eg:'Dark colours absorb more light energy, so the shirt heats up more.'}]}, stage=>{
         const strip = rwStrip(1); const mh = h('div'), after = h('div'); const slot = lrSlot('mark');
-        const spec = {labels:['Answers the question','Gives the numbers','Explains why'], after:['Claim','Evidence','Reasoning'], sents:[{t:'The results show that more cells make a stronger electromagnet.', a:0},{t:'With 1 cell it picked up 6 clips, and with 4 cells it picked up 24 clips.', a:1},{t:'More cells push a bigger current through the coil, so the magnetic field gets stronger.', a:2}]};
-        stage.append(strip, h('p',{class:'rw-do'}, 'Mark each sentence. Then write a claim for your results.'), mh, after);
+        const spec = {labels:['Claim','Evidence','Reasoning'], sents:[{t:'The results show that more cells make a stronger electromagnet.', a:0},{t:'With 1 cell it picked up 6 clips, and with 4 cells it picked up 24 clips.', a:1},{t:'More cells push a bigger current through the coil, so the magnetic field gets stronger.', a:2}]};
+        stage.append(strip, h('p',{class:'rw-do'}, 'Here is a different test, with 1 to 4 cells and 30 coils each time. Mark each sentence as Claim, Evidence or Reasoning.'), mh, after);
         const showWrite = ()=>{ strip.set(2); after.innerHTML = ''; const left = h('div'); let btn = null;
           const ta = rwTyped(left, 'My claim', 'claim', 3, v=>{ if (btn) btn.disabled = v.trim().length < 8; });
           btn = h('button',{class:'btn primary small', type:'button', disabled:ta.value.trim().length < 8, onclick:()=>{ btn.disabled = true; ta.readOnly = true; after.append(h('div',{class:'info-card'}, h('b',{}, 'Model: '), 'My results show that more coils make a stronger electromagnet.')); api.complete(); }}, 'Show me a model');
-          after.append(rwKey('Claim, Evidence, Reasoning. Say it, show it, explain it.'), h('div',{class:'rw-pair'}, left, h('div',{class:'rw-side'}, h('h4',{}, 'My evidence'), rwEvList(spec, spec.after))), rwHint('Try starting with: My results show that…'), btn); };
+          const gs = {xl:'Coils of wire', yl:'Paperclips held', xMax:50, yMax:24, xStep:10, yStep:4};
+          after.append(rwKey('Claim, Evidence, Reasoning. Say it, show it, explain it.'), h('h3',{}, 'Now write about your own test'), h('p',{class:'rw-do', html:'Your question was: <b>does the number of coils change how strong an electromagnet is?</b> Look at your results. Write one claim that answers this question.'}), h('div',{class:'rw-pair'}, left, h('div',{class:'rw-side'}, h('h4',{}, 'My results'), rwSvg(gs, [[10,4],[20,8],[30,12],[40,16],[50,20]], null, null))), rwHint('Try starting with: My results show that…'), btn); };
         markWidget(mh, spec, {saved:slot.saved, locked:!!slot.saved, onCheck:resp=>{ slot.put(resp); showWrite(); }});
         if (slot.saved) showWrite();
-      }}
+      }); }}
   ],
   explore(el){
     el.append(pipSay('<p>Welcome to Sturgeon’s test bench! Run your own fair test. Pick one variable to change, keep everything else the same, and press <b>Run a trial</b> each time. Real experiments give slightly different results each time, so try repeating a trial too.</p>'));
@@ -4389,11 +4397,14 @@ registerStop({
         rwPick(stage, sp, {saved:slot.saved, onChange:onPick}); stage.append(qHost);
         if (slot.saved && slot.saved.length===2) onPick(slot.saved);
       }},
-    { title:'Weak or strong?', say:`<p>Two students tested this hypothesis: faster spinning makes the peak voltage smaller. Which paragraph would convince you?</p>`,
-      build(stage, api){
+    { title:'Weak or strong?', say:`<p>Let’s learn how to write about a hypothesis. Then you will judge two students’ paragraphs.</p>`,
+      build(stage0, api){ rwTeach(stage0, {title:'A strong hypothesis paragraph', intro:'It works like a CER, but the claim says if the data support or contradict the hypothesis. Read this example.', eg:'<b>Example hypothesis:</b> dark shirts get hotter in the sun than light shirts.', parts:[
+          {name:'Say support or contradict', job:'Gives your answer to the hypothesis.', eg:'The data support this hypothesis.'},
+          {name:'Show two numbers', job:'Gives two numbers from the data, with units.', eg:'After 10 minutes the dark shirt was 38 °C, and the light shirt was 30 °C.'},
+          {name:'Explain the science', job:'Says why this happens.', eg:'Dark colours absorb more light energy, so the shirt heats up more.'}]}, stage=>{
         const A = '<b>A.</b> The data contradict the hypothesis. The line on the graph goes up. It was a really good generator.';
         const B = '<b>B.</b> The data contradict the hypothesis. At 2 turns each second the peak was 1.0 V, but at 10 turns each second it was 5.0 V. The magnet moves past the coil faster, so it makes a bigger voltage.';
-        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Tap the stronger paragraph. Then pick the three cards that make it strong.'), rwHint('What does B add?'));
+        stage.append(rwStrip(1), h('p',{class:'rw-do', html:'Two students tested this hypothesis: <b>faster spinning makes the peak voltage smaller</b>. Tap the stronger paragraph. Then pick the three cards that make it strong.'}), rwHint('What does B add?'));
         const qHost = h('div'), cHost = h('div'); stage.append(qHost, cHost);
         const opts = ['It says support or contradict','It uses two numbers with units','It explains the science','It uses very long words','It tells us what the student liked'];
         const cslot = lrSlot('cards');
@@ -4404,7 +4415,7 @@ registerStop({
           const done = ()=>{ const ok = [...picked].every(k=>k<3); fb.className = 'feedback ' + (ok ? 'ok' : 'bad'); fb.innerHTML = ok ? '<strong>Yes!</strong> B says contradict, uses two numbers with units and explains the science.' : '<strong>Whoops!</strong> The strong cards are: it says support or contradict, it uses two numbers with units, and it explains the science.'; cHost.append(rwKey('Say support or contradict. Show two numbers. Explain the science.')); api.complete(); };
           cHost.append(box, h('div',{class:'row'}, btn), fb, h('p',{class:'legend rv-onego'}, 'One go! Pick three cards, then check.')); if (locked){ btn.disabled = true; done(); } };
         askInline(qHost, [{q:'Which paragraph would convince you?', options:[B, A], answer:0, explain:'B says contradict, gives two numbers with units and explains the science.'}], cards, 'para');
-      }},
+      }); }},
     { title:'Hamster power', say:'<p>This hamster is running in a wheel. The wheel turns a real <b>generator</b>, which is connected to a bulb and an ammeter. Watch the ammeter reading carefully.</p><p>Then tap the <b>hamster</b> and press <b>Faster</b> or <b>Slower</b>.</p>',
       build(stage, api){ let start = null, asked = false;
         Circuit.board(stage, {cols:4, rows:2, edges:LW({'h,0,1':'bulb','h,0,3':'ammeter','h,2,2':'generator'}, [], {lock:true}), mech:[{type:'m_wheel', dx:0, dy:-62, locked:true},{type:'m_hamster', dx:0, dy:-62, level:2, locked:true}], tools:['hand'], noUnscrew:true, onChange:(s,user)=>{
@@ -4600,14 +4611,17 @@ registerStop({
       build(stage0, api){ predictThen(stage0, {q:'The town is 30 km away. Which do you think will light more homes?', options:['Edison’s DC','Tesla’s AC','Both the same']}, (stage)=>{ let dc = false, ac = false; transmission(stage, {onChange:s=>{ if (s.d>=30){ if (s.mode==='dc') dc = true; else ac = true; }
         if (dc && ac) api.complete('What a difference! With AC, a machine called a <b>transformer</b> can raise the voltage to a very high level for the journey, so very little energy is wasted. Another transformer lowers it again before it reaches homes. Edison’s low-voltage DC lost most of its energy after a few kilometres, so he needed a power station every couple of kilometres.');
         else if (dc && !ac) api.hint('Look how few homes are lit with DC! Now switch to Tesla’s AC.'); else if (ac && !dc) api.hint('Now try Edison’s DC over the same distance.'); }}); }); }},
-    { title:'Spot the structure', say:`<p>Science texts often have three parts. Read this text about your phone charger. What job does each sentence do?</p>`,
-      build(stage, api){
+    { title:'Spot the structure', say:`<p>Science texts often have three parts. Let’s learn them first. Then you will find them in a text about your phone charger.</p>`,
+      build(stage0, api){ rwTeach(stage0, {title:'Problem, Science, Solution', intro:'Many science texts do three jobs. Find the jobs and the text gets easier to read. Read this example.', eg:'<b>Example text:</b> keeping a hospital running.', parts:[
+          {name:'Problem', job:'What is going wrong?', eg:'A storm can cut the power to a hospital.'},
+          {name:'Science', job:'How does it work?', eg:'A backup generator spins a magnet inside coils of wire, and this makes electricity.'},
+          {name:'Solution', job:'What is better now?', eg:'The lights and machines keep running until the power comes back.'}]}, stage=>{
         const mh = h('div'), after = h('div'); const slot = lrSlot('mark');
-        const spec = {labels:["What's the trouble?", 'How does it work?', "What's better now?"], after:['Problem','Science','Solution'], sents:[{t:'A phone battery needs about 5 V of DC, but a socket in Beijing gives 220 V of AC.', a:0},{t:'A transformer inside the charger lowers the voltage.', a:1},{t:'Another part changes the AC to DC.', a:1},{t:'Now your phone can charge safely from the wall.', a:2}]};
-        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Mark each sentence.'), rwHint('What would go wrong without the charger?'), mh, after);
+        const spec = {labels:['Problem','Science','Solution'], sents:[{t:'A phone battery needs about 5 V of DC, but a socket in Beijing gives 220 V of AC.', a:0},{t:'A transformer inside the charger lowers the voltage.', a:1},{t:'Another part changes the AC to DC.', a:1},{t:'Now your phone can charge safely from the wall.', a:2}]};
+        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Mark each sentence as Problem, Science or Solution.'), rwHint('What would go wrong without the charger?'), mh, after);
         const fin = ()=>{ after.innerHTML = ''; after.append(rwKey('Problem, science, solution. Find all three.')); api.complete(); };
         markWidget(mh, spec, {saved:slot.saved, locked:!!slot.saved, onCheck:resp=>{ slot.put(resp); fin(); }}); if (slot.saved) after.append(rwKey('Problem, science, solution. Find all three.'));
-      }},
+      }); }},
     { title:'Put the cards in order', say:`<p>A paragraph needs its sentences in the right order. Put these mixed-up cards in the order a reader needs.</p>`,
       build(stage, api){
         const slot = lrSlot('order'), host = h('div',{class:'rw-plain'});
@@ -5127,8 +5141,10 @@ registerStop({
       build(stage, api){ co2Chart(stage); askInline(stage, [
         {q:'Which two sources release the <b>most</b> CO₂ for each kWh?', options:['Coal and gas','Wind and nuclear','Solar and hydro','Tidal and geothermal'], answer:0, explain:'Fossil fuels release by far the most CO₂.'},
         {q:'Coal releases so much CO₂. Why do we still use it?', options:['Coal power stations can make electricity whenever it’s needed, and many already exist','Coal is renewable, so the world will never run out of it however much we burn','Coal power stations make no pollution, so they are better for the climate','Wind turbines and solar farms have never been able to make any electricity'], answer:0, explain:'Coal is reliable and lots of countries already have the power stations. Switching to cleaner sources takes time and money, and the grid still needs power when the wind drops or the Sun sets.'}], ()=>api.complete()); }},
-    { title:'Fact or opinion?', say:`<p>Some sentences can be checked, and some tell you what a person thinks. Try sorting these before I give you the rule.</p>`,
-      build(stage, api){
+    { title:'Fact or opinion?', say:`<p>Some sentences can be checked, and some tell you what a person thinks. Let’s learn the rule first. Then you will sort some sentences.</p>`,
+      build(stage0, api){ rwTeach(stage0, {title:'Fact or opinion?', intro:'Good readers check which sentences they can trust. Read these examples.', parts:[
+          {name:'Fact', job:'Can be checked with a measurement, a chart or a record.', eg:'Water boils at 100 °C at sea level.'},
+          {name:'Opinion', job:'Tells you what someone thinks. Words like should, best and ugly are clues.', eg:'Everyone should drink more tea.'}]}, stage=>{
         const slot = lrSlot('sort'), host = h('div',{class:'rw-plain'}), rest = h('div');
         stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Sort each sentence. Then write one fact and one opinion about coal.'), rwHint('Could you check it with the chart or a measurement?'), host, rest);
         const typed = ()=>{ rest.innerHTML = ''; stage.querySelector('.rw-strip').set(2); let btn = null; const left = h('div');
@@ -5137,18 +5153,21 @@ registerStop({
           rest.append(rwKey('A fact can be checked. An opinion is what someone thinks.'), left, btn); };
         reviewCard(host, {t:'sort', q:'Sort each sentence.', groups:['Fact','Opinion'], colName:'Type', items:[['Coal releases about 820 g of CO₂ for each kWh.',0],['Solar panels look ugly on old roofs.',1],['A hydro dam needs a river.',0],['Every town should ban coal.',1]], explain:''}, '', slot.saved, v=>{ slot.put(v); typed(); });
         if (slot.saved && slot.saved.done) typed();
-      }},
-    { title:'Sum it up', say:`<p>Good readers see both sides. Read the question first: should our school put solar panels on its roof? Then mark the text.</p>`,
-      build(stage, api){
+      }); }},
+    { title:'Sum it up', say:`<p>Good readers see both sides. Let’s learn how to sum up both sides. Then you will try it with solar panels.</p>`,
+      build(stage0, api){ rwTeach(stage0, {title:'Sum up both sides', intro:'A good summary gives a benefit and a drawback in one sentence. Read this example.', eg:'<b>Example question:</b> should our school buy electric buses?', parts:[
+          {name:'Benefit', job:'A good point.', eg:'Electric buses release no fumes on the road.'},
+          {name:'Drawback', job:'A bad point.', eg:'They need hours to charge.'},
+          {name:'Sum it up', job:'Join both sides with the word but.', eg:'Electric buses release no fumes on the road, but they need hours to charge.'}]}, stage=>{
         const mh = h('div'), rest = h('div'), slot = lrSlot('mark'); const strip = rwStrip(1);
         const spec = {labels:['Benefit','Drawback'], sents:[{t:'For each kWh, solar panels release about 48 g of CO₂, and coal releases about 820 g.', a:0},{t:'Sunlight is free, and it will not run out.', a:0},{t:'Solar panels make no electricity at night.', a:1}]};
-        stage.append(strip, h('p',{class:'rw-do'}, 'Mark each sentence. Then sum it up in one sentence.'), mh, rest);
+        stage.append(strip, h('p',{class:'rw-do', html:'Read the question first: <b>should our school put solar panels on its roof?</b> Mark each sentence. Then sum it up in one sentence.'}), mh, rest);
         const sum = ()=>{ rest.innerHTML = ''; strip.set(2); let btn = null; const left = h('div');
           const ta = rwTyped(left, 'My one sentence', 'sum', 3, v=>{ if (btn) btn.disabled = v.trim().length < 8; });
           btn = h('button',{class:'btn primary small', type:'button', disabled:ta.value.trim().length < 8, onclick:()=>{ btn.disabled = true; ta.readOnly = true; rest.append(h('div',{class:'info-card'}, h('b',{}, 'Model: '), 'Solar panels release far less CO₂ than coal, but they make no electricity at night.')); api.complete(); }}, 'Show me a model');
           rest.append(rwKey('Sum it up: one sentence, both sides.'), left, rwHint('Try putting the word but in the middle.'), btn); };
         markWidget(mh, spec, {saved:slot.saved, locked:!!slot.saved, onCheck:resp=>{ slot.put(resp); sum(); }}); if (slot.saved) sum();
-      }}
+      }); }}
   ],
   explore(el){
     el.append(pipSay('<p>Revisit any power station, or study the CO₂ chart.</p>'));
@@ -5187,6 +5206,15 @@ function rwStrip(on){
   el.set = k=>[...el.children].forEach((c,j)=>c.classList.toggle('on', j===k));
   return el;
 }
+/* teach it first: the idea and a worked example, then the task opens underneath */
+function rwTeach(stage, o, build){
+  const slot = lrSlot('teach'), inner = h('div');
+  const card = h('div',{class:'rw-teach no-gloss'}, h('h3',{}, o.title), h('p',{html:o.intro}), o.eg ? h('p',{class:'rw-teach-q', html:o.eg}) : '',
+    h('div',{class:'rw-teach-list'}, o.parts.map((p,i)=>h('div',{class:'rw-teach-row mk-c' + i}, h('div',{class:'rw-teach-name'}, p.name), h('div',{}, h('p',{class:'rw-teach-job', html:p.job}), h('p',{class:'rw-teach-eg', html:p.eg}))))));
+  stage.append(card, inner);
+  const go = ()=>build(inner);
+  if (slot.saved) go(); else { const b = h('button',{class:'btn primary small', type:'button', onclick:()=>{ slot.put(1); b.remove(); go(); }}, 'Got it. Let me try'); card.append(b); }
+}
 function rwKey(text){ return h('div',{class:'rw-key', role:'note'}, h('span',{class:'rw-key-lab'}, 'Key idea'), h('p',{class:'rw-key-txt', html:text})); }
 function rwHint(text){ return h('details',{class:'rw-hint'}, h('summary',{}, 'Need a hint?'), h('p',{html:text})); }
 function rwTyped(host, label, key, rows, onInput){
@@ -5205,23 +5233,23 @@ function markWidget(host, spec, opt){
   opt = opt || {};
   const L = spec.labels, S = spec.sents;
   let cur = S.map((_,i)=>(Array.isArray(opt.saved) && typeof opt.saved[i]==='number') ? opt.saved[i] : -1);
-  let active = 0, locked = !!opt.locked, warned = false, focusI = -1;
+  let locked = !!opt.locked, warned = false, focusI = -1;
   const nm = k=>(locked && spec.after ? spec.after : L)[k];
-  const wrap = h('div',{class:'mk'}), bar = h('div',{class:'mk-labels', role:'radiogroup', 'aria-label':'Choose a label'}), list = h('ol',{class:'mk-list'});
-  const help = h('p',{class:'legend mk-help'}, 'Pick a label, then tap a sentence to paint it. Tap a painted sentence again to change its label. Leave a sentence white if it doesn’t belong.');
+  const wrap = h('div',{class:'mk'}), bar = h('div',{class:'mk-labels', role:'list', 'aria-label':'The labels'}), list = h('ol',{class:'mk-list no-gloss'});
+  const help = h('p',{class:'legend mk-help'}, 'Tap a sentence to label it. Tap again to change the label. Keep tapping to go back to no label.' + (S.some(s=>s.a<0) ? ' Leave a sentence with no label if it doesn’t belong.' : ''));
   const fb = h('div',{class:'feedback', role:'status'});
   const chk = h('button',{class:'btn primary small mk-check', type:'button', onclick:()=>check()}, 'Check');
-  const paint = i=>{ if (locked) return; if (cur[i]===active){ const nx = cur[i]+1; cur[i] = nx>=L.length ? -1 : nx; } else cur[i] = active; focusI = i; draw(); };
+  const paint = i=>{ if (locked) return; const nx = cur[i]+1; cur[i] = nx>=L.length ? -1 : nx; focusI = i; draw(); };
   function check(){
     if (locked) return;
-    if (cur.every(v=>v<0) && !warned){ warned = true; fb.className = 'feedback hint'; fb.textContent = 'Pick a label, then tap sentences to paint them. Press Check again to check anyway.'; return; }
+    if (cur.every(v=>v<0) && !warned){ warned = true; fb.className = 'feedback hint'; fb.textContent = 'Tap the sentences to label them. Press Check again to check anyway.'; return; }
     locked = true; fb.className = 'feedback'; fb.textContent = ''; draw();
     const right = S.filter((s,i)=>cur[i]===s.a).length;
     if (opt.onCheck) opt.onCheck(cur.slice(), right);
   }
   function draw(){
     bar.innerHTML = ''; list.innerHTML = '';
-    L.forEach((_,k)=>bar.append(h('button',{type:'button', class:'mk-lab mk-c' + k + (active===k && !locked ? ' on' : ''), role:'radio', 'aria-checked':String(active===k), disabled:locked, onclick:()=>{ active = k; draw(); }}, nm(k))));
+    L.forEach((_,k)=>bar.append(h('span',{class:'mk-lab mk-c' + k, role:'listitem'}, nm(k))));
     S.forEach((s,i)=>{
       const ok = cur[i]===s.a, c = cur[i];
       const sent = h('div',{class:'mk-sent ' + (c>=0 ? 'mk-c' + c : 'mk-w'), role:'button', tabindex:locked ? '-1' : '0', 'aria-disabled':String(locked), 'data-i':i, html:s.t});
@@ -5233,8 +5261,8 @@ function markWidget(host, spec, opt){
         else if (e.key==='0' || e.key==='Backspace' || e.key==='Delete'){ e.preventDefault(); cur[i] = -1; focusI = i; draw(); }
       });
       const li = h('li',{class:'mk-item' + (locked ? (ok ? ' right' : ' wrong') : '')}, sent,
-        h('div',{class:'mk-meta'}, h('span',{class:'mk-tag ' + (c>=0 ? 'mk-c' + c : 'mk-w')}, c>=0 ? nm(c) : 'White'),
-          locked ? (ok ? h('span',{class:'mk-yes'}, '✓ Right') : h('span',{class:'mk-fix'}, '→ ' + (s.a>=0 ? nm(s.a) : 'Leave it white'))) : null,
+        h('div',{class:'mk-meta'}, h('span',{class:'mk-tag ' + (c>=0 ? 'mk-c' + c : 'mk-w')}, c>=0 ? nm(c) : 'No label'),
+          locked ? (ok ? h('span',{class:'mk-yes'}, '✓ Right') : h('span',{class:'mk-fix'}, '→ ' + (s.a>=0 ? nm(s.a) : 'Leave it with no label'))) : null,
           locked && s.why ? h('span',{class:'mk-why', html:s.why}) : null));
       list.append(li);
     });
@@ -5246,7 +5274,7 @@ function markWidget(host, spec, opt){
 }
 /* ---------- tap two rows or two points ---------- */
 function rwSvg(sp, pts, sel, toggle){
-  const W=440, H=270, Lm=54, B=46, T=14, R=16;
+  const W=440, H=270, Lm=sp.yMax>=1000 ? 68 : 54, B=46, T=14, R=16;
   const X = v=>Lm + v/sp.xMax*(W-Lm-R), Y = v=>H-B - v/sp.yMax*(H-B-T);
   const s = sv('svg',{viewBox:`0 0 ${W} ${H}`, class:'sim-svg rw-graph', role:'group', 'aria-label':'Graph of ' + sp.yl + ' against ' + sp.xl});
   for (let v=0; v<=sp.xMax; v+=sp.xStep) s.append(sv('line',{x1:X(v), y1:T, x2:X(v), y2:H-B, class:'svg-line'}), sv('text',{x:X(v), y:H-B+16, class:'t-small svg-muted', 'text-anchor':'middle'}, v));
@@ -5312,7 +5340,13 @@ function rvItems(stop, part){ return (part==='c' ? stop.creview : stop.review) |
 function rvKey(stop, part){ return part==='c' ? stop.id + '~c' : (stop.rvKeyF || stop.id); }
 function lrKey(stop, k){ return stop.learnKeys && stop.learnKeys[k]!=null ? stop.learnKeys[k] : k; }
 const PART_NAME = {f:'Foundation', c:'Challenge'};
-function rvStore(stopId){ Store.data.rv = Store.data.rv || {}; Store.data.rv[stopId] = Store.data.rv[stopId] || {}; return Store.data.rv[stopId]; }
+function rvStore(stopId){
+  Store.data.rv = Store.data.rv || {};
+  if (!Store.data.rv[stopId]){ const fresh = {}, m = /^(electromagnets|generators)~f3$/.exec(stopId), old = m && Store.data.rv[m[1] + '~f2'];
+    if (old) for (let i=0; i<5; i++) if (old[i]) fresh[i] = old[i]; /* the paragraph (item 5) has a new context, so it starts empty */
+    Store.data.rv[stopId] = fresh; }
+  return Store.data.rv[stopId];
+}
 function normTxt(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9.\-]+/g,' ').trim(); }
 /* typed answers accept sensible synonyms: every word in a group counts when one of them is accepted */
 const SYN_GROUPS = [['bigger','more','larger','greater','higher','stronger','increases','increase','goes up','go up'],['smaller','less','lower','weaker','decreases','decrease','goes down','go down'],['centre','center','middle'],['against','opposite','opposing'],['attract','attracts','pull together','pulls together'],['repel','repels','push apart','pushes apart'],['electron','electrons'],['proton','protons'],['neutron','neutrons'],['loop','circuit','complete path','path'],['amps','amp','a','amperes'],['volts','volt','v'],['ohms','ohm'],['current','electric current'],['generator','dynamo'],['direction','directions','way'],['non-renewable','nonrenewable','non renewable','not renewable']];
@@ -5546,12 +5580,13 @@ function wsItem(it, n, mode, saved){
     else box.append(h('div',{class:'ws-drawbox'}));
     if (it.checklist) box.append(h('p',{class:'ws-note'}, h('b',{}, key ? 'Look for: ' : 'Include: '), it.checklist.join('; ') + '.'));
   } else if (t==='mark'){
-    const tbl = h('table',{class:'ws-table ws-mark'}, h('thead',{}, h('tr',{}, h('th',{}, '#'), h('th',{}, 'Sentence'), it.labels.map(c=>h('th',{class:'ws-markc'}, c)), h('th',{class:'ws-markc'}, 'White'))),
+    const tbl = h('table',{class:'ws-table ws-mark'}, h('thead',{}, h('tr',{}, h('th',{}, '#'), h('th',{}, 'Sentence'), it.labels.map(c=>h('th',{class:'ws-markc'}, c)), h('th',{class:'ws-markc'}, 'No label'))),
       h('tbody',{}, it.sents.map((s,i)=>{ const v = key ? s.a : (stu && r && typeof r[i]==='number') ? r[i] : null; return h('tr',{}, h('td',{}, i+1), h('td',{html:s.t}), it.labels.map((_,k)=>h('td',{class:'ws-markc'}, h('span',{class:'ws-box'}, v===k ? '✓' : ''))), h('td',{class:'ws-markc'}, h('span',{class:'ws-box'}, v===-1 ? '✓' : ''))); })));
     box.append(tbl);
-    if (key) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Reasons: '), it.sents.map((s,i)=>`${i+1} ${s.a>=0 ? it.labels[s.a] : 'White'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`).join('; ') + '.'));
-    else box.append(h('p',{class:'ws-note'}, 'Tick one box for each sentence. Tick White if the sentence doesn\u2019t belong.'));
+    if (key) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Reasons: '), it.sents.map((s,i)=>`${i+1} ${s.a>=0 ? it.labels[s.a] : 'No label'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`).join('; ') + '.'));
+    else box.append(h('p',{class:'ws-note'}, 'Tick one box for each sentence. Tick No label if the sentence doesn\u2019t belong.'));
   } else if (t==='write'){
+    if (it.evidence && it.evidence.kind==='graph') box.append(rwSvg(it.evidence, it.evidence.rows, stu && r && r.ev ? r.ev : null, null));
     if (it.evidence && !key){ const ev = stu && r && r.ev ? r.ev : null; box.append(h('p',{class:'ws-note'}, h('b',{}, 'My evidence: '), ev ? ev.map(i=>it.evidence.say(it.evidence.rows[i])).join('; ') : h('span',{class:'ws-line'}))); }
     if (it.starters && it.starters.length) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Sentence starters: '), it.starters.join('  ·  ')));
     if (it.words && it.words.length) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Words to use in a good answer: '), it.words.join(', ')));
@@ -6048,22 +6083,25 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
     B: ['I gave a benefit.', 'I gave a drawback.', 'I used a fact from the passage.', 'I gave my opinion with a reason.']
   };
   const byX = rs=>rs.slice().sort((a,b)=>a[0]-b[0]);
-  const emRows = [[10,4],[20,8],[30,12],[40,16],[50,20]], genRows = [[100,1.2],[200,2.4],[300,3.6],[400,4.8],[500,6.0]];
-  const EM_MODEL = 'My results show that more coils make a stronger electromagnet. With 10 coils it picked up 4 clips, and with 50 coils it picked up 20 clips. This happens because each coil adds to the magnetic field, so the electromagnet can hold more clips.';
-  const GEN_MODEL = 'The data support this hypothesis. At 200 turns of wire the peak voltage was 2.4 V, and at 400 turns of wire it was 4.8 V. That is twice the turns and twice the peak voltage. The moving magnet makes a voltage in every turn of wire, so more turns add up to a bigger voltage.';
+  const emRows = [[1,500],[2,1000],[3,1500],[4,2000]], genRows = [[2,1.6],[4,3.2],[6,4.8],[8,6.4]];
+  const kgs = n=>String(n).replace(/\B(?=(\d{3})+$)/g, ',');
+  const cellWord = n=>n===1 ? '1 cell' : n + ' cells';
+  const emPara = (a,b)=>`The results show that more cells make the crane’s electromagnet stronger. With ${cellWord(a[0])} it lifted a mass of ${kgs(a[1])} kg, and with ${cellWord(b[0])} it lifted ${kgs(b[1])} kg. This happens because more cells push a bigger current through the coils, so the magnetic field gets stronger and holds more steel.`;
+  const EM_MODEL = emPara([1,500],[4,2000]);
+  const GEN_MODEL = 'The data support this hypothesis. At 2 turns each second the peak voltage was 1.6 V, and at 4 turns each second it was 3.2 V. That is twice as fast and twice the peak voltage. The moving magnet passes the coil faster, so it makes a bigger voltage.';
   const lists = {
     electromagnets: o=>[o[0], o[1], o[2], o[5],
-      {t:'mark', obj:['Cii'], q:"Mia tested different cores, with 30 coils and 2 cells each time. Mark each sentence. Leave it white if it doesn't belong.", labels:['Claim','Evidence','Reasoning'], sents:[
+      {t:'mark', obj:['Cii'], q:"Mia tested different cores, with 30 coils and 2 cells each time. Mark each sentence. Leave it with no label if it doesn't belong.", labels:['Claim','Evidence','Reasoning'], sents:[
         {t:'The results show that an iron core makes the strongest electromagnet.', a:0, why:'It answers the question.'},
         {t:'With an iron core it picked up 12 clips.', a:1, why:'A number with a unit.'},
         {t:'I enjoyed using the iron nail the most.', a:-1, why:'A feeling is no help here.'},
         {t:'With an aluminium core it picked up 1 clip.', a:1, why:'A second number to compare.'},
         {t:'Iron becomes a strong magnet inside the coil, so the magnetic field is much stronger.', a:2, why:'It explains why.'}]},
-      {t:'write', label:'Data paragraph', obj:['Cii'], q:'Your question was: does the number of coils change how strong an electromagnet is? Tap two rows, then answer using your own results.',
-        words:['coils','clips','magnetic field','stronger'], starters:['My results show that…','With … coils it picked up … clips, and with … coils…','This happens because…'],
+      {t:'write', label:'Data paragraph', obj:['Cii'], q:'A scrapyard crane uses an electromagnet to lift old cars and scrap steel. The workers kept the coils the same and changed the number of cells. Their question: does the number of cells change how strong the crane’s electromagnet is? Tap two points on the graph, then answer the question.',
+        words:['cells','mass','magnetic field','stronger'], starters:['The results show that…','With … cells it lifted…','This happens because…'],
         remind:'Claim, Evidence, Reasoning. Say it, show it, explain it.', remindOpen:true,
-        evidence:{kind:'table', head:['Coils of wire','Paperclips held'], rows:emRows, need:2, say:r=>`With ${r[0]} coils it picked up ${r[1]} clips`},
-        model:EM_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return `My results show that more coils make a stronger electromagnet. With ${a[0]} coils it picked up ${a[1]} clips, and with ${b[0]} coils it picked up ${b[1]} clips. This happens because each coil adds to the magnetic field, so the electromagnet can hold more clips.`; },
+        evidence:{kind:'graph', rows:emRows, need:2, xl:'Number of cells', yl:'Mass of steel lifted (kg)', xMax:5, yMax:2500, xStep:1, yStep:500, say:r=>`With ${cellWord(r[0])} it lifted ${kgs(r[1])} kg`},
+        model:EM_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return emPara(a,b); },
         checklist:[RWT.C1[0], RWT.C1[1], 'I explained the pattern using the magnetic field.', 'I used the words given.']}],
     generators: o=>[o[1], o[2], o[4], Object.assign({}, o[5], {q:o[5].q.replace('in step with the speed', 'in step with the turns each second').replace('at 7 turns a second', 'at 7 turns each second')}),
       {t:'mark', obj:['Cii'], q:'Sam tested this hypothesis: a stronger magnet gives a bigger peak voltage. Mark each sentence. The claim could be anywhere!', labels:['Claim','Evidence','Reasoning'], sents:[
@@ -6072,14 +6110,14 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
         {t:'We used a red generator.', a:-1, why:"True, but colour doesn't test the hypothesis."},
         {t:'A stronger magnet makes a bigger voltage in the coil as it moves past.', a:2, why:'It explains why.'},
         {t:'So the data support the hypothesis.', a:0, why:'It says support or contradict.'}]},
-      {t:'write', label:'Data paragraph', obj:['Cii','Ciii'], q:"A student says: 'Twice the turns of wire gives twice the peak voltage.' Tap two points on your graph. Do the data support or contradict this?",
-        words:['turns of wire','moving magnet','peak voltage','twice'], starters:['The data…','At … turns of wire the peak voltage was…'],
+      {t:'write', label:'Data paragraph', obj:['Cii','Ciii'], q:"A bike dynamo is a small generator. The wheel spins a magnet next to a coil of wire. A cyclist says: 'If my wheel turns twice as fast, the dynamo makes twice the peak voltage.' Tap two points on the graph that test this. Do the data support or contradict it?",
+        words:['turns each second','moving magnet','peak voltage','twice'], starters:['The data…','At … turns each second the peak voltage was…'],
         remind:'Say support or contradict. Show two numbers. Explain the science.', remindOpen:false,
-        evidence:{kind:'graph', rows:genRows, need:2, xl:'Turns of wire', yl:'Peak voltage (V)', xMax:500, yMax:7, xStep:100, yStep:1, say:r=>`At ${r[0]} turns of wire the peak voltage was ${r[1]} V`},
-        model:GEN_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return b[0]===2*a[0] ? `The data support this hypothesis. At ${a[0]} turns of wire the peak voltage was ${a[1]} V, and at ${b[0]} turns of wire it was ${b[1]} V. That is twice the turns and twice the peak voltage. The moving magnet makes a voltage in every turn of wire, so more turns add up to a bigger voltage.` : GEN_MODEL; },
-        checklist:[RWT.C2[0], RWT.C2[1], 'I explained the pattern using a magnet moving past more wire.', 'I used the words given.']}],
+        evidence:{kind:'graph', rows:genRows, need:2, xl:'Wheel turns each second', yl:'Peak voltage (V)', xMax:10, yMax:8, xStep:2, yStep:2, say:r=>`At ${r[0]} turns each second the peak voltage was ${r[1]} V`},
+        model:GEN_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return b[0]===2*a[0] ? `The data support this hypothesis. At ${a[0]} turns each second the peak voltage was ${a[1]} V, and at ${b[0]} turns each second it was ${b[1]} V. That is twice as fast and twice the peak voltage. The moving magnet passes the coil faster, so it makes a bigger voltage.` : GEN_MODEL; },
+        checklist:[RWT.C2[0], RWT.C2[1], 'I explained the pattern using a magnet moving past the coil faster.', 'I used the words given.']}],
     acdc: o=>[o[1], o[3], o[4], o[5],
-      {t:'mark', obj:['Di'], q:"<b>The Waterfall and the City</b><br>Read the question first: how did engineers get electricity from Niagara Falls to Buffalo? Mark each sentence. Leave it white if it doesn't help.", labels:['Problem','Science','Solution'],
+      {t:'mark', obj:['Di'], q:"<b>The Waterfall and the City</b><br>Read the question first: how did engineers get electricity from Niagara Falls to Buffalo? Mark each sentence. Leave it with no label if it doesn't help.", labels:['Problem','Science','Solution'],
         note:'Today, engineers can also send DC over very long distances using special high-voltage equipment, but in 1896 AC was the only way.', sents:[
         {t:'Niagara Falls could make enough electricity for a whole city, but Buffalo was about 40 km away.', a:0, why:'The power was far from the city.'},
         {t:"Edison's low-voltage DC wasted so much energy as heat that customers had to live less than 2 km from a power station.", a:0, why:'It shows what stopped DC.'},
@@ -6110,7 +6148,7 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
   const mins = {electromagnets:[20,12], generators:[23,13], acdc:[22,12], power:[17,13]};
   Object.keys(lists).forEach(id=>{
     const s = STOPS.find(x=>x.id===id); if (!s || s.reviewArchive) return;
-    s.reviewArchive = s.review; s.review = lists[id](s.review); s.rvKeyF = id + '~f2';
+    s.reviewArchive = s.review; s.review = lists[id](s.review); s.rvKeyF = id + (id==='electromagnets' || id==='generators' ? '~f3' : '~f2');
     s.learnKeys = keys[id]; s.learnMins = mins[id][0]; s.reviewMins = mins[id][1];
   });
 })();
@@ -7468,10 +7506,11 @@ function markItem(it){
   else if (t==='order'){ marks = 2; L.push(`Correct order: ${it.items.map((x,i)=>`${i+1}) ${plain(x)}`).join('  ')}.`); L.push('2 marks if fully correct; 1 mark if only one pair of neighbouring items is swapped; otherwise 0.'); }
   else if (t==='num'){ marks = 2; L.push(`Answer: ${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''} (1 mark).`); L.push(`Working shown or method clear (1 mark)${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}.`); L.push('If the student completed this in the sim, the working box may be empty: give the working mark if the answer is correct.'); }
   else if (t==='fill'){ marks = it.blanks.length; it.blanks.forEach((b,i)=>{ const all = [...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))]; L.push(`Gap ${i+1}: ${all.join(' / ')} (1 mark)`); }); L.push('Accept small spelling mistakes if the meaning is clear.'); }
-  else if (t==='mark'){ marks = it.sents.length; L.push(`1 mark for each sentence labelled correctly (${marks} marks). A sentence that does not belong is left white (the White box on the sheet).`); it.sents.forEach((s,i)=>L.push(`- ${i+1}. ${plain(s.t)} → ${s.a>=0 ? it.labels[s.a] : 'White'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`)); }
+  else if (t==='mark'){ marks = it.sents.length; L.push(`1 mark for each sentence labelled correctly (${marks} marks). A sentence that does not belong has no label (the No label box on the sheet).`); it.sents.forEach((s,i)=>L.push(`- ${i+1}. ${plain(s.t)} → ${s.a>=0 ? it.labels[s.a] : 'White'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`)); }
   else if (t==='draw' || t==='write'){
     const ck = it.checklist || []; marks = Math.max(1, ck.length);
     L.push(`1 mark for each of these (${marks} marks):`); ck.forEach(c=>L.push(`- ${plain(c)}`));
+    if (t==='write' && it.evidence) L.push(`The data given to the student: ${it.evidence.rows.map(it.evidence.say).join('; ')}.`);
     if (t==='write' && typeof it.model==='string') L.push(`Model answer: ${plain(it.model)}`);
     if (t==='draw') L.push('A model drawing is shown in the answer key. Judge the science, not the artistic quality; neat hand-drawn or on-screen drawings are both fine.');
     if (t==='write' && it.words && it.words.length) L.push(`Words to use (shown to students): ${it.words.join(', ')}. The marking points are about using these words correctly.`);
@@ -7547,7 +7586,7 @@ function keyAnswerLine(it){
   if (t==='order') return it.items.map((x,i)=>`${i+1}) ${plain(x)}`).join(' ') + '. (1 mark if only one pair of neighbouring items is swapped.)';
   if (t==='num') return `${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''}. 1 mark for the answer and 1 for working or method${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}. If the working box is empty but the answer is right, give both marks.`;
   if (t==='fill') return it.blanks.map((b,i)=>`gap ${i+1}: ${[...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))].join(' / ')}`).join('; ') + '. (1 mark per gap; accept small spelling mistakes if the meaning is clear.)';
-  if (t==='mark') return it.sents.map((s,i)=>`${i+1}) ${s.a>=0 ? it.labels[s.a] : 'White'}`).join('; ') + '. (1 mark per sentence; a sentence that does not belong is left White.)';
+  if (t==='mark') return it.sents.map((s,i)=>`${i+1}) ${s.a>=0 ? it.labels[s.a] : 'No label'}`).join('; ') + '. (1 mark per sentence; a sentence that does not belong has no label.)';
   if (t==='draw' || t==='write'){ const ck = (it.checklist||[]).map(plain); let s = `Look for: ${ck.join('; ')}. (1 mark for each.)`; if (t==='write' && typeof it.model==='string') s += ` Model answer: ${plain(it.model)}`; if (t==='draw') s += ' Judge the science, not the artistic quality.'; return s; }
   return '';
 }
@@ -7572,7 +7611,7 @@ function howToMarkLines(keyName){ keyName = keyName || 'written answer key'; ret
   '- The last page of each sheet is a feedback page made by the sim. It shows which questions the sim auto-marked as correct and which build checks passed. Use it to confirm your marking; if your marking and the feedback page disagree, trust the student’s visible answer and mention it in your feedback.',
   '- Each stop has two worksheets. The Foundation worksheet covers the Learn steps. The Challenge worksheet is an extension that covers the Challenge missions; only some students may be set it.',
   '- Each worksheet starts with "Steps completed in the sim": the Learn steps (Foundation) or the Challenge missions (Challenge) the student should do before answering. A blue tick means the sim recorded that step as done. These are not marked, but mention any skipped steps in your feedback.',
-  '- A “Mark it” question prints the numbered sentences with one box under each label and a White box. The student’s ticked box is their answer; a sentence left white has the White box ticked. Give 1 mark for each sentence with the right box.',
+  '- A “Mark it” question prints the numbered sentences with one box under each label and a No label box. The student’s ticked box is their answer; a sentence with no label has the No label box ticked. Give 1 mark for each sentence with the right box.',
   '- A “Data paragraph” or “Reading paragraph” is the student’s own writing with four tick points. For a Data paragraph the student first tapped two rows or two points; “My evidence” on the sheet shows which, so judge their numbers against those rows.',
   '- Every auto-marked question in the sim gets one go. A wrong answer is shown with the right answer, so check the student’s first answer as printed.',
   '- If a sheet is missing, a question is blank, or the upload is an empty sheet, give 0 for those questions and say kindly what is missing.',
