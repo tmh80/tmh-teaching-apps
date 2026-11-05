@@ -165,7 +165,7 @@ function rtFcRun(ids, kind, cards){
       r.cards[c.key] = {box, due: rtFcAdd(today, RT_FC_DAYS[box - 1])}; got.add(c.key); result[c.key] = r.cards[c.key];
     } else {
       r.cards[c.key] = {box: 1, due: today}; missed.add(c.key);
-      queue.splice(Math.min(queue.length, 3), 0, c);
+      queue.splice(Math.min(queue.length, 7), 0, c);
     }
     Store.save(); show();
   }
