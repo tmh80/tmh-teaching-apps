@@ -1,10 +1,11 @@
-/* Checks that every review question and build-task question/rubric row carries MYP strands (obj),
+/* Foundation changes for the reading and writing chapters: electromagnets A i-iii, C ii, D i; generators A i, ii, C ii, iii, D i; acdc A i, ii, D i-iii; power unchanged.
+   Checks that every review question and build-task question/rubric row carries MYP strands (obj),
    prints each sheet's strands and compares them with the table Tom signed off.
    Run:  node check-strands.js   (needs Playwright; exits 1 on any problem) */
 const { chromium } = require(process.env.PLAYWRIGHT_PATH || 'playwright');
 const path = require('path');
 const EXPECT = {
-  f: {launch:'A i, ii, iii', atom:'A i, ii, iii', static:'A i, ii, iii · D i, iii', circuits:'A i, ii', electromagnets:'A i, ii, iii · D i, iii', ohm:'A i, ii', generators:'A i, ii · D i, iii', bulb:'A i, ii, iii · D i, ii, iii', series:'A i, ii · D i, iii', acdc:'A i, ii, iii · D i, ii, iii', power:'A i, ii, iii · D i, ii, iii', future:'A i, ii, iii · D i, iii'},
+  f: {launch:'A i, ii, iii', atom:'A i, ii, iii', static:'A i, ii, iii · D i, iii', circuits:'A i, ii', electromagnets:'A i, ii, iii · C ii · D i', ohm:'A i, ii', generators:'A i, ii · C ii, iii · D i', bulb:'A i, ii, iii · D i, ii, iii', series:'A i, ii · D i, iii', acdc:'A i, ii · D i, ii, iii', power:'A i, ii, iii · D i, ii, iii', future:'A i, ii, iii · D i, iii'},
   c: {launch:'A i, ii, iii', atom:'A i, ii, iii', static:'A ii, iii', circuits:'A i, ii · D i, ii, iii', electromagnets:'A i, ii, iii · D i, iii', ohm:'A i, ii', generators:'A i, ii', bulb:'A i, ii · D ii, iii', series:'A i, ii · D i, iii', acdc:'A i, ii, iii · D i, ii, iii', power:'A i, iii · D ii, iii', future:'A i, ii, iii · D i, ii, iii'}
 };
 (async () => {

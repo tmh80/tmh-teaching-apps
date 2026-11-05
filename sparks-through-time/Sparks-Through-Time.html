@@ -464,6 +464,51 @@ table.data th{background:var(--panel-2)}
 .ws-feedback{break-before:page}
 .ws-myp{margin-left:auto; font-size:10.5px; font-weight:800; letter-spacing:.06em; color:#56607e; border:1px solid #9aa3c2; border-radius:99px; padding:1px 8px; white-space:nowrap}
 .ws-myp-line{font-weight:700; color:#56607e}
+/* reading and writing: routine strip, key idea, Mark it, picking data */
+.rw-strip{display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:0 0 10px; font-weight:700}
+.rw-w{padding:4px 12px; border-radius:999px; border:2px solid var(--line); color:var(--muted); background:var(--panel-2); font-size:.9rem}
+.rw-w:not(:last-child)::after{content:"→"; margin-left:10px; color:var(--muted)}
+.rw-w.on{background:var(--spark); color:var(--spark-ink); border-color:var(--spark)}
+.rw-key{border:3px solid var(--spark); background:var(--hint-bg); border-radius:14px; padding:10px 16px; margin:8px 0}
+.rw-key-lab{font-size:.8rem; text-transform:uppercase; letter-spacing:.06em; color:var(--hint); font-weight:700}
+.rw-key-txt{font-size:clamp(1.35rem,4.4vw,1.9rem); line-height:1.25; font-weight:800; margin:2px 0 0; font-family:var(--font-display)}
+.rw-hint{margin:8px 0} .rw-hint summary{cursor:pointer; color:var(--accent); font-weight:600} .rw-hint p{margin:6px 0 0}
+.rw-do{font-weight:700; margin:8px 0}
+.rw-q{font-size:1.15rem; font-weight:700; line-height:1.8}
+.rw-part{font:inherit; border:2px dashed var(--accent); background:var(--accent-soft); color:var(--ink); border-radius:8px; padding:1px 8px; cursor:pointer}
+.rw-part.on{border-style:solid; background:var(--ok-bg); border-color:var(--ok)}
+.rw-typed-lab{display:grid; gap:4px; font-weight:600; margin:8px 0} .rw-typed{width:100%; font:inherit; padding:8px 10px; border:2px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink)}
+.rw-pair{display:grid; grid-template-columns:minmax(0,1.4fr) minmax(0,1fr); gap:12px; align-items:start; margin:8px 0}
+.rw-pair textarea{width:100%; min-height:130px; font:inherit; padding:8px 10px; border:2px solid var(--line); border-radius:10px; background:var(--panel); color:var(--ink)}
+.rw-side{border:2px solid var(--line); border-radius:10px; padding:8px 12px; background:var(--panel-2)} .rw-side h4{margin:0 0 4px}
+.rw-ev-list{margin:4px 0; padding-left:20px; display:grid; gap:6px}
+.rw-starters{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0}
+.rw-remind{margin:6px 0} .rw-remind summary{cursor:pointer; font-weight:600; color:var(--accent)}
+.rw-pick .data tr.rw-row{cursor:pointer} .rw-pick .data tr.rw-row.on{background:var(--ok-bg); font-weight:700} .rw-row:focus-visible,.mk-sent:focus-visible,.rw-pt:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.rw-pt{cursor:pointer} .rw-graph{max-width:460px; width:100%}
+.rw-twin{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; align-items:start}
+.rw-opt{display:block; width:100%; text-align:left; margin:6px 0}
+.rw-plain .rv-pill,.rw-plain .rv-num{display:none}
+.rw-cards{display:grid; gap:8px; margin:8px 0}
+.mk{display:grid; gap:10px; --mk0:#3b82f6; --mk1:#e08a1e; --mk2:#22a06b; --mk3:#a855f7}
+.mk-labels{display:flex; flex-wrap:wrap; gap:8px}
+.mk-lab{font:inherit; font-weight:700; padding:6px 14px; border-radius:999px; border:3px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.mk-lab.on{box-shadow:0 0 0 3px var(--ink)}
+.mk-list{list-style:decimal; margin:0; padding-left:26px; display:grid; gap:10px}
+.mk-item{padding-left:4px}
+.mk-sent{padding:8px 12px; border-radius:10px; border:3px solid var(--line); background:var(--panel); cursor:pointer; line-height:1.4}
+.mk-sent[aria-disabled="true"]{cursor:default}
+.mk-meta{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; margin-top:4px; font-size:.9rem}
+.mk-tag{font-weight:700; padding:1px 9px; border-radius:999px; border:2px solid var(--line); background:var(--panel-2)}
+.mk-fix{color:var(--ok); font-weight:700} .mk-yes{color:var(--ok); font-weight:700} .mk-why{color:var(--muted)}
+.mk-item.wrong .mk-sent{border-style:dashed}
+.mk-c0{--c:var(--mk0)} .mk-c1{--c:var(--mk1)} .mk-c2{--c:var(--mk2)} .mk-c3{--c:var(--mk3)}
+.mk-lab.mk-c0,.mk-lab.mk-c1,.mk-lab.mk-c2,.mk-lab.mk-c3{border-color:var(--c); background:color-mix(in srgb, var(--c) 22%, var(--panel))}
+.mk-sent.mk-c0,.mk-sent.mk-c1,.mk-sent.mk-c2,.mk-sent.mk-c3{border-color:var(--c); background:color-mix(in srgb, var(--c) 25%, var(--panel))}
+.mk-tag.mk-c0,.mk-tag.mk-c1,.mk-tag.mk-c2,.mk-tag.mk-c3{border-color:var(--c); background:color-mix(in srgb, var(--c) 30%, var(--panel))}
+.ws-mark th,.ws-mark td{font-size:.85em; vertical-align:top} .ws-mark .ws-markc{text-align:center; width:14%}
+@media (max-width:640px){ .rw-pair,.rw-twin{grid-template-columns:minmax(0,1fr)} .rw-side{order:-1} }
+
 .ws-info{font-size:.9rem; color:#1a2140; flex:1 1 100%} .ws-info.good{color:#1b7f46} .ws-info.bad{color:#b83434; font-weight:700} .ws-info:empty{display:none}
 .ws-toolbar .btn.ghost{background:transparent; text-decoration:underline}
 .ws-offscreen{position:fixed; left:-10000px; top:0; width:718px; background:#fff; pointer-events:none}
@@ -1535,7 +1580,7 @@ function readingTable(el, opt){
     const inp = inputs[key]; const v = parseFloat(String(inp.el.value).replace(',','.'));
     if (expect[key]==null){ inp.msg.textContent = 'Set up the circuit for this row first.'; inp.msg.className = 'rt-msg bad'; return; }
     if (isNaN(v)){ inp.msg.textContent = 'Type the number on the ammeter.'; inp.msg.className = 'rt-msg bad'; return; }
-    if (Math.abs(v - expect[key]) <= tol){ typed[key] = v; slot.put(typed); draw(); if (opt.onChange) opt.onChange(okCount()); }
+    if (Math.abs(v - expect[key]) <= tol){ typed[key] = v; slot.put(typed); draw(); if (opt.onChange) opt.onChange(okCount(), typed); }
     else { inp.msg.textContent = 'Look again at the meter. Copy the number exactly.'; inp.msg.className = 'rt-msg bad'; }
   }
   function draw(){
@@ -1550,7 +1595,7 @@ function readingTable(el, opt){
       else {
         const inpEl = h('input',{type:'text', inputmode:'decimal', class:'rt-in', placeholder: expect[r.key]!=null ? 'type it' : 'not set up yet', 'aria-label':`${opt.cols[opt.cols.length-1]} for ${r.cells.join(' ')}`, disabled: expect[r.key]==null});
         const msg = h('div',{class:'rt-msg'}, expect[r.key]!=null ? 'Read the meter, then type the number.' : '');
-        const btn = h('button',{class:'btn small', type:'button', disabled: expect[r.key]==null, onclick:()=>check(r.key)}, 'Check');
+        const btn = h('button',{class:'btn small', type:'button', disabled: expect[r.key]==null, onclick:()=>check(r.key)}, opt.btn || 'Check');
         inpEl.addEventListener('keydown', e=>{ if (e.key==='Enter'){ e.preventDefault(); check(r.key); } });
         inputs[r.key] = {el:inpEl, msg};
         cell = h('td',{class: expect[r.key]!=null ? 'rt-now' : ''}, h('div',{class:'rt-row'}, inpEl, h('span',{}, opt.unit||''), btn), msg);
@@ -1793,16 +1838,16 @@ function renderStop(stop, tab){
 
 function runLearn(el, stop){
   const steps = stop.learn; const p = prog(stop.id); const LR = lrStore(stop.id); let i = 0;
-  const done = new Set(Object.keys(LR.done).map(Number).filter(k=>k<steps.length));
+  const done = new Set(steps.map((_,k)=>k).filter(k=>LR.done[lrKey(stop,k)]));
   if (p.learn && done.size < steps.length) steps.forEach((_,k)=>done.add(k));
   function show(){
     el.innerHTML = '';
-    const idx = i, st = steps[idx];
+    const idx = i, st = steps[idx], K = lrKey(stop, idx);
     const wasDone = done.has(idx);
-    LCTX = {mem: LR.mem[idx] = LR.mem[idx] || {}, n:0};
+    LCTX = {mem: LR.mem[K] = LR.mem[K] || {}, n:0};
     const dots = h('div',{class:'steps-dots', 'aria-hidden':'true'}, steps.map((_,k)=>h('span',{class:(done.has(k)?'done':'')+(k===idx?' now':'')})));
     const pill = h('span',{class:'pill ' + (wasDone ? 'ok' : 'todo')}, wasDone ? '✓ Step complete' : 'To do');
-    const again = h('button',{class:'btn small ghost', type:'button', onclick:()=>{ LR.mem[idx] = {}; delete LR.done[idx]; done.delete(idx); Store.save(); show(); }}, '↻ Try this step again');
+    const again = h('button',{class:'btn small ghost', type:'button', onclick:()=>{ LR.mem[K] = {}; delete LR.done[K]; done.delete(idx); Store.save(); show(); }}, '↻ Try this step again');
     const top = h('div',{class:'learn-top'}, h('span',{class:'eyebrow'}, `Learn · Step ${idx+1} of ${steps.length}`), dots, pill, wasDone ? again : null);
     const stage = h('div',{class:'stage'});
     const fb = h('div',{class:'feedback', role:'status', 'aria-live':'polite'});
@@ -1813,10 +1858,10 @@ function runLearn(el, stop){
     const markDone = msg=>{ card.classList.add('step-done'); pill.className = 'pill ok'; pill.textContent = '✓ Step complete'; fb.className = 'feedback ok step-fb'; fb.innerHTML = `<strong>✓ Step complete!</strong> ${msg || ''} <span class="legend">Press <b>${isLast ? next.textContent : 'Next step'}</b> to carry on.</span>`; next.classList.add('pulse'); };
     let keyBox = null, pendingMsg = '';
     const keyHost = h('div');
-    const finishStep = msg=>{ done.add(idx); LR.done[idx] = msg || true; Store.save(); next.disabled = false; dots.children[idx].classList.add('done'); if (!top.contains(again)) top.append(again); markDone(msg); };
+    const finishStep = msg=>{ done.add(idx); LR.done[K] = msg || true; Store.save(); next.disabled = false; dots.children[idx].classList.add('done'); if (!top.contains(again)) top.append(again); markDone(msg); };
     const api = {
       complete(msg){ if (i!==idx) return;
-        const KI = st.key || (typeof KEY_IDEAS!=='undefined' && KEY_IDEAS[st.title]); const mem = LR.mem[idx] = LR.mem[idx] || {};
+        const KI = st.key || (typeof KEY_IDEAS!=='undefined' && KEY_IDEAS[st.title]); const mem = LR.mem[K] = LR.mem[K] || {};
         if (KI && !mem.__key){ if (keyBox) return; pendingMsg = msg;
           fb.className = 'feedback ok step-fb'; fb.innerHTML = `${msg ? `<strong>Nice work!</strong> ${msg} ` : ''}<span class="legend"><b>One last thing:</b> answer the key idea below to finish this step.</span>`;
           keyBox = keyIdeaCheck(keyHost, KI, false, ()=>{ mem.__key = true; Store.save(); keyBox = null; finishStep(pendingMsg); }); setTimeout(()=>scrollToEl(keyHost), 250); return; }
@@ -1828,7 +1873,7 @@ function runLearn(el, stop){
     const restartAll = p.learn ? h('div',{class:'row end'}, h('button',{class:'btn small ghost', type:'button', onclick:()=>{ LR.mem = {}; LR.done = {}; Store.save(); done.clear(); i = 0; show(); }}, '↻ Clear my answers and start all the steps again')) : null;
     card.append(top, h('h3',{class:'step-title'}, st.title), (()=>{ const r = pipSay(st.say, 64); r.classList.add('step-say'); return r; })(), stage, fb, keyHost, h('div',{class:'row between'}, back, next));
     el.append(card); if (restartAll) el.append(restartAll);
-    if (wasDone){ const m = LR.done[idx]; markDone(typeof m==='string' ? m : ''); const KI = st.key || (typeof KEY_IDEAS!=='undefined' && KEY_IDEAS[st.title]); if (KI && LR.mem[idx] && LR.mem[idx].__key) keyIdeaCheck(keyHost, KI, true, ()=>{}); }
+    if (wasDone){ const m = LR.done[K]; markDone(typeof m==='string' ? m : ''); const KI = st.key || (typeof KEY_IDEAS!=='undefined' && KEY_IDEAS[st.title]); if (KI && LR.mem[K] && LR.mem[K].__key) keyIdeaCheck(keyHost, KI, true, ()=>{}); }
     st.build(stage, api);
     if (st.auto) api.complete();
   }
@@ -1851,7 +1896,7 @@ function runLearn(el, stop){
     const tg = id=>document.querySelector(`.tabs [data-tab="${id}"] .tag`);
     if (tg('learn')){ tg('learn').textContent='Done'; tg('learn').classList.add('done'); }
     if (tg('explore')) tg('explore').textContent='Free play';
-    if (tg('review')){ const st = rvStore(stop.id); const n = (stop.review||[]).length; tg('review').textContent = `${(stop.review||[]).filter((_,i)=>st[i] && st[i].done).length}/${n}`; }
+    if (tg('review')){ const st = rvStore(rvKey(stop,'f')); const n = (stop.review||[]).length; tg('review').textContent = `${(stop.review||[]).filter((_,i)=>st[i] && st[i].done).length}/${n}`; }
     if (tg('challenge') && !p.challenge) tg('challenge').textContent='Ready';
   }
   show();
@@ -4109,7 +4154,43 @@ registerStop({
       build(stage, api){ askInline(stage, [
         {q:'What should you <b>change</b> in your experiment? (the independent variable)', options:['The number of coils','The number of paperclips','The size of the nail','Everything at once'], answer:0, explain:'You change the number of coils on purpose, because that’s what you’re testing.'},
         {q:'What should you <b>measure</b>? (the dependent variable)', options:['How many paperclips it picks up','How long the wire is','The colour of the wire','The number of cells'], answer:0, explain:'Counting the paperclips tells you how strong the electromagnet is.'},
-        {q:'Which of these must you <b>keep the same</b>? (a controlled variable)', options:['The number of cells','The number of coils','The number of paperclips picked up','Nothing needs to stay the same'], answer:0, explain:'If you changed the cells as well, you wouldn’t know whether the coils or the cells made the difference. The core material and the size of the paperclips should stay the same too.'}], ()=>api.complete('Brilliant planning! You can run this exact fair test in the Explore lab, with a results table and a graph.')); }}
+        {q:'Which of these must you <b>keep the same</b>? (a controlled variable)', options:['The number of cells','The number of coils','The number of paperclips picked up','Nothing needs to stay the same'], answer:0, explain:'If you changed the cells as well, you wouldn’t know whether the coils or the cells made the difference. The core material and the size of the paperclips should stay the same too.'}], ()=>api.complete("Brilliant planning! Now let's run it.")); }},
+    { title:'Run your fair test', say:`<p>You planned a fair test, and now you get to run it! Good readers read the question first. Tell me what you already know.</p>`,
+      build(stage, api){
+        const pslot = lrSlot('parts'); const picked = new Set(pslot.saved || []); let tbl = null, know = lrSlot('know').saved || '';
+        const fin = ()=>{ if (picked.size===2 && know.trim() && tbl && tbl.count===5) api.complete('You read the question first, so you knew what to look for.'); };
+        const part = (txt, good)=>{ const b = h('button',{type:'button', class:'rw-part' + (picked.has(txt) ? ' on' : ''), 'aria-pressed':String(picked.has(txt))}, txt);
+          b.addEventListener('click', ()=>{ if (!good){ api.hint('Look for what you change and what you measure.'); return; } picked.add(txt); pslot.put([...picked]); b.classList.add('on'); b.setAttribute('aria-pressed','true'); api.clear(); fin(); }); return b; };
+        stage.append(rwStrip(0), rwKey('Read the question first. Then you know what to look for.'),
+          h('p',{class:'rw-q'}, 'Does ', part('the number of coils', true), ' change ', part('how strong', true), ' ', part('an electromagnet', false), ' is?'),
+          h('p',{class:'rw-do'}, 'Tap the two parts to look for. Type what you know. Then set the coils to 10, 20, 30, 40 and 50, and type the clips for each.'), rwHint('Look for what you change and what you measure.'));
+        rwTyped(stage, 'What do I already know?', 'know', 3, v=>{ know = v; fin(); });
+        const wrap = h('div',{class:'rw-twin'}), left = h('div'), right = h('div'); wrap.append(left, right); stage.append(wrap);
+        tbl = readingTable(right, {key:'tbl', cols:['Coils of wire','Paperclips held'], rows:[10,20,30,40,50].map(c=>({key:String(c), cells:[c]})), unit:'clips', tol:0.5, onChange:()=>fin()});
+        electroRig(left, {controls:['coils'], start:{coils:10, cells:2, core:'iron', on:true}, onChange:s=>tbl.live(String(s.coils), s.clips)});
+        tbl.live('10', 4);
+      }},
+    { title:'Mark your evidence', say:`<p>Scientists pick the numbers that show the pattern best. Which two rows would convince a friend?</p>`,
+      build(stage, api){
+        stage.append(rwStrip(1), rwKey('Pick two numbers. Give each one its unit.'), h('p',{class:'rw-do'}, 'Tap two rows, then answer.'));
+        const slot = lrSlot('rows'), qHost = h('div'); let asked = false;
+        const ask = ()=>{ if (asked) return; asked = true; api.hint('The first and last rows show the biggest change.');
+          askInline(qHost, [{q:'Which sentence uses evidence best?', options:['With 10 coils it picked up 4 clips, and with 50 coils it picked up 20 clips.','With 10 coils it picked up lots of clips, and with 50 coils it picked up more.','With 10 and 50 coils it picked up 4 and 20, and that is a big jump.'], answer:0, explain:'It gives both numbers, and each number has its unit.'}], ()=>api.complete(), 'q1'); qHost.append(rwHint('Can a reader tell what each number means?')); };
+        rwPick(stage, {kind:'table', head:['Coils of wire','Paperclips held'], rows:[[10,4],[20,8],[30,12],[40,16],[50,20]], say:r=>`${r[0]} coils, ${r[1]} clips`, need:2}, {saved:slot.saved, onChange:s=>{ slot.put(s); if (s.length===2) ask(); }});
+        stage.append(qHost); if (slot.saved && slot.saved.length===2) ask();
+      }},
+    { title:'Take apart a good paragraph', say:`<p>Here is a different test, with 1 to 4 cells and 30 coils each time. What is each sentence doing? Have a go before I tell you the names.</p>`,
+      build(stage, api){
+        const strip = rwStrip(1); const mh = h('div'), after = h('div'); const slot = lrSlot('mark');
+        const spec = {labels:['Answers the question','Gives the numbers','Explains why'], after:['Claim','Evidence','Reasoning'], sents:[{t:'The results show that more cells make a stronger electromagnet.', a:0},{t:'With 1 cell it picked up 6 clips, and with 4 cells it picked up 24 clips.', a:1},{t:'More cells push a bigger current through the coil, so the magnetic field gets stronger.', a:2}]};
+        stage.append(strip, h('p',{class:'rw-do'}, 'Mark each sentence. Then write a claim for your results.'), mh, after);
+        const showWrite = ()=>{ strip.set(2); after.innerHTML = ''; const left = h('div'); let btn = null;
+          const ta = rwTyped(left, 'My claim', 'claim', 3, v=>{ if (btn) btn.disabled = v.trim().length < 8; });
+          btn = h('button',{class:'btn primary small', type:'button', disabled:ta.value.trim().length < 8, onclick:()=>{ btn.disabled = true; ta.readOnly = true; after.append(h('div',{class:'info-card'}, h('b',{}, 'Model: '), 'My results show that more coils make a stronger electromagnet.')); api.complete(); }}, 'Show me a model');
+          after.append(rwKey('Claim, Evidence, Reasoning. Say it, show it, explain it.'), h('div',{class:'rw-pair'}, left, h('div',{class:'rw-side'}, h('h4',{}, 'My evidence'), rwEvList(spec, spec.after))), rwHint('Try starting with: My results show that…'), btn); };
+        markWidget(mh, spec, {saved:slot.saved, locked:!!slot.saved, onCheck:resp=>{ slot.put(resp); showWrite(); }});
+        if (slot.saved) showWrite();
+      }}
   ],
   explore(el){
     el.append(pipSay('<p>Welcome to Sturgeon’s test bench! Run your own fair test. Pick one variable to change, keep everything else the same, and press <b>Run a trial</b> each time. Real experiments give slightly different results each time, so try repeating a trial too.</p>'));
@@ -4272,11 +4353,58 @@ registerStop({
       build(stage, api){ magnetCoil(stage, ()=>{ askInline(stage, [{q:'What happens to the meter when the magnet stops moving?', options:['The needle goes back to zero','The needle stays at the top','The needle spins round and round','The bulb explodes'], answer:0, explain:'Electricity only flows while the magnet is <b>moving</b>. Pushing it in makes the needle swing one way, and pulling it out makes it swing the other way. Making a voltage by moving a magnet near a wire is called <b>induction</b>.'}], ()=>api.complete()); }); }},
     { title:'Spin it!', say:'<p>Pushing a magnet in and out gets tiring. Instead, a <b>generator</b> spins a magnet next to coils of wire, so it keeps moving all the time. Turn the speed up to at least <b>80%</b> and watch the bulb.</p>',
       build(stage, api){ predictThen(stage, {q:'What do you think will happen to the bulb as the generator spins faster?', options:['It will get brighter','It will get dimmer','Nothing will change','It will flash on and off']}, (area, pr)=>genRig(area, {controls:['speed'], start:{speed:10}, onChange:s=>{ if (s.speed>=80) api.complete(`You predicted: <i>${pr.txt.toLowerCase()}</i>. The faster the magnet spins, the bigger the voltage and the brighter the bulb. Look at the green oscilloscope screen too: the line goes up and down in a wave.`); }})); }},
-    { title:'More power!', say:'<p>Speed isn’t the only thing that matters. Can you get the peak voltage up to at least <b>12 V</b>? Try changing the coil and the magnet as well as the speed.</p>',
+    { title:'More power!', say:'<p>Spinning faster is only one way. Can you get the peak voltage up to at least <b>12 V</b>? Try changing the coil and the magnet too.</p>',
       build(stage, api){ let asked = false; genRig(stage, {controls:['speed','coils','magnet'], start:{speed:60, coils:100, mag:1}, onChange:s=>{ if (s.peak>=12 && !asked){ asked = true;
         askInline(stage, [{tag:'Explain it', q:`<b>${fmt(s.peak,1)} V!</b> Which three changes increase the voltage from a generator?`, options:['Spinning faster, more turns of wire and a stronger magnet','Spinning slower, fewer turns and a weaker magnet','Only spinning faster','Making the bulb bigger'], answer:0, explain:'All three make the magnetic field change faster or more strongly through the coil, which pushes more electricity.'}], ()=>api.complete()); } }}); }},
-    { title:'Read the wave', say:'<p>Look closely at the oscilloscope trace. It goes above the middle line, then below it, again and again.</p>',
-      build(stage, api){ genRig(stage, {controls:['speed'], start:{speed:30}}); askInline(stage, [{q:'What does the wave going above and below the middle line tell us?', options:['The current keeps changing direction','The generator is broken','The current is getting used up','The bulb is switching off'], answer:0, explain:'Each time the magnet turns half a circle, the current flips direction. Current that keeps changing direction is called <b>alternating current (AC)</b>. You’ll find out why that matters at the 1893 stop!'}], ()=>api.complete()); }},
+    { title:'Crack a tricky word', say:`<p>Graphs have tricky words too. Look at this label: peak voltage. A mountain has a peak. Have a guess before you read on!</p>`,
+      build(stage, api){
+        let wordsDone = false, tbl = null; const sp = {xl:'Turns of wire', yl:'Peak voltage (V)', xMax:500, yMax:7, xStep:100, yStep:1, say:r=>`${r[0]} turns of wire, ${r[1]} V`};
+        const gHost = h('div'); const typed0 = lrSlot('tbl').saved || {};
+        const pts = t=>Object.entries(t).map(([k,v])=>[+k, +v]);
+        const drawG = t=>{ gHost.innerHTML = ''; gHost.append(rwSvg(sp, pts(t), null, null)); };
+        const fin = n=>{ if (wordsDone && n===5) api.complete('Clues around a word help you work out what it means.'); };
+        stage.append(rwStrip(0), rwKey('Stuck on a word? Use the clues around it: the picture, the label and the sentence.'), h('p',{class:'rw-do'}, 'Answer the word questions. Then set the turns of wire to 100, 200, 300, 400 and 500. Type each peak voltage and tap Plot.'));
+        const qHost = h('div'); stage.append(qHost, rwHint('Look at the green screen and the picture of the coil.'));
+        askInline(qHost, [{q:'What does peak voltage mean?', options:['The highest voltage the wave reaches','The lowest voltage the wave reaches','The middle voltage of the wave'], answer:0, explain:'The peak is the top of the wave, like the top of a mountain.'},
+          {q:'What does turns of wire mean on this graph?', options:['The loops of wire in the coil','The times the magnet goes round','The bends in the wire to the bulb'], answer:0, explain:'Each loop of wire in the coil is one turn.'}], ()=>{ wordsDone = true; fin(tbl ? tbl.count : 0); }, 'words');
+        const wrap = h('div',{class:'rw-twin'}), left = h('div'), right = h('div'); wrap.append(left, right); stage.append(wrap);
+        right.append(gHost); drawG(typed0);
+        tbl = readingTable(right, {key:'tbl', cols:['Turns of wire','Peak voltage (V)'], rows:[100,200,300,400,500].map(c=>({key:String(c), cells:[c]})), unit:'V', tol:0.05, btn:'Plot', onChange:(n, t)=>{ drawG(t); fin(n); }});
+        genRig(left, {controls:['coils'], start:{speed:60, coils:100, mag:1}, onChange:s=>tbl && tbl.live(String(s.coils), +s.peak.toFixed(1))});
+      }},
+    { title:'Test the hypothesis', say:`<p>Here is a hypothesis: twice the turns of wire gives twice the peak voltage. Tell me what you already know. Which two points can test it?</p>`,
+      build(stage, api){
+        const P = [[100,1.2],[200,2.4],[300,3.6],[400,4.8],[500,6]]; const slot = lrSlot('pts'); let know = lrSlot('know').saved || '', good = false, finished = false;
+        const sp = {kind:'graph', rows:P, need:2, xl:'Turns of wire', yl:'Peak voltage (V)', xMax:500, yMax:7, xStep:100, yStep:1, say:r=>`${r[0]} turns of wire, ${r[1]} V`};
+        const qHost = h('div'); let asked = false;
+        const fin = ()=>{ if (finished && know.trim()) api.complete('Twice the turns of wire gave twice the peak voltage, so the data support the hypothesis.'); };
+        const ask = ()=>{ if (asked) return; asked = true; const inp = h('input',{type:'text', inputmode:'decimal', class:'rv-num-in', 'aria-label':'Your answer'}), fb = h('div',{class:'feedback', role:'status'});
+          const aslot = lrSlot('q1'); const lock = (v, ok)=>{ inp.value = v; inp.disabled = true; btn.disabled = true; fb.className = 'feedback ' + (ok ? 'ok' : 'bad'); fb.innerHTML = (ok ? '<strong>Yes!</strong> ' : '<strong>Whoops!</strong> The answer is <b>2</b>. ') + '2.4 ÷ 1.2 = 2, and 4.8 ÷ 2.4 = 2.'; finished = true; fin(); };
+          const btn = h('button',{class:'btn primary small', type:'button', onclick:()=>{ const v = parseFloat(String(inp.value).replace(',','.')); if (isNaN(v)){ fb.className = 'feedback hint'; fb.textContent = 'Type a number first.'; return; } const ok = Math.abs(v-2) < 0.01; aslot.put({v:inp.value, ok}); lock(inp.value, ok); }}, 'Check');
+          qHost.append(h('p',{class:'quiz-q'}, 'How many times bigger is the peak voltage at your second point?'), h('div',{class:'row'}, inp, btn), fb, h('p',{class:'legend rv-onego'}, 'One go! Check your numbers first.'));
+          if (aslot.saved) lock(aslot.saved.v, aslot.saved.ok); };
+        const onPick = s=>{ slot.put(s); if (s.length<2) return; const [a,b] = s.map(i=>P[i]).sort((x,y)=>x[0]-y[0]); if (b[0]===2*a[0]){ api.clear(); ask(); } else api.hint('Find a point, then find the one with twice as many turns.'); };
+        stage.append(rwStrip(1), rwKey('Test the exact words of the hypothesis.'), h('p',{class:'rw-do'}, 'Type what you know. Tap two points where the turns of wire double.'), rwHint('Find a point, then find the one with twice as many turns.'));
+        rwTyped(stage, 'What do I already know?', 'know', 3, v=>{ know = v; fin(); });
+        rwPick(stage, sp, {saved:slot.saved, onChange:onPick}); stage.append(qHost);
+        if (slot.saved && slot.saved.length===2) onPick(slot.saved);
+      }},
+    { title:'Weak or strong?', say:`<p>Two students tested this hypothesis: faster spinning makes the peak voltage smaller. Which paragraph would convince you?</p>`,
+      build(stage, api){
+        const A = '<b>A.</b> The data contradict the hypothesis. The line on the graph goes up. It was a really good generator.';
+        const B = '<b>B.</b> The data contradict the hypothesis. At 2 turns each second the peak was 1.0 V, but at 10 turns each second it was 5.0 V. The magnet moves past the coil faster, so it makes a bigger voltage.';
+        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Tap the stronger paragraph. Then pick the three cards that make it strong.'), rwHint('What does B add?'));
+        const qHost = h('div'), cHost = h('div'); stage.append(qHost, cHost);
+        const opts = ['It says support or contradict','It uses two numbers with units','It explains the science','It uses very long words','It tells us what the student liked'];
+        const cslot = lrSlot('cards');
+        const cards = ()=>{ const picked = new Set(cslot.saved ? cslot.saved.picked : []); let locked = !!cslot.saved; const box = h('div',{class:'rw-cards'}), fb = h('div',{class:'feedback', role:'status'}); let btn = null;
+          const order = seeded(opts.map((_,i)=>i), 'weak-strong');
+          const draw = ()=>{ box.innerHTML = ''; order.forEach(k=>{ const good = k<3; const on = picked.has(k); box.append(h('button',{type:'button', class:'opt' + (on ? ' chosen' : '') + (locked ? (on ? (good ? ' right' : ' wrong') : (good ? ' should' : '')) : ''), 'aria-pressed':String(on), disabled:locked, onclick:()=>{ if (on) picked.delete(k); else picked.add(k); draw(); }}, opts[k])); }); };
+          draw(); btn = h('button',{class:'btn primary small', type:'button', onclick:()=>{ if (picked.size!==3){ fb.className = 'feedback hint'; fb.textContent = 'Pick exactly three cards.'; return; } locked = true; btn.disabled = true; cslot.put({picked:[...picked]}); draw(); done(); }}, 'Check my cards');
+          const done = ()=>{ const ok = [...picked].every(k=>k<3); fb.className = 'feedback ' + (ok ? 'ok' : 'bad'); fb.innerHTML = ok ? '<strong>Yes!</strong> B says contradict, uses two numbers with units and explains the science.' : '<strong>Whoops!</strong> The strong cards are: it says support or contradict, it uses two numbers with units, and it explains the science.'; cHost.append(rwKey('Say support or contradict. Show two numbers. Explain the science.')); api.complete(); };
+          cHost.append(box, h('div',{class:'row'}, btn), fb, h('p',{class:'legend rv-onego'}, 'One go! Pick three cards, then check.')); if (locked){ btn.disabled = true; done(); } };
+        askInline(qHost, [{q:'Which paragraph would convince you?', options:[B, A], answer:0, explain:'B says contradict, gives two numbers with units and explains the science.'}], cards, 'para');
+      }},
     { title:'Hamster power', say:'<p>This hamster is running in a wheel. The wheel turns a real <b>generator</b>, which is connected to a bulb and an ammeter. Watch the ammeter reading carefully.</p><p>Then tap the <b>hamster</b> and press <b>Faster</b> or <b>Slower</b>.</p>',
       build(stage, api){ let start = null, asked = false;
         Circuit.board(stage, {cols:4, rows:2, edges:LW({'h,0,1':'bulb','h,0,3':'ammeter','h,2,2':'generator'}, [], {lock:true}), mech:[{type:'m_wheel', dx:0, dy:-62, locked:true},{type:'m_hamster', dx:0, dy:-62, level:2, locked:true}], tools:['hand'], noUnscrew:true, onChange:(s,user)=>{
@@ -4472,8 +4600,31 @@ registerStop({
       build(stage0, api){ predictThen(stage0, {q:'The town is 30 km away. Which do you think will light more homes?', options:['Edison’s DC','Tesla’s AC','Both the same']}, (stage)=>{ let dc = false, ac = false; transmission(stage, {onChange:s=>{ if (s.d>=30){ if (s.mode==='dc') dc = true; else ac = true; }
         if (dc && ac) api.complete('What a difference! With AC, a machine called a <b>transformer</b> can raise the voltage to a very high level for the journey, so very little energy is wasted. Another transformer lowers it again before it reaches homes. Edison’s low-voltage DC lost most of its energy after a few kilometres, so he needed a power station every couple of kilometres.');
         else if (dc && !ac) api.hint('Look how few homes are lit with DC! Now switch to Tesla’s AC.'); else if (ac && !dc) api.hint('Now try Edison’s DC over the same distance.'); }}); }); }},
-    { title:'Who won?', say:'<p>In 1896, AC power from the giant waterfalls at Niagara Falls was sent about 40 km to light up the city of Buffalo. After that, AC became the way the whole world delivers electricity.</p>',
-      build(stage, api){ askInline(stage, [{q:'Why did AC win the War of the Currents?', options:['Transformers can raise its voltage, so it travels long distances without wasting much energy','AC is much safer to touch than DC, so people could use it at home without any risk','AC can travel through the air without wires, so it was cheaper to send long distances','Edison gave up on electricity and sold all of his power stations to Tesla'], answer:0, explain:'Being able to change the voltage with transformers made AC perfect for sending power across whole countries. (Today, engineers can also send DC over very long distances using special high-voltage equipment, but in 1893 AC was the only way.)'}], ()=>api.complete()); }}
+    { title:'Spot the structure', say:`<p>Science texts often have three parts. Read this text about your phone charger. What job does each sentence do?</p>`,
+      build(stage, api){
+        const mh = h('div'), after = h('div'); const slot = lrSlot('mark');
+        const spec = {labels:["What's the trouble?", 'How does it work?', "What's better now?"], after:['Problem','Science','Solution'], sents:[{t:'A phone battery needs about 5 V of DC, but a socket in Beijing gives 220 V of AC.', a:0},{t:'A transformer inside the charger lowers the voltage.', a:1},{t:'Another part changes the AC to DC.', a:1},{t:'Now your phone can charge safely from the wall.', a:2}]};
+        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Mark each sentence.'), rwHint('What would go wrong without the charger?'), mh, after);
+        const fin = ()=>{ after.innerHTML = ''; after.append(rwKey('Problem, science, solution. Find all three.')); api.complete(); };
+        markWidget(mh, spec, {saved:slot.saved, locked:!!slot.saved, onCheck:resp=>{ slot.put(resp); fin(); }}); if (slot.saved) after.append(rwKey('Problem, science, solution. Find all three.'));
+      }},
+    { title:'Put the cards in order', say:`<p>A paragraph needs its sentences in the right order. Put these mixed-up cards in the order a reader needs.</p>`,
+      build(stage, api){
+        const slot = lrSlot('order'), host = h('div',{class:'rw-plain'});
+        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Move the cards.'), rwHint('Start with the problem and end with the solution.'), host);
+        reviewCard(host, {t:'order', q:'Put these cards in the order a reader needs.', items:['A phone battery needs about 5 V of DC, but a socket in Beijing gives 220 V of AC.','A transformer inside the charger lowers the voltage.','Another part changes the AC to DC.','Now your phone can charge safely from the wall.']}, '', slot.saved, v=>{ slot.put(v); api.complete(); });
+      }},
+    { title:'Fix a weak paragraph', say:`<p>This paragraph is about the same charger, but we learn very little from it. Can you fix it?</p>`,
+      build(stage, api){
+        const slot = lrSlot('missing'), host = h('div',{class:'rw-plain'}), rest = h('div');
+        stage.append(rwStrip(1), h('div',{class:'info-card'}, h('b',{}, 'Weak paragraph: '), 'Chargers are really useful. A charger changes the electricity. My phone works.'), rwKey('Swap vague words for exact ones.'), h('p',{class:'rw-do'}, 'Tick what is missing. Then rewrite it in your own words.'), rwHint("'Changes the electricity' is vague. What exactly changes?"), host, rest);
+        const rewrite = ()=>{ rest.innerHTML = ''; const strip = stage.querySelector('.rw-strip'); if (strip) strip.set(2); let btn = null; const left = h('div');
+          const ta = rwTyped(left, 'My rewrite', 'rewrite', 4, v=>{ if (btn) btn.disabled = v.trim().length < 12; });
+          btn = h('button',{class:'btn primary small', type:'button', disabled:ta.value.trim().length < 12, onclick:()=>{ btn.disabled = true; ta.readOnly = true; rest.append(h('div',{class:'info-card'}, h('b',{}, 'Model: '), 'A phone battery needs about 5 V of DC, but a socket in Beijing gives 220 V of AC. A transformer inside the charger lowers the voltage, and another part changes the AC to DC. Now your phone can charge safely from the wall.')); api.complete(); }}, 'Show me a model');
+          rest.append(left, btn); };
+        reviewCard(host, {t:'multi', q:'What is missing from the weak paragraph?', options:['The problem','The science idea','A number from the text','A title','A joke'], answers:[0,1,2], explain:'A good paragraph names the problem, gives the science idea and uses a number from the text.'}, '', slot.saved, v=>{ slot.put(v); rewrite(); });
+        if (slot.saved && slot.saved.done) rewrite();
+      }}
   ],
   explore(el){
     el.append(pipSay('<p>Welcome to the World’s Fair lab! Switch the oscilloscope between different sources, then see how far you can send power with each kind of current.</p>'));
@@ -4975,7 +5126,29 @@ registerStop({
     { title:'Compare the CO₂', say:'<p>Burning coal, gas and biomass releases carbon dioxide, which traps heat and warms the planet. Look at the chart.</p>',
       build(stage, api){ co2Chart(stage); askInline(stage, [
         {q:'Which two sources release the <b>most</b> CO₂ for each kWh?', options:['Coal and gas','Wind and nuclear','Solar and hydro','Tidal and geothermal'], answer:0, explain:'Fossil fuels release by far the most CO₂.'},
-        {q:'Coal releases so much CO₂. Why do we still use it?', options:['Coal power stations can make electricity whenever it’s needed, and many already exist','Coal is renewable, so the world will never run out of it however much we burn','Coal power stations make no pollution, so they are better for the climate','Wind turbines and solar farms have never been able to make any electricity'], answer:0, explain:'Coal is reliable and lots of countries already have the power stations. Switching to cleaner sources takes time and money, and the grid still needs power when the wind drops or the Sun sets.'}], ()=>api.complete()); }}
+        {q:'Coal releases so much CO₂. Why do we still use it?', options:['Coal power stations can make electricity whenever it’s needed, and many already exist','Coal is renewable, so the world will never run out of it however much we burn','Coal power stations make no pollution, so they are better for the climate','Wind turbines and solar farms have never been able to make any electricity'], answer:0, explain:'Coal is reliable and lots of countries already have the power stations. Switching to cleaner sources takes time and money, and the grid still needs power when the wind drops or the Sun sets.'}], ()=>api.complete()); }},
+    { title:'Fact or opinion?', say:`<p>Some sentences can be checked, and some tell you what a person thinks. Try sorting these before I give you the rule.</p>`,
+      build(stage, api){
+        const slot = lrSlot('sort'), host = h('div',{class:'rw-plain'}), rest = h('div');
+        stage.append(rwStrip(1), h('p',{class:'rw-do'}, 'Sort each sentence. Then write one fact and one opinion about coal.'), rwHint('Could you check it with the chart or a measurement?'), host, rest);
+        const typed = ()=>{ rest.innerHTML = ''; stage.querySelector('.rw-strip').set(2); let btn = null; const left = h('div');
+          const ta = rwTyped(left, 'One fact and one opinion about coal', 'typed', 3, v=>{ if (btn) btn.disabled = v.trim().length < 8; });
+          btn = h('button',{class:'btn primary small', type:'button', disabled:ta.value.trim().length < 8, onclick:()=>{ btn.disabled = true; ta.readOnly = true; rest.append(h('div',{class:'info-card'}, h('b',{}, 'Model: '), 'Fact: coal is a fossil fuel. Opinion: coal is the worst source.')); api.complete(); }}, 'Show me a model');
+          rest.append(rwKey('A fact can be checked. An opinion is what someone thinks.'), left, btn); };
+        reviewCard(host, {t:'sort', q:'Sort each sentence.', groups:['Fact','Opinion'], colName:'Type', items:[['Coal releases about 820 g of CO₂ for each kWh.',0],['Solar panels look ugly on old roofs.',1],['A hydro dam needs a river.',0],['Every town should ban coal.',1]], explain:''}, '', slot.saved, v=>{ slot.put(v); typed(); });
+        if (slot.saved && slot.saved.done) typed();
+      }},
+    { title:'Sum it up', say:`<p>Good readers see both sides. Read the question first: should our school put solar panels on its roof? Then mark the text.</p>`,
+      build(stage, api){
+        const mh = h('div'), rest = h('div'), slot = lrSlot('mark'); const strip = rwStrip(1);
+        const spec = {labels:['Benefit','Drawback'], sents:[{t:'For each kWh, solar panels release about 48 g of CO₂, and coal releases about 820 g.', a:0},{t:'Sunlight is free, and it will not run out.', a:0},{t:'Solar panels make no electricity at night.', a:1}]};
+        stage.append(strip, h('p',{class:'rw-do'}, 'Mark each sentence. Then sum it up in one sentence.'), mh, rest);
+        const sum = ()=>{ rest.innerHTML = ''; strip.set(2); let btn = null; const left = h('div');
+          const ta = rwTyped(left, 'My one sentence', 'sum', 3, v=>{ if (btn) btn.disabled = v.trim().length < 8; });
+          btn = h('button',{class:'btn primary small', type:'button', disabled:ta.value.trim().length < 8, onclick:()=>{ btn.disabled = true; ta.readOnly = true; rest.append(h('div',{class:'info-card'}, h('b',{}, 'Model: '), 'Solar panels release far less CO₂ than coal, but they make no electricity at night.')); api.complete(); }}, 'Show me a model');
+          rest.append(rwKey('Sum it up: one sentence, both sides.'), left, rwHint('Try putting the word but in the middle.'), btn); };
+        markWidget(mh, spec, {saved:slot.saved, locked:!!slot.saved, onCheck:resp=>{ slot.put(resp); sum(); }}); if (slot.saved) sum();
+      }}
   ],
   explore(el){
     el.append(pipSay('<p>Revisit any power station, or study the CO₂ chart.</p>'));
@@ -5007,15 +5180,137 @@ registerStop({
   ]
 });
 
+/* ================= Reading and writing: Mark it, routine strip, picking data, paragraph card parts ================= */
+function typeName(it){ return it.label || RTYPES[it.t]; }
+function rwStrip(on){
+  const el = h('div',{class:'rw-strip', role:'note', 'aria-label':'Read it, Mark it, Write it'}, ['Read it','Mark it','Write it'].map((w,k)=>h('span',{class:'rw-w' + (k===on ? ' on' : '')}, w)));
+  el.set = k=>[...el.children].forEach((c,j)=>c.classList.toggle('on', j===k));
+  return el;
+}
+function rwKey(text){ return h('div',{class:'rw-key', role:'note'}, h('span',{class:'rw-key-lab'}, 'Key idea'), h('p',{class:'rw-key-txt', html:text})); }
+function rwHint(text){ return h('details',{class:'rw-hint'}, h('summary',{}, 'Need a hint?'), h('p',{html:text})); }
+function rwTyped(host, label, key, rows, onInput){
+  const slot = lrSlot(key); const ta = h('textarea',{class:'rw-typed', rows:rows||2, 'aria-label':label, placeholder:'Type here…'}); ta.value = slot.saved || '';
+  ta.addEventListener('input', ()=>{ slot.put(ta.value); if (onInput) onInput(ta.value); });
+  host.append(h('label',{class:'rw-typed-lab'}, h('span',{}, label), ta)); return ta;
+}
+/* a coloured list of sentences with their (corrected) labels, used beside "Write it" boxes */
+function rwEvList(spec, names){
+  const ol = h('ol',{class:'rw-ev-list'});
+  spec.sents.forEach((s,i)=>{ if (s.a<0) return; ol.append(h('li',{value:i+1}, h('span',{class:'mk-tag mk-c' + s.a}, names[s.a]), ' ', h('span',{html:s.t}))); });
+  return ol;
+}
+/* ---------- Mark it: pick a coloured label, tap sentences to paint them. One go. ---------- */
+function markWidget(host, spec, opt){
+  opt = opt || {};
+  const L = spec.labels, S = spec.sents;
+  let cur = S.map((_,i)=>(Array.isArray(opt.saved) && typeof opt.saved[i]==='number') ? opt.saved[i] : -1);
+  let active = 0, locked = !!opt.locked, warned = false, focusI = -1;
+  const nm = k=>(locked && spec.after ? spec.after : L)[k];
+  const wrap = h('div',{class:'mk'}), bar = h('div',{class:'mk-labels', role:'radiogroup', 'aria-label':'Choose a label'}), list = h('ol',{class:'mk-list'});
+  const help = h('p',{class:'legend mk-help'}, 'Pick a label, then tap a sentence to paint it. Tap a painted sentence again to change its label. Leave a sentence white if it doesn’t belong.');
+  const fb = h('div',{class:'feedback', role:'status'});
+  const chk = h('button',{class:'btn primary small mk-check', type:'button', onclick:()=>check()}, 'Check');
+  const paint = i=>{ if (locked) return; if (cur[i]===active){ const nx = cur[i]+1; cur[i] = nx>=L.length ? -1 : nx; } else cur[i] = active; focusI = i; draw(); };
+  function check(){
+    if (locked) return;
+    if (cur.every(v=>v<0) && !warned){ warned = true; fb.className = 'feedback hint'; fb.textContent = 'Pick a label, then tap sentences to paint them. Press Check again to check anyway.'; return; }
+    locked = true; fb.className = 'feedback'; fb.textContent = ''; draw();
+    const right = S.filter((s,i)=>cur[i]===s.a).length;
+    if (opt.onCheck) opt.onCheck(cur.slice(), right);
+  }
+  function draw(){
+    bar.innerHTML = ''; list.innerHTML = '';
+    L.forEach((_,k)=>bar.append(h('button',{type:'button', class:'mk-lab mk-c' + k + (active===k && !locked ? ' on' : ''), role:'radio', 'aria-checked':String(active===k), disabled:locked, onclick:()=>{ active = k; draw(); }}, nm(k))));
+    S.forEach((s,i)=>{
+      const ok = cur[i]===s.a, c = cur[i];
+      const sent = h('div',{class:'mk-sent ' + (c>=0 ? 'mk-c' + c : 'mk-w'), role:'button', tabindex:locked ? '-1' : '0', 'aria-disabled':String(locked), 'data-i':i, html:s.t});
+      sent.addEventListener('click', ()=>paint(i));
+      sent.addEventListener('keydown', e=>{
+        if (locked) return;
+        if (e.key==='Enter' || e.key===' '){ e.preventDefault(); paint(i); }
+        else if (/^[1-9]$/.test(e.key) && +e.key<=L.length){ e.preventDefault(); cur[i] = +e.key-1; focusI = i; draw(); }
+        else if (e.key==='0' || e.key==='Backspace' || e.key==='Delete'){ e.preventDefault(); cur[i] = -1; focusI = i; draw(); }
+      });
+      const li = h('li',{class:'mk-item' + (locked ? (ok ? ' right' : ' wrong') : '')}, sent,
+        h('div',{class:'mk-meta'}, h('span',{class:'mk-tag ' + (c>=0 ? 'mk-c' + c : 'mk-w')}, c>=0 ? nm(c) : 'White'),
+          locked ? (ok ? h('span',{class:'mk-yes'}, '✓ Right') : h('span',{class:'mk-fix'}, '→ ' + (s.a>=0 ? nm(s.a) : 'Leave it white'))) : null,
+          locked && s.why ? h('span',{class:'mk-why', html:s.why}) : null));
+      list.append(li);
+    });
+    help.hidden = locked; chk.hidden = locked;
+    if (focusI>=0){ const e = list.querySelector(`[data-i="${focusI}"]`); if (e) e.focus(); focusI = -1; }
+  }
+  wrap.append(bar, help, list, fb, h('div',{class:'row'}, chk)); host.append(wrap); draw();
+  return {get:()=>cur.slice(), locked:()=>locked, el:wrap};
+}
+/* ---------- tap two rows or two points ---------- */
+function rwSvg(sp, pts, sel, toggle){
+  const W=440, H=270, Lm=54, B=46, T=14, R=16;
+  const X = v=>Lm + v/sp.xMax*(W-Lm-R), Y = v=>H-B - v/sp.yMax*(H-B-T);
+  const s = sv('svg',{viewBox:`0 0 ${W} ${H}`, class:'sim-svg rw-graph', role:'group', 'aria-label':'Graph of ' + sp.yl + ' against ' + sp.xl});
+  for (let v=0; v<=sp.xMax; v+=sp.xStep) s.append(sv('line',{x1:X(v), y1:T, x2:X(v), y2:H-B, class:'svg-line'}), sv('text',{x:X(v), y:H-B+16, class:'t-small svg-muted', 'text-anchor':'middle'}, v));
+  for (let v=0; v<=sp.yMax; v+=sp.yStep) s.append(sv('line',{x1:Lm, y1:Y(v), x2:W-R, y2:Y(v), class:'svg-line'}), sv('text',{x:Lm-8, y:Y(v)+4, class:'t-small svg-muted', 'text-anchor':'end'}, v));
+  s.append(sv('text',{x:(Lm+W-R)/2, y:H-6, class:'t-small svg-ink', 'text-anchor':'middle'}, sp.xl), sv('text',{x:14, y:(T+H-B)/2, class:'t-small svg-ink', 'text-anchor':'middle', transform:`rotate(-90 14 ${(T+H-B)/2})`}, sp.yl));
+  pts.forEach(([x,y],i)=>{
+    const on = sel && sel.includes(i);
+    const g = sv('g',{class:'rw-pt' + (on ? ' on' : ''), 'data-i':i});
+    if (toggle){ g.setAttribute('role','checkbox'); g.setAttribute('tabindex','0'); g.setAttribute('aria-checked', String(on)); g.setAttribute('aria-label', sp.say([x,y])); g.addEventListener('click', ()=>toggle(i)); g.addEventListener('keydown', e=>{ if (e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(i); } }); g.append(sv('circle',{cx:X(x), cy:Y(y), r:16, fill:'transparent'})); }
+    g.append(sv('circle',{cx:X(x), cy:Y(y), r:on ? 8 : 6, fill:'var(--accent)', 'fill-opacity':.85, stroke:on ? 'var(--ink)' : 'none', 'stroke-width':2}));
+    s.append(g);
+  });
+  return s;
+}
+function rwPick(host, sp, o){
+  o = o || {}; let sel = (o.saved || []).slice(), locked = !!o.locked, focusI = -1;
+  const box = h('div',{class:'rw-pick'}); host.append(box);
+  const toggle = i=>{ if (locked) return; const k = sel.indexOf(i); if (k>=0) sel.splice(k,1); else { sel.push(i); if (sel.length>sp.need) sel.shift(); } focusI = i; draw(); if (o.onChange) o.onChange(sel.slice()); };
+  function draw(){
+    box.innerHTML = '';
+    if (sp.kind==='graph') box.append(rwSvg(sp, sp.rows, sel, toggle));
+    else {
+      const tb = h('tbody');
+      sp.rows.forEach((r,i)=>{ const on = sel.includes(i); const tr = h('tr',{class:'rw-row' + (on ? ' on' : ''), role:'checkbox', tabindex:locked ? '-1' : '0', 'aria-checked':String(on), 'aria-label':sp.say(r), 'data-i':i}, r.map(v=>h('td',{}, v)), h('td',{class:'rw-tick', 'aria-hidden':'true'}, on ? '✓' : ''));
+        tr.addEventListener('click', ()=>toggle(i)); tr.addEventListener('keydown', e=>{ if (e.key==='Enter' || e.key===' '){ e.preventDefault(); toggle(i); } }); tb.append(tr); });
+      box.append(h('div',{class:'tbl-wrap'}, h('table',{class:'data rw-table'}, h('thead',{}, h('tr',{}, sp.head.map(x=>h('th',{}, x)), h('th',{}, ''))), tb)));
+    }
+    box.append(h('p',{class:'legend'}, sel.length===sp.need ? `You picked ${sp.need}.` : `Tap ${sp.need} ${sp.kind==='graph' ? 'points' : 'rows'}. You have picked ${sel.length}.`));
+    if (focusI>=0){ const e = box.querySelector(`[data-i="${focusI}"]`); if (e && e.focus) e.focus(); focusI = -1; }
+  }
+  draw();
+  return {sel:()=>sel.slice(), lock(){ locked = true; draw(); }, el:box};
+}
+/* the front of a "Data paragraph" or "Reading paragraph": routine strip, rows to tap, starters, reminder, box with the marked evidence beside it */
+function rwWriteFront(body, ta, it, saved, opts){
+  if (!(it.starters || it.remind || it.evidence || it.evidenceFrom!=null)) return null;
+  opts = opts || {}; const done = !!(saved && saved.done); const strip = rwStrip(it.evidence && !done ? 1 : 2);
+  body.append(strip);
+  let picker = null; const need = it.evidence ? it.evidence.need : 0;
+  const side = h('div',{class:'rw-side'});
+  const fillSide = ()=>{
+    side.innerHTML = ''; side.append(h('h4',{}, 'My evidence'));
+    if (it.evidence){ const sel = picker ? picker.sel() : []; if (!sel.length) side.append(h('p',{class:'legend'}, 'The rows you tap will appear here.')); else side.append(h('ul',{class:'rw-ev-list'}, sel.slice().sort((a,b)=>a-b).map(i=>h('li',{}, it.evidence.say(it.evidence.rows[i]))))); }
+    else { const m = opts.peek ? opts.peek(it.evidenceFrom) : null; const spec = opts.items ? opts.items[it.evidenceFrom] : null; if (m && m.done && spec) side.append(h('p',{class:'legend'}, 'With the right labels:'), rwEvList(spec, spec.labels)); else side.append(h('p',{class:'legend'}, 'Do the Mark it question above first. Your marked sentences will appear here.')); }
+  };
+  if (it.evidence){ picker = rwPick(body, Object.assign({}, it.evidence), {saved:saved && saved.resp && saved.resp.ev, locked:done, onChange:()=>{ fillSide(); gate(); }}); }
+  if (it.starters && it.starters.length) body.append(h('div',{class:'rw-starters'}, h('b',{}, 'Sentence starters: '), it.starters.map(s=>h('span',{class:'chip'}, s))));
+  if (it.remind) body.append(h('details',Object.assign({class:'rw-remind'}, it.remindOpen ? {open:true} : {}), h('summary',{}, 'Need a reminder?'), h('p',{html:it.remind})));
+  const gate = ()=>{ const ok = !it.evidence || picker.sel().length===need; ta.readOnly = !ok || done; ta.placeholder = ok ? 'Write your answer in full sentences…' : `Tap ${need} ${it.evidence.kind==='graph' ? 'points' : 'rows'} first.`; if (ok && !done) strip.set(2); };
+  body.append(h('div',{class:'rw-pair'}, ta, side)); fillSide(); gate();
+  if (it.evidenceFrom!=null) document.addEventListener('rv-changed', ()=>{ if (side.isConnected) fillSide(); });
+  return {ev:()=>picker && picker.sel().length ? picker.sel() : null, ok:()=>!it.evidence || picker.sel().length===need, need:`Tap ${need} ${it.evidence ? (it.evidence.kind==='graph' ? 'points' : 'rows') : ''} first.`, lock(){ if (picker) picker.lock(); }};
+}
+
 /* ================= Review questions: varied types, saved answers, worksheets ================= */
 const RTYPES = {
   mcq:'Choose one', multi:'Tick all that apply', match:'Match it up', table:'Complete the table', sort:'Sort it',
-  order:'Put in order', num:'Calculate', fill:'Fill the gaps', draw:'Draw it', write:'Explain it'
+  order:'Put in order', num:'Calculate', fill:'Fill the gaps', draw:'Draw it', write:'Explain it', mark:'Mark it'
 };
 const SELF = t => t==='draw' || t==='write';
 /* each stop has two reviews: 'f' (Foundation, after Learn) and 'c' (Challenge, after the missions) */
 function rvItems(stop, part){ return (part==='c' ? stop.creview : stop.review) || []; }
-function rvKey(stop, part){ return part==='c' ? stop.id + '~c' : stop.id; }
+function rvKey(stop, part){ return part==='c' ? stop.id + '~c' : (stop.rvKeyF || stop.id); }
+function lrKey(stop, k){ return stop.learnKeys && stop.learnKeys[k]!=null ? stop.learnKeys[k] : k; }
 const PART_NAME = {f:'Foundation', c:'Challenge'};
 function rvStore(stopId){ Store.data.rv = Store.data.rv || {}; Store.data.rv[stopId] = Store.data.rv[stopId] || {}; return Store.data.rv[stopId]; }
 function normTxt(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9.\-]+/g,' ').trim(); }
@@ -5061,6 +5356,7 @@ function rvPoints(it, resp, ok){ // points per part (shown in the sim and on the
   if (t==='match' || t==='table' || t==='sort'){ const g = asGrid(it); let r = 0, m = 0; g.rows.forEach((row,i)=>row.ans.forEach((a,j)=>{ m++; if (resp[i] && resp[i][j]===a) r++; })); return {pts:r, max:m}; }
   if (t==='order'){ const wrong = resp.map((k,p)=>k!==p ? p : -1).filter(p=>p>=0); const one = wrong.length===2 && wrong[1]===wrong[0]+1 && resp[wrong[0]]===wrong[1]; return {pts: !wrong.length ? 2 : one ? 1 : 0, max:2}; }
   if (t==='fill'){ const r = resp.filter((v,i)=>gapOK(it.blanks[i], v)).length; return {pts:r, max:it.blanks.length}; }
+  if (t==='mark'){ const r = (resp||[]).filter((v,i)=>it.sents[i] && v===it.sents[i].a).length; return {pts:r, max:it.sents.length}; }
   if (t==='draw' || t==='write') return {pts:(resp && resp.ticks ? resp.ticks.length : 0), max:(it.checklist||[]).length};
   return {pts:0, max:0};
 }
@@ -5069,7 +5365,7 @@ function reviewCard(el, it, n, saved, onSave, opts){
   const card = h('div',{class:'rv-card', id: opts.anchor || null});
   const pill = h('span',{class:'rv-pill'});
   const setState = (st, pt)=>{ pill.className = 'rv-pill ' + (st ? 'done' : 'todo'); pill.textContent = st ? (pt && pt.max ? `✓ ${pt.pts} of ${pt.max} point${pt.max>1?'s':''}` : '✓ Done') : 'To do'; card.classList.toggle('done', !!st); };
-  card.append(h('div',{class:'rv-head'}, h('span',{class:'rv-num'}, n), h('span',{class:'rv-type'}, RTYPES[it.t]), pill));
+  card.append(h('div',{class:'rv-head'}, h('span',{class:'rv-num'}, n), h('span',{class:'rv-type'}, typeName(it)), pill));
   card.append(h('p',{class:'quiz-q', html:it.q}));
   if (it.vis){ const v = h('div',{class:'rv-vis'}); card.append(v); it.vis(v); }
   if (it.words && it.words.length) card.append(h('div',{class:'rv-words'}, h('b',{}, 'Words to use in a good answer: '), it.words.map(w=>h('span',{class:'chip'}, w))));
@@ -5081,7 +5377,12 @@ function reviewCard(el, it, n, saved, onSave, opts){
   const save = (resp, ok, msg)=>{ const pt = rvPoints(it, resp, ok); onSave({resp, ok, done:true, pts:pt.pts, max:pt.max}); setState(true, pt); showFb(ok, msg); lock(); };
   setState(saved && saved.done, saved && saved.done ? {pts:saved.pts||0, max:saved.max||0} : null);
   const answerText = ()=> t==='mcq' ? it.options[it.answer] : t==='num' ? `${it.answer} ${it.unit||''}` : '';
-  if (t==='mcq'){
+  if (t==='mark'){
+    const nS = it.sents.length; const noteEl = ()=>{ if (it.note && !body.querySelector('.mk-note')) body.append(h('p',{class:'legend mk-note', html:it.note})); };
+    markWidget(body, it, {saved:saved && saved.resp, locked:!!(saved && saved.done), onCheck:(resp, right)=>{ save(resp, right===nS, right===nS ? '' : `${right} of ${nS} sentences right. The tags show the right labels, and each one says why.`); noteEl(); }});
+    if (saved && saved.done) noteEl();
+  }
+  else if (t==='mcq'){
     const order = it.keep ? it.options.map((_,i)=>i) : (saved && saved.resp && saved.resp.order) || shuffle(it.options.map((_,i)=>i));
     const box = h('div',{class:'quiz-opts'}); body.append(box);
     const mark = k=>[...box.children].forEach(x=>{ const kk = +x.dataset.k; if (kk===k) x.classList.add(k===it.answer ? 'right' : 'wrong'); if (k!==it.answer && kk===it.answer) x.classList.add('should'); });
@@ -5139,23 +5440,24 @@ function reviewCard(el, it, n, saved, onSave, opts){
     if (saved && saved.done) mark();
   }
   else if (t==='draw' || t==='write'){
-    let pad = null, ta = null;
+    let pad = null, ta = null, rwx = null, setModel = ()=>{};
     if (t==='draw') pad = drawPad(body, saved && saved.resp);
-    else { ta = h('textarea',{class:'rv-write', rows:5, 'aria-label':'Your answer', placeholder:'Write your answer in full sentences…'}, saved && saved.resp ? saved.resp.text : ''); body.append(ta); }
+    else { ta = h('textarea',{class:'rv-write', rows:5, 'aria-label':'Your answer', placeholder:'Write your answer in full sentences…'}, saved && saved.resp ? saved.resp.text : ''); rwx = rwWriteFront(body, ta, it, saved, opts); if (!rwx) body.append(ta); }
     const reveal = h('div',{class:'rv-reveal', hidden:true});
     const checks = h('div',{class:'rv-checklist'});
     const ticked = new Set(saved && saved.resp && saved.resp.ticks ? saved.resp.ticks : []);
     (it.checklist||[]).forEach((c,i)=>{ const cb = h('input',{type:'checkbox', id:uid('ck'), checked: ticked.has(i)}); cb.addEventListener('change', ()=>{ if (cb.checked) ticked.add(i); else ticked.delete(i); if (card.classList.contains('done')) doSave(true); }); checks.append(h('label',{for:cb.id, class:'rv-check'}, cb, ' ', c)); });
-    const doSave = (quiet)=>{ const resp = t==='draw' ? Object.assign(pad.value(), {ticks:[...ticked]}) : {text: ta.value, ticks:[...ticked]}; const pt = rvPoints(it, resp, null); onSave({resp, ok:null, done:true, pts:pt.pts, max:pt.max}); setState(true, pt); if (!quiet) showFb(null, '<strong>Saved!</strong> Now compare your answer with the model. Tick each point you included. Your answer is locked now, so be honest with your ticks!'); };
+    const doSave = (quiet)=>{ const resp = t==='draw' ? Object.assign(pad.value(), {ticks:[...ticked]}) : Object.assign({text: ta.value, ticks:[...ticked]}, rwx && rwx.ev() ? {ev:rwx.ev()} : {}); const pt = rvPoints(it, resp, null); onSave({resp, ok:null, done:true, pts:pt.pts, max:pt.max}); setState(true, pt); if (!quiet) showFb(null, '<strong>Saved!</strong> Now compare your answer with the model. Tick each point you included. Your answer is locked now, so be honest with your ticks!'); };
     const btn = h('button',{class:'btn primary small', type:'button', onclick:()=>{
       if (t==='draw' && pad.empty()){ fb.className = 'feedback hint'; fb.innerHTML = 'Draw something first!'; return; }
       if (t==='write' && ta.value.trim().length < 12){ fb.className = 'feedback hint'; fb.innerHTML = 'Write a bit more first, in full sentences.'; return; }
-      reveal.hidden = false; doSave(); lockSelf(); }}, t==='draw' ? 'I’ve finished: show me the model' : 'I’ve finished: show me a model answer');
+      if (rwx && !rwx.ok()){ fb.className = 'feedback hint'; fb.innerHTML = rwx.need; return; }
+      if (rwx) rwx.lock(); setModel(); reveal.hidden = false; doSave(); lockSelf(); }}, t==='draw' ? 'I’ve finished: show me the model' : 'I’ve finished: show me a model answer');
     const lockSelf = ()=>{ card.classList.add('locked'); if (ta) ta.readOnly = true; if (pad) body.querySelectorAll('.pad-wrap, .pad-tools, canvas').forEach(x=>x.classList.add('pad-locked')); btn.disabled = true; card.querySelector('.rv-onego') && card.querySelector('.rv-onego').remove(); };
-    if (it.model){ const m = h('div',{class:'info-card'}); reveal.append(h('b',{}, 'Model answer'), m); if (typeof it.model==='function') it.model(m); else m.innerHTML = it.model; }
+    if (it.model){ const m = h('div',{class:'info-card'}); reveal.append(h('b',{}, 'Model answer'), m); if (typeof it.model==='function') it.model(m); else m.innerHTML = it.model; setModel = ()=>{ if (it.modelFor && rwx && rwx.ev()) m.innerHTML = it.modelFor(rwx.ev().map(i=>it.evidence.rows[i])); }; }
     if (it.checklist) reveal.append(h('b',{}, 'Did you include…? Tick each one you did.'), checks);
     body.append(h('div',{class:'row'}, btn), reveal);
-    if (saved && saved.done){ reveal.hidden = false; lockSelf(); }
+    if (saved && saved.done){ setModel(); reveal.hidden = false; lockSelf(); }
   }
   if (saved && saved.done && !self){ lock(); if (!saved.ok){ fb.className = 'feedback bad'; fb.innerHTML = `<strong>Whoops!</strong> ${answerText() ? `The answer is <b>${answerText()}</b>.` : 'The green marks show the right answers.'} ${it.explain||''}`; } else { fb.className = 'feedback ok'; fb.innerHTML = `<strong>Correct!</strong> ${it.explain||''}`; } }
   el.append(card);
@@ -5196,7 +5498,7 @@ function renderReview(panel, stop, part){
       h('button',{class:'btn small', type:'button', onclick:()=>{ box.remove(); showWorksheet(stop, 'student', part); }}, 'Make it anyway'));
     bar.append(box);
   }
-  items.forEach((it,i)=>reviewCard(list, it, i+1, st[i], v=>{ st[i] = Object.assign({}, st[i], v); Store.save(); drawBar(); drawDone(); }, {anchor:A + i}));
+  items.forEach((it,i)=>reviewCard(list, it, i+1, st[i], v=>{ st[i] = Object.assign({}, st[i], v); Store.save(); drawBar(); drawDone(); document.dispatchEvent(new Event('rv-changed')); }, {anchor:A + i, peek:j=>st[j], items}));
   const doneBox = h('div'); panel.append(doneBox);
   function drawDone(){
     doneBox.innerHTML = ''; if (!items.every((_,i)=>st[i] && st[i].done)) return;
@@ -5213,7 +5515,7 @@ function renderReview(panel, stop, part){
 function seeded(arr, seed){ let x = 0; for (const ch of String(seed)) x = (x*31 + ch.charCodeAt(0)) >>> 0; const b = arr.slice(); for (let i=b.length-1;i>0;i--){ x = (x*1103515245 + 12345) >>> 0; const j = x % (i+1); [b[i],b[j]] = [b[j],b[i]]; } return b; }
 function wsItem(it, n, mode, saved){
   const box = h('div',{class:'ws-q'});
-  box.append(h('div',{class:'ws-qhead'}, h('span',{class:'ws-n'}, n), h('span',{class:'ws-type'}, RTYPES[it.t]), mode==='key' && mypTag(it.obj) ? h('span',{class:'ws-myp'}, mypTag(it.obj)) : null), h('p',{class:'ws-qtext', html:it.q}));
+  box.append(h('div',{class:'ws-qhead'}, h('span',{class:'ws-n'}, n), h('span',{class:'ws-type'}, typeName(it)), mode==='key' && mypTag(it.obj) ? h('span',{class:'ws-myp'}, mypTag(it.obj)) : null), h('p',{class:'ws-qtext', html:it.q}));
   if (it.vis){ const v = h('div',{class:'ws-vis'}); box.append(v); it.vis(v); }
   const r = saved && saved.resp; const key = mode==='key', stu = mode==='student';
   const t = it.t;
@@ -5243,7 +5545,15 @@ function wsItem(it, n, mode, saved){
     else if (key && it.model){ const m = h('div',{class:'ws-model'}); if (typeof it.model==='function') it.model(m); else m.innerHTML = it.model; box.append(m); }
     else box.append(h('div',{class:'ws-drawbox'}));
     if (it.checklist) box.append(h('p',{class:'ws-note'}, h('b',{}, key ? 'Look for: ' : 'Include: '), it.checklist.join('; ') + '.'));
+  } else if (t==='mark'){
+    const tbl = h('table',{class:'ws-table ws-mark'}, h('thead',{}, h('tr',{}, h('th',{}, '#'), h('th',{}, 'Sentence'), it.labels.map(c=>h('th',{class:'ws-markc'}, c)), h('th',{class:'ws-markc'}, 'White'))),
+      h('tbody',{}, it.sents.map((s,i)=>{ const v = key ? s.a : (stu && r && typeof r[i]==='number') ? r[i] : null; return h('tr',{}, h('td',{}, i+1), h('td',{html:s.t}), it.labels.map((_,k)=>h('td',{class:'ws-markc'}, h('span',{class:'ws-box'}, v===k ? '✓' : ''))), h('td',{class:'ws-markc'}, h('span',{class:'ws-box'}, v===-1 ? '✓' : ''))); })));
+    box.append(tbl);
+    if (key) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Reasons: '), it.sents.map((s,i)=>`${i+1} ${s.a>=0 ? it.labels[s.a] : 'White'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`).join('; ') + '.'));
+    else box.append(h('p',{class:'ws-note'}, 'Tick one box for each sentence. Tick White if the sentence doesn\u2019t belong.'));
   } else if (t==='write'){
+    if (it.evidence && !key){ const ev = stu && r && r.ev ? r.ev : null; box.append(h('p',{class:'ws-note'}, h('b',{}, 'My evidence: '), ev ? ev.map(i=>it.evidence.say(it.evidence.rows[i])).join('; ') : h('span',{class:'ws-line'}))); }
+    if (it.starters && it.starters.length) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Sentence starters: '), it.starters.join('  ·  ')));
     if (it.words && it.words.length) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Words to use in a good answer: '), it.words.join(', ')));
     if (stu) box.append(h('div',{class:'ws-written'}, r && r.text ? r.text : ''));
     else if (key) box.append(h('div',{class:'ws-written', html: typeof it.model==='string' ? it.model : ''}));
@@ -5273,7 +5583,7 @@ function buildWorksheet(stop, mode, name, part){
     root.append(h('div',{class:'ws-feedback'}, h('h3',{class:'ws-part'}, 'Feedback page'),
       h('p',{}, `Auto-marked questions: `, h('b',{}, `${right} of ${auto.length} correct`), `. Questions answered: ${items.filter((_,i)=>st[i]&&st[i].done).length} of ${items.length}.`),
       progressBox(stop, part),
-      h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, 'Question'), h('th',{}, 'Type'), h('th',{}, 'Result'))), h('tbody',{}, items.map((it,i)=>h('tr',{}, h('td',{}, i+1), h('td',{}, RTYPES[it.t]), h('td',{}, !(st[i]&&st[i].done) ? 'Not answered' : SELF(it.t) ? `Self-checked (${(st[i].resp.ticks||[]).length} of ${(it.checklist||[]).length} ticked)` : st[i].ok ? '✓ Correct' : '✗ Try again')))))));
+      h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, 'Question'), h('th',{}, 'Type'), h('th',{}, 'Result'))), h('tbody',{}, items.map((it,i)=>h('tr',{}, h('td',{}, i+1), h('td',{}, typeName(it)), h('td',{}, !(st[i]&&st[i].done) ? 'Not answered' : SELF(it.t) ? `Self-checked (${(st[i].resp.ticks||[]).length} of ${(it.checklist||[]).length} ticked)` : st[i].ok ? '✓ Correct' : '✗ Try again')))))));
   }
   return root;
 }
@@ -5282,7 +5592,7 @@ function stepsDone(stop, mode, part){
   const LR = (Store.data.lr && Store.data.lr[stop.id]) || {done:{}}; const P = prog(stop.id);
   let missions = []; try { missions = stop.challenge && stop.challenge.missions ? stop.challenge.missions(stop) : []; } catch(e){}
   const M = Store.data.missions || {}; const mdone = {}; missions.forEach(m=>{ mdone[m.id] = !!M[stop.id + ':' + m.id]; });
-  const rows = part==='c' ? missions.map(m=>[`Mission: ${m.title}`, !!mdone[m.id]]) : (stop.learn||[]).map((l,i)=>[`Learn: ${l.title}`, !!(LR.done && LR.done[i]) || !!P.learn]);
+  const rows = part==='c' ? missions.map(m=>[`Mission: ${m.title}`, !!mdone[m.id]]) : (stop.learn||[]).map((l,i)=>[`Learn: ${l.title}`, !!(LR.done && LR.done[lrKey(stop,i)]) || !!P.learn]);
   const box = h('div',{class:'ws-steps'}, h('h3',{class:'ws-part'}, 'Steps completed in the sim'), mode==='key' ? h('p',{class:'legend'}, `Students tick these automatically by doing the ${part==='c' ? 'Challenge missions' : 'Learn steps'} in the sim. They are not marked.`) : null,
     h('div',{class:'ws-steps-grid'}, rows.map(([label, ok])=>h('div',{class:'ws-step'}, h('span',{class:'ws-tick' + (mode==='student' && ok ? ' on' : '')}, mode==='student' && ok ? '✓' : ''), h('span',{}, label)))));
   return box;
@@ -5290,7 +5600,7 @@ function stepsDone(stop, mode, part){
 function stu(mode){ return mode==='student'; }
 function progressBox(stop, part){
   const p = prog(stop.id); const LR = (Store.data.lr||{})[stop.id] || {done:{}};
-  const learnDone = k=> p.learn || (LR.done && LR.done[k]);
+  const learnDone = k=> p.learn || (LR.done && LR.done[lrKey(stop,k)]);
   const ms = (stop.challenge && stop.challenge.missions) ? stop.challenge.missions(stop) : [];
   const mDone = m=> !!((Store.data.missions||{})[stop.id + ':' + m.id]);
   const list = (title, rows)=>h('div',{}, h('b',{}, title), h('div',{class:'ws-opts'}, rows.map(([t,ok])=>h('div',{class:'ws-opt'}, h('span',{class:'ws-box'}, ok ? '\u2713' : ''), h('span',{}, t)))));
@@ -5725,6 +6035,86 @@ future:[
 ]
 };
 Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id===id); if (s) s.creview = items; });
+
+/* ================= Reading and writing: new Foundation Checks for four stops =================
+   The old Foundation lists stay on each stop as reviewArchive (retrieval reads positions in them).
+   The new lists save under a new key (rvKeyF), so old saved answers never land on new questions.
+   Learn steps keep their saved answers through learnKeys (explicit stable keys). */
+(function(){
+  const RWT = {
+    C1: ['I said what the pattern is.', 'I used two numbers with units.'],
+    C2: ['I said if the data support or contradict it.', 'I used two numbers with units.'],
+    E: ['I named the problem.', 'I named the science idea.', 'I explained how it solves the problem.', 'I used a detail from the passage.'],
+    B: ['I gave a benefit.', 'I gave a drawback.', 'I used a fact from the passage.', 'I gave my opinion with a reason.']
+  };
+  const byX = rs=>rs.slice().sort((a,b)=>a[0]-b[0]);
+  const emRows = [[10,4],[20,8],[30,12],[40,16],[50,20]], genRows = [[100,1.2],[200,2.4],[300,3.6],[400,4.8],[500,6.0]];
+  const EM_MODEL = 'My results show that more coils make a stronger electromagnet. With 10 coils it picked up 4 clips, and with 50 coils it picked up 20 clips. This happens because each coil adds to the magnetic field, so the electromagnet can hold more clips.';
+  const GEN_MODEL = 'The data support this hypothesis. At 200 turns of wire the peak voltage was 2.4 V, and at 400 turns of wire it was 4.8 V. That is twice the turns and twice the peak voltage. The moving magnet makes a voltage in every turn of wire, so more turns add up to a bigger voltage.';
+  const lists = {
+    electromagnets: o=>[o[0], o[1], o[2], o[5],
+      {t:'mark', obj:['Cii'], q:"Mia tested different cores, with 30 coils and 2 cells each time. Mark each sentence. Leave it white if it doesn't belong.", labels:['Claim','Evidence','Reasoning'], sents:[
+        {t:'The results show that an iron core makes the strongest electromagnet.', a:0, why:'It answers the question.'},
+        {t:'With an iron core it picked up 12 clips.', a:1, why:'A number with a unit.'},
+        {t:'I enjoyed using the iron nail the most.', a:-1, why:'A feeling is no help here.'},
+        {t:'With an aluminium core it picked up 1 clip.', a:1, why:'A second number to compare.'},
+        {t:'Iron becomes a strong magnet inside the coil, so the magnetic field is much stronger.', a:2, why:'It explains why.'}]},
+      {t:'write', label:'Data paragraph', obj:['Cii'], q:'Your question was: does the number of coils change how strong an electromagnet is? Tap two rows, then answer using your own results.',
+        words:['coils','clips','magnetic field','stronger'], starters:['My results show that…','With … coils it picked up … clips, and with … coils…','This happens because…'],
+        remind:'Claim, Evidence, Reasoning. Say it, show it, explain it.', remindOpen:true,
+        evidence:{kind:'table', head:['Coils of wire','Paperclips held'], rows:emRows, need:2, say:r=>`With ${r[0]} coils it picked up ${r[1]} clips`},
+        model:EM_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return `My results show that more coils make a stronger electromagnet. With ${a[0]} coils it picked up ${a[1]} clips, and with ${b[0]} coils it picked up ${b[1]} clips. This happens because each coil adds to the magnetic field, so the electromagnet can hold more clips.`; },
+        checklist:[RWT.C1[0], RWT.C1[1], 'I explained the pattern using the magnetic field.', 'I used the words given.']}],
+    generators: o=>[o[1], o[2], o[4], Object.assign({}, o[5], {q:o[5].q.replace('in step with the speed', 'in step with the turns each second').replace('at 7 turns a second', 'at 7 turns each second')}),
+      {t:'mark', obj:['Cii'], q:'Sam tested this hypothesis: a stronger magnet gives a bigger peak voltage. Mark each sentence. The claim could be anywhere!', labels:['Claim','Evidence','Reasoning'], sents:[
+        {t:'With a weak magnet the peak voltage was 1.2 V.', a:1, why:'A number with a unit.'},
+        {t:'With a strong magnet it was 3.6 V.', a:1, why:'A second number to compare.'},
+        {t:'We used a red generator.', a:-1, why:"True, but colour doesn't test the hypothesis."},
+        {t:'A stronger magnet makes a bigger voltage in the coil as it moves past.', a:2, why:'It explains why.'},
+        {t:'So the data support the hypothesis.', a:0, why:'It says support or contradict.'}]},
+      {t:'write', label:'Data paragraph', obj:['Cii','Ciii'], q:"A student says: 'Twice the turns of wire gives twice the peak voltage.' Tap two points on your graph. Do the data support or contradict this?",
+        words:['turns of wire','moving magnet','peak voltage','twice'], starters:['The data…','At … turns of wire the peak voltage was…'],
+        remind:'Say support or contradict. Show two numbers. Explain the science.', remindOpen:false,
+        evidence:{kind:'graph', rows:genRows, need:2, xl:'Turns of wire', yl:'Peak voltage (V)', xMax:500, yMax:7, xStep:100, yStep:1, say:r=>`At ${r[0]} turns of wire the peak voltage was ${r[1]} V`},
+        model:GEN_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return b[0]===2*a[0] ? `The data support this hypothesis. At ${a[0]} turns of wire the peak voltage was ${a[1]} V, and at ${b[0]} turns of wire it was ${b[1]} V. That is twice the turns and twice the peak voltage. The moving magnet makes a voltage in every turn of wire, so more turns add up to a bigger voltage.` : GEN_MODEL; },
+        checklist:[RWT.C2[0], RWT.C2[1], 'I explained the pattern using a magnet moving past more wire.', 'I used the words given.']}],
+    acdc: o=>[o[1], o[3], o[4], o[5],
+      {t:'mark', obj:['Di'], q:"<b>The Waterfall and the City</b><br>Read the question first: how did engineers get electricity from Niagara Falls to Buffalo? Mark each sentence. Leave it white if it doesn't help.", labels:['Problem','Science','Solution'],
+        note:'Today, engineers can also send DC over very long distances using special high-voltage equipment, but in 1896 AC was the only way.', sents:[
+        {t:'Niagara Falls could make enough electricity for a whole city, but Buffalo was about 40 km away.', a:0, why:'The power was far from the city.'},
+        {t:"Edison's low-voltage DC wasted so much energy as heat that customers had to live less than 2 km from a power station.", a:0, why:'It shows what stopped DC.'},
+        {t:"In 1889 he wrote that he had 'always consistently opposed' high-voltage AC.", a:-1, why:'This is his view.'},
+        {t:'A transformer can raise the voltage of AC.', a:1, why:'How the machine works.'},
+        {t:'When the voltage goes up, the current goes down, so the wires waste far less energy.', a:1, why:'Why less energy is wasted.'},
+        {t:'In November 1896, engineers used transformers to send AC from the falls to Buffalo at 11,000 V.', a:2, why:'What they did.'},
+        {t:"Buffalo's electric trams could now run on power from the falls.", a:2, why:'What was better afterwards.'},
+        {t:"Nikola Tesla called this 'a new and glorious epoch in the history of humanity.'", a:-1, why:'This is praise.'}]},
+      {t:'write', label:'Reading paragraph', obj:['Di','Dii','Diii'], q:"Edison's DC could not reach Buffalo from Niagara Falls. Explain how engineers solved this problem.",
+        words:['transformer','high voltage','current','heat'], starters:['The problem was that…'], remind:'Problem, science, solution. Find all three.', remindOpen:false, evidenceFrom:4,
+        model:'The problem was that Buffalo was about 40 km from Niagara Falls, and long wires turned most of the energy in low-voltage DC into heat. AC solved this because a transformer can raise its voltage. At high voltage the current is smaller, so the wires waste far less energy.',
+        checklist:RWT.E.slice()}],
+    power: o=>[o[0], o[2], o[4], o[5],
+      {t:'mark', obj:['Dii'], q:'<b>Is It Time for Wind?</b><br>Read the question first: should a wind farm replace a coal power station? Mark each sentence. Even famous scientists give opinions!', labels:['Benefit of wind','Drawback of wind','Opinion'], sents:[
+        {t:"In 1881, the scientist William Thomson thought that when coal ran low, 'windmills or wind-motors' would take over.", a:2, why:'Nobody could check this in 1881.'},
+        {t:'For each kWh, coal releases about 820 g of CO₂, and a wind turbine releases about 11 g, counting its whole life.', a:0, why:'Far less CO₂, and you can check it.'},
+        {t:'On a still day, a wind turbine makes no electricity.', a:1, why:'No wind means no power.'},
+        {t:'Nobody has to mine the wind or pay for it.', a:0, why:'The energy source is free.'},
+        {t:'Wind turbines look beautiful on a green hill.', a:2, why:'People can disagree.'},
+        {t:'A coal power station can run at any time, so a town with only wind needs a backup.', a:1, why:"Wind can't always meet the need."}]},
+      {t:'write', label:'Reading paragraph', obj:['Di','Dii','Diii'], q:"Your town's old coal power station is closing. Should a wind farm take its place? Give one benefit, one drawback and your opinion with a reason.",
+        words:['renewable','CO₂','reliable','backup'], evidenceFrom:4,
+        model:'One benefit is that wind is renewable, and a wind turbine releases only about 11 g of CO₂ for each kWh, while coal releases about 820 g. One drawback is that wind is less reliable, because a still day means no electricity. I think the town should build the wind farm and keep a backup for still days, because less CO₂ means less warming of the planet.',
+        checklist:RWT.B.slice()}]
+  };
+  const keys = {electromagnets:[0,1,2,3,'rw1','rw2','rw3'], generators:[0,1,2,'rw1','rw2','rw3',4,5], acdc:[0,1,2,3,'rw1','rw2','rw3'], power:[0,1,2,'rw1','rw2']};
+  const mins = {electromagnets:[20,12], generators:[23,13], acdc:[22,12], power:[17,13]};
+  Object.keys(lists).forEach(id=>{
+    const s = STOPS.find(x=>x.id===id); if (!s || s.reviewArchive) return;
+    s.reviewArchive = s.review; s.review = lists[id](s.review); s.rvKeyF = id + '~f2';
+    s.learnKeys = keys[id]; s.learnMins = mins[id][0]; s.reviewMins = mins[id][1];
+  });
+})();
+
 
 /* ================= End-of-mission questions: students explain how and why their solution worked ================= */
 const MQ = (q, options, explain)=>({tag:'How did you do it?', q, options, answer:0, explain});
@@ -7078,6 +7468,7 @@ function markItem(it){
   else if (t==='order'){ marks = 2; L.push(`Correct order: ${it.items.map((x,i)=>`${i+1}) ${plain(x)}`).join('  ')}.`); L.push('2 marks if fully correct; 1 mark if only one pair of neighbouring items is swapped; otherwise 0.'); }
   else if (t==='num'){ marks = 2; L.push(`Answer: ${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''} (1 mark).`); L.push(`Working shown or method clear (1 mark)${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}.`); L.push('If the student completed this in the sim, the working box may be empty: give the working mark if the answer is correct.'); }
   else if (t==='fill'){ marks = it.blanks.length; it.blanks.forEach((b,i)=>{ const all = [...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))]; L.push(`Gap ${i+1}: ${all.join(' / ')} (1 mark)`); }); L.push('Accept small spelling mistakes if the meaning is clear.'); }
+  else if (t==='mark'){ marks = it.sents.length; L.push(`1 mark for each sentence labelled correctly (${marks} marks). A sentence that does not belong is left white (the White box on the sheet).`); it.sents.forEach((s,i)=>L.push(`- ${i+1}. ${plain(s.t)} → ${s.a>=0 ? it.labels[s.a] : 'White'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`)); }
   else if (t==='draw' || t==='write'){
     const ck = it.checklist || []; marks = Math.max(1, ck.length);
     L.push(`1 mark for each of these (${marks} marks):`); ck.forEach(c=>L.push(`- ${plain(c)}`));
@@ -7092,24 +7483,26 @@ function markItem(it){
 /* ================= MYP Year 1 strands (teacher-only: never shown on student or blank sheets) ================= */
 // MYP level cut-offs: lowest percentage for each level 1–8 (0% earned = level 0). Tom can change these.
 const LEVEL_CUTS = [1, 13, 26, 38, 51, 63, 76, 88];
-const STRAND_ORDER = ['Ai','Aii','Aiii','Di','Dii','Diii'];
+const STRAND_ORDER = ['Ai','Aii','Aiii','Cii','Ciii','Di','Dii','Diii'];
 const STRAND_WORDING = {
   Ai:'outline scientific knowledge',
   Aii:'apply scientific knowledge and understanding to solve problems set in familiar situations',
   Aiii:'apply information to make judgments',
+  Cii:'interpret data and outline results using scientific reasoning',
+  Ciii:'discuss the validity of a prediction based on the outcome of the scientific investigation',
   Di:'summarize the ways in which science is applied and used to address a specific problem or issue',
   Dii:'describe and summarize the various implications of using science and its application in solving a specific problem or issue',
   Diii:'apply scientific language effectively'
 };
 const strandName = k=>k[0] + ' ' + k.slice(1);                       // 'Aii' -> 'A ii'
 const strandsOf = lists=>{ const set = new Set(); lists.forEach(l=>(l||[]).forEach(k=>set.add(k))); return STRAND_ORDER.filter(k=>set.has(k)); };
-const strandsLabel = keys=>['A','D'].map(c=>{ const ks = STRAND_ORDER.filter(k=>k[0]===c && (keys||[]).includes(k)); return ks.length ? c + ' ' + ks.map(k=>k.slice(1)).join(', ') : ''; }).filter(Boolean).join(' · ');   // 'A i, ii, iii · D i, iii'
+const strandsLabel = keys=>['A','C','D'].map(c=>{ const ks = STRAND_ORDER.filter(k=>k[0]===c && (keys||[]).includes(k)); return ks.length ? c + ' ' + ks.map(k=>k.slice(1)).join(', ') : ''; }).filter(Boolean).join(' · ');   // 'A i, ii, iii · D i, iii'
 const strandsFull = keys=>(keys||[]).map(strandName).join(', ');      // 'A i, A ii, D i'
 const mypTag = obj=>(obj && obj.length) ? 'MYP: ' + strandsLabel(obj) : '';
 function levelFor(earned, available){ if (!available || earned<=0) return 0; const pct = Math.round(earned / available * 100); return Math.max(1, LEVEL_CUTS.filter(c=>pct>=c).length); }
 function levelTable(){ const rows = ['0% = level 0']; LEVEL_CUTS.forEach((c,i)=>{ const hi = i<LEVEL_CUTS.length-1 ? LEVEL_CUTS[i+1]-1 : 100; rows.push((c===hi ? `${c}%` : `${c}–${hi}%`) + ` = level ${i+1}`); }); return rows.join(', '); }
 /* entries: [{marks, obj}] -> marks per criterion; a question counts once for each criterion it is tagged with */
-function critTotals(entries){ const T = {A:0, D:0}; entries.forEach(e=>{ ['A','D'].forEach(c=>{ if ((e.obj||[]).some(k=>k[0]===c)) T[c] += e.marks; }); }); return T; }
+function critTotals(entries){ const T = {A:0, C:0, D:0}; entries.forEach(e=>{ ['A','C','D'].forEach(c=>{ if ((e.obj||[]).some(k=>k[0]===c)) T[c] += e.marks; }); }); return T; }
 function sheetEntries(stop, part){ return rvItems(stop, part).map(it=>({marks:markItem(it).marks, obj:it.obj||[]})); }
 function taskEntries(task){ return (task.marking||[]).map(([d,m,o])=>({marks:m, obj:o||[]})).concat((task.questions||[]).map(it=>({marks:markItem(it).marks, obj:it.obj||[]}))); }
 function sheetStrands(stop, part){ return strandsOf(rvItems(stop, part).map(it=>it.obj)); }
@@ -7119,7 +7512,7 @@ function schemeForStop(stop, part){
   part = part || 'f'; const items = rvItems(stop, part); const L = []; let total = 0; const PN = PART_NAME[part];
   const parts = [['Part A: Show what you know', items.map((it,i)=>[it,i]).filter(([it])=>!SELF(it.t))], ['Part B: Draw and explain', items.map((it,i)=>[it,i]).filter(([it])=>SELF(it.t))]];
   parts.forEach(([title, list])=>{ if (!list.length) return; L.push(title);
-    list.forEach(([it,i])=>{ const m = markItem(it); total += m.marks; L.push(`Q${i+1} (${RTYPES[it.t]}, ${m.marks} mark${m.marks===1?'':'s'}${mypTag(it.obj) ? ', ' + mypTag(it.obj) : ''}): ${plain(it.q)}`); m.lines.forEach(x=>L.push('   ' + x)); }); L.push(''); });
+    list.forEach(([it,i])=>{ const m = markItem(it); total += m.marks; L.push(`Q${i+1} (${typeName(it)}, ${m.marks} mark${m.marks===1?'':'s'}${mypTag(it.obj) ? ', ' + mypTag(it.obj) : ''}): ${plain(it.q)}`); m.lines.forEach(x=>L.push('   ' + x)); }); L.push(''); });
   return {title:`${stop.title}: ${PN} worksheet`, fileBase:`${stop.title} - ${PN} worksheet`, total, strands:sheetStrands(stop, part), text:[`=== ${stop.title}: ${PN} worksheet (${stop.yearLabel}) - ${total} marks ===`, `MYP strands assessed: ${strandsLabel(sheetStrands(stop, part))}`, ''].concat(L).join('\n')};
 }
 function schemeForTask(ws, task){
@@ -7129,7 +7522,7 @@ function schemeForTask(ws, task){
   L.push('   Evidence: the picture of the build (a snapshot from the sim), the ticked build checklist, the results table and the feedback page. The sim ticks each checklist point only when the build really does it, so a ticked box is reliable evidence.');
   L.push('');
   L.push('Part B: Questions about my build');
-  task.questions.forEach((it,i)=>{ const m = markItem(it); total += m.marks; L.push(`Q${i+1} (${RTYPES[it.t]}, ${m.marks} mark${m.marks===1?'':'s'}${mypTag(it.obj) ? ', ' + mypTag(it.obj) : ''}): ${plain(it.q)}`); m.lines.forEach(x=>L.push('   ' + x)); });
+  task.questions.forEach((it,i)=>{ const m = markItem(it); total += m.marks; L.push(`Q${i+1} (${typeName(it)}, ${m.marks} mark${m.marks===1?'':'s'}${mypTag(it.obj) ? ', ' + mypTag(it.obj) : ''}): ${plain(it.q)}`); m.lines.forEach(x=>L.push('   ' + x)); });
   L.push('   Answers about the build should match the student’s own build in Part A (for example, the sources they say they used should appear in their picture and table).');
   return {title:`${task.title} build sheet`, fileBase:`${task.title} - Build sheet`, total, strands:taskStrands(task), text:[`=== ${ws.title}: ${task.title} build sheet - ${total} marks ===`, `MYP strands assessed: ${strandsLabel(taskStrands(task))}`, ''].concat(L).join('\n')};
 }
@@ -7154,11 +7547,12 @@ function keyAnswerLine(it){
   if (t==='order') return it.items.map((x,i)=>`${i+1}) ${plain(x)}`).join(' ') + '. (1 mark if only one pair of neighbouring items is swapped.)';
   if (t==='num') return `${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''}. 1 mark for the answer and 1 for working or method${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}. If the working box is empty but the answer is right, give both marks.`;
   if (t==='fill') return it.blanks.map((b,i)=>`gap ${i+1}: ${[...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))].join(' / ')}`).join('; ') + '. (1 mark per gap; accept small spelling mistakes if the meaning is clear.)';
+  if (t==='mark') return it.sents.map((s,i)=>`${i+1}) ${s.a>=0 ? it.labels[s.a] : 'White'}`).join('; ') + '. (1 mark per sentence; a sentence that does not belong is left White.)';
   if (t==='draw' || t==='write'){ const ck = (it.checklist||[]).map(plain); let s = `Look for: ${ck.join('; ')}. (1 mark for each.)`; if (t==='write' && typeof it.model==='string') s += ` Model answer: ${plain(it.model)}`; if (t==='draw') s += ' Judge the science, not the artistic quality.'; return s; }
   return '';
 }
 function keyBlock(title, total, strands, lines){ return [`=== ${title} (${total} marks)${strands.length ? ' · MYP: ' + strandsFull(strands) : ''} ===`].concat(lines).join('\n'); }
-function qKeyLine(it, n){ const m = markItem(it); return `Q${n} ${RTYPES[it.t]}, ${m.marks} mark${m.marks===1?'':'s'}${(it.obj||[]).length ? ' [' + strandsLabel(it.obj) + ']' : ''}: ${keyAnswerLine(it)}`; }
+function qKeyLine(it, n){ const m = markItem(it); return `Q${n} ${typeName(it)}, ${m.marks} mark${m.marks===1?'':'s'}${(it.obj||[]).length ? ' [' + strandsLabel(it.obj) + ']' : ''}: ${keyAnswerLine(it)}`; }
 function answerKeyText(stop, part){
   const items = rvItems(stop, part); const total = items.reduce((a,it)=>a + markItem(it).marks, 0);
   return keyBlock(`${stop.title}: ${PART_NAME[part]} worksheet`, total, sheetStrands(stop, part), items.map((it,i)=>qKeyLine(it, i+1)));
@@ -7178,6 +7572,8 @@ function howToMarkLines(keyName){ keyName = keyName || 'written answer key'; ret
   '- The last page of each sheet is a feedback page made by the sim. It shows which questions the sim auto-marked as correct and which build checks passed. Use it to confirm your marking; if your marking and the feedback page disagree, trust the student’s visible answer and mention it in your feedback.',
   '- Each stop has two worksheets. The Foundation worksheet covers the Learn steps. The Challenge worksheet is an extension that covers the Challenge missions; only some students may be set it.',
   '- Each worksheet starts with "Steps completed in the sim": the Learn steps (Foundation) or the Challenge missions (Challenge) the student should do before answering. A blue tick means the sim recorded that step as done. These are not marked, but mention any skipped steps in your feedback.',
+  '- A “Mark it” question prints the numbered sentences with one box under each label and a White box. The student’s ticked box is their answer; a sentence left white has the White box ticked. Give 1 mark for each sentence with the right box.',
+  '- A “Data paragraph” or “Reading paragraph” is the student’s own writing with four tick points. For a Data paragraph the student first tapped two rows or two points; “My evidence” on the sheet shows which, so judge their numbers against those rows.',
   '- Every auto-marked question in the sim gets one go. A wrong answer is shown with the right answer, so check the student’s first answer as printed.',
   '- If a sheet is missing, a question is blank, or the upload is an empty sheet, give 0 for those questions and say kindly what is missing.',
   '- Accept any scientifically correct wording. Do not take marks off for spelling or grammar unless the meaning is unclear.'
@@ -7191,7 +7587,7 @@ function feedbackStyleLines(){ return [
 function mypLevelLines(strands){
   const L = ['MYP LEVELS (MYP Year 1 Sciences)', 'Strands assessed in this task:'];
   strands.forEach(k=>L.push(`- ${strandName(k)}: ${STRAND_WORDING[k]}`));
-  L.push('Counting rule: a question’s marks count towards each criterion (A or D) it is tagged with, once per criterion even if it has two strands of the same criterion. For each criterion, add up the marks earned and the marks available across all the sheets in this task, then turn marks earned ÷ marks available into a percentage (round to the nearest whole number).');
+  L.push('Counting rule: a question’s marks count towards each criterion (A, C or D) it is tagged with, once per criterion even if it has two strands of the same criterion. For each criterion, add up the marks earned and the marks available across all the sheets in this task, then turn marks earned ÷ marks available into a percentage (round to the nearest whole number).');
   L.push(`Level table (percentage earned → MYP level): ${levelTable()}.`);
   L.push('Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student’s work clearly fits a different band; say why if you do. Report each criterion as ‘Criterion A: level x/8 (strands assessed: i, ii, iii)’, followed by one sentence for each strand.');
   return L;
@@ -7209,8 +7605,8 @@ function aiFeedbackText(sheets, tasks, challengeOptional){
   sheets.forEach(x=>{ if (optSheets.includes(x)) L.push('(OPTIONAL SHEET: only for students who chose to do it)'); L.push(answerKeyText(x.stop, x.part), ''); });
   tasks.forEach(({ws, t})=>{ L.push(answerKeyTextTask(ws, t), ''); });
   const total = entries.reduce((a,e)=>a + e.marks, 0), T = critTotals(entries);
-  L.push(`TOTAL MARKS FOR THE TASK: ${total}. ${['A','D'].filter(c=>strands.some(k=>k[0]===c)).map(c=>`Criterion ${c}: ${T[c]} marks available`).join('; ')}.`);
-  if (optSheets.length){ const oe = optSheets.flatMap(({stop, part})=>sheetEntries(stop, part)), oT = critTotals(oe), oTot = oe.reduce((a,e)=>a + e.marks, 0); L.push(`Of these, ${oTot} marks are on the optional sheets, so the required sheets total ${total - oTot}. ${['A','D'].filter(c=>strands.some(k=>k[0]===c)).map(c=>`Criterion ${c}: ${T[c] - oT[c]} marks available on the required sheets`).join('; ')}.`); }
+  L.push(`TOTAL MARKS FOR THE TASK: ${total}. ${['A','C','D'].filter(c=>strands.some(k=>k[0]===c)).map(c=>`Criterion ${c}: ${T[c]} marks available`).join('; ')}.`);
+  if (optSheets.length){ const oe = optSheets.flatMap(({stop, part})=>sheetEntries(stop, part)), oT = critTotals(oe), oTot = oe.reduce((a,e)=>a + e.marks, 0); L.push(`Of these, ${oTot} marks are on the optional sheets, so the required sheets total ${total - oTot}. ${['A','C','D'].filter(c=>strands.some(k=>k[0]===c)).map(c=>`Criterion ${c}: ${T[c] - oT[c]} marks available on the required sheets`).join('; ')}.`); }
   return L.join('\n');
 }
 
@@ -7230,9 +7626,9 @@ const VOCAB = {
   future:['renewable','fossil fuel','demand','battery store']
 };
 const PARTS_HW = {
-  learn:{label:'Foundation: Learn steps', desc:'Guided steps with predictions; earns the Learn stamp', mins:s=>Math.max(10, Math.round(s.learn.length*2.5))},
+  learn:{label:'Foundation: Learn steps', desc:'Guided steps with predictions; earns the Learn stamp', mins:s=>s.learnMins || Math.max(10, Math.round(s.learn.length*2.5))},
   explore:{label:'Foundation: Explore (free play)', desc:'Open sandbox with suggested experiments', mins:()=>10},
-  review:{label:'Foundation review + worksheet', desc:'About 10 mixed questions on the Learn steps, then the Foundation worksheet PDF', mins:()=>20},
+  review:{label:'Foundation review + worksheet', desc:'About 6 to 10 mixed questions on the Learn steps, then the Foundation worksheet PDF', mins:s=>s.reviewMins || 20},
   challenge:{label:'\u2b50 Challenge missions (extension)', desc:'Hands-on missions in the sim; earns the Challenge stamp', mins:()=>15},
   creview:{label:'\u2b50 Challenge review + worksheet (extension)', desc:'Harder questions on the missions, then the Challenge worksheet PDF', mins:()=>15}
 };
@@ -7365,11 +7761,11 @@ function renderTeacher(){
     L.push('');
     L.push(`Key vocabulary: ${[...new Set(stops.flatMap(s=>VOCAB[s.id]||[]))].join(', ')}.`);
     L.push('');
-    L.push('Teacher notes (not for students): Review questions include matching, tables, ordering, sorting, calculations and gap fills, which are auto-marked in the sim; the worksheet’s feedback page shows the score. “Draw it” and “Explain it” questions are self-checked by students against a model answer, so please check those when you mark. Students who don’t finish can still submit; unanswered questions are listed on the feedback page.');
+    L.push('Teacher notes (not for students): Review questions include matching, tables, ordering, sorting, calculations, gap fills and “Mark it” sentence labelling, which are auto-marked in the sim; the worksheet’s feedback page shows the score. “Draw it”, “Explain it”, “Data paragraph” and “Reading paragraph” questions are self-checked by students against a model answer, so please check those when you mark. Students who don’t finish can still submit; unanswered questions are listed on the feedback page.');
     if (sheets.length || tasks.length){
       L.push('');
       const sKeys = strandsOf(sheets.map(({stop:s, part})=>sheetStrands(s, part)).concat(tasks.map(x=>taskStrands(x.t))));
-      const crit = ['A','D'].filter(c=>sKeys.some(k=>k[0]===c)).map(c=>`Criterion ${c} (strands ${sKeys.filter(k=>k[0]===c).map(k=>k.slice(1)).join(', ')})`);
+      const crit = ['A','C','D'].filter(c=>sKeys.some(k=>k[0]===c)).map(c=>`Criterion ${c} (strands ${sKeys.filter(k=>k[0]===c).map(k=>k.slice(1)).join(', ')})`);
       if (crit.length) L.push(`MYP objectives: please attach these MYP Year 1 Sciences objectives to the task: ${crit.join(' and ')}.`);
       L.push('AI marking: I will paste the AI feedback instructions, which include a written answer key, into the AI feedback settings separately. Students must never see them.');
       L.push(`The sheets students hand in are: ${sheets.map(({stop:s, part})=>`\u201c${s.title}\u201d ${PART_NAME[part]} worksheet${optMarked && part==='c' ? ' (optional)' : ''}`).concat(tasks.map(x=>`\u201c${x.t.title}\u201d build sheet`)).join(', ')}.`);
@@ -7514,6 +7910,7 @@ const GLOSSARY = [
   ['energy transfer', 'Energy moving from one form to another, such as electrical energy to light and heat.', 'energy transfers'],
   ['useful energy', 'The energy that does the job we want, such as light from a lamp.'],
   ['wasted energy', 'Energy that doesn’t do the job we want. It is often heat that spreads into the surroundings.'],
+  ['epoch', 'A long period of time.'],
   ['hertz', 'The unit of frequency. 1 Hz means one complete cycle every second.'],
   ['oscilloscope', 'A screen that draws a graph of voltage as time goes on, so you can see how electricity changes.', 'oscilloscopes'],
 ];
@@ -9244,7 +9641,7 @@ function rtRvWord(r, stopId){
   return rtMcq(r, `What does “${w.w}” mean?`, w.def_, rtShuf(r, RT_WORDS.filter(x => x.def_ !== w.def_).map(x => x.def_)).slice(0, 3), `<b>${w.w}</b> means: ${w.def_}`, extra);
 }
 function rtRvRecall(r, stopId){
-  const stop = rtStopOf(stopId), re = RT_REUSE[stopId] && RT_REUSE[stopId].f, items = stop ? rvItems(stop, 'f') : [];
+  const stop = rtStopOf(stopId), re = RT_REUSE[stopId] && RT_REUSE[stopId].f, items = stop ? (stop.reviewArchive || rvItems(stop, 'f')) : [];
   if (!re) return null;
   const ok = p => items[p - 1] && !SELF(items[p - 1].t);
   const pos = re.recall.filter(ok).length ? re.recall.filter(ok) : re.pool.filter(ok);
@@ -9285,7 +9682,7 @@ function rtBuildReview(stops, rng, opts){
     out[5] = {t: 'para', slot: 'Paragraph', topic: ptopic, task, kind: task.kind, q: task.prompt};
   } else {
     const id = take(() => true), stop = rtStopOf(id);
-    const w = stop && rvItems(stop, 'f').find(x => x.t === 'write');
+    const w = stop && (stop.reviewArchive || rvItems(stop, 'f')).find(x => x.t === 'write');
     out[5] = Object.assign({}, w || {t: 'write', q: 'Explain one idea you learned about this topic.', words: [], checklist: ['I explained the idea.']}, {topic: id, slot: 'Paragraph', kind: null});
   }
   const fresh = (i, key) => RT_SLOTS[i][key].some(([id]) => !avoid.includes(rtFamN(id)));
@@ -9746,7 +10143,7 @@ function rtTtRecall(r, stop, ch){
   ['f', 'c'].forEach(k => {
     if (k === 'c' && !ch) return;
     const src = re && re[k]; if (!src || !st) return;
-    const list = rvItems(st, k);
+    const list = (k === 'f' && st.reviewArchive) || rvItems(st, k);
     src.recall.concat(src.pool).forEach(p => { const it = list[p - 1]; if (it && !SELF(it.t) && it.t !== 'num') cand.push([k, p, it]); });
   });
   if (!cand.length) return null;

@@ -30,7 +30,7 @@ function rtTtRecall(r, stop, ch){
   ['f', 'c'].forEach(k => {
     if (k === 'c' && !ch) return;
     const src = re && re[k]; if (!src || !st) return;
-    const list = rvItems(st, k);
+    const list = (k === 'f' && st.reviewArchive) || rvItems(st, k);
     src.recall.concat(src.pool).forEach(p => { const it = list[p - 1]; if (it && !SELF(it.t) && it.t !== 'num') cand.push([k, p, it]); });
   });
   if (!cand.length) return null;

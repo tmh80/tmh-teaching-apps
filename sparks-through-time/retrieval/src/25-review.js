@@ -54,7 +54,7 @@ function rtRvWord(r, stopId){
   return rtMcq(r, `What does “${w.w}” mean?`, w.def_, rtShuf(r, RT_WORDS.filter(x => x.def_ !== w.def_).map(x => x.def_)).slice(0, 3), `<b>${w.w}</b> means: ${w.def_}`, extra);
 }
 function rtRvRecall(r, stopId){
-  const stop = rtStopOf(stopId), re = RT_REUSE[stopId] && RT_REUSE[stopId].f, items = stop ? rvItems(stop, 'f') : [];
+  const stop = rtStopOf(stopId), re = RT_REUSE[stopId] && RT_REUSE[stopId].f, items = stop ? (stop.reviewArchive || rvItems(stop, 'f')) : [];
   if (!re) return null;
   const ok = p => items[p - 1] && !SELF(items[p - 1].t);
   const pos = re.recall.filter(ok).length ? re.recall.filter(ok) : re.pool.filter(ok);
@@ -95,7 +95,7 @@ function rtBuildReview(stops, rng, opts){
     out[5] = {t: 'para', slot: 'Paragraph', topic: ptopic, task, kind: task.kind, q: task.prompt};
   } else {
     const id = take(() => true), stop = rtStopOf(id);
-    const w = stop && rvItems(stop, 'f').find(x => x.t === 'write');
+    const w = stop && (stop.reviewArchive || rvItems(stop, 'f')).find(x => x.t === 'write');
     out[5] = Object.assign({}, w || {t: 'write', q: 'Explain one idea you learned about this topic.', words: [], checklist: ['I explained the idea.']}, {topic: id, slot: 'Paragraph', kind: null});
   }
   const fresh = (i, key) => RT_SLOTS[i][key].some(([id]) => !avoid.includes(rtFamN(id)));
