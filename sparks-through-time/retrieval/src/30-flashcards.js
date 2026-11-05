@@ -47,16 +47,28 @@ function rtFcCss(){
 .rt-bar{height:10px; border-radius:99px; background:var(--panel-2); border:1px solid var(--line); overflow:hidden}
 .rt-bar i{display:block; height:100%; background:var(--accent)}
 .rt-prog{display:flex; justify-content:space-between; align-items:center; font-weight:700; gap:8px}
-.rt-card{display:grid; gap:12px; align-content:center; justify-items:center; text-align:center; min-height:240px; padding:22px 18px; border:3px solid var(--accent); border-radius:22px; background:var(--panel); cursor:pointer; box-shadow:0 6px 0 var(--accent-soft); overflow-wrap:anywhere}
+.rt-scene{position:relative; width:100%; max-width:640px; margin:10px auto 18px; perspective:1400px; min-width:0}
+.rt-scene::before,.rt-scene::after{content:''; position:absolute; left:10px; right:10px; border-radius:18px; background:var(--panel); border:1px solid var(--line); z-index:0}
+.rt-scene::before{top:12px; bottom:-8px; box-shadow:0 2px 6px rgba(20,30,70,.10)}
+.rt-scene::after{top:20px; bottom:-15px; left:20px; right:20px; opacity:.75}
+:is(.rt-card,.rt-ghost){display:grid; gap:12px; align-content:center; justify-items:center; text-align:center; box-sizing:border-box; width:100%; min-height:clamp(250px,44vw,350px); padding:26px 24px; border:1px solid var(--line); border-radius:18px; background:var(--panel); box-shadow:0 1px 1px rgba(20,30,70,.10), 0 6px 12px rgba(20,30,70,.12), 0 18px 34px rgba(20,30,70,.16); overflow-wrap:anywhere}
+.rt-card{position:relative; z-index:1; cursor:pointer; transition:transform .16s ease, box-shadow .16s ease; animation:rtDeal .24s ease-out}
+.rt-card:hover{transform:translateY(-3px); box-shadow:0 2px 2px rgba(20,30,70,.10), 0 10px 16px rgba(20,30,70,.13), 0 24px 40px rgba(20,30,70,.18)}
 .rt-card:focus-visible{outline:4px solid var(--spark); outline-offset:3px}
-.rt-card.back{background:var(--accent-soft)}
-.rt-card .tag{font-size:.85rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
-.rt-card .big{font-size:1.6rem; font-weight:800; line-height:1.3}
-.rt-card .big.long{font-size:1.3rem}
-.rt-card .ask{color:var(--muted); font-weight:600}
-.rt-card .tap{font-size:.9rem; color:var(--muted)}
-.rt-card .small{font-size:1rem; color:var(--muted)}
-.rt-card .mine{font-size:1rem; padding:6px 12px; border-radius:10px; background:var(--panel-2); border:1px dashed var(--line)}
+:is(.rt-card,.rt-ghost).back{background:var(--panel-2)}
+.rt-ghost{position:absolute; inset:0; z-index:2; pointer-events:none; backface-visibility:hidden; animation:rtOut .17s ease-in forwards}
+.rt-card.rt-in{animation:rtIn .19s ease-out .17s both}
+@keyframes rtOut{to{transform:rotateY(90deg)}}
+@keyframes rtIn{from{transform:rotateY(-90deg)}to{transform:rotateY(0)}}
+@keyframes rtDeal{from{opacity:0; transform:translateY(10px) scale(.985)}to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){.rt-card,.rt-card.rt-in,.rt-ghost{animation:none; transition:none}.rt-ghost{display:none}}
+:is(.rt-card,.rt-ghost) .tag{font-size:.85rem; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--muted)}
+:is(.rt-card,.rt-ghost) .big{font-size:1.75rem; font-weight:800; line-height:1.3}
+:is(.rt-card,.rt-ghost) .big.long{font-size:1.35rem}
+:is(.rt-card,.rt-ghost) .ask{color:var(--muted); font-weight:600}
+:is(.rt-card,.rt-ghost) .tap{font-size:.9rem; color:var(--muted)}
+:is(.rt-card,.rt-ghost) .small{font-size:1rem; color:var(--muted)}
+:is(.rt-card,.rt-ghost) .mine{font-size:1rem; padding:6px 12px; border-radius:10px; background:var(--panel); border:1px dashed var(--line)}
 .rt-type{width:100%; box-sizing:border-box; font:inherit; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--panel); color:var(--ink)}
 .rt-answer-row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
 .rt-answer-row .btn{min-height:60px; font-size:1.2rem}
@@ -130,7 +142,8 @@ function rtFcRun(ids, kind, cards){
     flipped = false; typed = '';
     root.innerHTML = ''; window.scrollTo(0, 0);
     const bar = h('div', {class: 'rt-bar'}, h('i', {style: {width: (100 * got.size / total) + '%'}}));
-    const card = h('div', {class: 'rt-card', role: 'button', tabindex: '0', 'aria-label': 'Card. Press Enter or Space to flip.'});
+    const card = h('div', {class: 'rt-card no-gloss', role: 'button', tabindex: '0', 'aria-label': 'Card. Press Enter or Space to flip.'});
+    const scene = h('div', {class: 'rt-scene'}, card);
     const type = h('textarea', {class: 'rt-type', rows: '2', placeholder: 'Want to type your answer? (optional)', 'aria-label': 'Type your answer (optional)'});
     type.addEventListener('input', () => { typed = type.value; });
     const actions = h('div', {});
@@ -145,7 +158,10 @@ function rtFcRun(ids, kind, cards){
       }
     }
     function flip(){
-      if (flipped) return; flipped = true; face(); flipBtn.hidden = true; type.hidden = true; actions.innerHTML = '';
+      if (flipped) return;
+      const out = card.cloneNode(true); out.className = 'rt-ghost no-gloss' + (card.classList.contains('back') ? ' back' : ''); ['role', 'tabindex', 'aria-label'].forEach(a => out.removeAttribute(a)); out.setAttribute('aria-hidden', 'true');
+      flipped = true; face(); card.classList.remove('rt-in'); void card.offsetWidth; card.classList.add('rt-in'); scene.append(out); setTimeout(() => out.remove(), 400);
+      flipBtn.hidden = true; type.hidden = true; actions.innerHTML = '';
       const got_ = h('button', {class: 'btn got', type: 'button', onclick: () => answer(true)}, 'Got it'), no = h('button', {class: 'btn', type: 'button', onclick: () => answer(false)}, 'Not yet');
       actions.append(h('div', {class: 'rt-answer-row'}, no, got_)); got_.focus();
     }
@@ -155,7 +171,7 @@ function rtFcRun(ids, kind, cards){
     face();
     root.append(h('div', {class: 'rt-fc'},
       h('div', {class: 'rt-prog'}, h('span', {}, `${Math.min(got.size + 1, total)} of ${total}`), h('button', {class: 'btn small ghost', type: 'button', onclick: () => renderRtFlashcards(ids)}, 'Stop')),
-      bar, card, type, flipBtn, actions));
+      bar, scene, type, flipBtn, actions));
     card.focus({preventScroll: true});
   }
   function answer(ok){
