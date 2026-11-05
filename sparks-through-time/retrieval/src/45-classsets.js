@@ -148,9 +148,9 @@ function rtCsProject(set, opts){
     }
     sq.append(h('div', {class: 'rt-code'}, `Class code ${set.code}`));
     ctrl.innerHTML = '';
-    ctrl.append(h('button', {class: 'btn small', type: 'button', id: 'rtProjBack', disabled: screen === 1, onclick: () => { screen = 1; showing = false; draw(); }}, '← Back'),
+    ctrl.append(h('button', {class: 'btn small', type: 'button', id: 'rtProjBack', style: {color: '#1a2140', background: '#fff'}, disabled: screen === 1, onclick: () => { screen = 1; showing = false; draw(); }}, '← Back'),
       h('span', {}, `Screen ${screen} of 2`),
-      h('button', {class: 'btn small', type: 'button', id: 'rtProjNext', disabled: screen === 2, onclick: () => { screen = 2; showing = false; draw(); }}, 'Next →'),
+      h('button', {class: 'btn small', type: 'button', id: 'rtProjNext', style: {color: '#1a2140', background: '#fff'}, disabled: screen === 2, onclick: () => { screen = 2; showing = false; draw(); }}, 'Next →'),
       h('button', {class: 'btn small primary', type: 'button', id: 'rtProjAns', onclick: () => {
         if (showing){ showing = false; draw(); return; }
         if (teacherMode()){ showing = true; draw(); } else rtAskTeacherCode(() => { showing = true; draw(); });

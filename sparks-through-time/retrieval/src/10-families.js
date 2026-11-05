@@ -31,6 +31,7 @@ function rtMcq(r, q, right, wrongs, explain, extra){
 const rtNum = (q, answer, unit, tol, explain, extra) => Object.assign({t: 'num', q, answer, unit: unit || '', tol: tol == null ? 0.001 : tol, explain}, extra || {});
 
 /* ---------- families and slots ---------- */
+function rtWithA(m){ const x = String(m).toLowerCase(); return /balloon/.test(x) ? 'a ' + x : x; }
 const RT_FAMILIES = [
   {n: 'F1',  id: 'charge-rules',            stop: 'launch',         slots: {A: 'Apply',     B: 'Predict'}},
   {n: 'F2',  id: 'static-or-current',       stop: 'launch',         slots: {A: 'Apply',     B: 'Apply'}},
@@ -213,15 +214,15 @@ RT_GEN.F4 = {
 const RT5 = [
   {m: 'Democritus’s atoms (400 BCE)', short: 'Democritus', idea: 'Everything is made of tiny pieces that cannot be cut', qs: ['Which idea says everything is made of tiny pieces that cannot be cut?', 'Which idea came from thinking alone, with no experiments?', 'Which model dates from 400 BCE?']},
   {m: 'Dalton’s solid sphere model (1803)', short: 'Dalton', idea: 'Atoms are solid spheres, one kind for each element', qs: ['Which model pictures atoms as solid spheres, with a different kind for each element?', 'Which model fits elements always combining in fixed amounts?', 'Which model dates from 1803?']},
-  {m: 'Thomson’s plum pudding model (1897)', short: 'Thomson', idea: 'Electrons dotted through a ball of positive charge', qs: ['Which model pictures electrons dotted through a ball of positive charge?', 'Which model came from cathode rays bending towards a positive plate?', 'Which model dates from 1897?']},
+  {m: 'Thomson’s plum pudding model (1904)', short: 'Thomson', idea: 'Electrons dotted through a ball of positive charge', qs: ['Which model pictures electrons dotted through a ball of positive charge?', 'Which model came from cathode rays bending towards a positive plate?', 'Which model dates from 1897?']},
   {m: 'Rutherford’s nuclear model (1911)', short: 'Rutherford', idea: 'A tiny positive nucleus at the centre', qs: ['Which model first had a tiny positive nucleus?', 'Which model came from a few alpha particles bouncing back from gold foil?', 'Which model dates from 1911?']},
-  {m: 'Bohr’s shell model (1913)', short: 'Bohr', idea: 'Electrons in shells at set distances', qs: ['Which model first put electrons in shells?', 'Which model fits atoms giving out only certain colours of light?', 'Which model dates from 1913?']}
+  {m: 'Bohr’s shell model (1913)', short: 'Bohr', idea: 'Electrons in shells at set distances', qs: ['Which model first put electrons in shells?', 'Which model has electrons travelling at set distances from the nucleus?', 'Which model dates from 1913?']}
 ];
 const RT5B = [
   {q: 'If Thomson’s plum pudding model were right, what should alpha particles do at gold foil?', right: 'Almost all should go straight through, and none should bounce back', wrongs: ['Many should bounce straight back off the gold atoms', 'Most should be bent sharply to one side by the nucleus', 'All should be stopped by the solid spheres of gold'], ex: 'Thomson’s atom has no hard centre, so nothing should bounce the alpha particles back. Rutherford saw a few bounce back, which showed a tiny nucleus.'},
   {q: 'Which result could Dalton’s solid sphere model <b>not</b> explain?', right: 'Tiny negative particles being pulled out of atoms', wrongs: ['Elements always combining in fixed amounts', 'Each element having its own kind of atom', 'Atoms being too small to see'], ex: 'Dalton’s atoms have no parts inside, so they cannot give out electrons. Thomson found electrons in 1897.'},
   {q: 'Which result could Thomson’s model <b>not</b> explain?', right: 'A few alpha particles bouncing straight back from gold foil', wrongs: ['Tiny negative particles coming out of atoms', 'Atoms being neutral overall', 'Atoms containing electrons'], ex: 'A ball of spread-out positive charge cannot bounce an alpha particle straight back. Rutherford’s tiny nucleus can.'},
-  {q: 'Which result could Rutherford’s model <b>not</b> explain?', right: 'Atoms giving out only certain colours of light', wrongs: ['Most alpha particles going straight through gold foil', 'A few alpha particles bouncing straight back', 'Atoms having a tiny positive centre'], ex: 'Bohr added electron shells to explain the certain colours of light that atoms give out.'},
+  {q: 'Which idea was still missing from Rutherford’s model?', right: 'Electrons travelling in fixed shells', wrongs: ['Most alpha particles going straight through gold foil', 'A few alpha particles bouncing straight back', 'Atoms having a tiny positive centre'], ex: 'Rutherford found the nucleus. Bohr then placed the electrons in fixed shells around it.'},
   {q: 'What did Bohr’s model add to Rutherford’s model?', right: 'Electrons move in shells at set distances from the nucleus', wrongs: ['A solid ball of positive charge with electrons inside it', 'A tiny positive nucleus at the centre of the atom', 'Atoms that cannot be split and have no parts'], ex: 'Rutherford already had the nucleus. Bohr put the electrons in shells.'},
   {q: 'Why do scientists still learn about Thomson’s plum pudding model?', right: 'It explained the evidence of its time and led to better models', wrongs: ['It was wrong and useless, so it is only kept for history', 'It is still the model scientists use for every atom today', 'It was never tested, so nobody knows if it is right'], ex: 'Each model explained the evidence of its time. New evidence led to better models, so old models are not useless.'},
   {q: 'If Rutherford’s model were right, what should a few alpha particles do at gold foil?', right: 'Bounce back when they hit the tiny positive nucleus', wrongs: ['Pass straight through, because the atom has no centre', 'Stick to the foil, because the electrons are negative', 'Turn into electrons, because the gold is solid'], ex: 'A tiny, dense, positive nucleus pushes a head-on alpha particle back. That is what the scientists saw.'}
@@ -256,16 +257,16 @@ RT_GEN.F6 = {
   A(r){
     const [hi, lo] = rtPick(r, RT6_PAIRS), flip = r() < 0.5, a = flip ? lo : hi, b = flip ? hi : lo;
     const sign = i => i === hi ? 'Positive' : 'Negative';
-    return {t: 'table', q: `${RT_LADDER[a]} is rubbed with ${RT_LADDER[b].toLowerCase()}. Which charge does each one get?`, cols: [{name: 'Charge', options: ['Positive', 'Negative']}], rowHead: 'Material', vis: rtLadderVis(),
+    return {t: 'table', q: `${RT_LADDER[a]} is rubbed with ${rtWithA(RT_LADDER[b])}. Which charge does each one get?`, cols: [{name: 'Charge', options: ['Positive', 'Negative']}], rowHead: 'Material', vis: rtLadderVis(),
       rows: [{label: RT_LADDER[a], ans: [sign(a)]}, {label: RT_LADDER[b], ans: [sign(b)]}],
       explain: `${RT_LADDER[lo]} is lower on the ladder, so it grabs electrons and becomes negative. ${RT_LADDER[hi]} loses electrons and becomes positive.`, p: {hi, lo, a, b}};
   },
   B(r){
     const [hi, lo] = rtPick(r, RT6_PAIRS), P = RT_LADDER[hi].toLowerCase(), N = RT_LADDER[lo].toLowerCase();
-    if (r() < 0.5) return rtMcq(r, `${RT_LADDER[hi]} becomes positive when rubbed with ${N}. Which way did the electrons move?`, `From the ${P} onto the ${N}`,
+    if (r() < 0.5) return rtMcq(r, `${RT_LADDER[hi]} becomes positive when rubbed with ${rtWithA(N)}. Which way did the electrons move?`, `From the ${P} onto the ${N}`,
       rtShuf(r, [`From the ${N} onto the ${P}`, `Protons moved from the ${P} onto the ${N}`, 'No electrons moved: rubbing made new charge on both']),
       `The positive material lost electrons and the negative one gained them, so the electrons moved from the ${P} onto the ${N}. Rubbing does not make charge.`, {vis: rtLadderVis(), p: {hi, lo, mode: 0}});
-    return rtMcq(r, `${RT_LADDER[hi]} is rubbed with ${N} and becomes positive. Which material is lower on the electron ladder?`, `The ${N}, because it grabbed the electrons`,
+    return rtMcq(r, `${RT_LADDER[hi]} is rubbed with ${rtWithA(N)} and becomes positive. Which material is lower on the electron ladder?`, `The ${N}, because it grabbed the electrons`,
       rtShuf(r, [`The ${P}, because it grabbed the electrons`, 'They are on the same rung, because rubbing makes charge', `The ${P}, because the rubbed material always becomes negative`]),
       `The lower material grabs electrons and becomes negative. ${RT_LADDER[hi]} became positive, so the ${N} is lower.`, {vis: rtLadderVis(), p: {hi, lo, mode: 1}});
   }
@@ -443,7 +444,7 @@ RT_GEN.F11 = {
         explain: ks.map(k => `${RT11[k].name}: ${RT11[k].job}.`).join(' '), p: {keys: ks}};
     }
     const k = rtPick(r, RT11_KEYS), wr = rtShuf(r, RT11_KEYS.filter(x => x !== k && !(k === 'bulb' && x === 'led') && !(k === 'led' && x === 'bulb'))).slice(0, 3).map(x => 'It ' + RT11[x].job);
-    return rtMcq(r, `What does a ${RT11[k].name === 'LED' ? 'LED' : RT11[k].name.toLowerCase()} do?`, 'It ' + RT11[k].job, wr, `${RT11[k].name}: ${RT11[k].job}.`, {p: {key: k}});
+    return rtMcq(r, `What does ${/^[AEIOU]/.test(RT11[k].name) || RT11[k].name === 'LED' ? 'an' : 'a'} ${RT11[k].name === 'LED' ? 'LED' : RT11[k].name.toLowerCase()} do?`, 'It ' + RT11[k].job, wr, `${RT11[k].name}: ${RT11[k].job}.`, {p: {key: k}});
   },
   B(r){
     if (r() < 0.5){
@@ -535,7 +536,7 @@ const RT14 = [
   {q: 'Does the number of cells change how many clips an electromagnet picks up?', iv: 'the number of cells', dv: 'the number of clips picked up', ctl: 'the number of coils'},
   {q: 'Does the material of the core change how many clips an electromagnet picks up?', iv: 'the material of the core', dv: 'the number of clips picked up', ctl: 'the number of coils'},
   {q: 'Does the material in a tester change the current in the circuit?', iv: 'the material in the tester', dv: 'the current in the circuit', ctl: 'the cell that is used'},
-  {q: 'Do the turns each second of a generator change its peak voltage?', iv: 'the turns each second', dv: 'the peak voltage', ctl: 'the number of turns of wire'},
+  {q: 'Does the number of turns each second of a generator change its peak voltage?', iv: 'the number of turns each second', dv: 'the peak voltage', ctl: 'the number of turns of wire'},
   {q: 'Does the number of bulbs in series change the current?', iv: 'the number of bulbs in series', dv: 'the current in the circuit', ctl: 'the cell that is used'}
 ];
 const RT14_ROLES = ['Independent variable (what you change)', 'Dependent variable (what you measure)', 'Controlled variable (what you keep the same)'];
@@ -674,7 +675,7 @@ RT_GEN.F19 = {
     if (r() < 0.5){
       let p10, t0, t1; do { p10 = rtInt(r, 2, 30); t0 = rtInt(r, 2, 10); t1 = rtInt(r, 2, 10); } while (t0 === t1);
       return rtNum(`A dynamo gives ${rtT(p10 * t0 / 10)} V at ${t0} turns each second. What is the peak voltage at ${t1} turns each second?`, rtFix(p10 * t1 / 10, 1), 'V', 0.001,
-        `The peak goes up in step with the turns each second: ${rtT(p10 / 10)} V for each turn each second, × ${t1} = ${rtT(p10 * t1 / 10)} V.`, {p: {p10, t0, t1, mode: 0}});
+        `The peak goes up in step with the number of turns each second: ${rtT(p10 / 10)} V for each turn each second, × ${t1} = ${rtT(p10 * t1 / 10)} V.`, {p: {p10, t0, t1, mode: 0}});
     }
     const [T0, T1] = rtPick(r, RT19_PAIRS), k = rtInt(r, T1 < T0 ? 2 : 1, 25), v100 = 40 * k, n100 = v100 * T1 / T0;
     return rtNum(`A generator has ${T0} turns of wire and gives a peak of ${rtT(v100 / 100)} V. With ${T1} turns of wire and everything else the same, what peak voltage does it give?`, rtFix(n100 / 100, 2), 'V', 0.001,
@@ -1114,7 +1115,7 @@ const RT_X1_HYP = [
   {iv: 'the number of coils goes up', eff: 'more clips will be picked up', why: 'more coils make a stronger magnetic field'},
   {iv: 'the number of cells goes up', eff: 'more clips will be picked up', why: 'more cells push more current through the coil'},
   {iv: 'a metal is used in the tester instead of plastic', eff: 'the current will be bigger', why: 'metals have free electrons'},
-  {iv: 'the turns each second go up', eff: 'the peak voltage will go up', why: 'the magnet moves past the coil more quickly'},
+  {iv: 'the number of turns each second goes up', eff: 'the peak voltage will go up', why: 'the magnet moves past the coil more quickly'},
   {iv: 'the number of bulbs in series goes up', eff: 'the current will go down', why: 'there is more resistance in the loop'}
 ];
 const rtHyp = h => `If ${h.iv}, then ${h.eff}, because ${h.why}.`;

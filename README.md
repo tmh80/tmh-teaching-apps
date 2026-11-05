@@ -39,3 +39,8 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
 - **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.
 - **Tilt Lab (still to do):** the Toddle AI-marking pack, the "set classwork or homework" prompt generator, the calculator, the guided tour, draggable pop-ups, and one-go answers on the typed explore steps (the multiple-choice check questions are one go already).
+
+## Sparks Through Time: retrieval features (Nov 2026)
+Flashcards, Review mode, the new Time Test, class review sets and a save code live in `sparks-through-time/retrieval/src/`. Run `node retrieval/build-retrieval.js` from `sparks-through-time/` to place them in `Sparks-Through-Time.html`, then run the tests in `retrieval/tests/`. Content comes from `docs/Sparks_Retrieval_Catalogue.md`; `src/01-data.js` is generated from it.
+
+Still to try by hand: the real Save as PDF buttons, printing on school printers, and everything on a student Toddle account on a laptop and an iPad.

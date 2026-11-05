@@ -128,9 +128,9 @@ const RT_PG = {
     const v = rtPgTry(() => Array.from({length: n}, (_, i) => Math.max(0, (i + 1) * cells * 2 + rtPick(r, [-1, 0, 1]))), rtInc);
     const L = n * 10, a = v[0], z = v[n - 1];
     return Object.assign({head: ['Coils'].concat(v.map((_, i) => String((i + 1) * 10))), rows: [['Clips picked up'].concat(v.map(String))], note: `Iron core, ${rtPlural(cells, 'cell')}.`,
-      m1: `The results show that more coils make a stronger electromagnet. With 10 coils it picked up ${a} clips, and with ${L} coils it picked up ${z} clips. Each coil of wire adds to the magnetic field, so the iron core becomes a stronger magnet.`},
-      rtPm(`The electromagnet picked up ${a} clips with 10 coils and ${z} clips with ${L} coils`, 'Each coil adds to the magnetic field, which makes the electromagnet stronger.',
-        {evX: `The electromagnet picked up ${a} clips with 10 coils but ${z} clips with ${L} coils`, mid: '. The number of coils clearly made a difference.'}));
+      m1: `The results show that more coils make a stronger electromagnet. With 10 coils it picked up ${a} ${a===1?'clip':'clips'}, and with ${L} coils it picked up ${z} clips. Each coil of wire adds to the magnetic field, so the iron core becomes a stronger magnet.`},
+      rtPm(`The electromagnet picked up ${a} ${a===1?'clip':'clips'} with 10 coils and ${z} clips with ${L} coils`, 'Each coil adds to the magnetic field, which makes the electromagnet stronger.',
+        {evX: `The electromagnet picked up ${a} ${a===1?'clip':'clips'} with 10 coils but ${z} clips with ${L} coils`, mid: '. The number of coils clearly made a difference.'}));
   },
   C4(r){
     const coils = rtPick(r, [30, 40, 50, 60]), cells = rtInt(r, 2, 3), F = [1, 0.7, 0.1, 0.1, 0.1], base = coils / 10 * cells * 2;
@@ -170,7 +170,7 @@ const RT_PG = {
       rtPm(`The current fell from ${v[0]} A with 1 bulb to ${v[n - 1]} A with ${n} bulbs`, 'Each extra bulb adds resistance to the loop. The voltage stays the same, so the current gets smaller.'));
   },
   C8(r){
-    const km = rtPgTry(() => rtShuf(r, [2, 5, 10, 15, 20, 25, 30, 40]).slice(0, 4).sort((a, b) => a - b), a => a[3] >= 20 && a[2] >= 10);
+    const km = rtPgTry(() => rtShuf(r, [2, 5, 10, 15, 20, 25, 30]).slice(0, 4).sort((a, b) => a - b), a => a[3] >= 20 && a[2] >= 10);
     const dc = km.map(k => Math.round(100 * Math.exp(-k / 6))), ac = km.map(k => Math.round(100 * Math.exp(-k / 600)));
     return Object.assign({head: ['Distance (km)'].concat(km.map(String)), rows: [['DC: energy that arrives (%)'].concat(dc.map(String)), ['AC: energy that arrives (%)'].concat(ac.map(String))],
       m1: `The results show that AC delivers far more energy over long distances. At ${km[2]} km, ${ac[2]}% of the energy arrived with AC, but only ${dc[2]}% arrived with DC. Transformers raise the voltage of AC, which makes the current smaller. A smaller current wastes less energy as heat in the wires.`},
