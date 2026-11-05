@@ -734,6 +734,7 @@ body.wide .grid-wrap .controls{gap:10px}
 .rv-num-in.wrong,.rv-blank.wrong{border-color:#b83434}
 .pad-locked{pointer-events:none; opacity:.85}
 .rv-words{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:2px 0 6px}
+.rv-complete{padding:8px 12px; border-radius:10px; background:var(--ok-bg); color:var(--ok); border:2px solid var(--ok); font-weight:800}
 .rv-finished{display:flex; gap:18px; align-items:center; padding:20px 22px; margin-top:18px; border-radius:18px; background:#e9f7ef; border:3px solid #1b7f46}
 .rv-finished h3{margin:0 0 6px}
 .rv-fin-icon{font-size:2.6rem}
@@ -5027,7 +5028,7 @@ function asGrid(it){
   if (it.t==='sort') return {cols:[{name:it.colName||'Group', options:it.groups}], rows:it.items.map(([label,g])=>({label, ans:[it.groups[g]]}))};
   return {cols:it.cols.map(c=>typeof c==='string' ? {name:c} : c), rows:it.rows};
 }
-function gridOptions(grid, j){ const c = grid.cols[j]; if (c.options) return c.options; const set = []; grid.rows.forEach(r=>{ if (!set.includes(r.ans[j])) set.push(r.ans[j]); }); (c.extra||[]).forEach(x=>{ if (!set.includes(x)) set.push(x); }); return set.slice().sort(); }
+function gridOptions(grid, j){ const c = grid.cols[j]; const set = c.options ? c.options.slice() : []; if (!c.options){ grid.rows.forEach(r=>{ if (!set.includes(r.ans[j])) set.push(r.ans[j]); }); (c.extra||[]).forEach(x=>{ if (!set.includes(x)) set.push(x); }); } /* same mixed order on screen and on paper, and never the same as the rows */ let o = seeded(set, set.join('|')); const rowOrder = grid.rows.map(r=>r.ans[j]); if (o.length>2 && o.every((x,i)=>x===rowOrder[i])) o = o.slice(1).concat(o[0]); return o; }
 
 /* ---------- drawing pad ---------- */
 function drawPad(el, saved, onChange){
@@ -5184,7 +5185,8 @@ function renderReview(panel, stop, part){
     const pts = items.reduce((a,_,i)=>a + (st[i] && st[i].done ? (st[i].pts||0) : 0), 0), maxp = items.reduce((a,_,i)=>a + (st[i] && st[i].done ? (st[i].max||0) : 0), 0);
     bar.append(h('div',{class:'rv-bar-top'}, h('b',{}, `${done} of ${items.length} done`), h('span',{class:'legend'}, `Points so far: ${pts} of ${maxp}`)),
       h('div',{class:'chip-row'}, items.map((it,i)=>h('button',{class:'chip rv-chip ' + (st[i] && st[i].done ? 'ok' : ''), type:'button', onclick:()=>scrollToEl(document.getElementById(A + i))}, `${i+1}`))),
-      h('div',{class:'row'}, h('button',{class:'btn primary', type:'button', onclick:()=>preExport()}, `Make my ${PN} worksheet`), h('button',{class:'btn small', type:'button', onclick:()=>showWorksheet(stop, 'blank', part)}, 'Blank copy (for printing)')));
+      done===items.length ? h('div',{class:'rv-complete', role:'status'}, `✓ Complete! All ${items.length} questions are done.`) : null,
+      h('div',{class:'row'}, done===items.length ? h('button',{class:'btn primary', type:'button', onclick:()=>showWorksheet(stop, 'student', part)}, `📄 Make my ${PN} worksheet`) : h('button',{class:'btn primary', type:'button', onclick:()=>preExport()}, '✓ Complete my review'), h('button',{class:'btn small', type:'button', onclick:()=>showWorksheet(stop, 'blank', part)}, 'Blank copy (for printing)')));
   }
   function preExport(){
     const missing = items.map((it,i)=>[it,i]).filter(([it,i])=>!(st[i] && st[i].done));
@@ -5504,7 +5506,7 @@ circuits:[
   {t:'multi', obj:['Aii'], q:'A simple circuit has one cell, one bulb and a switch. Which changes would make the bulb go <b>out</b>? Tick all that apply.', options:['Opening the switch','Unclipping one wire','Adding a wire directly across the bulb','Adding a second cell facing the same way','Turning the cell around'], answers:[0,1,2], explain:'Turning a single cell around just reverses the current; the bulb still lights. A second cell facing the same way makes it brighter.'},
   {t:'mcq', obj:['Aii'], q:'Two cells are joined facing <b>opposite</b> ways in a circuit with a bulb. What happens?', options:['The pushes cancel, so the bulb stays off','The pushes add up, so the bulb is brighter','The pushes cancel, so the bulb flickers','Only one cell pushes, so the bulb is dimmer'], answer:0, explain:'Each cell pushes the opposite way, so the total push is zero.'},
   {t:'num', obj:['Aii'], q:'Each cell gives 1.5 V. What is the total voltage of <b>four</b> cells joined + to − in a row?', answer:6, unit:'V', tol:0.01, explain:'4 × 1.5 V = 6 V.'},
-  {t:'fill', obj:['Ai'], q:'Fill the gaps.', text:'Current is measured in ___ using an ___. It must be connected ___ the loop, in line with the other parts. Voltage is measured in ___.', blanks:[['amps','A','amperes'],['ammeter'],['in','into','inside'],['volts','V']], explain:''},
+  {t:'fill', obj:['Ai'], q:'Fill the gaps.', text:'Current is measured in ___ using an ___. It must be ___ in the loop, in line with the other parts. Voltage is measured in ___.', blanks:[['amps','A','amperes'],['ammeter'],['connected','joined','placed','put','wired','attached'],['volts','V']], explain:''},
   {t:'draw', obj:['Aii'], q:'Draw a <b>circuit diagram</b> using symbols: one cell, a switch, a bulb and an ammeter, all in one loop.', checklist:['Correct cell symbol (long and short line)','Switch symbol','Bulb symbol (circle with a cross)','Ammeter symbol (circle with A)','Straight lines, all in one complete loop'],
     model:circ(Circuit.loopWith({'h,0,1':'bulb','h,2,2':'cell','h,0,3':{type:'switch', closed:true},'v,0,0':{type:'ammeter', label:' '}}))},
   {t:'write', obj:['Ai'], words:['static','builds up','current','flows','complete circuit','battery'], q:'Explain the difference between <b>static</b> electricity and <b>current</b> electricity. Use Volta’s battery in your answer.', model:'Static electricity is charge that builds up on an object and stays there until it jumps as a single spark. Current electricity is a steady flow of charge round a complete circuit. Volta’s battery could keep pushing charge round a circuit, so it was the first steady source of current.', checklist:['Static = charge that builds up / stays put','Current = flow of charge round a complete circuit','Volta’s battery gives a steady push']}
