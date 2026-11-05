@@ -1706,18 +1706,19 @@ function renderHome(){
     ));
   });
   const best = Store.data.testBest;
-  tl.append(h('button',{class:'stop-card test', type:'button', onclick:()=>renderTest()},
+  tl.append(h('button',{class:'stop-card test', type:'button', onclick:()=>(typeof renderRtTimeTest==='function' ? renderRtTimeTest() : renderTest())},
     h('div',{class:'yr'}, 'Final', h('small',{}, 'Every era at once')),
     h('div',{class:'meta'}, h('h3',{}, 'The Time Test'), h('span',{}, 'Mixed questions from every stop, perfect for test revision')),
     h('div',{class:'stamps'}, h('span',{class:'best-pill'}, best!=null ? `Best ${best}%` : 'Not tried'))
   ));
   root.append(tl);
+  if (typeof rtHomeSection==='function') root.append(rtHomeSection());
   if (typeof workshopSection==='function') root.append(workshopSection());
   const resetBtn = h('button',{class:'btn small ghost', type:'button'}, 'Reset my progress');
   let armed = false, tmr;
   resetBtn.addEventListener('click', ()=>{
     if (!armed){ armed = true; resetBtn.textContent = 'Tap again to wipe all stamps'; tmr = setTimeout(()=>{ armed=false; resetBtn.textContent='Reset my progress'; }, 3500); return; }
-    clearTimeout(tmr); const pr = Store.data.prefs; Store.data = {prefs:pr}; Store.save(); renderHome();
+    clearTimeout(tmr); const pr = Store.data.prefs; const rt = Store.data.rt; Store.data = {prefs:pr}; if (rt){ rt.ttBest = null; rt.reviews = 0; rt.lastFams = []; Store.data.rt = rt; } Store.save(); renderHome();
   });
   root.append(h('div',{class:'home-foot'}, h('span',{}, 'Your stamps are saved on this device.'), resetBtn));
 }
@@ -3096,9 +3097,9 @@ registerStop({
 });
 
 /* ================= Stop 1: the atom ================= */
-const ELEMENTS = ['Hydrogen','Helium','Lithium','Beryllium','Boron','Carbon','Nitrogen','Oxygen','Fluorine','Neon','Sodium','Magnesium','Aluminium','Silicon','Phosphorus','Sulfur','Chlorine','Argon'];
-const SYMBOLS  = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar'];
-const NEUTRONS = [0,2,4,5,6,6,7,8,10,10,12,12,14,14,16,16,18,22];
+const ELEMENTS = ['Hydrogen','Helium','Lithium','Beryllium','Boron','Carbon','Nitrogen','Oxygen','Fluorine','Neon','Sodium','Magnesium','Aluminium','Silicon','Phosphorus','Sulfur','Chlorine','Argon','Potassium','Calcium'];
+const SYMBOLS  = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
+const NEUTRONS = [0,2,4,5,6,6,7,8,10,10,12,12,14,14,16,16,18,22,20,20];
 
 function atomBuilder(el, opts){
   opts = opts || {};
@@ -3107,14 +3108,14 @@ function atomBuilder(el, opts){
   const gS = sv('g'), gN = sv('g'); svg.append(gS, gN);
   const info = h('div',{class:'readout'});
   const steppers = [
-    stepper({label:'Protons', sub:'positive (+), in the nucleus', value:st.p, min:0, max:18, onChange:v=>{st.p=v; draw();}}),
+    stepper({label:'Protons', sub:'positive (+), in the nucleus', value:st.p, min:0, max:20, onChange:v=>{st.p=v; draw();}}),
     stepper({label:'Neutrons', sub:'no charge, in the nucleus', value:st.n, min:0, max:22, onChange:v=>{st.n=v; draw();}}),
-    stepper({label:'Electrons', sub:'negative (−), in the shells', value:st.e, min:0, max:18, onChange:v=>{st.e=v; draw();}})
+    stepper({label:'Electrons', sub:'negative (−), in the shells', value:st.e, min:0, max:20, onChange:v=>{st.e=v; draw();}})
   ];
   el.append(h('div',{class:'sim-grid'}, svg, h('div',{class:'controls'}, h('div',{class:'card', style:{padding:'6px 14px'}}, steppers), info)));
   function draw(){
     while (gS.firstChild) gS.firstChild.remove(); while (gN.firstChild) gN.firstChild.remove();
-    const shells = [2,8,8], radii = [62,98,134];
+    const shells = [2,8,8,2], radii = [62,98,134,150];
     let left = st.e;
     shells.forEach((cap,i)=>{
       gS.append(sv('circle',{cx:160, cy:160, r:radii[i], fill:'none', stroke:'var(--line)', 'stroke-width':2, 'stroke-dasharray': i===0?'':'4 5'}));
@@ -3322,7 +3323,7 @@ function targetText(t){
 }
 function elementCard(){
   return h('div',{class:'tbl-wrap'}, h('table',{class:'data'}, h('caption',{style:{textAlign:'left', fontWeight:700, padding:'4px 0'}}, 'Element card'), h('tbody',{},
-    [0,1].map(r=>h('tr',{}, ELEMENTS.slice(r*9, r*9+9).map((nm,i)=>h('td',{}, h('b',{}, SYMBOLS[r*9+i]), h('br'), h('small',{}, nm), h('br'), h('span',{class:'t-mono'}, `#${r*9+i+1}`))))))));
+    [0,1,2].map(r=>h('tr',{}, ELEMENTS.slice(r*9, r*9+9).map((nm,i)=>h('td',{}, h('b',{}, SYMBOLS[r*9+i]), h('br'), h('small',{}, nm), h('br'), h('span',{class:'t-mono'}, `#${r*9+i+1}`))))))));
 }
 
 registerStop({
@@ -4267,7 +4268,7 @@ registerStop({
   intro:`<p>Welcome to the Royal Institution in London, <b>1831</b>! <b>Michael Faraday</b> has heard about Ørsted’s discovery that electricity can make magnetism. So he asked a brilliant question: <i>can magnetism make electricity?</i></p><p>After lots of experiments, he found the answer. Moving a magnet near a coil of wire makes electricity flow! Almost every power station on Earth still uses Faraday’s discovery today, nearly 200 years later.</p>`,
   learn:[
     { title:'Move the magnet', say:'<p>Here’s Faraday’s experiment: a magnet, a coil of wire and a meter that shows when current flows. Push the magnet into the coil and pull it back out, using the slider or the buttons. Watch the meter needle carefully!</p>',
-      build(stage, api){ magnetCoil(stage, ()=>{ askInline(stage, [{q:'What happens to the meter when the magnet stops moving?', options:['The needle goes back to zero','The needle stays at the top','The needle spins round and round','The bulb explodes'], answer:0, explain:'Electricity only flows while the magnet is <b>moving</b>. Pushing it in makes the needle swing one way, and pulling it out makes it swing the other way.'}], ()=>api.complete()); }); }},
+      build(stage, api){ magnetCoil(stage, ()=>{ askInline(stage, [{q:'What happens to the meter when the magnet stops moving?', options:['The needle goes back to zero','The needle stays at the top','The needle spins round and round','The bulb explodes'], answer:0, explain:'Electricity only flows while the magnet is <b>moving</b>. Pushing it in makes the needle swing one way, and pulling it out makes it swing the other way. Making a voltage by moving a magnet near a wire is called <b>induction</b>.'}], ()=>api.complete()); }); }},
     { title:'Spin it!', say:'<p>Pushing a magnet in and out gets tiring. Instead, a <b>generator</b> spins a magnet next to coils of wire, so it keeps moving all the time. Turn the speed up to at least <b>80%</b> and watch the bulb.</p>',
       build(stage, api){ predictThen(stage, {q:'What do you think will happen to the bulb as the generator spins faster?', options:['It will get brighter','It will get dimmer','Nothing will change','It will flash on and off']}, (area, pr)=>genRig(area, {controls:['speed'], start:{speed:10}, onChange:s=>{ if (s.speed>=80) api.complete(`You predicted: <i>${pr.txt.toLowerCase()}</i>. The faster the magnet spins, the bigger the voltage and the brighter the bulb. Look at the green oscilloscope screen too: the line goes up and down in a wave.`); }})); }},
     { title:'More power!', say:'<p>Speed isn’t the only thing that matters. Can you get the peak voltage up to at least <b>12 V</b>? Try changing the coil and the magnet as well as the speed.</p>',
@@ -4884,7 +4885,7 @@ registerStop({
     { title:'Why does it glow?', say:'<p>The filament is so thin that it has a big resistance. As the electrons squeeze through, they bump into its atoms and make them jiggle faster. That means it heats up!</p>',
       build(stage, api){ predictThen(stage, {q:'What do you think will happen to the filament as more and more current flows through it?', options:['It will get hotter and start to glow','It will get colder','It will melt straight away','Nothing will happen']}, (area, pr)=>filamentHeat(area, p=>{ if (p>=90) api.complete(`You predicted: <i>${pr.txt.toLowerCase()}</i>. At about 2,500 °C the filament glows white-hot! But look at the energy readout: only about 10 J of every 100 J becomes light. The rest becomes heat, which is why old bulbs got too hot to touch.`); })); }},
     { title:'Follow the energy', say:'<p>Here’s a really important idea. When a bulb is lit, what actually gets used up? Watch the charges carrying energy round the circuit.</p>',
-      build(stage, api){ energyVans(stage); askInline(stage, [{q:'What gets used up as electricity flows round a circuit?', options:['The energy carried by the charges','The current flowing round the loop','The electrons moving in the wires','The wires that carry the charges'], answer:0, hint:'Remember Edison’s ammeters: the current was the same all the way round.', explain:'The current is the same all the way round, so charge is never used up. The cell gives the charges <b>energy</b>, and the bulb transfers that energy to light and heat. When a battery goes “flat”, it has run out of stored energy.'}], ()=>{ const s = h('div'); stage.append(h('b',{}, 'Filament bulb: where 100 J of energy goes'), s); sankey(s,'filament'); api.complete(); }); }},
+      build(stage, api){ energyVans(stage); askInline(stage, [{q:'What gets used up as electricity flows round a circuit?', options:['The energy carried by the charges','The current flowing round the loop','The electrons moving in the wires','The wires that carry the charges'], answer:0, hint:'Remember Edison’s ammeters: the current was the same all the way round.', explain:'The current is the same all the way round, so charge is never used up. The cell gives the charges <b>energy</b>, and the bulb makes an <b>energy transfer</b>: that energy turns into light and heat. When a battery goes “flat”, it has run out of stored energy.'}], ()=>{ const s = h('div'); stage.append(h('b',{}, 'Filament bulb: where 100 J of energy goes'), s); sankey(s,'filament'); api.complete(); }); }},
     { title:'Fast-forward: the LED', say:'<p>Jump forward to 1962, when <b>Nick Holonyak</b> made the first bright red LED. In the 1990s, Japanese scientists made a bright <b>blue</b> LED, which meant LEDs could make white light. They won the Nobel Prize in Physics in 2014! LEDs are made from semiconductors, and they don’t need a hot filament.</p>',
       build(stage0, api){ predictThen(stage0, {q:'These two bulbs give out exactly the same amount of light. Which do you think uses more energy?', options:['The old filament bulb','The LED','They use the same']}, (stage)=>{ let asked = false; ledCompare(stage, ()=>{ if (asked) return; asked = true;
         askInline(stage, [{q:'Both bulbs make the same light. Why does the LED use so much less energy?', options:['It wastes much less energy as heat','It is a smaller bulb','It only works in the daytime','It uses DC from the Sun'], answer:0, explain:'Filament bulbs turn most of their energy into heat. LEDs turn a much bigger share into light, so they need far less electricity for the same brightness.'}], ()=>{ const s = h('div'); stage.append(h('b',{}, 'LED: where 100 J of energy goes (roughly)'), s); sankey(s,'led'); api.complete(); }); }); }); }}
@@ -5554,7 +5555,7 @@ generators:[
 bulb:[
   {t:'table', obj:['Ai'], q:'What does each part of a filament bulb do?', rowHead:'Part', cols:[{name:'Its job', options:['Gets very hot and glows','Lets light out and keeps air away','Stops the filament burning up','Connects the bulb to the circuit','Holds the filament and carries current to it']}], rows:[{label:'Filament', ans:['Gets very hot and glows']},{label:'Glass bulb', ans:['Lets light out and keeps air away']},{label:'Argon gas or vacuum inside', ans:['Stops the filament burning up']},{label:'Metal base', ans:['Connects the bulb to the circuit']},{label:'Support wires', ans:['Holds the filament and carries current to it']}], explain:''},
   {t:'num', obj:['Aii'], q:'A filament bulb is given 240 J of electrical energy. 22 J comes out as light. How much energy is wasted as heat?', answer:218, tol:0, unit:'J', explain:'240 − 22 = 218 J. Energy is never destroyed, so it all has to go somewhere.'},
-  {t:'num', obj:['Aii'], q:'Using the same bulb (22 J of light from 240 J), what <b>percentage</b> of the energy became light? Round to the nearest whole number.', answer:9, tol:0.6, unit:'%', explain:'22 ÷ 240 × 100 = 9.2%, so about 9%.'},
+  {t:'num', obj:['Aii'], q:'A filament bulb gets 240 J and gives out 22 J of light. What <b>percentage</b> of the energy became light? Round to the nearest whole number.', answer:9, tol:0.6, unit:'%', explain:'22 ÷ 240 × 100 = 9.2%, so about 9%.'},
   {t:'table', obj:['Ai'], q:'Compare a filament bulb with an LED.', rowHead:'', cols:[{name:'Filament bulb', options:['A hot filament glows','A semiconductor gives out light','Most of it','Much less','About 60 W','About 9 W','Yes','No']},{name:'LED', options:['A hot filament glows','A semiconductor gives out light','Most of it','Much less','About 60 W','About 9 W','Yes','No']}], rows:[{label:'How it makes light', ans:['A hot filament glows','A semiconductor gives out light']},{label:'Energy wasted as heat', ans:['Most of it','Much less']},{label:'Power for the same brightness', ans:['About 60 W','About 9 W']},{label:'Works either way round', ans:['Yes','No']}], explain:''},
   {t:'mcq', obj:['Aiii'], q:'A student says: “The bulb uses up the current, so there’s less current coming out of the bulb than going in.” What’s wrong with this?', options:['The current is the same all the way round; it’s the energy that the bulb transfers','Nothing: the bulb uses up some of the current, so less flows after it','The current is bigger after the bulb, because the bulb adds energy to it','Bulbs don’t need current at all; they only need voltage to light up'], answer:0, explain:'Ammeters on either side of a bulb read exactly the same.'},
   {t:'sort', obj:['Ai'], q:'Is each energy output <b>useful</b> or <b>wasted</b>?', groups:['Useful','Wasted'], colName:'', items:[['Light from a lamp',0],['Heat from a lamp',1],['Heat from a kettle',0],['Sound from a kettle',1],['Sound from a speaker',0],['Heat from a laptop',1],['Movement of an electric fan',0]], explain:'Whether energy is useful depends on the job the device is meant to do.'},
@@ -7214,9 +7215,9 @@ function aiFeedbackText(sheets, tasks, challengeOptional){
 /* ================= Teacher page: set classwork or homework (Toddle AI task maker prompt) ================= */
 const VOCAB = {
   launch:['static electricity','current electricity','charge','positive','negative','neutral','attract','repel'],
-  atom:['atom','element','proton','neutron','electron','nucleus','shell','atomic number','mass number','model'],
+  atom:['atom','element','proton','neutron','electron','nucleus','shell','atomic number','mass number','model','ion'],
   static:['charge','electron','positive','negative','attract','repel','static','lightning','lightning rod'],
-  circuits:['cell','battery','circuit','complete circuit','switch','current','ammeter','amp (A)','volt (V)','circuit symbol','short circuit'],
+  circuits:['cell','battery','circuit','complete circuit','switch','current','ammeter','amp (A)','volt (V)','circuit symbol','short circuit','voltage','voltmeter'],
   electromagnets:['electromagnet','coil','core','magnetic field','independent variable','dependent variable','controlled variable'],
   ohm:['resistance','ohm (Ω)','conductor','insulator','semiconductor','resistor','LED','V = I × R'],
   generators:['generator','turbine','induction','coil','magnet','alternating current'],
@@ -7224,7 +7225,7 @@ const VOCAB = {
   series:['series circuit','parallel circuit','branch','junction','current','ammeter'],
   acdc:['alternating current (AC)','direct current (DC)','frequency','hertz (Hz)','transformer','oscilloscope','mains'],
   power:['fossil fuel','renewable','non-renewable','turbine','generator','carbon dioxide (CO₂)','nuclear','geothermal','biomass'],
-  future:['renewable','fossil fuel','demand','energy storage','battery store','sustainable']
+  future:['renewable','fossil fuel','demand','battery store']
 };
 const PARTS_HW = {
   learn:{label:'Foundation: Learn steps', desc:'Guided steps with predictions; earns the Learn stamp', mins:s=>Math.max(10, Math.round(s.learn.length*2.5))},
@@ -7315,7 +7316,7 @@ function renderTeacher(){
     L.push(`Task title: Sparks Through Time – ${titles.length>2 ? titles.length + ' activities' : titles.join(' and ')}`);
     stops.forEach(s=>{ reqParts.forEach(p=>{ total += PARTS_HW[p].mins(s); }); optParts.forEach(p=>{ optTotal += PARTS_HW[p].mins(s); }); });
     tasks.forEach(x=>{ total += x.t.mins; });
-    if (saved.timeTest) total += 15;
+    if (saved.timeTest) total += 45;
     L.push(`Estimated time for students: approx. ${total} minutes${total>60 ? (saved.mode==='classwork' ? ' (it can be split across more than one lesson)' : saved.mode==='either' ? ' (it can be split across lessons or evenings)' : ' (it can be split across more than one evening)') : ''}.${optTotal ? ` There is also an optional \u2b50 Challenge of approx. ${optTotal} minutes for students who want to go further.` : ''}`);
     if (saved.mode==='either') L.push('Students can work on this in lessons and finish anything left over at home.');
     L.push('');
@@ -7386,6 +7387,7 @@ function renderTeacher(){
         h('div',{class:'card hw-col'}, h('div',{class:'row between'}, h('h3',{}, '4. Copy into Toddle'), h('span',{}, 'Time: ', mins)), out, h('div',{class:'row'}, copyBtn), h('p',{class:'legend'}, 'Paste this prompt into Toddle\u2019s AI task maker. Then paste the step 5 text into the task\u2019s AI feedback settings.')),
         h('div',{class:'card hw-col'}, h('h3',{}, '5. AI feedback instructions (paste into Toddle\u2019s AI feedback box)'), lockBox),
         h('div',{class:'card hw-col'}, h('h3',{}, '6. Printable PDFs (optional)'), h('div',{class:'feedback hint hw-howto'}, h('span',{}, 'Optional: save these if you\u2019d like paper copies or a record. Toddle\u2019s AI uses the text in step 5, so nothing needs attaching. Each button opens a printable page with a download button. Keep the answer key and marking scheme teacher-only.')), filesBox))));
+  if (typeof rtTeacherSection==='function') root.append(rtTeacherSection());
   drawLock();
   gen();
 }
@@ -7493,12 +7495,25 @@ const GLOSSARY = [
   ['buzzer', 'A part that turns electrical energy into sound.', 'buzzers'],
   ['electron ladder', 'A list of materials in order of how easily they give away electrons. Scientists call it the triboelectric series.', 'triboelectric series'],
   ['lightning rod', 'A pointed metal rod on a building, joined by a copper wire to the ground, so lightning flows safely into the ground.', 'lightning rods'],
-  ['lumens', 'A measure of how much light something gives off. More lumens means brighter. A flashlight bulb gives a few lumens; a room light gives about 800.', 'lumen'],
+  ['lumens', 'A measure of how much light something gives off. More lumens means brighter. A small flashlight gives tens of lumens; a room light gives about 800.', 'lumen'],
   ['MWh', 'Megawatt-hour: the energy used by 1 megawatt (1,000,000 watts) for one hour. About what 100 homes use in a day.', null, true],
   ['kWh', 'Kilowatt-hour: the energy used by 1,000 watts for one hour, like a kettle boiling for about 25 minutes.', null, true],
   ['MW', 'Megawatt: one million watts. It measures how fast energy is being made or used.', null, true],
   ['CO₂', 'Carbon dioxide: a greenhouse gas released when fuels are burned. Too much of it warms the planet.', null, true],
-  ['pays back', 'Makes back, over time, the CO₂ (or energy) that was used to build it.', 'payback']
+  ['pays back', 'Makes back, over time, the CO₂ (or energy) that was used to build it.', 'payback'],
+  // added for retrieval practice
+  ['complete circuit', 'A loop with no gaps, so current can flow all the way round.', 'complete circuits'],
+  ['volt', 'The unit of voltage. More volts means a bigger push.', 'volts'],
+  ['circuit symbol', 'A simple drawing that stands for a part of a circuit. Scientists everywhere use the same symbols.', 'circuit symbols'],
+  ['independent variable', 'The one thing you change in a fair test.', 'independent variables'],
+  ['dependent variable', 'The thing you measure in a fair test.', 'dependent variables'],
+  ['controlled variable', 'Something you keep the same in a fair test.', 'controlled variables'],
+  ['induction', 'Making a voltage in a wire by moving a magnet near it.'],
+  ['energy transfer', 'Energy moving from one form to another, such as electrical energy to light and heat.', 'energy transfers'],
+  ['useful energy', 'The energy that does the job we want, such as light from a lamp.'],
+  ['wasted energy', 'Energy that doesn’t do the job we want. It is often heat that spreads into the surroundings.'],
+  ['hertz', 'The unit of frequency. 1 Hz means one complete cycle every second.'],
+  ['oscilloscope', 'A screen that draws a graph of voltage as time goes on, so you can see how electricity changes.', 'oscilloscopes'],
 ];
 const GL = (()=>{ const map = new Map(); const pats = [];
   GLOSSARY.forEach(([term, def, alts, caseSens])=>{ const forms = [term].concat(alts ? alts.split('|') : []); forms.forEach(f=>{ map.set(caseSens ? f : f.toLowerCase(), {term, def, caseSens}); pats.push({f, caseSens}); }); });
@@ -7658,6 +7673,8 @@ function keyIdeaCheck(el, k, saved, onPass){
 }
 function seededOrder(n, seedStr){ let s = 0; for (const ch of seedStr) s = (s*31 + ch.charCodeAt(0)) >>> 0; const a = [...Array(n).keys()]; for (let i=n-1;i>0;i--){ s = (s*1103515245 + 12345) >>> 0; const j = s % (i+1); [a[i],a[j]] = [a[j],a[i]]; } return a; }
 
+/* RETRIEVAL:START */
+/* RETRIEVAL:END */
 document.getElementById('brand').prepend(pipSVG(40));
 document.getElementById('tm-slot').append(timeMachineSVG(64, false));
 boot();
