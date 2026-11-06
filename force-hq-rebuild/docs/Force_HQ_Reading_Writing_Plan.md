@@ -50,6 +50,8 @@ Written so they can be lifted into the skill (section 10). The Sparks comment or
 21. Make students read the instructions first. Everything below the message stays blurred until they press OK. (Tom: helps students recognise that they should read this first.)
 22. Open each chapter with clear I can statements on their own first screen, and Next opens step 1. Immediately before its review, students place an X on a Beginning, Developing, Proficient, Mastering scale for each statement. Keep this on screen, off worksheets.
 23. Shuffle the display order of anything students classify, sort or match, with a stable order across reloads. (Tom: IV, DV, CV rows matched his lab report order, so position gave away the answer.)
+24. Keep the I can statements one click away on every tab. (Tom: they should always be available to refer to.)
+25. Students make graphs themselves as well as analyse them: choose the type, write the title and axis labels, set the scale and plot the points, using the Paper Plane Lab graph maker. Teach it with a worked example first. If a paragraph uses the same data, give it as a table, so the paragraph cannot reveal the graph. (Tom: "The paper plane virtual lab does a great job of this.")
 
 ## 3. What is different about Force HQ
 
@@ -67,7 +69,7 @@ Tom will set each Skills section **as homework with that chapter's Foundation**,
 | Part | Contents | Minutes |
 |---|---|---|
 | Learn | Two steps: gather or read the data, then the teach card and a marked example, ending in a short written practice | About 11 |
-| Check | One graph or reading question, one Mark it, one paragraph | About 9 |
+| Check | One make-the-graph or reading question, one Mark it, one paragraph | About 9 |
 
 The Foundation's Check covers the science, so Skills Checks carry no extra science questions. Existing Foundation and Extension questions stay as they are, apart from the whole-app changes in section 9. Each section teaches one new skill.
 
@@ -77,6 +79,7 @@ These go on the teacher page, the AI marking text and the question tags. Student
 
 | Strand | Year 3 wording | What it asks for here |
 |---|---|---|
+| C i | present collected and transformed data | Choose the graph type, label it, set the scale and plot accurately |
 | C ii | interpret data and describe results using scientific reasoning | Find the trend, give numbers, use science to say why |
 | C iii | discuss the validity of a hypothesis based on the outcome of the scientific investigation | Weigh how well all the data fit the hypothesis, then conclude |
 | D i | describe the ways in which science is applied and used to address a specific problem or issue | A detailed account of how the science helps |
@@ -98,23 +101,23 @@ Two consequences for marking:
 
 | Section | When | Graph skill | Writing skill | Support | Strands |
 |---|---|---|---|---|---|
-| `c2s` Graphs and CER | After lesson 3 | Plot data; describe a pattern; pick two points | Full CER, explicitly taught | Starters, open reminder, words | C ii, D iii |
-| `c3s` Test a hypothesis | After lesson 4 | Straight lines; test exact words, such as "twice" | Hypothesis paragraph | Starters, closed reminder, words | C ii, C iii, D iii |
+| `c2s` Graphs and CER | After lesson 3 | Make a graph; describe a pattern; pick two points | Full CER, explicitly taught | Starters, open reminder, words | C i, C ii, D iii |
+| `c3s` Test a hypothesis | After lesson 4 | Make a graph; test exact words, such as "twice" | Hypothesis paragraph | Starters, closed reminder, words | C i, C ii, C iii, D iii |
 | `c4s` Science solving a problem | After lesson 5 | None | Read and mark Problem, Science, Solution; describe how science helps | One starter, words | D i, D iii |
 | `c5s` Weigh it up | With Chapter 5 | Use a graph as evidence | Factors, SDG targets and a first judgement | One starter, factor list | D ii, D iii |
-| `c6s` Ramp or lift? | When the Workshop reopens | Curved graph | Independent judgement | Words only | C ii, D ii, D iii |
+| `c6s` Ramp or lift? | When the Workshop reopens | Make a curved graph | Independent judgement | Words only | C i, C ii, D ii, D iii |
 
 ## 7. Section by section
 
 All contexts below are agreed.
 
 **`c2s` Graphs and CER**
-- **Learn 1:** brake crates of 20, 40, 60 and 80 kg with the 36 N brake at 2.4 m/s, type each distance and plot it. Expected: 1.6, 3.2, 4.8 and 6.4 m. Describe the pattern and pick two points.
+- **Learn 1:** brake crates of 20, 40, 60 and 80 kg with the 36 N brake at 2.4 m/s, type each distance and make the graph themselves. Expected: 1.6, 3.2, 4.8 and 6.4 m. Describe the pattern and pick two points.
 - **Learn 2:** CER teach card, with a worked example away from crates. Mark a paragraph, then write a claim about their own test with its question and graph beside the box.
 - **Check context:** a loaded truck on a test track, with load against stopping distance. Hook: SDG 3.6, road safety.
 
 **`c3s` Test a hypothesis**
-- **Learn 1:** 1 to 4 huskies pull a 60 kg sled with no friction. Expected: 1.5, 3.0, 4.5 and 6.0 m/s². Test "twice the pull gives twice the acceleration".
+- **Learn 1:** 1 to 4 huskies pull a 60 kg sled with no friction. Expected: 1.5, 3.0, 4.5 and 6.0 m/s². Make the graph, then test "twice the pull gives twice the acceleration".
 - **Learn 2:** teach card on how a hypothesis paragraph differs from a CER, then judge a weak and a strong paragraph.
 - **Check context:** tugboats and a container ship, with a claim the data contradict, such as "twice the tugboats gives four times the acceleration".
 
@@ -129,7 +132,7 @@ All contexts below are agreed.
 - **Check context:** a flood cuts off a town, so should aid arrive by parachute drop or by another route? Evidence includes a velocity–time graph of a crate landing. Hook: SDG 11.5, disasters. This replaces the Mars landing idea, which has no clear SDG link.
 
 **`c6s` Ramp or lift?**
-- **Learn 1:** pull the 490 N cart up ramps of different lengths to a 1 m platform and plot the effort. It should fall from 245 N at 2 m to 98 N at 5 m on the Perfect setting.
+- **Learn 1:** pull the 490 N cart up ramps of different lengths to a 1 m platform and make a graph of the effort. It should fall from 245 N at 2 m to 98 N at 5 m on the Perfect setting.
 - **Learn 2:** a short reminder of factors, then a worked judgement to mark.
 - **Check context:** should a school fit a ramp or a lift for wheelchair access? Students make their own judgement with very little support. Hook: SDG 4.a, disability-sensitive education facilities.
 - **Timing:** this waits for the rescue rebuild, and `c6r26` stays as it is.
@@ -152,7 +155,7 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 **New parts**
 1. Skills section type: home card, teacher page row, `needs`, stamp, PDF.
 2. Teach card, with a short reminder if the student has already seen it and the full example one tap away.
-3. Plot step: typed readings, checked against the sim, plotted on a graph that stays on screen.
+3. Graph maker, ported from the Sparks version: typed readings, checked against the sim, then the student makes the graph themselves. It works as a Learn step and as a 5-mark Check question, and it prints on worksheets.
 4. Mark it, ported from Sparks with the fixes in section 2.
 5. Tap two points or rows, with those choices shown as "My evidence".
 6. Paragraph question: built on `explain`, adding starters, reminder levels and side panel. Ticks stay hidden until the model shows.
@@ -162,7 +165,7 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 
 **Whole-app changes, for every section including Chapter 1**
 10. Read-first OK: the rest of the step stays blurred until the student presses OK. Remembered once pressed, and skipped on finished steps.
-11. I can statements: 3 or 4 at the start of each Foundation, Extension and Skills section, in Grade 7/8 language. They have their own first screen, and Next opens step 1. Reuse the Sparks version.
+11. I can statements: 3 or 4 at the start of each Foundation, Extension and Skills section, in Grade 7/8 language. They have their own first screen, and Next opens step 1, plus a "My I can statements" button on every tab. Reuse the Sparks version.
 12. Self-check: an X on the four-level scale for each statement, immediately before that section's Check, with the questions hidden until it is done. Reuse the Sparks version. Students part-way through a Check are not blocked.
 13. Shuffled display order for any table, sort or match question, using the Sparks fix.
 
