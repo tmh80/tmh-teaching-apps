@@ -495,11 +495,8 @@ table.data th{background:var(--panel-2)}
 .mk-labels{display:flex; flex-wrap:wrap; gap:8px}
 .rg-blur{filter:blur(5px); opacity:.55; pointer-events:none; user-select:none}
 .say-ok{display:block; margin:10px 0 0 auto; min-width:84px; font-size:1.05rem}
-.ican-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:12px 18px; margin-bottom:12px} .ican-card h3{margin:0 0 6px}
-.ican-back{position:fixed; inset:0; z-index:70; display:grid; place-items:center; padding:16px; background:rgba(10,14,30,.55); transition:background .4s}
-.ican-pop{width:min(640px,100%); margin:0; padding:22px 26px; box-shadow:0 12px 40px rgba(0,0,0,.35); cursor:move; touch-action:none} .ican-pop .ican-list{font-size:1.25rem} .ican-pop h3{font-size:1.4rem}
-.ican-ok{display:block; margin:14px 0 0 auto; min-width:96px; font-size:1.1rem; cursor:pointer}
-.ican-list{margin:0; padding-left:1.2em; font-size:1.1rem; line-height:1.5; font-weight:600}
+.ican-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:12px 18px; margin-bottom:12px} .ican-card h3{margin:0 0 6px} .ican-next{margin-top:12px}
+.ican-list{margin:0; padding-left:1.2em; font-size:1.2rem; line-height:1.5; font-weight:600}
 .sa-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:14px 18px; margin:10px 0; display:grid; gap:14px} .sa-card h3,.sa-card p{margin:0}
 .sa-can{font-weight:700; margin-bottom:8px !important}
 .sa-track{position:relative; display:grid; grid-template-columns:repeat(4,1fr); height:38px; border:2px solid var(--line); border-radius:10px; cursor:pointer; touch-action:none; overflow:visible}
@@ -1872,28 +1869,6 @@ const ICAN = {
 };
 const SA_LEVELS = ['Beginning','Developing','Proficient','Mastering'];
 function icanCard(stop){ const L = ICAN[stop.id]; return L ? h('div',{class:'ican-card'}, h('h3',{}, 'By the end of this chapter'), h('ul',{class:'ican-list'}, L.map(t=>h('li',{}, t)))) : ''; }
-/* the I can statements open as a pop-up; OK sends them to their place above the first step */
-function icanPop(target, onDone){
-  const big = target.cloneNode(true); big.classList.add('ican-pop');
-  const back = h('div',{class:'ican-back', role:'dialog', 'aria-modal':'true', 'aria-label':'What you will learn in this chapter'}, big);
-  const ok = h('button',{class:'btn primary ican-ok', type:'button'}, 'OK'); big.append(ok);
-  target.style.visibility = 'hidden'; document.body.append(back); setTimeout(()=>{ if (ok.isConnected) ok.focus({preventScroll:true}); }, 30);
-  let dx = 0, dy = 0, from = null;
-  big.addEventListener('pointerdown', e=>{ if (e.target===ok) return; from = {x:e.clientX - dx, y:e.clientY - dy}; try { big.setPointerCapture(e.pointerId); } catch(err){} });
-  big.addEventListener('pointermove', e=>{ if (!from) return; dx = e.clientX - from.x; dy = e.clientY - from.y; big.style.transform = `translate(${dx}px,${dy}px)`; });
-  big.addEventListener('pointerup', ()=>{ from = null; });
-  ok.addEventListener('click', ()=>{
-    ok.disabled = true; onDone();
-    const end = ()=>{ back.remove(); target.style.visibility = ''; };
-    target.scrollIntoView({block:'start'}); const hd = document.querySelector('header'); window.scrollBy(0, -((hd ? hd.offsetHeight : 70) + 12));
-    const a = big.getBoundingClientRect(), b = target.getBoundingClientRect();
-    if (!big.animate || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return end();
-    ok.style.visibility = 'hidden'; back.style.background = 'transparent';
-    big.style.transformOrigin = 'top left'; big.style.transform = '';
-    const home = big.getBoundingClientRect(), to = `translate(${b.left - home.left}px,${b.top - home.top}px) scale(${b.width / home.width})`;
-    big.animate([{transform:`translate(${a.left - home.left}px,${a.top - home.top}px)`}, {transform:to}], {duration:550, easing:'ease-in-out'}).onfinish = end;
-  });
-}
 function saStore(id){ const S = Store.data.selfA = Store.data.selfA || {}; return S[id] = S[id] || {v:[], done:false}; }
 function saLevel(v){ return SA_LEVELS[Math.min(3, Math.floor(v/25))]; }
 function saScale(label, val, onSet){ /* place an X anywhere on the line; val is 0 to 100 */
@@ -1922,8 +1897,7 @@ function runLearn(el, stop){
   if (p.learn && done.size < steps.length) steps.forEach((_,k)=>done.add(k));
   function showIntro(){ /* the first screen of a chapter: its I can statements, then Next opens step 1 */
     el.innerHTML = '';
-    const ic = icanCard(stop); el.append(ic, h('div',{class:'row end'}, h('button',{class:'btn primary ican-next', type:'button', onclick:()=>{ LR.introDone = true; Store.save(); i = 0; show(); scrollToEl(el); }}, 'Next: Step 1 →')));
-    if (!LR.icanRead) icanPop(ic, ()=>{ LR.icanRead = true; Store.save(); });
+    const ic = icanCard(stop); ic.append(h('button',{class:'btn primary ican-next', type:'button', onclick:()=>{ LR.introDone = true; Store.save(); i = 0; show(); scrollToEl(el); }}, 'Next: Step 1 →')); el.append(ic);
   }
   function show(){
     el.innerHTML = '';
@@ -1949,7 +1923,7 @@ function runLearn(el, stop){
         const KI = st.key || (typeof KEY_IDEAS!=='undefined' && KEY_IDEAS[st.title]); const mem = LR.mem[K] = LR.mem[K] || {};
         if (KI && !mem.__key){ if (keyBox) return; pendingMsg = msg;
           fb.className = 'feedback ok step-fb'; fb.innerHTML = `${msg ? `<strong>Nice work!</strong> ${msg} ` : ''}<span class="legend"><b>One last thing:</b> answer the key idea below to finish this step.</span>`;
-          keyBox = keyIdeaCheck(keyHost, KI, false, ()=>{ mem.__key = true; Store.save(); keyBox = null; finishStep(pendingMsg); }); setTimeout(()=>scrollToEl(keyHost), 250); return; }
+          keyBox = keyIdeaCheck(keyHost, KI, false, ()=>{ mem.__key = true; Store.save(); keyBox = null; finishStep(pendingMsg); }); setTimeout(()=>{ if (!stage.classList.contains('rg-blur')) scrollToEl(keyHost); }, 250); return; }
         finishStep(msg); },
       hint(msg){ if (i!==idx || card.classList.contains('step-done')) return; fb.className='feedback hint'; fb.innerHTML = msg; },
       clear(){ if (i!==idx || card.classList.contains('step-done')) return; fb.className='feedback'; fb.innerHTML=''; },

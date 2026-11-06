@@ -266,7 +266,7 @@ Keep Q1 order (Di), Q3 num (Aii), Q5 match (Aiii), Q6 mcq (Ai).
 
 **Read first:** in every Learn step, everything below Pip's message stays blurred until the student presses OK. Remembered once pressed.
 
-**I can screen:** Learn opens on its own first screen of I can statements. The first time, they appear as a draggable pop-up, and OK moves them into place on that screen. Students press Next to reach step 1, and Back on step 1 returns to it.
+**I can screen:** Learn opens on its own first screen of I can statements. Students press Next to reach step 1, and Back on step 1 returns to it.
 
 **Self-check:** immediately before the Foundation review, students place an X on a Beginning, Developing, Proficient, Mastering line for each I can statement. The questions appear after that. On screen only, not on worksheets.
 
