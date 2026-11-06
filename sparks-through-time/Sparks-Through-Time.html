@@ -1920,6 +1920,11 @@ function runLearn(el, stop){
   const steps = stop.learn; const p = prog(stop.id); const LR = lrStore(stop.id); let i = 0;
   const done = new Set(steps.map((_,k)=>k).filter(k=>LR.done[lrKey(stop,k)]));
   if (p.learn && done.size < steps.length) steps.forEach((_,k)=>done.add(k));
+  function showIntro(){ /* the first screen of a chapter: its I can statements, then Next opens step 1 */
+    el.innerHTML = '';
+    const ic = icanCard(stop); el.append(ic, h('div',{class:'row end'}, h('button',{class:'btn primary ican-next', type:'button', onclick:()=>{ LR.introDone = true; Store.save(); i = 0; show(); scrollToEl(el); }}, 'Next: Step 1 →')));
+    if (!LR.icanRead) icanPop(ic, ()=>{ LR.icanRead = true; Store.save(); });
+  }
   function show(){
     el.innerHTML = '';
     const idx = i, st = steps[idx], K = lrKey(stop, idx);
@@ -1932,7 +1937,7 @@ function runLearn(el, stop){
     const stage = h('div',{class:'stage'});
     const fb = h('div',{class:'feedback', role:'status', 'aria-live':'polite'});
     const isLast = idx===steps.length-1;
-    const back = h('button',{class:'btn', type:'button', disabled: idx===0, onclick:()=>{ i--; show(); }}, 'Back');
+    const back = h('button',{class:'btn', type:'button', disabled: idx===0 && !ICAN[stop.id], onclick:()=>{ if (idx===0) showIntro(); else { i--; show(); } }}, 'Back');
     const next = h('button',{class:'btn primary', type:'button', disabled: !(done.has(idx) || p.learn || teacherMode()), onclick:()=>{ if (isLast) finish(); else { i++; show(); scrollToEl(el); } }}, isLast ? (p.learn ? 'Finish' : 'Finish and collect my stamp') : 'Next step →');
     const card = h('div',{class:'card learn-card' + (wasDone ? ' step-done' : ''), style:{display:'grid', gap:'14px'}});
     const markDone = msg=>{ card.classList.add('step-done'); pill.className = 'pill ok'; pill.textContent = '✓ Step complete'; fb.className = 'feedback ok step-fb'; fb.innerHTML = `<strong>✓ Step complete!</strong> ${msg || ''} <span class="legend">Press <b>${isLast ? next.textContent : 'Next step'}</b> to carry on.</span>`; next.classList.add('pulse'); };
@@ -1953,7 +1958,6 @@ function runLearn(el, stop){
     const restartAll = p.learn ? h('div',{class:'row end'}, h('button',{class:'btn small ghost', type:'button', onclick:()=>{ LR.mem = {}; LR.done = {}; Store.save(); done.clear(); i = 0; show(); }}, '↻ Clear my answers and start all the steps again')) : null;
     const sayRow = pipSay(st.say, 64); sayRow.classList.add('step-say');
     card.append(top, h('h3',{class:'step-title'}, st.title), sayRow, stage, fb, keyHost, h('div',{class:'row between'}, back, next));
-    if (i===0){ const ic = icanCard(stop); if (ic){ el.append(ic); LR.icanRead = LR.icanRead || false; if (!LR.icanRead) icanPop(ic, ()=>{ LR.icanRead = true; Store.save(); }); } }
     el.append(card); if (restartAll) el.append(restartAll);
     LR.read = LR.read || {};
     if (st.say && !wasDone && !LR.read[K]){ /* read Pip's message first: everything below stays blurred until OK */
@@ -1987,7 +1991,7 @@ function runLearn(el, stop){
     if (tg('review')){ const st = rvStore(rvKey(stop,'f')); const n = (stop.review||[]).length; tg('review').textContent = `${(stop.review||[]).filter((_,i)=>st[i] && st[i].done).length}/${n}`; }
     if (tg('challenge') && !p.challenge) tg('challenge').textContent='Ready';
   }
-  show();
+  if (ICAN[stop.id] && !LR.introDone && (!p.learn || teacherMode())) showIntro(); else show();
 }
 
 /* ================= Time Test ================= */
