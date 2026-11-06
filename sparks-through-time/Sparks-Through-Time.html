@@ -1658,7 +1658,7 @@ function readingTable(el, opt){
     const tb = h('tbody');
     opt.rows.forEach(r=>{
       let cell;
-      if (typed[r.key]!=null) cell = h('td',{class:'rt-ok'}, `✓ ${fmt(typed[r.key])} ${opt.unit||''}`);
+      if (typed[r.key]!=null) cell = h('td',{class:'rt-ok'}, `✓ ${opt.unit==='clips' ? Math.round(typed[r.key]) : fmt(typed[r.key])} ${opt.unit||''}`);
       else {
         const inpEl = h('input',{type:'text', inputmode:'decimal', class:'rt-in', placeholder: expect[r.key]!=null ? 'type it' : 'not set up yet', 'aria-label':`${opt.cols[opt.cols.length-1]} for ${r.cells.join(' ')}`, disabled: expect[r.key]==null});
         const msg = h('div',{class:'rt-msg'}, expect[r.key]!=null ? 'Read the meter, then type the number.' : '');
