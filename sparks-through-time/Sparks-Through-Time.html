@@ -493,6 +493,19 @@ table.data th{background:var(--panel-2)}
 :root{--mk0:#3b82f6; --mk1:#e08a1e; --mk2:#22a06b; --mk3:#a855f7}
 .mk{display:grid; gap:10px}
 .mk-labels{display:flex; flex-wrap:wrap; gap:8px}
+.rg-blur{filter:blur(5px); opacity:.55; pointer-events:none; user-select:none}
+.say-ok{display:block; margin:10px 0 0 auto; min-width:84px; font-size:1.05rem}
+.ican-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:12px 18px; margin-bottom:12px} .ican-card h3{margin:0 0 6px}
+.ican-list{margin:0; padding-left:1.2em; font-size:1.1rem; line-height:1.5; font-weight:600}
+.sa-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:14px 18px; margin:10px 0; display:grid; gap:14px} .sa-card h3,.sa-card p{margin:0}
+.sa-can{font-weight:700; margin-bottom:8px !important}
+.sa-track{position:relative; display:grid; grid-template-columns:repeat(4,1fr); height:38px; border:2px solid var(--line); border-radius:10px; cursor:pointer; touch-action:none; overflow:visible}
+.sa-track:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.sa-zone{border-left:2px dashed var(--line)} .sa-zone:first-child{border-left:0}
+.sa-zone:nth-child(1){background:color-mix(in srgb, #e8590c 16%, var(--panel)); border-radius:8px 0 0 8px} .sa-zone:nth-child(2){background:color-mix(in srgb, #f2b705 18%, var(--panel))} .sa-zone:nth-child(3){background:color-mix(in srgb, #22a06b 16%, var(--panel))} .sa-zone:nth-child(4){background:color-mix(in srgb, #3b82f6 18%, var(--panel)); border-radius:0 8px 8px 0}
+.sa-x{position:absolute; top:50%; transform:translate(-50%,-50%); font-size:1.5rem; font-weight:900; color:var(--ink); pointer-events:none; line-height:1}
+.sa-labels{display:grid; grid-template-columns:repeat(4,1fr); text-align:center; font-size:.85rem; font-weight:600; margin-top:4px; color:var(--muted)}
+.sa-done{margin:8px 0} .sa-done summary{cursor:pointer; font-weight:700}
 .mk-lab{font:inherit; font-weight:700; padding:6px 14px; border-radius:999px; border:3px solid var(--line); background:var(--panel); color:var(--ink)}
 .mk-list{list-style:decimal; margin:0; padding-left:26px; display:grid; gap:10px}
 .mk-item{padding-left:4px}
@@ -1840,6 +1853,44 @@ function renderStop(stop, tab){
   }
 }
 
+const ICAN = {
+  launch:['I can spot things that use electricity in everyday life.','I can describe how charged objects push and pull on each other.','I can explain the difference between static electricity and current electricity.'],
+  atom:['I can describe how the model of the atom changed over time.','I can name the protons, neutrons and electrons in an atom and say where they are.','I can use the atomic number and mass number to build an atom.'],
+  static:['I can explain how rubbing moves electrons from one object to another.','I can work out if an object has a positive or negative charge.','I can predict if two charged objects will repel or attract.','I can explain how lightning happens and how a lightning rod protects a house.'],
+  circuits:['I can name the parts of a circuit and match them to their symbols.','I can build a complete circuit with a switch.','I can explain why a shortcut in a circuit stops a bulb from lighting.','I can use an ammeter to measure current.'],
+  electromagnets:['I can explain how an electric current makes a magnetic field.','I can describe how to make an electromagnet stronger.','I can run a fair test and pick the best evidence from my results.','I can write a CER paragraph with a claim, evidence and reasoning.'],
+  ohm:['I can sort materials into conductors and insulators.','I can explain why metals conduct electricity.','I can describe what a resistor does to the current.','I can use V = I × R to work out voltage, current or resistance.'],
+  generators:['I can explain how moving a magnet near a coil of wire makes electricity.','I can describe how to make a generator give a bigger voltage.','I can test a hypothesis using data.','I can write a paragraph that says if data support or contradict a hypothesis.'],
+  bulb:['I can name the parts of a light bulb and say what they do.','I can explain why a filament glows.','I can explain what gets used up when a bulb is lit.','I can compare a filament bulb with an LED.'],
+  series:['I can describe the difference between series and parallel circuits.','I can predict what happens to the other bulbs when one bulb is taken out.','I can work out the current in series and parallel circuits.'],
+  acdc:['I can describe the difference between AC and DC.','I can explain how high voltage helps send electricity to a town.','I can find the problem, the science and the solution in a science text.','I can write a clear paragraph about how science solves a problem.'],
+  power:['I can explain how a spinning turbine helps a power station make electricity.','I can compare the CO₂ from different energy sources.','I can tell a fact from an opinion.','I can sum up the benefits and drawbacks of an energy source.'],
+  future:['I can sort energy sources into renewable and non-renewable.','I can explain how solar panels make electricity without a turbine.','I can plan how to keep a town’s lights on using different energy sources.']
+};
+const SA_LEVELS = ['Beginning','Developing','Proficient','Mastering'];
+function icanCard(stop){ const L = ICAN[stop.id]; return L ? h('div',{class:'ican-card'}, h('h3',{}, 'By the end of this chapter'), h('ul',{class:'ican-list'}, L.map(t=>h('li',{}, t)))) : ''; }
+function saStore(id){ const S = Store.data.selfA = Store.data.selfA || {}; return S[id] = S[id] || {v:[], done:false}; }
+function saLevel(v){ return SA_LEVELS[Math.min(3, Math.floor(v/25))]; }
+function saScale(label, val, onSet){ /* place an X anywhere on the line; val is 0 to 100 */
+  const x = h('span',{class:'sa-x', 'aria-hidden':'true'}, '✕');
+  const track = h('div',{class:'sa-track', role:'slider', tabindex:onSet ? '0' : '-1', 'aria-label':label, 'aria-valuemin':'0', 'aria-valuemax':'100'}, SA_LEVELS.map(()=>h('span',{class:'sa-zone'})), x);
+  const show = v=>{ x.style.display = v==null ? 'none' : ''; if (v==null) return; x.style.left = v + '%'; track.setAttribute('aria-valuenow', String(v)); track.setAttribute('aria-valuetext', saLevel(v)); };
+  const put = v=>{ v = Math.max(0, Math.min(100, Math.round(v))); val = v; show(v); onSet(v); };
+  show(val);
+  if (onSet){
+    const at = e=>{ const r = track.getBoundingClientRect(); put((e.clientX - r.left) / r.width * 100); };
+    track.addEventListener('pointerdown', e=>{ e.preventDefault(); track.focus({preventScroll:true}); try { track.setPointerCapture(e.pointerId); } catch(err){} at(e); });
+    track.addEventListener('pointermove', e=>{ if (e.buttons) at(e); });
+    track.addEventListener('keydown', e=>{ const d = e.key==='ArrowRight' || e.key==='ArrowUp' ? 5 : e.key==='ArrowLeft' || e.key==='ArrowDown' ? -5 : 0; if (!d) return; e.preventDefault(); put((val==null ? 50 : val) + d); });
+  }
+  return h('div',{class:'sa-scale'}, track, h('div',{class:'sa-labels'}, SA_LEVELS.map(t=>h('span',{}, t))));
+}
+function selfAssessCard(stop, locked, onDone){
+  const L = ICAN[stop.id], S = saStore(stop.id);
+  const go = locked ? null : h('button',{class:'btn primary', type:'button', disabled:!L.every((_,i)=>S.v[i]!=null), onclick:()=>{ S.done = true; Store.save(); onDone(); }}, 'Save and start my review');
+  const rows = L.map((t,i)=>h('div',{class:'sa-row'}, h('p',{class:'sa-can'}, t), saScale(t, S.v[i], locked ? null : v=>{ S.v[i] = v; Store.save(); go.disabled = !L.every((_,k)=>S.v[k]!=null); })));
+  return h('div',{class:'sa-card no-gloss'}, h('h3',{}, 'How sure are you?'), locked ? '' : h('p',{}, 'Before you start the review, place an X on each line to show where you are right now.'), rows, go || '');
+}
 function runLearn(el, stop){
   const steps = stop.learn; const p = prog(stop.id); const LR = lrStore(stop.id); let i = 0;
   const done = new Set(steps.map((_,k)=>k).filter(k=>LR.done[lrKey(stop,k)]));
@@ -1875,8 +1926,16 @@ function runLearn(el, stop){
       isDone(){ return done.has(idx); }
     };
     const restartAll = p.learn ? h('div',{class:'row end'}, h('button',{class:'btn small ghost', type:'button', onclick:()=>{ LR.mem = {}; LR.done = {}; Store.save(); done.clear(); i = 0; show(); }}, '↻ Clear my answers and start all the steps again')) : null;
-    card.append(top, h('h3',{class:'step-title'}, st.title), (()=>{ const r = pipSay(st.say, 64); r.classList.add('step-say'); return r; })(), stage, fb, keyHost, h('div',{class:'row between'}, back, next));
+    const sayRow = pipSay(st.say, 64); sayRow.classList.add('step-say');
+    card.append(top, h('h3',{class:'step-title'}, st.title), sayRow, stage, fb, keyHost, h('div',{class:'row between'}, back, next));
+    if (i===0) el.append(icanCard(stop));
     el.append(card); if (restartAll) el.append(restartAll);
+    LR.read = LR.read || {};
+    if (st.say && !wasDone && !LR.read[K]){ /* read Pip's message first: everything below stays blurred until OK */
+      const hidden = [stage, fb, keyHost, next]; hidden.forEach(x=>{ x.classList.add('rg-blur'); x.inert = true; });
+      const ok = h('button',{class:'btn primary small say-ok', type:'button', onclick:()=>{ LR.read[K] = true; Store.save(); hidden.forEach(x=>{ x.classList.remove('rg-blur'); x.inert = false; }); ok.remove(); }}, 'OK');
+      sayRow.querySelector('.bubble').append(ok); setTimeout(()=>{ if (ok.isConnected) ok.focus({preventScroll:true}); }, 0);
+    }
     if (wasDone){ const m = LR.done[K]; markDone(typeof m==='string' ? m : ''); const KI = st.key || (typeof KEY_IDEAS!=='undefined' && KEY_IDEAS[st.title]); if (KI && LR.mem[K] && LR.mem[K].__key) keyIdeaCheck(keyHost, KI, true, ()=>{}); }
     st.build(stage, api);
     if (st.auto) api.complete();
@@ -5511,7 +5570,8 @@ function renderReview(panel, stop, part){
   const items = rvItems(stop, part); const st = rvStore(rvKey(stop, part)); const A = `rv-${rvKey(stop, part).replace('~','-')}-`;
   const PN = PART_NAME[part];
   panel.append(h('div',{class:'rv-banner ' + (part==='c' ? 'ext' : '')}, h('b',{}, part==='c' ? '\u2b50 Challenge review' : 'Foundation review'), h('span',{}, part==='c' ? 'Harder questions that build on the missions. They make your Challenge worksheet.' : 'Questions on the Learn steps. They make your Foundation worksheet.')));
-  panel.append(pipSay(`<p>Time to show what you know! There are <b>${items.length} questions</b> here, and they’re all different types. <b>You get one go at each question</b>, so read carefully and check your answer before you press Check. If you get one wrong, you’ll see the right answer and why.</p><p>When you’ve answered them all, make your <b>${PN} worksheet</b> and upload it to Toddle.</p>`));
+  const saOn = part==='f' && !!ICAN[stop.id]; const saHost = h('div'); panel.append(saHost);
+  const introRow = pipSay(`<p>Time to show what you know! There are <b>${items.length} questions</b> here, and they’re all different types. <b>You get one go at each question</b>, so read carefully and check your answer before you press Check. If you get one wrong, you’ll see the right answer and why.</p><p>When you’ve answered them all, make your <b>${PN} worksheet</b> and upload it to Toddle.</p>`); panel.append(introRow);
   const bar = h('div',{class:'rv-bar'}); panel.append(bar);
   const list = h('div',{class:'rv-list'}); panel.append(list);
   function drawBar(){
@@ -5531,6 +5591,13 @@ function renderReview(panel, stop, part){
       h('div',{class:'chip-row', style:{margin:'8px 0'}}, missing.map(([it,i])=>h('button',{class:'btn small', type:'button', onclick:()=>{ box.remove(); scrollToEl(document.getElementById(A + i)); }}, `Go to ${i+1}`))),
       h('button',{class:'btn small', type:'button', onclick:()=>{ box.remove(); showWorksheet(stop, 'student', part); }}, 'Make it anyway'));
     bar.append(box);
+  }
+  if (saOn){
+    const S = saStore(stop.id), parts = [introRow, bar, list];
+    const lockedView = ()=>{ saHost.innerHTML = ''; saHost.append(h('details',{class:'sa-done'}, h('summary',{}, 'My self-check before this review'), selfAssessCard(stop, true))); };
+    if (S.done) lockedView();
+    else if (items.some((_,i)=>st[i] && st[i].done) || teacherMode()) saHost.append(selfAssessCard(stop, false, lockedView));
+    else { parts.forEach(x=>{ x.style.display = 'none'; }); saHost.append(selfAssessCard(stop, false, ()=>{ parts.forEach(x=>{ x.style.display = ''; }); lockedView(); })); }
   }
   items.forEach((it,i)=>reviewCard(list, it, i+1, st[i], v=>{ st[i] = Object.assign({}, st[i], v); Store.save(); drawBar(); drawDone(); document.dispatchEvent(new Event('rv-changed')); }, {anchor:A + i, peek:j=>st[j], items}));
   const doneBox = h('div'); panel.append(doneBox);
