@@ -1,6 +1,6 @@
 /* Reading and writing chapters (electromagnets, generators, acdc, power).
    Run: node sparks-through-time/retrieval/tests/test-chapters.js  (builds a test copy, drives it with Playwright) */
-const {chromium} = require('playwright'), {execFileSync} = require('child_process'), path = require('path'), os = require('os');
+const {chromium} = require('playwright'), GH = require('./graph-helpers.js'), {execFileSync} = require('child_process'), path = require('path'), os = require('os');
 const OUT = process.env.CH_OUT || path.join(os.tmpdir(), 'ch-test.html');
 execFileSync('node', [path.join(__dirname, '..', 'build-retrieval.js'), '--out', OUT], {stdio: 'pipe'});
 let fails = 0, passes = 0;
@@ -22,12 +22,13 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   const shape = await page.evaluate(([IDS]) => IDS.map(id => { const s = STOPS.find(x => x.id === id), it = s.review;
     return {id, n: it.length, arch: (s.reviewArchive || []).length, key: rvKey(s, 'f'), keys: (s.learnKeys || []).length, steps: s.learn.length, tagged: it.every(x => x.obj && x.obj.length), types: it.map(x => x.t).join(), strands: strandsLabel(sheetStrands(s, 'f')), noMyp: !/MYP|objective|criteri|strand/i.test(JSON.stringify(s.learn.map(l => [l.title, l.say])))}; }), [IDS]);
   shape.forEach(s => {
-    ok(s.n === 6 && s.arch > 6, s.id + ' Check has 6 items and the old list is archived');
-    ok(s.key === s.id + (s.id === 'electromagnets' || s.id === 'generators' ? '~f3' : '~f2'), s.id + ' new review key'); ok(s.keys === s.steps, s.id + ' learnKeys match steps');
-    ok(s.tagged, s.id + ' items tagged'); ok(/mark,write$/.test(s.types), s.id + ' ends mark, write'); ok(s.noMyp, s.id + ' no MYP words in Learn text');
+    const graphed = s.id !== 'acdc';
+    ok(s.n === (graphed ? 7 : 6) && s.arch > 6, s.id + ' Check has ' + (graphed ? 7 : 6) + ' items and the old list is archived');
+    ok(s.key === s.id + ({electromagnets: '~f4', generators: '~f4', power: '~f3'}[s.id] || '~f2'), s.id + ' new review key'); ok(s.keys === s.steps, s.id + ' learnKeys match steps');
+    ok(s.tagged, s.id + ' items tagged'); ok(graphed ? /mark,graph,write$/.test(s.types) : /mark,write$/.test(s.types), s.id + ' ends ' + (graphed ? 'mark, graph, write' : 'mark, write')); ok(s.noMyp, s.id + ' no MYP words in Learn text');
   });
   ok(shape[0].steps === 7 && shape[1].steps === 8 && shape[2].steps === 7 && shape[3].steps === 5, 'step counts');
-  ok(shape[0].strands === 'A i, ii, iii · C ii · D i' && shape[1].strands === 'A i, ii · C ii, iii · D i', 'strand labels C');
+  ok(shape[0].strands === 'A i, ii, iii · C i, ii · D i' && shape[1].strands === 'A i, ii · C i, ii, iii · D i', 'strand labels C');
 
   /* ---------- old saves ---------- */
   await page.evaluate(() => {
@@ -57,6 +58,9 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   await page.locator('.rw-part:has-text("the number of coils")').click(); await page.locator('.rw-part:has-text("how strong")').click();
   await page.locator('.rw-typed').first().fill('Coils may change the clips.');
   for (let k = 0; k < 5; k++){ const c = (k + 1) * 10; await page.locator('input[type=range]').first().fill(String(c)); await page.locator('.rt-in').nth(0).fill(String(c / 10 * 4)); await page.locator('.rt-row button:has-text("Check")').first().click(); }
+  ok(await page.locator('.gm').count() === 0 && await page.locator('.rw-teach').count() === 1 && /How to make a good graph/.test(await page.locator('.rw-teach').innerText()), '1A teaches "How to make a good graph" once the table is full, graph still hidden');
+  await page.locator('button:has-text("Got it")').click();
+  await GH.makeGraph(page, page.locator('.gm'), {type: 'scatter', title: 'Coils of wire vs Paperclips held', xl: 'Coils of wire', yl: 'Paperclips held (clips)', y: [0, 25, 5], x: [0, 60, 10], rows: [[10, 4], [20, 8], [30, 12], [40, 16], [50, 20]]});
   await complete('1A Run your fair test');
   // 1B
   await goStep('electromagnets', 5);
@@ -128,12 +132,13 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
     ok(await card.locator('.mk-fix').count() >= (wrong ? 1 : 0), id + ' right labels shown for wrong sentences');
     if (id === 'acdc') ok(await card.locator('.mk-note').count() === 1 && /1896/.test(await card.locator('.mk-note').innerText()), 'acdc DC note with 1896');
     // paragraph
-    const para = page.locator('.rv-card').nth(5);
+    const pi = id === 'acdc' ? 5 : 6; const para = page.locator('.rv-card').nth(pi);
     ok(/paragraph/.test((await para.locator('.rv-type').innerText()).toLowerCase()), id + ' paragraph label');
     const needsPick = (id === 'electromagnets' || id === 'generators');
     if (needsPick){
       ok(await para.locator('textarea').evaluate(t => t.readOnly), id + ' box locked until points are tapped');
-      const pick = para.locator('.rw-graph g[data-i]'); ok(await pick.count() === 4, id + ' new graph has four points');
+      const pick = para.locator('tr.rw-row'); ok(await pick.count() === 4 && await para.locator('.rw-graph').count() === 0, id + ' paragraph shows a table of four rows, not a graph');
+      ok(/Tap two rows of the table/.test(await para.locator('.quiz-q').innerText()) && !/graph|points/i.test(await para.locator('.quiz-q').innerText() + await para.locator('.rw-starters').innerText()), id + ' prompt says rows, no graph');
       ok(!/your own results|your graph/i.test(await para.innerText()), id + ' paragraph is a new context');
       await pick.nth(0).click(); await pick.nth(1).click();
       ok(await para.locator('.rw-side li').count() === 2, id + ' tapped evidence beside the box');
@@ -147,12 +152,19 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
     // reload
     await page.waitForTimeout(1200); await page.reload(); await page.waitForTimeout(500); await open(id, 'review'); await page.waitForSelector('.rv-card');
     ok(await page.locator('.rv-card').nth(4).locator('.mk-sent[aria-disabled="true"]').count() === n, id + ' mark saved after reload');
-    ok((await page.locator('.rv-card').nth(5).locator('textarea').inputValue()).length > 10, id + ' paragraph saved after reload');
+    ok((await page.locator('.rv-card').nth(pi).locator('textarea').inputValue()).length > 10, id + ' paragraph saved after reload');
   }
 
   /* ---------- worksheets ---------- */
-  for (const id of ['electromagnets', 'generators']){ const r = await page.evaluate(id => { const st = STOPS.find(x => x.id === id); showWorksheet(st, 'blank', 'f'); const el = document.querySelector('#ws-root .ws'); const res = {graphs: el.querySelectorAll('.rw-graph').length, white: /\bwhite\b/i.test(el.innerText)}; document.getElementById('ws-root').remove(); return res; }, id); ok(r.graphs === 1, id + ' blank sheet prints the graph'); ok(!r.white, id + ' no white on the sheet'); }
-  { const r = await page.evaluate(() => { const keep = Store.data.rv; Store.data.rv = {'electromagnets~f2': {0: {done: 1}, 4: {done: 1}, 5: {done: 1, text: 'old'}}}; const k = Object.keys(rvStore('electromagnets~f3')).join(); Store.data.rv = keep; return k; }); ok(r === '0,4', 'old Check answers kept, old paragraph cleared: ' + r); }
+  for (const id of ['electromagnets', 'generators']){ const r = await page.evaluate(id => { const st = STOPS.find(x => x.id === id); showWorksheet(st, 'blank', 'f'); const el = document.querySelector('#ws-root .ws'); const res = {graphs: el.querySelectorAll('.rw-graph').length, imgs: el.querySelectorAll('.ws-gimg').length, tables: el.querySelectorAll('.ws-gtable').length, white: /\bwhite\b/i.test(el.innerText)}; document.getElementById('ws-root').remove(); return res; }, id); ok(r.graphs === 0 && r.imgs === 1 && r.tables >= 2, id + ' blank sheet prints the data table and a grid for the graph question (' + JSON.stringify(r) + ')'); ok(!r.white, id + ' no white on the sheet'); }
+  { const r = await page.evaluate(() => { const keep = Store.data.rv; Store.data.rv = {'electromagnets~f2': {0: {done: 1}, 4: {done: 1}, 5: {done: 1, text: 'old'}}}; const k = Object.keys(rvStore('electromagnets~f4')).join(); Store.data.rv = keep; return k; }); ok(r === '0,4', 'from ~f2: old Check answers kept, old paragraph cleared: ' + r); }
+  { const r = await page.evaluate(() => { const keep = Store.data.rv; const out = {};
+      Store.data.rv = {'generators~f3': {0: {done: 1}, 3: {done: 1}, 4: {done: 1}, 5: {done: 1, resp: {text: 'mine', ev: [0, 3]}}}, 'generators~f2': {1: {done: 1}}}; out.gen = Object.keys(rvStore('generators~f4')).join() + '|' + rvStore('generators~f4')[6].resp.text + '|' + Object.keys(Store.data.rv['generators~f3']).join();
+      Store.data.rv = {'power~f2': {0: {done: 1}, 4: {done: 1}, 5: {done: 1, resp: {text: 'wind'}}}}; out.pow = Object.keys(rvStore('power~f3')).join() + '|' + rvStore('power~f3')[6].resp.text;
+      Store.data.rv = {'electromagnets~f3': {5: {done: 1}}, 'electromagnets~f2': {1: {done: 1}}}; out.pref = Object.keys(rvStore('electromagnets~f4')).join();
+      Store.data.rv = {}; out.none = Object.keys(rvStore('power~f3')).length; Store.data.rv = keep; return out; });
+    ok(r.gen === '0,3,4,6|mine|0,3,4,5', 'from ~f3: items 0-4 keep their index and the paragraph moves to 6, and ~f3 is left alone: ' + r.gen); ok(r.pow === '0,4,6|wind', 'power ~f2 to ~f3 keeps items and moves the paragraph: ' + r.pow);
+    ok(r.pref === '6', '~f3 is used before ~f2 when both exist: ' + r.pref); ok(r.none === 0, 'a new student starts empty'); }
   await teacher(true);
   const ws = await page.evaluate(() => IDS_ => IDS_, 0);
   for (const id of IDS){

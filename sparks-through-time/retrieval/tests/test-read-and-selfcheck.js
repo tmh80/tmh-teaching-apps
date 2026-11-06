@@ -32,10 +32,10 @@ let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; con
   const v = await pg.evaluate(() => saStore('electromagnets').v); ok(v[0] === 15 && v[3] === 85, 'positions saved: ' + v);
   ok(await tracks.nth(3).getAttribute('aria-valuetext') === 'Mastering', 'level read out');
   await go.click();
-  ok(await pg.locator('.rv-card:visible').count() === 6, 'questions appear after the self-check');
+  ok(await pg.locator('.rv-card:visible').count() === 7, 'questions appear after the self-check');
   ok(await pg.locator('.sa-done').count() === 1, 'self-check kept in a fold-out');
   await pg.evaluate(() => renderStop(STOPS.find(s => s.id === 'electromagnets'), 'review')); await pg.waitForSelector('.rv-card');
-  ok(await pg.locator('.rv-card:visible').count() === 6 && await pg.locator('.sa-done .sa-x').count() === 4, 'saved self-check is not asked again');
+  ok(await pg.locator('.rv-card:visible').count() === 7 && await pg.locator('.sa-done .sa-x').count() === 4, 'saved self-check is not asked again');
   await pg.evaluate(() => { Store.data = {studentName: 'Check', studentClass: '6X', teacherOK: true, lr: {}}; Store.save(); });
   for (const [id] of data){
     await pg.evaluate(id => renderStop(STOPS.find(s => s.id === id), 'learn'), id); await pg.waitForSelector('.ican-next');

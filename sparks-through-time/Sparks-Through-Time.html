@@ -498,6 +498,7 @@ table.data th{background:var(--panel-2)}
 .ican-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:12px 18px; margin-bottom:12px} .ican-card h3{margin:0 0 6px} .ican-next{margin-top:12px}
 .ican-peek{margin:12px 0 0; justify-self:start; max-width:100%; background:var(--panel); border:2px solid var(--accent); border-radius:12px; padding:6px 14px; width:fit-content}
 .ican-peek summary{cursor:pointer; font-weight:700; color:var(--accent)} .ican-peek[open]{padding-bottom:10px} .ican-peek[open] summary{margin-bottom:6px}
+.gm-remind{margin:6px 0 10px} .gm-remind summary{cursor:pointer; font-weight:700; color:var(--accent)} .gm-remind ul{margin:6px 0 0; padding-left:1.2em}
 .ican-list{margin:0; padding-left:1.2em; font-size:1.2rem; line-height:1.5; font-weight:600}
 .sa-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:14px 18px; margin:10px 0; display:grid; gap:14px} .sa-card h3,.sa-card p{margin:0}
 .sa-can{font-weight:700; margin-bottom:8px !important}
@@ -527,6 +528,53 @@ table.data th{background:var(--panel-2)}
 .rw-teach-name{font-weight:800} .rw-teach-job{font-size:.9rem; color:var(--muted)} .rw-teach-eg{font-weight:600}
 .ws-mark th,.ws-mark td{font-size:.85em; vertical-align:top} .ws-mark .ws-markc{text-align:center; width:14%}
 @media (max-width:640px){ .rw-pair,.rw-twin{grid-template-columns:minmax(0,1fr)} .rw-side{order:-1} .rw-teach-row{grid-template-columns:minmax(0,1fr)} }
+/* ---------- graph maker ---------- */
+.mk-c4{--c:#d6457a}
+.gm{display:grid; gap:14px; grid-template-columns:minmax(0,1fr); min-width:0; max-width:100%}
+.gm-canvas{min-width:0; background:var(--panel); border:2px solid var(--line); border-radius:12px; padding:8px; align-self:start}
+.gm-cv{display:block; width:100%; height:auto; background:#fff; border-radius:6px; touch-action:none; cursor:crosshair}
+.gm-cv.gm-over{outline:3px dashed var(--accent); outline-offset:1px}
+.gm-legend{margin:6px 2px 0}
+.gm-side{display:grid; gap:12px; min-width:0}
+.gm-tablebox h4,.gm-step h4,.gm-out h4{margin:0 0 6px}
+.gm-table{max-width:100%}
+.gm-steps{display:grid; gap:10px}
+.gm-step{border:2px solid var(--line); border-radius:12px; padding:10px 12px; background:var(--panel-2); display:grid; gap:8px; min-width:0}
+.gm-step h4{display:flex; align-items:center; gap:8px}
+.gm-n{display:inline-grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-size:.85rem}
+.gm-note{margin:0}
+.gm-opts{display:flex; flex-wrap:wrap; gap:8px}
+.gm-opt{font:inherit; font-weight:700; padding:9px 14px; border-radius:10px; border:2px solid var(--line); background:var(--panel); color:var(--ink); cursor:pointer}
+.gm-opt.on{border-color:var(--accent); background:var(--accent-soft)}
+.gm-opt:disabled{cursor:default; opacity:.75}
+.gm-lab{display:grid; gap:3px; font-weight:600; font-size:.9rem}
+.gm-in{font:inherit; font-size:16px; padding:8px 10px; border-radius:10px; border:2px solid var(--line); background:var(--panel); color:var(--ink); width:100%; min-width:0; box-sizing:border-box}
+.gm-axrow{display:grid; grid-template-columns:auto repeat(3,minmax(0,1fr)); gap:6px 8px; align-items:end}
+.gm-axrow[hidden]{display:none}
+.gm-axrow label{display:grid; gap:2px; font-size:.8rem; font-weight:600}
+.gm-chips{display:flex; flex-wrap:wrap; gap:8px}
+.gm-chip{display:inline-flex; align-items:center; gap:6px; border:2px solid #1b7ea6; background:#e1f2fa; color:#0d3447; border-radius:10px; padding:9px 12px; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none; font-weight:700; font-size:1rem}
+.gm-chip.cat{border-color:#c2700c; background:#fdeed8; color:#5a3406}
+.gm-chip.placed{opacity:.5; border-style:dashed; cursor:pointer}
+.gm-grip{opacity:.6}
+.gm-ghost{position:fixed; pointer-events:none; z-index:2000; transform:translate(-50%,-50%); opacity:.93; box-shadow:0 6px 18px rgba(20,30,70,.3)}
+.gm-locked .gm-chip{pointer-events:none; opacity:.55}
+.gm-marks{list-style:none; margin:0; padding:0; display:grid; gap:6px}
+.gm-marks li{display:flex; gap:8px; align-items:flex-start; padding:7px 10px; border-radius:8px; border:2px solid var(--line); background:var(--panel)}
+.gm-marks li.ok{background:var(--ok-bg); border-color:var(--ok)}
+.gm-marks li.bad{background:var(--bad-bg); border-color:var(--bad)}
+.gm-marks li.todo{background:var(--panel-2)}
+.gm-tick{font-weight:900; min-width:1.2em; text-align:center}
+.gm-fixtxt{display:block; font-size:.9rem}
+.gm-done{margin:8px 0 0; font-weight:800; color:var(--ok)}
+.gm-warn:empty{display:none}
+@media (max-width:899px){ .gm{display:block} .gm-side{margin-top:14px} }
+@media (max-width:620px){ .gm-canvas{position:sticky; top:calc(env(safe-area-inset-top,0px) + 64px); z-index:6; padding:4px; border-width:1px; margin-inline:-6px} }
+@media (min-width:900px){ .gm{display:grid; grid-template-columns:minmax(290px,370px) minmax(0,1fr)} .gm-canvas{grid-column:2; grid-row:1; position:sticky; top:76px; z-index:6} .gm-side{grid-column:1; grid-row:1} }
+.rw-teach .gm-eg{display:block; width:100%; max-width:560px; border:1px solid var(--line); border-radius:8px; background:#fff}
+.ws-gimg{display:block; width:100%; max-width:600px; border:1px solid #d2d7e5; border-radius:8px; background:#fff}
+.ws-student .ws-gimg{outline:2px solid #1d4ed8; outline-offset:2px}
+.ws-gtable{max-width:420px; margin-bottom:8px}
 
 .ws-info{font-size:.9rem; color:#1a2140; flex:1 1 100%} .ws-info.good{color:#1b7f46} .ws-info.bad{color:#b83434; font-weight:700} .ws-info:empty{display:none}
 .ws-toolbar .btn.ghost{background:transparent; text-decoration:underline}
@@ -1860,7 +1908,7 @@ const ICAN = {
   atom:['I can describe how the model of the atom changed over time.','I can name the protons, neutrons and electrons in an atom and say where they are.','I can use the atomic number and mass number to build an atom.'],
   static:['I can explain how rubbing moves electrons from one object to another.','I can work out if an object has a positive or negative charge.','I can predict if two charged objects will repel or attract.','I can explain how lightning happens and how a lightning rod protects a house.'],
   circuits:['I can name the parts of a circuit and match them to their symbols.','I can build a complete circuit with a switch.','I can explain why a shortcut in a circuit stops a bulb from lighting.','I can use an ammeter to measure current.'],
-  electromagnets:['I can explain how an electric current makes a magnetic field.','I can describe how to make an electromagnet stronger.','I can run a fair test and pick the best evidence from my results.','I can write a CER paragraph with a claim, evidence and reasoning.'],
+  electromagnets:['I can explain how an electric current makes a magnetic field.','I can describe how to make an electromagnet stronger.','I can run a fair test, make a graph and pick the best evidence from my results.','I can write a CER paragraph with a claim, evidence and reasoning.'],
   ohm:['I can sort materials into conductors and insulators.','I can explain why metals conduct electricity.','I can describe what a resistor does to the current.','I can use V = I × R to work out voltage, current or resistance.'],
   generators:['I can explain how moving a magnet near a coil of wire makes electricity.','I can describe how to make a generator give a bigger voltage.','I can test a hypothesis using data.','I can write a paragraph that says if data support or contradict a hypothesis.'],
   bulb:['I can name the parts of a light bulb and say what they do.','I can explain why a filament glows.','I can explain what gets used up when a bulb is lit.','I can compare a filament bulb with an LED.'],
@@ -4224,20 +4272,39 @@ registerStop({
         {q:'What should you <b>change</b> in your experiment? (the independent variable)', options:['The number of coils','The number of paperclips','The size of the nail','Everything at once'], answer:0, explain:'You change the number of coils on purpose, because that’s what you’re testing.'},
         {q:'What should you <b>measure</b>? (the dependent variable)', options:['How many paperclips it picks up','How long the wire is','The colour of the wire','The number of cells'], answer:0, explain:'Counting the paperclips tells you how strong the electromagnet is.'},
         {q:'Which of these must you <b>keep the same</b>? (a controlled variable)', options:['The number of cells','The number of coils','The number of paperclips picked up','Nothing needs to stay the same'], answer:0, explain:'If you changed the cells as well, you wouldn’t know whether the coils or the cells made the difference. The core material and the size of the paperclips should stay the same too.'}], ()=>api.complete("Brilliant planning! Now let's run it.")); }},
-    { title:'Run your fair test', say:`<p>You planned a fair test, and now you get to run it! Good readers read the question first. Tell me what you already know.</p>`,
+    { title:'Run your fair test', say:`<p>You planned a fair test, and now you get to run it! Good readers read the question first. Tell me what you already know. When your table is full, you will make a graph of it.</p>`,
       build(stage, api){
         const pslot = lrSlot('parts'); const picked = new Set(pslot.saved || []); let tbl = null, know = lrSlot('know').saved || '';
-        const fin = ()=>{ if (picked.size===2 && know.trim() && tbl && tbl.count===5) api.complete('You read the question first, so you knew what to look for.'); };
+        const gslot = lrSlot('graph'), gdone = lrSlot('gdone'); let gOK = !!gdone.saved, gShown = false;
+        const fin = ()=>{ if (picked.size===2 && know.trim() && tbl && tbl.count===5 && gOK) api.complete('You read the question first, so you knew what to look for. Your graph shows the pattern in your table.'); };
         const part = (txt, good)=>{ const b = h('button',{type:'button', class:'rw-part' + (picked.has(txt) ? ' on' : ''), 'aria-pressed':String(picked.has(txt))}, txt);
           b.addEventListener('click', ()=>{ if (!good){ api.hint('Look for what you change and what you measure.'); return; } picked.add(txt); pslot.put([...picked]); b.classList.add('on'); b.setAttribute('aria-pressed','true'); api.clear(); fin(); }); return b; };
         stage.append(rwStrip(0), rwKey('Read the question first. Then you know what to look for.'),
           h('p',{class:'rw-q'}, 'Does ', part('the number of coils', true), ' change ', part('how strong', true), ' ', part('an electromagnet', false), ' is?'),
-          h('p',{class:'rw-do'}, 'Tap the two parts to look for. Type what you know. Then set the coils to 10, 20, 30, 40 and 50, and type the clips for each.'), rwHint('Look for what you change and what you measure.'));
+          h('p',{class:'rw-do'}, 'Tap the two parts to look for. Type what you know. Then set the coils to 10, 20, 30, 40 and 50, and type the clips for each. When the table is full, make a graph of it.'), rwHint('Look for what you change and what you measure.'));
         rwTyped(stage, 'What do I already know?', 'know', 3, v=>{ know = v; fin(); });
         const wrap = h('div',{class:'rw-twin'}), left = h('div'), right = h('div'); wrap.append(left, right); stage.append(wrap);
-        tbl = readingTable(right, {key:'tbl', cols:['Coils of wire','Paperclips held'], rows:[10,20,30,40,50].map(c=>({key:String(c), cells:[c]})), unit:'clips', tol:0.5, onChange:()=>fin()});
+        const gHost = h('div'); stage.append(gHost);
+        /* once the coils table is full, teach "How to make a good graph" with a worked example, then the student makes a graph of the table (Learn: live rings and checklist) */
+        const showGraph = ()=>{
+          if (gShown || !tbl || tbl.count!==5) return; gShown = true;
+          const COIL = {head:['Coils of wire','Paperclips held (clips)'], rows:[[10,4],[20,8],[30,12],[40,16],[50,20]], kind:'scatter', xWord:['coil','wire','turn'], yWord:['clip','paperclip','held']};
+          const EG = {head:['Days','Height of the plant (cm)'], rows:[[2,3],[4,6],[6,9],[8,12]], kind:'scatter'}, egS = gmModel(EG); Object.assign(egS, {xmin:0, xmax:10, xstep:2, ymin:0, ymax:14, ystep:2});
+          const tHost = h('div'); gHost.append(h('p',{class:'rw-do'}, 'Your table is full. Now make a graph of it.'), tHost);
+          rwTeach(tHost, {title:'How to make a good graph', intro:'A good graph shows the pattern in a table. It has five parts. Read this worked example, then make your own.', eg:'<b>Worked example:</b> Maya grew a bean plant and measured its height every 2 days. Here is her graph.', parts:[
+            {name:'Type', job:'Numbers along the bottom? Use a scatter graph. Names along the bottom? Use a bar graph.', eg:'Days are numbers, so Maya made a scatter graph.'},
+            {name:'Title', job:'Say what the graph shows: the x-axis, then vs, then the y-axis.', eg:'Days vs Height of the plant'},
+            {name:'Axes', job:'Label both axes. What you change goes along the bottom (x). What you measure goes up the side (y). Put the unit in brackets.', eg:'x-axis: Days. y-axis: Height of the plant (cm).'},
+            {name:'Numbers', job:'Start at the lowest number and count up in equal gaps. Stop just above your biggest value, so all your data fits.', eg:'Days: 0 to 10, gap 2. Height: 0 to 14, gap 2.'},
+            {name:'Points', job:'Plot carefully. Find the x number along the bottom, then go up to the y number and put a dot there.', eg:'Day 6 and 9 cm: go along to 6, then up to 9.'}]}, inner=>{
+            graphMaker(inner, COIL, {help:true, saved:gslot.saved, onChange:v=>gslot.put(v), onComplete:()=>{ gdone.put(1); gOK = true; fin(); }}); });
+          const tc = tHost.querySelector('.rw-teach'), lst = tc && tc.querySelector('.rw-teach-list');
+          if (lst) lst.before(h('img',{class:'gm-eg', alt:'A worked example graph: Days vs Height of the plant, with the days along the bottom and the height up the side', src:gmImageURL(EG, egS)}));
+        };
+        tbl = readingTable(right, {key:'tbl', cols:['Coils of wire','Paperclips held'], rows:[10,20,30,40,50].map(c=>({key:String(c), cells:[c]})), unit:'clips', tol:0.5, onChange:()=>{ fin(); showGraph(); }});
         electroRig(left, {controls:['coils'], start:{coils:10, cells:2, core:'iron', on:true}, onChange:s=>tbl.live(String(s.coils), s.clips)});
         tbl.live('10', 4);
+        showGraph();
       }},
     { title:'Mark your evidence', say:`<p>Scientists pick the numbers that show the pattern best. Which two rows would convince a friend?</p>`,
       build(stage, api){
@@ -5394,12 +5461,337 @@ function rwWriteFront(body, ta, it, saved, opts){
   return {ev:()=>picker && picker.sel().length ? picker.sel() : null, ok:()=>!it.evidence || picker.sel().length===need, need:`Tap ${need} ${it.evidence ? (it.evidence.kind==='graph' ? 'points' : 'rows') : ''} first.`, lock(){ if (picker) picker.lock(); }};
 }
 
+/* ================= Graph maker: students make the graph themselves (scatter or bar) =================
+   graphMaker(host, spec, opts)
+     spec = {head:[xHead, yHead], rows:[[x,y],...], kind:'scatter'|'bar', xWord:[...], yWord:[...]}   (bar rows are [name, y])
+     opts = {help:true  -> Learn: live rings and a live checklist, points snap when close
+             help:false -> Check: no rings or checklist until reveal(),
+             saved, locked, revealed, onChange(state), onComplete()}
+   One draw function (gmDraw) makes the live canvas and the worksheet pictures (1000 x 560, white background).
+   Marks (Check): 1 right type, 2 title, 3 both axis labels, 4 axes that fit with an even gap, 5 every point in the right place. */
+const GM = {W:1000, H:560, L:240, R:34, T:70, B:104, TOL:0.035, SNAP:0.07};
+const gmNum = v=>{ const n = parseFloat(String(v==null ? '' : v).replace(/,/g,'')); return isFinite(n) ? n : NaN; };
+const gmFmt = v=>String(Math.round(v*1e6)/1e6);
+const gmBlank = ()=>({type:'', title:'', xl:'', yl:'', xmin:'', xmax:'', xstep:'', ymin:'', ymax:'', ystep:'', pts:{}, slots:null, bars:{}});
+const gmData = spec=>spec.rows.map((r,i)=>({i, name:String(r[0]), x:gmNum(r[0]), y:Number(r[1])}));
+const gmCanScatter = spec=>gmData(spec).every(d=>isFinite(d.x) && /^-?[\d.,]+$/.test(d.name.trim()));
+function gmTicks(min, max, step){ const o = []; if (!(step>0) || !(max>min)) return o; let k = 0; for (let v=min; v<=max+step*1e-6 && k<60; v+=step, k++) o.push(Math.round(v*1e6)/1e6); return o; }
+const gmAxisValid = (a, b, s)=>{ a = gmNum(a); b = gmNum(b); s = gmNum(s); return isFinite(a) && isFinite(b) && s>0 && b>a && gmTicks(a, b, s).length<=40; };
+function gmReady(spec, S){ /* axes are set well enough to draw and plot */
+  if (!S.type) return false;
+  if (S.type==='scatter' && !gmCanScatter(spec)) return false;
+  return gmAxisValid(S.ymin, S.ymax, S.ystep) && (S.type!=='scatter' || gmAxisValid(S.xmin, S.xmax, S.xstep));
+}
+function gmMap(S, n){
+  const L = GM.L, R = GM.W-GM.R, T = GM.T, B = GM.H-GM.B, ymin = gmNum(S.ymin), ymax = gmNum(S.ymax), xmin = gmNum(S.xmin), xmax = gmNum(S.xmax), nn = Math.max(1, n);
+  return {L, R, T, B, ymin, ymax, xmin, xmax, n:nn,
+    px:x=>L + (x-xmin)/(xmax-xmin)*(R-L), py:y=>B - (y-ymin)/(ymax-ymin)*(B-T),
+    vx:p=>xmin + (p-L)/(R-L)*(xmax-xmin), vy:p=>ymin + (B-p)/(B-T)*(ymax-ymin),
+    slotX:i=>L + (R-L)*(i+.5)/nn, slotW:(R-L)/nn};
+}
+const gmPtOK = (d, p, m)=>Math.abs(p.x-d.x) <= (m.xmax-m.xmin)*GM.TOL && Math.abs(p.y-d.y) <= (m.ymax-m.ymin)*GM.TOL;
+const gmBarOK = (d, v, m)=>Math.abs(v-d.y) <= (m.ymax-m.ymin)*GM.TOL;
+/* words: any capitalisation, plurals and word starts count ("cell" finds "cells"); CO₂ and CO2 are the same */
+const gmNorm = s=>String(s==null ? '' : s).toLowerCase().replace(/₂/g,'2').replace(/[^a-z0-9.]+/g,' ').replace(/\.(?!\d)/g,' ').replace(/\s+/g,' ').trim();
+function gmHas(text, words){ const t = ' ' + gmNorm(text); return (words||[]).some(w=>{ const x = gmNorm(w); return x && t.includes(' ' + x); }); }
+function gmUnitNorm(s){ return gmNorm(String(s).replace(/\//g,' per ')).replace(/\bgrams?\b/g,'g').replace(/\bkilograms?\b|\bkilos?\b/g,'kg').replace(/\bvolts?\b/g,'v').replace(/\b(?:seconds?|secs?)\b/g,'s').replace(/\bpaperclips?\b|\bclips?\b/g,'clips').replace(/\bkilowatt ?hours?\b/g,'kwh').replace(/\bcentimet(?:re|er)s?\b/g,'cm').replace(/\bdays?\b/g,'days').replace(/\s+/g,' ').trim(); }
+const gmUnitOf = head=>{ const m = /\(([^)]+)\)\s*$/.exec(String(head)); return m ? m[1] : ''; };
+const gmStrip = head=>String(head).replace(/\s*\([^)]*\)\s*$/, '').trim();
+function gmTitleOK(title, xw, yw){
+  title = String(title||''); const m = /(?:^|\s)(vs\.?|versus|against|v\.?)(?=\s|$)/i.exec(title); if (!m) return false;
+  const left = title.slice(0, m.index), right = title.slice(m.index + m[0].length); if (!left.trim() || !right.trim()) return false;
+  return /against/i.test(m[1]) ? (gmHas(left, yw) && gmHas(right, xw)) : (gmHas(left, xw) && gmHas(right, yw));
+}
+function gmLabelOK(label, words, head){
+  if (!gmHas(label, words)) return false;
+  const u = gmUnitOf(head); if (!u) return true;
+  const want = gmUnitNorm(u), groups = [...String(label).matchAll(/[(\[]([^)\]]+)[)\]]/g)];
+  return groups.some(g=>gmUnitNorm(g[1]) === want);
+}
+/* one axis: does the data fit, is the gap even, is the range sensible? */
+function gmAxis(min, max, step, dmin, dmax, zero){
+  min = gmNum(min); max = gmNum(max); step = gmNum(step);
+  const r = {valid:gmAxisValid(min, max, step)}; if (!r.valid) return Object.assign(r, {even:false, fits:false, sensible:false});
+  const k = (max-min)/step; r.even = Math.abs(k - Math.round(k)) < 1e-6; r.ticks = Math.round(k) + 1;
+  r.fits = min <= dmin + 1e-9 && max >= dmax - 1e-9;
+  r.sensible = r.even && r.ticks>=3 && r.ticks<=21 && r.fits && max <= 2*dmax + step + 1e-9 && (zero ? min===0 : (dmin<0 || min>=0));
+  return r;
+}
+function gmEval(spec, S){
+  const data = gmData(spec), n = data.length, r = {};
+  const bar = S.type==='bar', sc = S.type==='scatter';
+  const xw = spec.xWord || [], yw = spec.yWord || [];
+  r.chosen = !!S.type; r.type = S.type===spec.kind;
+  r.title = gmTitleOK(S.title, xw, yw);
+  r.xl = gmLabelOK(S.xl, xw, spec.head[0]); r.yl = gmLabelOK(S.yl, yw, spec.head[1]); r.labels = r.xl && r.yl;
+  const ys = data.map(d=>d.y), xs = data.map(d=>d.x);
+  r.yAx = gmAxis(S.ymin, S.ymax, S.ystep, Math.min(...ys), Math.max(...ys), bar);
+  r.xAx = sc && gmCanScatter(spec) ? gmAxis(S.xmin, S.xmax, S.xstep, Math.min(...xs), Math.max(...xs), false) : null;
+  r.fits = !!S.type && r.yAx.fits && (!sc || (!!r.xAx && r.xAx.fits));
+  r.even = !!S.type && r.yAx.even && (!sc || (!!r.xAx && r.xAx.even));
+  r.axes = !!S.type && r.yAx.sensible && (!sc || (!!r.xAx && r.xAx.sensible));
+  let placed = 0, right = 0;
+  if (gmReady(spec, S)){
+    const m = gmMap(S, n);
+    data.forEach(d=>{
+      if (sc){ const p = S.pts[d.i]; if (p){ placed++; if (gmPtOK(d, p, m)) right++; } }
+      else if (S.slots && S.slots.indexOf(d.i)>=0 && S.bars[d.i]!=null){ placed++; if (gmBarOK(d, S.bars[d.i], m)) right++; }
+    });
+  }
+  r.total = n; r.placed = placed; r.right = right; r.plotted = placed===n; r.points = placed===n && right===n;
+  r.marks = [r.type, r.title, r.labels, r.axes, r.points]; r.score = r.marks.filter(Boolean).length;
+  r.touched = r.chosen || !!S.title || !!S.xl || !!S.yl || placed>0 || S.ymax!=='' || S.xmax!=='';
+  r.complete = r.type && r.title && r.xl && r.yl && r.axes && r.plotted && r.points;
+  return r;
+}
+const GM_MARK_NAMES = ['The right type of graph', 'A title written as x vs y', 'Both axis labels, with units in brackets', 'Axis numbers that fit the data, with the same gap each time', 'Every point in the right place'];
+function gmFixText(spec, S, e, k){
+  const ux = gmUnitOf(spec.head[0]), uy = gmUnitOf(spec.head[1]);
+  if (k===0) return spec.kind==='scatter' ? 'Numbers along the bottom need a scatter graph.' : 'Names along the bottom need a bar graph.';
+  if (k===1) return `The title should be written like this: ${gmStrip(spec.head[0])} vs ${gmStrip(spec.head[1])}.`;
+  if (k===2) return `The x-axis label is ${spec.head[0]}${ux ? ' (units in brackets)' : ''} and the y-axis label is ${spec.head[1]}.`;
+  if (k===3){
+    if (!e.chosen) return 'Choose a type of graph and set the axis numbers.';
+    if (!e.yAx.valid || (e.xAx && !e.xAx.valid) || (S.type==='scatter' && !e.xAx)) return 'Set the lowest number, the highest number and the gap for each axis.';
+    if (!e.fits) return 'Some of the data does not fit on the axes. Make the highest number bigger.';
+    if (!e.even) return 'The highest number should be the lowest number plus a whole number of gaps.';
+    if (S.type==='bar' && gmNum(S.ymin)!==0) return 'The bars start at 0, so the lowest number is 0.';
+    return 'The axes are too big or too small for the data. Aim for about 4 to 10 gaps, with the highest number just above the biggest value.';
+  }
+  return e.placed<e.total ? `Only ${e.placed} of ${e.total} are on the graph.` : `${e.right} of ${e.total} are in the right place. Read along to the x number, then up to the y number.`;
+}
+/* the correct graph, used by answer keys and the worked example */
+function gmNiceAxis(dmax){
+  const c = []; for (let p=-3; p<=7; p++) [1,2,5].forEach(f=>c.push(+(f*Math.pow(10,p)).toFixed(6)));
+  const step = c.find(s=>dmax/s <= 6) || 1; let top = Math.ceil(dmax/step - 1e-9) * step; if (top <= dmax + 1e-9) top += step;
+  return {min:0, max:+top.toFixed(6), step};
+}
+function gmModel(spec){
+  const data = gmData(spec), S = gmBlank(); S.type = spec.kind; S.title = gmStrip(spec.head[0]) + ' vs ' + gmStrip(spec.head[1]); S.xl = spec.head[0]; S.yl = spec.head[1];
+  const ya = gmNiceAxis(Math.max(...data.map(d=>d.y))); Object.assign(S, {ymin:ya.min, ymax:ya.max, ystep:ya.step});
+  if (spec.kind==='scatter'){ const xa = gmNiceAxis(Math.max(...data.map(d=>d.x))); Object.assign(S, {xmin:xa.min, xmax:xa.max, xstep:xa.step}); data.forEach(d=>{ S.pts[d.i] = {x:d.x, y:d.y}; }); }
+  else { S.slots = data.map(d=>d.i); data.forEach(d=>{ S.bars[d.i] = d.y; }); }
+  return S;
+}
+/* ---------- the one draw function ---------- */
+const GM_FONT = 'system-ui,"Segoe UI","PingFang SC",sans-serif';
+function gmWrap(c, text, maxW){ const ws = String(text).split(/\s+/), lines = []; let cur = ''; ws.forEach(w=>{ const t = cur ? cur + ' ' + w : w; if (c.measureText(t).width>maxW && cur){ lines.push(cur); cur = w; } else cur = t; }); if (cur) lines.push(cur); return lines; }
+function gmFitFont(c, text, maxW, size, weight){ let s = size; do { c.font = `${weight} ${s}px ${GM_FONT}`; s -= 2; } while (c.measureText(text).width>maxW && s>14); }
+function gmAxisLabels(c, S, L, R){
+  c.fillStyle = '#14202e'; c.font = `bold 28px ${GM_FONT}`; c.textAlign = 'left';
+  if (S.yl){ const lines = gmWrap(c, S.yl, L-92).slice(0, 5), y0 = (GM.T + GM.H-GM.B)/2 - (lines.length-1)*17; lines.forEach((ln,i)=>c.fillText(ln, 10, y0 + i*34)); }
+  c.textAlign = 'center'; if (S.xl){ gmFitFont(c, S.xl, R-L, 28, 'bold'); c.fillText(S.xl, (L+R)/2, GM.H-12); }
+}
+function gmHint(c, L, R, T, B, t1, t2){
+  const x = L+24, w = R-L-48, y = (T+B)/2-52;
+  c.fillStyle = 'rgba(194,112,12,.10)'; c.fillRect(x, y, w, 100); c.strokeStyle = '#c2700c'; c.lineWidth = 2; c.setLineDash([8,6]); c.strokeRect(x, y, w, 100); c.setLineDash([]);
+  c.fillStyle = '#8a4f06'; c.textAlign = 'center'; gmFitFont(c, t1, w-20, 32, 'bold'); c.fillText(t1, (L+R)/2, y+44); gmFitFont(c, t2, w-20, 26, ''); c.fillText(t2, (L+R)/2, y+82);
+}
+function gmDraw(c, spec, S, o){
+  o = o || {};
+  const W = GM.W, H = GM.H, L = GM.L, R = W-GM.R, T = GM.T, B = H-GM.B, sc = S.type==='scatter', data = gmData(spec);
+  const ready = gmReady(spec, S), m = ready ? gmMap(S, data.length) : null;
+  c.save(); c.fillStyle = '#fff'; c.fillRect(0, 0, W, H); c.textBaseline = 'alphabetic'; c.lineCap = 'butt';
+  c.fillStyle = '#14202e'; c.textAlign = 'center';
+  if (S.title){ gmFitFont(c, S.title, R-L+120, 36, 'bold'); c.fillText(S.title, (L+R)/2 + 30, 44); }
+  else if (o.inter){ c.fillStyle = '#8a97a8'; c.font = `italic 28px ${GM_FONT}`; c.fillText('Graph title', (L+R)/2 + 30, 44); }
+  if (!ready){
+    c.fillStyle = '#5a6878'; c.font = `28px ${GM_FONT}`; c.textAlign = 'center';
+    const msg = !S.type ? 'Choose a type of graph to start.' : (sc && !gmCanScatter(spec)) ? 'A scatter graph needs numbers along the bottom.' : 'Choose your axis numbers to start the graph.';
+    if (o.inter || S.type) c.fillText(msg, (L+R)/2, (T+B)/2);
+    c.strokeStyle = '#14202e'; c.lineWidth = 3; c.beginPath(); c.moveTo(L, T); c.lineTo(L, B); c.lineTo(R, B); c.stroke();
+    gmAxisLabels(c, S, L, R); c.restore(); return;
+  }
+  c.font = `27px ${GM_FONT}`; c.lineWidth = 1;
+  gmTicks(m.ymin, m.ymax, gmNum(S.ystep)).forEach(v=>{ const y = m.py(v); c.strokeStyle = '#dfe5ec'; c.beginPath(); c.moveTo(L, y); c.lineTo(R, y); c.stroke(); c.fillStyle = '#14202e'; c.textAlign = 'right'; c.fillText(gmFmt(v), L-12, y+9); });
+  if (sc) gmTicks(m.xmin, m.xmax, gmNum(S.xstep)).forEach(v=>{ const x = m.px(v); c.strokeStyle = '#e6eaf0'; c.beginPath(); c.moveTo(x, T); c.lineTo(x, B); c.stroke(); c.fillStyle = '#14202e'; c.textAlign = 'center'; c.fillText(gmFmt(v), x, B+34); });
+  c.strokeStyle = '#14202e'; c.lineWidth = 3; c.beginPath(); c.moveTo(L, T); c.lineTo(L, B); c.lineTo(R, B); c.stroke();
+  gmAxisLabels(c, S, L, R);
+  if (o.inter && sc && !Object.keys(S.pts).length) gmHint(c, L, R, T, B, 'Drag each point onto the graph', 'Press and hold a blue chip, move it here, then let go.');
+  if (o.inter && !sc && !S.slots.some(x=>x!=null)) gmHint(c, L, R, T, B, 'Drag each name into a box under the graph', 'Press and hold an orange chip, move it to a box, then let go.');
+  if (sc){
+    c.save(); c.beginPath(); c.rect(L-16, T-16, R-L+32, B-T+32); c.clip();
+    data.forEach(d=>{ const p = S.pts[d.i]; if (!p) return; const X = m.px(p.x), Y = m.py(p.y), st = o.rings ? (gmPtOK(d, p, m) ? 'ok' : 'bad') : null;
+      if (st){ c.strokeStyle = st==='ok' ? '#2e7d4f' : '#b3301e'; c.lineWidth = 5; c.beginPath(); c.arc(X, Y, 20, 0, 7); c.stroke(); }
+      c.fillStyle = '#1b7ea6'; c.strokeStyle = '#0d4a63'; c.lineWidth = 2; c.beginPath(); c.arc(X, Y, 12, 0, 7); c.fill(); c.stroke(); });
+    c.restore();
+  } else {
+    const bw = m.slotW*.5;
+    S.slots.forEach((k, i)=>{
+      const cxp = m.slotX(i);
+      if (k==null){ if (o.inter){ c.setLineDash([6,5]); c.strokeStyle = '#8a97a8'; c.lineWidth = 2; c.strokeRect(cxp-m.slotW*.42, B+8, m.slotW*.84, 46); c.setLineDash([]); c.fillStyle = '#8a97a8'; c.font = `21px ${GM_FONT}`; c.textAlign = 'center'; c.fillText('drop a name here', cxp, B+37); } return; }
+      const v = S.bars[k], val = v==null ? m.ymin : Math.max(m.ymin, Math.min(m.ymax, v)), y = m.py(val), d = data[k];
+      c.fillStyle = '#8cc3dc'; c.strokeStyle = '#0d4a63'; c.lineWidth = 2; c.fillRect(cxp-bw/2, y, bw, B-y); c.strokeRect(cxp-bw/2, y, bw, B-y);
+      const st = o.rings && v!=null ? (gmBarOK(d, v, m) ? 'ok' : 'bad') : null;
+      if (o.inter || st){ c.fillStyle = '#fff'; c.strokeStyle = st==='ok' ? '#2e7d4f' : st==='bad' ? '#b3301e' : '#c2700c'; c.lineWidth = 5; c.beginPath(); c.arc(cxp, y, o.inter ? 15 : 12, 0, 7); c.fill(); c.stroke(); }
+      c.fillStyle = '#14202e'; c.textAlign = 'center'; c.font = `bold 24px ${GM_FONT}`;
+      gmWrap(c, d.name, m.slotW*.92).slice(0, 2).forEach((ln, j)=>c.fillText(ln, cxp, B+32 + j*26));
+    });
+  }
+  if (o.cross){ c.strokeStyle = 'rgba(194,112,12,.85)'; c.lineWidth = 2; c.setLineDash([6,5]); c.beginPath(); c.moveTo(o.cross.x, T); c.lineTo(o.cross.x, B); c.moveTo(L, o.cross.y); c.lineTo(R, o.cross.y); c.stroke(); c.setLineDash([]); }
+  c.restore();
+}
+function gmCanvas(spec, S, o){ const sc = (o && o.scale) || 1.5, cv = document.createElement('canvas'); cv.width = GM.W*sc; cv.height = GM.H*sc; const c = cv.getContext('2d'); c.scale(sc, sc); gmDraw(c, spec, S, o); return cv; }
+const gmImageURL = (spec, S, o)=>gmCanvas(spec, S, o).toDataURL('image/png');
+function gmGridURL(){ const sc = 1.5, cv = document.createElement('canvas'); cv.width = GM.W*sc; cv.height = GM.H*sc; const c = cv.getContext('2d'); c.scale(sc, sc); c.fillStyle = '#fff'; c.fillRect(0, 0, GM.W, GM.H); c.strokeStyle = '#cfd6e2'; c.lineWidth = 1; for (let x=20; x<GM.W; x+=28){ c.beginPath(); c.moveTo(x, 0); c.lineTo(x, GM.H); c.stroke(); } for (let y=14; y<GM.H; y+=28){ c.beginPath(); c.moveTo(0, y); c.lineTo(GM.W, y); c.stroke(); } c.strokeStyle = '#9aa3b8'; c.lineWidth = 3; c.strokeRect(1.5, 1.5, GM.W-3, GM.H-3); return cv.toDataURL('image/png'); }
+function gmDataTable(spec, cls){ return h('table', {class:cls || 'data gm-table'}, h('thead', {}, h('tr', {}, spec.head.map(x=>h('th', {}, x)))), h('tbody', {}, spec.rows.map(r=>h('tr', {}, r.map(v=>h('td', {}, String(v))))))); }
+
+/* ---------- dragging with a ghost chip (mouse, pen and touch) ---------- */
+let GMD = null;
+function gmDragEndNow(){ window.removeEventListener('pointermove', gmDragMove); window.removeEventListener('pointerup', gmDragEnd); window.removeEventListener('pointercancel', gmDragCancel); if (GMD){ GMD.ghost.remove(); if (GMD.g.preview) GMD.g.preview(null); } GMD = null; }
+function gmDragMove(ev){ if (!GMD) return; GMD.ghost.style.left = ev.clientX + 'px'; GMD.ghost.style.top = ev.clientY + 'px'; GMD.g.preview(ev.clientX, ev.clientY); }
+function gmDragEnd(ev){ const d = GMD; gmDragEndNow(); if (d) d.g.drop(d.kind, d.key, ev.clientX, ev.clientY); }
+function gmDragCancel(){ gmDragEndNow(); }
+function gmDragStart(ev, g, kind, key, label, cls){
+  if (ev.button>0) return; ev.preventDefault(); gmDragEndNow();
+  const ghost = h('div', {class:'gm-chip gm-ghost ' + (cls||'')}, label); ghost.style.left = ev.clientX + 'px'; ghost.style.top = ev.clientY + 'px'; document.body.append(ghost);
+  GMD = {g, kind, key, ghost};
+  window.addEventListener('pointermove', gmDragMove); window.addEventListener('pointerup', gmDragEnd); window.addEventListener('pointercancel', gmDragCancel);
+}
+
+function graphMaker(host, spec, opts){
+  opts = opts || {};
+  const help = !!opts.help, data = gmData(spec), n = data.length;
+  const S = Object.assign(gmBlank(), JSON.parse(JSON.stringify(opts.saved || {})));
+  if (!Array.isArray(S.slots) || S.slots.length!==n) S.slots = new Array(n).fill(null);
+  let locked = !!opts.locked, revealed = !!opts.revealed, completed = false, cross = null, cvDrag = null;
+  const root = h('div', {class:'gm no-gloss' + (help ? ' gm-help' : '')});
+  const cv = h('canvas', {width:GM.W, height:GM.H, class:'gm-cv', role:'img', 'aria-label':'The graph you are making'});
+  const ctx = cv.getContext('2d');
+  const legend = h('p', {class:'legend gm-legend'});
+  const canvasBox = h('div', {class:'gm-canvas'}, cv, legend);
+  const warn = h('div', {class:'gm-warn', role:'status'});
+  const trayHost = h('div', {class:'gm-tray'});
+  const out = h('div', {class:'gm-out', role:'status', 'aria-live':'polite'});
+  const emit = ()=>{ if (opts.onChange) opts.onChange(JSON.parse(JSON.stringify(S))); };
+  const showRings = ()=>help || revealed;
+  const say = (t)=>{ warn.innerHTML = t ? `<div class="feedback hint">${t}</div>` : ''; };
+
+  /* --- steps --- */
+  const step = (num, title, ...kids)=>h('section', {class:'gm-step'}, h('h4', {}, h('span', {class:'gm-n'}, num), title), kids);
+  const typeBtns = [['scatter', 'Scatter graph'], ['bar', 'Bar graph']].map(([k, label])=>h('button', {type:'button', class:'gm-opt', 'data-type':k, 'aria-pressed':'false', onclick:()=>{ if (locked) return; S.type = k; changed(true); }}, label));
+  const typeNote = h('p', {class:'legend gm-note'});
+  const mkInput = (key, label, ph)=>{ const inp = h('input', {type:'text', class:'gm-in', maxlength:'80', 'aria-label':label, placeholder:ph||'', autocomplete:'off', value:S[key]||''}); inp.addEventListener('input', ()=>{ S[key] = inp.value; changed(false); }); return inp; };
+  const titleIn = mkInput('title', 'Graph title', 'x vs y'), xlIn = mkInput('xl', 'x-axis label (along the bottom)'), ylIn = mkInput('yl', 'y-axis label (up the side)');
+  const numIn = (key, label)=>{ const inp = h('input', {type:'number', class:'gm-in gm-num', inputmode:'decimal', step:'any', 'aria-label':label, value:S[key]===''||S[key]==null ? '' : S[key]}); inp.addEventListener('input', ()=>{ S[key] = inp.value; changed(false); }); return inp; };
+  const axrow = (name, k)=>h('div', {class:'gm-axrow', 'data-ax':k}, h('b', {}, name), h('label', {}, 'lowest', numIn(k+'min', name + ' lowest number')), h('label', {}, 'highest', numIn(k+'max', name + ' highest number')), h('label', {}, 'gap', numIn(k+'step', name + ' gap')));
+  const xRow = axrow('x-axis', 'x'), yRow = axrow('y-axis', 'y');
+  const steps = h('div', {class:'gm-steps'},
+    step(1, 'Type of graph', h('div', {class:'gm-opts'}, typeBtns), typeNote),
+    step(2, 'Graph title', h('p', {class:'legend gm-note'}, 'Write it as: x vs y. Say what the x-axis shows, then vs, then what the y-axis shows.'), titleIn),
+    step(3, 'Axis labels', h('p', {class:'legend gm-note'}, 'The x-axis runs along the bottom and the y-axis goes up the side. Put units in brackets, like Height (cm).'), h('label', {class:'gm-lab'}, 'x-axis label', xlIn), h('label', {class:'gm-lab'}, 'y-axis label', ylIn)),
+    step(4, 'Axis numbers', h('p', {class:'legend gm-note'}, 'Choose the lowest number, the highest number and the gap for each axis. Every gap must be the same size, and all your data must fit.'), yRow, xRow, warn),
+    step(5, 'Plot the data', trayHost));
+  const tableBox = h('div', {class:'gm-tablebox'}, h('h4', {}, 'My data'), h('div', {class:'tbl-wrap'}, gmDataTable(spec)));
+  const side = h('div', {class:'gm-side'}, tableBox, steps, out);
+  root.append(canvasBox, side); host.append(root);
+
+  /* --- drawing and checking --- */
+  function ev(){ return gmEval(spec, S); }
+  function draw(){ gmDraw(ctx, spec, S, {inter:!locked, rings:showRings(), cross}); }
+  function marksList(e, withFix){ return h('ul', {class:'gm-marks'}, GM_MARK_NAMES.map((nm, k)=>h('li', {class:e.marks[k] ? 'ok' : 'bad', 'aria-label':nm + (e.marks[k] ? ': 1 mark' : ': 0 marks')}, h('span', {class:'gm-tick', 'aria-hidden':'true'}, e.marks[k] ? '✓' : '✗'), h('span', {}, h('b', {}, nm), !e.marks[k] && withFix ? h('span', {class:'gm-fixtxt'}, ' ' + gmFixText(spec, S, e, k)) : null)))); }
+  function paintOut(){
+    out.innerHTML = ''; const e = ev();
+    if (revealed){ out.append(h('h4', {}, `Your marks: ${e.score} of 5`), marksList(e, true)); return; }
+    if (!help) return;
+    const items = [
+      [e.type, 'I chose the right type of graph.', gmFixText(spec, S, e, 0)],
+      [e.title, 'My title is written as x vs y.', 'Write the title as x vs y, using the headings from the table.'],
+      [e.xl, 'My x-axis label is right' + (gmUnitOf(spec.head[0]) ? ', with the unit in brackets.' : '.'), `Label the x-axis with the table heading${gmUnitOf(spec.head[0]) ? ' and put the unit in brackets' : ''}.`],
+      [e.yl, 'My y-axis label is right' + (gmUnitOf(spec.head[1]) ? ', with the unit in brackets.' : '.'), `Label the y-axis with the table heading${gmUnitOf(spec.head[1]) ? ' and put the unit in brackets' : ''}.`],
+      [e.axes, 'My axis numbers fit all the data, with the same gap each time.', gmFixText(spec, S, e, 3)],
+      [e.plotted, `All my data is plotted (${e.placed} of ${e.total}).`, `Drag the rest of the chips onto the graph (${e.placed} of ${e.total} so far).`],
+      [e.points, 'Every point is in the right place.', 'Look for the red rings. Drag those points to where the x and y numbers meet.']];
+    out.append(h('h4', {}, 'My checklist'), h('ul', {class:'gm-marks gm-check'}, items.map(([ok, good, fix])=>h('li', {class:ok ? 'ok' : 'todo'}, h('span', {class:'gm-tick', 'aria-hidden':'true'}, ok ? '✓' : '○'), h('span', {}, ok ? good : fix)))));
+    if (e.complete && !completed){ completed = true; if (opts.onComplete) setTimeout(opts.onComplete, 0); }
+    if (e.complete) out.append(h('p', {class:'gm-done'}, 'Your graph is finished!'));
+  }
+  function paintTray(){
+    trayHost.innerHTML = '';
+    if (!S.type){ trayHost.append(h('p', {class:'legend gm-note'}, 'Choose a type of graph first.')); return; }
+    if (S.type==='scatter' && !gmCanScatter(spec)){ trayHost.append(h('div', {class:'feedback hint'}, 'A scatter graph needs numbers along the bottom. These are names, so this data needs a different type of graph.')); return; }
+    if (S.type==='scatter'){
+      trayHost.append(h('p', {class:'legend gm-note'}, 'Press and hold a chip, drag it onto the graph to where its x number and y number meet, then let go. Drag a point on the graph to move it. Press a grey chip to take its point back.'),
+        h('div', {class:'gm-chips'}, data.map(d=>{ const on = !!S.pts[d.i]; return h('div', {class:'gm-chip' + (on ? ' placed' : ''), role:'button', tabindex:'0', 'data-i':d.i, 'aria-label':`Point: x ${d.name}, y ${gmFmt(d.y)}${on ? ', placed' : ''}`, onpointerdown:evn=>{ if (locked) return;
+          if (on){ evn.preventDefault(); delete S.pts[d.i]; changed(true); return; }
+          if (!gmReady(spec, S)){ evn.preventDefault(); say('Choose your axis numbers first (step 4).'); return; }
+          gmDragStart(evn, api, 'pt', d.i, `x ${d.name} · y ${gmFmt(d.y)}`); }}, h('span', {class:'gm-grip', 'aria-hidden':'true'}, '⠿'), `x ${d.name} · y ${gmFmt(d.y)}`, on ? ' ✓' : ''); })));
+    } else {
+      const free = data.filter(d=>!S.slots.includes(d.i));
+      trayHost.append(h('p', {class:'legend gm-note'}, 'First press and hold an orange chip, drag it into a box under the graph and let go. You choose the order. Then drag the round dot on top of each bar up to its height.'),
+        h('div', {class:'gm-chips'}, free.length ? free.map(d=>h('div', {class:'gm-chip cat', role:'button', tabindex:'0', 'data-i':d.i, 'aria-label':'Name: ' + d.name, onpointerdown:evn=>{ if (locked) return; if (!gmReady(spec, S)){ evn.preventDefault(); say('Choose your axis numbers first (step 4).'); return; } gmDragStart(evn, api, 'cat', d.i, d.name, 'cat'); }}, h('span', {class:'gm-grip', 'aria-hidden':'true'}, '⠿'), d.name)) : h('span', {class:'legend'}, 'All the names are placed.')));
+    }
+  }
+  function paintType(){
+    typeBtns.forEach(b=>{ const on = S.type===b.dataset.type; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); b.disabled = locked; });
+    typeNote.textContent = help ? 'A scatter graph has numbers along the bottom (like days). A bar graph has names along the bottom (like materials).' : '';
+    xRow.hidden = S.type==='bar';
+    if (S.type==='scatter' && !gmCanScatter(spec)) typeNote.textContent = 'A scatter graph needs numbers along the bottom. This data has names.';
+  }
+  function paintLegend(){ legend.textContent = showRings() ? 'Green ring = in the right place. Red ring = check the numbers on both axes.' : ''; legend.hidden = !showRings(); }
+  function refresh(full){
+    paintType(); if (full) paintTray(); paintLegend(); draw(); paintOut();
+    [titleIn, xlIn, ylIn, ...root.querySelectorAll('.gm-num')].forEach(x=>{ x.disabled = locked; });
+    root.classList.toggle('gm-locked', locked);
+  }
+  function changed(full){ say(''); emit(); refresh(full); }
+
+  /* --- placing --- */
+  function toCv(cx, cy){ const r = cv.getBoundingClientRect(); return {x:(cx-r.left)/r.width*GM.W, y:(cy-r.top)/r.height*GM.H, inside:cx>=r.left && cx<=r.right && cy>=r.top && cy<=r.bottom, scale:r.width/GM.W}; }
+  const clamp = (v, a, b)=>Math.max(a, Math.min(b, v));
+  function putPoint(i, x, y, snap){
+    const m = gmMap(S, n), d = data[i]; x = clamp(x, m.xmin, m.xmax); y = clamp(y, m.ymin, m.ymax);
+    if (snap && help && Math.abs(x-d.x) <= (m.xmax-m.xmin)*GM.SNAP && Math.abs(y-d.y) <= (m.ymax-m.ymin)*GM.SNAP){ x = d.x; y = d.y; }
+    S.pts[i] = {x, y};
+  }
+  function setBar(i, y, snap){ const m = gmMap(S, n); y = clamp(y, m.ymin, m.ymax); if (snap && help && Math.abs(y-data[i].y) <= (m.ymax-m.ymin)*GM.SNAP) y = data[i].y; S.bars[i] = y; }
+  function dropCat(i, x){ const m = gmMap(S, n); const slot = clamp(Math.floor((x-m.L)/m.slotW), 0, n-1), prev = S.slots[slot], old = S.slots.indexOf(i); if (old>=0) S.slots[old] = prev; else if (prev!=null) delete S.bars[prev]; S.slots[slot] = i; }
+  const api = {
+    preview(cx, cy){ if (cx==null){ cross = null; cv.classList.remove('gm-over'); draw(); return; } const p = toCv(cx, cy); cv.classList.toggle('gm-over', p.inside); cross = p.inside && GMD && GMD.kind==='pt' && gmReady(spec, S) ? {x:p.x, y:p.y} : null; draw(); },
+    drop(kind, key, cx, cy){
+      if (locked) return; const p = toCv(cx, cy);
+      if (kind==='pt'){ if (p.inside && gmReady(spec, S)){ const m = gmMap(S, n); if (p.x>=m.L-8 && p.x<=m.R+8 && p.y>=m.T-8 && p.y<=m.B+8) putPoint(key, m.vx(p.x), m.vy(p.y), true); } }
+      else if (kind==='cat'){ if (p.inside && gmReady(spec, S)) dropCat(key, p.x); else { const old = S.slots.indexOf(key); if (old>=0){ S.slots[old] = null; delete S.bars[key]; } } }
+      changed(true);
+    }
+  };
+  /* dragging things that are already on the canvas */
+  cv.style.touchAction = 'none';
+  cv.addEventListener('pointerdown', evn=>{
+    if (locked || !gmReady(spec, S) || evn.button>0) return;
+    const p = toCv(evn.clientX, evn.clientY), m = gmMap(S, n), hit = Math.max(22, 28/p.scale);
+    if (S.type==='scatter'){
+      let best = null, bd = 1e9; data.forEach(d=>{ const q = S.pts[d.i]; if (!q) return; const dd = Math.hypot(p.x-m.px(q.x), p.y-m.py(q.y)); if (dd<hit && dd<bd){ bd = dd; best = d.i; } });
+      if (best!=null){ evn.preventDefault(); cvDrag = {kind:'pt', key:best}; try { cv.setPointerCapture(evn.pointerId); } catch(e){} }
+    } else {
+      for (let i=0; i<n && !cvDrag; i++){ const k = S.slots[i]; if (k==null) continue; const cxp = m.slotX(i), v = S.bars[k], yy = m.py(v==null ? m.ymin : v);
+        if (Math.hypot(p.x-cxp, p.y-yy) < hit){ evn.preventDefault(); cvDrag = {kind:'bar', key:k}; try { cv.setPointerCapture(evn.pointerId); } catch(e){} }
+        else if (p.y>m.B+4 && Math.abs(p.x-cxp) < m.slotW*.45){ gmDragStart(evn, api, 'cat', k, data[k].name, 'cat'); return; } }
+    }
+  });
+  cv.addEventListener('pointermove', evn=>{ if (!cvDrag) return; const p = toCv(evn.clientX, evn.clientY), m = gmMap(S, n);
+    if (cvDrag.kind==='pt') S.pts[cvDrag.key] = {x:clamp(m.vx(p.x), m.xmin, m.xmax), y:clamp(m.vy(p.y), m.ymin, m.ymax)}; else S.bars[cvDrag.key] = clamp(m.vy(p.y), m.ymin, m.ymax);
+    draw(); });
+  const cvUp = ()=>{ if (!cvDrag) return; const d = cvDrag; cvDrag = null; if (d.kind==='pt'){ const q = S.pts[d.key]; if (q) putPoint(d.key, q.x, q.y, true); } else if (S.bars[d.key]!=null) setBar(d.key, S.bars[d.key], true); changed(true); };
+  cv.addEventListener('pointerup', cvUp); cv.addEventListener('pointercancel', cvUp);
+
+  const self = {
+    el:root, state:()=>JSON.parse(JSON.stringify(S)), eval:ev,
+    lock(){ locked = true; if (GMD) gmDragEndNow(); refresh(true); },
+    reveal(){ const first = !revealed; revealed = true; locked = true; side.prepend(out); refresh(true); if (first && !opts.locked) setTimeout(()=>{ try { out.scrollIntoView({block:'center', behavior:reduceMotion ? 'auto' : 'smooth'}); } catch(e){} }, 60); }
+  };
+  if (revealed) side.prepend(out);
+  refresh(true);
+  return self;
+}
+
 /* ================= Review questions: varied types, saved answers, worksheets ================= */
 const RTYPES = {
   mcq:'Choose one', multi:'Tick all that apply', match:'Match it up', table:'Complete the table', sort:'Sort it',
-  order:'Put in order', num:'Calculate', fill:'Fill the gaps', draw:'Draw it', write:'Explain it', mark:'Mark it'
+  order:'Put in order', num:'Calculate', fill:'Fill the gaps', draw:'Draw it', write:'Explain it', mark:'Mark it', graph:'Make a graph'
 };
-const SELF = t => t==='draw' || t==='write';
+/* SELF = not auto-marked as right or wrong: it goes in Part B, stays out of the Time Test and retrieval pools. A graph is marked by the sim in five parts (graphMaker), so it counts here too. */
+const SELF = t => t==='draw' || t==='write' || t==='graph';
 /* each stop has two reviews: 'f' (Foundation, after Learn) and 'c' (Challenge, after the missions) */
 function rvItems(stop, part){ return (part==='c' ? stop.creview : stop.review) || []; }
 function rvKey(stop, part){ return part==='c' ? stop.id + '~c' : (stop.rvKeyF || stop.id); }
@@ -5407,9 +5799,15 @@ function lrKey(stop, k){ return stop.learnKeys && stop.learnKeys[k]!=null ? stop
 const PART_NAME = {f:'Foundation', c:'Challenge'};
 function rvStore(stopId){
   Store.data.rv = Store.data.rv || {};
-  if (!Store.data.rv[stopId]){ const fresh = {}, m = /^(electromagnets|generators)~f3$/.exec(stopId), old = m && Store.data.rv[m[1] + '~f2'];
-    if (old) for (let i=0; i<5; i++) if (old[i]) fresh[i] = old[i]; /* the paragraph (item 5) has a new context, so it starts empty */
-    Store.data.rv[stopId] = fresh; }
+  if (!Store.data.rv[stopId]){
+    const fresh = {}, RV = Store.data.rv;
+    /* A graph question was added at item 5 of electromagnets, generators (key ~f4) and power (key ~f3). Items 0 to 4 keep their index and a paragraph already written (old item 5) moves to item 6.
+       Electromagnets and generators carry across from ~f3, or from ~f2 (only items 0 to 4: its paragraph had a different context, so it starts empty). */
+    const copy = (old, para)=>{ for (let i=0; i<5; i++) if (old[i]) fresh[i] = Object.assign({}, old[i]); if (para && old[5]) fresh[6] = Object.assign({}, old[5]); };
+    const m4 = /^(electromagnets|generators)~f4$/.exec(stopId), m3 = /^power~f3$/.exec(stopId);
+    if (m4){ if (RV[m4[1] + '~f3']) copy(RV[m4[1] + '~f3'], true); else if (RV[m4[1] + '~f2']) copy(RV[m4[1] + '~f2'], false); }
+    else if (m3 && RV['power~f2']) copy(RV['power~f2'], true);
+    RV[stopId] = fresh; }
   return Store.data.rv[stopId];
 }
 function normTxt(s){ return String(s||'').toLowerCase().replace(/[^a-z0-9.\-]+/g,' ').trim(); }
@@ -5479,6 +5877,7 @@ function rvPoints(it, resp, ok){ // points per part (shown in the sim and on the
   if (t==='order'){ const wrong = resp.map((k,p)=>k!==p ? p : -1).filter(p=>p>=0); const one = wrong.length===2 && wrong[1]===wrong[0]+1 && resp[wrong[0]]===wrong[1]; return {pts: !wrong.length ? 2 : one ? 1 : 0, max:2}; }
   if (t==='fill'){ const r = resp.filter((v,i)=>gapOK(it.blanks[i], v)).length; return {pts:r, max:it.blanks.length}; }
   if (t==='mark'){ const r = (resp||[]).filter((v,i)=>it.sents[i] && v===it.sents[i].a).length; return {pts:r, max:it.sents.length}; }
+  if (t==='graph') return {pts:((resp && resp.m) || []).filter(Boolean).length, max:5};
   if (t==='draw' || t==='write') return {pts:(resp && resp.ticks ? resp.ticks.length : 0), max:(it.checklist||[]).length};
   return {pts:0, max:0};
 }
@@ -5493,7 +5892,7 @@ function reviewCard(el, it, n, saved, onSave, opts){
   if (it.words && it.words.length) card.append(h('div',{class:'rv-words'}, h('b',{}, 'Words to use in a good answer: '), it.words.map(w=>h('span',{class:'chip'}, w))));
   const body = h('div',{class:'rv-body'}); const fb = h('div',{class:'feedback', role:'status'});
   const t = it.t; const self = SELF(t);
-  card.append(body, fb, self ? h('p',{class:'legend rv-onego'}, 'You can only compare with the model once, so finish your answer first.') : h('p',{class:'legend rv-onego'}, 'You get one go, so check your answer carefully before you press Check.'));
+  card.append(body, fb, (self && t!=='graph') ? h('p',{class:'legend rv-onego'}, 'You can only compare with the model once, so finish your answer first.') : h('p',{class:'legend rv-onego'}, 'You get one go, so check your answer carefully before you press Check.'));
   const showFb = (ok, extra)=>{ if (ok===null){ fb.className = 'feedback ok'; fb.innerHTML = extra || ''; return; } fb.className = 'feedback ' + (ok ? 'ok' : 'bad'); fb.innerHTML = `<strong>${ok ? pick(PRAISE) : 'Whoops!'}</strong> ${extra||''} ${it.explain||''}`; };
   const lock = ()=>{ card.classList.add('locked'); body.querySelectorAll('button, select, input:not([type=checkbox]), textarea').forEach(x=>{ x.disabled = true; }); card.querySelector('.rv-onego') && card.querySelector('.rv-onego').remove(); };
   const save = (resp, ok, msg)=>{ const pt = rvPoints(it, resp, ok); onSave({resp, ok, done:true, pts:pt.pts, max:pt.max}); setState(true, pt); showFb(ok, msg); lock(); };
@@ -5560,6 +5959,19 @@ function reviewCard(el, it, n, saved, onSave, opts){
     const mark = ()=>ins.forEach((x,i)=>{ x.classList.remove('right','wrong'); const okk = gapOK(it.blanks[i], x.value); x.classList.add(okk ? 'right' : 'wrong'); if (!okk && !(x.nextSibling && x.nextSibling.classList && x.nextSibling.classList.contains('rv-fix'))) x.after(h('span',{class:'rv-fix'}, '→ ' + it.blanks[i][0])); });
     body.append(h('div',{class:'row'}, h('button',{class:'btn primary small', type:'button', onclick:()=>{ const resp = ins.map(x=>x.value); if (resp.some(v=>!v.trim()) && !card.dataset.warned){ card.dataset.warned = 1; fb.className = 'feedback hint'; fb.innerHTML = 'Some gaps are still empty. Fill them in, or press Check again to check anyway.'; return; } const right = resp.filter((v,i)=>gapOK(it.blanks[i], v)).length; mark(); save(resp, right===ins.length, right===ins.length ? '' : `${right} of ${ins.length} gaps correct. The green tags show the right words.`); }}, 'Check')));
     if (saved && saved.done) mark();
+  }
+  else if (t==='graph'){
+    const isDone = !!(saved && saved.done), r0 = saved && saved.resp;
+    const doneMsg = m=>`You earned ${m.filter(Boolean).length} of 5 marks. The list under the graph shows each mark.`;
+    body.append(h('details',{class:'gm-remind no-gloss'}, h('summary',{}, 'Need a reminder? How to make a good graph'), h('ul',{}, h('li',{}, 'Type: numbers along the bottom need a scatter graph, and names need a bar graph.'), h('li',{}, 'Title: the x-axis, then vs, then the y-axis.'), h('li',{}, 'Axes: what you change goes along the bottom, and what you measure goes up the side. Put units in brackets.'), h('li',{}, 'Numbers: equal gaps, with all your data fitting.'), h('li',{}, 'Points: go along to the x number, then up to the y number.'))));
+    const gm = graphMaker(body, it.graph, {help:false, saved:r0 && r0.s, locked:isDone, revealed:isDone, onChange:s=>{ if (!card.classList.contains('done')) onSave({resp:{s}, done:false}); }});
+    body.append(h('div',{class:'row'}, h('button',{class:'btn primary small', type:'button', onclick:()=>{
+      if (card.classList.contains('locked')) return;
+      const e = gm.eval();
+      if (!e.touched && !card.dataset.warned){ card.dataset.warned = 1; fb.className = 'feedback hint'; fb.innerHTML = 'Make your graph first. Press Check again to check anyway.'; return; }
+      gm.reveal(); const m = e.marks.map(x=>x ? 1 : 0);
+      save({s:gm.state(), m}, e.score===5, doneMsg(m)); }}, 'Check my graph')));
+    if (isDone){ if (r0 && r0.m) showFb(!!saved.ok, doneMsg(r0.m)); lock(); }
   }
   else if (t==='draw' || t==='write'){
     let pad = null, ta = null, rwx = null, setModel = ()=>{};
@@ -5681,7 +6093,18 @@ function wsItem(it, n, mode, saved){
     box.append(tbl);
     if (key) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Reasons: '), it.sents.map((s,i)=>`${i+1} ${s.a>=0 ? it.labels[s.a] : 'No label'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`).join('; ') + '.'));
     else box.append(h('p',{class:'ws-note'}, 'Tick one box for each sentence. Tick No label if the sentence doesn\u2019t belong.'));
+  } else if (t==='graph'){
+    const gs = it.graph, gdone = stu && !!(saved && saved.done && r && r.s), md = key ? gmModel(gs) : null;
+    box.append(h('div',{class:'tbl-wrap'}, gmDataTable(gs, 'ws-table ws-gtable')));
+    box.append(h('img',{class:'ws-gimg', alt:key ? 'The correct graph' : gdone ? 'My graph' : 'Grid for the graph', src: key ? gmImageURL(gs, md) : gdone ? gmImageURL(gs, r.s) : gmGridURL()}));
+    if (stu && !gdone) box.append(h('p',{class:'ws-note'}, 'Not answered.'));
+    if (mode==='blank') box.append(h('p',{class:'ws-note'}, 'Draw your graph on the grid. It needs a title, both axis labels with units in brackets, axis numbers with the same gap each time, and every point in the right place.'));
+    const mk = key ? [1,1,1,1,1] : gdone ? (r.m || []) : null;
+    box.append(h('table',{class:'ws-table ws-gmarks'}, h('thead',{}, h('tr',{}, h('th',{}, '#'), h('th',{}, 'What earns the mark'), h('th',{}, 'Mark'))),
+      h('tbody',{}, GM_MARK_NAMES.map((nm,k)=>h('tr',{}, h('td',{}, k+1), h('td',{}, nm), h('td',{class:'ws-cell'}, mk ? (mk[k] ? '\u2713 1' : '\u2717 0') : ''))))));
+    if (key) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Look for: '), `${gs.kind==='scatter' ? 'a scatter graph' : 'a bar graph'}; the title “${md.title}”; labels “${gs.head[0]}” and “${gs.head[1]}”; the y-axis from ${md.ymin} to ${md.ymax} in gaps of ${md.ystep}${gs.kind==='scatter' ? ` and the x-axis from ${md.xmin} to ${md.xmax} in gaps of ${md.xstep}` : ''}; every point or bar within 3.5% of the axis range. Other sensible axis numbers are fine.`));
   } else if (t==='write'){
+    if (it.evidence && it.evidence.kind==='table' && it.evidence.head) box.append(h('div',{class:'tbl-wrap'}, gmDataTable({head:it.evidence.head, rows:it.evidence.rows}, 'ws-table ws-gtable')));
     if (it.evidence && it.evidence.kind==='graph') box.append(rwSvg(it.evidence, it.evidence.rows, stu && r && r.ev ? r.ev : null, null));
     if (it.evidence && !key){ const ev = stu && r && r.ev ? r.ev : null; box.append(h('p',{class:'ws-note'}, h('b',{}, 'My evidence: '), ev ? ev.map(i=>it.evidence.say(it.evidence.rows[i])).join('; ') : h('span',{class:'ws-line'}))); }
     if (it.starters && it.starters.length) box.append(h('p',{class:'ws-note'}, h('b',{}, 'Sentence starters: '), it.starters.join('  ·  ')));
@@ -5714,7 +6137,7 @@ function buildWorksheet(stop, mode, name, part){
     root.append(h('div',{class:'ws-feedback'}, h('h3',{class:'ws-part'}, 'Feedback page'),
       h('p',{}, `Auto-marked questions: `, h('b',{}, `${right} of ${auto.length} correct`), `. Questions answered: ${items.filter((_,i)=>st[i]&&st[i].done).length} of ${items.length}.`),
       progressBox(stop, part),
-      h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, 'Question'), h('th',{}, 'Type'), h('th',{}, 'Result'))), h('tbody',{}, items.map((it,i)=>h('tr',{}, h('td',{}, i+1), h('td',{}, typeName(it)), h('td',{}, !(st[i]&&st[i].done) ? 'Not answered' : SELF(it.t) ? `Self-checked (${(st[i].resp.ticks||[]).length} of ${(it.checklist||[]).length} ticked)` : st[i].ok ? '✓ Correct' : '✗ Try again')))))));
+      h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, 'Question'), h('th',{}, 'Type'), h('th',{}, 'Result'))), h('tbody',{}, items.map((it,i)=>h('tr',{}, h('td',{}, i+1), h('td',{}, typeName(it)), h('td',{}, !(st[i]&&st[i].done) ? 'Not answered' : it.t==='graph' ? `Graph: ${((st[i].resp && st[i].resp.m) || []).filter(Boolean).length} of 5 marks` : SELF(it.t) ? `Self-checked (${(st[i].resp.ticks||[]).length} of ${(it.checklist||[]).length} ticked)` : st[i].ok ? '✓ Correct' : '✗ Try again')))))));
   }
   return root;
 }
@@ -6180,6 +6603,13 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
   };
   const byX = rs=>rs.slice().sort((a,b)=>a[0]-b[0]);
   const emRows = [[1,500],[2,1000],[3,1500],[4,2000]], genRows = [[2,1.6],[4,3.2],[6,4.8],[8,6.4]];
+  /* the data for the three Check graphs: the same figures as the Data paragraph that follows each one */
+  const EM_HEAD = ['Number of cells', 'Mass of steel lifted (kg)'], GEN_HEAD = ['Wheel turns each second', 'Peak voltage (V)'];
+  const EM_GRAPH = {head:EM_HEAD, rows:emRows, kind:'scatter', xWord:['cell','battery','batteries'], yWord:['mass','steel','lifted','lift','weight','load']};
+  const GEN_GRAPH = {head:GEN_HEAD, rows:genRows, kind:'scatter', xWord:['turn','wheel','spin','rotation','revolution','speed'], yWord:['voltage','volt','peak']};
+  const pw = id=>POWER.find(p=>p.id===id);   /* CO₂ figures come straight from the Power list that co2Chart draws */
+  const PW_GRAPH = {head:['Energy source', 'CO₂ released (g per kWh)'], kind:'bar', rows:['coal','gas','biomass','wind'].map(id=>[pw(id).name, pw(id).co2]),
+    xWord:['source','energy','power','fuel','type','generation'], yWord:['co2','carbon','dioxide','release','emission','emitted']};
   const kgs = n=>String(n).replace(/\B(?=(\d{3})+$)/g, ',');
   const cellWord = n=>n===1 ? '1 cell' : n + ' cells';
   const emPara = (a,b)=>`The results show that more cells make the crane’s electromagnet stronger. With ${cellWord(a[0])} it lifted a mass of ${kgs(a[1])} kg, and with ${cellWord(b[0])} it lifted ${kgs(b[1])} kg. This happens because more cells push a bigger current through the coils, so the magnetic field gets stronger and holds more steel.`;
@@ -6193,10 +6623,11 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
         {t:'I enjoyed using the iron nail the most.', a:-1, why:'A feeling is no help here.'},
         {t:'With an aluminium core it picked up 1 clip.', a:1, why:'A second number to compare.'},
         {t:'Iron becomes a strong magnet inside the coil, so the magnetic field is much stronger.', a:2, why:'It explains why.'}]},
-      {t:'write', label:'Data paragraph', obj:['Cii'], q:'A scrapyard crane uses an electromagnet to lift old cars and scrap steel. The workers kept the coils the same and changed the number of cells. Their question: does the number of cells change how strong the crane’s electromagnet is? Tap two points on the graph, then answer the question.',
+      {t:'graph', obj:['Ci'], q:'The scrapyard workers recorded these results. Make a graph of them.', graph:EM_GRAPH},
+      {t:'write', label:'Data paragraph', obj:['Cii'], q:'A scrapyard crane uses an electromagnet to lift old cars and scrap steel. The workers kept the coils the same and changed the number of cells. Their question: does the number of cells change how strong the crane’s electromagnet is? Tap two rows of the table, then answer the question.',
         words:['cells','mass','magnetic field','stronger'], starters:['The results show that…','With … cells it lifted…','This happens because…'],
         remind:'Claim, Evidence, Reasoning. Say it, show it, explain it.', remindOpen:true,
-        evidence:{kind:'graph', rows:emRows, need:2, xl:'Number of cells', yl:'Mass of steel lifted (kg)', xMax:5, yMax:2500, xStep:1, yStep:500, say:r=>`With ${cellWord(r[0])} it lifted ${kgs(r[1])} kg`},
+        evidence:{kind:'table', head:EM_HEAD, rows:emRows, need:2, say:r=>`With ${cellWord(r[0])} it lifted ${kgs(r[1])} kg`},
         model:EM_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return emPara(a,b); },
         checklist:[RWT.C1[0], RWT.C1[1], 'I explained the pattern using the magnetic field.', 'I used the words given.']}],
     generators: o=>[o[1], o[2], o[4], Object.assign({}, o[5], {q:o[5].q.replace('in step with the speed', 'in step with the turns each second').replace('at 7 turns a second', 'at 7 turns each second')}),
@@ -6206,10 +6637,11 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
         {t:'We used a red generator.', a:-1, why:"True, but colour doesn't test the hypothesis."},
         {t:'A stronger magnet makes a bigger voltage in the coil as it moves past.', a:2, why:'It explains why.'},
         {t:'So the data support the hypothesis.', a:0, why:'It says support or contradict.'}]},
-      {t:'write', label:'Data paragraph', obj:['Cii','Ciii'], q:"A bike dynamo is a small generator. The wheel spins a magnet next to a coil of wire. A cyclist says: 'If my wheel turns twice as fast, the dynamo makes twice the peak voltage.' Tap two points on the graph that test this. Do the data support or contradict it?",
+      {t:'graph', obj:['Ci'], q:'The cyclist recorded these results. Make a graph of them.', graph:GEN_GRAPH},
+      {t:'write', label:'Data paragraph', obj:['Cii','Ciii'], q:"A bike dynamo is a small generator. The wheel spins a magnet next to a coil of wire. A cyclist says: 'If my wheel turns twice as fast, the dynamo makes twice the peak voltage.' Tap two rows of the table that test this. Do the data support or contradict it?",
         words:['turns each second','moving magnet','peak voltage','twice'], starters:['The data…','At … turns each second the peak voltage was…'],
         remind:'Say support or contradict. Show two numbers. Explain the science.', remindOpen:false,
-        evidence:{kind:'graph', rows:genRows, need:2, xl:'Wheel turns each second', yl:'Peak voltage (V)', xMax:10, yMax:8, xStep:2, yStep:2, say:r=>`At ${r[0]} turns each second the peak voltage was ${r[1]} V`},
+        evidence:{kind:'table', head:GEN_HEAD, rows:genRows, need:2, say:r=>`At ${r[0]} turns each second the peak voltage was ${r[1]} V`},
         model:GEN_MODEL, modelFor:rs=>{ const [a,b] = byX(rs); return b[0]===2*a[0] ? `The data support this hypothesis. At ${a[0]} turns each second the peak voltage was ${a[1]} V, and at ${b[0]} turns each second it was ${b[1]} V. That is twice as fast and twice the peak voltage. The moving magnet passes the coil faster, so it makes a bigger voltage.` : GEN_MODEL; },
         checklist:[RWT.C2[0], RWT.C2[1], 'I explained the pattern using a magnet moving past the coil faster.', 'I used the words given.']}],
     acdc: o=>[o[1], o[3], o[4], o[5],
@@ -6235,16 +6667,17 @@ Object.entries(CREVIEWS).forEach(([id, items])=>{ const s = STOPS.find(x=>x.id==
         {t:'Nobody has to mine the wind or pay for it.', a:0, why:'The energy source is free.'},
         {t:'Wind turbines look beautiful on a green hill.', a:2, why:'People can disagree.'},
         {t:'A coal power station can run at any time, so a town with only wind needs a backup.', a:1, why:"Wind can't always meet the need."}]},
+      {t:'graph', obj:['Ci'], q:'Make a graph of the CO₂ released by each energy source.', graph:PW_GRAPH},
       {t:'write', label:'Reading paragraph', obj:['Di','Dii','Diii'], q:"Your town's old coal power station is closing. Should a wind farm take its place? Give one benefit, one drawback and your opinion with a reason.",
         words:['renewable','CO₂','reliable','backup'], evidenceFrom:4,
         model:'One benefit is that wind is renewable, and a wind turbine releases only about 11 g of CO₂ for each kWh, while coal releases about 820 g. One drawback is that wind is less reliable, because a still day means no electricity. I think the town should build the wind farm and keep a backup for still days, because less CO₂ means less warming of the planet.',
         checklist:RWT.B.slice()}]
   };
   const keys = {electromagnets:[0,1,2,3,'rw1','rw2','rw3'], generators:[0,1,2,'rw1','rw2','rw3',4,5], acdc:[0,1,2,3,'rw1','rw2','rw3'], power:[0,1,2,'rw1','rw2']};
-  const mins = {electromagnets:[20,12], generators:[23,13], acdc:[22,12], power:[17,13]};
+  const mins = {electromagnets:[23,15], generators:[23,16], acdc:[22,12], power:[17,16]};   /* about 3 minutes more for each Check graph, and 3 for the Electromagnets Learn graph */
   Object.keys(lists).forEach(id=>{
     const s = STOPS.find(x=>x.id===id); if (!s || s.reviewArchive) return;
-    s.reviewArchive = s.review; s.review = lists[id](s.review); s.rvKeyF = id + (id==='electromagnets' || id==='generators' ? '~f3' : '~f2');
+    s.reviewArchive = s.review; s.review = lists[id](s.review); s.rvKeyF = id + ({electromagnets:'~f4', generators:'~f4', power:'~f3'}[id] || '~f2');
     s.learnKeys = keys[id]; s.learnMins = mins[id][0]; s.reviewMins = mins[id][1];
   });
 })();
@@ -7603,6 +8036,17 @@ function markItem(it){
   else if (t==='num'){ marks = 2; L.push(`Answer: ${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''} (1 mark).`); L.push(`Working shown or method clear (1 mark)${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}.`); L.push('If the student completed this in the sim, the working box may be empty: give the working mark if the answer is correct.'); }
   else if (t==='fill'){ marks = it.blanks.length; it.blanks.forEach((b,i)=>{ const all = [...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))]; L.push(`Gap ${i+1}: ${all.join(' / ')} (1 mark)`); }); L.push('Accept small spelling mistakes if the meaning is clear.'); }
   else if (t==='mark'){ marks = it.sents.length; L.push(`1 mark for each sentence labelled correctly (${marks} marks). A sentence that does not belong has no label (the No label box on the sheet).`); it.sents.forEach((s,i)=>L.push(`- ${i+1}. ${plain(s.t)} → ${s.a>=0 ? it.labels[s.a] : 'White'}${s.why ? ' (' + plain(s.why).replace(/\.$/,'') + ')' : ''}`)); }
+  else if (t==='graph'){
+    marks = 5; const g = it.graph, ex = gmModel(g);
+    L.push('The sim marks this question automatically. The marks appear on the student’s sheet under their graph (a tick or a cross for each of the 5 marks), so give 1 mark for each tick printed there. If the picture clearly disagrees, trust the picture and say why.');
+    L.push('1 mark for each of these (5 marks):');
+    L.push(`- Right type of graph: a ${g.kind==='scatter' ? 'scatter graph (numbers along the bottom)' : 'bar graph (names along the bottom)'}.`);
+    L.push(`- A title written as x vs y, for example “${ex.title}”.`);
+    L.push(`- Both axis labels, with units in brackets where the column has one: x-axis “${g.head[0]}”, y-axis “${g.head[1]}”.`);
+    L.push(`- Axis numbers that fit all the data, with the same gap each time, for example ${ex.ymin} to ${ex.ymax} in gaps of ${ex.ystep}${g.kind==='scatter' ? ` and ${ex.xmin} to ${ex.xmax} in gaps of ${ex.xstep}` : ''}. Other sensible numbers are fine.`);
+    L.push('- Every point (or bar) in the right place, within 3.5% of the axis range. One wrong point loses this mark only.');
+    L.push(`The data: ${g.rows.map(r=>`${g.head[0]} = ${r[0]}, ${g.head[1]} = ${r[1]}`).join('; ')}.`);
+  }
   else if (t==='draw' || t==='write'){
     const ck = it.checklist || []; marks = Math.max(1, ck.length);
     L.push(`1 mark for each of these (${marks} marks):`); ck.forEach(c=>L.push(`- ${plain(c)}`));
@@ -7618,11 +8062,12 @@ function markItem(it){
 /* ================= MYP Year 1 strands (teacher-only: never shown on student or blank sheets) ================= */
 // MYP level cut-offs: lowest percentage for each level 1–8 (0% earned = level 0). Tom can change these.
 const LEVEL_CUTS = [1, 13, 26, 38, 51, 63, 76, 88];
-const STRAND_ORDER = ['Ai','Aii','Aiii','Cii','Ciii','Di','Dii','Diii'];
+const STRAND_ORDER = ['Ai','Aii','Aiii','Ci','Cii','Ciii','Di','Dii','Diii'];
 const STRAND_WORDING = {
   Ai:'outline scientific knowledge',
   Aii:'apply scientific knowledge and understanding to solve problems set in familiar situations',
   Aiii:'apply information to make judgments',
+  Ci:'present collected and transformed data',
   Cii:'interpret data and outline results using scientific reasoning',
   Ciii:'discuss the validity of a prediction based on the outcome of the scientific investigation',
   Di:'summarize the ways in which science is applied and used to address a specific problem or issue',
@@ -7683,6 +8128,7 @@ function keyAnswerLine(it){
   if (t==='num') return `${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''}. 1 mark for the answer and 1 for working or method${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}. If the working box is empty but the answer is right, give both marks.`;
   if (t==='fill') return it.blanks.map((b,i)=>`gap ${i+1}: ${[...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))].join(' / ')}`).join('; ') + '. (1 mark per gap; accept small spelling mistakes if the meaning is clear.)';
   if (t==='mark') return it.sents.map((s,i)=>`${i+1}) ${s.a>=0 ? it.labels[s.a] : 'No label'}`).join('; ') + '. (1 mark per sentence; a sentence that does not belong has no label.)';
+  if (t==='graph'){ const g = it.graph; return `The sim marks this automatically, and the marks appear under the student’s graph on the sheet, so use those. 5 marks, 1 each: right type of graph (${g.kind}); title written as x vs y; both axis labels with units in brackets where the column has one; axis numbers that fit the data with the same gap each time; every point in the right place (within 3.5% of the axis range; one wrong point loses this mark only). The data: ${g.rows.map(r=>`${g.head[0]} = ${r[0]}, ${g.head[1]} = ${r[1]}`).join('; ')}.`; }
   if (t==='draw' || t==='write'){ const ck = (it.checklist||[]).map(plain); let s = `Look for: ${ck.join('; ')}. (1 mark for each.)`; if (t==='write' && typeof it.model==='string') s += ` Model answer: ${plain(it.model)}`; if (t==='draw') s += ' Judge the science, not the artistic quality.'; return s; }
   return '';
 }
@@ -7708,6 +8154,7 @@ function howToMarkLines(keyName){ keyName = keyName || 'written answer key'; ret
   '- Each stop has two worksheets. The Foundation worksheet covers the Learn steps. The Challenge worksheet is an extension that covers the Challenge missions; only some students may be set it.',
   '- Each worksheet starts with "Steps completed in the sim": the Learn steps (Foundation) or the Challenge missions (Challenge) the student should do before answering. A blue tick means the sim recorded that step as done. These are not marked, but mention any skipped steps in your feedback.',
   '- A “Mark it” question prints the numbered sentences with one box under each label and a No label box. The student’s ticked box is their answer; a sentence with no label has the No label box ticked. Give 1 mark for each sentence with the right box.',
+  '- A “Make a graph” question prints the data table and the student’s graph as a picture. The sim has already marked it in five parts, and the marks (a tick or a cross for each) are printed under the graph. Give 1 mark for each tick. The five marks are: the right type of graph, a title written as x vs y, both axis labels with units in brackets, axis numbers that fit the data with the same gap each time, and every point in the right place.',
   '- A “Data paragraph” or “Reading paragraph” is the student’s own writing with four tick points. For a Data paragraph the student first tapped two rows or two points; “My evidence” on the sheet shows which, so judge their numbers against those rows.',
   '- Every auto-marked question in the sim gets one go. A wrong answer is shown with the right answer, so check the student’s first answer as printed.',
   '- If a sheet is missing, a question is blank, or the upload is an empty sheet, give 0 for those questions and say kindly what is missing.',

@@ -16,7 +16,9 @@ Quoted text is exact student text. *Teacher* items stay off student screens.
 
 **Paragraph card:** the `write` type with four ticks, titled "Data paragraph" or "Reading paragraph". Marked evidence sits beside the box, with corrected labels. In Ch 1 and 2 the student taps two rows or points first. Ticks below name a catalogue section 3 row.
 
-**Check:** the listed items, Mark it, then the paragraph. Other questions stay in the data for retrieval and the Time Test.
+**Make a graph (Electromagnets Learn step 1A, and the Check in Electromagnets, Generators and Power):** the student makes the graph on one screen with the data table always showing. Steps in order: choose scatter or bar, type a title ("x vs y"), type both axis labels with units in brackets, choose lowest, highest and gap for each axis, then press and drag orange chips onto the graph. Any capital letters and sensible word choices are accepted. A point counts if it is within 3.5% of the axis range. In Learn, green and red rings and a seven-point checklist show live. In Check there are no hints until the student presses Check, and they get one go. Marks (strand Ci, "present collected and transformed data", never shown to students): 1 the right type of graph; 2 a title written as x vs y; 3 both axis labels, with units where the column has one; 4 axis numbers that fit the data with the same gap each time; 5 every point in the right place. The worksheet prints the picture and the five marks; the blank copy prints the data table and an empty grid; the key prints a correct graph.
+
+**Check:** the listed items, a graph question (Electromagnets, Generators and Power), Mark it, then the paragraph. The graph question sits before the paragraph, so the paragraph is now item 7. Other questions stay in the data for retrieval and the Time Test.
 
 **Strands** (*Teacher*, to confirm against WAB's guide): Cii "interpret data and outline results using scientific reasoning"; Ciii "discuss the validity of a prediction based on the outcome of the scientific investigation".
 
@@ -55,7 +57,7 @@ Rig: coils only, 2 cells, iron core, no wobble. Table on screen at once.
   2. "With 1 cell it picked up 6 clips, and with 4 cells it picked up 24 clips." Evidence
   3. "More cells push a bigger current through the coil, so the magnetic field gets stronger." Reasoning
 **Key idea (after marking):** "Claim, Evidence, Reasoning. Say it, show it, explain it."  
-**Write:** "Your question was: does the number of coils change how strong an electromagnet is? Look at your results. Write one claim that answers this question." A graph of the coil results sits beside the box, headed "My results". Any text counts. Model: "My results show that more coils make a stronger electromagnet."  
+**Write:** "Your question was: does the number of coils change how strong an electromagnet is? Look at your results. Write one claim that answers this question." The coil results sit beside the box, headed "My results". Any text counts. Model: "My results show that more coils make a stronger electromagnet."  
 **Hint:** "Try starting with: My results show that…"
 
 ### Check
@@ -70,10 +72,12 @@ Keep Q1 table (Aii), Q2 num (Aiii), Q3 multi (Ai), Q6 sort (Di).
 4. "With an aluminium core it picked up 1 clip." Evidence: "A second number to compare."
 5. "Iron becomes a strong magnet inside the coil, so the magnetic field is much stronger." Reasoning: "It explains why."
 
+**Graph question (new, before the paragraph)** (*Teacher*: Ci). Prompt: "The scrapyard workers recorded these results. Make a graph of them." Table: Number of cells 1, 2, 3, 4 and Mass of steel lifted (kg) 500, 1000, 1500, 2000. Scatter graph, 5 marks.
+
 **Data paragraph** (*Teacher*: Cii).
 
-**Prompt:** "A scrapyard crane uses an electromagnet to lift old cars and scrap steel. The workers kept the coils the same and changed the number of cells. Their question: does the number of cells change how strong the crane's electromagnet is? Tap two points on the graph, then answer the question."  
-**Graph:** 1 cell 500 kg, 2 cells 1,000 kg, 3 cells 1,500 kg, 4 cells 2,000 kg. Prints on the worksheet.  
+**Prompt:** "A scrapyard crane uses an electromagnet to lift old cars and scrap steel. The workers kept the coils the same and changed the number of cells. Their question: does the number of cells change how strong the crane's electromagnet is? Tap two rows of the table, then answer the question."  
+**Table:** 1 cell 500 kg, 2 cells 1,000 kg, 3 cells 1,500 kg, 4 cells 2,000 kg. Prints on the worksheet.  
 **Words to use:** cells, mass, magnetic field, stronger  
 **Starters:** "The results show that…"; "With … cells it lifted…"; "This happens because…"  
 **Model (numbers from the points tapped):** "The results show that more cells make the crane's electromagnet stronger. With 1 cell it lifted a mass of 500 kg, and with 4 cells it lifted 2,000 kg. This happens because more cells push a bigger current through the coils, so the magnetic field gets stronger and holds more steel."  
@@ -130,10 +134,12 @@ Q6 fix: "in step with the turns each second" and "at 7 turns each second". Answe
 4. "A stronger magnet makes a bigger voltage in the coil as it moves past." Reasoning: "It explains why."
 5. "So the data support the hypothesis." Claim: "It says support or contradict."
 
+**Graph question (new, before the paragraph)** (*Teacher*: Ci). Prompt: "The cyclist recorded these results. Make a graph of them." Table: Turns each second 2, 4, 6, 8 and Peak voltage (V) 1.6, 3.2, 4.8, 6.4. Scatter graph, 5 marks.
+
 **Data paragraph** (*Teacher*: Cii, Ciii).
 
-**Prompt:** "A bike dynamo is a small generator. The wheel spins a magnet next to a coil of wire. A cyclist says: 'If my wheel turns twice as fast, the dynamo makes twice the peak voltage.' Tap two points on the graph that test this. Do the data support or contradict it?"  
-**Graph:** 2 turns each second 1.6 V, 4 turns 3.2 V, 6 turns 4.8 V, 8 turns 6.4 V. Prints on the worksheet.  
+**Prompt:** "A bike dynamo is a small generator. The wheel spins a magnet next to a coil of wire. A cyclist says: 'If my wheel turns twice as fast, the dynamo makes twice the peak voltage.' Tap two rows of the table that test this. Do the data support or contradict it?"  
+**Table:** 2 turns each second 1.6 V, 4 turns 3.2 V, 6 turns 4.8 V, 8 turns 6.4 V. Prints on the worksheet.  
 **Words to use:** turns each second, moving magnet, peak voltage, twice  
 **Starters:** "The data…"; "At … turns each second the peak voltage was…"  
 **Model:** "The data support this hypothesis. At 2 turns each second the peak voltage was 1.6 V, and at 4 turns each second it was 3.2 V. That is twice as fast and twice the peak voltage. The moving magnet passes the coil faster, so it makes a bigger voltage."  
@@ -277,7 +283,7 @@ Keep Q1 order (Di), Q3 num (Aii), Q5 match (Aiii), Q6 mcq (Ai).
 - **atom:** I can describe how the model of the atom changed over time. I can name the protons, neutrons and electrons in an atom and say where they are. I can use the atomic number and mass number to build an atom.
 - **static:** I can explain how rubbing moves electrons from one object to another. I can work out if an object has a positive or negative charge. I can predict if two charged objects will repel or attract. I can explain how lightning happens and how a lightning rod protects a house.
 - **circuits:** I can name the parts of a circuit and match them to their symbols. I can build a complete circuit with a switch. I can explain why a shortcut in a circuit stops a bulb from lighting. I can use an ammeter to measure current.
-- **electromagnets:** I can explain how an electric current makes a magnetic field. I can describe how to make an electromagnet stronger. I can run a fair test and pick the best evidence from my results. I can write a CER paragraph with a claim, evidence and reasoning.
+- **electromagnets:** I can explain how an electric current makes a magnetic field. I can describe how to make an electromagnet stronger. I can run a fair test, make a graph and pick the best evidence from my results. I can write a CER paragraph with a claim, evidence and reasoning.
 - **ohm:** I can sort materials into conductors and insulators. I can explain why metals conduct electricity. I can describe what a resistor does to the current. I can use V = I × R to work out voltage, current or resistance.
 - **generators:** I can explain how moving a magnet near a coil of wire makes electricity. I can describe how to make a generator give a bigger voltage. I can test a hypothesis using data. I can write a paragraph that says if data support or contradict a hypothesis.
 - **bulb:** I can name the parts of a light bulb and say what they do. I can explain why a filament glows. I can explain what gets used up when a bulb is lit. I can compare a filament bulb with an LED.
@@ -285,3 +291,11 @@ Keep Q1 order (Di), Q3 num (Aii), Q5 match (Aiii), Q6 mcq (Ai).
 - **acdc:** I can describe the difference between AC and DC. I can explain how high voltage helps send electricity to a town. I can find the problem, the science and the solution in a science text. I can write a clear paragraph about how science solves a problem.
 - **power:** I can explain how a spinning turbine helps a power station make electricity. I can compare the CO₂ from different energy sources. I can tell a fact from an opinion. I can sum up the benefits and drawbacks of an energy source.
 - **future:** I can sort energy sources into renewable and non-renewable. I can explain how solar panels make electricity without a turbine. I can plan how to keep a town’s lights on using different energy sources.
+
+
+## Graph questions: saving and timing (Nov 2026)
+- Power Check also has a graph question before its Reading paragraph: "Make a bar graph of the CO2 released by each energy source." Data from the app's CO2 chart: Coal 820, Natural gas 490, Biomass 230, Wind 11 (g per kWh). Bar graph, 5 marks.
+- Electromagnets Learn step "Run your fair test" now ends with a teach card, "How to make a good graph" (plant height against days), then a graph of the student's own coil results with live help. The step finishes when the graph is right.
+- Check answers save under new keys: `electromagnets~f4`, `generators~f4`, `power~f3`. Old answers for the first five items are carried over, and the old paragraph answer moves down one place to make room for the graph.
+- Each Check graph adds about 3 minutes; the Electromagnets Learn graph adds 3.
+- Graph questions are marked by the sim, so they print Part B and are left out of the Time Test and retrieval.
