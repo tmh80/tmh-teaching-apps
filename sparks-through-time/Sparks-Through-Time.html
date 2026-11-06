@@ -4289,17 +4289,22 @@ registerStop({
         const showGraph = ()=>{
           if (gShown || !tbl || tbl.count!==5) return; gShown = true;
           const COIL = {head:['Coils of wire','Paperclips held (clips)'], rows:[[10,4],[20,8],[30,12],[40,16],[50,20]], kind:'scatter', xWord:['coil','wire','turn'], yWord:['clip','paperclip','held']};
-          const EG = {head:['Days','Height of the plant (cm)'], rows:[[2,3],[4,6],[6,9],[8,12]], kind:'scatter'}, egS = gmModel(EG); Object.assign(egS, {xmin:0, xmax:10, xstep:2, ymin:0, ymax:14, ystep:2});
+          const EG = {head:['Current (A)','Temperature of the bulb (°C)'], rows:[[0.1,23],[0.2,32],[0.3,47],[0.4,68]], kind:'scatter'}, egS = gmModel(EG); Object.assign(egS, {xmin:0, xmax:0.5, xstep:0.1, ymin:0, ymax:80, ystep:10});
           const tHost = h('div'); gHost.append(h('p',{class:'rw-do'}, 'Your table is full. Now make a graph of it.'), tHost);
-          rwTeach(tHost, {title:'How to make a good graph', intro:'A good graph shows the pattern in a table. It has five parts. Read this worked example, then make your own.', eg:'<b>Worked example:</b> Maya grew a bean plant and measured its height every 2 days. Here is her graph.', parts:[
-            {name:'Type', job:'Numbers along the bottom? Use a scatter graph. Names along the bottom? Use a bar graph.', eg:'Days are numbers, so Maya made a scatter graph.'},
-            {name:'Title', job:'Say what the graph shows: the x-axis, then vs, then the y-axis.', eg:'Days vs Height of the plant'},
-            {name:'Axes', job:'Label both axes. What you change goes along the bottom (x). What you measure goes up the side (y). Put the unit in brackets.', eg:'x-axis: Days. y-axis: Height of the plant (cm).'},
-            {name:'Numbers', job:'Start at the lowest number and count up in equal gaps. Stop just above your biggest value, so all your data fits.', eg:'Days: 0 to 10, gap 2. Height: 0 to 14, gap 2.'},
-            {name:'Points', job:'Plot carefully. Find the x number along the bottom, then go up to the y number and put a dot there.', eg:'Day 6 and 9 cm: go along to 6, then up to 9.'}]}, inner=>{
-            graphMaker(inner, COIL, {help:true, saved:gslot.saved, onChange:v=>gslot.put(v), onComplete:()=>{ gdone.put(1); gOK = true; fin(); }}); });
+          rwTeach(tHost, {title:'How to make a good graph', intro:'A good graph shows the pattern in a table. It has five parts. Read this worked example, then make your own.', eg:'<b>Worked example:</b> Aisha measured how hot a bulb got as she turned up the current. Here is her graph.', parts:[
+            {name:'Type', job:'Look at what you changed. If it is a number, use a scatter graph. If it is a name or a group, use a bar graph.', eg:'Current is a number, so Aisha used a scatter graph. For different types of bulb, she would use a bar graph.'},
+            {name:'Title', job:'Say what the graph shows: the x-axis, then vs, then the y-axis.', eg:'Current vs Temperature of the bulb'},
+            {name:'Axes', job:'Label both axes. What you change goes along the bottom (x). What you measure goes up the side (y). Put the unit in brackets.', eg:'x-axis: Current (A). y-axis: Temperature of the bulb (°C).'},
+            {name:'Numbers', job:'Start at the lowest number and count up in equal gaps. Stop just above your biggest value, so all your data fits.', eg:'Current: 0 to 0.5, gap 0.1. Temperature: 0 to 80, gap 10.'},
+            {name:'Points', job:'Plot carefully. Find the x number along the bottom, then go up to the y number and put a dot there.', eg:'0.3 A and 47 °C: go along to 0.3, then up to 47.'}]}, inner=>{
+            const qh = h('div'), gh = h('div'); inner.append(h('h3',{}, 'Scatter graph or bar graph?'), h('p',{class:'rw-do'}, 'Look at what each student changed. Pick the right graph.'), qh, gh);
+            askInline(qh, [
+              {q:'Zara tests iron, steel and aluminium cores, and counts the paperclips each one holds.', options:['Scatter graph','Bar graph'], answer:1, keepOrder:true, explain:'She changed the type of core. Those are names, so she needs a bar graph.'},
+              {q:'Omar changes the voltage from 1.5 V to 6 V, and measures the current each time.', options:['Scatter graph','Bar graph'], answer:0, keepOrder:true, explain:'He changed the voltage. That is a number, so he needs a scatter graph.'},
+              {q:'Lena tests a filament bulb and an LED, and measures how hot each one gets.', options:['Scatter graph','Bar graph'], answer:1, keepOrder:true, explain:'She changed the type of bulb. Those are names, so she needs a bar graph.'}
+            ], ()=>{ if (gh.firstChild) return; gh.append(h('h3',{}, 'Now make your graph')); graphMaker(gh, COIL, {help:true, saved:gslot.saved, onChange:v=>gslot.put(v), onComplete:()=>{ gdone.put(1); gOK = true; fin(); }}); }, 'gtype'); });
           const tc = tHost.querySelector('.rw-teach'), lst = tc && tc.querySelector('.rw-teach-list');
-          if (lst) lst.before(h('img',{class:'gm-eg', alt:'A worked example graph: Days vs Height of the plant, with the days along the bottom and the height up the side', src:gmImageURL(EG, egS)}));
+          if (lst) lst.before(h('img',{class:'gm-eg', alt:'A worked example graph: Current vs Temperature of the bulb, with the current along the bottom and the temperature up the side', src:gmImageURL(EG, egS)}));
         };
         tbl = readingTable(right, {key:'tbl', cols:['Coils of wire','Paperclips held'], rows:[10,20,30,40,50].map(c=>({key:String(c), cells:[c]})), unit:'clips', tol:0.5, onChange:()=>{ fin(); showGraph(); }});
         electroRig(left, {controls:['coils'], start:{coils:10, cells:2, core:'iron', on:true}, onChange:s=>tbl.live(String(s.coils), s.clips)});
@@ -5963,7 +5968,7 @@ function reviewCard(el, it, n, saved, onSave, opts){
   else if (t==='graph'){
     const isDone = !!(saved && saved.done), r0 = saved && saved.resp;
     const doneMsg = m=>`You earned ${m.filter(Boolean).length} of 5 marks. The list under the graph shows each mark.`;
-    body.append(h('details',{class:'gm-remind no-gloss'}, h('summary',{}, 'Need a reminder? How to make a good graph'), h('ul',{}, h('li',{}, 'Type: numbers along the bottom need a scatter graph, and names need a bar graph.'), h('li',{}, 'Title: the x-axis, then vs, then the y-axis.'), h('li',{}, 'Axes: what you change goes along the bottom, and what you measure goes up the side. Put units in brackets.'), h('li',{}, 'Numbers: equal gaps, with all your data fitting.'), h('li',{}, 'Points: go along to the x number, then up to the y number.'))));
+    body.append(h('details',{class:'gm-remind no-gloss'}, h('summary',{}, 'Need a reminder? How to make a good graph'), h('ul',{}, h('li',{}, 'Type: if you changed a number, use a scatter graph. If you changed a name or a group, use a bar graph.'), h('li',{}, 'Title: the x-axis, then vs, then the y-axis.'), h('li',{}, 'Axes: what you change goes along the bottom, and what you measure goes up the side. Put units in brackets.'), h('li',{}, 'Numbers: equal gaps, with all your data fitting.'), h('li',{}, 'Points: go along to the x number, then up to the y number.'))));
     const gm = graphMaker(body, it.graph, {help:false, saved:r0 && r0.s, locked:isDone, revealed:isDone, onChange:s=>{ if (!card.classList.contains('done')) onSave({resp:{s}, done:false}); }});
     body.append(h('div',{class:'row'}, h('button',{class:'btn primary small', type:'button', onclick:()=>{
       if (card.classList.contains('locked')) return;

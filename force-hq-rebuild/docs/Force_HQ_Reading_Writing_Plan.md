@@ -51,7 +51,7 @@ Written so they can be lifted into the skill (section 10). The Sparks comment or
 22. Open each chapter with clear I can statements on their own first screen, and Next opens step 1. Immediately before its review, students place an X on a Beginning, Developing, Proficient, Mastering scale for each statement. Keep this on screen, off worksheets.
 23. Shuffle the display order of anything students classify, sort or match, with a stable order across reloads. (Tom: IV, DV, CV rows matched his lab report order, so position gave away the answer.)
 24. Keep the I can statements one click away on every tab. (Tom: they should always be available to refer to.)
-25. Students make graphs themselves as well as analyse them: choose the type, write the title and axis labels, set the scale and plot the points, using the Paper Plane Lab graph maker. Teach it with a worked example first. If a paragraph uses the same data, give it as a table, so the paragraph cannot reveal the graph. (Tom: "The paper plane virtual lab does a great job of this.")
+25. Students make graphs themselves as well as analyse them: choose the type, write the title and axis labels, set the scale and plot the points, using the Paper Plane Lab graph maker. Teach it with a worked example from the sim's subject that isn't tied to one concept (Sparks uses a bulb's temperature against current). Teach scatter or bar as its own skill: a number you changed needs a scatter graph, and a name or group needs a bar graph, with practice questions before students make a graph. If a paragraph uses the same data, give it as a table, so the paragraph cannot reveal the graph. (Tom: "The paper plane virtual lab does a great job of this.")
 
 ## 3. What is different about Force HQ
 

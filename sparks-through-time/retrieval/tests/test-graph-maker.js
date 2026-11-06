@@ -195,11 +195,14 @@ const spec = (id, over) => Object.assign({rows: CASES[id].rows}, CASES[id].good,
     ok(await page.locator('.gm, .rw-teach').count() === 0, 'no graph or lesson before the table is full');
     for (let k = 0; k < 5; k++){ const c = (k + 1) * 10; await page.locator('input[type=range]').first().fill(String(c)); await page.locator('.rt-in').nth(0).fill(String(c / 10 * 4)); await page.locator('.rt-row button:has-text("Check")').first().click(); if (k < 4) ok(await page.locator('.rw-teach').count() === 0, 'the lesson waits for row ' + (k + 1) + ' of 5'); }
     ok(await page.locator('.rw-teach').count() === 1 && await page.locator('.gm').count() === 0, 'when the table is full, the lesson shows first');
-    const teach = await page.locator('.rw-teach').innerText(); ok(/How to make a good graph/.test(teach) && /Days vs Height of the plant/.test(teach) && /Height of the plant \(cm\)/.test(teach) && /0 to 14, gap 2/.test(teach) && !/coil/i.test(teach), 'worked example is a plant height against days, not coils');
+    const teach = await page.locator('.rw-teach').innerText(); ok(/How to make a good graph/.test(teach) && /Current vs Temperature of the bulb/.test(teach) && /Temperature of the bulb \(°C\)/.test(teach) && !/coil/i.test(teach), 'worked example is a bulb, current against temperature, not coils');
     ok(await page.locator('.rw-teach .rw-teach-row').count() === 5 && (await page.locator('.rw-teach-name').allInnerTexts()).join() === 'Type,Title,Axes,Numbers,Points' && await page.locator('.rw-teach img.gm-eg').count() === 1, 'five parts and a picture of the worked example');
     ok(await page.locator('.learn-card.step-done').count() === 0, 'the step is not complete yet');
     await page.screenshot({path: path.join(SHOTS, 'learn-teach-card.png'), fullPage: false});
-    await page.locator('button:has-text("Got it")').click(); const root = page.locator('.gm'); await root.waitFor();
+    await page.locator('button:has-text("Got it")').click(); ok(await page.locator('.gm').count() === 0, 'graph type practice comes before the graph');
+    for (const [k, w] of ['Bar graph', 'Scatter graph', 'Bar graph'].entries()){ await page.locator(`.ask button.opt:has-text("${w}"):not([disabled])`).first().click(); if (k < 2) await page.locator('.ask button:has-text("Next question")').click(); }
+    ok(await page.locator('.ask .opt.wrong').count() === 0, 'graph type answers are right');
+    const root = page.locator('.gm'); await root.waitFor();
     ok(await root.evaluate(r => r.classList.contains('gm-help')) && await root.locator('.gm-check li').count() === 7 && await root.locator('.gm-check li.ok').count() === 0, 'Learn mode: live checklist of 7 items, none ticked yet');
     ok(await root.locator('.gm-table tbody tr').count() === 5, 'the coil table is on screen');
     const names = ['I chose the right type', 'My title', 'My x-axis label', 'My y-axis label', 'My axis numbers', 'All my data is plotted', 'Every point'];
@@ -261,7 +264,7 @@ const spec = (id, over) => Object.assign({rows: CASES[id].rows}, CASES[id].good,
     await openReview(page, 'power'); await page.locator('.rv-card').nth(5).locator('.gm').scrollIntoViewIfNeeded(); ok(await wide() <= 1, 'Power bar graph card: no sideways scroll at 390 px');
     await page.evaluate(() => { Store.data.teacherOK = true; renderStop(STOPS.find(s => s.id === 'electromagnets'), 'learn'); }); await page.waitForSelector('.learn-card');
     for (let k = 0; k < 4; k++) await page.locator('.learn-card .btn.primary:has-text("Next step")').click();
-    await page.evaluate(() => { const LR = lrStore('electromagnets'); LR.mem['rw1'] = {tbl: {10: 4, 20: 8, 30: 12, 40: 16, 50: 20}, teach: 1}; Store.save(); renderStop(STOPS.find(s => s.id === 'electromagnets'), 'learn'); }); await page.waitForSelector('.learn-card');
+    await page.evaluate(() => { const LR = lrStore('electromagnets'); LR.mem['rw1'] = {tbl: {10: 4, 20: 8, 30: 12, 40: 16, 50: 20}, teach: 1, gtype: 3}; Store.save(); renderStop(STOPS.find(s => s.id === 'electromagnets'), 'learn'); }); await page.waitForSelector('.learn-card');
     for (let k = 0; k < 4; k++) await page.locator('.learn-card .btn.primary:has-text("Next step")').click();
     await page.locator('.gm').scrollIntoViewIfNeeded(); ok(await wide() <= 1, 'Learn graph step: no sideways scroll at 390 px (' + await wide() + ')');
     await page.evaluate(() => { const LR = lrStore('electromagnets'); LR.mem['rw1'].teach = undefined; Store.save(); renderStop(STOPS.find(s => s.id === 'electromagnets'), 'learn'); }); await page.waitForSelector('.learn-card');

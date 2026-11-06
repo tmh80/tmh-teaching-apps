@@ -60,6 +60,7 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   for (let k = 0; k < 5; k++){ const c = (k + 1) * 10; await page.locator('input[type=range]').first().fill(String(c)); await page.locator('.rt-in').nth(0).fill(String(c / 10 * 4)); await page.locator('.rt-row button:has-text("Check")').first().click(); }
   ok(await page.locator('.gm').count() === 0 && await page.locator('.rw-teach').count() === 1 && /How to make a good graph/.test(await page.locator('.rw-teach').innerText()), '1A teaches "How to make a good graph" once the table is full, graph still hidden');
   await page.locator('button:has-text("Got it")').click();
+  for (const [k, w] of ['Bar graph', 'Scatter graph', 'Bar graph'].entries()){ await page.locator(`.ask button.opt:has-text("${w}"):not([disabled])`).first().click(); if (k < 2) await page.locator('.ask button:has-text("Next question")').click(); }
   await GH.makeGraph(page, page.locator('.gm'), {type: 'scatter', title: 'Coils of wire vs Paperclips held', xl: 'Coils of wire', yl: 'Paperclips held (clips)', y: [0, 25, 5], x: [0, 60, 10], rows: [[10, 4], [20, 8], [30, 12], [40, 16], [50, 20]]});
   await complete('1A Run your fair test');
   // 1B
