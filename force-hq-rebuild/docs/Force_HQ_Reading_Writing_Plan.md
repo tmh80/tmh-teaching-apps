@@ -48,7 +48,7 @@ Written so they can be lifted into the skill (section 10). The Sparks comment or
 
 **Added from Tom's Sparks play-through**
 21. Make students read the instructions first. Everything below the message stays blurred until they press OK. (Tom: helps students recognise that they should read this first.)
-22. Open each chapter with clear I can statements in a pop-up. These sit on their own first screen: OK moves them into place, then Next opens step 1. Immediately before its review, students place an X on a Beginning, Developing, Proficient, Mastering scale for each statement. Keep this on screen, off worksheets.
+22. Open each chapter with clear I can statements on their own first screen, and Next opens step 1. Immediately before its review, students place an X on a Beginning, Developing, Proficient, Mastering scale for each statement. Keep this on screen, off worksheets.
 23. Shuffle the display order of anything students classify, sort or match, with a stable order across reloads. (Tom: IV, DV, CV rows matched his lab report order, so position gave away the answer.)
 
 ## 3. What is different about Force HQ
@@ -162,7 +162,7 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 
 **Whole-app changes, for every section including Chapter 1**
 10. Read-first OK: the rest of the step stays blurred until the student presses OK. Remembered once pressed, and skipped on finished steps.
-11. I can statements: 3 or 4 at the start of each Foundation, Extension and Skills section, in Grade 7/8 language. They have their own first screen: a draggable pop-up, OK moves them into place, and Next opens step 1. Reuse the Sparks version.
+11. I can statements: 3 or 4 at the start of each Foundation, Extension and Skills section, in Grade 7/8 language. They have their own first screen, and Next opens step 1. Reuse the Sparks version.
 12. Self-check: an X on the four-level scale for each statement, immediately before that section's Check, with the questions hidden until it is done. Reuse the Sparks version. Students part-way through a Check are not blocked.
 13. Shuffled display order for any table, sort or match question, using the Sparks fix.
 
