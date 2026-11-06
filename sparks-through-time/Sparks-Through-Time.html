@@ -496,6 +496,8 @@ table.data th{background:var(--panel-2)}
 .rg-blur{filter:blur(5px); opacity:.55; pointer-events:none; user-select:none}
 .say-ok{display:block; margin:10px 0 0 auto; min-width:84px; font-size:1.05rem}
 .ican-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:12px 18px; margin-bottom:12px} .ican-card h3{margin:0 0 6px} .ican-next{margin-top:12px}
+.ican-peek{margin:12px 0 0; justify-self:start; max-width:100%; background:var(--panel); border:2px solid var(--accent); border-radius:12px; padding:6px 14px; width:fit-content}
+.ican-peek summary{cursor:pointer; font-weight:700; color:var(--accent)} .ican-peek[open]{padding-bottom:10px} .ican-peek[open] summary{margin-bottom:6px}
 .ican-list{margin:0; padding-left:1.2em; font-size:1.2rem; line-height:1.5; font-weight:600}
 .sa-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:14px 18px; margin:10px 0; display:grid; gap:14px} .sa-card h3,.sa-card p{margin:0}
 .sa-can{font-weight:700; margin-bottom:8px !important}
@@ -1828,7 +1830,7 @@ function renderStop(stop, tab){
   const curPart = (tab==='challenge' || tab==='creview') ? 'c' : 'f';
   const saveBtn = h('button',{class:'btn small tab-save-btn', type:'button', title:`Save a PDF of your ${curPart==='c' ? 'Challenge' : 'Foundation'} worksheet so far`, onclick:()=>showWorksheet(stop, 'student', curPart)}, `\ud83d\udcc4 Save my ${curPart==='c' ? 'Challenge' : 'Foundation'} work (PDF)`);
   if (T) wrapEl.append(h('div',{class:'teacher-note'}, '\ud83c\udf93 Teacher mode: every tab and step is unlocked. ', h('button',{class:'btn small ghost', type:'button', onclick:()=>{ Store.data.teacherOK = false; Store.save(); renderHome(); }}, 'Switch to student mode')));
-  wrapEl.append(h('div',{class:'tab-tools'}, saveBtn), tabs, panel);
+  wrapEl.append(h('div',{class:'tab-tools'}, saveBtn), tabs, ICAN[stop.id] ? h('details',{class:'ican-peek'}, h('summary',{}, '🎯 My I can statements'), h('ul',{class:'ican-list'}, ICAN[stop.id].map(t=>h('li',{}, t)))) : '', panel);
   root.append(wrapEl);
 
   if (tab==='learn'){ runLearn(panel, stop); }
@@ -1895,12 +1897,13 @@ function runLearn(el, stop){
   const steps = stop.learn; const p = prog(stop.id); const LR = lrStore(stop.id); let i = 0;
   const done = new Set(steps.map((_,k)=>k).filter(k=>LR.done[lrKey(stop,k)]));
   if (p.learn && done.size < steps.length) steps.forEach((_,k)=>done.add(k));
+  const peek = on=>{ const d = document.querySelector('.ican-peek'); if (d) d.style.display = on ? '' : 'none'; };
   function showIntro(){ /* the first screen of a chapter: its I can statements, then Next opens step 1 */
-    el.innerHTML = '';
+    el.innerHTML = ''; peek(false);
     const ic = icanCard(stop); ic.append(h('button',{class:'btn primary ican-next', type:'button', onclick:()=>{ LR.introDone = true; Store.save(); i = 0; show(); scrollToEl(el); }}, 'Next: Step 1 →')); el.append(ic);
   }
   function show(){
-    el.innerHTML = '';
+    el.innerHTML = ''; peek(true);
     const idx = i, st = steps[idx], K = lrKey(stop, idx);
     const wasDone = done.has(idx);
     LCTX = {mem: LR.mem[K] = LR.mem[K] || {}, n:0};

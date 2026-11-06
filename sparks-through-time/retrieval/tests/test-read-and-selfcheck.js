@@ -48,6 +48,9 @@ let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; con
       if (k < n - 1) await pg.locator('.learn-card .btn.primary:has-text("Next step")').click();
     }
   }
+  await pg.evaluate(() => renderStop(STOPS.find(s => s.id === 'circuits'), 'review')); await pg.waitForSelector('.ican-peek');
+  ok(!(await pg.locator('.ican-peek li').first().isVisible()), 'I can button starts closed');
+  await pg.locator('.ican-peek summary').click(); ok(await pg.locator('.ican-peek li').first().isVisible(), 'I can button opens on the review tab too');
   ok(errs.length === 0, 'no page errors ' + errs[0]);
   await b.close(); console.log(`test-read-and-selfcheck: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();
