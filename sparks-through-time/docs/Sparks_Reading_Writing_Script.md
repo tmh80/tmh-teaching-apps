@@ -40,7 +40,7 @@ Rig: coils only, 2 cells, iron core, no wobble. Table on screen at once.
 ### 1B Mark your evidence
 
 **say:** "Scientists pick the numbers that show the pattern best. Which two rows would convince a friend?"  
-**Key idea:** "Pick two numbers. Give each one its unit."  
+**Key idea:** "Pick two numbers. Write each one with its unit, like 4 clips or 2.4 V."  
 **Do this:** "Tap two rows, then answer." Any rows count. Feedback: "The first and last rows show the biggest change."  
 **Q:** "Which sentence uses evidence best?" ✔ "With 10 coils it picked up 4 clips, and with 50 coils it picked up 20 clips."; "With 10 coils it picked up lots of clips, and with 50 coils it picked up more."; "With 10 and 50 coils it picked up 4 and 20, and that is a big jump."  
 **Hint:** "Can a reader tell what each number means?"
@@ -48,7 +48,7 @@ Rig: coils only, 2 cells, iron core, no wobble. Table on screen at once.
 ### 1C Take apart a good paragraph
 
 **say:** "Scientists share their results in a paragraph called a CER. Let's learn the three parts first. Then you will find them in a real paragraph."  
-**Teach card, "CER: Claim, Evidence, Reasoning":** "A good science paragraph does three jobs, in this order." Example question: "Do dark shirts get hotter in the sun than light shirts?" Claim (answers the question): "Dark shirts get hotter in the sun than light shirts." Evidence (gives numbers from the test, with units): "After 10 minutes the dark shirt was 38 °C, and the light shirt was 30 °C." Reasoning (explains why, using science): "Dark colours absorb more light energy, so the shirt heats up more." Button: "Got it. Let me try".  
+**Teach card, "CER: Claim, Evidence, Reasoning":** "A good science paragraph does three jobs, in this order." Example question: "Do dark shirts get hotter in the sun than light shirts?" Claim (answers the question): "Dark shirts get hotter in the sun than light shirts." Evidence (gives numbers from the test, with their units, like clips, kg or °C): "After 10 minutes the dark shirt was 38 °C, and the light shirt was 30 °C." Reasoning (explains why, using science): "Dark colours absorb more light energy, so the shirt heats up more." Button: "Got it. Let me try".  
 **Do this:** "Here is a different test, with 1 to 4 cells and 30 coils each time. Mark each sentence as Claim, Evidence or Reasoning."  
 **Labels:** Claim, Evidence, Reasoning.
   1. "The results show that more cells make a stronger electromagnet." Claim
