@@ -12,7 +12,7 @@ const NEW = {electromagnets: 3, generators: 3, acdc: 3, power: 2};
   const browser = await chromium.launch();
   const ctx = await browser.newContext({viewport: {width: 1000, height: 1000}});
   const page = await ctx.newPage(), errs = [];
-  await page.addInitScript(() => { new MutationObserver(() => { const b = document.querySelector('.say-ok'); if (b) b.click(); }).observe(document, {subtree: true, childList: true}); }); // the OK gate has its own test
+  await page.addInitScript(() => { new MutationObserver(() => { const b = document.querySelector('.ican-ok:not([disabled])') || document.querySelector('.say-ok'); if (b) b.click(); }).observe(document, {subtree: true, childList: true}); }); // the OK gate has its own test
   page.on('pageerror', e => errs.push(String(e))); page.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await page.goto('file://' + OUT); await page.evaluate(() => localStorage.setItem('sparks-through-time-v1', JSON.stringify({studentName: 'Check', studentClass: '6X'}))); await page.waitForTimeout(1000); await page.reload(); await page.waitForTimeout(500);
   const open = (id, tab) => page.evaluate(([id, tab]) => { Store.data.rv = Store.data.rv || {}; if (tab !== 'learn') prog(id).learn = true; if (tab === 'review'){ Store.data.selfA = Store.data.selfA || {}; Store.data.selfA[id] = {v: [], done: true}; } renderStop(STOPS.find(s => s.id === id), tab); }, [id, tab]);

@@ -266,6 +266,8 @@ Keep Q1 order (Di), Q3 num (Aii), Q5 match (Aiii), Q6 mcq (Ai).
 
 **Read first:** in every Learn step, everything below Pip's message stays blurred until the student presses OK. Remembered once pressed.
 
+**I can pop-up:** the first time a student opens a chapter, the I can statements appear as a draggable pop-up. Pressing OK moves them into place above step 1. Shown once per chapter.
+
 **Self-check:** immediately before the Foundation review, students place an X on a Beginning, Developing, Proficient, Mastering line for each I can statement. The questions appear after that. On screen only, not on worksheets.
 
 **Answer order:** table, match and sort rows show in a stable shuffled order (`gridRowOrder`), and order questions never start correct. `keepRows` keeps truth tables and other true sequences in order.

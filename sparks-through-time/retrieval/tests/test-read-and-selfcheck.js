@@ -9,6 +9,11 @@ let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; con
   const data = await pg.evaluate(() => STOPS.map(s => [s.id, (ICAN[s.id] || []).length]));
   for (const [id, n] of data) ok(n >= 3 && n <= 4, id + ' has 3 or 4 I can statements: ' + n);
   await pg.evaluate(() => renderStop(STOPS.find(s => s.id === 'electromagnets'), 'learn')); await pg.waitForSelector('.learn-card');
+  ok(await pg.locator('.ican-pop li').count() === 4, 'I can statements open as a pop-up');
+  ok(await pg.evaluate(() => document.querySelector('.ican-card:not(.ican-pop)').style.visibility) === 'hidden', 'its place stays empty until OK');
+  { const box = await pg.locator('.ican-pop h3').boundingBox(); await pg.mouse.move(box.x + 20, box.y + 8); await pg.mouse.down(); await pg.mouse.move(box.x + 60, box.y + 48); await pg.mouse.up(); const moved = await pg.locator('.ican-pop h3').boundingBox(); ok(moved.x > box.x + 30, 'pop-up can be dragged'); }
+  await pg.locator('.ican-ok').click(); await pg.waitForSelector('.ican-back', {state: 'detached'});
+  ok(await pg.evaluate(() => { const c = document.querySelector('.ican-card'); return c.style.visibility === '' && !!c.offsetParent; }), 'OK moves them into place');
   ok(await pg.locator('.ican-card li').count() === 4, 'I can card on step 1');
   ok(await pg.locator('.learn-card .rg-blur').count() >= 3, 'rest of step blurred before OK');
   ok(await pg.evaluate(() => [...document.querySelectorAll('.learn-card .rg-blur')].every(x => x.inert)), 'blurred parts cannot be used');
@@ -16,6 +21,7 @@ let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; con
   ok(await pg.locator('.rg-blur').count() === 0 && await pg.locator('.say-ok').count() === 0, 'OK clears the blur');
   await pg.evaluate(() => renderStop(STOPS.find(s => s.id === 'electromagnets'), 'learn')); await pg.waitForSelector('.learn-card');
   ok(await pg.locator('.rg-blur').count() === 0, 'an OK is remembered');
+  ok(await pg.locator('.ican-back').count() === 0, 'the pop-up shows once');
   await pg.evaluate(() => { prog('electromagnets').learn = true; Store.save(); renderStop(STOPS.find(s => s.id === 'electromagnets'), 'review'); }); await pg.waitForSelector('.sa-card');
   ok(await pg.locator('.rv-card:visible').count() === 0, 'questions hidden until the self-check is done');
   const go = pg.locator('.sa-card button:has-text("Save and start")'); ok(await go.isDisabled(), 'start waits for every X');
