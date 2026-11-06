@@ -25,16 +25,19 @@ function rtCsConv(it, r){
   else if (it.t === 'match'){
     const g = asGrid(it), ans = g.rows.map(rw => rw.ans[0]), uniq = ans.filter((x, i) => ans.indexOf(x) === i); let order = uniq, n = 0;
     do { order = rtShuf(r, uniq); n++; } while (n < 40 && ans.some((x, i) => order.indexOf(x) === i));
-    o.q = it.q + '<br>' + g.rows.map((rw, i) => `${i + 1}. ${rw.label}`).join('<br>'); o.opts = order;
-    o.a = g.rows.map((rw, i) => (i + 1) + 'ABCDEFGH'[order.indexOf(rw.ans[0])]).join(', ');
+    const ro = gridRowOrder(it, g).map(i => g.rows[i]);   /* rows shown in the same shuffled order as the sim and the worksheet */
+    o.q = it.q + '<br>' + ro.map((rw, i) => `${i + 1}. ${rw.label}`).join('<br>'); o.opts = order;
+    o.a = ro.map((rw, i) => (i + 1) + 'ABCDEFGH'[order.indexOf(rw.ans[0])]).join(', ');
   }
   else if (it.t === 'table' || it.t === 'sort'){
-    const g = asGrid(it); o.q = it.q + '<br>' + g.rows.map(rw => `${rw.label}: ______`).join('<br>');
-    o.a = g.rows.map(rw => rw.label + ': ' + rw.ans.join(', ')).join('; ');
+    const g = asGrid(it), ro = gridRowOrder(it, g).map(i => g.rows[i]); o.q = it.q + '<br>' + ro.map(rw => `${rw.label}: ______`).join('<br>');
+    o.a = ro.map(rw => rw.label + ': ' + rw.ans.join(', ')).join('; ');
     const ch = gridOptions(g, 0); if (ch && ch.length) o.q += '<br><i>Choose from: ' + ch.join(', ') + '</i>';
   }
   else if (it.t === 'order'){
-    const idx = rtShuf(r, it.items.map((_, i) => i)); o.q = it.q + '<br>' + idx.map((k, i) => `${'ABCDEFGH'[i]}. ${it.items[k]}`).join('<br>');
+    const base = it.items.map((_, i) => i); let idx = rtShuf(r, base); for (let n = 0; n < 40 && idx.every((x, i) => x === base[i]); n++) idx = rtShuf(r, base);   /* never starts in the right order */
+    if (idx.every((x, i) => x === base[i])) idx = base.slice(1).concat(base[0]);
+    o.q = it.q + '<br>' + idx.map((k, i) => `${'ABCDEFGH'[i]}. ${it.items[k]}`).join('<br>');
     o.a = it.items.map((_, p) => 'ABCDEFGH'[idx.indexOf(p)]).join(', ');
   }
   else o.a = it.explain || '';

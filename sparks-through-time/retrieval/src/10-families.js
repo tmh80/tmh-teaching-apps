@@ -198,7 +198,7 @@ RT_GEN.F4 = {
   A(r){
     const e = rtPick(r, RT_ELEMENTS.slice(0, 18)), s = rtShells(e.p), opts = ['0', '1', '2', '3', '4', '5', '6', '7', '8'];
     return {t: 'table', q: `A neutral ${e.name.toLowerCase()} atom has ${e.p} electrons. How many electrons sit in each shell? Fill from the inside, and use 0 for an empty shell.`,
-      cols: [{name: 'Electrons', options: opts}], rowHead: 'Shell', rows: ['First shell', 'Second shell', 'Third shell'].map((l, i) => ({label: l, ans: [String(s[i])]})),
+      cols: [{name: 'Electrons', options: opts}], keepRows: true, rowHead: 'Shell', rows: ['First shell', 'Second shell', 'Third shell'].map((l, i) => ({label: l, ans: [String(s[i])]})),
       explain: `Fill from the inside: the first shell holds up to 2, the next up to 8. ${e.p} electrons fill as ${s.join(', ')}.`, p: {z: e.p, shells: s}};
   },
   B(r){
@@ -308,7 +308,7 @@ RT_GEN.F8 = {
   B(r){
     const hid = rtPick(r, ['+', '-', '0']), nm = rtPick(r, ['B', 'C', 'D', 'X', 'Y']);
     const label = hid === '0' ? 'neutral' : RT1_CH[hid];
-    return {t: 'table', q: `Ball ${nm} is ${label}. What will it do near a positive test ball, then near a negative test ball?`, cols: [{name: 'What happens?', options: ['Attract', 'Repel', 'Nothing']}], rowHead: 'Test ball',
+    return {t: 'table', q: `Ball ${nm} is ${label}. What will it do near a positive test ball, then near a negative test ball?`, cols: [{name: 'What happens?', options: ['Attract', 'Repel', 'Nothing']}], keepRows: true, rowHead: 'Test ball',
       rows: [{label: 'Near a positive ball', ans: [rt1res(hid, '+')]}, {label: 'Near a negative ball', ans: [rt1res(hid, '-')]}],
       explain: hid === '0' ? 'A neutral ball is attracted to both a positive and a negative ball.' : `Like charges repel and opposite charges attract, so a ${label} ball repels the ${label} test ball and attracts the other one.`, p: {hid}};
   }

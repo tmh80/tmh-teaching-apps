@@ -3250,7 +3250,7 @@ function atomBuilder(el, opts){
 }
 
 function orderTask(el, items, onDone){
-  const shuffled = shuffle(items.map((it,k)=>Object.assign({k}, it)));
+  const shuffled = shuffleNotSame(items.map((it,k)=>Object.assign({k}, it)));
   let nextK = 0;
   const fb = h('div',{class:'feedback', role:'status'});
   const list = h('div',{class:'order-list'});
@@ -5417,6 +5417,29 @@ function asGrid(it){
   return {cols:it.cols.map(c=>typeof c==='string' ? {name:c} : c), rows:it.rows};
 }
 function gridOptions(grid, j){ const c = grid.cols[j]; const set = c.options ? c.options.slice() : []; if (!c.options){ grid.rows.forEach(r=>{ if (!set.includes(r.ans[j])) set.push(r.ans[j]); }); (c.extra||[]).forEach(x=>{ if (!set.includes(x)) set.push(x); }); } /* same mixed order on screen and on paper, and never the same as the rows */ let o = seeded(set, set.join('|')); const rowOrder = grid.rows.map(r=>r.ans[j]); if (o.length>2 && o.every((x,i)=>x===rowOrder[i])) o = o.slice(1).concat(o[0]); return o; }
+/* Row order for match / table / sort questions. The authored order often follows the order of a lab report (IV, DV, then controls), so the rows are shown in a
+   stable shuffled order seeded from the question text: the same on screen, on paper, and after a reload. Saved answers, marking and the keys always use the
+   ORIGINAL row index; only the display order changes. Kept in authored order: it.keepRows, and rows that are the same words with a rising or falling number. */
+function gridRowsKeepOrder(it, grid){
+  if (it.keepRows) return true;
+  const labs = grid.rows.map(r=>String(r.label==null ? '' : r.label).replace(/<[^>]+>/g,'').trim());
+  if (!labs.length || labs.some(l=>!/\d/.test(l))) return false;
+  const pat = labs.map(l=>l.replace(/-?\d+(\.\d+)?/g,'#'));
+  if (pat.some(x=>x!==pat[0])) return false;
+  const nums = labs.map(l=>parseFloat(l.match(/-?\d+(\.\d+)?/)[0]));
+  return nums.every((v,k)=>k===0 || v>=nums[k-1]) || nums.every((v,k)=>k===0 || v<=nums[k-1]);
+}
+function gridRowOrder(it, grid){
+  const n = grid.rows.length, id = grid.rows.map((_,i)=>i);
+  if (n<2 || gridRowsKeepOrder(it, grid)) return id;
+  if (n===2) return seeded(id, it.q + '|rows');
+  let o = id;
+  /* few rows stay where they were, and (4 or more rows) no two neighbouring rows stay together in their authored order */
+  for (let k=0;k<300;k++){ o = seeded(id, it.q + '|rows' + (k||'')); if (o.filter((x,p)=>x===p).length <= Math.floor(n/3) && (n<4 || !o.some((x,p)=>p>0 && x===o[p-1]+1))) return o; }
+  return id.slice(1).concat(id[0]);
+}
+/* a shuffle that never comes back in the order it was given (for cards a student puts in order) */
+function shuffleNotSame(a, rnd){ if (a.length<2) return a.slice(); let b; let k = 0; do { b = (rnd ? rnd(a, k) : shuffle(a)); k++; } while (k<60 && b.every((x,i)=>x===a[i])); return b.every((x,i)=>x===a[i]) ? a.slice(1).concat(a[0]) : b; }
 
 /* ---------- drawing pad ---------- */
 function drawPad(el, saved, onChange){
@@ -5497,8 +5520,8 @@ function reviewCard(el, it, n, saved, onSave, opts){
     const tbl = h('table',{class:'data rv-grid'});
     tbl.append(h('thead',{}, h('tr',{}, h('th',{}, it.rowHead || ''), grid.cols.map(c=>h('th',{}, c.name)))));
     const tb = h('tbody'); const sels = [];
-    grid.rows.forEach((r,i)=>{ const tr = h('tr'); const lab = h('td',{class:'rv-rowlabel', html:r.label}); if (r.vis){ const v = h('div',{class:'rv-rowvis'}); lab.prepend(v); r.vis(v); } tr.append(lab);
-      grid.cols.forEach((c,j)=>{ const sel = h('select',{'aria-label':`${c.name} for row ${i+1}`}, h('option',{value:''}, 'Choose…'), opts2[j].map(o=>h('option',{value:o}, o))); if (saved && saved.resp) sel.value = saved.resp[i][j] || ''; sels.push([i,j,sel]); tr.append(h('td',{}, sel)); });
+    gridRowOrder(it, grid).forEach((i,pos)=>{ const r = grid.rows[i]; const tr = h('tr'); const lab = h('td',{class:'rv-rowlabel', html:r.label}); if (r.vis){ const v = h('div',{class:'rv-rowvis'}); lab.prepend(v); r.vis(v); } tr.append(lab);
+      grid.cols.forEach((c,j)=>{ const sel = h('select',{'aria-label':`${c.name} for row ${pos+1}`}, h('option',{value:''}, 'Choose…'), opts2[j].map(o=>h('option',{value:o}, o))); if (saved && saved.resp) sel.value = saved.resp[i][j] || ''; sels.push([i,j,sel]); tr.append(h('td',{}, sel)); });
       tb.append(tr); });
     tbl.append(tb); body.append(h('div',{class:'tbl-wrap'}, tbl));
     const mark = ()=>sels.forEach(([i,j,s])=>{ const td = s.parentElement; td.classList.remove('right','wrong'); const okk = s.value===grid.rows[i].ans[j]; td.classList.add(okk ? 'right' : 'wrong'); if (!okk && !td.querySelector('.rv-fix')) td.append(h('span',{class:'rv-fix'}, '→ ' + grid.rows[i].ans[j])); });
@@ -5508,7 +5531,7 @@ function reviewCard(el, it, n, saved, onSave, opts){
     if (saved && saved.done) mark();
   }
   else if (t==='order'){
-    let cur = (saved && saved.resp) || shuffle(it.items.map((_,i)=>i));
+    let cur = (saved && saved.resp) || shuffleNotSame(it.items.map((_,i)=>i));
     const list = h('ol',{class:'rv-order'}); body.append(list);
     const fix = h('div');
     const draw = (marks)=>{ list.innerHTML = ''; cur.forEach((k,pos)=>{ const li = h('li',{class: marks ? (k===pos ? 'right' : 'wrong') : ''}, h('span',{class:'rv-otxt', html:it.items[k]}),
@@ -5613,7 +5636,7 @@ function renderReview(panel, stop, part){
 }
 
 /* ---------- worksheet (student / blank / key) ---------- */
-function seeded(arr, seed){ let x = 0; for (const ch of String(seed)) x = (x*31 + ch.charCodeAt(0)) >>> 0; const b = arr.slice(); for (let i=b.length-1;i>0;i--){ x = (x*1103515245 + 12345) >>> 0; const j = x % (i+1); [b[i],b[j]] = [b[j],b[i]]; } return b; }
+function seeded(arr, seed){ let x = 0; for (const ch of String(seed)) x = (x*31 + ch.charCodeAt(0)) >>> 0; const b = arr.slice(); for (let i=b.length-1;i>0;i--){ x = (Math.imul(x,1103515245) + 12345) >>> 0; const j = (x >>> 8) % (i+1); [b[i],b[j]] = [b[j],b[i]]; } return b; } /* exact 32-bit maths and the high bits, so every order can come up (the old version only ever made 3 or 4 of the 24 orders of four options, which put the right answer last on every printed worksheet) */
 function wsItem(it, n, mode, saved){
   const box = h('div',{class:'ws-q'});
   box.append(h('div',{class:'ws-qhead'}, h('span',{class:'ws-n'}, n), h('span',{class:'ws-type'}, typeName(it)), mode==='key' && mypTag(it.obj) ? h('span',{class:'ws-myp'}, mypTag(it.obj)) : null), h('p',{class:'ws-qtext', html:it.q}));
@@ -5626,11 +5649,11 @@ function wsItem(it, n, mode, saved){
     box.append(ul);
   } else if (t==='match' || t==='table' || t==='sort'){
     const grid = asGrid(it);
-    const tbl = h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, it.rowHead||''), grid.cols.map(c=>h('th',{}, c.name)))), h('tbody',{}, grid.rows.map((row,i)=>{ const lab = h('td',{html:row.label}); if (row.vis){ const v = h('div',{class:'ws-rowvis'}); lab.prepend(v); row.vis(v); } return h('tr',{}, lab, grid.cols.map((_,j)=>h('td',{class:'ws-cell'}, key ? row.ans[j] : stu && r ? (r[i][j]||'') : ''))); })));
+    const tbl = h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, it.rowHead||''), grid.cols.map(c=>h('th',{}, c.name)))), h('tbody',{}, gridRowOrder(it, grid).map(i=>{ const row = grid.rows[i]; const lab = h('td',{html:row.label}); if (row.vis){ const v = h('div',{class:'ws-rowvis'}); lab.prepend(v); row.vis(v); } return h('tr',{}, lab, grid.cols.map((_,j)=>h('td',{class:'ws-cell'}, key ? row.ans[j] : stu && r ? (r[i][j]||'') : ''))); })));
     box.append(tbl);
     if (mode==='blank'){ const all = grid.cols.map((_,j)=>gridOptions(grid,j).join('|')); if (grid.cols.length>1 && all.every(x=>x===all[0])) box.append(h('p',{class:'ws-bank'}, h('b',{}, 'Choices (use each as many times as you need): '), gridOptions(grid,0).join('  ·  '))); else grid.cols.forEach((c,j)=>box.append(h('p',{class:'ws-bank'}, h('b',{}, `${c.name} choices: `), gridOptions(grid,j).join('  ·  ')))); }
   } else if (t==='order'){
-    if (mode==='blank'){ const letters = 'ABCDEFGH'; const sh = seeded(it.items.map((_,i)=>i), it.q + 'order');
+    if (mode==='blank'){ const letters = 'ABCDEFGH'; const sh = shuffleNotSame(it.items.map((_,i)=>i), (a,k)=>seeded(a, it.q + 'order' + (k||'')));
       box.append(h('div',{class:'ws-opts'}, sh.map((k,i)=>h('div',{class:'ws-opt'}, h('b',{}, letters[i] + '.'), h('span',{html:it.items[k]})))), h('p',{}, 'Correct order: ', sh.map(()=>h('span',{class:'ws-blankbox'})))); }
     else { const seq = key ? it.items.map((_,i)=>i) : (r||[]); box.append(h('ol',{class:'ws-ol'}, seq.map(k=>h('li',{html:it.items[k]})))); }
   } else if (t==='num'){
@@ -6060,7 +6083,7 @@ static:[
   {t:'write', obj:['Aiii'], words:['attract','repel','neutral','charge','test'], q:'A student says: “Ball B was attracted to ball A, so ball B must have the opposite charge.” Explain why this might be wrong, and what test they should do next.', model:'Ball B could be neutral, because a charged ball attracts a neutral ball too. The student should test again with the opposite charge on ball A. If ball B is pushed away (repelled) by either one, it has a charge. If it is attracted both times, it is neutral.', checklist:['A neutral ball is also attracted by a charged ball','Test again with the opposite charge on ball A','Being repelled proves ball B is charged','Attracted both times means neutral']}
 ],
 circuits:[
-  {t:'table', obj:['Aii'], q:'Safety lock: two switches are in the same loop as one bulb. Complete the table.', rowHead:'Switches', cols:[{name:'Bulb', options:['On','Off']}], rows:[{label:'Switch 1 closed, switch 2 closed', ans:['On']},{label:'Switch 1 closed, switch 2 open', ans:['Off']},{label:'Switch 1 open, switch 2 closed', ans:['Off']},{label:'Both switches open', ans:['Off']}], explain:'Both switches are in series, so an open switch anywhere breaks the only loop.'},
+  {t:'table', obj:['Aii'], q:'Safety lock: two switches are in the same loop as one bulb. Complete the table.', keepRows:true, rowHead:'Switches', cols:[{name:'Bulb', options:['On','Off']}], rows:[{label:'Switch 1 closed, switch 2 closed', ans:['On']},{label:'Switch 1 closed, switch 2 open', ans:['Off']},{label:'Switch 1 open, switch 2 closed', ans:['Off']},{label:'Both switches open', ans:['Off']}], explain:'Both switches are in series, so an open switch anywhere breaks the only loop.'},
   {t:'num', obj:['Aii'], q:'Three 1.5 V cells are joined + to − in a row. Then a fourth 1.5 V cell is added facing the <b>wrong</b> way. What is the total voltage now?', answer:3, unit:'V', tol:0, explain:'1.5 + 1.5 + 1.5 = 4.5 V, but the backwards cell pushes against them: 4.5 − 1.5 = 3 V.'},
   {t:'mcq', obj:['Ai'], q:'Super bright: why does a bulb glow brighter with two cells than with one?', options:['Two cells give a bigger push, so a bigger current flows','Two cells give a smaller push, so the current slows down','Two cells make the wire inside the bulb thicker','Two cells let the current flow both ways at once'], answer:0, explain:'Two cells joined + to − double the voltage, so more current flows through the bulb.'},
   {t:'multi', obj:['Aii'], q:'Night light: there is one cell, one bulb and one switch in a single loop. Where could the switch go so it turns the bulb on and off? Tick all that apply.', options:['Next to the cell','Just after the bulb','Anywhere in the single loop','Only exactly halfway round the loop','Only touching the + end of the cell'], answers:[0,1,2], explain:'In a single loop, a gap anywhere stops the current everywhere, so the switch works in any position.'},
@@ -7567,7 +7590,7 @@ function markItem(it){
   else if (t==='multi'){ marks = 2; L.push(`Correct answers (all must be ticked): ${it.answers.map(k=>plain(it.options[k])).join('; ')}.`); L.push('2 marks if exactly these are ticked; 1 mark if one is missing or one extra is ticked; otherwise 0.'); }
   else if (t==='match' || t==='table' || t==='sort'){
     const g = asGrid(it); marks = g.rows.length*g.cols.length;
-    g.rows.forEach((r,ri)=>L.push(`- ${plain(r.label) || `Row ${ri+1} (picture)`} → ${r.ans.map((a,j)=>g.cols.length>1 ? `${g.cols[j].name}: ${plain(a)}` : plain(a)).join('; ')}`));
+    gridRowOrder(it, g).map(i=>g.rows[i]).forEach((r,ri)=>L.push(`- ${plain(r.label) || `Row ${ri+1} (picture)`} → ${r.ans.map((a,j)=>g.cols.length>1 ? `${g.cols[j].name}: ${plain(a)}` : plain(a)).join('; ')}`));
     L.unshift(`1 mark for each correct cell (${marks} marks):`);
   }
   else if (t==='order'){ marks = 2; L.push(`Correct order: ${it.items.map((x,i)=>`${i+1}) ${plain(x)}`).join('  ')}.`); L.push('2 marks if fully correct; 1 mark if only one pair of neighbouring items is swapped; otherwise 0.'); }
@@ -7649,7 +7672,7 @@ function keyAnswerLine(it){
   const t = it.t;
   if (t==='mcq') return plain(it.options[it.answer]) + '.';
   if (t==='multi') return it.answers.map(k=>plain(it.options[k])).join('; ') + '. (1 mark if one is missing or one extra is ticked; otherwise 0.)';
-  if (t==='match' || t==='table' || t==='sort'){ const g = asGrid(it); return g.rows.map((r,ri)=>`${plain(r.label) || `Row ${ri+1} (picture)`} = ${r.ans.map((a,j)=>g.cols.length>1 ? `${g.cols[j].name}: ${plain(a)}` : plain(a)).join(', ')}`).join('; ') + '. (1 mark per correct cell.)'; }
+  if (t==='match' || t==='table' || t==='sort'){ const g = asGrid(it); return gridRowOrder(it, g).map(i=>g.rows[i]).map((r,ri)=>`${plain(r.label) || `Row ${ri+1} (picture)`} = ${r.ans.map((a,j)=>g.cols.length>1 ? `${g.cols[j].name}: ${plain(a)}` : plain(a)).join(', ')}`).join('; ') + '. (1 mark per correct cell.)'; }
   if (t==='order') return it.items.map((x,i)=>`${i+1}) ${plain(x)}`).join(' ') + '. (1 mark if only one pair of neighbouring items is swapped.)';
   if (t==='num') return `${it.answer}${it.unit ? ' ' + it.unit : ''}${it.tol ? ` (accept ${+(it.answer-it.tol).toFixed(3)} to ${+(it.answer+it.tol).toFixed(3)})` : ''}. 1 mark for the answer and 1 for working or method${it.explain ? ': ' + plain(it.explain).replace(/\.$/,'') : ''}. If the working box is empty but the answer is right, give both marks.`;
   if (t==='fill') return it.blanks.map((b,i)=>`gap ${i+1}: ${[...new Set(b.map(plain).concat(...SYN_GROUPS.filter(g=>b.some(x=>g.includes(canonWord(x))))))].join(' / ')}`).join('; ') + '. (1 mark per gap; accept small spelling mistakes if the meaning is clear.)';
@@ -8177,7 +8200,7 @@ function keyIdeaCheck(el, k, saved, onPass){
   el.append(box);
   return box;
 }
-function seededOrder(n, seedStr){ let s = 0; for (const ch of seedStr) s = (s*31 + ch.charCodeAt(0)) >>> 0; const a = [...Array(n).keys()]; for (let i=n-1;i>0;i--){ s = (s*1103515245 + 12345) >>> 0; const j = s % (i+1); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+function seededOrder(n, seedStr){ let s = 0; for (const ch of seedStr) s = (s*31 + ch.charCodeAt(0)) >>> 0; const a = [...Array(n).keys()]; for (let i=n-1;i>0;i--){ s = (Math.imul(s,1103515245) + 12345) >>> 0; const j = (s >>> 8) % (i+1); [a[i],a[j]] = [a[j],a[i]]; } return a; }
 
 /* RETRIEVAL:START */
 /* ---- 01-data.js ---- */
@@ -8395,7 +8418,7 @@ RT_GEN.F4 = {
   A(r){
     const e = rtPick(r, RT_ELEMENTS.slice(0, 18)), s = rtShells(e.p), opts = ['0', '1', '2', '3', '4', '5', '6', '7', '8'];
     return {t: 'table', q: `A neutral ${e.name.toLowerCase()} atom has ${e.p} electrons. How many electrons sit in each shell? Fill from the inside, and use 0 for an empty shell.`,
-      cols: [{name: 'Electrons', options: opts}], rowHead: 'Shell', rows: ['First shell', 'Second shell', 'Third shell'].map((l, i) => ({label: l, ans: [String(s[i])]})),
+      cols: [{name: 'Electrons', options: opts}], keepRows: true, rowHead: 'Shell', rows: ['First shell', 'Second shell', 'Third shell'].map((l, i) => ({label: l, ans: [String(s[i])]})),
       explain: `Fill from the inside: the first shell holds up to 2, the next up to 8. ${e.p} electrons fill as ${s.join(', ')}.`, p: {z: e.p, shells: s}};
   },
   B(r){
@@ -8505,7 +8528,7 @@ RT_GEN.F8 = {
   B(r){
     const hid = rtPick(r, ['+', '-', '0']), nm = rtPick(r, ['B', 'C', 'D', 'X', 'Y']);
     const label = hid === '0' ? 'neutral' : RT1_CH[hid];
-    return {t: 'table', q: `Ball ${nm} is ${label}. What will it do near a positive test ball, then near a negative test ball?`, cols: [{name: 'What happens?', options: ['Attract', 'Repel', 'Nothing']}], rowHead: 'Test ball',
+    return {t: 'table', q: `Ball ${nm} is ${label}. What will it do near a positive test ball, then near a negative test ball?`, cols: [{name: 'What happens?', options: ['Attract', 'Repel', 'Nothing']}], keepRows: true, rowHead: 'Test ball',
       rows: [{label: 'Near a positive ball', ans: [rt1res(hid, '+')]}, {label: 'Near a negative ball', ans: [rt1res(hid, '-')]}],
       explain: hid === '0' ? 'A neutral ball is attracted to both a positive and a negative ball.' : `Like charges repel and opposite charges attract, so a ${label} ball repels the ${label} test ball and attracts the other one.`, p: {hid}};
   }
@@ -10552,16 +10575,19 @@ function rtCsConv(it, r){
   else if (it.t === 'match'){
     const g = asGrid(it), ans = g.rows.map(rw => rw.ans[0]), uniq = ans.filter((x, i) => ans.indexOf(x) === i); let order = uniq, n = 0;
     do { order = rtShuf(r, uniq); n++; } while (n < 40 && ans.some((x, i) => order.indexOf(x) === i));
-    o.q = it.q + '<br>' + g.rows.map((rw, i) => `${i + 1}. ${rw.label}`).join('<br>'); o.opts = order;
-    o.a = g.rows.map((rw, i) => (i + 1) + 'ABCDEFGH'[order.indexOf(rw.ans[0])]).join(', ');
+    const ro = gridRowOrder(it, g).map(i => g.rows[i]);   /* rows shown in the same shuffled order as the sim and the worksheet */
+    o.q = it.q + '<br>' + ro.map((rw, i) => `${i + 1}. ${rw.label}`).join('<br>'); o.opts = order;
+    o.a = ro.map((rw, i) => (i + 1) + 'ABCDEFGH'[order.indexOf(rw.ans[0])]).join(', ');
   }
   else if (it.t === 'table' || it.t === 'sort'){
-    const g = asGrid(it); o.q = it.q + '<br>' + g.rows.map(rw => `${rw.label}: ______`).join('<br>');
-    o.a = g.rows.map(rw => rw.label + ': ' + rw.ans.join(', ')).join('; ');
+    const g = asGrid(it), ro = gridRowOrder(it, g).map(i => g.rows[i]); o.q = it.q + '<br>' + ro.map(rw => `${rw.label}: ______`).join('<br>');
+    o.a = ro.map(rw => rw.label + ': ' + rw.ans.join(', ')).join('; ');
     const ch = gridOptions(g, 0); if (ch && ch.length) o.q += '<br><i>Choose from: ' + ch.join(', ') + '</i>';
   }
   else if (it.t === 'order'){
-    const idx = rtShuf(r, it.items.map((_, i) => i)); o.q = it.q + '<br>' + idx.map((k, i) => `${'ABCDEFGH'[i]}. ${it.items[k]}`).join('<br>');
+    const base = it.items.map((_, i) => i); let idx = rtShuf(r, base); for (let n = 0; n < 40 && idx.every((x, i) => x === base[i]); n++) idx = rtShuf(r, base);   /* never starts in the right order */
+    if (idx.every((x, i) => x === base[i])) idx = base.slice(1).concat(base[0]);
+    o.q = it.q + '<br>' + idx.map((k, i) => `${'ABCDEFGH'[i]}. ${it.items[k]}`).join('<br>');
     o.a = it.items.map((_, p) => 'ABCDEFGH'[idx.indexOf(p)]).join(', ');
   }
   else o.a = it.explain || '';

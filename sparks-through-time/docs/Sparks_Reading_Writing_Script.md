@@ -261,3 +261,25 @@ Keep Q1 order (Di), Q3 num (Aii), Q5 match (Aiii), Q6 mcq (Ai).
 - Add Cii and Ciii to `STRAND_ORDER` and level reporting.
 - Update `check-strands.js`, with Tom's OK: electromagnets A i to iii, C ii, D i. Generators A i, ii, C ii, iii, D i. Acdc A i, ii, D i to iii (A iii left with Q9). Power unchanged.
 - "Speed" remains in the "Turning speed" slider, "Spin it!" and challenge g2. Ask Tom.
+
+## Every chapter (added 6 Nov 2026)
+
+**Read first:** in every Learn step, everything below Pip's message stays blurred until the student presses OK. Remembered once pressed.
+
+**Self-check:** immediately before the Foundation review, students place an X on a Beginning, Developing, Proficient, Mastering line for each I can statement. The questions appear after that. On screen only, not on worksheets.
+
+**Answer order:** table, match and sort rows show in a stable shuffled order (`gridRowOrder`), and order questions never start correct. `keepRows` keeps truth tables and other true sequences in order.
+
+**I can statements:**
+- **launch:** I can spot things that use electricity in everyday life. I can describe how charged objects push and pull on each other. I can explain the difference between static electricity and current electricity.
+- **atom:** I can describe how the model of the atom changed over time. I can name the protons, neutrons and electrons in an atom and say where they are. I can use the atomic number and mass number to build an atom.
+- **static:** I can explain how rubbing moves electrons from one object to another. I can work out if an object has a positive or negative charge. I can predict if two charged objects will repel or attract. I can explain how lightning happens and how a lightning rod protects a house.
+- **circuits:** I can name the parts of a circuit and match them to their symbols. I can build a complete circuit with a switch. I can explain why a shortcut in a circuit stops a bulb from lighting. I can use an ammeter to measure current.
+- **electromagnets:** I can explain how an electric current makes a magnetic field. I can describe how to make an electromagnet stronger. I can run a fair test and pick the best evidence from my results. I can write a CER paragraph with a claim, evidence and reasoning.
+- **ohm:** I can sort materials into conductors and insulators. I can explain why metals conduct electricity. I can describe what a resistor does to the current. I can use V = I × R to work out voltage, current or resistance.
+- **generators:** I can explain how moving a magnet near a coil of wire makes electricity. I can describe how to make a generator give a bigger voltage. I can test a hypothesis using data. I can write a paragraph that says if data support or contradict a hypothesis.
+- **bulb:** I can name the parts of a light bulb and say what they do. I can explain why a filament glows. I can explain what gets used up when a bulb is lit. I can compare a filament bulb with an LED.
+- **series:** I can describe the difference between series and parallel circuits. I can predict what happens to the other bulbs when one bulb is taken out. I can work out the current in series and parallel circuits.
+- **acdc:** I can describe the difference between AC and DC. I can explain how high voltage helps send electricity to a town. I can find the problem, the science and the solution in a science text. I can write a clear paragraph about how science solves a problem.
+- **power:** I can explain how a spinning turbine helps a power station make electricity. I can compare the CO₂ from different energy sources. I can tell a fact from an opinion. I can sum up the benefits and drawbacks of an energy source.
+- **future:** I can sort energy sources into renewable and non-renewable. I can explain how solar panels make electricity without a turbine. I can plan how to keep a town’s lights on using different energy sources.
