@@ -136,3 +136,13 @@ Voice and terminology rules for the script are in section 3 (velocity, not speed
 - Teacher code: `FORCE`. g = 9.8 N/kg. Students say "velocity", not "speed".
 - **Finish the Check (1 Nov 2026):** each question type registers `api.reg({blank, check, reveal?, blankV?})`. `box.autoCheck` runs the check for an unchecked question, and `revFinish` in `50-review.js` shows the results pop-up and the stamp. New question types must call `api.reg`, and `tests/finish_types.py` should cover them.
 - **Labels and rulers:** use `picLabel` for labels in SVG pictures and `wsLabel` for labels on the Workshop canvas (white boxes, leader lines stop at the box edge). Rulers come from `wsRulers`, one shared scale.
+
+## Reading and writing build (8 Nov 2026)
+- Branch: `reading-writing`. Not yet merged to `main`.
+- `c2s` (Chapter 2 Skills, Graphs and CER) is built: `src/js/42b-c2s.js`. Shared skills code is in `src/js/39-skills.js`.
+- I can statements, self-check and read-first OK are on every section.
+- The FAST flag in the test build skips the new first screens for older tests.
+- Tools: `tools/inventory.py` refreshes `docs/inventory.txt`; `tools/check_skills_numbers.py` checks the skills numbers.
+- Specs: `docs/Skills_c2s_Script.md` and `docs/Skills_Audit_and_ICan.md`.
+- Worksheets: `worksheets/Chapter-2-Skills`. The offline file is `Force-HQ-Rebuild-offline.html`, checked for external references.
+- Next step: Tom plays `c2s` (stage 5 of `docs/Force_HQ_Reading_Writing_Plan.md`).

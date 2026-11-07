@@ -939,6 +939,51 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid currentColor;vertical-align:baseline;margin:0 2px}
 .glhint .glplug li{margin:4px 0}
 
+/* ===== whole-app reading and self-review: I can screen, read-first OK, self-check ===== */
+.ican-card{border:2px solid var(--accent);border-radius:14px;background:var(--panel);padding:14px 20px;margin:12px 0;max-width:760px}.ican-card h3{margin:0 0 6px;font-family:var(--f-display);font-size:24px}.ican-next{margin-top:12px}
+.ican-list{margin:0;padding-left:1.2em;font-size:19px;line-height:1.55;font-weight:600}
+.ican-peek{margin:8px 0;background:var(--panel);border:2px solid var(--accent);border-radius:12px;padding:6px 14px;width:fit-content;max-width:100%}.ican-peek summary{cursor:pointer;font-weight:700;color:var(--accent)}.ican-peek[open] summary{margin-bottom:6px}.ican-peek .ican-list{font-size:16px}
+.rg-blur{filter:blur(5px);opacity:.55;pointer-events:none;user-select:none}
+.say-ok{display:block;margin:10px 0 0 auto;min-width:84px;font-size:17px}
+.sa-card{border:2px solid var(--accent);border-radius:14px;background:var(--panel);padding:14px 18px;margin:10px 0;display:grid;gap:14px}.sa-card h3,.sa-card p{margin:0}.sa-can{font-weight:700;margin-bottom:8px!important;font-size:16px}
+.sa-track{position:relative;display:grid;grid-template-columns:repeat(4,1fr);height:38px;border:2px solid var(--line);border-radius:10px;cursor:pointer;touch-action:none}.sa-track:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sa-zone{border-left:2px dashed var(--line)}.sa-zone:first-child{border-left:0}.sa-zone:nth-child(1){background:color-mix(in srgb,#e8590c 16%,var(--panel));border-radius:8px 0 0 8px}.sa-zone:nth-child(2){background:color-mix(in srgb,#f2b705 18%,var(--panel))}.sa-zone:nth-child(3){background:color-mix(in srgb,#22a06b 16%,var(--panel))}.sa-zone:nth-child(4){background:color-mix(in srgb,#3b82f6 18%,var(--panel));border-radius:0 8px 8px 0}
+.sa-x{position:absolute;top:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:900;color:var(--ink);pointer-events:none;line-height:1}
+.sa-labels{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;font-size:13.5px;font-weight:600;margin-top:4px;color:var(--muted)}
+.sa-done{margin:8px 0}.sa-done summary{cursor:pointer;font-weight:700}
+
+/* ===== Skills: teach cards, graph maker, Mark it, tap points, paragraph ===== */
+.qstory{background:var(--accent-soft);border-radius:8px;padding:8px 12px;font-size:15px;line-height:1.45}
+.qctx{border:2px solid var(--accent);border-radius:10px;padding:8px 12px;background:var(--panel);font-size:15px}.qctx .lbl{color:var(--accent)}.qctx svg{max-width:340px}
+.qitem.gated>*:not(.qtype){display:none}.qitem.gated::after{content:"This card opens when your table is full.";font-size:14px;color:var(--muted)}
+.qitem[data-t=teach] .pts,.qitem[data-t=rtable] .pts{display:none}
+.teach{display:flex;flex-direction:column;gap:8px;font-size:15.5px}.teach h3{margin:0;font-family:var(--f-display);font-size:21px}.teach .tpart{display:flex;gap:8px;align-items:baseline;border-left:5px solid var(--accent);padding:3px 8px;background:var(--chip);border-radius:0 8px 8px 0}.teach .tpart b{min-width:92px}.teach .keyidea{background:var(--hazard-soft);border-radius:8px;padding:6px 10px;font-weight:700}.teach .tfig{display:flex;gap:10px;flex-wrap:wrap}.teach .tfig svg{max-width:280px}
+.teach.short .teacheg{margin-top:4px}.teacheg summary,.howexp summary,.gmhow summary,.cerhow summary{cursor:pointer;font-weight:700;color:var(--accent)}
+.howexp,.gmhow,.cerhow{border:1.5px solid var(--line);border-radius:10px;padding:6px 12px;background:var(--panel)}.howexp p,.gmhow li{margin:4px 0}.gmhowlist{margin:6px 0;padding-left:1.2em}
+.rtbl td{width:40%}.rtbl input{width:100%;font:inherit;padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink)}.rtbl tr.ok input{border-color:var(--good);background:var(--okbg)}.rtbl tr.bad input{border-color:var(--bad)}.rtok{font-size:13.5px;color:var(--muted)}.rtbl tr.ok .rtok{color:var(--good);font-weight:800;font-size:18px}.rtbl tr.bad .rtok{color:var(--bad)}
+.qpopbox:has(.gm){width:min(980px,calc(100vw - 16px))}
+.gm{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-start}.gm-left{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:8px}.gm-right{flex:1 1 300px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.gm-step{border:1.5px solid var(--line);border-radius:10px;padding:6px 10px;background:var(--panel);display:flex;flex-direction:column;gap:5px}.gm-step h4{margin:0;font-family:var(--f-display);font-size:16px;display:flex;align-items:center;gap:6px}.gm-n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px}
+.gm-opts{display:flex;gap:6px}.gm-opt{flex:1;border:1.5px solid var(--line);border-radius:9px;background:var(--panel);padding:7px;font-size:15px;color:var(--ink)}.gm-opt[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);font-weight:800}
+.gm-in{font:inherit;padding:5px 8px;border:1.5px solid var(--line);border-radius:7px;background:var(--panel);color:var(--ink);width:100%}.gm-num{width:72px}.gm-axrow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:14px}.gm-axrow label{display:flex;gap:4px;align-items:center}.gm-lab{display:flex;flex-direction:column;gap:2px;font-size:14px}
+.gm-note{margin:0;font-size:13.5px;color:var(--muted)}.gm-tray{display:flex;flex-wrap:wrap;gap:6px}
+.gm-chip{border:2px solid #1b7ea6;background:#d9eef7;color:#0d3a4d;border-radius:18px;padding:4px 10px;font-size:14px;font-weight:700;touch-action:none;cursor:grab}.gm-chip.sel{outline:3px solid var(--hazard)}.gm-chip.placed{background:#cfeedd;border-color:var(--good)}.gm-ghost{position:fixed;transform:translate(-50%,-50%);pointer-events:none;z-index:200}
+.gm-marks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px}.gm-marks li{display:flex;gap:6px;font-size:14.5px;border-radius:7px;padding:3px 8px}.gm-marks li.ok{background:var(--okbg)}.gm-marks li.bad{background:var(--nobg)}.gm-tick{font-weight:900}.gm-fixtxt{font-size:13.5px;color:var(--muted)}
+.gm-tablebox .tbl{width:auto}.gmmodel{margin-top:8px}.gmmodel .lbl{color:var(--good)}
+.mktitle{font-weight:800;font-size:17px}.mkkey{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mktag{display:inline-block;border-radius:12px;padding:2px 10px;font-size:13.5px;font-weight:800;color:#fff;white-space:nowrap}.mk0{background:#3b82f6}.mk1{background:#c27412}.mk2{background:#1c8a5a}.mk3{background:#a855f7}.mkno{background:#6b7b84}
+.mksents{display:flex;flex-direction:column;gap:6px}.mksent{display:flex;gap:10px;align-items:flex-start;text-align:left;width:100%;border:2px solid var(--line);border-radius:9px;background:var(--panel);padding:8px 10px;font-size:15px;color:var(--ink)}.mksent .mktag{flex:none;min-width:84px;text-align:center}
+.mksent[data-l="0"]{border-color:#3b82f6}.mksent[data-l="1"]{border-color:#c27412}.mksent[data-l="2"]{border-color:#1c8a5a}.mksent.right{background:var(--okbg)}.mksent.wrong{background:var(--nobg)}
+.mkwhy{font-size:14px;padding:3px 10px 0 104px;color:var(--muted)}.mkwhy.ok b{color:var(--good)}.mkwhy.no b{color:var(--bad)}
+.tapfig svg{max-width:420px}.myev{border:2px solid var(--hazard);border-radius:10px;padding:6px 12px;background:var(--hazard-soft)}.myev ul{margin:4px 0 0;padding-left:1.2em}
+.pargrid{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start}.parmain{flex:2 1 320px;display:flex;flex-direction:column;gap:8px;min-width:0}.parside{flex:1 1 250px;border:2px solid var(--accent);border-radius:10px;padding:8px 12px;background:var(--panel);display:flex;flex-direction:column;gap:6px;min-width:0}.parside .lbl{color:var(--accent)}.parq{margin:0;font-weight:700}.parside svg{max-width:100%}
+.parta{min-height:150px}.starters{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.starter{text-align:left}.taprow{cursor:pointer}.taprow.on td{background:var(--hazard-soft);font-weight:800}
+.howexp .example{background:var(--chip);border-radius:8px;padding:6px 10px;margin-top:6px}
+.stepask{border:2px solid var(--accent);border-radius:10px;padding:6px 12px;background:var(--accent-soft);margin:6px 0}.stepask .lbl{color:var(--accent)}.stepask p{margin:2px 0 0;font-weight:700}.stepfin{font-weight:700;color:var(--good);margin:4px 0}
+.cn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#c94a34;color:#fff;font-size:13px;font-weight:800;flex:none}
+.vtshapes{display:grid;grid-template-columns:1fr 1fr;gap:6px}.vtshapes figure{margin:0}.vtshapes figcaption{font-size:13px}.vtshapes .qfig{margin:0}
+.unithint{margin:2px 0 0}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -999,6 +1044,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
     </div>
     <div class="panel rescueboard" id="rescueBoard" hidden></div>
     <div class="onpage" id="onPage"></div>
+    <div id="icanPeek"></div>
     <div id="learnHost"></div>
     <div id="challengeHost" hidden></div>
     <div id="reviewHost" hidden></div>
@@ -2964,7 +3010,23 @@ const TERMS = {
   lift: ['Lift', 'The upward force on a helicopter or a plane. A helicopter\'s blades push air down, so the air pushes the helicopter up.', ['lift'], [5]],
   hover: ['Hover', 'To stay still in the air. A hovering helicopter\'s lift is exactly equal to its weight.', ['hover', 'hovers', 'hovering'], [5]],
   vacuum: ['Vacuum', 'A space with no air in it at all, so there is no air resistance.', ['vacuum'], [5]],
-  drag: ['Drag', 'Another name for air resistance (or water resistance): a force that pushes against an object moving through a fluid.', ['drag'], [5]]
+  drag: ['Drag', 'Another name for air resistance (or water resistance): a force that pushes against an object moving through a fluid.', ['drag'], [5]],
+  graph: ['Graph', 'A picture of data that shows how one thing changes when another thing changes.', []],
+  scattergraph: ['Scatter graph', 'A graph with a point for each result. Use one when the thing you changed is a number, like a mass or a force.', ['scatter graph', 'scatter graphs']],
+  bargraph: ['Bar graph', 'A graph with a bar for each result. Use one when the thing you changed is a name or a group, like different floors or shoes.', ['bar graph', 'bar graphs']],
+  axis: ['Axis', 'One of the two number lines on a graph. The bottom axis shows what you changed, and the side axis shows what you measured. More than one axis are called axes.', []],
+  trend: ['Trend', 'The overall pattern in data, such as "as the mass goes up, the braking distance goes up".', []],
+  claim: ['Claim', 'The first part of a CER paragraph: a sentence that answers the question.', []],
+  evidence: ['Evidence', 'The second part of a CER paragraph: numbers from a test, each with its unit, or facts from something you read, that back up the claim.', []],
+  reasoning: ['Reasoning', 'The third part of a CER paragraph: the science that explains why the evidence supports the claim.', []],
+  cer: ['CER', 'A science paragraph in three parts: Claim, Evidence and Reasoning. Say it, show it, explain it.', ['CER']],
+  hypothesis: ['Hypothesis', 'A prediction that can be tested, such as "twice the pull will give twice the acceleration".', ['hypothesis', 'hypotheses']],
+  factor: ['Factor', 'Something to think about when you weigh up a decision. In Force HQ the factors are society, environment, economy and health.', []],
+  judgement: ['Judgement', 'A decision you make after weighing up the pros and cons, with a reason for your choice.', []],
+  interpret: ['Interpret', 'Find the pattern in data and say what it means.', []],
+  describe: ['Describe', 'Say what happens, with details.', []],
+  analyse: ['Analyse', 'Break something into parts and see how the parts connect.', []],
+  discuss: ['Discuss', 'Look at different sides, use evidence, then decide.', []]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */
 const GL_ALIASES = Object.entries(TERMS).flatMap(([k, [, , al]]) => (al || []).map(a => [a.toLowerCase(), k])).sort((a, b) => b[0].length - a[0].length);
@@ -3029,17 +3091,18 @@ let CARDS = null;
 function showCards(cards, opt = {}) {
   hideCards(); CARDS = { cards, k: 0, opt }; drawCard();
 }
-function hideCards() { const ch = $('#chunk'); if (ch) ch.hidden = true; unhi(); CARDS = null; }
+function hideCards() { const ch = $('#chunk'); if (ch) ch.hidden = true; unhi(); CARDS = null; if (typeof gateOn === 'function') gateOn(false); }
 function unhi() { $$('.coachhi').forEach(e => e.classList.remove('coachhi')); }
 function drawCard() {
   const ch = $('#chunk'); if (!CARDS || !ch) return; const { cards, k, opt } = CARDS, c = cards[k], last = k === cards.length - 1;
   ch.hidden = false; unhi();
   ch.innerHTML = `<div class="chead" title="Drag to move this card"><span class="qgrip" aria-hidden="true">⠿</span><span class="lbl">${esc(opt.title || '')}${cards.length > 1 ? ` · card ${k + 1} of ${cards.length}` : ''}</span><button type="button" class="cx" aria-label="Close these cards">✕</button></div>
-    <div class="gbody gl">${c.html}</div>
+    <div class="gbody gl">${c.html}${opt.readGate && k === 0 && opt.readGate() ? '<button type="button" class="go say-ok" data-cb="ok">OK</button>' : ''}</div>
     <div class="cnav">${k ? '<button type="button" class="ghost" data-cb="back">‹ Back</button>' : ''}<span class="cdots">${cards.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</span><button type="button" class="go" data-cb="next">${last ? (opt.journal === false ? 'Got it ✓' : 'Save to my Journal ✓') : 'Next ›'}</button></div>`;
   makeDraggable(ch, '.chead', 'cards'); dragPlace(ch, 'cards', '.chead');
   if (c.hi) $$(c.hi).forEach(e => { if (e.offsetParent) e.classList.add('coachhi'); });
-  ch.querySelector('[data-cb=next]').addEventListener('click', () => { if (last) finishCards(); else { CARDS.k++; drawCard(); } });
+  ch.querySelector('[data-cb=next]').addEventListener('click', () => { if (k === 0 && opt.readOK) opt.readOK(); if (last) finishCards(); else { CARDS.k++; drawCard(); } });
+  const ok = ch.querySelector('[data-cb=ok]'); if (ok) { ok.addEventListener('click', () => { opt.readOK(); ok.remove(); }); setTimeout(() => { if (ok.isConnected) ok.focus({ preventScroll: true }); }, 0); }
   const b = ch.querySelector('[data-cb=back]'); if (b) b.addEventListener('click', () => { CARDS.k--; drawCard(); });
   ch.querySelector('.cx').addEventListener('click', () => finishCards());
   if (innerWidth <= 640) ch.scrollIntoView({ block: 'nearest' });
@@ -3047,6 +3110,7 @@ function drawCard() {
 function finishCards() {
   if (!CARDS) return; const { cards, opt } = CARDS; hideCards();
   if (opt.journalKey && opt.journal !== false) journalAdd(opt.journalKey, opt.where || '', opt.title || '', cards.map(c => c.html).join(''));
+  if (opt.readOK) opt.readOK();
   if (opt.onDone) opt.onDone();
 }
 
@@ -3518,6 +3582,9 @@ function draftSave(store, id, part, val, src) {
   $$('[data-draft="' + store + '|' + id + '"]').forEach(el => { if (el === src || el.disabled || el.dataset.dk !== part) return; if (el.value !== val) el.value = val; });
   if (typeof checkStep === 'function') checkStep();
 }
+/* a fold-out above every explain question: what a good explanation looks like (Skills audit, gap C); q.fold swaps in another one (gap E) */
+const foldHTML = f => `<details class="howexp"><summary>${f.title}</summary>${f.html}</details>`;
+const EXPLAIN_HOW = { title: 'How to write a good explanation', html: '<p>Answer the question in your first sentence.</p><p>Give the science step by step, joined with <b>because</b> and <b>so</b>.</p><p>Use key words, and numbers with their units, like 90 N or 2.5 m/s².</p><div class="example"><b>Example.</b> Why does a crate slide further on ice than on carpet?<br><i>A crate slides further on ice because ice has less friction than carpet. There is less friction pushing against the crate, so it slows down more slowly and slides further before it stops.</i></div>' };
 const QLABEL = { mcq: 'Choose one', tap: 'Tap the sentence', num: 'Calculate', reading: 'Read the arena', gap: 'Fill the gaps', sort: 'Sort it', match: 'Match it up', table: 'Complete the table', tick: 'Tick all that apply', fbd: 'Draw it: free-body diagram', explain: 'Explain it' };
 const normWord = s => String(s || '').toLowerCase().replace(/[^a-z0-9.]+/g, ' ').trim();
 /* Gap answers accept sensible synonyms: if any accepted answer is in a group, every word in that group counts.
@@ -3538,7 +3605,8 @@ function gapAccepts(list) { const out = new Set(list.map(gapNorm)); SYNS.forEach
 const gapOk = (list, x) => gapAccepts(list).includes(gapNorm(x));
 function optOrder(q) { return q.noShuffle ? q.opts.map((_, i) => i) : shuffled(q.opts.map((_, i) => i), hashStr(q.id + (q.seed || ''))); }
 function hashStr(s) { let x = 7; for (const ch of String(s)) x = (x * 31 + ch.charCodeAt(0)) | 0; return x; }
-function sortItems(q) { return shuffled(q.items.map((_, i) => i), hashStr(q.id) + 3); }
+function sortItems(q) { return rowOrder(q, q.items.map(x => x[0])); }
+const rowsOf = q => rowOrder(q, q.rows.map(r => r[0]));   // table and match rows, in their stable shuffled display order
 
 /* One go at every question. A right answer locks green; a wrong one locks and shows the right answer.
    Questions with several parts score a point per part; diagrams score a point per check. */
@@ -3546,7 +3614,7 @@ const art = g => (/^[aeiou]/i.test(g) ? 'an ' : 'a ') + g.toLowerCase();
 const qq = t => '“' + plain(t) + '”';
 function corr(after, text) { const c = document.createElement('span'); c.className = 'corr'; c.textContent = '→ ' + plain(text); after.after(c); }
 function lockInputs(el) { $$('input,select,textarea,button', el).forEach(x => { if (!x.classList.contains('qopen')) x.disabled = true; }); $$('.qchk', el).forEach(b => b.hidden = true); }
-function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; } }
+function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'mark': return q.sents.length; case 'rtable': return q.rows.length; case 'graph': return 5; case 'para': return (q.check || []).length; default: return 1; } }
 /* "How sure are you?" (opt-in: sure:true on mcq, reason and pick). Three buttons; the student must choose one before checking.
    Not marked. Saved as st.sure ('guess' | 'fair' | 'cert') so the feedback page can show answers that were certain but wrong. */
 const SURE_LABEL = { guess: 'Guessing', fair: 'Fairly sure', cert: 'Certain' };
@@ -3573,7 +3641,7 @@ const QT = {
     html(q, s, api) {
       const U = q.units && q.units.length, L = q.ladder && q.hints && q.hints.length, D = api && api.draft ? api.draft.get() || {} : {}, dk = api && api.draft ? ` data-draft="${api.draft.key}"` : '';
       const v0 = s && s.v != null ? s.v : D.v || '', u0 = s && s.u ? s.u : D.u || '';
-      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div><label class="numwork"><span class="lbl">Working (optional, not marked)</span><textarea class="numworkin" rows="3" aria-label="Your working"${dk} data-dk="w" placeholder="Show how you worked it out, for example 4,500 ÷ 18 = 250">${esc((s && s.w != null) ? s.w : D.w || '')}</textarea></label>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
+      return `<div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your answer"${dk} data-dk="v" value="${esc(v0)}">${U ? `<select class="unitsel" aria-label="Unit"${dk} data-dk="u"><option value="">unit?</option>${q.units.map(u => `<option value="${esc(u)}"${u0 === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${q.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>${U ? '<p class="scaleNote unithint">Type the number, then choose its unit, like 90 N or 2.5 m/s².</p>' : ''}<label class="numwork"><span class="lbl">Working (optional, not marked)</span><textarea class="numworkin" rows="3" aria-label="Your working"${dk} data-dk="w" placeholder="Show how you worked it out, for example 4,500 ÷ 18 = 250">${esc((s && s.w != null) ? s.w : D.w || '')}</textarea></label>${L ? `<details class="clue ladder"><summary>Need a clue?</summary><ol class="clist"></ol><button type="button" class="mini cluebtn">Show a hint</button></details>` : ''}`;
     },
     bind(el, q, api) {
       const U = q.units && q.units.length;
@@ -3618,7 +3686,7 @@ const QT = {
     model(q) { return q.groups.map((g, gi) => `<b>${g}:</b> ${q.items.filter(x => x[1] === gi).map(x => x[0]).join(', ')}`).join('<br>'); }
   },
   match: {
-    html(q, s) { const ch = shuffled(q.rows.map((_, i) => i), hashStr(q.id) + 9); return `<div class="sortgrid">${q.rows.map((r, i) => `<div class="matchrow" data-i="${i}"><span>${r[0]}</span><select aria-label="Match for ${esc(plain(r[0]))}"><option value="">Choose…</option>${ch.map(j => `<option value="${j}" ${s && s.v && s.v[i] === j ? 'selected' : ''}>${q.rows[j][1]}</option>`).join('')}</select></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
+    html(q, s) { const ch = shuffled(q.rows.map((_, i) => i), hashStr(q.id) + 9); return `<div class="sortgrid">${rowsOf(q).map(i => { const r = q.rows[i]; return `<div class="matchrow" data-i="${i}"><span>${r[0]}</span><select aria-label="Match for ${esc(plain(r[0]))}"><option value="">Choose…</option>${ch.map(j => `<option value="${j}" ${s && s.v && s.v[i] === j ? 'selected' : ''}>${q.rows[j][1]}</option>`).join('')}</select></div>`; }).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => { const s = $(`.matchrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
       if (v.some(x => x == null) && !api.auto) { api.say('Choose a match for every row first.', 'no'); return; }
       const bad = v.map((x, i) => x === i ? -1 : i).filter(i => i >= 0);
@@ -3628,7 +3696,7 @@ const QT = {
     show(q, v) { return q.rows.map((r, i) => `${r[0]} → ${v && v[i] != null ? q.rows[v[i]][1] : '–'}`).join('<br>'); }, model(q) { return q.rows.map(r => `${r[0]} → ${r[1]}`).join('<br>'); }
   },
   table: { // q.cols, q.rows:[[label, [answerIndex per col]]], q.choices: per col list
-    html(q, s) { return `<table class="tbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, i) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td data-c="${i}-${j}"><select aria-label="${esc(plain(r[0]))}, ${esc(plain(q.cols[j]))}"><option value="">Choose…</option>${q.choices[j].map((o, k) => `<option value="${k}" ${s && s.v && s.v[i] && s.v[i][j] === k ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</table><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
+    html(q, s) { return `<table class="tbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${rowsOf(q).map(i => { const r = q.rows[i]; return `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td data-c="${i}-${j}"><select aria-label="${esc(plain(r[0]))}, ${esc(plain(q.cols[j]))}"><option value="">Choose…</option>${q.choices[j].map((o, k) => `<option value="${k}" ${s && s.v && s.v[i] && s.v[i][j] === k ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`).join('')}</tr>`; }).join('')}</table><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => q.cols.map((_, j) => { const s = $(`td[data-c="${i}-${j}"] select`, el).value; return s === '' ? null : +s; }));
       if (v.flat().some(x => x == null) && !api.auto) { api.say('Fill in every cell first.', 'no'); return; }
       let wrong = 0; q.rows.forEach((r, i) => q.cols.forEach((_, j) => { if (v[i][j] !== r[1][j]) wrong++; }));
@@ -3652,7 +3720,7 @@ const QT = {
     /* The "Did you include…?" checklist stays hidden until the student has pressed Check (or Finish), which shows the model answer and the checklist together; one point per tick, and ticks can still change afterwards. */
     html(q, s) {
       const v = (s && s.v) || {}, ticks = v.ticks || [], done = !!(s && s.done);
-      return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck" ${done ? '' : 'hidden'}><div class="lbl exckhd">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
+      return `${q.fold === false ? '' : foldHTML(q.fold || EXPLAIN_HOW)}${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck" ${done ? '' : 'hidden'}><div class="lbl exckhd">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
     },
     bind(el, q, api) {
       const ticksNow = () => $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck), textNow = () => $('.explain', el).value;
@@ -3693,10 +3761,11 @@ QT.tap.show = QT.mcq.show;
 function renderQuestion(host, q, ctx) {
   const path = ctx.store + '.' + q.id; let s = dbGet(path, null);
   const box = h('div', { class: 'qitem' + (s && s.done ? ' locked' + (s.ok ? ' ok' : '') : ''), 'data-q': q.id });
-  box.innerHTML = `<div class="qtype"><span>${QLABEL[q.type] || ''}</span><span class="pts"></span></div>${q.type === 'gap' || q.type === 'pick' ? '' : `<div class="qp gl">${q.p}</div>`}<div class="qbody"></div><div class="fb"></div>`;   // gap and pick put the sentence inside the answer area
+  box.innerHTML = `<div class="qtype"><span>${q.label || QLABEL[q.type] || ''}</span><span class="pts"></span></div>${q.story ? `<div class="qstory gl">${q.story}</div>` : ''}${q.type === 'gap' || q.type === 'pick' ? '' : `<div class="qp gl">${q.p}</div>`}<div class="qbody"></div><div class="fb"></div>`;   // gap and pick put the sentence inside the answer area
+  box.dataset.t = q.type; if (q.needs) { box.dataset.needs = '1'; if (!q.needs()) box.classList.add('gated'); }
   host.appendChild(box);
   const body = $('.qbody', box), fbEl = $('.fb', box);
-  const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
+  const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done && m ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
   let reg = null;   // what the question type says about itself: { blank(), check(), reveal?, blankV? }, used by the Finish button
   const api = {
     auto: false,       // true while the Finish button is checking this question: skip every "do this first" guard and mark what is there
@@ -3707,7 +3776,7 @@ function renderQuestion(host, q, ctx) {
     setRaw: v => dbSet(path, v),
     persist: () => dbSet(path, dbGet(path, null)),
     tries: () => (dbGet(path, null) || {}).tries || 0,
-    locked: () => { const st = dbGet(path, null); return !!(st && st.done && q.type !== 'explain'); },
+    locked: () => { const st = dbGet(path, null); return !!(st && st.done && q.type !== 'explain' && q.type !== 'para'); },
     say: (m, cls) => { fbEl.className = 'fb ' + cls; fbEl.textContent = m; },
     answer(v, ok, msg, x = {}) {
       const st = dbGet(path, null) || { tries: 0 }; st.v = v;
@@ -4258,6 +4327,401 @@ function predSketchBind(P) {
 /* how many rows of a freeze question (in the current Learn step) have a moment attached: used by "Do this" tasks */
 const frzCount = qid => { const s = dbGet(stepKey(CH.id, GI) + '.' + qid, null); return s && s.v && Array.isArray(s.v.rows) ? s.v.rows.filter(r => r.snap).length : 0; };
 
+/* ===== Graph maker (ported from Sparks, redrawn as SVG for Force HQ) =====
+   A student chooses scatter or bar, writes the title and axis labels with units, types the axis numbers and places a point for each row of the data.
+   spec: { head:[xName, yName], rows:[[x, y]], xKind:'num'|'name', titleWords:[[…],[…]], xWords, yWords, xUnits, yUnits, exTitle, exX, exY }
+   Marks (5): graph type, title, axis labels, axis numbers, points. Learn shows live rings and a checklist; the Check gives one go. */
+const GM = { W: 600, H: 400, L: 74, R: 580, T: 44, B: 322 };
+const GM_MARKS = ['Graph type', 'Title', 'Axis labels', 'Axis numbers', 'Points'];
+const gmBlank = () => ({ type: '', title: '', xl: '', yl: '', xmin: '', xmax: '', xstep: '', ymin: '', ymax: '', ystep: '', pts: {}, bars: {} });
+const gmNum = v => (v === '' || v == null || isNaN(+v)) ? NaN : +v;
+const gmIsScatter = spec => spec.xKind === 'num';
+const gmData = spec => spec.rows.map((r, i) => ({ i, name: String(r[0]), x: gmIsScatter(spec) ? +r[0] : null, y: +r[1] }));
+function gmAxis(S, k) {   // the typed numbers for one axis, or null until they make a sensible grid
+  const mn = gmNum(S[k + 'min']), mx = gmNum(S[k + 'max']), st = gmNum(S[k + 'step']);
+  if ([mn, mx, st].some(isNaN) || st <= 0 || mx <= mn || (mx - mn) / st > 24) return null;
+  return { min: mn, max: mx, step: st };
+}
+const gmTicks = a => { const out = []; for (let k = 0; a.min + k * a.step <= a.max + 1e-9; k++) out.push(+(a.min + k * a.step).toFixed(6)); return out; };
+const gmFmt = v => String(+(+v).toFixed(4)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+function gmNiceAxis(max) {   // starts at 0, equal steps (1, 2 or 5 times a power of ten), finishes at or just above the biggest number
+  for (const p of [0.01, 0.1, 1, 10, 100, 1000, 10000, 100000]) for (const m of [1, 2, 5]) { const st = m * p; if (Math.ceil(max / st - 1e-9) <= 10 && Math.ceil(max / st - 1e-9) >= 4) return { min: 0, max: +(Math.ceil(max / st - 1e-9) * st).toFixed(6), step: st }; }
+  return { min: 0, max: max, step: max / 5 };
+}
+function gmModel(spec) {
+  const D = gmData(spec), sc = gmIsScatter(spec), S = gmBlank(), Y = gmNiceAxis(Math.max(...D.map(d => d.y))), X = sc ? gmNiceAxis(Math.max(...D.map(d => d.x))) : null;
+  S.type = sc ? 'scatter' : 'bar'; S.title = spec.exTitle; S.xl = spec.exX; S.yl = spec.exY;
+  S.ymin = Y.min; S.ymax = Y.max; S.ystep = Y.step; if (X) { S.xmin = X.min; S.xmax = X.max; S.xstep = X.step; }
+  D.forEach(d => { if (sc) S.pts[d.i] = { x: d.x, y: d.y }; else S.bars[d.i] = d.y; });
+  return S;
+}
+function gmLabelOK(spec, label, k) {
+  const l = String(label || '').toLowerCase(), br = l.match(/\(([^)]*)\)/), units = spec[k + 'Units'];
+  if (!spec[k + 'Words'].some(w => l.includes(w))) return false;
+  if (!units) return true;
+  return !!br && units.includes(br[1].trim().toLowerCase().replace(/\./g, ''));
+}
+function gmScaleOK(vals, a) { if (!a) return false; const mx = Math.max(...vals), n = (a.max - a.min) / a.step; return a.min === 0 && Math.abs(n - Math.round(n)) < 1e-6 && n >= 2 && n <= 20 && a.max >= mx - 1e-9 && a.max - mx < 2 * a.step - 1e-9; }
+const gmPtOK = (d, p, X, Y) => !!p && Math.abs(p.x - d.x) <= 0.4 * X.step + 1e-9 && Math.abs(p.y - d.y) <= 0.4 * Y.step + 1e-9;
+const gmBarOK = (d, v, Y) => v != null && Math.abs(v - d.y) <= 0.4 * Y.step + 1e-9;
+function gmEval(spec, S) {
+  S = S || gmBlank(); const D = gmData(spec), sc = gmIsScatter(spec), X = sc ? gmAxis(S, 'x') : null, Y = gmAxis(S, 'y'), m = [false, false, false, false, false];
+  m[0] = S.type === (sc ? 'scatter' : 'bar');
+  const t = String(S.title || '').toLowerCase(); m[1] = spec.titleWords.every(g => g.some(w => t.includes(w)));
+  m[2] = gmLabelOK(spec, S.xl, 'x') && gmLabelOK(spec, S.yl, 'y');
+  m[3] = gmScaleOK(D.map(d => d.y), Y) && (!sc || gmScaleOK(D.map(d => d.x), X));
+  m[4] = sc ? !!(X && Y) && D.every(d => gmPtOK(d, (S.pts || {})[d.i], X, Y)) : !!Y && D.every(d => gmBarOK(d, (S.bars || {})[d.i], Y));
+  return { marks: m, score: m.filter(Boolean).length, X, Y };
+}
+function gmFixText(spec, k) {
+  return [gmIsScatter(spec) ? 'You changed a number, so a scatter graph fits best.' : 'You changed names or groups, so a bar graph fits best.',
+    `Write the title as what you changed vs what you measured, like "${spec.exTitle}".`,
+    `Label each axis with its name and its unit in brackets, like "${spec.exX}".`,
+    'Start each axis at 0, go up in equal steps, and finish just above your biggest number.',
+    'Place one point for each row of the table, carefully. Red rings show the points to fix.'][k];
+}
+/* the graph as SVG. o: { rings, inter (hints), blank (an empty grid for the blank worksheet), print } */
+function gmSVG(spec, S, o = {}) {
+  const { W, H, L, R, T, B } = GM, sc = gmIsScatter(spec), D = gmData(spec); S = S || gmBlank();
+  const X = sc ? gmAxis(S, 'x') : null, Y = gmAxis(S, 'y'), ready = !!Y && (!sc || !!X) && !o.blank;
+  const px = v => L + (v - X.min) / (X.max - X.min) * (R - L), py = v => B - (v - Y.min) / (Y.max - Y.min) * (B - T);
+  const col = o.print ? BLUE : '#1b7ea6', edge = o.print ? '#0b2f86' : '#0d4a63';
+  let g = `<rect width="${W}" height="${H}" fill="#fff"/>`;
+  if (o.blank) { for (let x = L; x <= R + 1; x += 25) g += `<line x1="${x}" y1="${T}" x2="${x}" y2="${B}" stroke="#dfe5ec"/>`; for (let y = B; y >= T - 1; y -= 25) g += `<line x1="${L}" y1="${y}" x2="${R}" y2="${y}" stroke="#dfe5ec"/>`; }
+  g += `<text x="${(L + R) / 2}" y="28" text-anchor="middle" font-size="20" font-weight="700" fill="${S.title ? '#13212a' : '#8a97a8'}" ${S.title ? '' : 'font-style="italic"'}>${S.title ? esc(S.title) : (o.inter ? 'Graph title' : '')}</text>`;
+  if (!ready) { if (!o.blank) g += `<text x="${(L + R) / 2}" y="${(T + B) / 2}" text-anchor="middle" font-size="18" fill="#5a6878">${!S.type ? 'Choose a type of graph to start.' : 'Type your axis numbers to start the graph.'}</text>`; }
+  else {
+    gmTicks(Y).forEach(v => { g += `<line x1="${L}" y1="${py(v)}" x2="${R}" y2="${py(v)}" stroke="#dfe5ec"/><text x="${L - 8}" y="${py(v) + 5}" text-anchor="end" font-size="15" fill="#13212a">${gmFmt(v)}</text>`; });
+    if (sc) gmTicks(X).forEach(v => { g += `<line x1="${px(v)}" y1="${T}" x2="${px(v)}" y2="${B}" stroke="#e6eaf0"/><text x="${px(v)}" y="${B + 20}" text-anchor="middle" font-size="15" fill="#13212a">${gmFmt(v)}</text>`; });
+  }
+  g += `<path d="M${L} ${T}V${B}H${R}" fill="none" stroke="#13212a" stroke-width="2.5"/>`;
+  if (S.xl) g += `<text x="${(L + R) / 2}" y="${H - 10}" text-anchor="middle" font-size="17" font-weight="700" fill="#13212a">${esc(S.xl)}</text>`;
+  if (S.yl) g += `<text transform="translate(20 ${(T + B) / 2}) rotate(-90)" text-anchor="middle" font-size="17" font-weight="700" fill="#13212a">${esc(S.yl)}</text>`;
+  if (ready && sc) D.forEach(d => { const p = (S.pts || {})[d.i]; if (!p || p.x < X.min - 1e-9 || p.x > X.max + 1e-9 || p.y < Y.min - 1e-9 || p.y > Y.max + 1e-9) return;
+    if (o.rings) g += `<circle cx="${px(p.x)}" cy="${py(p.y)}" r="15" fill="none" stroke="${gmPtOK(d, p, X, Y) ? '#2e7d4f' : '#b3301e'}" stroke-width="4" class="gmring ${gmPtOK(d, p, X, Y) ? 'ok' : 'bad'}"/>`;
+    g += `<circle class="gmpt" data-i="${d.i}" cx="${px(p.x)}" cy="${py(p.y)}" r="8" fill="${col}" stroke="${edge}" stroke-width="2"/>`; });
+  if (ready && !sc) { const sw = (R - L) / D.length;
+    D.forEach((d, k) => { const cx = L + sw * (k + .5), v = (S.bars || {})[d.i], lab = String(d.name); g += `<text x="${cx}" y="${B + 20}" text-anchor="middle" font-size="14" font-weight="700" fill="#13212a">${esc(lab.length > 14 ? lab.slice(0, 13) + '…' : lab)}</text>`;
+      if (v != null) { const y = py(clamp(v, Y.min, Y.max)); g += `<rect class="gmbar" data-i="${d.i}" x="${cx - sw * .25}" y="${y}" width="${sw * .5}" height="${B - y}" fill="${o.print ? '#9db8f0' : '#8cc3dc'}" stroke="${edge}" stroke-width="2"/>`;
+        if (o.rings) g += `<circle cx="${cx}" cy="${y}" r="12" fill="#fff" fill-opacity=".6" stroke="${gmBarOK(d, v, Y) ? '#2e7d4f' : '#b3301e'}" stroke-width="4" class="gmring ${gmBarOK(d, v, Y) ? 'ok' : 'bad'}"/>`; } }); }
+  if (o.inter && ready && sc && !Object.keys(S.pts || {}).length) g += `<text x="${(L + R) / 2}" y="${(T + B) / 2}" text-anchor="middle" font-size="16" fill="#8a97a8">Tap a blue point below, then tap here to place it.</text>`;
+  return `<svg class="gmsvg" viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'The graph'}" style="width:100%;max-width:${o.maxW || 560}px;display:block;background:#fff;border-radius:8px">${g}</svg>`;
+}
+const gmTable = (spec, cls) => `<table class="${cls || 'tbl gm-table'}"><tr>${spec.head.map(x => `<th>${x}</th>`).join('')}</tr>${spec.rows.map(r => `<tr>${r.map(v => `<td>${typeof v === 'number' ? gmFmt(v) : v}</td>`).join('')}</tr>`).join('')}</table>`;
+const GM_HOW = `<ul class="gmhowlist"><li><b>Title:</b> what you changed vs what you measured, like <i>Mass vs stretch</i>.</li><li><b>Bottom axis (x):</b> what you changed, with its unit in brackets, like <i>Mass (g)</i>.</li><li><b>Side axis (y):</b> what you measured, with its unit in brackets, like <i>Stretch (cm)</i>.</li><li><b>Scale:</b> start at 0, go up in equal steps, and finish just above your biggest number.</li><li><b>Points:</b> one point for each row of the table, placed carefully.</li><li><b>Type:</b> if you changed a number, use a ${T('scattergraph', 'scatter graph')}. If you changed a name or a group, use a bar graph.</li></ul>`;
+const gmHowHTML = open => `<details class="gmhow"${open ? ' open' : ''}><summary>How to make a good graph</summary>${GM_HOW}</details>`;
+
+/* ---------- the maker itself ---------- */
+function graphMaker(host, spec, opts = {}) {
+  const help = !!opts.help, sc = gmIsScatter(spec), D = gmData(spec);
+  const S = Object.assign(gmBlank(), JSON.parse(JSON.stringify(opts.saved || {}))); S.pts = S.pts || {}; S.bars = S.bars || {};
+  let locked = !!opts.locked, rings = help || locked, sel = null;
+  const root = h('div', { class: 'gm noglos' });
+  const inp = (key, label, cls, type) => `<input class="gm-in ${cls || ''}" data-k="${key}" ${type === 'num' ? 'type="text" inputmode="decimal"' : 'type="text" maxlength="80"'} autocomplete="off" aria-label="${label}" value="${esc(S[key])}">`;
+  const axrow = (name, k) => `<div class="gm-axrow" data-ax="${k}"><b>${name}</b><label>lowest ${inp(k + 'min', name + ' lowest number', 'gm-num', 'num')}</label><label>highest ${inp(k + 'max', name + ' highest number', 'gm-num', 'num')}</label><label>gap ${inp(k + 'step', name + ' gap', 'gm-num', 'num')}</label></div>`;
+  root.innerHTML = `<div class="gm-left"><div class="gm-svg"></div><section class="gm-step"><h4><span class="gm-n">5</span>${sc ? 'Plot the points' : 'Draw the bars'}</h4><p class="gm-note">${sc ? 'Tap a blue chip (or drag it), then tap the graph where the point goes.' : 'Tap a chip, then tap the graph at the height of the bar.'}</p><div class="gm-tray"></div></section><div class="gm-tablebox"><b>My data</b>${gmTable(spec)}</div></div>
+    <div class="gm-right"><section class="gm-step"><h4><span class="gm-n">1</span>Type of graph</h4><div class="gm-opts"><button type="button" class="gm-opt" data-type="scatter" aria-pressed="false">Scatter graph</button><button type="button" class="gm-opt" data-type="bar" aria-pressed="false">Bar graph</button></div><p class="gm-note gm-typenote"></p></section>
+    <section class="gm-step"><h4><span class="gm-n">2</span>Graph title</h4>${inp('title', 'Graph title')}</section>
+    <section class="gm-step"><h4><span class="gm-n">3</span>Axis labels</h4><label class="gm-lab">x-axis label (along the bottom) ${inp('xl', 'x-axis label')}</label><label class="gm-lab">y-axis label (up the side) ${inp('yl', 'y-axis label')}</label></section>
+    <section class="gm-step"><h4><span class="gm-n">4</span>Axis numbers</h4>${axrow('y-axis', 'y')}${sc ? axrow('x-axis', 'x') : ''}</section>
+    <div class="gm-out" role="status" aria-live="polite"></div></div>`;
+  host.appendChild(root);
+  const svgBox = $('.gm-svg', root), tray = $('.gm-tray', root), out = $('.gm-out', root);
+  const emit = () => { if (opts.onChange) opts.onChange(JSON.parse(JSON.stringify(S)), gmEval(spec, S)); };
+  function chipLabel(d) { return sc ? `(${gmFmt(d.x)}, ${gmFmt(d.y)})` : `${d.name}: ${gmFmt(d.y)}`; }
+  const placed = d => sc ? !!S.pts[d.i] : S.bars[d.i] != null;
+  function draw() {
+    svgBox.innerHTML = gmSVG(spec, S, { rings, inter: !locked, alt: 'The graph you are making' });
+    $$('.gm-opt', root).forEach(b => b.setAttribute('aria-pressed', S.type === b.dataset.type));
+    tray.innerHTML = D.map(d => `<button type="button" class="gm-chip ${placed(d) ? 'placed' : ''} ${sel === d.i ? 'sel' : ''}" data-i="${d.i}" ${locked ? 'disabled' : ''}>${chipLabel(d)}${placed(d) ? ' ✓' : ''}</button>`).join('') + (sel != null && placed(D[sel]) && !locked ? '<button type="button" class="mini gm-rm">Take this point off</button>' : '');
+    const e = gmEval(spec, S), tn = $('.gm-typenote', root);
+    tn.textContent = S.type && S.type !== (sc ? 'scatter' : 'bar') && rings ? gmFixText(spec, 0) : '';
+    out.innerHTML = rings ? `<ul class="gm-marks">${GM_MARKS.map((nm, k) => `<li class="${e.marks[k] ? 'ok' : 'bad'}"><span class="gm-tick" aria-hidden="true">${e.marks[k] ? '✓' : '✗'}</span><span><b>${nm}</b>${!e.marks[k] ? ` <span class="gm-fixtxt">${gmFixText(spec, k)}</span>` : ''}</span></li>`).join('')}</ul>` : '';
+    return e;
+  }
+  const toData = ev => {   // a click on the graph as a point in the data
+    const svg = $('.gmsvg', root), r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * GM.W, sy = (ev.clientY - r.top) / r.height * GM.H, X = sc ? gmAxis(S, 'x') : null, Y = gmAxis(S, 'y');
+    if (!Y || (sc && !X) || sx < GM.L - 6 || sx > GM.R + 6 || sy < GM.T - 6 || sy > GM.B + 6) return null;
+    return { x: sc ? +(X.min + (sx - GM.L) / (GM.R - GM.L) * (X.max - X.min)).toFixed(3) : null, y: +(Y.min + (GM.B - sy) / (GM.B - GM.T) * (Y.max - Y.min)).toFixed(3) };
+  };
+  function putAt(i, p) { if (locked || !p) return; if (sc) S.pts[i] = { x: p.x, y: p.y }; else S.bars[i] = p.y; sel = null; emit(); draw(); }
+  root.addEventListener('click', ev => {
+    if (locked) return;
+    const t = ev.target.closest('.gm-opt'); if (t) { S.type = t.dataset.type; emit(); draw(); return; }
+    if (ev.target.closest('.gm-rm')) { if (sel != null) { delete S.pts[sel]; delete S.bars[sel]; } emit(); draw(); return; }
+    const c = ev.target.closest('.gm-chip'); if (c) { if (c.dataset.moved) { delete c.dataset.moved; return; } sel = sel === +c.dataset.i ? null : +c.dataset.i; draw(); return; }
+    const pt = ev.target.closest('.gmpt, .gmbar'); if (pt && sel == null) { sel = +pt.dataset.i; draw(); return; }
+    if (ev.target.closest('.gmsvg') && sel != null) putAt(sel, toData(ev));
+  });
+  root.addEventListener('input', ev => { const k = ev.target.dataset && ev.target.dataset.k; if (!k || locked) return; S[k] = ev.target.value; emit(); draw(); });
+  /* drag a chip onto the graph (mouse, pen and touch); a tap still just selects it */
+  root.addEventListener('pointerdown', ev => {
+    const c = ev.target.closest('.gm-chip'); if (!c || locked || ev.button > 0) return; const i = +c.dataset.i, x0 = ev.clientX, y0 = ev.clientY; let ghost = null;
+    const mv = e => { if (!ghost && Math.hypot(e.clientX - x0, e.clientY - y0) > 6) { ghost = h('div', { class: 'gm-chip gm-ghost' }, c.textContent); document.body.appendChild(ghost); c.dataset.moved = '1'; } if (ghost) { ghost.style.left = e.clientX + 'px'; ghost.style.top = e.clientY + 'px'; } };
+    const up = e => { window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', up); if (ghost) { ghost.remove(); const r = $('.gmsvg', root).getBoundingClientRect(); if (e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) putAt(i, toData(e)); setTimeout(() => { delete c.dataset.moved; }, 0); } };
+    window.addEventListener('pointermove', mv); window.addEventListener('pointerup', up);
+  });
+  draw();
+  return { S, root, eval: () => gmEval(spec, S), draw, lock() { locked = true; rings = true; sel = null; $$('input,.gm-opt', root).forEach(x => { x.disabled = true; }); draw(); } };
+}
+
+/* ===== Skills question types (Reading and Writing plan, section 10, parts 2 to 6):
+   teach (a worked example, then a short reminder), rtable (typed readings checked against the sim), graph (the graph maker as a question),
+   mark (Mark it: Claim, Evidence, Reasoning), tappts (tap two points: My evidence) and para (a paragraph with starters, a side panel and ticks). ===== */
+Object.assign(QLABEL, { teach: 'Learn this', rtable: 'Collect your data', graph: 'Make a graph', mark: 'Mark it', tappts: 'Pick your evidence', para: 'Write it' });
+const fmtRow = (spec, r) => `${gmFmt(r[0])}${spec.xUnit ? ' ' + spec.xUnit : ''}: ${gmFmt(r[1])}${spec.yUnit ? ' ' + spec.yUnit : ''}`;
+/* question items that wait for something (q.needs) show a short message until it is true; typed tables repaint as the sim runs */
+function qRefresh() {
+  $$('#qCard .qitem[data-needs], #dataCard .qitem[data-needs], #qPopBox .qitem[data-needs]').forEach(b => { const q = (CHDATA[CH.id].steps[GI].qs || []).find(x => x.id === b.dataset.q); if (q && q.needs) b.classList.toggle('gated', !q.needs()); });
+  $$('#qCard .qbody, #dataCard .qbody').forEach(b => { if (b._refresh) b._refresh(); });
+}
+
+/* ---------- teach: the full worked example the first time, then a short reminder with the example one tap away ---------- */
+QT.teach = {
+  html(q, s) {
+    const seen = !!dbGet('teachSeen.' + q.tid, false) || !!(s && s.done);
+    return seen ? `<div class="teach short">${q.reminder}<details class="teacheg"><summary>Show the worked example</summary>${q.full()}</details></div>`
+      : `<div class="teach">${q.full()}<button type="button" class="go sm teachgo" style="align-self:flex-start">Got it. Let me try</button></div>`;
+  },
+  bind(el, q, api) { api.reg({ blank: () => true, check() { } }); const b = $('.teachgo', el); if (b) b.addEventListener('click', () => { dbSet('teachSeen.' + q.tid, true); api.answer(1, true, '', { score: 1 }); }); },
+  lock(el, q) { el.innerHTML = QT.teach.html(q, { done: true }); },
+  show() { return ''; }, model() { return ''; }
+};
+/* ---------- rtable: type each reading; a row ticks when it matches the sim ---------- */
+QT.rtable = {
+  html(q, s) {
+    const v = (s && s.v) || [];
+    return `<table class="tbl rtbl"><tr><th>${q.head[0]}</th><th>${q.head[1]}</th><th></th></tr>${q.rows.map((r, i) => `<tr data-i="${i}"><th>${r}</th><td><input class="rtin" inputmode="decimal" autocomplete="off" aria-label="${esc(q.head[1])} for ${r}" value="${esc(v[i] == null ? '' : v[i])}"></td><td class="rtok"></td></tr>`).join('')}</table>`;
+  },
+  bind(el, q, api) {
+    const rows = $$('tr[data-i]', el), vals = () => rows.map(r => $('.rtin', r).value);
+    const state = i => { const x = parseNum($('.rtin', rows[i]).value), L = q.live(q.rows[i]); return isNaN(x) ? (L == null ? 'wait' : 'none') : L == null ? 'wait' : near(x, L, q.tol) ? 'ok' : 'bad'; };
+    const paint = () => { let all = true;
+      rows.forEach((r, i) => { const e = state(i); r.classList.toggle('ok', e === 'ok'); r.classList.toggle('bad', e === 'bad'); $('.rtok', r).textContent = e === 'ok' ? '✓' : e === 'bad' ? 'Not quite: check the readout' : e === 'wait' ? q.waitMsg(q.rows[i]) : ''; if (e !== 'ok') all = false; });
+      if (all && !api.locked()) api.answer(vals(), true, q.ok || 'Every reading matches the sim!', { score: q.rows.length }); };
+    el._refresh = () => { if (!api.locked()) paint(); };
+    rows.forEach(r => $('.rtin', r).addEventListener('input', () => { if (api.locked()) return; const cur = api.state() || {}; cur.v = vals(); api.setRaw(cur); paint(); }));
+    api.reg({ blank: () => vals().every(x => !x.trim()), check: paint, blankV: [] });
+    paint();
+  },
+  lock(el, q, s) { $$('tr[data-i]', el).forEach((r, i) => { r.classList.add('ok'); $('.rtok', r).textContent = '✓'; }); lockInputs(el); },
+  show(q, v) { return (v || []).map((x, i) => `${q.rows[i]}: ${esc(x)}`).join('<br>'); }, model(q) { return q.rows.map((r, i) => `${r}: ${q.live(r) == null ? '' : fmt(q.live(r), 2)}`).join('<br>'); }
+};
+/* ---------- graph: the graph maker as a question (Learn: live help; Check: one go, 5 marks) ---------- */
+const gmSpecOf = q => typeof q.spec === 'function' ? q.spec() : q.spec;
+QT.graph = {
+  html(q, s) { return `${q.learn ? '' : gmHowHTML(false)}<div class="gmhost"></div>${q.learn ? '' : '<button type="button" class="ghost sm qchk" style="align-self:flex-start">Check my graph</button>'}`; },
+  bind(el, q, api) {
+    const spec = gmSpecOf(q), s = api.state(), done = !!(s && s.done), host = $('.gmhost', el);
+    const gm = graphMaker(host, spec, { help: !!q.learn, locked: done, saved: s && s.v, onChange: (S, e) => {
+      if (api.locked()) return; const cur = api.state() || {}; cur.v = S; api.setRaw(cur);
+      if (q.learn && e.score === 5) { api.answer(S, true, q.ok || 'Brilliant graph! All five checks are green.', { score: 5 }); } } });
+    el._gm = gm;
+    const go = () => { if (api.locked()) return; const e = gm.eval(); api.answer(JSON.parse(JSON.stringify(gm.S)), e.score === 5, e.score === 5 ? (q.ok || 'A perfect graph: 5 out of 5.') : `You scored ${e.score} of 5. The checks below show what to change next time.`, { score: e.score }); };
+    api.reg({ blank: () => !(gm.S.type || gm.S.title || gm.S.xl || gm.S.yl || gm.S.ymax || Object.keys(gm.S.pts).length || Object.keys(gm.S.bars).length), check: go, blankV: gmBlank() });
+    const b = $('.qchk', el); if (b) b.addEventListener('click', go);
+    if (done) QT.graph.lock(el, q, s);
+  },
+  lock(el, q, s) {
+    const gm = el._gm; if (gm) { Object.assign(gm.S, gmBlank(), JSON.parse(JSON.stringify(s.v || {}))); gm.lock(); }
+    const host = $('.gmhost', el); if (!q.learn && host && !$('.gmmodel', el)) host.insertAdjacentHTML('afterend', `<div class="gmmodel"><div class="lbl">A correct graph</div>${gmSVG(gmSpecOf(q), gmModel(gmSpecOf(q)), { alt: 'A correct graph', maxW: 460 })}</div>`);
+    lockInputs(el);
+  },
+  show(q, v) { return v ? gmSVG(gmSpecOf(q), v, { print: true, alt: 'My graph', maxW: 360 }) : ''; }, model(q) { return gmSVG(gmSpecOf(q), gmModel(gmSpecOf(q)), { maxW: 360 }); }
+};
+/* ---------- mark: tap a sentence to go through every label and back to No label. One go. ---------- */
+const MK_NONE = -1;
+QT.mark = {
+  html(q, s) {
+    const v = s && Array.isArray(s.v) ? s.v : q.sents.map(() => MK_NONE), tag = l => `<span class="mktag mk${l < 0 ? 'no' : l}">${l < 0 ? 'No label' : q.labels[l]}</span>`;
+    return `${q.title ? `<div class="mktitle">${q.title}</div>` : ''}<div class="mkkey" role="note" aria-label="The labels"><span class="lbl">Labels</span>${q.labels.map((l, i) => tag(i)).join('')}${tag(MK_NONE)}</div><p class="scaleNote">Tap a sentence to give it a label. Keep tapping to go through every label and back to No label.</p><div class="mksents noglos">${q.sents.map((x, i) => `<div class="mkrow" data-i="${i}"><button type="button" class="mksent" data-i="${i}" data-l="${v[i]}">${tag(v[i])}<span class="mkt">${x.t}</span></button></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`;
+  },
+  bind(el, q, api) {
+    const cur = () => $$('.mksent', el).map(b => +b.dataset.l);
+    el.addEventListener('click', e => { const b = e.target.closest('.mksent'); if (!b || api.locked()) return; const l = +b.dataset.l, n = l + 1 >= q.labels.length ? MK_NONE : l + 1; b.dataset.l = n;
+      $('.mktag', b).className = 'mktag mk' + (n < 0 ? 'no' : n); $('.mktag', b).textContent = n < 0 ? 'No label' : q.labels[n]; const st = api.state() || {}; st.v = cur(); api.setRaw(st); });
+    const go = () => { if (api.locked()) return; const v = cur(), right = v.filter((x, i) => x === q.sents[i].a).length, ok = right === q.sents.length;
+      api.answer(v, ok, ok ? (q.ok || 'Every sentence is marked correctly!') : `Whoops! ${q.sents.length - right} sentence${q.sents.length - right > 1 ? 's' : ''} weren't right. Each one now shows the right label and the reason.`, { score: right }); };
+    api.reg({ blank: () => { const st = api.state(); return !(st && Array.isArray(st.v)); }, check: go, blankV: q.sents.map(() => MK_NONE) });
+    $('.qchk', el).addEventListener('click', go);
+  },
+  lock(el, q, s) {
+    $$('.mkrow', el).forEach(r => { const i = +r.dataset.i, a = q.sents[i].a, ok = (s.v || [])[i] === a, b = $('.mksent', r); b.classList.add(ok ? 'right' : 'wrong'); b.dataset.l = (s.v || [])[i] == null ? MK_NONE : s.v[i];
+      r.insertAdjacentHTML('beforeend', `<div class="mkwhy ${ok ? 'ok' : 'no'}"><b>${ok ? '✓' : '→'} ${a < 0 ? 'No label' : q.labels[a]}.</b> ${q.sents[i].why}</div>`); });
+    lockInputs(el);
+  },
+  show(q, v) { return Array.isArray(v) ? v.map((l, i) => `${i + 1}. ${l < 0 ? 'No label' : q.labels[l]}`).join('<br>') : ''; },
+  model(q) { return q.sents.map((x, i) => `${i + 1}. ${x.a < 0 ? 'No label' : q.labels[x.a]}`).join('<br>'); }
+};
+/* ---------- tappts: tap two points on a graph; they are shown as My evidence ---------- */
+function gmDotsFor(spec, S, hitR) {   // transparent hit circles over each point of a graph, for tapping
+  const X = gmIsScatter(spec) ? gmAxis(S, 'x') : null, Y = gmAxis(S, 'y'), { L, R, T, B } = GM;
+  return gmData(spec).map(d => `<circle class="tapdot" data-i="${d.i}" cx="${L + (d.x - X.min) / (X.max - X.min) * (R - L)}" cy="${B - (d.y - Y.min) / (Y.max - Y.min) * (B - T)}" r="${hitR || 18}" fill="rgba(0,0,0,0)" stroke="none" style="cursor:pointer"/>`).join('');
+}
+const myEvidenceHTML = (spec, sel) => `<div class="myev"><b>My evidence</b>${sel && sel.length ? `<ul>${sel.map(i => `<li>${fmtRow(spec, spec.rows[i])}</li>`).join('')}</ul>` : '<p class="scaleNote">Nothing tapped yet.</p>'}</div>`;
+QT.tappts = {
+  html(q, s) {
+    const spec = q.spec(), M = gmModel(spec), sel = s && Array.isArray(s.v) ? s.v : [];
+    return `<div class="tapfig">${gmSVG(spec, M, { alt: 'Your graph', maxW: 420 }).replace('</svg>', gmDotsFor(spec, M) + '</svg>')}</div><div class="tapev">${myEvidenceHTML(spec, sel)}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">That's my evidence</button>`;
+  },
+  bind(el, q, api) {
+    const spec = q.spec(), M = gmModel(spec); let sel = (api.state() || {}).v; sel = Array.isArray(sel) ? sel.slice() : [];
+    const paint = () => { $$('.tapdot', el).forEach(c => { const on = sel.includes(+c.dataset.i); c.setAttribute('fill', on ? 'rgba(227,165,28,.35)' : 'rgba(0,0,0,0)'); c.setAttribute('stroke', on ? '#e3a51c' : 'none'); c.setAttribute('stroke-width', '4'); }); $('.tapev', el).innerHTML = myEvidenceHTML(spec, sel); };
+    paint();
+    $('.tapfig', el).addEventListener('click', e => { const c = e.target.closest('.tapdot'); if (!c || api.locked()) return; const i = +c.dataset.i; sel = sel.includes(i) ? sel.filter(x => x !== i) : sel.concat(i).slice(-2); const st = api.state() || {}; st.v = sel.slice(); api.setRaw(st); paint(); });
+    const go = () => { if (api.locked()) return; if (sel.length < 2 && !api.auto) { api.say('Tap two points first.', 'no'); return; } api.answer(sel.slice().sort((a, b) => a - b), true, q.ok || 'Good choices.', { score: 1 }); };
+    api.reg({ blank: () => !sel.length, check: go, blankV: [] });
+    $('.qchk', el).addEventListener('click', go);
+  },
+  lock(el, q) { lockInputs(el); $$('.tapdot', el).forEach(c => { c.style.pointerEvents = 'none'; }); },
+  show(q, v) { return Array.isArray(v) ? v.map(i => fmtRow(q.spec(), q.spec().rows[i])).join('<br>') : ''; }, model(q) { return ''; }
+};
+/* ---------- para: a paragraph with starters, a CER reminder, a side panel with the question and the data, and ticks that wait for the model ---------- */
+const CER_REMIND = `<p><b>Claim:</b> answer the question.</p><p><b>Evidence:</b> numbers from the data, each with its unit, like 2 N or 6.4 m.</p><p><b>Reasoning:</b> the science that explains why.</p>`;
+const paraSel = (q, v) => (v && Array.isArray(v.sel) && v.sel.length === 2 ? v.sel.slice().sort((a, b) => a - b) : [0, q.data.rows.length - 1]);
+QT.para = {
+  html(q, s) {
+    const v = (s && s.v) || {}, ticks = v.ticks || [], done = !!(s && s.done), sel = Array.isArray(v.sel) ? v.sel : [];
+    const side = `<aside class="parside"><div class="lbl">${q.sideHead || 'The question and the data'}</div><p class="parq">${q.question}</p>${q.data ? (q.tapRows ? `<p class="scaleNote">Tap two rows of the table.</p>` : '') + `<table class="tbl partbl"><tr>${q.data.head.map(x => `<th>${x}</th>`).join('')}</tr>${q.data.rows.map((r, i) => `<tr class="${q.tapRows ? 'taprow' : ''}${sel.includes(i) ? ' on' : ''}" data-i="${i}">${r.map(c => `<td>${typeof c === 'number' ? gmFmt(c) : c}</td>`).join('')}</tr>`).join('')}</table>` : ''}${q.sideHTML ? q.sideHTML() : ''}${q.tapRows ? `<div class="paev">${myEvidenceHTML(q.data, sel)}</div>` : ''}</aside>`;
+    const main = `<div class="parmain">${q.starters ? `<div class="starters"><span class="lbl">Starters: tap one to begin</span>${q.starters.map((t, i) => `<button type="button" class="mini starter" data-s="${i}">${t}</button>`).join('')}</div>` : ''}${q.reminder ? `<details class="cerhow"${q.reminder === 'open' ? ' open' : ''}><summary>Reminder: Claim, Evidence, Reasoning</summary>${CER_REMIND}</details>` : ''}${q.words ? `<div class="wordsuse"><span class="lbl">Words to use</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain parta" aria-label="Your paragraph" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck" ${done && q.check && q.check.length ? '' : 'hidden'}><div class="lbl exckhd">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${(q.check || []).map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div></div>`;
+    return `<div class="pargrid">${main}${side}</div>`;
+  },
+  bind(el, q, api) {
+    const textNow = () => $('.parta', el).value, ticksNow = () => $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck);
+    let sel = ((api.state() || {}).v || {}).sel; sel = Array.isArray(sel) ? sel.slice() : [];
+    const draft = () => { const cur = api.state() || {}; cur.v = { text: textNow(), ticks: ticksNow(), sel }; api.setRaw(cur); };
+    const paintSel = () => { $$('.taprow', el).forEach(r => r.classList.toggle('on', sel.includes(+r.dataset.i))); const pe = $('.paev', el); if (pe) pe.innerHTML = myEvidenceHTML(q.data, sel); };
+    const model = () => typeof q.model === 'function' ? q.model(paraSel(q, { sel })) : q.model;
+    const reveal = () => { $('.modelwrap', el).innerHTML = `<div class="model"><div class="lbl">Model answer</div><p>${model()}</p></div>`; if (q.check && q.check.length) $('.exck', el).hidden = false; $('.qchk', el).hidden = true; };
+    const go = () => { const t = textNow().trim(); if (!t && !api.auto) { api.say('Write your answer first, then compare it with the model answer.', 'no'); return; }
+      if (q.tapRows && sel.length < 2 && !api.auto) { api.say('Tap two rows of the table first: they are your evidence.', 'no'); return; }
+      const tk = ticksNow(); reveal(); api.answer({ text: t, ticks: tk, sel: sel.slice() }, null, 'Now compare your answer with the model answer.' + (q.check && q.check.length ? ' You can still change your ticks.' : ''), { score: tk.length }); };
+    api.reg({ blank: () => !textNow().trim() && !ticksNow().length, check: go, reveal, blankV: { text: '', ticks: [], sel: [] } });
+    $('.qchk', el).addEventListener('click', go);
+    $('.parta', el).addEventListener('input', () => { if (!api.locked() || !(api.state() || {}).done) draft(); });
+    $$('.starter', el).forEach(b => b.addEventListener('click', () => { const ta = $('.parta', el); if ((api.state() || {}).done) return; const t = q.starters[+b.dataset.s]; ta.value = (ta.value && !/\s$/.test(ta.value) ? ta.value + ' ' : ta.value) + t.replace(/…$/, '') + (/…$/.test(t) ? '' : ' '); ta.focus(); draft(); }));
+    if (q.tapRows) $('.partbl', el).addEventListener('click', e => { const r = e.target.closest('.taprow'); if (!r || (api.state() || {}).done) return; const i = +r.dataset.i; sel = sel.includes(i) ? sel.filter(x => x !== i) : sel.concat(i).slice(-2); paintSel(); draft(); });
+    $$('[data-ck]', el).forEach(c => c.addEventListener('change', () => { const st = api.state(); if (st && st.done) api.answer({ text: textNow(), ticks: ticksNow(), sel: sel.slice() }, null, null, { quiet: true, score: ticksNow().length }); else draft(); }));
+    const s = api.state(); if (s && s.done) reveal();
+  },
+  show(q, v) { return v ? esc(v.text || '').replace(/\n/g, '<br>') : ''; }, model(q) { return typeof q.model === 'function' ? q.model(paraSel(q, null)) : q.model; }
+};
+
+/* ===== Whole-app reading and self-review (Reading and Writing plan, part 8 of section 10):
+   I can statements (own first screen + a button on every tab), the read-first OK, the self-check before every Check,
+   and the stable shuffled order for table, match and sort rows. ===== */
+let FAST = false;   // the test build switches this on, so older tests skip the new first screens; the new tests switch it off
+const ICAN = {
+  c1f: ["I can describe a force as a push or a pull measured in newtons.", "I can work out the resultant force and say whether forces are balanced or unbalanced.", "I can calculate an object's weight using weight = mass × 9.8.", "I can sort forces into contact and non-contact forces."],
+  c1x: ["I can draw a free-body diagram with every arrow starting at the centre of the object.", "I can use a scale to draw each force arrow the right length.", "I can use a free-body diagram to work out whether an object will start to move."],
+  c2f: ["I can explain why objects with more mass are harder to start moving and harder to stop.", "I can read a velocity from a velocity–time graph.", "I can state Newton's first law and use it to explain everyday examples."],
+  c2s: ["I can choose a scatter graph or a bar graph for my data.", "I can make a graph with a title, labelled axes and accurate points.", "I can read a value from a graph and describe the trend using numbers.", "I can write a CER paragraph, and find the claim, evidence and reasoning in an article."],
+  c2x: ["I can describe how an object is moving from the shape of a velocity–time graph.", "I can explain why a heavier vehicle needs a bigger brake force to stop in the same distance.", "I can draw the free-body diagram of an object gliding at a steady velocity."],
+  c3f: ["I can describe how the resultant force and the mass change an object's acceleration.", "I can use F = m × a and the formula triangle to find the force, the mass or the acceleration.", "I can work out the resultant force when friction acts, then use it in F = m × a."],
+  c3x: ["I can find an acceleration from the slope of a velocity–time graph.", "I can solve two-step problems: the resultant force first, then F = m × a.", "I can turn a weight into a mass before I use F = m × a."],
+  c4f: ["I can state Newton's third law and describe a force pair.", "I can explain why the two forces in a pair do not cancel each other out.", "I can use F = m × a to explain why the lighter object in a pair moves faster."],
+  c4x: ["I can explain how thrusters and rockets use force pairs.", "I can work out the push needed to reach a target velocity.", "I can choose a mass that keeps a velocity under a safe limit."],
+  c5f: ["I can describe how weight and air resistance change during a fall.", "I can use balanced forces to explain terminal velocity.", "I can explain what happens to the forces and the velocity when a parachute opens."],
+  c5x: ["I can explain why heavy and light objects fall differently in air, but not in a vacuum.", "I can use weight = mass × g to find an object's weight on different worlds.", "I can explain how a hovering helicopter's lift balances its weight.", "I can choose a canopy and an opening height for a safe landing."],
+  c6a: ["I can name the fulcrum, the load and the effort on a lever.", "I can explain how moving the fulcrum changes the effort.", "I can describe the catch: a smaller effort means a bigger distance.", "I can name the three classes of lever."],
+  c6b: ["I can describe how pulleys, wheels and axles, ramps, wedges and screws help a small effort move a big load.", "I can say how more ropes, a longer handle or a longer ramp changes the effort.", "I can explain why a smaller effort needs a bigger distance."],
+  c6c: ["I can work out mechanical advantage as load ÷ effort.", "I can find mechanical advantage from a machine's shape and use it to predict the effort.", "I can calculate work in joules using work = force × distance.", "I can explain why a perfect machine does the same work, however much it reduces the effort."],
+  c6d: ["I can describe a compound machine as simple machines working together.", "I can multiply mechanical advantages to find the total.", "I can work out the effort and the hand travel for a compound machine."],
+  c6e: ["I can design a route of machines to rescue a spaceship.", "I can predict the effort before I test my machine.", "I can explain why a bigger mechanical advantage never reduces the work.", "I can weigh up two plans and choose one with reasons."],
+  c6f: ["I can explain how friction wastes energy in a machine.", "I can calculate the efficiency of a machine.", "I can choose a machine that is strong enough and wastes little energy."],
+};
+/* the statements, as shown on the first screen and behind the "My I can statements" button */
+const hasICAN = id => !!ICAN[id];
+const icanListHTML = id => `<ul class="ican-list">${ICAN[id].map(t => `<li>${t}</li>`).join('')}</ul>`;
+const icanSeen = id => FAST || !hasICAN(id) || !!dbGet('icanSeen.' + id, false);
+let INTRO = false;
+function showIntro() {
+  INTRO = true; hideCards(); closeDesk(); qUnpop(); parkLab();
+  const host = $('#learnHost'); host.innerHTML = `<div class="ican-card" id="icanCard"><h3>By the end of this section</h3>${icanListHTML(CH.id)}<button type="button" class="go ican-next">Next: Step 1 →</button></div>`;
+  $('.ican-next', host).addEventListener('click', () => { dbSet('icanSeen.' + CH.id, true); setCTab('learn'); });
+  renderPeek(); renderOnPage(); window.scrollTo(0, 0);
+}
+function leaveIntro() { if (!INTRO) return; INTRO = false; dbSet('icanSeen.' + CH.id, true); parkIntro(); placeLab($('#learnHost')); LAB.mode = 'guided'; renderPeek(); }
+function renderPeek() { const el = $('#icanPeek'); if (!el) return; el.innerHTML = CH && hasICAN(CH.id) && !INTRO ? `<details class="ican-peek"><summary>My I can statements</summary>${icanListHTML(CH.id)}</details>` : ''; }
+
+/* a teach card as a Learn card: the full worked example the first time a student meets it, then a short reminder with the example one tap away.
+   teachSeen.<id> remembers the step where it was first shown, so re-reading the cards in that same step still shows the full example. */
+function teachHTML(tid, full, reminder) {
+  if (!CH || !CHDATA[CH.id] || !CHDATA[CH.id].steps[GI] || VIEW !== 'vChapter') return full();   // not playing a step (the inventory tool, tests): just the full card
+  const k = 'teachSeen.' + tid, at = CH.id + '.' + CHDATA[CH.id].steps[GI].id, seen = dbGet(k, null);
+  if (!seen) { dbSet(k, at); return full(); }
+  return seen === at ? full() : reminder() + `<details class="teacheg"><summary>Show the worked example</summary>${full()}</details>`;
+}
+
+/* ---------- read-first OK: the rest of a step stays blurred until the student presses OK on its first card ---------- */
+const readKey = () => 'readOK.' + CH.id + '.' + CHDATA[CH.id].steps[GI].id;
+const readNeeded = () => !FAST && !!CH && !stepDone(CH.id, GI) && !dbGet(readKey(), false);
+function gateEls() { const ch = $('#chunk'); return $$('#lab .leftcol, #lab .kit, #lab .stagecol > *, #lab .stagecard > *').filter(e => e.id !== 'chunk' && !e.contains(ch)); }
+function gateOn(on) { gateEls().forEach(e => { e.classList.toggle('rg-blur', on); e.inert = on; }); }
+function readOK() { if (CH && CHDATA[CH.id].steps[GI]) dbSet(readKey(), true); gateOn(false); }
+
+/* ---------- self-check: an X on a Beginning to Mastering line for every I can statement, just before the Check ---------- */
+const SA_LEVELS = ['Beginning', 'Developing', 'Proficient', 'Mastering'];
+const saStore = id => dbGet('selfA.' + id, null) || { v: [], done: false };
+const saLevel = v => SA_LEVELS[Math.min(3, Math.floor(v / 25))];
+const saDone = id => !hasICAN(id) || !!saStore(id).done;
+function saScale(label, val, onSet) {   // place an X anywhere on the line; val is 0 to 100
+  const x = h('span', { class: 'sa-x', 'aria-hidden': 'true' }, '✕');
+  const track = h('div', { class: 'sa-track', role: 'slider', tabindex: onSet ? '0' : '-1', 'aria-label': plain(label), 'aria-valuemin': '0', 'aria-valuemax': '100' }, SA_LEVELS.map(() => '<span class="sa-zone"></span>').join(''));
+  track.appendChild(x);
+  const show = v => { x.style.display = v == null ? 'none' : ''; if (v == null) return; x.style.left = v + '%'; track.setAttribute('aria-valuenow', String(v)); track.setAttribute('aria-valuetext', saLevel(v)); };
+  const put = v => { v = clamp(Math.round(v), 0, 100); val = v; show(v); onSet(v); };
+  show(val);
+  if (onSet) {
+    const at = e => { const r = track.getBoundingClientRect(); put((e.clientX - r.left) / r.width * 100); };
+    track.addEventListener('pointerdown', e => { e.preventDefault(); track.focus({ preventScroll: true }); try { track.setPointerCapture(e.pointerId); } catch (err) { } at(e); });
+    track.addEventListener('pointermove', e => { if (e.buttons) at(e); });
+    track.addEventListener('keydown', e => { const d = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 5 : e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -5 : 0; if (!d) return; e.preventDefault(); put((val == null ? 50 : val) + d); });
+  }
+  const wrap = h('div', { class: 'sa-scale' }); wrap.appendChild(track); wrap.appendChild(h('div', { class: 'sa-labels' }, SA_LEVELS.map(t => `<span>${t}</span>`).join(''))); return wrap;
+}
+function selfAssessCard(id, locked, onDone) {
+  const L = ICAN[id], S = saStore(id), card = h('div', { class: 'sa-card noglos' }, `<h3>How sure are you?</h3>${locked ? '' : '<p>Before you start the Check, place an X on each line to show where you are right now. This is just for you: it is not marked.</p>'}`);
+  const go = locked ? null : h('button', { type: 'button', class: 'go sa-go', disabled: !L.every((_, i) => S.v[i] != null) }, 'Save and start my Check');
+  if (go) go.addEventListener('click', () => { S.done = true; dbSet('selfA.' + id, S); onDone(); });
+  L.forEach((t, i) => { const row = h('div', { class: 'sa-row' }, `<p class="sa-can">${t}</p>`); row.appendChild(saScale(t, S.v[i], locked ? null : v => { S.v[i] = v; dbSet('selfA.' + id, S); go.disabled = !L.every((_, k) => S.v[k] != null); })); card.appendChild(row); });
+  if (go) card.appendChild(go);
+  return card;
+}
+/* the self-check on a worksheet, straight under the name: the student's Xs, empty lines on the blank copy, a note on the answer key */
+function wsSelfCheck(chId, mode) {
+  if (!hasICAN(chId)) return '';
+  const S = saStore(chId), fills = ['#fde3d3', '#fdf0c4', '#d6f0e2', '#dbe6fb'];
+  const line = v => { const W = 600, z = W / 4; let g = SA_LEVELS.map((t, k) => `<rect x="${k * z + 1}" y="1" width="${z - 2}" height="28" fill="${fills[k]}" stroke="#8a93a8" stroke-width="1.2" rx="4"/><text x="${k * z + z / 2}" y="46" text-anchor="middle" font-size="13" fill="#3b4256" font-family="Arial,sans-serif">${t}</text>`).join('');
+    if (v != null) { const x = clamp(v / 100 * W, 12, W - 12); g += `<path class="wsx" d="M${x - 8} 7L${x + 8} 23M${x + 8} 7L${x - 8} 23" stroke="${BLUE}" stroke-width="4" stroke-linecap="round" fill="none"/>`; }
+    return `<svg viewBox="0 0 ${W} 52" width="100%" class="ws-sa-line" role="img" aria-label="${v == null ? 'Not marked' : saLevel(v)}">${g}</svg>`; };
+  const note = mode === 'student' ? (S.done ? 'Before the Check, I placed an X on each line to show how sure I felt.' : 'The self-check was not done in the sim.') : mode === 'blank' ? 'Before you start the questions, put an X on each line to show how sure you are right now.' : 'Students place these X marks themselves before the Check. They are not marked, so there is nothing to mark here.';
+  return `<div class="q ws-selfcheck"><div class="qh">My self-check before the Check</div><p class="note" style="margin:0 0 4px">${note}</p>${ICAN[chId].map((t, i) => `<div class="ws-sa-row" style="margin:4px 0"><div style="font-weight:700;font-size:10.5pt">${t}</div>${line(mode === 'student' && S.done ? S.v[i] : null)}</div>`).join('')}</div>`;
+}
+
+/* ---------- stable shuffled row order for table, match and sort rows ----------
+   The authored order often follows the order of a lesson (and can give the answer away), so rows are shown in a seeded shuffle:
+   the same on screen, on paper and after a reload. Saved answers, marking and the keys always use the ORIGINAL row index.
+   Kept in order: q.keepRows, and rows that are the same words with a rising or falling number. */
+const stripTags = s => String(s == null ? '' : s).replace(/<[^>]+>/g, '').trim();
+function rowsKeepOrder(q, labs) {
+  if (q.keepRows) return true;
+  labs = labs.map(stripTags); if (!labs.length || labs.some(l => !/\d/.test(l))) return false;
+  const pat = labs.map(l => l.replace(/-?\d+(\.\d+)?/g, '#')); if (pat.some(x => x !== pat[0])) return false;
+  const nums = labs.map(l => parseFloat(l.match(/-?\d+(\.\d+)?/)[0]));
+  return nums.every((v, k) => k === 0 || v >= nums[k - 1]) || nums.every((v, k) => k === 0 || v <= nums[k - 1]);
+}
+function rowOrder(q, labs) {
+  const n = labs.length, id = labs.map((_, i) => i);
+  if (n < 2 || rowsKeepOrder(q, labs)) return id;
+  if (n === 2) return shuffled(id, hashStr(q.id + '|rows'));
+  for (let k = 0; k < 300; k++) {   // few rows stay where they were, and (4 or more rows) no two neighbours stay together in their authored order
+    const o = shuffled(id, hashStr(q.id + '|rows' + (k || '')));
+    if (o.filter((x, p) => x === p).length <= Math.floor(n / 3) && (n < 4 || !o.some((x, p) => p > 0 && x === o[p - 1] + 1))) return o;
+  }
+  return id.slice(1).concat(id[0]);
+}
+
 /* ===== Guided (Learn) engine ===== */
 const CHDATA = {}; // filled by chapter modules: CHDATA.c1 = {steps, challenge, review, ...}
 let GI = 0, CARDS_SEEN = false, LASTSIG = '';
@@ -4283,11 +4747,13 @@ function setCTab(t) {
   CTAB = t; $$('#chTabs [data-ctab]').forEach(b => { b.setAttribute('aria-selected', b.dataset.ctab === t); });
   $('#learnHost').hidden = t !== 'learn'; $('#challengeHost').hidden = t !== 'challenge'; $('#reviewHost').hidden = t !== 'review';
   hideCards(); closeDesk(); qUnpop();
-  if (t === 'learn') { placeLab($('#learnHost')); LAB.mode = 'guided'; const d = dbGet('learnDone.' + CH.id, {}); const first = CHDATA[CH.id].steps.findIndex(s => !d[s.id]); setStep(dbGet('learnAt.' + CH.id, first < 0 ? 0 : first)); }
+  INTRO = false; if (t !== 'learn') parkIntro();
+  if (t === 'learn') { if (!icanSeen(CH.id)) { showIntro(); tabTicks(); return; } parkIntro(); placeLab($('#learnHost')); LAB.mode = 'guided'; const d = dbGet('learnDone.' + CH.id, {}); const first = CHDATA[CH.id].steps.findIndex(s => !d[s.id]); setStep(dbGet('learnAt.' + CH.id, first < 0 ? 0 : first)); }
   else if (t === 'challenge') renderChallenge(CH.id);
   else renderReview(CH.id);
-  tabTicks(); renderOnPage();
+  tabTicks(); renderOnPage(); renderPeek();
 }
+function parkIntro() { const c = $('#icanCard'); if (c) c.remove(); }
 function tabTicks() { if (!CH) return; const L = learnProgress(CH.id), R = reviewProgress(CH.id); $('[data-ctab=learn]').classList.toggle('ok', L.done === L.total); $('[data-ctab=challenge]').classList.toggle('ok', challengeDone(CH.id)); $('[data-ctab=review]').classList.toggle('ok', R.done === R.total); }
 function renderOnPage() {
   if (!CH) return; if (typeof renderRescue === 'function') renderRescue(); const el = $('#onPage');
@@ -4297,6 +4763,7 @@ function renderOnPage() {
 }
 
 function setStep(i) {
+  leaveIntro(); gateOn(false);
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
   const st = chd.steps[GI]; LASTSIG = ''; if (typeof renderFormulas === 'function' && $('#calcForm') && !$('#calcForm').hidden) renderFormulas();   // keep the glowing formulas in step with the chapter
   // arena state
@@ -4322,7 +4789,9 @@ function stepCards(ch, i) {
 function playStepCards() {
   const st = CHDATA[CH.id].steps[GI], cards = stepCards(CH.id, GI);
   if (!cards.length) { cardsDone(); return; }
-  showCards(cards, { title: st.title, journalKey: `${CH.id}:${st.id}`, where: `Chapter ${CH.n}: ${CH.title}`, onDone: cardsDone });
+  const gate = readNeeded();
+  showCards(cards, { title: st.title, journalKey: `${CH.id}:${st.id}`, where: `Chapter ${CH.n}: ${CH.title}`, onDone: cardsDone, readGate: readNeeded, readOK });
+  if (gate) gateOn(true);
 }
 function cardsDone() {
   const st = CHDATA[CH.id].steps[GI]; const seen = dbGet('cardsSeen.' + CH.id, {}); seen[st.id] = true; dbSet('cardsSeen.' + CH.id, seen); CARDS_SEEN = true;
@@ -4375,18 +4844,19 @@ function renderRail() {
   const chd = CHDATA[CH.id], st = chd.steps[GI];
   $('#rail').innerHTML = `<div class="row" style="justify-content:space-between"><span class="lbl">Step ${GI + 1} of ${chd.steps.length}</span><div class="dots">${chd.steps.map((s, i) => `<button type="button" aria-label="Step ${i + 1}: ${esc(s.title)}" class="${stepDone(CH.id, i) ? 'done' : ''} ${i === GI ? 'cur' : ''}" data-goto="${i}"></button>`).join('')}</div></div>
     <h2>${st.title}</h2>
+    ${st.ask ? `<div class="stepask"><span class="lbl">Our question</span><p class="gl">${st.ask}</p></div>` : ''}
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
     ${/^c6/.test(CH.id) && (st.qs || []).some(q => q.type === 'num') ? remindersHTML() : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
-    <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
+    <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 && !hasICAN(CH.id) ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();
   { const st = CHDATA[CH.id].steps[GI]; if (st && st.predict && st.predict.kind === 'sketch' && !predSketch()) predSketchBind(st.predict); }
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
-  $('#gPrev').addEventListener('click', () => setStep(GI - 1));
+  $('#gPrev').addEventListener('click', () => { if (GI === 0) { if (hasICAN(CH.id)) showIntro(); } else setStep(GI - 1); });
   $('#gNext').addEventListener('click', tryNext);
 }
 /* "Predict first": the student locks in a prediction before testing it in the arena */
@@ -4401,9 +4871,10 @@ function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'), dc = $('#dataCard'); qc.innerHTML = ''; dc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
+  if (st.ctx) qc.appendChild(h('div', { class: 'qctx' }, st.ctx()));   // the question and the student's own graph, beside the questions
   /* a question marked early collects data while the student works the arena (the freeze-frame table), so it sits under the arena from the start instead of waiting in the Your turn box */
   const early = qs.filter(q => q.early); dc.hidden = !early.length;
-  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop at each moment listed. The row fills itself in; then type its numbers from the free-body diagram.</span>'));
+  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, st.dataHead || '<b>Collect your data here</b><span>Pause the drop at each moment listed. The row fills itself in; then type its numbers from the free-body diagram.</span>'));
   qs.forEach(q => renderQuestion(q.early ? dc : qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
@@ -4474,9 +4945,9 @@ function checkStep(force) {
     const d = dbGet('learnDone.' + CH.id, {}); d[CHDATA[CH.id].steps[GI].id] = true; dbSet('learnDone.' + CH.id, d);
     renderRail(); renderOnPage(); tabTicks(); toast('Step complete! Press Next when you\'re ready.' + (CHDATA[CH.id].steps[GI].rescue ? ' Rescue log: ' + CHDATA[CH.id].steps[GI].rescue : ''), 'good'); maybeStamp(CH.id);
   }
-  qChrome();
+  qChrome(); qRefresh();
   const n = $('#gNext'); if (n) n.classList.toggle('ready', all || stepDone(CH.id, GI) || (hasQs() && !qsDone() && ts.every(Boolean) && CARDS_SEEN));
-  const box = $('#stepDoneBox'); if (box) { const rl = CHDATA[CH.id].steps[GI].rescue; box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' + (rl ? `<div class="rlog">📡 Rescue log: ${rl}</div>` : '') : ''; }
+  const box = $('#stepDoneBox'); if (box) { const rl = CHDATA[CH.id].steps[GI].rescue; box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' + (CHDATA[CH.id].steps[GI].finish ? `<p class="gl stepfin">${CHDATA[CH.id].steps[GI].finish}</p>` : '') + (rl ? `<div class="rlog">📡 Rescue log: ${rl}</div>` : '') : ''; }
   $$('#rail .tasks li').forEach((li, i) => li.classList.toggle('ok', ts[i]));
 }
 function tryNext() {
@@ -4701,6 +5172,15 @@ function vtSVG(lines, o = {}) {
   if (o.tap) g += `<g class="tapg"></g><rect class="tapzone" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="transparent" style="cursor:crosshair"/>`;
   return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" ${o.tap ? `data-x0="${x0}" data-x1="${x1}" data-y0="${y0}" data-y1="${y1}" data-w="${W}" data-h="${H}" data-tmax="${tMax}" ` : ''}style="width:100%;max-width:${o.maxW || 440}px;display:block;background:#fff;border-radius:8px${o.tap ? ';touch-action:manipulation' : ''}">${g}</svg></div>`;
 }
+/* Skills audit gaps A and B: how to read a velocity–time graph, taught once with a worked example (c2f i3), then shown as a short reminder (c2x x1, c5f d4) */
+function vtGuideSVG() {   // reading the velocity at 4 s, with the guide lines drawn on
+  const g = '<path d="M286 176V53H46" fill="none" stroke="#e3a51c" stroke-width="3" stroke-dasharray="7 4"/><circle cx="286" cy="53" r="5" fill="#e3a51c"/><text x="292" y="168" font-size="12" font-weight="800" fill="#9a5d1f">1 Find 4 s</text><text x="292" y="116" font-size="12" font-weight="800" fill="#9a5d1f">2 Go up</text><text x="58" y="45" font-size="12" font-weight="800" fill="#9a5d1f">3 Go across: 1.5 m/s</text>';
+  return vtSVG([{ pts: [[0, 0], [1, 0], [2, 1.5], [6, 1.5]] }], { tMax: 6, vMax: 2, vStep: 0.5, maxW: 330, alt: 'A velocity–time graph with guide lines to read the velocity at 4 seconds' }).replace('</svg>', g + '</svg>');
+}
+const VT_SHAPES = [['Flat line above 0', 'steady velocity', [[0, 1], [4, 1]]], ['Line sloping up', 'speeding up', [[0, 0], [4, 2]]], ['Line sloping down', 'slowing down', [[0, 2], [4, 0]]], ['Flat line along 0', 'not moving', [[0, 0], [4, 0]]]];
+const vtShapesFull = () => `<p><b>What the shape of the line tells you.</b></p><div class="vtshapes">${VT_SHAPES.map(([a, b, pts]) => `<figure>${vtSVG([{ pts }], { tMax: 4, vMax: 2, vStep: 1, maxW: 170, alt: a })}<figcaption><b>${a}:</b> ${b}</figcaption></figure>`).join('')}</div>`;
+const vtShapesCard = () => ({ get html() { return teachHTML('vt-shapes', vtShapesFull, () => '<p><b>Remember the shapes.</b> Flat line above 0: steady velocity. Line sloping up: speeding up. Line sloping down: slowing down. Flat line along 0: not moving.</p>'); } });
+const vtReadCard = () => ({ get html() { return teachHTML('vt-read', () => `<p><b>Reading a value off a graph.</b> Worked example: what is the crate's velocity at 4 s?</p>${vtGuideSVG()}<ol><li>Find <b>4 s</b> on the bottom axis.</li><li>Go straight <b>up</b> to the line.</li><li>Then go straight <b>across</b> to the velocity axis: <b>1.5 m/s</b>.</li></ol>`, () => '<p><b>Reading a value off a graph.</b> Find the time on the bottom axis, go straight up to the line, then straight across to the velocity axis.</p>'); } });
 /* record what the student measured, per crate mass, so questions can check their own runs */
 function ch2Record() {
   const F = S.flags; F.sp = F.sp || {}; F.sd = F.sd || {}; F.st = F.st || {};
@@ -4747,7 +5227,7 @@ CHDATA.c2 = {
         { id: 'q4', type: 'num', p: 'A 96 kg crate has 4 times the mass of the 24 kg crate. The same push gave the 24 kg crate 3.13 m/s. What velocity will it give the 96 kg crate?', unit: 'm/s', ans: 0.78, tol: 0.02, ok: 'Brilliant! 4 times the mass gives a quarter of the velocity: 3.13 ÷ 4 = 0.78 m/s.', hints: ['4 times the mass gives a quarter of the velocity.', 'Type 3.13 ÷ 4 into the calculator.'] }] },
 
     { id: 'i3', title: 'The velocity–time graph', info: ['vt'], floors: ['air'],
-      cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's velocity as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the velocity from the graph instead.</p>` }],
+      cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's velocity as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the velocity from the graph instead.</p>` }, vtReadCard(), vtShapesCard()],
       setup() { S.floor = 'air'; S.mass = 61; }, adds: ['vt'], hide: ['readV'], sides: [], pullers: [], idle: 'Give the crate a push',
       tick() { ch2Record(); },
       tasks: [['Set the crate to <b>61 kg</b> and give it a push. Watch the graph as it moves.', () => sp(61) != null]],
@@ -4792,7 +5272,7 @@ CHDATA.c2 = {
     /* ---------- Extension ---------- */
     { id: 'x1', title: 'Reading velocity–time graphs', floors: ['air'],
       cards: [
-        { html: `<p>Welcome to the Chapter 2 Extension! Velocity–time graphs tell the whole story of a journey. Each shape of line means something different.</p><div class="example">Flat line: steady velocity. Line sloping up: speeding up. Line sloping down: slowing down. Line along 0: not moving.</div>` },
+        { get html() { return `<p>Welcome to the Chapter 2 Extension! Velocity–time graphs tell the whole story of a journey. Each shape of line means something different.</p>` + teachHTML('vt-shapes', vtShapesFull, () => '<div class="example">Flat line: steady velocity. Line sloping up: speeding up. Line sloping down: slowing down. Line along 0: not moving.</div>'); } },
         { html: `<p>This time the launch velocity is a mystery, so you'll read it from the graph. The free-body diagram is back too, so you can see which forces act at each moment.</p>` }],
       setup() { course(55, 1.8, 30); }, adds: ['launch', 'readD', 'vt', 'fbd', 'readW', 'readN'], hide: ['shove', 'readV'], sides: [], pullers: [], idle: 'Press Launch the crate', mysteryLaunch: true,
       tick() { ch2Record(); },
@@ -4849,6 +5329,106 @@ CHDATA.c2.challenge = {
     { id: 'b3', kind: 'brake', title: 'Crate 3: a heavy crate', mass: 129, v0: 1.6, target: 1.8 }
   ]
 };
+
+/* ===== Chapter 2 Skills: Graphs and CER (script: docs/Skills_c2s_Script.md) =====
+   Two Learn steps (brake-test four crates and make a graph; from graph to CER), a self-check, and a 14-mark Check.
+   The steps sit after i6 in the Chapter 2 list so no later step picks up their panels. All ids are new, so saved answers never move. */
+const PRIYA = { head: ['Mass (g)', 'Stretch (cm)'], rows: [[100, 2.0], [200, 4.1], [300, 5.9], [400, 8.0]], xKind: 'num', xUnit: 'g', yUnit: 'cm', titleWords: [['mass'], ['stretch']], xWords: ['mass'], yWords: ['stretch'], xUnits: ['g', 'grams'], yUnits: ['cm'], exTitle: 'Mass vs stretch', exX: 'Mass (g)', exY: 'Stretch (cm)' };
+const FLOORS_BAR = { head: ['Floor', 'Friction (N)'], rows: [['Ice', 2], ['Wood', 6], ['Carpet', 9], ['Concrete', 14]], xKind: 'name', yUnit: 'N', titleWords: [['floor'], ['friction']], xWords: ['floor'], yWords: ['friction'], xUnits: null, yUnits: ['n', 'newtons'], exTitle: 'Floor vs friction', exX: 'Floor', exY: 'Friction (N)' };
+const TRUCK = { head: ['Mass of cargo (kg)', 'Braking distance (m)'], rows: [[0, 40], [2000, 50], [4000, 60], [6000, 70], [8000, 80]], xKind: 'num', xUnit: 'kg', yUnit: 'm', titleWords: [['mass', 'cargo', 'load'], ['braking', 'stopping', 'distance']], xWords: ['mass', 'cargo', 'load'], yWords: ['braking', 'stopping', 'distance'], xUnits: ['kg', 'kilograms'], yUnits: ['m', 'metres', 'meters'], exTitle: 'Mass of cargo vs braking distance', exX: 'Mass of cargo (kg)', exY: 'Braking distance (m)' };
+/* the crates the student brake-tests: what they typed, or the expected readings until they have */
+const C2S_MASSES = [20, 40, 60, 80], C2S_NOM = [1.6, 3.2, 4.8, 6.4];
+function c2sSpec() {
+  const s = dbGet('learn.c2s.sk1.q1', null);
+  return { head: ['Mass of crate (kg)', 'Braking distance (m)'], rows: C2S_MASSES.map((m, i) => { const x = s && s.v ? parseNum(s.v[i]) : NaN; return [m, isNaN(x) ? C2S_NOM[i] : x]; }), xKind: 'num', xUnit: 'kg', yUnit: 'm', titleWords: [['mass'], ['braking', 'stopping', 'distance', 'slide']], xWords: ['mass'], yWords: ['braking', 'stopping', 'distance'], xUnits: ['kg', 'kilograms'], yUnits: ['m', 'metres', 'meters'], exTitle: 'Mass vs braking distance', exX: 'Mass (kg)', exY: 'Braking distance (m)' };
+}
+const c2sTableFull = () => { const s = dbGet('learn.c2s.sk1.q1', null); return !!(s && s.done); };
+const c2sQ1Done = () => { const s = dbGet('learn.c2s.sk2.q1', null); return !!(s && s.done); };
+const c2sMyGraph = () => { const s = dbGet('learn.c2s.sk1.q7', null); return s && s.v && s.v.type ? s.v : gmModel(c2sSpec()); };
+/* Priya's finished graph, with a numbered circle on each part */
+function gmCallouts(spec) {
+  const M = gmModel(spec), X = gmAxis(M, 'x'), Y = gmAxis(M, 'y'), { L, R, T, B } = GM, px = v => L + (v - X.min) / (X.max - X.min) * (R - L), py = v => B - (v - Y.min) / (Y.max - Y.min) * (B - T), d = spec.rows[2];
+  const at = { 1: [48, 24], 2: [150, 388], 3: [22, 118], 4: [44, 70], 5: [px(d[0]) + 22, py(d[1]) - 18] };
+  return gmSVG(spec, M, { alt: 'A finished graph with each part numbered', maxW: 300 }).replace('</svg>', Object.entries(at).map(([n, [x, y]]) => `<circle cx="${x}" cy="${y}" r="12" fill="#c94a34"/><text x="${x}" y="${y + 5}" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">${n}</text>`).join('') + '</svg>');
+}
+const cn = n => `<span class="cn">${n}</span>`;
+const TEACH_GRAPH = {
+  tid: 'graph-how', needs: c2sTableFull,
+  full: () => `<h3>How to make a good graph</h3><p>Priya hangs masses on a spring and measures how far it stretches.</p><div class="tfig">${gmTable(PRIYA, 'tbl')}${gmCallouts(PRIYA)}</div>
+    <div class="tpart">${cn(1)}<b>Title</b><span>what you changed vs what you measured: <i>Mass vs stretch</i>.</span></div>
+    <div class="tpart">${cn(2)}<b>Bottom axis (x)</b><span>what you changed, with its unit in brackets: <i>Mass (g)</i>.</span></div>
+    <div class="tpart">${cn(3)}<b>Side axis (y)</b><span>what you measured, with its unit in brackets: <i>Stretch (cm)</i>.</span></div>
+    <div class="tpart">${cn(4)}<b>Scale</b><span>start at 0, go up in equal steps, and finish just above your biggest number.</span></div>
+    <div class="tpart">${cn(5)}<b>Points</b><span>one point for each row of the table, placed carefully.</span></div>
+    <div class="keyidea">Key idea: changed along the bottom, measured up the side, units in brackets.</div>`,
+  reminder: `<h3>How to make a good graph</h3><p><b>Title:</b> what you changed vs what you measured. <b>Bottom axis (x):</b> what you changed, with its unit in brackets. <b>Side axis (y):</b> what you measured, with its unit in brackets. <b>Scale:</b> start at 0 and go up in equal steps. <b>Points:</b> one for each row.</p>`
+};
+const TEACH_TYPE = {
+  tid: 'scatter-bar', needs: c2sTableFull,
+  full: () => `<h3>Scatter or bar?</h3><p>If you changed a <b>number</b>, use a ${T('scattergraph', 'scatter graph')}. If you changed a <b>name or a group</b>, use a bar graph.</p><div class="tfig"><figure><figcaption>Priya changed the mass: numbers, so a scatter graph.</figcaption>${gmSVG(PRIYA, gmModel(PRIYA), { maxW: 270 })}</figure><figure><figcaption>Friction on four named floors: names, so a bar graph.</figcaption>${gmSVG(FLOORS_BAR, gmModel(FLOORS_BAR), { maxW: 270 })}</figure></div>`,
+  reminder: '<h3>Scatter or bar?</h3><p>If you changed a <b>number</b>, use a scatter graph. If you changed a <b>name or a group</b>, use a bar graph.</p>'
+};
+const TEACH_CER = {
+  tid: 'cer',
+  full: () => `<h3>CER: Claim, Evidence, Reasoning</h3><p>A good science paragraph does three jobs, in this order.</p><p><i>Question: Does a rougher surface make more friction?</i></p>
+    <div class="tpart"><b>Claim</b><span>answers the question: “Rougher surfaces make more friction.”</span></div>
+    <div class="tpart"><b>Evidence</b><span>numbers from the test, each with its unit, like 2 N or 6.4 m: “A block needed a pull of 2 N to slide on ice, and 14 N to slide on sandpaper.”</span></div>
+    <div class="tpart"><b>Reasoning</b><span>explains why, using science: “Rough surfaces have more bumps that catch on each other, so more friction pushes back against the pull.”</span></div>
+    <p>Evidence can also be facts from something you read, like an article. Scientists use both.</p>`,
+  reminder: '<h3>CER: Claim, Evidence, Reasoning</h3><p><b>Claim:</b> answers the question. <b>Evidence:</b> numbers with their units, or facts from something you read. <b>Reasoning:</b> the science that explains why.</p>'
+};
+const teachQ = (id, T0) => ({ id, type: 'teach', p: '', tid: T0.tid, full: T0.full, reminder: T0.reminder, needs: T0.needs });
+/* three quick scatter-or-bar questions, one go each */
+const typeQ = (id, p, bar, why) => ({ id, type: 'mcq', p, opts: ['Scatter graph', 'Bar graph'], a: bar ? 1 : 0, needs: c2sTableFull, ok: `That's right! ${why}`, work: why });
+const JO = [{ t: 'My results show that a stronger brake stops the crate in a shorter distance.', a: 0, why: 'It answers the question.' }, { t: 'With a 24 N brake the crate slid 3.6 m, and with a 48 N brake it slid 1.8 m.', a: 1, why: 'Numbers from the test, each with its unit.' }, { t: 'A bigger force against the motion slows the crate down faster, so it stops sooner.', a: 2, why: 'It explains why, using science.' }];
+const MKCER = ['Claim', 'Evidence', 'Reasoning'];
+const cargoWords = v => v === 0 ? 'no cargo' : gmFmt(v) + ' kg of cargo';
+const TRUCK_STORY = 'Road crashes kill about 1.2 million people around the world every year. The United Nations has a goal, target 3.6, to halve the number of deaths and injuries from road crashes. Knowing how cargo changes a truck\'s braking distance helps keep everyone safe. A road safety team tested one truck on a test track. They loaded it with different masses of cargo, drove it at 20 m/s and braked with the same force each time.';
+
+{
+  const C = CHDATA.c2, at = C.steps.findIndex(s => s.id === 'i6') + 1;
+  C.steps.splice(at, 0,
+    { id: 'sk1', title: 'Brake test, then graph it', floors: ['air'], ask: 'How does the mass of a crate change its braking distance?',
+      cards: [{ html: `<p>In the Foundation you found out that heavier crates are harder to stop. Now you'll test it properly, like a scientist: four crates, the same ${T('brake', '36 N brake')}, and the same launch velocity of 2.4 m/s every time. Then you'll turn your results into a graph.</p>` }],
+      setup() { course(20, 2.4, 36); }, adds: ['launch', 'readD'], hide: ['shove', 'vt', 'readV'], sides: [], pullers: [], idle: 'Press Launch the crate',
+      tick() { ch2Record(); },
+      tasks: [['Launch the <b>20 kg</b> crate and type its braking distance in the table.', () => sd(20) != null], ['Set <b>40 kg</b>, launch it and type its braking distance.', () => sd(40) != null], ['Do the same for <b>60 kg</b> and <b>80 kg</b>.', () => sd(60) != null && sd(80) != null]],
+      dataHead: '<b>Collect your data here</b><span>Launch each crate and read its braking distance. Type each reading in the table: a row turns green when it matches the arena.</span>',
+      finish: 'Brilliant graph! Now let\'s find out what it tells you.',
+      qs: [
+        { id: 'q1', type: 'rtable', early: true, p: 'Type the braking distance you read for each crate.', head: ['Mass of crate (kg)', 'Braking distance (m)'], rows: C2S_MASSES, tol: 0.04, live: m => sd(m), waitMsg: m => `Launch the ${m} kg crate first`, ok: 'Every reading matches the sim. Now for the graph!' },
+        teachQ('q2', TEACH_GRAPH), teachQ('q3', TEACH_TYPE),
+        typeQ('q4', 'Kai pulls the same box across carpet, wood, ice and concrete, and measures the friction on each floor. Which graph should he make?', true, 'The floors are names, not numbers.'),
+        typeQ('q5', 'Noor hangs 1, 2, 3, 4 and 5 kg masses on a newtonmeter and records each reading. Which graph should she make?', false, 'She changed a number: the mass.'),
+        typeQ('q6', 'Ben tests four brands of trainer and measures the pull needed to make each one slide. Which graph should he make?', true, 'The brands are names.'),
+        { id: 'q7', type: 'graph', learn: true, p: 'Make a graph of your own results. Each check turns green when that part is right.', spec: c2sSpec, needs: c2sTableFull }] },
+    { id: 'sk2', title: 'From graph to CER', floors: ['air'],
+      cards: [{ html: '<p>A graph lets you find values you never measured, and see the trend at a glance. Then scientists write up what they found in a paragraph called a ' + T('cer', 'CER') + '.</p>' }],
+      setup() { course(50, 2.4, 36); }, adds: ['launch', 'readD'], hide: ['shove', 'vt', 'readV', 'readD'], sides: [], pullers: [], idle: 'Press Launch the crate',
+      tick() { ch2Record(); if (c2sQ1Done() && !LAB.show.has('readD')) { LAB.show.add('readD'); applyPanels(); } },
+      ctx: () => `<span class="lbl">Our question</span><p><b>How does the mass of a crate change its braking distance?</b></p><span class="lbl">My graph</span>${gmSVG(c2sSpec(), c2sMyGraph(), { alt: 'My graph', maxW: 340 })}`,
+      tasks: [['Now check it: launch the <b>50 kg</b> crate.', () => sd(50) != null && c2sQ1Done()]],
+      finish: 'That\'s a CER claim! In the Check you\'ll write all three parts.',
+      qs: [
+        { id: 'q1', type: 'reading', label: 'Read your graph', p: 'Use your graph. What braking distance would a 50 kg crate have?', unit: 'm', ans: 4, tol: 0.2, ladder: true, hints: ['Find 50 kg on the bottom axis, go straight up to your line of points, then straight across to the side axis.'], ok: 'Well read! Now check it in the arena.', work: 'Your graph gives about 4 m for a 50 kg crate.' },
+        { id: 'q2', type: 'mcq', p: 'Which sentence describes the trend best?', opts: ['Every extra 20 kg makes the braking distance 1.6 m longer.', 'When the mass goes up, the braking distance goes up.', 'The 80 kg crate slid 6.4 m.', 'When the mass goes up, the braking distance goes down.'], a: 0, ok: 'Yes: it gives numbers.', why: { 1: 'True, but it gives no numbers.', 2: 'That is one result, not a trend.', 3: 'Look at your graph again: which way do the points go?' } },
+        { id: 'q3', type: 'tappts', p: 'Tap the two points that would convince a friend best.', spec: c2sSpec, ok: 'The first and last points show the biggest change.' },
+        teachQ('q4', TEACH_CER),
+        { id: 'q5', type: 'mark', learn: true, p: 'Jo launched a 30 kg crate at 2.4 m/s and changed the brake force. Mark each sentence as Claim, Evidence or Reasoning.', labels: MKCER, sents: JO, ok: 'Claim, Evidence, Reasoning. Say it, show it, explain it.' },
+        { id: 'q6', type: 'para', claim: true, p: 'Your question was: how does the mass of a crate change its braking distance? Write one claim that answers it.', question: 'How does the mass of a crate change its braking distance?', sideHead: 'My graph', sideHTML: () => gmSVG(c2sSpec(), c2sMyGraph(), { alt: 'My graph', maxW: 300 }), starters: ['My results show that…'], model: 'My results show that crates with more mass slide further before they stop.', check: [] }] });
+  C.review.push(
+    { id: 'c2sr1', obj: ['Ci'], type: 'graph', p: 'Make a graph of the road safety team\'s results.', story: TRUCK_STORY, spec: TRUCK },
+    { id: 'c2sr2', obj: ['Cii', 'Di'], type: 'mark', p: 'Read this short article. Mark each sentence as Claim, Evidence or Reasoning. Leave it with no label if it doesn\'t belong.', title: 'Why do cars have seatbelts?', labels: MKCER, sents: [
+      { t: 'Seatbelts save lives in car crashes.', a: 0, why: 'It answers the question in the title.' },
+      { t: 'The World Health Organization says that wearing a seatbelt cuts the risk of death for people in the front seats by about half.', a: 1, why: 'A fact from a trusted source.' },
+      { t: 'Seatbelts come in lots of colours, like black, grey and red.', a: -1, why: 'True, but it doesn\'t help answer the question.' },
+      { t: 'For passengers in the back seats, a seatbelt cuts the risk of death or serious injury by about a quarter.', a: 1, why: 'A second fact to back up the claim.' },
+      { t: 'When a car stops suddenly, a passenger\'s body has inertia and keeps moving forwards, so the seatbelt gives the force that stops them safely.', a: 2, why: 'It explains why, using science.' }] },
+    { id: 'c2sr3', obj: ['Cii', 'Diii'], type: 'para', tapRows: true, p: 'The road safety team\'s question: how does the mass of cargo change a truck\'s braking distance? Tap two rows of the table, then write a CER paragraph that answers the question.', question: 'How does the mass of cargo change a truck\'s braking distance?', story: TRUCK_STORY, data: TRUCK, reminder: 'open',
+      starters: ['The results show that…', 'With … kg of cargo the truck slid…, and with…', 'This happens because…'], words: ['braking distance', 'mass', 'inertia', 'brake force'],
+      model: sel => { const [a, b] = sel.map(i => TRUCK.rows[i]); return `The results show that the more cargo a truck carries, the further it slides before it stops. With ${cargoWords(a[0])} the truck's braking distance was ${gmFmt(a[1])} m, and with ${cargoWords(b[0])} it was ${gmFmt(b[1])} m. This happens because the cargo gives the truck more mass, so it has more inertia. The same brake force takes longer to stop something with more inertia, so the truck slides further.`; },
+      check: ['My claim answers the question.', 'I gave two numbers from the table, each with its unit.', 'I explained the trend using mass and inertia.', 'I used science words correctly, like braking distance and inertia.'] });
+}
 
 /* ===== Chapter 3: F = ma (Newton's second law), all in the Snow Arena =====
    Foundation (a1–a6): friction OFF for the first steps, so the husky pull is the whole resultant force.
@@ -4986,7 +5566,7 @@ CHDATA.c3 = {
 
     { id: 'a6', title: 'Five mystery sleds', info: [], floors: ['snow0', 'snow'],
       cards: [
-        { html: `<p>Time to put F = ma to work on <b>five different sleds</b>. Each one has a <b>?</b> that you have to find.</p><ol><li>Cover the unknown letter on the ${T('triangle', 'formula triangle')} and work out the answer with the calculator.</li><li>Type your answer and choose its unit.</li><li>Set up the sled in the arena and press <b>Pull!</b> The readouts show whether you were right.</li></ol><p>Every question has a <b>Need a clue?</b> box. It gives you one hint at a time, and never the answer.</p>` },
+        { html: `<p>Time to put F = ma to work on <b>five different sleds</b>. Each one has a <b>?</b> that you have to find.</p><ol><li>Cover the unknown letter on the ${T('triangle', 'formula triangle')} and work out the answer with the calculator.</li><li>Type your answer and choose its unit, like 90 N or 2.5 m/s².</li><li>Set up the sled in the arena and press <b>Pull!</b> The readouts show whether you were right.</li></ol><p>Every question has a <b>Need a clue?</b> box. It gives you one hint at a time, and never the answer.</p>` },
         { html: `<div class="notebox"><b>Which floor?</b><p>Sleds 1 to 3 use the <b>Friction off</b> floor, so the huskies' pull is the whole resultant force. Sleds 4 and 5 use <b>packed snow</b>, where friction is on. Choose the floor with the floor buttons.</p></div>` }],
       setup() { snow(85, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work out the answer first, then set up the sled and press Pull!',
       tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['<b>Check sled 1</b>: <b>85 kg</b>, <b>3 huskies</b>, friction off.', () => rHas(3, 85, 'snow0')], ['', () => hasAns('q2'), { q: 'q2' }], ['<b>Check sled 2</b>: <b>72 kg</b>, the huskies your force needs, friction off.', () => rHas(2, 72, 'snow0')], ['', () => hasAns('q3'), { q: 'q3' }], ['<b>Check sled 3</b>: your mass, <b>3 huskies</b>, friction off.', () => rHas(3, 120, 'snow0')], ['Choose <b>packed snow</b>, set <b>64 kg</b>, add <b>2 huskies</b> and pull. Read the friction.', () => rHas(2, 64, 'snow')], ['', () => hasAns('q4'), { q: 'q4' }], ['', () => hasAns('q5'), { q: 'q5' }], ['<b>Check sled 5</b>: packed snow, your mass, <b>3 huskies</b>.', () => rHas(3, 70, 'snow')]],
@@ -5158,7 +5738,7 @@ CHDATA.c4 = {
 
     { id: 'f5', title: 'Mystery push-offs', info: [], floors: ['air'],
       cards: [
-        { html: `<p>Time to use everything. There are <b>four puzzles</b>. For each one:</p><ol class="steps"><li><b>Read the question</b> in the Do this list.</li><li><b>Work it out</b> with the calculator (velocity = force ÷ mass). Show your working in your Journal.</li><li><b>Type your answer</b> and its unit in the box under the puzzle. It is copied into Your turn for you.</li><li><b>Check it</b> in the Space Dome. The velocity you are working out stays hidden until you have answered.</li></ol>` }],
+        { html: `<p>Time to use everything. There are <b>four puzzles</b>. For each one:</p><ol class="steps"><li><b>Read the question</b> in the Do this list.</li><li><b>Work it out</b> with the calculator (velocity = force ÷ mass). Show your working in your Journal.</li><li><b>Type your answer</b> with its unit, like 90 N or 2.5 m/s², in the box under the puzzle. It is copied into Your turn for you.</li><li><b>Check it</b> in the Space Dome. The velocity you are working out stays hidden until you have answered.</li></ol>` }],
       setup() { space(250, 75, 150); }, adds: ['pushf', 'astro', 'mass'], hide: SPACE_HIDE_MAIN.concat(['thrust']), sides: [], pullers: [], idle: 'Set up the puzzle, then press Push off!',
       tasks: [
         ['', () => hasAns('q1'), { q: 'q1' }], ['<b>Check puzzle 1</b> in the Space Dome.', () => sHas(150, 250, 75)],
@@ -6304,7 +6884,7 @@ CHDATA.c5 = {
     { id: 'd4', title: 'Open the parachute', info: ['dcanopy', 'dvt', 'dft'], floors: ['air'],
       cards: [
         { html: `<p>Meet our skydiver! With the canopy closed, they fall just like the crate until they reach a terminal velocity of about <b>54 m/s</b>. That's nearly 200 km/h. Then they open the parachute.</p>` },
-        { hi: '#dzOpen', html: `<p>A <b>canopy</b> is huge, so it has to push a lot of air out of the way. At the same velocity, the air resistance is suddenly much bigger. Use <b>⏸ Pause</b> to catch the arrows just after the canopy opens, and again once things settle down.</p>` }],
+        { hi: '#dzOpen', html: `<p>A <b>canopy</b> is huge, so it has to push a lot of air out of the way. At the same velocity, the air resistance is suddenly much bigger. Use <b>⏸ Pause</b> to catch the arrows just after the canopy opens, and again once things settle down.</p>` }, vtShapesCard()],
       predict: { kind: 'sketch', q: 'Sketch the skydiver\'s velocity from the jump until well after the canopy opens. The dashed line shows when the canopy opens.', cols: 10, levels: 10, xLabel: 'Time', yLabel: 'Velocity (downwards)', marks: [{ col: 6, label: 'Canopy opens' }], then: 'Drop the skydiver, open the canopy, then compare your sketch with the real graph.' },
       setup() { dropSetup({ height: 1500, a: { obj: 'para', world: 'earth', removed: 0, canopy: 'medium' } }); }, adds: ['dcanopy', 'dvt', 'dft'], sides: [], pullers: [], idle: 'Press Drop!, then open the canopy',
       tasks: [['Sketch your prediction in the box above.', () => predOf() != null], ['Press <b>Drop!</b>. When the velocity has stopped going up, press <b>Open canopy!</b>', () => !!dzRun(Object.assign({}, c5Sky, { canopy: c => c !== 'none', openT: v => v != null, vt1: v => v != null }), true)], ['Pause at the two moments in the table under the arena. Each row says when to pause and fills in by itself.', () => frzCount('q1') >= 2]],
@@ -7906,7 +8486,7 @@ CHDATA.c6 = {
       opts: ['No, the work stays the same, but the effort gets smaller', 'Yes, a bigger advantage always means less work', 'No, a bigger advantage means he does more work', 'Yes, because the ship weighs less with a bigger machine'], a: 0,
       reasons: ['He pulls with less force over a longer distance, so force × distance stays at 94,500 J', 'A smaller force always means a smaller amount of work done', 'He turns the handle further, so force × distance must be bigger', 'The machine carries part of the ship\'s weight for him'], r: 0,
       why: { a: { 1: 'A smaller effort is paid for with a longer distance, so the work is the same.', 2: 'A bigger advantage makes the effort smaller, and the work stays the same.', 3: 'The ship\'s weight never changes.' }, r: { 1: 'The force is smaller, but the distance is longer, so the work does not shrink.', 2: 'The distance is longer, but the force is smaller, so the work does not grow.', 3: 'The machine changes the effort, not the ship\'s weight.' } } },
-    { id: 'c6r26', obj: ['Dii', 'Diii'], type: 'explain', p: 'The rescue team had two plans. Plan A: build long, gentle ramps and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9\'s crater, then say which plan you would choose and why.', words: ['mechanical advantage', 'distance', 'safety', 'cost'],
+    { id: 'c6r26', obj: ['Dii', 'Diii'], type: 'explain', fold: { title: 'Weighing up', html: '<p>Look at the plans through four factors: <b>society</b> (people), the <b>environment</b>, the <b>economy</b> (cost) and <b>health</b> (including safety).</p><p>Then give your judgement: <i>I would choose… The most important factor here is… because…</i></p>' }, p: 'The rescue team had two plans. Plan A: build long, gentle ramps and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9\'s crater, then say which plan you would choose and why.', words: ['mechanical advantage', 'distance', 'safety', 'cost'],
       model: 'Plan A uses the ramps, which give mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and building the ramps takes time. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.',
       check: ['Gives an advantage of Plan A (the ramps\' mechanical advantage means a smaller or cheaper crane, or a smaller effort)', 'Gives a disadvantage of Plan A (more cable or distance, or more time)', 'Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground)', 'Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails)', 'Makes a choice and gives a reason for it'] },
     { id: 'c6r32', obj: ['Aii', 'Di', 'Diii'], type: 'explain', refl: true, p: 'Describe the rescue route you built and how it helped Smooshy. Use your own numbers, then say one change you would make and why.', words: ['load', 'effort', 'mechanical advantage', 'distance', 'work'],
@@ -9452,6 +10032,12 @@ function renderReview(ch) {
   body.appendChild(h('div', { class: 'finishrow' }, `<button type="button" class="go big" id="finishCheck">${finLabel(ch, false)}</button><span class="scaleNote">Finish checks every answer you have not checked yet, then shows your score${SECTIONS.find(x => x.id === ch) ? ' and your stamp' : ''}.</span>`));
   body.appendChild(h('div', { class: 'row' }, `<button type="button" class="go" id="mkWs2">Make my worksheet</button><button type="button" class="ghost" data-act="home">Back to the home page</button>`));
   const next = SECTIONS.find(s => s.needs === ch); if (next) body.appendChild(h('div', { class: 'keepgoing' }, `<b>Finished? You can stop here and upload your ${CH.part} worksheet.</b><span>Or, if you'd like to go further, try the <b>${next.part}</b>. It takes approx. ${secMins(next.id).total} minutes and makes its own worksheet that you can upload too.</span><button type="button" class="go sm" data-open="${next.id}" style="align-self:flex-start">Go to the ${next.part} →</button>`));
+  { /* self-check just before the Check: the questions stay hidden until every X is placed. A part-done or finished Check, and teacher mode, are never blocked. */
+    const saHost = h('div', { id: 'saHost' }), kids = [...body.children]; body.insertBefore(saHost, body.firstChild);
+    const fold = () => { saHost.innerHTML = ''; const d = h('details', { class: 'sa-done' }, '<summary>My self-check</summary>'); d.appendChild(selfAssessCard(ch, true)); saHost.appendChild(d); };
+    if (hasICAN(ch) && !saDone(ch) && !FAST && !isTeacher() && !reviewProgress(ch).done && !revFinished(ch)) { kids.forEach(k => { k.hidden = true; }); saHost.appendChild(selfAssessCard(ch, false, () => { kids.forEach(k => { k.hidden = false; }); fold(); })); }
+    else if (hasICAN(ch) && saStore(ch).done) fold();
+  }
   host.onclick = e => { if (e.target.closest('#finishCheck, #finishCheckTop')) { revFinish(ch, items); return; } const j = e.target.closest('[data-jump]'); if (j) $('#rq-' + j.dataset.jump).scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' });
     if (e.target.id === 'mkWs' || e.target.id === 'mkWs2') makeWorksheet(ch); if (e.target.id === 'blankWs') openSheet(ch, 'blank'); };
 }
@@ -9528,6 +10114,11 @@ const SECTIONS = [
     steps: ['i1', 'i2', 'i3', 'i4', 'i5', 'i6'], challenge: null, review: ['c2r1', 'c2r2', 'c2r3', 'c2r4', 'c2r5', 'c2r6'],
     goal: 'Explain that objects with more mass have more inertia, so they are harder to start moving and harder to stop; read a velocity from a velocity–time graph; state Newton\'s first law and use it to explain everyday examples.',
     vocab: ['inertia', 'mass', 'velocity', 'velocity–time graph', 'brake', 'braking distance', 'Newton\'s first law', 'unbalanced force'] },
+  { id: 'c2s', ch: 'c2', n: 2, title: 'Graphs and CER', part: 'Skills', stamp: 'Evidence Expert',
+    blurb: 'Brake-test four crates, turn your results into a graph, then use them to write a science paragraph with a claim, evidence and reasoning. Finish by finding the claim, evidence and reasoning in a short article.',
+    steps: ['sk1', 'sk2'], challenge: null, review: ['c2sr1', 'c2sr2', 'c2sr3'], needs: 'c2f',
+    goal: 'Present braking data as a scatter graph; read values and describe the trend with numbers; write a CER paragraph that uses data and the science of inertia; find the claim, evidence and reasoning in an article.',
+    vocab: ['graph', 'scatter graph', 'bar graph', 'axis', 'unit', 'trend', 'claim', 'evidence', 'reasoning', 'braking distance', 'inertia'] },
   { id: 'c2x', ch: 'c2', n: 2, title: 'Inertia', part: 'Extension', stamp: 'Brake Master',
     blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
     steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
@@ -9598,7 +10189,7 @@ const SECTIONS = [
     goal: 'Explain that friction turns some of the work put into a real machine into heat; calculate efficiency as useful work out ÷ work in × 100%; compare the efficiency of different machines and choose one that is strong enough and wastes little energy.',
     vocab: ['friction', 'wasted energy', 'efficiency', 'lubricant', 'terraform'] }
 ].filter(s => WORKSHOP_OPEN || s.ch !== 'c6');
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5, u1: 4, u2: 4, u3: 5, k1: 4, k2: 5, k3: 5, v1: 4, p5a: 6, p5b: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { sk1: 7, sk2: 6, s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5, u1: 4, u2: 4, u3: 5, k1: 4, k2: 5, k3: 5, v1: 4, p5a: 6, p5b: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2, graph: 3, mark: 2, para: 3 };
 CHDATA.c1.review.push({ id: 'r12', obj: ['Aii'], seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];
@@ -9609,6 +10200,9 @@ SECTIONS.forEach(sec => {
     goal: sec.goal, vocab: sec.vocab
   };
 });
+/* Learn questions share ids (q1, q2…) from step to step, so they all shuffled alike and the right answer kept landing on the same letter.
+   Seeding each with its step id gives every step its own order. Saved answers store the original option number, so nothing saved moves. */
+['c1', 'c2', 'c3', 'c4', 'c5', 'c6'].forEach(c => ((CHDATA[c] && CHDATA[c].steps) || []).forEach(st => (st.qs || []).forEach(q => { if (q.opts && q.seed == null && !q.noShuffle) q.seed = st.id; })));
 /* estimated minutes for each part of a section */
 function secMins(id) {
   const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.mins || (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3)), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);
@@ -9624,11 +10218,14 @@ const MYP_STRANDS = {
   Ai: 'describe scientific knowledge',
   Aii: 'apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations',
   Aiii: 'analyse information to make scientifically supported judgments',
+  Ci: 'present collected and transformed data',
+  Cii: 'interpret data and describe results using scientific reasoning',
+  Ciii: 'discuss the validity of a hypothesis based on the outcome of the scientific investigation',
   Di: 'describe the ways in which science is applied and used to address a specific problem or issue',
   Dii: 'discuss and analyse the various implications of using science and its application in solving a specific problem or issue',
   Diii: 'apply scientific language effectively'
 };
-const MYP_CRIT = { A: 'Criterion A: Knowing and understanding', D: 'Criterion D: Reflecting on the impacts of science' };
+const MYP_CRIT = { A: 'Criterion A: Knowing and understanding', C: 'Criterion C: Processing and evaluating', D: 'Criterion D: Reflecting on the impacts of science' };
 // q.obj is also the Drop Zone object name (a string) on some freeze questions, so only an array counts as strand tags
 const strandsOf = q => Array.isArray(q.obj) ? q.obj : [];
 const strandLabel = s => s[0] + ' ' + s.slice(1);                                   // 'Aii' -> 'A ii'
@@ -9638,10 +10235,10 @@ const STRAND_ORDER = Object.keys(MYP_STRANDS);
 function sheetStrands(chId) { const u = new Set(); CHDATA[chId].review.forEach(q => strandsOf(q).forEach(s => u.add(s))); return STRAND_ORDER.filter(s => u.has(s)); }
 function taskStrands(chIds) { const u = new Set(); chIds.forEach(c => sheetStrands(c).forEach(s => u.add(s))); return STRAND_ORDER.filter(s => u.has(s)); }
 /* the compact form used in the table of §6a: 'A i, ii, iii · D i, iii' */
-function strandsShort(list) { return ['A', 'D'].map(c => { const l = list.filter(s => s[0] === c).map(s => s.slice(1)); return l.length ? c + ' ' + l.join(', ') : ''; }).filter(Boolean).join(' · '); }
+function strandsShort(list) { return ['A', 'C', 'D'].map(c => { const l = list.filter(s => s[0] === c).map(s => s.slice(1)); return l.length ? c + ' ' + l.join(', ') : ''; }).filter(Boolean).join(' · '); }
 /* marks available per criterion: a question counts once for each criterion it is tagged with */
 function critTotals(chIds) {
-  const t = { A: 0, D: 0 };
+  const t = { A: 0, C: 0, D: 0 };
   chIds.forEach(c => CHDATA[c].review.forEach(q => { const crits = new Set(strandsOf(q).map(s => s[0])); crits.forEach(k => { t[k] += qMarks(q); }); }));
   return t;
 }
@@ -9670,7 +10267,7 @@ function answerKeyText(chId) {
 }
 
 /* ---------- marking rules (shared by the printable scheme and the AI text) ---------- */
-function markingRules(hasSure) {
+function markingRules(hasSure, hasSA) {
   return [
     'Student answers are printed in blue. Mark only what the student added. The worksheet\'s own text, choices and word lists are not student work.',
     'Students don\'t need to match the answer key word for word: accept any correct scientific wording.',
@@ -9679,6 +10276,7 @@ function markingRules(hasSure) {
     'Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.',
     'A blank question scores 0. Add a kind note saying what is missing.',
     ...(hasSure ? ['Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.'] : []),
+    ...(hasSA ? ['The top of the worksheet shows "My self-check before the Check". It is the student\'s own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.'] : []),
     'Don\'t take marks off for spelling unless the meaning is unclear.',
     'Mark each worksheet separately. An optional worksheet that wasn\'t submitted is not counted.'
   ];
@@ -9692,7 +10290,7 @@ function aiFeedbackText(secIds, optIds) {
   if (!ids.length) return 'Tick at least one section to build the AI feedback instructions.';
   const L = [`All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.`, ''];   /* first line of every AI feedback text (Tom, 3 Nov 2026) */
   L.push('HOW TO MARK');
-  markingRules(ids.some(c => CHDATA[c].review.some(q => q.sure))).forEach(r => L.push('- ' + r));
+  markingRules(ids.some(c => CHDATA[c].review.some(q => q.sure)), ids.some(hasICAN)).forEach(r => L.push('- ' + r));
   L.push(''); L.push('FEEDBACK STYLE'); L.push(FEEDBACK_STYLE);
   const st = taskStrands(ids), tot = critTotals(ids);
   L.push(''); L.push('MYP LEVELS');
@@ -9706,7 +10304,7 @@ function aiFeedbackText(secIds, optIds) {
   const totalMarks = ids.reduce((a, c) => a + CHDATA[c].review.reduce((b, q) => b + qMarks(q), 0), 0);
   L.push(''); L.push('TOTALS');
   L.push(`Total marks for this task: ${totalMarks}.`);
-  L.push(['A', 'D'].filter(k => tot[k] > 0).map(k => `Criterion ${k}: ${tot[k]} marks available`).join('; ') + '.');
+  L.push(['A', 'C', 'D'].filter(k => tot[k] > 0).map(k => `Criterion ${k}: ${tot[k]} marks available`).join('; ') + '.');
   return L.join('\n');
 }
 
@@ -9731,6 +10329,7 @@ const WS_CSS = `
 .ws .q .qh span{font-weight:400;font-size:9pt;color:#555}
 .ws .stu{color:${BLUE};font-weight:700}
 .ws .stu svg{border:1.5px solid ${BLUE};border-radius:6px}
+.ws .gmwsfig svg{width:125mm!important;max-width:125mm!important;border:1px solid #cbd7dc}.ws .gmwsdata{margin-bottom:4px}.ws .gmwsdata table{width:auto}.ws .story{font-size:10pt;margin:4px 0}.ws .ws-sa-row svg{display:block;margin:0}
 .ws .key{color:#1d6b3a;font-weight:700}
 .ws table{border-collapse:collapse;width:100%;font-size:10pt}
 .ws td,.ws th{border:1px solid #9aa9b0;padding:4px 6px;text-align:left;vertical-align:top}
@@ -9750,16 +10349,16 @@ const WS_CSS = `
 @media print{@page{size:A4;margin:12mm}.ws .page{padding:0}}
 `;
 const LET = 'ABCDEFGHIJ';
-function wsHeader(ch, title, mode) {
+function wsHeader(ch, title, mode, withSA) {
   const u = user(), today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const name = mode === 'student' ? `<span class="stu">${esc(u.teacher ? 'Teacher copy' : u.name || '')}</span>` : '';
   return `<div class="hd"><div class="l"><b>FORCE HQ</b><div style="font-size:10pt;color:#cfe0ea">Force Arenas · Chapter ${ch.n} · ${ch.part}</div></div><div class="r"><div style="font-size:14pt;font-weight:800">${title}</div><div style="font-size:10pt">${ch.title}${mode === 'key' ? ' · ANSWER KEY (teacher only)' : mode === 'blank' ? ' · Blank template' : ''}</div></div></div>
     <div class="namebar"><div>Name: ${name}</div><div>Class: ${mode === 'student' ? `<span class="stu">${esc(u.cls || '')}</span>` : ''}</div><div>Date: ${mode === 'student' ? today : ''}</div></div>
-    ${mode === 'key' ? sheetStrandHTML(ch.id) : ''}${mode === 'student' ? '<p class="note">Everything printed in blue was added by the student in the sim.</p>' : mode === 'blank' ? '<p class="note">Answer every question. Show your working for calculations.</p>' : ''}`;
+    ${withSA ? wsSelfCheck(ch.id, mode) : ''}${mode === 'key' ? sheetStrandHTML(ch.id) : ''}${mode === 'student' ? '<p class="note">Everything printed in blue was added by the student in the sim.</p>' : mode === 'blank' ? '<p class="note">Answer every question. Show your working for calculations.</p>' : ''}`;
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
-  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'build': return q.marks; default: return 1; }
+  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'mark': return q.sents.length; case 'graph': return 5; case 'para': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'build': return q.marks; default: return 1; }
 }
 /* a line under questions that ask "How sure are you?": blank on the template, the student's choice in blue, not marked */
 const sureLine = (q, mode, s) => !q.sure || mode === 'key' ? '' : mode === 'student' ? `<p class="note" style="margin:4px 0 0">How sure I was: ${s && s.done && s.sure ? `<span class="stu">${SURE_LABEL[s.sure]}</span>` : '–'}</p>` : '<p class="note" style="margin:4px 0 0">How sure were you? ☐ Guessing &nbsp; ☐ Fairly sure &nbsp; ☐ Certain</p>';
@@ -9772,9 +10371,9 @@ function wsQuestion(q, i, mode, s) {
   else if (q.type === 'tick') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v && v.includes(oi)) || (key && q.a.includes(oi)) ? W('☑') : '☐'} ${q.opts[oi]}</div>`).join('') + (key ? `<div class="look">${q.work || ''}</div>` : '');
   else if (q.type === 'num') body = `<div class="box">Working: ${stu ? (s && s.w ? W(esc(s.w).replace(/\n/g, '<br>')) : '') : key ? W(q.work) : ''}<br><br></div><p>Answer: ${stu && v != null ? W(esc(v)) : key ? W(fmt(q.ans, 2)) : '____________'} ${q.units ? (stu ? W(esc((s && s.u) || '')) : key ? W(q.unit) : '________ <small>(write the unit)</small>') : q.unit}</p>`;
   else if (q.type === 'gap') { let k = 0; body = `<p>${q.p.replace(/___/g, () => { const j = k++; return stu && v ? W('<u>' + esc(v[j] || '') + '</u>') : key ? W('<u>' + esc(q.ans[j][0]) + '</u>') : '______________'; })}</p>`; }
-  else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>${q.colA || "Force"}</th><th>Letter</th></tr>${q.rows.map((r, ri) => `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
+  else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>${q.colA || "Force"}</th><th>Letter</th></tr>${rowsOf(q).map(ri => { const r = q.rows[ri]; return `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`; }).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
   else if (q.type === 'sort') body = `<table><tr><th>Item</th>${q.groups.map(g => `<th style="width:22%">${g}</th>`).join('')}</tr>${sortItems(q).map(ii => `<tr><td>${q.items[ii][0]}</td>${q.groups.map((_, gi) => `<td style="text-align:center">${(stu && v && v[ii] === gi) || (key && q.items[ii][1] === gi) ? W('✓') : ''}</td>`).join('')}</tr>`).join('')}</table><p class="note">Tick one box in each row.</p>`;
-  else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
+  else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${rowsOf(q).map(ri => { const r = q.rows[ri]; return `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`; }).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
   else if (q.type === 'fbd') body = `<div class="fbdbox"><div>${q.scen.brief}${key ? `<div class="look"><b>Look for:</b><br>${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N, ${DIRWORD[f.dir]}`).join('<br>')}<br>All arrows start at the centre; bigger forces have longer arrows.</div>` : stu && s && s.v && s.v.lastRes ? `<p style="font-size:10pt">Checks passed in the sim: ${s.v.lastRes.chips.filter(c => c[2]).map(c => c[1]).join(', ') || 'none'}</p>` : ''}</div><div>${stu ? (v && v.arrows && v.arrows.length ? `<div class="stu">${FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true })}</div>` : '<div class="box" style="height:60mm">Not drawn in the sim.</div>') : key ? FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }) : `<div style="border:1.5px dashed #9aa9b0;border-radius:6px">${blankFbd(q.scen)}</div>`}</div></div>`;
   else if (q.type === 'explain') body = (q.words ? `<p class="words"><b>Words to use in a good answer:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6));
   else if (q.type === 'order') {   // lettered cards in the seeded shuffled order, then the letters written in order
@@ -9812,9 +10411,31 @@ function wsQuestion(q, i, mode, s) {
     body = `<div class="skp">${sketchSVG(q, { dots: stu && Array.isArray(dv) ? dv : [], model: key ? q.model : null, col: BLUE, legend: false, alt: 'A blank graph grid' })}</div><p class="note">Put one dot in each time column, then join the dots with straight lines.</p>`
       + (key ? `<div class="look"><b>Look for:</b><br>${q.look ? q.look + '<br>' : ''}${q.checks.map(c => '• ' + c[0]).join('<br>')}</div>` : '');
   }
+  else if (q.type === 'graph') {
+    const sp = gmSpecOf(q);
+    body = `<div class="gmwsdata">${gmTable(sp, '')}</div>` + (stu ? (dv ? `<div class="stu gmwsfig">${gmSVG(sp, dv, { print: true, alt: 'My graph' })}</div>` : '<div class="box" style="height:60mm">Not made in the sim.</div>')
+      : key ? `<div class="gmwsfig">${gmSVG(sp, gmModel(sp), { alt: 'A correct graph' })}</div><div class="look"><b>Look for:</b><br>${gmKeyLines(sp).join('<br>')}</div>`
+      : `<div class="gmwsfig">${gmSVG(sp, null, { blank: true, alt: 'An empty grid' })}</div><p class="note">Choose the type of graph. Write a title and label both axes with units. Choose your scale, then plot every point.</p>`);
+  }
+  else if (q.type === 'mark') {
+    body = (q.title ? `<p><b>${q.title}</b></p>` : '') + `<table><tr><th style="width:6%">#</th><th>Sentence</th><th style="width:20%">Label</th></tr>${q.sents.map((x, i) => `<tr><td>${i + 1}</td><td>${x.t}</td><td>${stu && Array.isArray(dv) ? W(dv[i] < 0 ? 'No label' : q.labels[dv[i]]) : key ? W(x.a < 0 ? 'No label' : q.labels[x.a]) : ''}</td></tr>`).join('')}</table><p class="note">Write ${q.labels.join(', ')} or No label for each sentence.</p>`
+      + (key ? `<div class="look">${q.sents.map((x, i) => `${i + 1}. ${x.why}`).join('<br>')}</div>` : '');
+  }
+  else if (q.type === 'para') {
+    const sel = stu && dv && Array.isArray(dv.sel) ? dv.sel : [];
+    body = `<p class="words"><b>${q.sideHead || 'The question and the data'}</b></p><p>${q.question}</p>` + (q.data ? gmTable(q.data, '') : '') + (q.tapRows ? `<p><b>My evidence</b> (two rows I used): ${stu ? W(sel.map(i => fmtRow(q.data, q.data.rows[i])).join('; ') || '–') : key ? '' : '____________________'}</p>` : '')
+      + (q.words ? `<p class="words"><b>Words to use:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks && q.check.length ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${typeof q.model === 'function' ? q.model(paraSel(q, null)) : q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(7));
+  }
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   const head = q.type === 'gap' ? 'Fill the gaps.' : q.type === 'pick' ? 'Choose the right words.' : q.type === 'fix' ? paperTap(qp) : qp;
-  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}${mode === 'key' ? strandTagHTML(q) : ''}</span></div>${fig}${body}</div>`;
+  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}${mode === 'key' ? strandTagHTML(q) : ''}</span></div>${q.story ? `<div class="look story">${q.story}</div>` : ''}${fig}${body}</div>`;
+}
+/* what the marker looks for in a graph (answer key and marking scheme) */
+function gmKeyLines(sp) {
+  const M = gmModel(sp), sc = gmIsScatter(sp);
+  return [`Graph type: ${sc ? 'a scatter graph, because the bottom axis shows numbers the investigator changed' : 'a bar graph, because the bottom axis shows names or groups'}.`, `Title: names both variables, for example "${sp.exTitle}".`, `Axis labels: "${sp.exX}" along the bottom and "${sp.exY}" up the side, each with its unit in brackets.`,
+    `Axis numbers: each axis starts at 0, goes up in equal steps and finishes just above the biggest value (for example y: 0 to ${gmFmt(M.ymax)} in steps of ${gmFmt(M.ystep)}${sc ? '; x: 0 to ' + gmFmt(M.xmax) + ' in steps of ' + gmFmt(M.xstep) : ''}).`,
+    `Points: ${sp.rows.map(r => `(${gmFmt(r[0])}, ${gmFmt(r[1])})`).join(', ')}, each within about 0.4 of a grid step.`];
 }
 /* "Steps completed in the sim": a tick list of the Learn steps and Challenge missions, so the teacher (and Toddle AI)
    can see the student did the work that leads up to the questions. Blue ticks are from the sim. */
@@ -9830,7 +10451,7 @@ function buildWorksheet(chId, mode) {
   const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
   const qs = L => L.map(q => wsQuestion(q, num(q), mode, st[q.id])).join(''), partBn = partB.filter(q => !q.refl), refl = partB.filter(q => q.refl);
-  let h1 = chId === 'c6e' ? `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${myRescueHTML(mode)}</div><div class="page">${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${qs(partA)}${partBn.length ? `<h2>Part B: Draw and explain</h2>${qs(partBn)}` : ''}</div>${refl.length ? `<div class="page"><h2>Part C: My rescue reflection</h2>${qs(refl)}</div>` : ''}` : `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  let h1 = chId === 'c6e' ? `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode, true)}${myRescueHTML(mode)}</div><div class="page">${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${qs(partA)}${partBn.length ? `<h2>Part B: Draw and explain</h2>${qs(partBn)}` : ''}</div>${refl.length ? `<div class="page"><h2>Part C: My rescue reflection</h2>${qs(refl)}</div>` : ''}` : `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode, true)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -9838,14 +10459,14 @@ function feedbackPage(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {}), L = learnProgress(chId), C2 = challengeState(chId), P = reviewProgress(chId);
   return `<div class="page">${wsHeader(ch, 'Feedback page', 'student')}<h2>How I did in the sim</h2>
     <table><tr><th>Part</th><th>Result</th></tr><tr><td>Learn steps</td><td class="stu">${L.done} of ${L.total} done</td></tr>${CHDATA[chId].challenge ? `<tr><td>Challenge: ${CHDATA[chId].challenge.title}</td><td class="stu">${C2.tried} of ${C2.total} missions tried · ${C2.score} of ${C2.max} objectives met</td></tr>` : ''}<tr><td>Check questions</td><td class="stu">${P.done} of ${P.total} answered · ${P.points} of ${P.maxPoints} points</td></tr></table>
-    <h2>Check questions</h2><table><tr><th>Q</th><th>Type</th><th>In the sim</th></tr>${R.map((q, i) => { const s = st[q.id]; const r = !s || !s.done ? 'Not answered' : q.type === 'explain' ? `Self-checked: ${s.v && s.v.ticks ? s.v.ticks.length : 0} of ${q.check.length} points` : (p => `${s.ok ? '✓' : p.score ? '◐' : '✗'} ${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, s)); return `<tr><td>${i + 1}</td><td>${QLABEL[q.type]}</td><td class="stu">${r}${q.sure && s && s.done && s.sure ? ` · ${SURE_LABEL[s.sure]}` : ''}</td></tr>`; }).join('')}</table>
+    <h2>Check questions</h2><table><tr><th>Q</th><th>Type</th><th>In the sim</th></tr>${R.map((q, i) => { const s = st[q.id]; const r = !s || !s.done ? 'Not answered' : (q.type === 'explain' || q.type === 'para') ? `Self-checked: ${s.v && s.v.ticks ? s.v.ticks.length : 0} of ${q.check.length} points` : (p => `${s.ok ? '✓' : p.score ? '◐' : '✗'} ${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, s)); return `<tr><td>${i + 1}</td><td>${QLABEL[q.type]}</td><td class="stu">${r}${q.sure && s && s.done && s.sure ? ` · ${SURE_LABEL[s.sure]}` : ''}</td></tr>`; }).join('')}</table>
     ${(sw => sw.length ? `<h2>Certain but not right</h2><p class="note">These answers were marked "Certain" in the sim, but were not fully right. They are worth talking about.</p><p class="stu">${sw.map(([q, i]) => `Question ${i + 1} (${QLABEL[q.type]})`).join(', ')}</p>` : '')(R.map((q, i) => [q, i]).filter(([q, i]) => q.sure && st[q.id] && st[q.id].done && st[q.id].sure === 'cert' && !st[q.id].ok))}
 </div>`;   /* no teacher comment box: Tom leaves comments directly on Toddle */
 }
 /* ---------- marking scheme (also on the answer key) ---------- */
-function markingInstructions(title, total, hasSure) {
+function markingInstructions(title, total, hasSure, hasSA) {
   return `<h2>Marking instructions for Toddle AI</h2><p>This marking scheme is for the Force HQ worksheet "${title}". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.</p>
-  <ul>${markingRules(hasSure).map(r => `<li>${r}</li>`).join('')}<li>${FEEDBACK_STYLE}</li></ul><p><b>Total: ${total} marks.</b></p>`;
+  <ul>${markingRules(hasSure, hasSA).map(r => `<li>${r}</li>`).join('')}<li>${FEEDBACK_STYLE}</li></ul><p><b>Total: ${total} marks.</b></p>`;
 }
 function markItem(q, i) {
   const n = i + 1, m = qMarks(q);
@@ -9866,6 +10487,9 @@ function markItem(q, i) {
     case 'freeze': return `Q${n} (${m} marks, 1 per box): every student's moments are different, so mark for consistency. The weight is the same in every row (mass × g). Resultant = weight − air resistance in each row (accept 1.5 N either way). The velocity choice matches the resultant: downwards = speeding up, zero = steady, upwards = slowing down. Example values (students' will differ): ` + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('; ') + '.';
     case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
     case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
+    case 'graph': { const sp = gmSpecOf(q); return `Q${n} (5 marks, 1 each for the graph type, the title, both axis labels, the axis numbers and the points): the data are ${sp.head.join(' and ')}: ${sp.rows.map(r => `${gmFmt(r[0])} → ${gmFmt(r[1])}`).join('; ')}. ` + gmKeyLines(sp).join(' ') + ' The question does not name the graph type, so the type mark is earned by the student.'; }
+    case 'mark': return `Q${n} (${m} marks, 1 per sentence): ${q.title ? q.title + ' ' : ''}` + q.sents.map((x, i) => `${i + 1}. ${x.a < 0 ? 'No label' : q.labels[x.a]} (${plain(x.t).slice(0, 60)}…): ${x.why}`).join(' ');
+    case 'para': return `Q${n} (${m} marks, 1 per point): The question: ${q.question} The data the student could use: ${q.data.head.join(' and ')}: ${q.data.rows.map(r => `${gmFmt(r[0])} → ${gmFmt(r[1])}`).join('; ')}. ${q.check.map(c => '• ' + c).join(' ')} Model answer: ${typeof q.model === 'function' ? q.model(paraSel(q, null)) : q.model}`;
     case 'build': return `Build marks (${m} mark${m > 1 ? 's' : ''}): ${q.p}. ${q.how}`;
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}${q.mnote ? ' ' + q.mnote : ''}`;
   }
@@ -9873,7 +10497,7 @@ function markItem(q, i) {
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>Page 1 of the worksheet is the My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg and the totals. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection: check the numbers a student quotes against their My Rescue table.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure), hasICAN(chId))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>Page 1 of the worksheet is the My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg and the totals. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection: check the numbers a student quotes against their My Rescue table.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 
@@ -10112,7 +10736,7 @@ function teacherPrompt(T1, mins, omins) {
   L.push(''); L.push('Teacher-only notes: g = 9.8 N/kg is used throughout. Answer keys are locked inside the simulation with a teacher code.');
   if (parts.includes('review')) {
     const st = taskStrands([...all.map(c => c.id), ...bts]), crit = k => { const l = st.filter(x => x[0] === k); return l.length ? `Criterion ${k} (strands ${l.map(strandLabel).join(', ')})` : ''; };
-    L.push(''); L.push(`MYP objectives: please attach these MYP Year 3 Sciences objectives to the task: ${['A', 'D'].map(crit).filter(Boolean).join(' and ')}.`);
+    L.push(''); L.push(`MYP objectives: please attach these MYP Year 3 Sciences objectives to the task: ${['A', 'C', 'D'].map(crit).filter(Boolean).join(' and ')}.`);
     L.push('AI marking: I will paste the AI feedback instructions, which include a written answer key, into the AI feedback settings separately. Students must never see them.');
     L.push(''); L.push('Marks for each worksheet:');
     all.forEach(c => L.push(`- ${nm(c)} worksheet${opt.includes(c) && req.length ? ' (optional)' : ''}: ${CHDATA[c.id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); bts.forEach(id => L.push(`- ${btn(BT_SEC[id])} build sheet: ${CHDATA[id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); }

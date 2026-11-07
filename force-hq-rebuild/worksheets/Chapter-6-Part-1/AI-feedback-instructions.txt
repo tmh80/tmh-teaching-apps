@@ -8,6 +8,7 @@ HOW TO MARK
 - Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 - A blank question scores 0. Add a kind note saying what is missing.
 - Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+- The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 - Don't take marks off for spelling unless the meaning is unclear.
 - Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 

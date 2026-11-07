@@ -8,6 +8,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 1 Foundation: What is
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -33,6 +34,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 1 Extension: What is 
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -56,6 +58,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 2 Foundation: Inertia
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -70,6 +73,28 @@ Q5 (3 marks, 1 per gap): gap 1: still (also accept at rest, stationary, not movi
 Q6 (3 marks, 1 per point): The question gives the words to use (inertia, keeps moving, unbalanced force); each point is about using one of them correctly. • Says the passenger was moving forwards at the same velocity as the bus • Uses inertia to explain that the passenger keeps moving forwards when the bus slows down • States that an unbalanced force (from a pole, a seat or their feet) has to act on the passenger to bring them to a stop Model answer: The passenger was moving forwards at the same velocity as the bus. When the bus brakes, the bus slows down, but nothing slows the passenger straight away. Because of their inertia, the passenger keeps moving forwards. To stop them, an unbalanced force has to act on them, such as the pull of a pole they grab or friction on their feet. MYP: A ii
 Total: 17 marks.
 
+MYP strands on this sheet: C i, C ii, D i, D iii
+
+Marking instructions for Toddle AI
+This marking scheme is for the Force HQ worksheet "Chapter 2 Skills: Graphs and CER". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.
+• Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+• Students don't need to match the answer key word for word: accept any correct scientific wording.
+• The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+• The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+• Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+• A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
+• Don't take marks off for spelling unless the meaning is unclear.
+• Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+• Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+Total: 14 marks.
+
+Mark scheme
+Q1 (5 marks, 1 each for the graph type, the title, both axis labels, the axis numbers and the points): the data are Mass of cargo (kg) and Braking distance (m): 0 → 40; 2,000 → 50; 4,000 → 60; 6,000 → 70; 8,000 → 80. Graph type: a scatter graph, because the bottom axis shows numbers the investigator changed. Title: names both variables, for example "Mass of cargo vs braking distance". Axis labels: "Mass of cargo (kg)" along the bottom and "Braking distance (m)" up the side, each with its unit in brackets. Axis numbers: each axis starts at 0, goes up in equal steps and finishes just above the biggest value (for example y: 0 to 80 in steps of 10; x: 0 to 8,000 in steps of 1,000). Points: (0, 40), (2,000, 50), (4,000, 60), (6,000, 70), (8,000, 80), each within about 0.4 of a grid step. The question does not name the graph type, so the type mark is earned by the student. MYP: C i
+Q2 (5 marks, 1 per sentence): Why do cars have seatbelts? 1. Claim (Seatbelts save lives in car crashes.…): It answers the question in the title. 2. Evidence (The World Health Organization says that wearing a seatbelt c…): A fact from a trusted source. 3. No label (Seatbelts come in lots of colours, like black, grey and red.…): True, but it doesn't help answer the question. 4. Evidence (For passengers in the back seats, a seatbelt cuts the risk o…): A second fact to back up the claim. 5. Reasoning (When a car stops suddenly, a passenger's body has inertia an…): It explains why, using science. MYP: C ii, D i
+Q3 (4 marks, 1 per point): The question: How does the mass of cargo change a truck's braking distance? The data the student could use: Mass of cargo (kg) and Braking distance (m): 0 → 40; 2,000 → 50; 4,000 → 60; 6,000 → 70; 8,000 → 80. • My claim answers the question. • I gave two numbers from the table, each with its unit. • I explained the trend using mass and inertia. • I used science words correctly, like braking distance and inertia. Model answer: The results show that the more cargo a truck carries, the further it slides before it stops. With no cargo the truck's braking distance was 40 m, and with 8,000 kg of cargo it was 80 m. This happens because the cargo gives the truck more mass, so it has more inertia. The same brake force takes longer to stop something with more inertia, so the truck slides further. MYP: C ii, D iii
+Total: 14 marks.
+
 MYP strands on this sheet: A i, A ii, A iii, D i, D iii
 
 Marking instructions for Toddle AI
@@ -80,6 +105,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 2 Extension: Inertia"
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -103,6 +129,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 3 Foundation: F = ma"
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -128,6 +155,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 3 Extension: F = ma".
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -151,6 +179,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 4 Foundation: Action 
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -177,6 +206,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 4 Extension: Action a
 • The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -201,6 +231,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 5 Foundation: Falling
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -227,6 +258,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 5 Extension: Falling 
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -251,6 +283,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Part 1: Levers". To
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -278,6 +311,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Part 2: Pulleys, wh
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -302,6 +336,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Part 3: Mechanical 
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -327,6 +362,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Part 4: Compound ma
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -351,6 +387,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Part 5: Rescue Capt
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
@@ -376,6 +413,7 @@ This marking scheme is for the Force HQ worksheet "Chapter 6 Extension: Real mac
 • Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
 • A blank question scores 0. Add a kind note saying what is missing.
 • Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.
+• The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
 • Don't take marks off for spelling unless the meaning is unclear.
 • Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
 • Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.

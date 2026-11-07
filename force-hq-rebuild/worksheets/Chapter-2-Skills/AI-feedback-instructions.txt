@@ -1,0 +1,35 @@
+All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.
+
+HOW TO MARK
+- Student answers are printed in blue. Mark only what the student added. The worksheet's own text, choices and word lists are not student work.
+- Students don't need to match the answer key word for word: accept any correct scientific wording.
+- The feedback page at the end of each PDF shows how the student did in the sim. If it disagrees with what you can see on the worksheet, trust the visible answer and say so.
+- The worksheet starts with "Steps completed in the sim". A blue tick means the sim recorded that step as done. These ticks are not marked, but mention any skipped steps in the feedback.
+- Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.
+- A blank question scores 0. Add a kind note saying what is missing.
+- The top of the worksheet shows "My self-check before the Check". It is the student's own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.
+- Don't take marks off for spelling unless the meaning is unclear.
+- Mark each worksheet separately. An optional worksheet that wasn't submitted is not counted.
+
+FEEDBACK STYLE
+Feedback for Grade 7–8: the score with a breakdown per question, one or two specific strengths quoting the student, and one next step with a hint rather than the answer.
+
+MYP LEVELS
+Strands on this task (MYP Year 3 Sciences):
+- C i: present collected and transformed data
+- C ii: interpret data and describe results using scientific reasoning
+- D i: describe the ways in which science is applied and used to address a specific problem or issue
+- D iii: apply scientific language effectively
+Each question is tagged in the answer key, for example [A ii]. A question counts towards every criterion it is tagged with, once per criterion even if it carries two strands of that criterion. For each criterion, add the marks earned and the marks available across all the worksheets, work out the percentage, then give the level: 1–12% = level 1, 13–25% = level 2, 26–37% = level 3, 38–50% = level 4, 51–62% = level 5, 63–75% = level 6, 76–87% = level 7, 88–100% = level 8 (0% = level 0).
+Check the level against the MYP band (1–2 limited, 3–4 adequate, 5–6 substantial, 7–8 excellent). You may move it by one level if the student's work clearly fits a different band; say why if you do. Report each criterion as 'Criterion A: level x/8 (strands assessed: i, ii, iii)', followed by one sentence for each strand.
+
+WRITTEN ANSWER KEY
+
+=== Force HQ Ch2 Skills (Graphs and CER) worksheet (14 marks) · MYP: C i, C ii, D i, D iii ===
+Q1 Make a graph, 5 marks, 1 each for the graph type, the title, both axis labels, the axis numbers and the points [C i]: the data are Mass of cargo (kg) and Braking distance (m): 0 → 40; 2,000 → 50; 4,000 → 60; 6,000 → 70; 8,000 → 80. Graph type: a scatter graph, because the bottom axis shows numbers the investigator changed. Title: names both variables, for example "Mass of cargo vs braking distance". Axis labels: "Mass of cargo (kg)" along the bottom and "Braking distance (m)" up the side, each with its unit in brackets. Axis numbers: each axis starts at 0, goes up in equal steps and finishes just above the biggest value (for example y: 0 to 80 in steps of 10; x: 0 to 8,000 in steps of 1,000). Points: (0, 40), (2,000, 50), (4,000, 60), (6,000, 70), (8,000, 80), each within about 0.4 of a grid step. The question does not name the graph type, so the type mark is earned by the student.
+Q2 Mark it, 5 marks, 1 per sentence [C ii, D i]: Why do cars have seatbelts? 1. Claim (Seatbelts save lives in car crashes.…): It answers the question in the title. 2. Evidence (The World Health Organization says that wearing a seatbelt c…): A fact from a trusted source. 3. No label (Seatbelts come in lots of colours, like black, grey and red.…): True, but it doesn't help answer the question. 4. Evidence (For passengers in the back seats, a seatbelt cuts the risk o…): A second fact to back up the claim. 5. Reasoning (When a car stops suddenly, a passenger's body has inertia an…): It explains why, using science.
+Q3 Write it, 4 marks, 1 per point [C ii, D iii]: The question: How does the mass of cargo change a truck's braking distance? The data the student could use: Mass of cargo (kg) and Braking distance (m): 0 → 40; 2,000 → 50; 4,000 → 60; 6,000 → 70; 8,000 → 80. • My claim answers the question. • I gave two numbers from the table, each with its unit. • I explained the trend using mass and inertia. • I used science words correctly, like braking distance and inertia. Model answer: The results show that the more cargo a truck carries, the further it slides before it stops. With no cargo the truck's braking distance was 40 m, and with 8,000 kg of cargo it was 80 m. This happens because the cargo gives the truck more mass, so it has more inertia. The same brake force takes longer to stop something with more inertia, so the truck slides further.
+
+TOTALS
+Total marks for this task: 14.
+Criterion C: 14 marks available; Criterion D: 9 marks available.

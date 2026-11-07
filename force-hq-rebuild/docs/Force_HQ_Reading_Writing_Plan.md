@@ -224,10 +224,10 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 | Stage | Job | Who |
 |---|---|---|
 | 1 | Tom signs off the plan (done 6 Nov) | Tom |
-| 2 | Script for `c2s`, with numbers and facts checked | Opus |
-| 3 | Skills audit and I can statements for every section, for Tom to approve | Opus |
-| 4 | Build parts 1 to 13, the audit's teach cards and `c2s` on branch `reading-writing` | Sonnet, medium effort; Haiku for glossary terms, tests, PDFs and docs |
-| 5 | Tom plays `c2s`; fix the shared parts | Tom, then Sonnet |
+| 2 | Script for `c2s`, with numbers and facts checked (done 7–8 Nov 2026) | Opus |
+| 3 | Skills audit and I can statements for every section, for Tom to approve (done 7–8 Nov 2026) | Opus |
+| 4 | Build parts 1 to 13, the audit's teach cards and `c2s` on branch `reading-writing` | Sonnet, medium effort; Haiku for glossary terms, tests, PDFs and docs (done 7–8 Nov 2026) |
+| 5 | Tom plays `c2s`; fix the shared parts (next) | Tom, then Sonnet |
 | 6 | Scripts for `c3s` to `c5s`, then one batch build | Opus, then Sonnet |
 | 7 | Opus checks all science and wording | Opus |
 | 8 | Save the skill (section 11) | Opus |
