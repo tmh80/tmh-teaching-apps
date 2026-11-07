@@ -61,7 +61,23 @@ const TERMS = {
   lift: ['Lift', 'The upward force on a helicopter or a plane. A helicopter\'s blades push air down, so the air pushes the helicopter up.', ['lift'], [5]],
   hover: ['Hover', 'To stay still in the air. A hovering helicopter\'s lift is exactly equal to its weight.', ['hover', 'hovers', 'hovering'], [5]],
   vacuum: ['Vacuum', 'A space with no air in it at all, so there is no air resistance.', ['vacuum'], [5]],
-  drag: ['Drag', 'Another name for air resistance (or water resistance): a force that pushes against an object moving through a fluid.', ['drag'], [5]]
+  drag: ['Drag', 'Another name for air resistance (or water resistance): a force that pushes against an object moving through a fluid.', ['drag'], [5]],
+  graph: ['Graph', 'A picture of data that shows how one thing changes when another thing changes.', []],
+  scattergraph: ['Scatter graph', 'A graph with a point for each result. Use one when the thing you changed is a number, like a mass or a force.', ['scatter graph', 'scatter graphs']],
+  bargraph: ['Bar graph', 'A graph with a bar for each result. Use one when the thing you changed is a name or a group, like different floors or shoes.', ['bar graph', 'bar graphs']],
+  axis: ['Axis', 'One of the two number lines on a graph. The bottom axis shows what you changed, and the side axis shows what you measured. More than one axis are called axes.', []],
+  trend: ['Trend', 'The overall pattern in data, such as "as the mass goes up, the braking distance goes up".', []],
+  claim: ['Claim', 'The first part of a CER paragraph: a sentence that answers the question.', []],
+  evidence: ['Evidence', 'The second part of a CER paragraph: numbers from a test, each with its unit, or facts from something you read, that back up the claim.', []],
+  reasoning: ['Reasoning', 'The third part of a CER paragraph: the science that explains why the evidence supports the claim.', []],
+  cer: ['CER', 'A science paragraph in three parts: Claim, Evidence and Reasoning. Say it, show it, explain it.', ['CER']],
+  hypothesis: ['Hypothesis', 'A prediction that can be tested, such as "twice the pull will give twice the acceleration".', ['hypothesis', 'hypotheses']],
+  factor: ['Factor', 'Something to think about when you weigh up a decision. In Force HQ the factors are society, environment, economy and health.', []],
+  judgement: ['Judgement', 'A decision you make after weighing up the pros and cons, with a reason for your choice.', []],
+  interpret: ['Interpret', 'Find the pattern in data and say what it means.', []],
+  describe: ['Describe', 'Say what happens, with details.', []],
+  analyse: ['Analyse', 'Break something into parts and see how the parts connect.', []],
+  discuss: ['Discuss', 'Look at different sides, use evidence, then decide.', []]
 };
 /* auto-underline the first use of each term inside any element with class "gl" */
 const GL_ALIASES = Object.entries(TERMS).flatMap(([k, [, , al]]) => (al || []).map(a => [a.toLowerCase(), k])).sort((a, b) => b[0].length - a[0].length);
