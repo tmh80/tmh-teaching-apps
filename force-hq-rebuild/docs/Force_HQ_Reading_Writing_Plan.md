@@ -128,6 +128,20 @@ Graph skills are taught once, then practised with less help. Each one gets a tea
 
 **Existing velocity–time graphs.** The skills audit (section 10) decides whether Chapters 2, 3 and 5 also need the reading card before their own v–t questions.
 
+## 6b. The reading thread (Tom, 7 Nov: "I don't want all CERs to be exclusively from graphs")
+
+Every Skills section has students read a short passage written for the sim, not only data. Evidence can be numbers from a test or facts from a text, and the CER teach card says so from `c2s`.
+
+| Section | What students read | The paragraph's evidence comes from |
+|---|---|---|
+| `c2s` | Check Mark it: a short article, "Why do cars have seatbelts?" (WHO facts) | Data (the truck table) |
+| `c3s` | A short news report about the tugboats, with the claim and the results table inside it | Data inside the text |
+| `c4s` | The "Rockets that land" article, marked Problem, Science, Solution | The text: a Reading CER |
+| `c5s` | A short report on the flooded town, with facts for and against each aid route | The text, plus the bar graph |
+| `c6s` | A school newsletter piece on fitting a ramp or a lift | The text, plus the student's own ramp graph |
+
+So two paragraphs lean on data, two on reading and data together, and one on reading alone, and every section practises reading. Passages are written in Grade 7/8 language, about 80 to 150 words, with real facts checked at the script stage and a source in the teacher notes. The reading skills are taught with a worked example where first used: picking out facts from a text in `c2s` (via the CER card), and spotting problem, science and solution in `c4s`.
+
 ## 7. The skill ladder
 
 | Section | When | Graph skill | Writing skill | Support | Strands |

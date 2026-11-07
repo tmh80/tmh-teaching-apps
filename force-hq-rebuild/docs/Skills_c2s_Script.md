@@ -6,7 +6,7 @@ Stage 2 of `Force_HQ_Reading_Writing_Plan.md`. Quoted text is exact student text
 
 - **id** `c2s` · **ch** `c2` · **part** "Skills" · **title** "Graphs and CER" · **stamp** "Evidence Expert"
 - **needs** `c2f` (it uses the brake from Foundation step 4 and the idea of inertia). Set as homework with Chapter 2 Foundation.
-- **Blurb:** "Brake-test four crates, turn your results into a graph, then use them to write a science paragraph with a claim, evidence and reasoning."
+- **Blurb:** "Brake-test four crates, turn your results into a graph, then use them to write a science paragraph with a claim, evidence and reasoning. Finish by finding the claim, evidence and reasoning in a short article."
 - **Goal** (*Teacher*): Present braking data as a scatter graph; read values and describe the trend with numbers; write a CER paragraph that uses data and the science of inertia.
 - **Vocab:** graph, scatter graph, bar graph, axis, unit, trend, claim, evidence, reasoning, braking distance, inertia
 - **Strands** (*Teacher*, MYP Year 3): C i, C ii, D iii
@@ -18,7 +18,7 @@ Stage 2 of `Force_HQ_Reading_Writing_Plan.md`. Quoted text is exact student text
 - "I can choose a scatter graph or a bar graph for my data."
 - "I can make a graph with a title, labelled axes and accurate points."
 - "I can read a value from a graph and describe the trend using numbers."
-- "I can write a CER paragraph with a claim, evidence and reasoning."
+- "I can write a CER paragraph, and find the claim, evidence and reasoning in an article."
 
 ## Learn 1: Brake test, then graph it
 
@@ -78,6 +78,7 @@ Rig: same course, crate at 50 kg but the braking-distance readout hidden until q
 Example question: "Does a rougher surface make more friction?"
 - **Claim** (answers the question): "Rougher surfaces make more friction."
 - **Evidence** (numbers from the test, each with its unit, like 2 N or 6.4 m): "A block needed a pull of 2 N to slide on ice, and 14 N to slide on sandpaper."
+Under the three parts: "Evidence can also be facts from something you read, like an article. Scientists use both."
 - **Reasoning** (explains why, using science): "Rough surfaces have more bumps that catch on each other, so more friction pushes back against the pull."
 Button: "Got it. Let me try"
 
@@ -103,12 +104,12 @@ Table (prints on every worksheet and goes in the AI marking text): Mass of cargo
 
 **Q1 Make a graph** (`graph`, 5 marks, one go, fold-out "How to make a good graph"; *Teacher*: C i): "Make a graph of the road safety team's results." Answer: scatter graph; title like "Mass of cargo vs braking distance"; x "Mass of cargo (kg)", y "Braking distance (m)"; even scales; five points. The prompt never names the graph type.
 
-**Q2 Mark it** (`mark`, 5 points, one go; *Teacher*: C ii): "Zane gave trolleys of different mass the same push on a smooth floor and measured their velocity. Mark each sentence. Leave it with no label if it doesn't belong." Labels: Claim, Evidence, Reasoning. Sentences display in this order:
-1. "The results show that a heavier trolley gets a smaller velocity from the same push." Claim: "It answers the question."
-2. "The empty 10 kg trolley reached 3.0 m/s." Evidence: "A number with its unit."
-3. "Supermarkets have lots of trolleys." No label: "True, but it isn't about the results."
-4. "The full 30 kg trolley only reached 1.0 m/s." Evidence: "A second number to compare."
-5. "A heavier trolley has more inertia, so the same push changes its velocity less." Reasoning: "It explains why, using science."
+**Q2 Mark it: read an article** (`mark`, 5 points, one go; *Teacher*: C ii, D i): "Read this short article. Mark each sentence as Claim, Evidence or Reasoning. Leave it with no label if it doesn't belong." Labels: Claim, Evidence, Reasoning. Title shown above the sentences: "Why do cars have seatbelts?" Sentences display in this order:
+1. "Seatbelts save lives in car crashes." Claim: "It answers the question in the title."
+2. "The World Health Organization says that wearing a seatbelt cuts the risk of death for people in the front seats by about half." Evidence: "A fact from a trusted source."
+3. "Seatbelts come in lots of colours, like black, grey and red." No label: "True, but it doesn't help answer the question."
+4. "For passengers in the back seats, a seatbelt cuts the risk of death or serious injury by about a quarter." Evidence: "A second fact to back up the claim."
+5. "When a car stops suddenly, a passenger's body has inertia and keeps moving forwards, so the seatbelt gives the force that stops them safely." Reasoning: "It explains why, using science."
 
 **Q3 Data paragraph** (paragraph card on `explain`, 4 ticks; *Teacher*: C ii, D iii): "The road safety team's question: how does the mass of cargo change a truck's braking distance? Tap two rows of the table, then write a CER paragraph that answers the question." The table (not the graph) sits beside the box, with the tapped rows shown as "My evidence".
 - **Support (most help):** three starters, "The results show that…", "With … kg of cargo the truck slid…, and with…", "This happens because…"; the CER reminder fold-out open; words to use: braking distance, mass, inertia, brake force.
@@ -117,8 +118,9 @@ Table (prints on every worksheet and goes in the AI marking text): Mass of cargo
 
 ## Teacher notes
 
-- **Numbers:** braking distance = mass × velocity² ÷ (2 × brake force). Learn: 36 N brake at 2.4 m/s gives 0.08 m per kg (20 kg 1.6 m, 50 kg 4.0 m, 80 kg 6.4 m). Jo: 30 kg at 2.4 m/s, 24 N gives 3.6 m and 48 N gives 1.8 m. Truck: 8,000 kg empty, 40,000 N brake, 20 m/s, so 40 m empty and 80 m with 8,000 kg of cargo (decelerations 5.0 to 2.5 m/s², realistic for a truck). Zane: the same push gives velocity ÷ mass, so 10 kg 3.0 m/s and 30 kg 1.0 m/s.
+- **Numbers:** braking distance = mass × velocity² ÷ (2 × brake force). Learn: 36 N brake at 2.4 m/s gives 0.08 m per kg (20 kg 1.6 m, 50 kg 4.0 m, 80 kg 6.4 m). Jo: 30 kg at 2.4 m/s, 24 N gives 3.6 m and 48 N gives 1.8 m. Truck: 8,000 kg empty, 40,000 N brake, 20 m/s, so 40 m empty and 80 m with 8,000 kg of cargo (decelerations 5.0 to 2.5 m/s², realistic for a truck).
 - **Facts:** WHO reports about 1.19 million road traffic deaths a year ([WHO road safety](https://who.int/health-topics/road-safety), Global status report on road safety 2023). SDG 3.6 originally said "By 2020, halve the number of global deaths and injuries from road traffic accidents" ([INSTAT](https://instat.gov.al/en/sdgs/good-health-and-well-being/36-by-2020-halve-the-number-of-global-deaths-and-injuries-from-road-traffic-accidents)); the UN has since set the halving goal for 2030, so the student text names no deadline.
-- **Marks:** Q1 5, Q2 5, Q3 4: 14 in total. Q2 and Q3 assess C ii; Q3 also D iii.
+- **Seatbelt facts:** WHO: seat-belt wearing reduces the risk of death among drivers and front-seat occupants by 45–50%, and death and serious injury among rear-seat occupants by about 25% ([GRSP seat belts fact sheet](https://www.grsproadsafety.org/wp-content/uploads/2023/03/GRSP-Seat-Belts-Fact-Sheet.pdf), quoting WHO).
+- **Marks:** Q1 5, Q2 5, Q3 4: 14 in total. Q2 assesses C ii and D i (reading a science text); Q3 assesses C ii and D iii.
 - **Toddle:** a new task, "Chapter 2 Skills: Graphs and CER", set with the Chapter 2 Foundation. The AI text gets the truck table, the self-check note and the first-line rule.
 - **Saves:** new ids only, so no saved answers move.

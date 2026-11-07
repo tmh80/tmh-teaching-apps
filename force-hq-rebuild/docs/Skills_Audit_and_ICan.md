@@ -57,7 +57,7 @@ Shown on each section's own first screen and behind the "My I can statements" bu
 - I can choose a scatter graph or a bar graph for my data.
 - I can make a graph with a title, labelled axes and accurate points.
 - I can read a value from a graph and describe the trend using numbers.
-- I can write a CER paragraph with a claim, evidence and reasoning.
+- I can write a CER paragraph, and find the claim, evidence and reasoning in an article.
 
 **`c2x` Inertia Extension**
 - I can describe how an object is moving from the shape of a velocity–time graph.
