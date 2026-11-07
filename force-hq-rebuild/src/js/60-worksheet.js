@@ -19,6 +19,7 @@ const WS_CSS = `
 .ws .q .qh span{font-weight:400;font-size:9pt;color:#555}
 .ws .stu{color:${BLUE};font-weight:700}
 .ws .stu svg{border:1.5px solid ${BLUE};border-radius:6px}
+.ws .gmwsfig svg{width:125mm!important;max-width:125mm!important;border:1px solid #cbd7dc}.ws .gmwsdata{margin-bottom:4px}.ws .gmwsdata table{width:auto}.ws .story{font-size:10pt;margin:4px 0}.ws .ws-sa-row svg{display:block;margin:0}
 .ws .key{color:#1d6b3a;font-weight:700}
 .ws table{border-collapse:collapse;width:100%;font-size:10pt}
 .ws td,.ws th{border:1px solid #9aa9b0;padding:4px 6px;text-align:left;vertical-align:top}
@@ -38,16 +39,16 @@ const WS_CSS = `
 @media print{@page{size:A4;margin:12mm}.ws .page{padding:0}}
 `;
 const LET = 'ABCDEFGHIJ';
-function wsHeader(ch, title, mode) {
+function wsHeader(ch, title, mode, withSA) {
   const u = user(), today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
   const name = mode === 'student' ? `<span class="stu">${esc(u.teacher ? 'Teacher copy' : u.name || '')}</span>` : '';
   return `<div class="hd"><div class="l"><b>FORCE HQ</b><div style="font-size:10pt;color:#cfe0ea">Force Arenas · Chapter ${ch.n} · ${ch.part}</div></div><div class="r"><div style="font-size:14pt;font-weight:800">${title}</div><div style="font-size:10pt">${ch.title}${mode === 'key' ? ' · ANSWER KEY (teacher only)' : mode === 'blank' ? ' · Blank template' : ''}</div></div></div>
     <div class="namebar"><div>Name: ${name}</div><div>Class: ${mode === 'student' ? `<span class="stu">${esc(u.cls || '')}</span>` : ''}</div><div>Date: ${mode === 'student' ? today : ''}</div></div>
-    ${mode === 'key' ? sheetStrandHTML(ch.id) : ''}${mode === 'student' ? '<p class="note">Everything printed in blue was added by the student in the sim.</p>' : mode === 'blank' ? '<p class="note">Answer every question. Show your working for calculations.</p>' : ''}`;
+    ${withSA ? wsSelfCheck(ch.id, mode) : ''}${mode === 'key' ? sheetStrandHTML(ch.id) : ''}${mode === 'student' ? '<p class="note">Everything printed in blue was added by the student in the sim.</p>' : mode === 'blank' ? '<p class="note">Answer every question. Show your working for calculations.</p>' : ''}`;
 }
 function blankFbd(scen) { return FBDB.svg(scen, [], { noDot: true }); }
 function qMarks(q) {
-  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'build': return q.marks; default: return 1; }
+  switch (q.type) { case 'mcq': case 'tap': return 1; case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'match': return q.rows.length; case 'sort': return q.items.length; case 'num': return 2; case 'gap': return q.ans.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': return q.scen.forces.length + 1; case 'explain': return q.check.length; case 'mark': return q.sents.length; case 'graph': return 5; case 'para': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'build': return q.marks; default: return 1; }
 }
 /* a line under questions that ask "How sure are you?": blank on the template, the student's choice in blue, not marked */
 const sureLine = (q, mode, s) => !q.sure || mode === 'key' ? '' : mode === 'student' ? `<p class="note" style="margin:4px 0 0">How sure I was: ${s && s.done && s.sure ? `<span class="stu">${SURE_LABEL[s.sure]}</span>` : '–'}</p>` : '<p class="note" style="margin:4px 0 0">How sure were you? ☐ Guessing &nbsp; ☐ Fairly sure &nbsp; ☐ Certain</p>';
@@ -60,9 +61,9 @@ function wsQuestion(q, i, mode, s) {
   else if (q.type === 'tick') body = optOrder(q).map((oi, k) => `<div class="opt">${(stu && v && v.includes(oi)) || (key && q.a.includes(oi)) ? W('☑') : '☐'} ${q.opts[oi]}</div>`).join('') + (key ? `<div class="look">${q.work || ''}</div>` : '');
   else if (q.type === 'num') body = `<div class="box">Working: ${stu ? (s && s.w ? W(esc(s.w).replace(/\n/g, '<br>')) : '') : key ? W(q.work) : ''}<br><br></div><p>Answer: ${stu && v != null ? W(esc(v)) : key ? W(fmt(q.ans, 2)) : '____________'} ${q.units ? (stu ? W(esc((s && s.u) || '')) : key ? W(q.unit) : '________ <small>(write the unit)</small>') : q.unit}</p>`;
   else if (q.type === 'gap') { let k = 0; body = `<p>${q.p.replace(/___/g, () => { const j = k++; return stu && v ? W('<u>' + esc(v[j] || '') + '</u>') : key ? W('<u>' + esc(q.ans[j][0]) + '</u>') : '______________'; })}</p>`; }
-  else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>${q.colA || "Force"}</th><th>Letter</th></tr>${q.rows.map((r, ri) => `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
+  else if (q.type === 'match') { const ch2 = shuffled(q.rows.map((_, i2) => i2), hashStr(q.id) + 9); body = `<table><tr><th>${q.colA || "Force"}</th><th>Letter</th></tr>${rowsOf(q).map(ri => { const r = q.rows[ri]; return `<tr><td>${r[0]}</td><td style="width:22%">${stu && v && v[ri] != null ? W(LET[ch2.indexOf(v[ri])]) : key ? W(LET[ch2.indexOf(ri)]) : ''}</td></tr>`; }).join('')}</table><p style="margin:6px 0 0"><b>Choices:</b><br>${ch2.map((j, k) => `${LET[k]}. ${q.rows[j][1]}`).join('<br>')}</p>`; }
   else if (q.type === 'sort') body = `<table><tr><th>Item</th>${q.groups.map(g => `<th style="width:22%">${g}</th>`).join('')}</tr>${sortItems(q).map(ii => `<tr><td>${q.items[ii][0]}</td>${q.groups.map((_, gi) => `<td style="text-align:center">${(stu && v && v[ii] === gi) || (key && q.items[ii][1] === gi) ? W('✓') : ''}</td>`).join('')}</tr>`).join('')}</table><p class="note">Tick one box in each row.</p>`;
-  else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, ri) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
+  else if (q.type === 'table') body = `<table><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${rowsOf(q).map(ri => { const r = q.rows[ri]; return `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td style="height:26px">${stu && v && v[ri] && v[ri][j] != null ? W(q.choices[j][v[ri][j]]) : key ? W(q.choices[j][r[1][j]]) : ''}</td>`).join('')}</tr>`; }).join('')}</table><p style="margin:6px 0 0;font-size:10pt"><b>Choose from:</b> ${q.choices[0].join(' · ')}</p>`;
   else if (q.type === 'fbd') body = `<div class="fbdbox"><div>${q.scen.brief}${key ? `<div class="look"><b>Look for:</b><br>${q.scen.forces.map(f => `${FTYPES[f.type].name} ${fmt(f.value, 1)} N, ${DIRWORD[f.dir]}`).join('<br>')}<br>All arrows start at the centre; bigger forces have longer arrows.</div>` : stu && s && s.v && s.v.lastRes ? `<p style="font-size:10pt">Checks passed in the sim: ${s.v.lastRes.chips.filter(c => c[2]).map(c => c[1]).join(', ') || 'none'}</p>` : ''}</div><div>${stu ? (v && v.arrows && v.arrows.length ? `<div class="stu">${FBDB.svg(q.scen, v.arrows, { blue: true, noDot: true })}</div>` : '<div class="box" style="height:60mm">Not drawn in the sim.</div>') : key ? FBDB.svg(q.scen, FBDB.model(q.scen), { noDot: true }) : `<div style="border:1.5px dashed #9aa9b0;border-radius:6px">${blankFbd(q.scen)}</div>`}</div></div>`;
   else if (q.type === 'explain') body = (q.words ? `<p class="words"><b>Words to use in a good answer:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(6));
   else if (q.type === 'order') {   // lettered cards in the seeded shuffled order, then the letters written in order
@@ -100,9 +101,31 @@ function wsQuestion(q, i, mode, s) {
     body = `<div class="skp">${sketchSVG(q, { dots: stu && Array.isArray(dv) ? dv : [], model: key ? q.model : null, col: BLUE, legend: false, alt: 'A blank graph grid' })}</div><p class="note">Put one dot in each time column, then join the dots with straight lines.</p>`
       + (key ? `<div class="look"><b>Look for:</b><br>${q.look ? q.look + '<br>' : ''}${q.checks.map(c => '• ' + c[0]).join('<br>')}</div>` : '');
   }
+  else if (q.type === 'graph') {
+    const sp = gmSpecOf(q);
+    body = `<div class="gmwsdata">${gmTable(sp, '')}</div>` + (stu ? (dv ? `<div class="stu gmwsfig">${gmSVG(sp, dv, { print: true, alt: 'My graph' })}</div>` : '<div class="box" style="height:60mm">Not made in the sim.</div>')
+      : key ? `<div class="gmwsfig">${gmSVG(sp, gmModel(sp), { alt: 'A correct graph' })}</div><div class="look"><b>Look for:</b><br>${gmKeyLines(sp).join('<br>')}</div>`
+      : `<div class="gmwsfig">${gmSVG(sp, null, { blank: true, alt: 'An empty grid' })}</div><p class="note">Choose the type of graph. Write a title and label both axes with units. Choose your scale, then plot every point.</p>`);
+  }
+  else if (q.type === 'mark') {
+    body = (q.title ? `<p><b>${q.title}</b></p>` : '') + `<table><tr><th style="width:6%">#</th><th>Sentence</th><th style="width:20%">Label</th></tr>${q.sents.map((x, i) => `<tr><td>${i + 1}</td><td>${x.t}</td><td>${stu && Array.isArray(dv) ? W(dv[i] < 0 ? 'No label' : q.labels[dv[i]]) : key ? W(x.a < 0 ? 'No label' : q.labels[x.a]) : ''}</td></tr>`).join('')}</table><p class="note">Write ${q.labels.join(', ')} or No label for each sentence.</p>`
+      + (key ? `<div class="look">${q.sents.map((x, i) => `${i + 1}. ${x.why}`).join('<br>')}</div>` : '');
+  }
+  else if (q.type === 'para') {
+    const sel = stu && dv && Array.isArray(dv.sel) ? dv.sel : [];
+    body = `<p class="words"><b>${q.sideHead || 'The question and the data'}</b></p><p>${q.question}</p>` + (q.data ? gmTable(q.data, '') : '') + (q.tapRows ? `<p><b>My evidence</b> (two rows I used): ${stu ? W(sel.map(i => fmtRow(q.data, q.data.rows[i])).join('; ') || '–') : key ? '' : '____________________'}</p>` : '')
+      + (q.words ? `<p class="words"><b>Words to use:</b> ${q.words.join(' · ')}</p>` : '') + (stu ? `<div class="box">${W(v ? esc(v.text || '').replace(/\n/g, '<br>') : '')}</div>${v && v.ticks && q.check.length ? `<p class="note">Self-check in the sim: ticked ${v.ticks.length} of ${q.check.length} points.</p>` : ''}` : key ? `<div class="look"><b>Model answer:</b> ${typeof q.model === 'function' ? q.model(paraSel(q, null)) : q.model}<br><b>Look for:</b><br>${q.check.map(c => '• ' + c).join('<br>')}</div>` : '<div class="line"></div>'.repeat(7));
+  }
   const fig = (q.p.match(/<div class="qfig[\s\S]*$/) || [''])[0], qp = q.p.slice(0, q.p.length - fig.length);   // graphs print under the question, full width
   const head = q.type === 'gap' ? 'Fill the gaps.' : q.type === 'pick' ? 'Choose the right words.' : q.type === 'fix' ? paperTap(qp) : qp;
-  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}${mode === 'key' ? strandTagHTML(q) : ''}</span></div>${fig}${body}</div>`;
+  return `<div class="q"><div class="qh">Question ${i + 1}. ${head} <span>${QLABEL[q.type]} · ${qMarks(q)} mark${qMarks(q) > 1 ? 's' : ''}${mode === 'key' ? strandTagHTML(q) : ''}</span></div>${q.story ? `<div class="look story">${q.story}</div>` : ''}${fig}${body}</div>`;
+}
+/* what the marker looks for in a graph (answer key and marking scheme) */
+function gmKeyLines(sp) {
+  const M = gmModel(sp), sc = gmIsScatter(sp);
+  return [`Graph type: ${sc ? 'a scatter graph, because the bottom axis shows numbers the investigator changed' : 'a bar graph, because the bottom axis shows names or groups'}.`, `Title: names both variables, for example "${sp.exTitle}".`, `Axis labels: "${sp.exX}" along the bottom and "${sp.exY}" up the side, each with its unit in brackets.`,
+    `Axis numbers: each axis starts at 0, goes up in equal steps and finishes just above the biggest value (for example y: 0 to ${gmFmt(M.ymax)} in steps of ${gmFmt(M.ystep)}${sc ? '; x: 0 to ' + gmFmt(M.xmax) + ' in steps of ' + gmFmt(M.xstep) : ''}).`,
+    `Points: ${sp.rows.map(r => `(${gmFmt(r[0])}, ${gmFmt(r[1])})`).join(', ')}, each within about 0.4 of a grid step.`];
 }
 /* "Steps completed in the sim": a tick list of the Learn steps and Challenge missions, so the teacher (and Toddle AI)
    can see the student did the work that leads up to the questions. Blue ticks are from the sim. */
@@ -118,7 +141,7 @@ function buildWorksheet(chId, mode) {
   const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
   const qs = L => L.map(q => wsQuestion(q, num(q), mode, st[q.id])).join(''), partBn = partB.filter(q => !q.refl), refl = partB.filter(q => q.refl);
-  let h1 = chId === 'c6e' ? `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${myRescueHTML(mode)}</div><div class="page">${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${qs(partA)}${partBn.length ? `<h2>Part B: Draw and explain</h2>${qs(partBn)}` : ''}</div>${refl.length ? `<div class="page"><h2>Part C: My rescue reflection</h2>${qs(refl)}</div>` : ''}` : `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  let h1 = chId === 'c6e' ? `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode, true)}${myRescueHTML(mode)}</div><div class="page">${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${qs(partA)}${partBn.length ? `<h2>Part B: Draw and explain</h2>${qs(partBn)}` : ''}</div>${refl.length ? `<div class="page"><h2>Part C: My rescue reflection</h2>${qs(refl)}</div>` : ''}` : `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode, true)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -126,14 +149,14 @@ function feedbackPage(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {}), L = learnProgress(chId), C2 = challengeState(chId), P = reviewProgress(chId);
   return `<div class="page">${wsHeader(ch, 'Feedback page', 'student')}<h2>How I did in the sim</h2>
     <table><tr><th>Part</th><th>Result</th></tr><tr><td>Learn steps</td><td class="stu">${L.done} of ${L.total} done</td></tr>${CHDATA[chId].challenge ? `<tr><td>Challenge: ${CHDATA[chId].challenge.title}</td><td class="stu">${C2.tried} of ${C2.total} missions tried · ${C2.score} of ${C2.max} objectives met</td></tr>` : ''}<tr><td>Check questions</td><td class="stu">${P.done} of ${P.total} answered · ${P.points} of ${P.maxPoints} points</td></tr></table>
-    <h2>Check questions</h2><table><tr><th>Q</th><th>Type</th><th>In the sim</th></tr>${R.map((q, i) => { const s = st[q.id]; const r = !s || !s.done ? 'Not answered' : q.type === 'explain' ? `Self-checked: ${s.v && s.v.ticks ? s.v.ticks.length : 0} of ${q.check.length} points` : (p => `${s.ok ? '✓' : p.score ? '◐' : '✗'} ${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, s)); return `<tr><td>${i + 1}</td><td>${QLABEL[q.type]}</td><td class="stu">${r}${q.sure && s && s.done && s.sure ? ` · ${SURE_LABEL[s.sure]}` : ''}</td></tr>`; }).join('')}</table>
+    <h2>Check questions</h2><table><tr><th>Q</th><th>Type</th><th>In the sim</th></tr>${R.map((q, i) => { const s = st[q.id]; const r = !s || !s.done ? 'Not answered' : (q.type === 'explain' || q.type === 'para') ? `Self-checked: ${s.v && s.v.ticks ? s.v.ticks.length : 0} of ${q.check.length} points` : (p => `${s.ok ? '✓' : p.score ? '◐' : '✗'} ${p.score} of ${p.max} point${p.max > 1 ? 's' : ''}`)(qPoints(q, s)); return `<tr><td>${i + 1}</td><td>${QLABEL[q.type]}</td><td class="stu">${r}${q.sure && s && s.done && s.sure ? ` · ${SURE_LABEL[s.sure]}` : ''}</td></tr>`; }).join('')}</table>
     ${(sw => sw.length ? `<h2>Certain but not right</h2><p class="note">These answers were marked "Certain" in the sim, but were not fully right. They are worth talking about.</p><p class="stu">${sw.map(([q, i]) => `Question ${i + 1} (${QLABEL[q.type]})`).join(', ')}</p>` : '')(R.map((q, i) => [q, i]).filter(([q, i]) => q.sure && st[q.id] && st[q.id].done && st[q.id].sure === 'cert' && !st[q.id].ok))}
 </div>`;   /* no teacher comment box: Tom leaves comments directly on Toddle */
 }
 /* ---------- marking scheme (also on the answer key) ---------- */
-function markingInstructions(title, total, hasSure) {
+function markingInstructions(title, total, hasSure, hasSA) {
   return `<h2>Marking instructions for Toddle AI</h2><p>This marking scheme is for the Force HQ worksheet "${title}". Toddle's AI uses the written version on the teacher page, so nothing needs attaching.</p>
-  <ul>${markingRules(hasSure).map(r => `<li>${r}</li>`).join('')}<li>${FEEDBACK_STYLE}</li></ul><p><b>Total: ${total} marks.</b></p>`;
+  <ul>${markingRules(hasSure, hasSA).map(r => `<li>${r}</li>`).join('')}<li>${FEEDBACK_STYLE}</li></ul><p><b>Total: ${total} marks.</b></p>`;
 }
 function markItem(q, i) {
   const n = i + 1, m = qMarks(q);
@@ -154,6 +177,9 @@ function markItem(q, i) {
     case 'freeze': return `Q${n} (${m} marks, 1 per box): every student's moments are different, so mark for consistency. The weight is the same in every row (mass × g). Resultant = weight − air resistance in each row (accept 1.5 N either way). The velocity choice matches the resultant: downwards = speeding up, zero = steady, upwards = slowing down. Example values (students' will differ): ` + q.rows.map((r, ri) => `${plain(r.label)}: ` + q.cols.map(([k], ci) => frzDisp(k, q.example[ri][ci], true)).join(', ')).join('; ') + '.';
     case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
     case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
+    case 'graph': { const sp = gmSpecOf(q); return `Q${n} (5 marks, 1 each for the graph type, the title, both axis labels, the axis numbers and the points): the data are ${sp.head.join(' and ')}: ${sp.rows.map(r => `${gmFmt(r[0])} → ${gmFmt(r[1])}`).join('; ')}. ` + gmKeyLines(sp).join(' ') + ' The question does not name the graph type, so the type mark is earned by the student.'; }
+    case 'mark': return `Q${n} (${m} marks, 1 per sentence): ${q.title ? q.title + ' ' : ''}` + q.sents.map((x, i) => `${i + 1}. ${x.a < 0 ? 'No label' : q.labels[x.a]} (${plain(x.t).slice(0, 60)}…): ${x.why}`).join(' ');
+    case 'para': return `Q${n} (${m} marks, 1 per point): The question: ${q.question} The data the student could use: ${q.data.head.join(' and ')}: ${q.data.rows.map(r => `${gmFmt(r[0])} → ${gmFmt(r[1])}`).join('; ')}. ${q.check.map(c => '• ' + c).join(' ')} Model answer: ${typeof q.model === 'function' ? q.model(paraSel(q, null)) : q.model}`;
     case 'build': return `Build marks (${m} mark${m > 1 ? 's' : ''}): ${q.p}. ${q.how}`;
     case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}${q.mnote ? ' ' + q.mnote : ''}`;
   }
@@ -161,7 +187,7 @@ function markItem(q, i) {
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>Page 1 of the worksheet is the My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg and the totals. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection: check the numbers a student quotes against their My Rescue table.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure), hasICAN(chId))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>Page 1 of the worksheet is the My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg and the totals. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection: check the numbers a student quotes against their My Rescue table.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 

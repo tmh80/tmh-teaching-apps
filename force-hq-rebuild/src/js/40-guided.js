@@ -23,11 +23,13 @@ function setCTab(t) {
   CTAB = t; $$('#chTabs [data-ctab]').forEach(b => { b.setAttribute('aria-selected', b.dataset.ctab === t); });
   $('#learnHost').hidden = t !== 'learn'; $('#challengeHost').hidden = t !== 'challenge'; $('#reviewHost').hidden = t !== 'review';
   hideCards(); closeDesk(); qUnpop();
-  if (t === 'learn') { placeLab($('#learnHost')); LAB.mode = 'guided'; const d = dbGet('learnDone.' + CH.id, {}); const first = CHDATA[CH.id].steps.findIndex(s => !d[s.id]); setStep(dbGet('learnAt.' + CH.id, first < 0 ? 0 : first)); }
+  INTRO = false; if (t !== 'learn') parkIntro();
+  if (t === 'learn') { if (!icanSeen(CH.id)) { showIntro(); tabTicks(); return; } parkIntro(); placeLab($('#learnHost')); LAB.mode = 'guided'; const d = dbGet('learnDone.' + CH.id, {}); const first = CHDATA[CH.id].steps.findIndex(s => !d[s.id]); setStep(dbGet('learnAt.' + CH.id, first < 0 ? 0 : first)); }
   else if (t === 'challenge') renderChallenge(CH.id);
   else renderReview(CH.id);
-  tabTicks(); renderOnPage();
+  tabTicks(); renderOnPage(); renderPeek();
 }
+function parkIntro() { const c = $('#icanCard'); if (c) c.remove(); }
 function tabTicks() { if (!CH) return; const L = learnProgress(CH.id), R = reviewProgress(CH.id); $('[data-ctab=learn]').classList.toggle('ok', L.done === L.total); $('[data-ctab=challenge]').classList.toggle('ok', challengeDone(CH.id)); $('[data-ctab=review]').classList.toggle('ok', R.done === R.total); }
 function renderOnPage() {
   if (!CH) return; if (typeof renderRescue === 'function') renderRescue(); const el = $('#onPage');
@@ -37,6 +39,7 @@ function renderOnPage() {
 }
 
 function setStep(i) {
+  leaveIntro();
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
   const st = chd.steps[GI]; LASTSIG = ''; if (typeof renderFormulas === 'function' && $('#calcForm') && !$('#calcForm').hidden) renderFormulas();   // keep the glowing formulas in step with the chapter
   // arena state
@@ -62,7 +65,9 @@ function stepCards(ch, i) {
 function playStepCards() {
   const st = CHDATA[CH.id].steps[GI], cards = stepCards(CH.id, GI);
   if (!cards.length) { cardsDone(); return; }
-  showCards(cards, { title: st.title, journalKey: `${CH.id}:${st.id}`, where: `Chapter ${CH.n}: ${CH.title}`, onDone: cardsDone });
+  const gate = readNeeded();
+  showCards(cards, { title: st.title, journalKey: `${CH.id}:${st.id}`, where: `Chapter ${CH.n}: ${CH.title}`, onDone: cardsDone, readGate: readNeeded, readOK });
+  if (gate) gateOn(true);
 }
 function cardsDone() {
   const st = CHDATA[CH.id].steps[GI]; const seen = dbGet('cardsSeen.' + CH.id, {}); seen[st.id] = true; dbSet('cardsSeen.' + CH.id, seen); CARDS_SEEN = true;
@@ -115,18 +120,19 @@ function renderRail() {
   const chd = CHDATA[CH.id], st = chd.steps[GI];
   $('#rail').innerHTML = `<div class="row" style="justify-content:space-between"><span class="lbl">Step ${GI + 1} of ${chd.steps.length}</span><div class="dots">${chd.steps.map((s, i) => `<button type="button" aria-label="Step ${i + 1}: ${esc(s.title)}" class="${stepDone(CH.id, i) ? 'done' : ''} ${i === GI ? 'cur' : ''}" data-goto="${i}"></button>`).join('')}</div></div>
     <h2>${st.title}</h2>
+    ${st.ask ? `<div class="stepask"><span class="lbl">Our question</span><p class="gl">${st.ask}</p></div>` : ''}
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
     ${/^c6/.test(CH.id) && (st.qs || []).some(q => q.type === 'num') ? remindersHTML() : ''}
     ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
-    <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
+    <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 && !hasICAN(CH.id) ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();
   { const st = CHDATA[CH.id].steps[GI]; if (st && st.predict && st.predict.kind === 'sketch' && !predSketch()) predSketchBind(st.predict); }
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
-  $('#gPrev').addEventListener('click', () => setStep(GI - 1));
+  $('#gPrev').addEventListener('click', () => { if (GI === 0) { if (hasICAN(CH.id)) showIntro(); } else setStep(GI - 1); });
   $('#gNext').addEventListener('click', tryNext);
 }
 /* "Predict first": the student locks in a prediction before testing it in the arena */
@@ -141,9 +147,10 @@ function renderStepQs() {
   const st = CHDATA[CH.id].steps[GI], qc = $('#qCard'), dc = $('#dataCard'); qc.innerHTML = ''; dc.innerHTML = '';
   const qs = st.qs || [];
   qc.appendChild(h('div', { class: 'qhead' }));
+  if (st.ctx) qc.appendChild(h('div', { class: 'qctx' }, st.ctx()));   // the question and the student's own graph, beside the questions
   /* a question marked early collects data while the student works the arena (the freeze-frame table), so it sits under the arena from the start instead of waiting in the Your turn box */
   const early = qs.filter(q => q.early); dc.hidden = !early.length;
-  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, '<b>Collect your data here</b><span>Pause the drop at each moment listed. The row fills itself in; then type its numbers from the free-body diagram.</span>'));
+  if (early.length) dc.appendChild(h('div', { class: 'dchead' }, st.dataHead || '<b>Collect your data here</b><span>Pause the drop at each moment listed. The row fills itself in; then type its numbers from the free-body diagram.</span>'));
   qs.forEach(q => renderQuestion(q.early ? dc : qc, q, { store: stepKey(CH.id, GI), mode: 'learn', onDone: () => { refreshTkAns(); checkStep(true); if (typeof labChanged === 'function') labChanged(); if (typeof journalOpen === 'function' && journalOpen()) renderJournal(); } }));
   if (st.more) {   // "Another one": fresh seeded questions from the maths bank (not scored; every right answer goes into the Journal as evidence)
     const wrap = h('div', { class: 'more' }, `<p class="scaleNote">Want more practice? Every new question you get right is saved in your Journal.</p><div class="morebtns">${st.more.map(L => `<button type="button" class="mini" data-more="${L}">Another level ${L} question</button>`).join('')}</div><div class="morehost"></div>`);
@@ -214,9 +221,9 @@ function checkStep(force) {
     const d = dbGet('learnDone.' + CH.id, {}); d[CHDATA[CH.id].steps[GI].id] = true; dbSet('learnDone.' + CH.id, d);
     renderRail(); renderOnPage(); tabTicks(); toast('Step complete! Press Next when you\'re ready.' + (CHDATA[CH.id].steps[GI].rescue ? ' Rescue log: ' + CHDATA[CH.id].steps[GI].rescue : ''), 'good'); maybeStamp(CH.id);
   }
-  qChrome();
+  qChrome(); qRefresh();
   const n = $('#gNext'); if (n) n.classList.toggle('ready', all || stepDone(CH.id, GI) || (hasQs() && !qsDone() && ts.every(Boolean) && CARDS_SEEN));
-  const box = $('#stepDoneBox'); if (box) { const rl = CHDATA[CH.id].steps[GI].rescue; box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' + (rl ? `<div class="rlog">📡 Rescue log: ${rl}</div>` : '') : ''; }
+  const box = $('#stepDoneBox'); if (box) { const rl = CHDATA[CH.id].steps[GI].rescue; box.innerHTML = stepDone(CH.id, GI) ? '<div class="stepdone">✓ Step complete</div>' + (CHDATA[CH.id].steps[GI].finish ? `<p class="gl stepfin">${CHDATA[CH.id].steps[GI].finish}</p>` : '') + (rl ? `<div class="rlog">📡 Rescue log: ${rl}</div>` : '') : ''; }
   $$('#rail .tasks li').forEach((li, i) => li.classList.toggle('ok', ts[i]));
 }
 function tryNext() {

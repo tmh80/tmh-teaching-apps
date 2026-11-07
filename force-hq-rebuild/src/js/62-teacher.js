@@ -82,7 +82,7 @@ function teacherPrompt(T1, mins, omins) {
   L.push(''); L.push('Teacher-only notes: g = 9.8 N/kg is used throughout. Answer keys are locked inside the simulation with a teacher code.');
   if (parts.includes('review')) {
     const st = taskStrands([...all.map(c => c.id), ...bts]), crit = k => { const l = st.filter(x => x[0] === k); return l.length ? `Criterion ${k} (strands ${l.map(strandLabel).join(', ')})` : ''; };
-    L.push(''); L.push(`MYP objectives: please attach these MYP Year 3 Sciences objectives to the task: ${['A', 'D'].map(crit).filter(Boolean).join(' and ')}.`);
+    L.push(''); L.push(`MYP objectives: please attach these MYP Year 3 Sciences objectives to the task: ${['A', 'C', 'D'].map(crit).filter(Boolean).join(' and ')}.`);
     L.push('AI marking: I will paste the AI feedback instructions, which include a written answer key, into the AI feedback settings separately. Students must never see them.');
     L.push(''); L.push('Marks for each worksheet:');
     all.forEach(c => L.push(`- ${nm(c)} worksheet${opt.includes(c) && req.length ? ' (optional)' : ''}: ${CHDATA[c.id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); bts.forEach(id => L.push(`- ${btn(BT_SEC[id])} build sheet: ${CHDATA[id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); }

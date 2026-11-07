@@ -17,6 +17,11 @@ const SECTIONS = [
     steps: ['i1', 'i2', 'i3', 'i4', 'i5', 'i6'], challenge: null, review: ['c2r1', 'c2r2', 'c2r3', 'c2r4', 'c2r5', 'c2r6'],
     goal: 'Explain that objects with more mass have more inertia, so they are harder to start moving and harder to stop; read a velocity from a velocity–time graph; state Newton\'s first law and use it to explain everyday examples.',
     vocab: ['inertia', 'mass', 'velocity', 'velocity–time graph', 'brake', 'braking distance', 'Newton\'s first law', 'unbalanced force'] },
+  { id: 'c2s', ch: 'c2', n: 2, title: 'Graphs and CER', part: 'Skills', stamp: 'Evidence Expert',
+    blurb: 'Brake-test four crates, turn your results into a graph, then use them to write a science paragraph with a claim, evidence and reasoning. Finish by finding the claim, evidence and reasoning in a short article.',
+    steps: ['sk1', 'sk2'], challenge: null, review: ['c2sr1', 'c2sr2', 'c2sr3'], needs: 'c2f',
+    goal: 'Present braking data as a scatter graph; read values and describe the trend with numbers; write a CER paragraph that uses data and the science of inertia; find the claim, evidence and reasoning in an article.',
+    vocab: ['graph', 'scatter graph', 'bar graph', 'axis', 'unit', 'trend', 'claim', 'evidence', 'reasoning', 'braking distance', 'inertia'] },
   { id: 'c2x', ch: 'c2', n: 2, title: 'Inertia', part: 'Extension', stamp: 'Brake Master',
     blurb: 'Read the shape of a velocity–time graph, compare a car and a truck, then run the inertia obstacle course.',
     steps: ['x1', 'x2'], challenge: ['b1', 'b2', 'b3'], review: ['c2r7', 'c2r8', 'c2r9', 'c2r12', 'c2r11'], needs: 'c2f',
@@ -87,7 +92,7 @@ const SECTIONS = [
     goal: 'Explain that friction turns some of the work put into a real machine into heat; calculate efficiency as useful work out ÷ work in × 100%; compare the efficiency of different machines and choose one that is strong enough and wastes little energy.',
     vocab: ['friction', 'wasted energy', 'efficiency', 'lubricant', 'terraform'] }
 ].filter(s => WORKSHOP_OPEN || s.ch !== 'c6');
-const STEPMIN = { s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5, u1: 4, u2: 4, u3: 5, k1: 4, k2: 5, k3: 5, v1: 4, p5a: 6, p5b: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2 };
+const STEPMIN = { sk1: 7, sk2: 6, s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5, u1: 4, u2: 4, u3: 5, k1: 4, k2: 5, k3: 5, v1: 4, p5a: 6, p5b: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2, graph: 3, mark: 2, para: 3 };
 CHDATA.c1.review.push({ id: 'r12', obj: ['Aii'], seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

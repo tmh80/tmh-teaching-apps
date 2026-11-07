@@ -41,6 +41,12 @@ function renderReview(ch) {
   body.appendChild(h('div', { class: 'finishrow' }, `<button type="button" class="go big" id="finishCheck">${finLabel(ch, false)}</button><span class="scaleNote">Finish checks every answer you have not checked yet, then shows your score${SECTIONS.find(x => x.id === ch) ? ' and your stamp' : ''}.</span>`));
   body.appendChild(h('div', { class: 'row' }, `<button type="button" class="go" id="mkWs2">Make my worksheet</button><button type="button" class="ghost" data-act="home">Back to the home page</button>`));
   const next = SECTIONS.find(s => s.needs === ch); if (next) body.appendChild(h('div', { class: 'keepgoing' }, `<b>Finished? You can stop here and upload your ${CH.part} worksheet.</b><span>Or, if you'd like to go further, try the <b>${next.part}</b>. It takes approx. ${secMins(next.id).total} minutes and makes its own worksheet that you can upload too.</span><button type="button" class="go sm" data-open="${next.id}" style="align-self:flex-start">Go to the ${next.part} →</button>`));
+  { /* self-check just before the Check: the questions stay hidden until every X is placed. A part-done or finished Check, and teacher mode, are never blocked. */
+    const saHost = h('div', { id: 'saHost' }), kids = [...body.children]; body.insertBefore(saHost, body.firstChild);
+    const fold = () => { saHost.innerHTML = ''; const d = h('details', { class: 'sa-done' }, '<summary>My self-check</summary>'); d.appendChild(selfAssessCard(ch, true)); saHost.appendChild(d); };
+    if (hasICAN(ch) && !saDone(ch) && !FAST && !isTeacher() && !reviewProgress(ch).done && !revFinished(ch)) { kids.forEach(k => { k.hidden = true; }); saHost.appendChild(selfAssessCard(ch, false, () => { kids.forEach(k => { k.hidden = false; }); fold(); })); }
+    else if (hasICAN(ch) && saStore(ch).done) fold();
+  }
   host.onclick = e => { if (e.target.closest('#finishCheck, #finishCheckTop')) { revFinish(ch, items); return; } const j = e.target.closest('[data-jump]'); if (j) $('#rq-' + j.dataset.jump).scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' });
     if (e.target.id === 'mkWs' || e.target.id === 'mkWs2') makeWorksheet(ch); if (e.target.id === 'blankWs') openSheet(ch, 'blank'); };
 }

@@ -3,17 +3,18 @@ let CARDS = null;
 function showCards(cards, opt = {}) {
   hideCards(); CARDS = { cards, k: 0, opt }; drawCard();
 }
-function hideCards() { const ch = $('#chunk'); if (ch) ch.hidden = true; unhi(); CARDS = null; }
+function hideCards() { const ch = $('#chunk'); if (ch) ch.hidden = true; unhi(); CARDS = null; if (typeof gateOn === 'function') gateOn(false); }
 function unhi() { $$('.coachhi').forEach(e => e.classList.remove('coachhi')); }
 function drawCard() {
   const ch = $('#chunk'); if (!CARDS || !ch) return; const { cards, k, opt } = CARDS, c = cards[k], last = k === cards.length - 1;
   ch.hidden = false; unhi();
   ch.innerHTML = `<div class="chead" title="Drag to move this card"><span class="qgrip" aria-hidden="true">⠿</span><span class="lbl">${esc(opt.title || '')}${cards.length > 1 ? ` · card ${k + 1} of ${cards.length}` : ''}</span><button type="button" class="cx" aria-label="Close these cards">✕</button></div>
-    <div class="gbody gl">${c.html}</div>
+    <div class="gbody gl">${c.html}${opt.readGate && k === 0 && opt.readGate() ? '<button type="button" class="go say-ok" data-cb="ok">OK</button>' : ''}</div>
     <div class="cnav">${k ? '<button type="button" class="ghost" data-cb="back">‹ Back</button>' : ''}<span class="cdots">${cards.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</span><button type="button" class="go" data-cb="next">${last ? (opt.journal === false ? 'Got it ✓' : 'Save to my Journal ✓') : 'Next ›'}</button></div>`;
   makeDraggable(ch, '.chead', 'cards'); dragPlace(ch, 'cards', '.chead');
   if (c.hi) $$(c.hi).forEach(e => { if (e.offsetParent) e.classList.add('coachhi'); });
-  ch.querySelector('[data-cb=next]').addEventListener('click', () => { if (last) finishCards(); else { CARDS.k++; drawCard(); } });
+  ch.querySelector('[data-cb=next]').addEventListener('click', () => { if (k === 0 && opt.readOK) opt.readOK(); if (last) finishCards(); else { CARDS.k++; drawCard(); } });
+  const ok = ch.querySelector('[data-cb=ok]'); if (ok) { ok.addEventListener('click', () => { opt.readOK(); ok.remove(); }); setTimeout(() => { if (ok.isConnected) ok.focus({ preventScroll: true }); }, 0); }
   const b = ch.querySelector('[data-cb=back]'); if (b) b.addEventListener('click', () => { CARDS.k--; drawCard(); });
   ch.querySelector('.cx').addEventListener('click', () => finishCards());
   if (innerWidth <= 640) ch.scrollIntoView({ block: 'nearest' });
@@ -21,6 +22,7 @@ function drawCard() {
 function finishCards() {
   if (!CARDS) return; const { cards, opt } = CARDS; hideCards();
   if (opt.journalKey && opt.journal !== false) journalAdd(opt.journalKey, opt.where || '', opt.title || '', cards.map(c => c.html).join(''));
+  if (opt.readOK) opt.readOK();
   if (opt.onDone) opt.onDone();
 }
 

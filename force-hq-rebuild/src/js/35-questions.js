@@ -8,6 +8,9 @@ function draftSave(store, id, part, val, src) {
   $$('[data-draft="' + store + '|' + id + '"]').forEach(el => { if (el === src || el.disabled || el.dataset.dk !== part) return; if (el.value !== val) el.value = val; });
   if (typeof checkStep === 'function') checkStep();
 }
+/* a fold-out above every explain question: what a good explanation looks like (Skills audit, gap C); q.fold swaps in another one (gap E) */
+const foldHTML = f => `<details class="howexp"><summary>${f.title}</summary>${f.html}</details>`;
+const EXPLAIN_HOW = { title: 'How to write a good explanation', html: '<p>Answer the question in your first sentence.</p><p>Give the science step by step, joined with <b>because</b> and <b>so</b>.</p><p>Use key words, and numbers with their units, like 90 N or 2.5 m/s².</p><div class="example"><b>Example.</b> Why does a crate slide further on ice than on carpet?<br><i>A crate slides further on ice because ice has less friction than carpet. There is less friction pushing against the crate, so it slows down more slowly and slides further before it stops.</i></div>' };
 const QLABEL = { mcq: 'Choose one', tap: 'Tap the sentence', num: 'Calculate', reading: 'Read the arena', gap: 'Fill the gaps', sort: 'Sort it', match: 'Match it up', table: 'Complete the table', tick: 'Tick all that apply', fbd: 'Draw it: free-body diagram', explain: 'Explain it' };
 const normWord = s => String(s || '').toLowerCase().replace(/[^a-z0-9.]+/g, ' ').trim();
 /* Gap answers accept sensible synonyms: if any accepted answer is in a group, every word in that group counts.
@@ -28,7 +31,8 @@ function gapAccepts(list) { const out = new Set(list.map(gapNorm)); SYNS.forEach
 const gapOk = (list, x) => gapAccepts(list).includes(gapNorm(x));
 function optOrder(q) { return q.noShuffle ? q.opts.map((_, i) => i) : shuffled(q.opts.map((_, i) => i), hashStr(q.id + (q.seed || ''))); }
 function hashStr(s) { let x = 7; for (const ch of String(s)) x = (x * 31 + ch.charCodeAt(0)) | 0; return x; }
-function sortItems(q) { return shuffled(q.items.map((_, i) => i), hashStr(q.id) + 3); }
+function sortItems(q) { return rowOrder(q, q.items.map(x => x[0])); }
+const rowsOf = q => rowOrder(q, q.rows.map(r => r[0]));   // table and match rows, in their stable shuffled display order
 
 /* One go at every question. A right answer locks green; a wrong one locks and shows the right answer.
    Questions with several parts score a point per part; diagrams score a point per check. */
@@ -36,7 +40,7 @@ const art = g => (/^[aeiou]/i.test(g) ? 'an ' : 'a ') + g.toLowerCase();
 const qq = t => '“' + plain(t) + '”';
 function corr(after, text) { const c = document.createElement('span'); c.className = 'corr'; c.textContent = '→ ' + plain(text); after.after(c); }
 function lockInputs(el) { $$('input,select,textarea,button', el).forEach(x => { if (!x.classList.contains('qopen')) x.disabled = true; }); $$('.qchk', el).forEach(b => b.hidden = true); }
-function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; default: return 1; } }
+function simMax(q) { switch (q.type) { case 'tick': case 'order': case 'reason': case 'fix': return 2; case 'calcorder': return 5; case 'pick': return q.picks.length; case 'gap': return q.ans.length; case 'sort': return q.items.length; case 'match': return q.rows.length; case 'table': return q.rows.length * q.cols.length; case 'fbd': case 'desk': return 6; case 'explain': return q.check.length; case 'freeze': return q.rows.length * q.cols.length; case 'spot': return q.targets.length; case 'sketch': return q.checks.length; case 'mark': return q.sents.length; case 'rtable': return q.rows.length; case 'graph': return 5; case 'para': return (q.check || []).length; default: return 1; } }
 /* "How sure are you?" (opt-in: sure:true on mcq, reason and pick). Three buttons; the student must choose one before checking.
    Not marked. Saved as st.sure ('guess' | 'fair' | 'cert') so the feedback page can show answers that were certain but wrong. */
 const SURE_LABEL = { guess: 'Guessing', fair: 'Fairly sure', cert: 'Certain' };
@@ -108,7 +112,7 @@ const QT = {
     model(q) { return q.groups.map((g, gi) => `<b>${g}:</b> ${q.items.filter(x => x[1] === gi).map(x => x[0]).join(', ')}`).join('<br>'); }
   },
   match: {
-    html(q, s) { const ch = shuffled(q.rows.map((_, i) => i), hashStr(q.id) + 9); return `<div class="sortgrid">${q.rows.map((r, i) => `<div class="matchrow" data-i="${i}"><span>${r[0]}</span><select aria-label="Match for ${esc(plain(r[0]))}"><option value="">Choose…</option>${ch.map(j => `<option value="${j}" ${s && s.v && s.v[i] === j ? 'selected' : ''}>${q.rows[j][1]}</option>`).join('')}</select></div>`).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
+    html(q, s) { const ch = shuffled(q.rows.map((_, i) => i), hashStr(q.id) + 9); return `<div class="sortgrid">${rowsOf(q).map(i => { const r = q.rows[i]; return `<div class="matchrow" data-i="${i}"><span>${r[0]}</span><select aria-label="Match for ${esc(plain(r[0]))}"><option value="">Choose…</option>${ch.map(j => `<option value="${j}" ${s && s.v && s.v[i] === j ? 'selected' : ''}>${q.rows[j][1]}</option>`).join('')}</select></div>`; }).join('')}</div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => { const s = $(`.matchrow[data-i="${i}"] select`, el).value; return s === '' ? null : +s; });
       if (v.some(x => x == null) && !api.auto) { api.say('Choose a match for every row first.', 'no'); return; }
       const bad = v.map((x, i) => x === i ? -1 : i).filter(i => i >= 0);
@@ -118,7 +122,7 @@ const QT = {
     show(q, v) { return q.rows.map((r, i) => `${r[0]} → ${v && v[i] != null ? q.rows[v[i]][1] : '–'}`).join('<br>'); }, model(q) { return q.rows.map(r => `${r[0]} → ${r[1]}`).join('<br>'); }
   },
   table: { // q.cols, q.rows:[[label, [answerIndex per col]]], q.choices: per col list
-    html(q, s) { return `<table class="tbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${q.rows.map((r, i) => `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td data-c="${i}-${j}"><select aria-label="${esc(plain(r[0]))}, ${esc(plain(q.cols[j]))}"><option value="">Choose…</option>${q.choices[j].map((o, k) => `<option value="${k}" ${s && s.v && s.v[i] && s.v[i][j] === k ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`).join('')}</tr>`).join('')}</table><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
+    html(q, s) { return `<table class="tbl"><tr><th></th>${q.cols.map(c => `<th>${c}</th>`).join('')}</tr>${rowsOf(q).map(i => { const r = q.rows[i]; return `<tr><th>${r[0]}</th>${q.cols.map((_, j) => `<td data-c="${i}-${j}"><select aria-label="${esc(plain(r[0]))}, ${esc(plain(q.cols[j]))}"><option value="">Choose…</option>${q.choices[j].map((o, k) => `<option value="${k}" ${s && s.v && s.v[i] && s.v[i][j] === k ? 'selected' : ''}>${o}</option>`).join('')}</select></td>`).join('')}</tr>`; }).join('')}</table><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check</button>`; },
     bind(el, q, api) { const go = () => { if (api.locked()) return; const v = q.rows.map((_, i) => q.cols.map((_, j) => { const s = $(`td[data-c="${i}-${j}"] select`, el).value; return s === '' ? null : +s; }));
       if (v.flat().some(x => x == null) && !api.auto) { api.say('Fill in every cell first.', 'no'); return; }
       let wrong = 0; q.rows.forEach((r, i) => q.cols.forEach((_, j) => { if (v[i][j] !== r[1][j]) wrong++; }));
@@ -142,7 +146,7 @@ const QT = {
     /* The "Did you include…?" checklist stays hidden until the student has pressed Check (or Finish), which shows the model answer and the checklist together; one point per tick, and ticks can still change afterwards. */
     html(q, s) {
       const v = (s && s.v) || {}, ticks = v.ticks || [], done = !!(s && s.done);
-      return `${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck" ${done ? '' : 'hidden'}><div class="lbl exckhd">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
+      return `${q.fold === false ? '' : foldHTML(q.fold || EXPLAIN_HOW)}${q.words ? `<div class="wordsuse"><span class="lbl">Words to use in a good answer</span><div>${q.words.map(w => `<b>${w}</b>`).join('')}</div></div>` : ''}<textarea class="explain" aria-label="Your explanation" placeholder="Write your answer in full sentences.">${esc(v.text || '')}</textarea><div class="exck" ${done ? '' : 'hidden'}><div class="lbl exckhd">Did you include…? Tick what you included. You get a point for each one.</div><div class="checklist">${q.check.map((c, i) => `<label><input type="checkbox" data-ck="${i}" ${ticks.includes(i) ? 'checked' : ''}> ${c}</label>`).join('')}</div></div><button type="button" class="ghost sm qchk" style="align-self:flex-start">Check: show the model answer</button><div class="modelwrap"></div>`;
     },
     bind(el, q, api) {
       const ticksNow = () => $$('[data-ck]', el).filter(x => x.checked).map(x => +x.dataset.ck), textNow = () => $('.explain', el).value;
@@ -183,10 +187,11 @@ QT.tap.show = QT.mcq.show;
 function renderQuestion(host, q, ctx) {
   const path = ctx.store + '.' + q.id; let s = dbGet(path, null);
   const box = h('div', { class: 'qitem' + (s && s.done ? ' locked' + (s.ok ? ' ok' : '') : ''), 'data-q': q.id });
-  box.innerHTML = `<div class="qtype"><span>${QLABEL[q.type] || ''}</span><span class="pts"></span></div>${q.type === 'gap' || q.type === 'pick' ? '' : `<div class="qp gl">${q.p}</div>`}<div class="qbody"></div><div class="fb"></div>`;   // gap and pick put the sentence inside the answer area
+  box.innerHTML = `<div class="qtype"><span>${q.label || QLABEL[q.type] || ''}</span><span class="pts"></span></div>${q.story ? `<div class="qstory gl">${q.story}</div>` : ''}${q.type === 'gap' || q.type === 'pick' ? '' : `<div class="qp gl">${q.p}</div>`}<div class="qbody"></div><div class="fb"></div>`;   // gap and pick put the sentence inside the answer area
+  box.dataset.t = q.type; if (q.needs) { box.dataset.needs = '1'; if (!q.needs()) box.classList.add('gated'); }
   host.appendChild(box);
   const body = $('.qbody', box), fbEl = $('.fb', box);
-  const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
+  const pts = st => { const m = st.max || simMax(q), sc = st.score != null ? st.score : st.ok ? m : 0; $('.pts', box).innerHTML = st.done && m ? `<span class="ptsb ${sc === m ? 'full' : sc ? 'part' : 'none'}">${sc} of ${m} point${m > 1 ? 's' : ''}</span>` : ''; };
   let reg = null;   // what the question type says about itself: { blank(), check(), reveal?, blankV? }, used by the Finish button
   const api = {
     auto: false,       // true while the Finish button is checking this question: skip every "do this first" guard and mark what is there
@@ -197,7 +202,7 @@ function renderQuestion(host, q, ctx) {
     setRaw: v => dbSet(path, v),
     persist: () => dbSet(path, dbGet(path, null)),
     tries: () => (dbGet(path, null) || {}).tries || 0,
-    locked: () => { const st = dbGet(path, null); return !!(st && st.done && q.type !== 'explain'); },
+    locked: () => { const st = dbGet(path, null); return !!(st && st.done && q.type !== 'explain' && q.type !== 'para'); },
     say: (m, cls) => { fbEl.className = 'fb ' + cls; fbEl.textContent = m; },
     answer(v, ok, msg, x = {}) {
       const st = dbGet(path, null) || { tries: 0 }; st.v = v;

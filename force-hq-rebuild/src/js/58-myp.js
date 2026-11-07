@@ -6,11 +6,14 @@ const MYP_STRANDS = {
   Ai: 'describe scientific knowledge',
   Aii: 'apply scientific knowledge and understanding to solve problems set in familiar and unfamiliar situations',
   Aiii: 'analyse information to make scientifically supported judgments',
+  Ci: 'present collected and transformed data',
+  Cii: 'interpret data and describe results using scientific reasoning',
+  Ciii: 'discuss the validity of a hypothesis based on the outcome of the scientific investigation',
   Di: 'describe the ways in which science is applied and used to address a specific problem or issue',
   Dii: 'discuss and analyse the various implications of using science and its application in solving a specific problem or issue',
   Diii: 'apply scientific language effectively'
 };
-const MYP_CRIT = { A: 'Criterion A: Knowing and understanding', D: 'Criterion D: Reflecting on the impacts of science' };
+const MYP_CRIT = { A: 'Criterion A: Knowing and understanding', C: 'Criterion C: Processing and evaluating', D: 'Criterion D: Reflecting on the impacts of science' };
 // q.obj is also the Drop Zone object name (a string) on some freeze questions, so only an array counts as strand tags
 const strandsOf = q => Array.isArray(q.obj) ? q.obj : [];
 const strandLabel = s => s[0] + ' ' + s.slice(1);                                   // 'Aii' -> 'A ii'
@@ -20,10 +23,10 @@ const STRAND_ORDER = Object.keys(MYP_STRANDS);
 function sheetStrands(chId) { const u = new Set(); CHDATA[chId].review.forEach(q => strandsOf(q).forEach(s => u.add(s))); return STRAND_ORDER.filter(s => u.has(s)); }
 function taskStrands(chIds) { const u = new Set(); chIds.forEach(c => sheetStrands(c).forEach(s => u.add(s))); return STRAND_ORDER.filter(s => u.has(s)); }
 /* the compact form used in the table of §6a: 'A i, ii, iii · D i, iii' */
-function strandsShort(list) { return ['A', 'D'].map(c => { const l = list.filter(s => s[0] === c).map(s => s.slice(1)); return l.length ? c + ' ' + l.join(', ') : ''; }).filter(Boolean).join(' · '); }
+function strandsShort(list) { return ['A', 'C', 'D'].map(c => { const l = list.filter(s => s[0] === c).map(s => s.slice(1)); return l.length ? c + ' ' + l.join(', ') : ''; }).filter(Boolean).join(' · '); }
 /* marks available per criterion: a question counts once for each criterion it is tagged with */
 function critTotals(chIds) {
-  const t = { A: 0, D: 0 };
+  const t = { A: 0, C: 0, D: 0 };
   chIds.forEach(c => CHDATA[c].review.forEach(q => { const crits = new Set(strandsOf(q).map(s => s[0])); crits.forEach(k => { t[k] += qMarks(q); }); }));
   return t;
 }
@@ -52,7 +55,7 @@ function answerKeyText(chId) {
 }
 
 /* ---------- marking rules (shared by the printable scheme and the AI text) ---------- */
-function markingRules(hasSure) {
+function markingRules(hasSure, hasSA) {
   return [
     'Student answers are printed in blue. Mark only what the student added. The worksheet\'s own text, choices and word lists are not student work.',
     'Students don\'t need to match the answer key word for word: accept any correct scientific wording.',
@@ -61,6 +64,7 @@ function markingRules(hasSure) {
     'Auto-marked questions in the sim allowed one go each, so mark the answer exactly as printed.',
     'A blank question scores 0. Add a kind note saying what is missing.',
     ...(hasSure ? ['Some questions ask "How sure are you?" (Guessing, Fairly sure or Certain). Confidence is not marked. If a student was Certain but wrong, mention it kindly in the feedback: it shows an idea worth talking about.'] : []),
+    ...(hasSA ? ['The top of the worksheet shows "My self-check before the Check". It is the student\'s own self-review: for each I can statement they placed an X on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks, so do not grade or correct it. In the feedback you may add at most one short sentence comparing how sure they felt with how they did.'] : []),
     'Don\'t take marks off for spelling unless the meaning is unclear.',
     'Mark each worksheet separately. An optional worksheet that wasn\'t submitted is not counted.'
   ];
@@ -74,7 +78,7 @@ function aiFeedbackText(secIds, optIds) {
   if (!ids.length) return 'Tick at least one section to build the AI feedback instructions.';
   const L = [`All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.`, ''];   /* first line of every AI feedback text (Tom, 3 Nov 2026) */
   L.push('HOW TO MARK');
-  markingRules(ids.some(c => CHDATA[c].review.some(q => q.sure))).forEach(r => L.push('- ' + r));
+  markingRules(ids.some(c => CHDATA[c].review.some(q => q.sure)), ids.some(hasICAN)).forEach(r => L.push('- ' + r));
   L.push(''); L.push('FEEDBACK STYLE'); L.push(FEEDBACK_STYLE);
   const st = taskStrands(ids), tot = critTotals(ids);
   L.push(''); L.push('MYP LEVELS');
@@ -88,6 +92,6 @@ function aiFeedbackText(secIds, optIds) {
   const totalMarks = ids.reduce((a, c) => a + CHDATA[c].review.reduce((b, q) => b + qMarks(q), 0), 0);
   L.push(''); L.push('TOTALS');
   L.push(`Total marks for this task: ${totalMarks}.`);
-  L.push(['A', 'D'].filter(k => tot[k] > 0).map(k => `Criterion ${k}: ${tot[k]} marks available`).join('; ') + '.');
+  L.push(['A', 'C', 'D'].filter(k => tot[k] > 0).map(k => `Criterion ${k}: ${tot[k]} marks available`).join('; ') + '.');
   return L.join('\n');
 }
