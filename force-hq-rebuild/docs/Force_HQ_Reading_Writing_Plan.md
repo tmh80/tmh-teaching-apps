@@ -199,7 +199,7 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 **Whole-app changes, for every section including Chapter 1**
 10. Read-first OK: the rest of the step stays blurred until the student presses OK. Remembered once pressed, and skipped on finished steps.
 11. I can statements: 3 or 4 for each Foundation, Extension and Skills section, in Grade 7/8 language, covering the skills as well as the science (for example, "I can make a graph and describe what it shows"). They have their own first screen before step 1, with Next to move on and Back on step 1 to return. A "My I can statements" button sits above the steps on every tab. Reuse the Sparks version (`ICAN`, `icanCard`, `showIntro`, `.ican-peek`).
-12. Self-check: an X on a Beginning, Developing, Proficient, Mastering line for each statement, immediately before that section's Check, with the questions hidden until it is done. The answers are saved, and the self-check stays in a fold-out above the Check. Students part-way through a Check and teacher mode are not blocked. It prints at the top of that section's worksheet, straight under the name: the student's Xs on their sheet, empty lines on the blank sheet, and a not-marked note on the answer key. Reuse the Sparks version (`selfAssessCard`, `saScale`, `saStore`, `wsSelfCheck`).
+12. Self-check: an X on a Beginning, Developing, Proficient, Mastering line for each statement, immediately before that section's Check, with the questions hidden until it is done. The answers are saved, and the self-check stays in a fold-out above the Check. Students part-way through a Check and teacher mode are not blocked. It prints at the top of that section's worksheet, straight under the name: the student's Xs on their sheet, empty lines on the blank sheet, and a not-marked note on the answer key. The AI marking text for every task with one of these sheets gets a note: the self-check is the student's own self-review, it is not marked or corrected, and the feedback may add at most one short sentence comparing how sure they felt with how they did. Reuse the Sparks version (`selfAssessCard`, `saScale`, `saStore`, `wsSelfCheck`, and the SELF-CHECK lines in `aiFeedbackText`).
 13. Shuffled display order for any table, sort or match question, using the Sparks fix (`gridRowOrder`, `keepRows` for true sequences, order questions never start correct), and check Force HQ's own shuffle spreads right answers across A to D.
 14. Larger Pip text across the app (rule 27).
 
@@ -221,7 +221,7 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 
 The rescue rebuild stays first. It touches some shared files, so merge it before this branch where possible.
 
-Each stage ends with tests, PDFs, a commit, the file for Toddle, a republish and updated project docs. Each new section needs its own Toddle task, set with its Foundation. The whole-app changes need no new AI marking text, but any Foundation that gains a graph question does, and its marks and strands change.
+Each stage ends with tests, PDFs, a commit, the file for Toddle, a republish and updated project docs. Each new section needs its own Toddle task, set with its Foundation. The whole-app changes mean every existing Toddle task needs its AI marking text pasted again, because of the self-check note. Any Foundation that gains a graph question also changes its marks and strands.
 
 ## 11. Turning this into a skill
 
