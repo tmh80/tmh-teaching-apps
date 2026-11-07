@@ -104,16 +104,3 @@ function openTransmission() {
     box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>${RB_SLOTS.filter(s => !s.ext).length} jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.filter(s => !s.ext).map(s => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
   });
 }
-
-/* ---------- the Rescue report on the Part 5 worksheet: one row per stage, from the student's best try (not marked) ---------- */
-const RR_KEY = { sm1: ['Load arm 0.30 m (boulder 0.30 m from the fulcrum)', '44.5 N', '44.5 N', [1, 1, 1, 1]], sm2: ['120 cm per turn, 1.0 cm between threads', '31.5 N', '31.5 N', [1, 1, 1, 1]], sm3: ['Medium track (45 m), 4 ropes, winch ×10', 'MA 120', 'MA 120, pull 52.5 N', [1, 1, 1, 1, 1]] };
-function rescueReportHTML(mode) {
-  const stu = mode === 'student', key = mode === 'key', ms = CHDATA.c6e.challenge.missions, sv = dbGet('chal.c6e', {}), W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x;
-  const rows = ms.map(m => {
-    const s = sv[m.id] || {}, l = stu && s.log && s.log.length ? (s.log.find(x => x.met === s.best) || s.log[s.log.length - 1]) : null, K = key ? RR_KEY[m.id] : null, oks = K ? K[3] : l && l.oks ? l.oks.map(x => +x) : [];
-    const set = K ? K[0] : l ? l.desc : '', pred = K ? K[1] : l && l.pred != null ? `${fmt(l.pred, 2)} ${m.pred.unit}`.trim() : l ? '–' : '';
-    const need = K ? K[2] : l && l.need != null ? (m.id === 'sm3' ? `MA ${fmt(l.ma, 1)}, pull ${fmt(l.need, 1)} N` : `${fmt(l.need, 1)} N`) : l ? '–' : '';
-    const res = K ? `${m.max} of ${m.max} points` : l ? `${s.best} of ${m.max} points (${s.n} ${s.n === 1 ? 'try' : 'tries'})` : '';
-    return `<tr><td><b>${esc(m.title)}</b></td><td>${set ? W(esc(set)) : ''}</td><td>${pred ? W(esc(pred)) : ''}</td><td>${need ? W(esc(need)) : ''}</td><td>${res ? W(esc(res)) : ''}</td><td>${m.objs.map((o, i) => `<div>${stu || key ? (oks[i] ? W('✓') : stu && l ? W('✗') : '☐') : '☐'} ${o.label}</div>`).join('')}</td></tr>`; }).join('');
-  return `<div class="q"><div class="qh">Rescue report${stu ? '<span>from your best try at each stage in the sim</span>' : ''}</div><table><tr><th>Stage</th><th>My settings</th><th>My prediction</th><th>What Smooshy needed</th><th>Result</th><th>Objectives (✓ met, ✗ not met)</th></tr>${rows}</table><p class="note">${key ? 'These are passing settings. Other settings can pass too. The Rescue report is not marked.' : stu ? 'The Rescue report is not marked. It shows the work done in the Challenge.' : 'The Rescue report is not marked.'}</p></div>`;
-}

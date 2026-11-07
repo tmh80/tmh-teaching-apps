@@ -184,18 +184,23 @@ function glShowResult(sum, pred, newBest) {
 /* ===== stage 4 plumbing: the best run's picture for the worksheet's "My Rescue" page =====
    rigSnapshot() draws the best run's rig over the whole crater (no handles or dots) into a 900 px wide JPEG, kept under about 150 KB,
    and stores it as chal.c6e.gl.bestRun.snap (best run only, so progress stays small; backups in 70-backup.js carry it as part of DB). */
-function rigSnapshot() {
-  const st = glState(), br = st.bestRun; if (!br || !br.rig) return null;
+/* draws a rig over the whole crater into a JPEG data URL (900 px wide, under about 150 KB); the title is written in the corner */
+function glSnapURL(rig, title) {
   const keep = { LW: GLV.LW, LH: GLV.LH, z: GLV.z, cx: GLV.cx, cy: GLV.cy };
   try {
     const cv = document.createElement('canvas'); cv.width = 900; cv.height = 270; const c = cv.getContext('2d');
     Object.assign(GLV, { LW: 1000, LH: 300, z: 1, cx: 48, cy: 12 }); c.setTransform(0.9, 0, 0, 0.9, 0, 0);
-    const ev = glEvaluate(br.rig);
-    glDrawWorld(c, { rig: br.rig, ev, ground: ev.ground, ghost: br.rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, t: 0,
+    const ev = glEvaluate(rig);
+    glDrawWorld(c, { rig, ev, ground: ev.ground, ghost: rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, t: 0,
       ship: { x: GL.shipX, y: ev.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0 }, run: { on: true } });
-    c.setTransform(1, 0, 0, 1, 0, 0); glLbl(c, `${(dbGet('user', {}) || {}).name || ''}'s best rescue route`.trim(), 12, 18, GLC.ink, 13, 'left', '#fffaf2');
+    c.setTransform(1, 0, 0, 1, 0, 0); glLbl(c, title, 12, 18, GLC.ink, 13, 'left', '#fffaf2');
     let q = 0.8, url = cv.toDataURL('image/jpeg', q); while (url.length * 0.75 > 150000 && q > 0.35) { q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
-    const all = dbGet('chal.' + GLB.ch, {}); if (all[GLB.mid] && all[GLB.mid].bestRun) { all[GLB.mid].bestRun.snap = url; dbSet('chal.' + GLB.ch, all); }
     return url;
   } catch (e) { return null; } finally { Object.assign(GLV, keep); }
+}
+function rigSnapshot() {
+  const st = glState(), br = st.bestRun; if (!br || !br.rig) return null;
+  const url = glSnapURL(br.rig, `${(dbGet('user', {}) || {}).name || ''}'s best rescue route`.trim()); if (!url) return null;
+  const all = dbGet('chal.' + GLB.ch, {}); if (all[GLB.mid] && all[GLB.mid].bestRun) { all[GLB.mid].bestRun.snap = url; dbSet('chal.' + GLB.ch, all); }
+  return url;
 }
