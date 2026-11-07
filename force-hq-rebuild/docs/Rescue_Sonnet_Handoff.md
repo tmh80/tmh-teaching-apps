@@ -69,4 +69,25 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 
 ## Still to do (Sonnet)
 
-Filled in as stages finish.
+Read the brief, then this file. Search rather than reading whole files (`grep -n`, `cut -c1-200`). No subagents. Tests while working: `python3 build.py && python3 tests/rescue_numbers.py && python3 tests/play_rescue.py`.
+
+### Sonnet chat 1: stage 4b, then stages 5 to 7
+
+**4b. Story half of stage 4**
+- Part 5 opening cards: the `c6e` step `v1` in `src/js/4c-ch6.js` (search `Part 5: Rescue Captain Smooshy`) still describes three stages, and `picCraterPlan()` (`src/js/4bb-shoppics.js`) draws a three-stage plan. Rewrite both in the brief section 2 order: Smooshy peeps from the window; he squeezes out through the hatch when the rescue starts; he stays at the handle of each machine and walks to the next; at the end he climbs aboard and waves as the tractor beam lifts the ship. Mention the Big Jelly, the crumbly rim, the tractor beam needing the Gumdrop level with the crest, 475 crystals, 1,500 m of oxygen, and that the challenge is two sessions.
+- Guided warm-up, about 3 minutes, before free build: place a lever on the boulder. Useful hooks: `GLB.rig`, `glAddPart(type, x, y)`, `glPart(id)`, `GLB.ev.boulder` (`{how, ok, pull, ma}`), `GLB.onChange`. A lever dropped within about 1.6 m of x = 18.2 on the floor snaps onto the boulder. Load arm 2 m (MA 4) gives 63 N and fails; 1.5 m (MA 5.7) works. The boulder pull may be shown in the warm-up, since it is practice; keep the ship's leg pulls hidden. If tokens are short, keep this plain (brief section 12).
+- Endings: define `glShowEnding(sum, {first, better})` (called by `glFinishRun` in `4i-glrun.js`). Three draggable ending cards from `sum.ending`: **spotless**, **dented**, **not yet** (not yet invites another go and never blocks the Check). When `first` is true (the first run that reached the beam), add the friendly "good place to stop for today" pop-up with the "Save my work" button. Replace the old `openEnding`, `END_CAPS` and `endScene` in `src/js/4d-rescue.js` (search for callers first).
+
+**5. Hint tree, working boxes, Reminders on top.** Hints are spent: store the count in `chal.c6e.gl.hints`; `glChanged` and `glStartRun` already pass it to `glEvaluate`, and `glScore` applies "first free, then −1, never below 1". Use the student's own rig for tier 2 (`GLB.ev.legs`: `type, mma, ropes, winches, rise, m.L`). Move `remindersHTML()` above "Do this" on every page where it appears (`40-guided.js` around line 121, the shop course in `45-challenge.js`; Part 5 already has it at the top).
+
+**6. Reflection, My Rescue page, keys and teacher text.** Replace `rescueReportHTML` and `RR_KEY` (`4d-rescue.js`, used in `60-worksheet.js` around line 118) with the My Rescue page: `chal.c6e.gl.bestRun.snap` (the screenshot), `bestRun.sum` (from `glSummary`: `legs[] {name, rise, ma, pull, hand, work}`, `hardest, hand, cost, crest, work, dmg.total, boulder, score, ending`), `runs` (tries), `hints`, and `bestRun.pred.working`. Blank template: empty frame; answer key: the top route (two 24 m ramps, 4 ropes, winch ×7, crest blasted, lever on the boulder: 56.3 N per leg, 1,344 m, 358 crystals, crest 12.2 m, 75,600 J, 0%, 10 of 10). Check the JPEG survives `61-pdf.js`. Add the `explain` reflection as the last Part 5 Check question on its own page (brief section 8). Update the AI text in `58-myp.js` (line around 50; keep its first line), the marking scheme, the teacher page two-session note, and set `secMins` for `c6e` to approx. 60.
+
+**7. Tests.** Rewrite Part 5 in `tests/play_c6.py` and `tests/play_bt.py` (they still play sm1–sm3). Add `tests/rescue_numbers.py` and `tests/play_rescue.py` to `tests/run_all.sh`, plus tests for hints and working. `tests/workshop_closed.py` expects `WORKSHOP_OPEN = false`: update or retire it. Then run `bash tests/run_all.sh` in the background and fix what fails.
+
+### Sonnet chat 2: stages 8 to 10
+
+As brief section 12: docs (`Force_HQ_Brief.md`, `Force_HQ_Backlog.md`, `Force_HQ_Handoff.md`, `Force_HQ_Next_Chat_Handoff.md`, `Chapter6_Workshop_Script.md`, the README table, and the Project copies), worksheets (`python3 tools/make_worksheets.py`, copy `dist/toddle-files` and the zip into `worksheets/`), the offline file (`dist/Force-HQ-offline.html` → `Force-HQ-Rebuild-offline.html`), then merge `rescue-rebuild` into `main`, push, republish the preview, send Tom the HTML and tell him to upload it to Toddle. `WORKSHOP_OPEN` stays `true` on merge.
+
+### Ideas Opus noticed (not required)
+- Optional crater variants (brief, tokens permitting): `GL_PROFILE` is the only thing to swap; re-run `tests/rescue_routes.js` against each.
+- The builder could show a faint 1 m grid when the ruler is on.
