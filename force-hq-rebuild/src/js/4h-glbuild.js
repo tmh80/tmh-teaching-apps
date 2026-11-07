@@ -15,7 +15,7 @@ const GLB = { rig: null, ev: null, hist: [], sel: null, drag: null, ruler: null,
 const glNewId = t => t[0] + Math.random().toString(36).slice(2, 7);
 const glSnap = (v, s) => Math.round(v / (s || 0.5)) * (s || 0.5);
 const glState = () => (dbGet('chal.' + GLB.ch, {})[GLB.mid]) || {};
-function glSaveRig() { const st = dbGet('chal.' + GLB.ch, {}); st[GLB.mid] = Object.assign(st[GLB.mid] || {}, { rig: GLB.rig, at: Date.now() }); dbSet('chal.' + GLB.ch, st); }
+function glSaveRig() { const st = dbGet('chal.' + GLB.ch, {}); st[GLB.mid] = Object.assign(st[GLB.mid] || {}, { rig: GLB.rig, at: Date.now(), view: { z: GLV.z, cx: GLV.cx, cy: GLV.cy, LH: GLV.LH } }); dbSet('chal.' + GLB.ch, st); }
 /* winches are bolted down: they sit on the ground or a platform, so Smooshy can stand at the handle */
 function glSettle() { const g = glGround(GLB.rig).g, pl = glPlatforms(GLB.rig, g);
   /* an add-on with no spot yet (from an older save or a test rig) parks beside its machine's cable dot */
@@ -140,7 +140,7 @@ function glBindBoard() {
     const d = GLB.drag; GLB.drag = null; if (!d) return; const P = glPt(e); GLB.hintLine = '';
     if (d.kind === 'cable') { if (!d.moved) { if (d.from !== 'boulder') { GLB.sel = d.from; glOpenMenu(d.from, P); } return; }
       const hit = glHit(P), to = hit && hit.id !== d.from ? hit.id : null; if (to) { glPush(); if (glConnect(d.from, to)) glChanged(); else GLB.hist.pop(); } return; }
-    if (d.kind === 'pan') { if (!d.moved) { GLB.sel = null; glCloseMenu(); } return; }
+    if (d.kind === 'pan') { if (!d.moved) { GLB.sel = null; glCloseMenu(); } else glSaveRig(); return; }
     if (d.kind === 'ruler') return;
     if (!d.moved) { GLB.sel = d.id; glOpenMenu(d.id, P); return; }
     const p = glPart(d.id); if (p && glIsAddon(p)) glAutoAttach(p);
@@ -204,7 +204,7 @@ function glToolAct(k) {
   if (k === 'undo') { const s = GLB.hist.pop(); if (s) { GLB.rig = JSON.parse(s); GLB.sel = null; glCloseMenu(); glChanged(); } else toast('Nothing to undo.'); }
   else if (k === 'clear') { if (!GLB.rig.parts.length) return; if (!confirm('Clear the whole rig and start again?')) return; glPush(); GLB.rig = { parts: [], cables: [] }; GLB.sel = null; glCloseMenu(); glChanged(); }
   else if (k === 'ruler') { GLB.rulerOn = !GLB.rulerOn; if (!GLB.ruler) GLB.ruler = { a: { x: glSnap(GLV.cx - 6, 0.1), y: 0 }, b: { x: glSnap(GLV.cx + 4, 0.1), y: 6 } }; if (GLB.rulerOn) { GLB.ruler.a = glRulerSnap({ x: GLB.ruler.a.x, y: GLB.ruler.a.y }); } $('[data-gt=ruler]').classList.toggle('on', GLB.rulerOn); }
-  else if (k === 'zin' || k === 'zout') { GLV.z = clamp(GLV.z * (k === 'zin' ? 1.5 : 1 / 1.5), 1, 4); glClampView(); }
+  else if (k === 'zin' || k === 'zout') { GLV.z = clamp(GLV.z * (k === 'zin' ? 1.5 : 1 / 1.5), 1, 4); glClampView(); glSaveRig(); }
   else if (k === 'zall') { GLV.z = 1; GLV.cx = 48; GLV.cy = GLV.LH > GLV.wide ? 15 : 12; glClampView(); }
 }
 /* the board, built into a host element */
@@ -232,7 +232,8 @@ function glMountBoard(host, opts) {
       const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
       setTimeout(() => { GLB.trayDrag = false; }, 0); };
     document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
-  glSize(); glLoop();
+  glSize(); if (st.view && st.view.LH === GLV.LH) { GLV.z = st.view.z; GLV.cx = st.view.cx; GLV.cy = st.view.cy; glClampView(); }
+  glLoop();
 }
 
 /* ---------- the Part 5 Challenge card ---------- */

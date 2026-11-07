@@ -23,13 +23,14 @@ function glMountRun(host) {
       <div class="glwork"><label for="glWork">Working (not marked)</label><textarea id="glWork" rows="2" placeholder="Write your working here: the MA of each part, multiplied, then the pull."></textarea></div></div>
     <div class="row glrunrow"><button type="button" class="go" id="glRun">▶ Run Rescue</button><button type="button" class="ghost" id="glSkip" hidden>Skip to the end ▶▶</button><button type="button" class="ghost" id="glBack" hidden>🔧 Back to building</button><span class="scaleNote" id="glTries"></span></div>
     <div id="glRes" aria-live="polite"></div></div>`;
-  const st = glState(); if (st.pred) { $('#glWork').value = st.pred.working || ''; }
-  $('#glPVal').addEventListener('input', () => glRunPaint()); $('#glPLeg').addEventListener('change', () => glRunPaint());
+  const st = glState(); $('#glWork').value = st.draftWork != null ? st.draftWork : (st.pred && st.pred.working) || '';
+  const keepPred = () => { const s = dbGet('chal.' + GLB.ch, {}); s[GLB.mid] = Object.assign(s[GLB.mid] || {}, { draftPred: { leg: $('#glPLeg').value, value: $('#glPVal').value } }); dbSet('chal.' + GLB.ch, s); glRunPaint(); };
+  $('#glPVal').addEventListener('input', keepPred); $('#glPLeg').addEventListener('change', keepPred);
   $('#glWork').addEventListener('input', e => { const s = dbGet('chal.' + GLB.ch, {}); s[GLB.mid] = Object.assign(s[GLB.mid] || {}, { draftWork: e.target.value }); dbSet('chal.' + GLB.ch, s); });
-  if (st.draftWork && !$('#glWork').value) $('#glWork').value = st.draftWork;
   $('#glRun').addEventListener('click', glStartRun); $('#glSkip').addEventListener('click', () => { GLR.t0 -= 1e7; });
   $('#glBack').addEventListener('click', glBackToBuild);
-  glRunPaint(); if (st.last) glShowResult(st.last, st.lastPred);
+  glRunPaint(); if (st.draftPred) { if (st.draftPred.leg !== '' && $(`#glPLeg option[value="${st.draftPred.leg}"]`)) $('#glPLeg').value = st.draftPred.leg; $('#glPVal').value = st.draftPred.value || ''; glRunPaint(); }
+  if (st.last) glShowResult(st.last, st.lastPred);
 }
 function glRunPaint() {
   const sel = $('#glPLeg'); if (!sel || !GLB.ev) return; const legs = GLB.ev.legs, keep = sel.value;
@@ -179,4 +180,22 @@ function glShowResult(sum, pred, newBest) {
     <ul class="glsums"><li>Hand travel: <b>${n0(sum.hand)} m</b> of 1,500 m oxygen</li><li>Sugar crystals: <b>${sum.cost}</b> of 475</li><li>Final crest height: <b>${f1(sum.crest)} m</b></li><li>Total work: <b>${n0(sum.work)} J</b></li>
       <li>Ship damage: <b>${f1(sum.dmg.total)}%</b>${sum.dmg.total ? ` <small>(thrusters ${f1(sum.dmg.t)}%, rock ${sum.dmg.r}%, blasts ${sum.dmg.b}%)</small>` : ''}</li><li>Boulder: <b>${{ lever: 'levered off', jack: 'jacked off', winch: 'winched away', blast: 'blasted', stuck: 'still jammed on', left: 'left on' }[sum.boulder]}</b></li></ul>
     ${sum.score != null ? `<ul class="objs glpts">${pt('Smooshy\'s hardest pull', P.pull, 5, `${f1(sum.hardest)} N. 54 to 60 N earns 5.`)}${pt('Ship condition', P.cond, 2)}${pt('Boulder cleared', P.boulder, 1)}${pt('Oxygen: 1,500 m or less', P.oxy, 1, P.oxy ? '' : 'Force HQ sent extra oxygen.')}${pt('Budget: 475 crystals or less', P.budget, 1, P.budget ? '' : 'Force HQ sent extra crystals.')}${sum.hintCost ? `<li>Hints: <b>−${sum.hintCost}</b></li>` : ''}</ul>` : ''}`;
+}
+/* ===== stage 4 plumbing: the best run's picture for the worksheet's "My Rescue" page =====
+   rigSnapshot() draws the best run's rig over the whole crater (no handles or dots) into a 900 px wide JPEG, kept under about 150 KB,
+   and stores it as chal.c6e.gl.bestRun.snap (best run only, so progress stays small; backups in 70-backup.js carry it as part of DB). */
+function rigSnapshot() {
+  const st = glState(), br = st.bestRun; if (!br || !br.rig) return null;
+  const keep = { LW: GLV.LW, LH: GLV.LH, z: GLV.z, cx: GLV.cx, cy: GLV.cy };
+  try {
+    const cv = document.createElement('canvas'); cv.width = 900; cv.height = 270; const c = cv.getContext('2d');
+    Object.assign(GLV, { LW: 1000, LH: 300, z: 1, cx: 48, cy: 12 }); c.setTransform(0.9, 0, 0, 0.9, 0, 0);
+    const ev = glEvaluate(br.rig);
+    glDrawWorld(c, { rig: br.rig, ev, ground: ev.ground, ghost: br.rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, t: 0,
+      ship: { x: GL.shipX, y: ev.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0 }, run: { on: true } });
+    c.setTransform(1, 0, 0, 1, 0, 0); glLbl(c, `${(dbGet('user', {}) || {}).name || ''}'s best rescue route`.trim(), 12, 18, GLC.ink, 13, 'left', '#fffaf2');
+    let q = 0.8, url = cv.toDataURL('image/jpeg', q); while (url.length * 0.75 > 150000 && q > 0.35) { q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
+    const all = dbGet('chal.' + GLB.ch, {}); if (all[GLB.mid] && all[GLB.mid].bestRun) { all[GLB.mid].bestRun.snap = url; dbSet('chal.' + GLB.ch, all); }
+    return url;
+  } catch (e) { return null; } finally { Object.assign(GLV, keep); }
 }

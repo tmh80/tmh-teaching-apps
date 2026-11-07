@@ -16,7 +16,7 @@ Updated after each Opus stage, so it is always current on branch `rescue-rebuild
 | 1. Rescue maths and height-profile ground | Done |
 | 2. Crater scene and builder | Done |
 | 3. Run Rescue | Done |
-| 4. Plumbing (autosave, best run, `rigSnapshot()`) | Not started |
+| 4. Plumbing (autosave, best run, `rigSnapshot()`) | Done |
 | 4b. Story half of stage 4 | Sonnet |
 
 ## Stage 1: the model (`src/js/4f-gummylift.js`)
@@ -60,6 +60,12 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 - **Hooks for Sonnet:** `glFinishRun` calls `glShowEnding(sum, {first, better})` if it exists (the three ending cards and the stopping-point pop-up on `first`), and `rigSnapshot()` on a new best run (stage 4).
 - Pulls are shown with normal rounding to one decimal place, so 56.25 N shows as 56.3 N (the brief's table says 56.2).
 - RMOTION shortens every beat to a quarter of a second and drops the shakes, bobbing and flashes.
+
+## Stage 4 plumbing
+
+- **Autosave and resume:** every change saves the rig (`chal.c6e.gl.rig`) and the view (zoom and pan, `view`); the prediction (`draftPred`) and working (`draftWork`) save as they are typed; the last result shows again on return. A reload reopens everything exactly as left (tested).
+- **`rigSnapshot()`** (end of `4i-glrun.js`) draws the best run's rig over the whole crater, without handles, into a 900 × 270 JPEG titled "<name>'s best rescue route", stepping the quality down until it is under 150 KB (about 60–90 KB in tests), and stores it as `chal.c6e.gl.bestRun.snap`. It runs automatically after any run that becomes the new best. `bkPack()` backups carry it (tested). **Not yet checked: the PDF route** (`61-pdf.js` renders pages with html2canvas; a `data:` JPEG `<img>` should survive, but check it when the My Rescue page exists in stage 6).
+- `WORKSHOP_OPEN` is now `true` on this branch (as `docs/Force_HQ_Handoff.md` asks), so the preview shows the Workshop. `tests/workshop_closed.py` checks the closed version and will need updating or retiring in stage 7.
 
 ## Still to do (Sonnet)
 

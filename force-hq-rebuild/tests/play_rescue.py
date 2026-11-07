@@ -112,6 +112,16 @@ with sync_playwright() as p:
         chk(f'route {k} plays through and saves', last and (last['stop'] == 'collapse' if k == 'collapse' else True), last and (last['score'], last['stop']))
         if not pg.locator('#glBack').is_visible(): print('STUCK', k, B.evr('[GLR.on,GLR.done,GLR.total]'), errs); break
         pg.click('#glBack'); pg.wait_for_timeout(100)
+    # stage 4: the snapshot, resume after a reload, backups
+    snap = B.evr("(__fhq.dbGet('chal.c6e',{}).gl.bestRun||{}).snap||''")
+    chk('best run has a JPEG snapshot under 150 KB', snap.startswith('data:image/jpeg') and len(snap) * 0.75 < 150000, len(snap))
+    pathlib.Path(OUT + 'snapshot.jpg').write_bytes(__import__('base64').b64decode(snap.split(',', 1)[1]))
+    B.ev("glToolAct('zin')"); pg.fill('#glPVal', '42'); pg.fill('#glWork', 'my working'); before = B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]')
+    pg.reload(); pg.wait_for_timeout(400); pg.evaluate("__fhq.openChapter('c6e','challenge')"); pg.wait_for_timeout(500); pg.evaluate("__fhq.ev('closeModal()')")
+    chk('reload reopens the rig and the view exactly as left', B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]') == before, (before, B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]')))
+    chk('reload keeps the prediction and working', pg.input_value('#glPVal') == '42' and pg.input_value('#glWork') == 'my working')
+    chk('reload shows the last result again', len(pg.inner_text('#glRes')) > 20)
+    chk('a backup carries the snapshot', 'data:image/jpeg' in B.ev('bkPack().text'))
     chk('best run is still the 10', B.evr("__fhq.dbGet('chal.c6e',{}).gl.bestRun.sum.score") == 10)
     chk('no page errors', not errs, errs)
     b.close()
