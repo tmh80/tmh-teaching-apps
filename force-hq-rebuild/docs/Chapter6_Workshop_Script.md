@@ -77,7 +77,7 @@ A wide strip above the section tabs, drawn on a small canvas:
   5. **Smooshy saved!** (Part 5): the Gumdrop sits on the rim and Smooshy has his arms up.
   6. **Extension: Gummy Base One** (a dashed slot labelled "Extension", shown once Part 5 is done): a sugar-crystal dome, a water tower and a sugar garden appear beside the crater, one for each Extension mission passed or attempted (gb1–gb3).
 - Until Part 5 is done, Smooshy is **inside** the tipped Gumdrop, seen through the window (`drawGumdropInside`), with the black box blinking beside it.
-- Buttons: **📡 Replay transmission** and, once Part 5 is done, **Watch the rescue again** (replays the ending animation).
+- Buttons: **📡 Replay transmission** (the "Watch the rescue again" button was removed with the old ending animation in the rescue rebuild).
 - One plain sentence under the slots that always says the next job, e.g. "Next: Part 3 teaches the maths the mission computer needs."
 
 ### B4. Smooshy in the Workshop
@@ -172,12 +172,12 @@ No effort slider: the machine settings are the variables, and the newtonmeter me
 - Pressing Pull! again resets the load and runs again. Changing a setting resets the load.
 - Keyboard: Space or Enter on the button. Works with touch. A pull can't be started while one is running.
 
-### C4. The machine builder (`builder` panel, Part 4, the rescue and Explore)
+### C4. The machine builder (`builder` panel, Part 4 and Explore; Part 5 has its own Gummy Lift builder, section O)
 Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild mDrawCrane mDrawPulley mDrawLever PARTS bJudge mCalc` (never Read the old file whole). Keep the old look where it fits; change it to these rules:
 - A chain of slots from left to right: **[the puller] → slot 1 → slot 2 → slot 3 → [the load]**. Each slot takes one part: **Route/ramp** (only in the last slot, because the ramp carries the load), **Pulley block** (1–4 supporting ropes), **Winch** (×2–×10). Each part type can be used once. An empty slot is skipped. Missions say which parts and routes are available.
 - Live readouts (each maskable): **Total MA** = the product of the parts' MAs; **Cable needed** = pulley ropes × route length (route length = the lift height when there's no ramp; 1 rope if there's no pulley block); **Hand travel** = total MA × lift height.
 - Drawing: the puller turning the winch handle (or pulling the rope), the cable to the pulley block, the block hooked to the load, the load on the route. With no winch the puller pulls the rope directly.
-- **Lever, wedge and screw are not builder parts** (they are push machines, used in their own rescue stages).
+- **Lever, wedge and screw are not builder parts** (they are push machines; the Part 5 Gummy Lift builder has its own lever and screw jack parts).
 
 ### C5. Runs, readings and masks
 - **Every pull is a run** (`runMark` / `runTick` / `runEnd`), with a `runText` sentence and `runChips`, so the Journal's Runs tab holds every reading and no question forces a re-run. Examples:
@@ -192,17 +192,16 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 - **Calculation steps** use the 28 Oct pattern: a *calculate* task `['', () => hasAns('q2'), { q: 'q2' }]` and a short *check* task that ticks when the matching run exists. Leave a task's text empty when the question already holds the numbers.
 - **Target-finding** isn't needed (the newtonmeter measures the effort directly), so no `LAB.bmarks` here.
 
-### C6. The rescue site (`S.scene = 'rescue'`, Part 5)
-- Glimmer-9's crater (B6), side-on. The Gumdrop at the bottom, tipped on its side, one leg under a boulder. The crater wall is **15 m** high, with an altitude scale.
-- Stage 1 shows the crowbar on a rock fulcrum under the boulder; stage 2 shows the screw jack under the ship's sunken side; stage 3 shows the four routes up the wall, a winch anchored on the rim, and the builder below the canvas.
-- **Smooshy is the puller in every stage** (`cap: 60`). He walks out of the ship in his suit and works the crowbar, the jack handle or the winch handle.
-- The mission computer panel (`mcomp`): before each try, the student types a prediction (C7); Smooshy only tries once a number is typed (any number counts).
-- When stage 3 succeeds: the ending animation. The Gumdrop rises up the chosen route onto the rim and Smooshy does a happy wobble-dance. He leans on a glittering crystal, licks it, and freezes: "Wait... these crystals are SUGAR!" He calls home on his wrist radio: "Gummies of the galaxy, I've found us a new home!" The Gumdrop does a victory loop above the crater with a blue exhaust trail, then a "Mission complete" card. If Extension exists, the card adds: "Extension unlocked: help the gummy colonists build Gummy Base One." Reduced motion: a still picture and the card.
+### C6. The rescue site (Part 5, built in the rescue rebuild, Nov 2026)
+- Glimmer-9's crater (B6), side-on, drawn by `4g-glscene.js` (`glDrawWorld`): the height-profile ground, the Big Jelly waiting on the plain, the Gumdrop (`drawGumdropInside` while Smooshy is inside), the boulder, machines, platforms, cables, dynamite with a dashed blast preview, the glowing handover box and the ruler. Damage shows on the hull (cracks, scorch marks, wobble).
+- **Smooshy** starts inside the Gumdrop, peeping out of the window. When Run Rescue starts he squeezes out through the hatch, stays at the handle of whichever machine is running and walks to the next one. At the end he climbs aboard, waves from the window, and the Big Jelly's tractor beam lifts the Gumdrop away. `RMOTION` shortens every beat and drops the shakes.
+- The mission computer (`glPred`): before each run the student picks one leg and types a predicted pull (any number unlocks Run Rescue), with a "Working (not marked)" box. Section O has the rules, the physics and the scoring.
+- **Endings** (`glShowEnding` in `4j-glstory.js`): three draggable cards, **Spotless rescue!**, **Dented, but home!** and **Not yet!**, plus the "good place to stop for today" pop-up after the first complete rescue. There is no sugar-discovery scene and no victory loop any more; the glittering crystals are picked up by the Extension (`p5a`).
 
 ### C7. Scoring
 - **Parts 3 and 4 Challenges** (y1–y3, h1–h3): the existing pattern. All objectives met on the 1st try = 4 points, 2nd = 3, 3rd = 2, later = 1; **Move on** after 3 misses scores 1. A pass is green and starts "Congratulations!". A miss lists each objective with its result, target and ✓/✗ in that order ("Effort: 61.3 N. Target: 60 N or less. ✗"). Each mission has a "Need a clue?" ladder.
-- **The rescue** (sm1–sm3, Tom's rule for hard game challenges): score = **objectives met on the student's best try** in each stage (4 + 4 + 5 = 13 points). Easier objectives are included, so everyone scores. **Attempting all three stages is enough to finish the Challenge.** After 3 tries in a stage, a **Move on** button appears; moving on keeps the best score. Show the objectives as a checklist that ticks live.
-- **The ending always celebrates.** If stage 3 was never fully met, the ending says: "With your plan, Smooshy got the Gumdrop part of the way up. Force HQ's backup team used your numbers to finish the job. Want to perfect it? You can try the rescue again in Explore." and the sugar discovery and victory loop still play.
+- **The rescue** (`gl`, Tom's rule for hard game challenges): a quality score out of **10** on the best run (section O has the table). Easier points are included (boulder cleared, oxygen, budget, no damage), so everyone scores. **Attempting is enough to finish the Challenge**: a run that does not finish shows "Not yet", invites another go and never blocks the Check or the worksheet. The rescue score stays unmarked and is reported on the My Rescue page.
+- **The ending always invites another go.** Spotless and dented endings celebrate the rescue. "Not yet" names the part that stopped the run (a missing link, a collapsed platform, a pull that was too heavy) and keeps everything else in the rig, so the student fixes only that part.
 
 ### C8. Glossary, formulas, facts, sections, chapter data
 **New `TERMS`** (check for duplicates first; `weight`, `mass`, `gfs` exist):
@@ -258,7 +257,7 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 | `c6b` | Pulleys, wheels and ramps | Part 2 | Toolkit Packer | pl1–pl4 | none | c6r7–c6r11 | c6a |
 | `c6c` | Mechanical advantage and work | Part 3 | Advantage Ace | u1–u3 | y1–y3 | c6r12–c6r17 | c6b |
 | `c6d` | Compound machines | Part 4 | Master Builder | k1–k3 | h1–h3 | c6r18–c6r22 | c6c |
-| `c6e` | Rescue Captain Smooshy! | Part 5 | Smooshy Saver | v1 | sm1–sm3 | c6r23–c6r26 | c6d |
+| `c6e` | Rescue Captain Smooshy! | Part 5 | Smooshy Saver | v1 | gl (Operation Gummy Lift) | c6r23–c6r26, c6r32 | c6d |
 | `c6f` | Real machines waste energy | Extension | Colony Engineer | p5a–p5b | gb1–gb3 | c6r27–c6r31 | c6e |
 
 - Blurbs: c6a "Levers, pulleys, wheels and axles, ramps, wedges and screws: the six simple machines, and the trade-off they all share." · c6c "Put numbers on it: mechanical advantage, the force–distance trade-off and work in joules, then load the rescue rocket." · c6d "Machines inside machines: build a crane, multiply mechanical advantages and assemble the rescue kit." · c6e "Fly to Glimmer-9 and plan the rescue in three stages. Can a 60 N gummy bear haul a spaceship out of a crater?" · c6f "Glimmer-9's crystals are sugar! Measure how real machines waste energy, then build Gummy Base One on a tight solar energy budget."
@@ -268,7 +267,7 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 - **Chapter data:** `CHAPTERS` gets `{ id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: true, arena: 'Workshop', icon: 'gear' }` (draw a `gear` icon for `chIcon`, or reuse the Workshop card's pulley icon). `goal`: "Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn't reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue." `vocab`: machine, simple machine, compound machine, lever, fulcrum, effort, load, pulley, supporting rope, wheel and axle, inclined plane, wedge, screw, mechanical advantage, work, joule.
 - **Home:** the Workshop building on the home map opens Chapter 6 (replace the "being built" toast). Rewrite `#workshopCard` to "Chapter 6 · The Workshop: Save Captain Smooshy!". Add Chapter 6 to the chapter list in Chapter 1's overview card (`41-ch1.js`, around line 107). Remove "and the Workshop" from the teacher page's "More chapters…" note.
 - **Explore:** a **Workshop** card in Explore with every machine, the builder, any load, the world picker (Earth, Moon, Mars, Glimmer-9) and the Perfect / Real switch, plus **Try the rescue again** (the rescue site with every setting free and no scoring) and the four **build tasks** (section W).
-- **Worksheets:** add `c6a`–`c6f` to `SHEETS` in `tools/make_worksheets.py`. The Part 5 worksheet also prints a **Rescue report** (section K4). Add lever and pulley pictures for paper with small SVG helpers (`leverSVG({cls, ea, la, labels})`, `pulleySVG(ropes)`, `buildSVG(parts)`); the same helpers draw the pictures inside questions.
+- **Worksheets:** add `c6a`–`c6f` to `SHEETS` in `tools/make_worksheets.py`. The Part 5 worksheet opens with the **My Rescue** page (section O1). Add lever and pulley pictures for paper with small SVG helpers (`leverSVG({cls, ea, la, labels})`, `pulleySVG(ropes)`, `buildSVG(parts)`); the same helpers draw the pictures inside questions.
 - **MYP tags:** `obj` on every Check question, as listed. Run `python3 tests/strands.py`. Strands never go on student screens or sheets. Part 5's Check carries **D i, D ii and D iii**, which fills the D ii gap in the Backlog. The Extension Check carries D i and D iii.
 
 ---
@@ -278,7 +277,7 @@ Port and adapt the old build's builder: `python3 tools/old.py bParts mDrawBuild 
 | Code | Misconception | Where it is challenged |
 |---|---|---|
 | M1 | A machine reduces the work you have to do | u3 q4, c6r14, c6r25 |
-| M2 | A bigger mechanical advantage is always better (no cost) | u3 q5, h-missions, sm3, c6r25 |
+| M2 | A bigger mechanical advantage is always better (no cost) | u3 q5, h-missions, gl, c6r25 |
 | M3 | A single fixed pulley reduces the effort | pl1 q4, u1 q4 |
 | M4 | Compound MAs add instead of multiply | k2 predict, k3 q3, c6r20 |
 | M5 | The rope you pull is the same length as the height lifted | pl1 q2, u3 q1, c6r16 |
@@ -883,18 +882,20 @@ c6r22 | explain | obj ['Aii'] | A crane uses a winch and a pulley system to lift
 ---
 
 ## N. Part 5: Rescue Captain Smooshy! (c6e)
-**As built (3 Nov 2026), where it differs from the plan below:** the rescue site and Base camp are `WS.site` backdrops ('rescue', 'base') on the Workshop scene, not a separate `S.scene`. Smooshy climbs out of the Gumdrop's hatch in v1 (`WS.hatch`). The Challenge is `renderRescueCourse`: Smooshy's try button stays locked until the student types a prediction; each stage is scored 4, 4 and 5 points on the best try; the ending (`openEnding`) plays once all three stages are tried. About 4 min Learn, 12 min Challenge, 9 min Check (25 min).
+**As built (rescue rebuild, 7 Nov 2026):** this replaces the earlier three-stage Part 5 (crowbar, jack, haul). Part 5 is now one homework in two sessions, about 60 min in all (4 Learn + 44 Challenge + 12 Check). The step `v1` cards are in `src/js/4c-ch6.js`, the Challenge is the free-build mission `gl` (section O), and the Check is c6r23 to c6r26 plus the reflection c6r32 (section P). The full design is `docs/Force_HQ_Rescue_Rebuild_Brief.md`, and what was built and the small choices made are in `docs/Rescue_Sonnet_Handoff.md`.
 
 ### Step v1: Landing on Glimmer-9   (Part 5, about 4 min)
-Arena: the rescue site (C6), overview of the crater, no stage active. Adds `mcomp` (the mission computer panel, used here for the calculate tasks). Formulas glowing: `weight`, `ma`, `effortq`.
+Arena: the rescue site backdrop (`WS.site = 'rescue'`), overview of the crater. Smooshy is peeping out of the Gumdrop's window (`WS.peep`, drawn with `drawGumdropInside`). Formulas glowing: `weight`, `ma`, `effortq`.
 
 CARDS
-1. You've landed on **Planet Glimmer-9**! Purple sky, two moons, and there's the Gumdrop, tipped over at the bottom of a **15 m** deep crater, with a boulder pinning one landing leg. Captain Smooshy waves from the cockpit window, then squeezes out through the hatch (gummy bears are very squishy) to do the pulling. On Glimmer-9, **g = 4.2 N/kg**, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear.
-2. The rescue has three stages. **Stage 1:** lever the boulder off the landing leg. **Stage 2:** jack up the ship's sunken side so it sits level. **Stage 3:** build a compound machine to haul the Gumdrop up the crater wall. You plan each stage, and Smooshy does the pulling. The mission computer wants your numbers before every try.
+1. You've landed on **Planet Glimmer-9**! Purple sky, two moons, and there is the Gumdrop, tipped over at the bottom of a **15 m** deep crater with a boulder jammed against its landing leg. Captain Smooshy is peeping out of the Gumdrop's window, wondering how a gummy bear is going to get his ship home.
+2. The huge repair ship, the **Big Jelly**, waits on the plain beyond the crater, because the rim is too crumbly for it to come any closer. Its **tractor beam** can lift the Gumdrop once the ship is level with the crest. When the rescue begins, Smooshy squeezes out through the hatch (gummy bears are very squishy), because he has to be outside to pull. He stays at the handle of each machine in the route and walks on to the next one. At the end he climbs aboard, waves from the window, and the tractor beam lifts the ship away. (Picture: `picCraterPlan()`, the crater, the Big Jelly and its beam, with four numbered steps.)
+3. On Glimmer-9, g = **4.2 N/kg**, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear. The student has **475 sugar crystals** to spend on machines, platforms and dynamite, and Smooshy has oxygen for **1,500 m** of hand pulling. Design a route, press **Run Rescue**, and watch it work. One homework in two sessions: build and test a first route in the first, improve it in the second.
 
 DO THIS
 - (calculate task) q1
 - (calculate task) q2
+- (pick task) q3
 
 YOUR TURN QUESTIONS
 q1 | num | The Gumdrop has a mass of 1,500 kg. On Glimmer-9, g = 4.2 N/kg. What does the Gumdrop weigh there? | answer 6300 | unit N | tolerance 1 | units picker | ladder
@@ -902,7 +903,7 @@ q1 | num | The Gumdrop has a mass of 1,500 kg. On Glimmer-9, g = 4.2 N/kg. What 
    Working shown after: weight = 1,500 × 4.2 = 6,300 N.
 q2 | num | Smooshy can pull with 60 N. What mechanical advantage would he need to lift the 6,300 N Gumdrop straight up? | answer 105 | unit (no unit) | tolerance 0.5 | ladder
    Hints: Mechanical advantage = load ÷ effort. · The load is 6,300 N and the effort is 60 N. · 6,300 ÷ 60.
-   Working shown after: MA = 6,300 ÷ 60 = 105. No single Workshop machine comes close, so stage 3 needs a compound machine.
+   Working shown after: MA = 6,300 ÷ 60 = 105. No single Workshop machine comes close, so the rescue route needs several machines working together.
 q3 | pick | If the Gumdrop had crashed on Earth instead, its mass would be {0} and its weight would be {1}.
    {0}: smaller / the same / bigger → the same
    {1}: smaller / the same / bigger → bigger
@@ -913,43 +914,46 @@ Rescue log: Landed on Glimmer-9. Rescue plan loaded!
 
 ---
 
-## O. Part 5 Challenge: Operation Gummy Lift (sm1–sm3)
+## O. Part 5 Challenge: Operation Gummy Lift (`gl`)
 
-Engine: `renderRescueCourse` in `4d-rescue.js`, objective scoring (C7). Smooshy pulls (`cap: 60`). One stage at a time; the stage's settings are the only controls. **Before each try**, the mission computer asks for a prediction (a number box with a unit, under the controls); **Smooshy, try it!** is enabled once any number is typed. Objectives tick live; after each try, the result lines follow the November pattern (result, target, ✓/✗). Each stage has a "Need a clue?" ladder. After 3 tries, **Move on** appears.
+One free-build mission, worth **10 points** on the student's best run (`CHDATA.c6.challenge`, `mins: 44`). Code: the model `4f-gummylift.js` (pure maths, `glEvaluate`), the scene `4g-glscene.js`, the builder `4h-glbuild.js`, Run Rescue `4i-glrun.js`, story, warm-up and endings `4j-glstory.js`, hints `4k-glhints.js`. Tests: `tests/rescue_numbers.py` (the table below), `play_rescue.py`, `play_story.py`, `play_hints.py`.
 
-Intro: Operation Gummy Lift is go! Three stages stand between Smooshy and home. Plan each one with the numbers, then let Smooshy try it. Every objective you meet scores a point, and you can try each stage as often as you like.
+**The world.** Side-on crater. The ground is a height profile (one height per metre), so dynamite carves dips with no tunnels. Floor 0 m, a wall to a shelf at 6 m, a **bulge** up to about 9 m, a wall to 12 m, a narrow crest peak at 15 m, then the plain at 8 m where the Big Jelly waits. The bulge blocks any single straight ramp from floor to crest, so a relay of machines is the natural answer (blasting the bulge is the alternative). The ship arrives when a leg ends level with the top (within 0.5 m), because the tractor beam cannot bend over the rim. Blasting the crest from 15 m to about 12 m lowers the target. A ruler lets students measure heights and lengths themselves.
 
-sm1 | Free the landing leg | lever, class 1, crowbar 2 m long, boulder 60 kg (252 N on Glimmer-9); student sets the load arm 0.20–1.00 m in 0.05 steps; Smooshy can push his end down **1.5 m** at most (`maxTravel` 1.5); the boulder must rise **0.25 m** to free the leg
-   Brief: A **60 kg** boulder is pinning the landing leg (g = 4.2 N/kg). Smooshy has a 2 m crowbar and a rock to use as a fulcrum. He can push down with **60 N at most**, and he can push his end down **1.5 m** before it hits the ground. The boulder must rise **0.25 m** to free the leg.
-   Prediction box: "What effort will Smooshy need with your fulcrum position?" (N)
-   Objectives (4): Planned: you typed a prediction · Prediction within 1 N of the effort Smooshy needed · Smooshy's push is 60 N or less · The boulder rises at least 0.25 m
-   Clues: The boulder weighs 60 × 4.2 = 252 N, so the lever's MA must be at least 252 ÷ 60 = 4.2. · But a big MA means the boulder rises only a little: rise = 1.5 m ÷ MA. For a 0.25 m rise, the MA can be 6 at most. · Find a load arm that gives an MA between 4.2 and 6. (MA = effort arm ÷ load arm, and effort arm = 2 − load arm.)
-   Feasibility (model): load arm 0.30 m (MA 5.67, 44.5 N, rise 0.265 m) and 0.35 m (MA 4.71, 53.5 N, rise 0.318 m). 0.25 m lifts with 36.0 N but only 0.214 m; 0.40 m needs 63.0 N.
+**Parts and costs.** Ramp (3 per m, up to 30 m, rise ÷ length at most 0.5). Crane gantry (40, MA 1, rise at most 8 m). Lever (25, 10 m beam, MA at most 9, rise at most 2 m). Screw jack (60, MA 120, rise at most 2 m). Pulley block (10 per rope, 1 to 4 ropes). Winch (15 each, ×2, ×4, ×6, ×7, ×8, ×10, up to 2 per leg). Cable (1 per 5 m). Dynamite (small 20, radius 1.5 m; big 40, radius 3 m). Platforms hold a load (ship 6,300 N plus machines standing on them) or collapse: small 4,000 N (10 + 2 per m high), medium 7,000 N (20 + 2 per m), large 10,000 N (35 + 2 per m). Machine weights: crane 1,000 N, lever 500 N, jack 400 N, winch 100 N, pulley block 100 N. The next leg must start within 3 m across and 0.5 m up or down of the last leg's end (the glowing handover box). Mouse and touch both work.
 
-sm2 | Level the ship | screw jack under the sunken side, which presses down with **3,780 N**; lift **40 cm**; student chooses the distance the handle moves in one turn (0.6, 1.2 or 1.8 m) and the pitch (0.2, 0.5 or 1.0 cm); turn counter on
-   Brief: The Gumdrop's sunken side presses down with **3,780 N**. Smooshy must jack it up **40 cm**. He can push the handle with **60 N at most**, and after **50 turns** his gummy arms go floppy.
-   Prediction box: "What effort will Smooshy need on the jack handle?" (N)
-   Objectives (4): Planned: you typed a prediction · Prediction within 1 N · Smooshy's push is 60 N or less · 50 turns or fewer
-   Clues: Turns = 40 cm ÷ pitch. Which pitches need 50 turns or fewer? · Screw MA = distance per turn ÷ pitch (use the same units: 1.2 m = 120 cm). · With a 1.0 cm pitch, which handle gets the effort to 60 N or less? 3,780 ÷ MA.
-   Feasibility: pitch 1.0 cm with 1.2 m per turn (MA 120, 31.5 N, 40 turns) or 1.8 m per turn (MA 180, 21.0 N, 40 turns). 0.6 m per turn needs 63.0 N; the finer pitches need 80 or 200 turns.
+**Physics.** Pull on a leg = load ÷ the leg's total MA (MAs multiply inside a leg). Hand travel = MA × rise, added over all legs (oxygen limit 1,500 m). Work = 6,300 × the total rise (94,500 J to a 15 m crest, 75,600 J to a 12 m crest). Relay and compound are different: machines on one leg multiply, while legs one after another add their heights. Pull above 60 N comes from the Gumdrop's damaged thrusters: damage % = (pull − 60) ÷ 120 × 100, added for each weak leg and capped at 100%. Rock left on the ship adds 2,100 N to every leg's load and always adds 25% damage. A blast within 6 m of the ship adds 15%. The boulder (252 N) is cleared by a lever or jack at 60 N or less, a rope and winch, or dynamite.
 
-sm3 | Haul out of the crater | the builder (C4); the 6,300 N Gumdrop rises **15 m**; routes: straight up the wall (15 m), steep track (30 m), medium track (45 m), gentle track (75 m); pulley block 1–4 ropes; winch ×2–×10 (the winch is anchored on the rim)
-   Brief: Time for the big one! Haul the **6,300 N** Gumdrop **15 m** up and out of the crater. Smooshy can pull **60 N at most**. The winch drum holds **240 m of cable**, and Smooshy has oxygen for **2,400 m of hand travel** (about 40 minutes of turning). Choose a route, a pulley block and a winch.
-   Prediction box: "What is the total mechanical advantage of your machine?" (no unit)
-   Objectives (5): Used a compound machine (two or more parts) · Total MA typed correctly (within 0.5) · Smooshy's pull is 60 N or less · Cable 240 m or less · Hand travel 2,400 m or less
-   Clues: MA needed = 6,300 ÷ 60 = 105. Hand travel = MA × 15 m, so the MA can be 160 at most. · Cable = supporting ropes × route length. The gentle track (75 m) can only take 3 ropes. · Each route is a ramp: its MA = length ÷ 15 m. The gentle track gives 5, the medium track 3. What must the pulley block and the winch multiply to?
-   Feasibility (model): medium track + 4 ropes + ×10 (MA 120, 52.5 N, cable 180 m, travel 1,800 m); gentle track + 3 ropes + ×8 (MA 120, 52.5 N, 225 m, 1,800 m); gentle track + 3 ropes + ×10 (MA 150, 42.0 N, 225 m, 2,250 m). Near misses worth a specific message: gentle track + 4 ropes (cable 300 m: "Not enough cable! You'd need 300 m."); any MA over 160 ("Smooshy's oxygen would run out after 2,400 m of turning.").
+**Scoring (10 points, best run counts).** Hardest leg's pull: 54 to 60 N = 5, 45 to under 54 N = 4, under 45 N = 3, over 60 to 80 N = 2, over 80 to 120 N = 1, over 120 to 180 N = 0, over 180 N or a route that does not finish = "Not yet", no score. Rock left on caps the pull points at 2. Ship condition: no damage 2, up to 25% damage 1, more 0. Boulder cleared 1. Oxygen 1,500 m or less 1. Budget 475 or less 1. Going over oxygen or budget does not stop the rescue; the point is lost. Each hint after the first costs 1 point, never taking a rescued route below 1. Endings: **spotless** (0 damage), **dented** (any damage), **not yet** (invites another go and never blocks the Check or the worksheet).
 
-When all three stages are attempted: the ending (C6, C7), the stamp, and a pop-up nudging the student to the Check: "Mission complete! Do the debrief questions in the Check to get your completed worksheet, with your rescue report on it."
+**Student flow.** Session 1 (about 30 min): the landing questions, then a guided warm-up of about 3 minutes (place a lever on the boulder; the boulder's pull may be shown because it is practice), then free build and a first Run Rescue. After the first complete rescue, a friendly pop-up says this is a good place to stop for the day, with a Save my work button. Session 2 (about 30 min): improve the route, see the ending, write the reflection, do the Check, save the worksheet. The rig autosaves after every change and reopens exactly as left. Pop-ups are draggable.
 
-### O1. Rescue report on the Part 5 worksheet
-**As built:** `rescueReportHTML(mode)` (end of `4d-rescue.js`) prints the table from the best try stored in `chal.c6e` (each try's log keeps desc, met, pred, need, ma and the ticks). The answer key shows these passing settings: stage 1 load arm 0.30 m (44.5 N); stage 2 120 cm per turn with a 1.0 cm gap (31.5 N, 40 turns); stage 3 medium track, 4 ropes, winch ×10 (MA 120, 52.5 N). The marking scheme and the AI text say the report is not marked.
-The c6e worksheet prints, before the Check questions, a **Rescue report** with one row per stage: the student's settings, their prediction, what Smooshy needed, the result, and each objective with ✓ or ✗ (best try). Blank template: the same table, empty. Answer key: the passing settings from the feasibility notes. The marking scheme says the Rescue report isn't marked (Challenges are not marked), but the AI feedback may mention it in the strengths or next step.
+**No giving away the answer.** Live pull, MA and hand travel stay hidden while building. Before each run the student picks one leg and types a predicted pull, with a "Working (not marked)" box; any number unlocks Run Rescue. After the run, a result card shows the stamp, score, prediction feedback and a receipt per leg (machine, rise, total MA, pull, hand travel, work).
+
+**Hints (spent).** "💡 Need a hint?" has six topics: Smooshy's pull, mechanical advantage, hand distance, cable, weight, work. Choosing a topic is free. Tier 1 gives formulas and ideas, tier 2 plugs in the student's own leg or boulder lever with blanks, tier 3 is a worked example with different numbers. Opening each tier for a topic spends one hint the first time; reading it again is free.
+
+**Tested routes** (`tests/rescue_numbers.py`; pulls display with normal rounding, so 56.25 N shows as 56.3 N):
+
+| Route | Hardest pull | Hand travel | Score |
+|---|---|---|---|
+| 2 ramps of 24 m (rope 4, winch ×7), blast crest to about 12 m | 56.3 N | 1,344 m | 10 |
+| Crane 4 m, ramp, lever 2 m, blast crest | 58.3 N | 1,336 m | 10 |
+| 2 ramps of 30 m, no blast | 56.3 N | 1,680 m | 9 |
+| Blast crest, one 30 m ramp to a 6 m Large platform, winches ×7 and ×8 | 45.0 N | 1,680 m | 8 |
+| 2 ramps with winch ×10 (over-built) | 39.4 N | 1,920 m | 7 |
+| Boulder dynamited, otherwise the top route | 56.3 N | 1,344 m | 9 |
+| One weak leg (winch ×4) | 98.4 N | 1,056 m | 4 |
+| Rock left on | 75.0 N | 1,344 m | 4 |
+| No machine | 6,300 N | | Not yet |
+
+Costs of the top routes: top route 358 crystals, crane route 463, two 30 m ramps 386, one ramp 238.
+
+### O1. My Rescue page on the Part 5 worksheet
+**As built:** `myRescueHTML(mode)` (`src/js/4l-glreport.js`) is page 1 of the c6e worksheet. It shows a large screenshot of the student's best run (`chal.c6e.gl.bestRun.snap`, a JPEG of about 900 px saved by `rigSnapshot()`), the result stamp and score, one table row per leg (leg, machines, rise, total MA, pull), totals (hand travel, crystals spent, final crest height, work, damage, hints, tries) and the student's working. Blank template: an empty dashed frame and empty boxes. Answer key: the top route (`GL_KEY_RIG`: two 24 m ramps, 4 ropes, winch ×7, lever on the boulder, crest blasted: 56.3 N per leg, 1,344 m, 358 crystals, crest 12.2 m, 75,600 J, 0% damage, 10 of 10), drawn live by `glSnapURL`. The screenshot survives the PDF route (`61-pdf.js`) and backups (`70-backup.js`); `tests/play_myrescue.py` checks both. The marking scheme and the AI text say My Rescue is reported and not marked; the reflection and the Check are marked. No standards appear on student pages. Worksheet pages for c6e: page 1 My Rescue, page 2 steps summary with Part A and Part B, page 3 Part C (the reflection, on its own page).
 
 ---
 
-## P. Part 5 Check: Mission debrief (c6r23–c6r26)
-
+## P. Part 5 Check: Mission debrief (c6r23–c6r26, then the reflection c6r32)
 c6r23 | explain | obj ['Aii', 'Di', 'Diii'] | Real rescue teams use compound machines too. A tow truck pulls a car out of a ditch with a winch and a pulley block. Describe how the tow truck's machine helps the rescuers.
    words: winch, pulley, mechanical advantage, effort
    model: The winch is a wheel and axle that winds in the cable, and the pulley block adds supporting ropes. Together they make a compound machine, so their mechanical advantages multiply. That means a small effort from the winch's motor or handle can pull the heavy car out. The cable has to be wound in much further than the car moves.
@@ -965,10 +969,16 @@ c6r25 | reason | sure: true | obj ['Aiii'] | Ana says: "If Smooshy had built an 
    reasons: He pulls with less force over a longer distance, so force × distance stays at 94,500 J · A smaller force always means a smaller amount of work done · He turns the handle further, so force × distance must be bigger · The machine carries part of the ship's weight for him
    correct reason 0
 
-c6r26 | explain | obj ['Dii', 'Diii'] | The rescue team had two plans. Plan A: dig the gentle 75 m track and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9's crater, then say which plan you would choose and why.
+c6r26 | explain | obj ['Dii', 'Diii'] | The rescue team had two plans. Plan A: build long, gentle ramps and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9's crater, then say which plan you would choose and why.
    words: mechanical advantage, distance, safety, cost
-   model: Plan A uses the track as a ramp, which gives mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and digging a 75 m track takes time and damages more of the crater. Plan B moves the ship a much shorter distance, so it's quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.
-   checklist: Gives an advantage of Plan A (the track's mechanical advantage means a smaller or cheaper crane, or a smaller effort) · Gives a disadvantage of Plan A (more cable or distance, more time, or more damage to the crater) · Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground) · Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails) · Makes a choice and gives a reason for it
+   model: Plan A uses the ramps, which give mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and building the ramps takes time. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.
+   checklist: Gives an advantage of Plan A (the ramps' mechanical advantage means a smaller or cheaper crane, or a smaller effort) · Gives a disadvantage of Plan A (more cable or distance, or more time) · Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground) · Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails) · Makes a choice and gives a reason for it
+
+c6r32 | explain (reflection, `refl: true`; the last Check question, on its own worksheet page) | obj ['Aii', 'Di', 'Diii'] | Describe the rescue route you built and how it helped Smooshy. Use your own numbers, then say one change you would make and why.
+   words: load, effort, mechanical advantage, distance, work
+   model (a different route from the answer key's): My route used a ramp, a pulley block and a winch on each leg. On my hardest leg the 30 m ramp rose 6 m, so the ramp's mechanical advantage was 30 ÷ 6 = 5. With 4 ropes and a ×7 winch the parts multiply, so the total mechanical advantage was 5 × 4 × 7 = 140. Smooshy's effort was the load ÷ the mechanical advantage = 6,300 ÷ 140 = 45 N, which is under his 60 N limit, so the thrusters stayed off. The price is distance: his hand moved 140 × 6 = 840 m on that leg. The work was still 6,300 × 6 = 37,800 J, because machines change the effort and the distance but not the work. Next time I would blast the crest lower, because then the ship needs to be lifted less far, which means less work and less hand travel.
+   checklist (shown only after Check, with the model answer): Names the machines in the route, in order · Gives the total mechanical advantage of the hardest leg and says the parts multiply · Compares the pull with Smooshy's 60 N · Explains that a smaller effort means a longer hand distance · Gives one improvement with a reason
+   marking note (`mnote`, printed on the marking line): Accept any route and mark the numbers against the student's My Rescue table (page 1 of the worksheet).
 
 ## P2. Extension: Real machines waste energy (c6f)
 **As built (3 Nov 2026):** `c6f` is optional and, on the teacher page, ticking it also ticks its Optional box. The Perfect / Real switch sits in panel `mfric` (`#wsReal`) and is hidden in p5b, which uses Real machines only. The Check c6r29 is a `calcorder` with `desc: true` (highest efficiency first). Gummy Base One has an energy budget bar (`WS.budget`): gb1 3,800 J, gb2 10,000 J, gb3 2,000 J, with a calculate-first box. About 11 min Learn, 9 min Challenge, 10 min Check (30 min). The Rescue board has a sixth, Extension slot.
@@ -1158,7 +1168,7 @@ bt4 | Lift it on three worlds | about 15 min | load 400 kg rover, up 2 m; worlds
 | c6b | c6r7 Ai · c6r8 Aii · c6r9 Aiii · c6r10 Aii · c6r11 Aii | A i, ii, iii |
 | c6c | c6r12 Aii · c6r13 Aiii · c6r14 Aii · c6r15 Aii · c6r16 Aii · c6r17 Aii | A ii, iii |
 | c6d | c6r18 Ai · c6r19 Aii · c6r20 Aii · c6r21 Ai · c6r22 Aii | A i, ii |
-| c6e | c6r23 Aii, Di, Diii · c6r24 Aii · c6r25 Aiii · c6r26 Dii, Diii | A ii, iii · D i, ii, iii |
+| c6e | c6r23 Aii, Di, Diii · c6r24 Aii · c6r25 Aiii · c6r26 Dii, Diii · c6r32 Aii, Di, Diii | A ii, iii · D i, ii, iii |
 | c6f | c6r27 Aii · c6r28 Aii · c6r29 Aii, Aiii · c6r30 Aiii · c6r31 Aii, Di, Diii | A ii, iii · D i, iii |
 | build tasks | bt1 Aii, Aii, Aiii · bt2 Aii, Aiii · bt3 Aiii, Aii · bt4 Aii, Aii | A ii, iii |
 
@@ -1170,7 +1180,7 @@ Commit and deliver after each working step, as the Handoff says. **Done so far (
 
 1. **Re-pitch Part 3 against section A2** (one new word per card, a labelled picture for every new idea, one familiar pictured example, plain words, no prediction given away), update section H to J of this script, then build Part 3: steps u1–u3, `renderShopCourse` with y1–y3, and the Part 3 Check. **Stop: ask Tom to play Part 3.**
 2. Re-pitch Part 4, then the machine builder (C4) and the crane; Part 4 steps k1–k3, h1–h3 and the Part 4 Check. (k1's gallery must use pictured, familiar machines: scissors and a building-site crane, not a can opener or a wheelbarrow without a picture.)
-3. Re-pitch Part 5, then the rescue site (C6), step v1, the rescue course sm1–sm3 with objective scoring and the ending, the Part 5 Check and the Rescue report on the worksheet. Smooshy climbs out of the Gumdrop's hatch at the start of v1.
+3. Re-pitch Part 5, then the rescue site (C6), step v1, the Gummy Lift mission `gl` (section O) with its endings, the Part 5 Check with the reflection, and the My Rescue page on the worksheet. (Built as the rescue rebuild, 7 Nov 2026: this script's older three-stage plan was replaced.)
 4. Extension: the Perfect / Real switch and efficiencies (C1), Base camp, steps p5a–p5b, gb1–gb3 with the energy budget bar, the Extension Check, and the sixth (Extension) Rescue board slot.
 5. Build tasks bt1–bt4 (section W): port Sparks' `buildSheet` and teacher-page build-task rows, the Build tasks tab in Explore, live checks, results tables, build sheets in all three modes, and the Toddle files.
 6. Glossary, formulas, fun facts, Explore (Workshop and Try the rescue again), the teacher page, worksheets and Toddle files, MYP strands check, `tests/play_c6.py` (every Part, right and wrong answers, every mission, stage and build task passing and failing), the full test run, and the Brief, Backlog and Handoff updates.

@@ -66,8 +66,8 @@ function wsSite(c) {
     c.fillStyle = 'rgba(255,255,255,.9)'; [[820, 336], [846, 340], [872, 334]].forEach(([x, y]) => { c.beginPath(); c.moveTo(x, y - 24); c.lineTo(x + 8, y); c.lineTo(x - 8, y); c.closePath(); c.fill(); });
   } else {   // the rescue site: the Gumdrop tipped over on the left, a 15 m scale on the right
     const t = performance.now() / 1000 - (WS.siteT0 || 0), hatch = WS.hatch, out = hatch ? (RMOTION ? 1 : clamp((t - 0.4) / 2.4, 0, 1)) : (WS.noShip ? 0 : 1);
-    drawGumdrop(c, 96, 340, .62, -0.5);
-    if (!WS.noShip) drawSmooshy(c, 96 + 74 * out, 318 - (hatch ? Math.sin(out * Math.PI) * 30 : 0) + 6 * (1 - out), .27, out >= 1 ? 'wave' : 'worried');
+    if (WS.peep) drawGumdropInside(c, 96, 340, .62, -0.5, 'worried', t); else drawGumdrop(c, 96, 340, .62, -0.5);
+    if (!WS.noShip && !WS.peep) drawSmooshy(c, 96 + 74 * out, 318 - (hatch ? Math.sin(out * Math.PI) * 30 : 0) + 6 * (1 - out), .27, out >= 1 ? 'wave' : 'worried');
     c.strokeStyle = '#fffaf2'; c.lineWidth = 2; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(868, 350); c.lineTo(868, 130); c.stroke(); c.setLineDash([]);
     [0, 5, 10, 15].forEach(m => { const y = 350 - m * 14.67; c.beginPath(); c.moveTo(860, y); c.lineTo(876, y); c.stroke(); txt(c, m + ' m', 856, y, '#fffaf2', `700 11px ${C.fb}`, 'right'); });
   }

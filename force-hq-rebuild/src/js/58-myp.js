@@ -47,7 +47,7 @@ function answerKeyText(chId) {
     const m = plain(markItem(q, i)), mm = m.match(/^Q\d+ \(([^)]*)\): ([\s\S]*)$/), tag = strandsTag(q);
     out.push(mm ? `Q${i + 1} ${QLABEL[q.type]}, ${mm[1]}${tag ? ' [' + tag + ']' : ''}: ${mm[2]}` : m);
   });
-  if (chId === 'c6e') out.push('Rescue report (not marked): The worksheet has a Rescue report (a table of the student\'s three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.');
+  if (chId === 'c6e') out.push('My Rescue page (not marked): Page 1 of the worksheet has a My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg (machines, rise, total MA, pull) and totals for hand travel, crystals, crest height, work, damage, hints and tries. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection on their own route: check the numbers they quote against the My Rescue table.');
   return out.join('\n');
 }
 

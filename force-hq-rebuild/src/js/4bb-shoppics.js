@@ -268,14 +268,15 @@ function picCompoundChain(A, B) {
   return picWrap(W, 160, `Two machines with mechanical advantages ${A} and ${B} give a total of ${A * B} when you multiply`, b, '', 420);
 }
 
-/* ---------- Part 5 picture: the three rescue stages ---------- */
+/* ---------- Part 5 picture: the rescue story in order (peep, squeeze out, pull at each machine, climb aboard) ---------- */
 function picCraterPlan() {
-  const W = 420;
-  let b = `<rect x="0" y="0" width="${W}" height="236" rx="10" fill="#6f55b3"/><polygon points="0,60 90,60 150,196 270,196 330,60 420,60 420,236 0,236" fill="#b9a2e4"/>`;
-  b += `<g transform="rotate(-24 210 170)"><path d="M180 190 Q180 130 210 130 Q240 130 240 190 Z" fill="#e8639b"/><circle cx="210" cy="158" r="8" fill="#bfe6f5"/></g><ellipse cx="258" cy="186" rx="14" ry="10" fill="#8b8f93"/>`;
-  b += `<line x1="330" y1="60" x2="330" y2="196" stroke="#fffaf2" stroke-width="2" stroke-dasharray="4 4"/>` + picArrow(150, 184, 112, 116, '#fffaf2', 3);
-  b += picLabs([picLabel(258, 186, 330, 214, ['Stage 1', 'lever the boulder off'], PIC_C.E, { W }), picLabel(205, 176, 120, 214, ['Stage 2', 'jack the ship level'], PIC_C.L, { W }), picLabel(130, 150, 76, 100, ['Stage 3', 'haul it out'], PIC_C.F, { W }), picNote(372, 108, ['15 m', 'crater wall'], PIC_C.ink, { all: true, W })]);
-  return picWrap(W, 236, 'A cross-section of the crater: the Gumdrop tipped at the bottom with a boulder on its leg, and three stages: lever the boulder off, jack the ship level, and haul it up the 15 m wall', b, '', 420);
+  const W = 420, H = 250;
+  let b = `<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="#6f55b3"/><polygon points="0,60 20,60 40,190 150,190 175,140 195,140 205,128 222,128 240,95 268,60 282,60 320,150 420,150 420,250 0,250" fill="#b9a2e4"/>`;
+  b += `<polygon points="338,104 308,14 412,14 384,104" fill="#bfe6f5" opacity=".38"/><ellipse cx="361" cy="122" rx="44" ry="27" fill="#7fd4a5"/><ellipse cx="361" cy="112" rx="26" ry="9" fill="#bdf0d3" opacity=".8"/>`;
+  b += `<line x1="268" y1="60" x2="420" y2="60" stroke="#fffaf2" stroke-width="2" stroke-dasharray="4 4"/>`;
+  b += `<g transform="rotate(-24 85 170)"><path d="M55 190 Q55 130 85 130 Q115 130 115 190 Z" fill="#e8639b"/><circle cx="85" cy="158" r="8" fill="#bfe6f5"/></g><ellipse cx="128" cy="181" rx="14" ry="10" fill="#8b8f93"/>`;
+  b += picLabs([picLabel(85, 150, 70, 96, ['1. Peeps out of', 'the window'], PIC_C.E, { W }), picLabel(112, 168, 118, 222, ['2. Squeezes out', 'through the hatch'], PIC_C.L, { W }), picLabel(210, 128, 250, 205, ['3. Pulls at each', 'machine, walks on'], PIC_C.F, { W }), picLabel(361, 124, 352, 222, ['4. Climbs aboard,', 'beam lifts the ship'], PIC_C.E, { W }), picNote(364, 36, ['Big Jelly', 'tractor beam'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, H, 'A cross-section of the crater: the Gumdrop tipped at the bottom with a boulder against its leg, a crumbly wall, and the Big Jelly waiting on the plain with its tractor beam. Four steps: Smooshy peeps out of the window, squeezes out through the hatch, pulls at each machine and walks on to the next, then climbs aboard as the beam lifts the ship', b, '', 420);
 }
 
 /* ---------- Extension pictures: friction, wasted energy and efficiency ---------- */

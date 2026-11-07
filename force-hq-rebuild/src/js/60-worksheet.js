@@ -4,6 +4,8 @@ const WS_CSS = `
 .ws{font-family:Atkinson Hyperlegible,Segoe UI,system-ui,sans-serif;color:#13212a;background:#fff;font-size:11pt;line-height:1.4;max-width:190mm;margin:0 auto}
 .ws *{box-sizing:border-box}
 .ws .page{page-break-after:always;padding:2mm 0}
+.ws .rsnap{border:1.5px solid #888;border-radius:6px;overflow:hidden;margin:6px 0}.ws .rsnap img{display:block;width:100%;height:auto}.ws .rsnap.empty{height:62mm;display:flex;align-items:center;justify-content:center;border:2px dashed #999;color:#777;text-align:center;padding:8px}
+.ws .rstamp{margin:6px 0;font-size:12pt}.ws .rtab td,.ws .rtab th,.ws .rtot td,.ws .rtot th{padding:4px 6px}.ws .rtab tr td:first-child{width:8%}.ws .rtot td{height:9mm}.ws .rwork .box{min-height:26mm;border:1px solid #888;border-radius:6px;padding:6px;margin-top:4px}
 .ws .page:last-child{page-break-after:auto}
 .ws .hd{display:flex;justify-content:space-between;align-items:stretch;border-radius:6px;overflow:hidden;margin-bottom:6px}
 .ws .hd .l{background:#13212a;color:#fff;padding:8px 14px;flex:1}.ws .hd .l b{font-family:Saira Condensed,Arial Narrow,sans-serif;font-size:20pt;letter-spacing:2px;color:#f0bf4c}
@@ -115,7 +117,8 @@ function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
   const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
-  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}${chId === 'c6e' ? rescueReportHTML(mode) : ''}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  const qs = L => L.map(q => wsQuestion(q, num(q), mode, st[q.id])).join(''), partBn = partB.filter(q => !q.refl), refl = partB.filter(q => q.refl);
+  let h1 = chId === 'c6e' ? `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${myRescueHTML(mode)}</div><div class="page">${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${qs(partA)}${partBn.length ? `<h2>Part B: Draw and explain</h2>${qs(partBn)}` : ''}</div>${refl.length ? `<div class="page"><h2>Part C: My rescue reflection</h2>${qs(refl)}</div>` : ''}` : `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -152,13 +155,13 @@ function markItem(q, i) {
     case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
     case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
     case 'build': return `Build marks (${m} mark${m > 1 ? 's' : ''}): ${q.p}. ${q.how}`;
-    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
+    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}${q.mnote ? ' ' + q.mnote : ''}`;
   }
   return '';
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>The worksheet has a Rescue report (a table of the student\'s three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>Page 1 of the worksheet is the My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg and the totals. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection: check the numbers a student quotes against their My Rescue table.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 

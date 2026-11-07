@@ -75,10 +75,10 @@ const SECTIONS = [
     goal: 'Describe a compound machine as two or more simple machines working together; find the total mechanical advantage by multiplying; work out the effort and the hand travel for a compound machine; build a machine that meets limits on effort, cable and hand travel.',
     vocab: ['compound machine', 'simple machine', 'mechanical advantage', 'winch', 'pulley'] },
   { id: 'c6e', ch: 'c6', n: 6, title: 'Rescue Captain Smooshy!', part: 'Part 5', stamp: 'Smooshy Saver',
-    blurb: 'Land on Glimmer-9 and use everything you know to free the Gumdrop: lever off the boulder, jack the ship level, then haul it out of the crater.',
-    steps: ['v1'], challenge: ['sm1', 'sm2', 'sm3'], review: ['c6r23', 'c6r24', 'c6r25', 'c6r26'], needs: 'c6d',
-    chalInfo: { title: 'Operation Gummy Lift', intro: 'Operation Gummy Lift is go! Three stages stand between Smooshy and home. Plan each one with the numbers, then let Smooshy try it. Every objective you meet scores a point, and you can try each stage as often as you like.' },
-    goal: 'Use weight, mechanical advantage, effort, work and compound machines to plan a three-stage rescue; predict the effort before each try; explain why a bigger mechanical advantage never reduces the work; weigh up two real-world plans for the rescue.',
+    blurb: 'Land on Glimmer-9 and design a rescue route: free the boulder, build ramps, platforms and machines, blast the crest, and watch Smooshy lift the Gumdrop into the Big Jelly\'s tractor beam.',
+    steps: ['v1'], challenge: ['gl'], review: ['c6r23', 'c6r24', 'c6r25', 'c6r26', 'c6r32'], needs: 'c6d',
+    chalInfo: { title: 'Operation Gummy Lift', intro: 'Design one rescue route that gets the Gumdrop out of the crater and into the Big Jelly\'s tractor beam. Build it, press Run Rescue, then make it even better. Your best run counts, and every run you try helps you move on.' },
+    goal: 'Use weight, mechanical advantage, effort, work and compound machines to design a rescue route of machines; predict the effort before each try; explain why a bigger mechanical advantage never reduces the work; weigh up two real-world plans for the rescue.',
     vocab: ['weight', 'gravitational field strength', 'mechanical advantage', 'compound machine', 'work'] },
   { id: 'c6f', ch: 'c6', n: 6, title: 'Real machines waste energy', part: 'Extension', stamp: 'Colony Engineer', optional: true,
     blurb: 'Switch from perfect to real machines: friction turns work into heat, so find the efficiency of each machine and build Gummy Base One within an energy budget.',
@@ -100,7 +100,7 @@ SECTIONS.forEach(sec => {
 });
 /* estimated minutes for each part of a section */
 function secMins(id) {
-  const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);
+  const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.mins || (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3)), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);
   return { learn: Math.round(learn), challenge: Math.round(chal), review: Math.round(rev), total: Math.round(learn + chal + rev) };
 }
 const secOf = id => SECTIONS.find(s => s.id === id) || (typeof BT_SEC !== 'undefined' ? BT_SEC[id] : undefined);

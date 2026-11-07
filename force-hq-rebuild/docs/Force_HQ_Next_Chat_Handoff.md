@@ -8,10 +8,10 @@ Tom is a British science teacher (Head of MS Sciences at WAB), **a teacher, not 
 3. `docs/Chapter6_Workshop_Script.md`, section **A2 (pacing and vocabulary rules)** before writing any step, then the section for each Part as you reach it. Repo and project copies are `claude/Force_HQ_*.md` and `claude/Force_HQ_Chapter6_Workshop_Script.md`.
 4. `docs/Force_HQ_Backlog.md`.
 
-## 0. Where things stand (3 Nov 2026)
-- Chapters 1 to 6 are built. Chapter 6 (the Workshop, "Save Captain Smooshy!"): Parts 1 to 5 (`c6a` to `c6e`), the optional Extension `c6f`, the Build tasks bt1 to bt4 (Explore > Workshop > Build tasks), fun facts, the Rescue report on the Part 5 worksheet, worksheets and Toddle files for every Part and build task. All tests pass.
-- Minutes (app estimate): Part 1 31, Part 2 27, Part 3 32, Part 4 32, Part 5 25, Extension 30; build tasks 12 to 15 each. Tom's target is about 30 or less per Part: offer to trim a Challenge job in Parts 3 and 4 if his class finds them long.
-- Tom has not yet played Parts 4 and 5, the Extension or the Build tasks.
+## 0. Where things stand (7 Nov 2026)
+- Chapters 1 to 6 are built. **Part 5 (the final rescue) was rebuilt on 7 Nov 2026 as Operation Gummy Lift and merged to `main`** (a free-build rescue mission; see the last section of `docs/Force_HQ_Brief.md` and `docs/Rescue_Sonnet_Handoff.md`). Chapter 6 (the Workshop, "Save Captain Smooshy!"): Parts 1 to 5 (`c6a` to `c6e`), the optional Extension `c6f`, the Build tasks bt1 to bt4 (Explore > Workshop > Build tasks), fun facts, the My Rescue page on the Part 5 worksheet, worksheets and Toddle files for every Part and build task. All tests pass.
+- Minutes (app estimate): Part 1 31, Part 2 27, Part 3 32, Part 4 32, Part 5 about 60 in two sessions, Extension 30; build tasks 12 to 15 each. Tom's target is about 30 or less per Part: offer to trim a Challenge job in Parts 3 and 4 if his class finds them long.
+- Tom has not yet played the rebuilt Part 5, the Extension or the Build tasks.
 - The Brief's "Chapter 6 Parts 4 and 5, the Extension and the Build tasks: build log" lists the files, the engine rules and the tests. The script (`docs/Chapter6_Workshop_Script.md`) has an "As built" note under sections K, N, O1, P2 and W.
 
 ## 1. Next job
@@ -27,14 +27,14 @@ Tom is a British science teacher (Head of MS Sciences at WAB), **a teacher, not 
 - **Wording.** Students say "velocity" (not speed), never use the letter W for work (it means weight), g = 9.8 N/kg (Glimmer-9 4.2 N/kg, always stated in the question), no "it isn't X, it's Y", no lines that justify why something is worth learning, no standards on student screens or worksheets, no "I can" statements.
 - **Anything a student must read from the sim** has an inline answer box in the Do this list (`{ q: 'q1' }`), and never points at a question that only opens with "Next: questions".
 - **Pictures.** `picLabel` puts labels in white boxes with leader lines; check dark mode (no dark ink strokes outside white boxes) and 390 px phone width. Render them with a small Playwright script and look at the PNGs before committing.
-- **Challenges.** 4/3/2/1 by try, "Move on" after 3 misses scores 1 (the rescue uses best-try objective scoring instead). A pass is green and starts "Congratulations!". Show each objective as result, target, ✓/✗. Round before judging (60.0 N passes "60 N or less").
+- **Challenges.** 4/3/2/1 by try, "Move on" after 3 misses scores 1 (the rescue scores out of 10 on the best run instead). A pass is green and starts "Congratulations!". Show each objective as result, target, ✓/✗. Round before judging (60.0 N passes "60 N or less").
 - **Lanes (Drop Zone).** Lane B has its own scenery. Do not undo it.
 
 ## 3. Practical notes learned in the last chat
 - Run `python3 build.py` from `force-hq-rebuild/`, then tests. `sh tests/run_all.sh` takes about 15 minutes; run it in the background to a log file and watch the log with the Monitor tool. **Do not use `sleep` loops in the foreground** (the harness blocks them), and do not use `pgrep -f` wait loops that match themselves.
 - Playwright strict mode: a selector that matches several elements fails. Use `.first`. `#mi-shop summary` matches three summaries.
 - `fmt()` trims zeros ("18 m", not "18.0 m"); use `toFixed(1)` where a one-decimal number must show.
-- Section ids, step ids, mission ids and question ids share one namespace (`STEPMIN` too). Grep before using an id. Part 4 ids per the script: steps `k1`–`k3`, missions `h1`–`h3`, Check `c6r18`–`c6r22`; Part 5: `v1`, `sm1`–`sm3`, `c6r23`–`c6r26`; Extension: `p5a`, `p5b`, `gb1`–`gb3`, `c6r27`–`c6r31` (the script's section F note explains why).
+- Section ids, step ids, mission ids and question ids share one namespace (`STEPMIN` too). Grep before using an id. Part 4 ids per the script: steps `k1`–`k3`, missions `h1`–`h3`, Check `c6r18`–`c6r22`; Part 5: `v1`, mission `gl`, `c6r23`–`c6r26` and `c6r32`; Extension: `p5a`, `p5b`, `gb1`–`gb3`, `c6r27`–`c6r31` (the script's section F note explains why).
 - `renderShopCourse` (45-challenge.js) judges each pull from `WS.last`; capped runs record `eDist=0`, so distances are computed from `ma × lift`. The challenge storage key is `chal.<sectionId>`.
 - Names to avoid reusing (one shared scope): `WS`, `WS_*`, `ws*`, `shop*`, `SMOOSHY`, `WL`, `UNITS_W`, `shMark`, `shObjE`, `pic*`.
 - The play-through test (`tests/play_c6.py`) must be extended for each new Part with right and wrong answers, every mission passing and failing, the Check, the stamp, and a `chk` for each rule above. `tests/workshop_numbers.py` must match `tools/workshop_model.py`.
@@ -55,5 +55,8 @@ Tom is a British science teacher (Head of MS Sciences at WAB), **a teacher, not 
 - **CER paragraph review (needs Opus).** Review how claim, evidence and reasoning writing is introduced and built up slowly across the chapters. Tom needs Opus for this specifically: plan it as an Opus job (a review and a proposed scaffold sequence), then Sonnet builds from it.
 - Other open items: Tom to class-test Chapters 1 to 4; Chapter 1's table question `r10` overflows a 390 px phone by about 46 px; Chapter 1 information-overload test with a colleague; MYP D ii has no Check question outside Part 5 (Part 5's c6r26 will cover it); Toddle's real limit for the AI feedback box; testing the Download PDF button on a real student account.
 
-## Top priority next: rebuild the final rescue mission (Part 5)
-Tom playtested Parts 4 and 5 on 3 Nov 2026 and wants the final mission redone as a free-form, creative rescue builder with quality-based scoring, a spend-a-hint tree and a clearer ending. Full brief for Opus: `docs/Force_HQ_Rescue_Rebuild_Brief.md`.
+## Next: after the rescue rebuild (7 Nov 2026)
+The final rescue mission is done and merged (the design is `docs/Force_HQ_Rescue_Rebuild_Brief.md`; the build record is `docs/Rescue_Sonnet_Handoff.md`).
+- Tom plays Operation Gummy Lift with a class. Fix what he finds first.
+- Explore "Draw what's happening now" is the next planned build.
+- Optional rescue extras: three preset crater variants (swap `GL_PROFILE`, re-run `tests/rescue_routes.js` against each) and a faint 1 m grid when the ruler is on.

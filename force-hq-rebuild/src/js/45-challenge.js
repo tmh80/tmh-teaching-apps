@@ -247,8 +247,8 @@ function renderShopCourse(ch, wm, host, save) {
   const get = id => (dbGet('chal.' + ch, {})[id]) || {};
   let cur = Math.max(0, wm.findIndex(m => !get(m.id).done)), judged = null;
   const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
-  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>${remindersHTML()}
+  card.innerHTML = `${remindersHTML()}<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
     <div class="gl" id="shCalc" hidden></div><div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
@@ -293,59 +293,5 @@ function renderShopCourse(ch, wm, host, save) {
   load(cur);
 }
 
-/* Chapter 6 Part 5: Operation Gummy Lift (sm1 to sm3). Objective scoring (script C7): the score for a stage is the number of objectives met on the student's BEST try,
-   so everyone scores. Before every try the mission computer needs a typed prediction (any number counts). Trying all three stages is enough to finish; the ending then plays. */
-function renderRescueCourse(ch, wm, host, save) {
-  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
-  let cur = Math.max(0, wm.findIndex(m => !get(m.id).tried)), judged = null;
-  if (cur < 0) cur = 0;
-  const card = h('section', { class: 'panel mission', id: 'mi-rescue' }); host.appendChild(card);
-  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a rescue stage"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="rsClues"></div><div class="row"><button type="button" class="ghost sm" id="rsNext">Show a clue</button></div></details>${remindersHTML()}
-    <div class="labhost"></div>
-    <div class="mcomp" id="rsComp"><label for="rsPred"><b>🖥️ Mission computer:</b> <span id="rsQ"></span></label> <input type="number" step="any" id="rsPred" style="width:7em" aria-label="Your prediction"> <b id="rsUnit"></b><p class="scaleNote">Type any number and Smooshy can try it.</p></div>
-    <div class="fb" id="rsFb" hidden></div><ol class="blog" id="rsLog"></ol><ul class="objs" data-o></ul><div class="row" id="rsMore"></div>`;
-  LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
-  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
-  const predVal = () => { const v = $('#rsPred', card).value; return v === '' || isNaN(+v) ? null : +v; };
-  const allTried = () => wm.every(x => get(x.id).tried);
-  const paint = () => {
-    const m = wm[cur], s = get(m.id), nc = Math.min(s.clues || 0, m.clues.length), live = predVal() != null;
-    $('.mtabs', card).innerHTML = wm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-rs="${i}" class="${g.tried ? 'done' : ''}">${g.tried ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
-    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal}</p>`;
-    $('#rsQ', card).textContent = m.pred.q; $('#rsUnit', card).textContent = m.pred.unit;
-    $('#rsClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
-    const nx = $('#rsNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
-    $('#rsLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.met === m.objs.length ? 'ok' : ''}">Try ${i + 1}: ${r.desc}. ${r.met} of ${m.objs.length} objectives met.</li>`).join('');
-    const fb = $('#rsFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.best === m.objs.length ? 'ok' : 'hint'); fb.innerHTML = s.msg || '';
-    const oks = s.bestOks || [];
-    $('[data-o]', card).innerHTML = m.objs.map((o, i) => [o.label, o.planned ? (live || oks[i]) : oks[i]]).map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('') + `<li class="scaleNote">Your best try: ${s.best || 0} of ${m.max} points.</li>`;
-    let more = '';
-    if (s.tried) more = cur < wm.length - 1 ? `<button type="button" class="${s.n >= 3 && s.best < m.max ? 'ghost' : 'go'}" data-rs="${cur + 1}">${s.n >= 3 && s.best < m.max ? 'Move on (keeps your best score)' : 'Next stage →'}</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`;
-    if (allTried()) more += ` <button type="button" class="ghost" id="rsEnd">▶ Watch the ending</button>`;
-    $('#rsMore', card).innerHTML = more;
-    const e = $('#rsEnd', card); if (e) e.addEventListener('click', () => openEnding(wm.every(x => get(x.id).best === x.max)));
-    const pb = $('#wsPull'); if (pb) pb.disabled = WS.busy || !live;
-  };
-  const load = i => {
-    cur = i; const m = wm[cur];
-    shopStage(Object.assign({}, m.setup, { cap: 60, pullLabel: 'Smooshy, try it!' })); S.flags = newFlags(); resetSim(); judged = null;
-    LAB.pullGate = () => predVal() != null; $('#rsPred', card).value = '';
-    LAB.show = new Set(m.show); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Type your prediction, then press Smooshy, try it!';
-    applyPanels(); labChanged(); paint();
-  };
-  $('#rsPred', card).addEventListener('input', () => { wsRenderControls(); paint(); });
-  card.addEventListener('click', e => { const b = e.target.closest('[data-rs]'); if (b) load(+b.dataset.rs); });
-  $('#rsNext', card).addEventListener('click', () => { const m = wm[cur], s = get(m.id); save(m, { clues: Math.min(m.clues.length, (s.clues || 0) + 1) }); paint(); });
-  LAB.tick = () => {
-    if (!WS.done || !WS.last || WS.last === judged) return; judged = WS.last;
-    const m = wm[cur], s = get(m.id), c = WS.last, pred = predVal();
-    const r = { E: c.E, need: c.need, capped: c.capped, rise: c.rise, ma: c.ma, parts: c.parts || 0, cable: c.cable, dist: wsR2(c.ma * WS.lift), turns: WS.mach === 'screw' ? wsR2(WS.lift * 100 / WS.pitch) : null, pred, la: WS.arm, per: WS.per, pitch: WS.pitch, bw: WS.bw, bn: WS.bn, br: WS.br };
-    const oks = m.objs.map(o => !!o.ok(r)), met = oks.filter(Boolean).length, n = (s.n || 0) + 1, better = met > (s.best || 0), best = Math.max(s.best || 0, met), desc = m.desc(r);
-    const log = (s.log || []).concat([{ desc, met, pred, need: c.need, ma: c.ma, E: c.E, capped: !!c.capped, oks }]), sayAll = m.objs.map(o => o.say(r)).join(' ');
-    save(m, { tried: true, n, log, best, bestOks: better || !s.bestOks ? oks : s.bestOks, done: best === m.max, msg: (met === m.objs.length ? `Congratulations! ${m.win} ` : 'Not quite. ') + sayAll + ` You met ${met} of ${m.objs.length} objectives${met === m.objs.length ? '.' : '. Change your plan and try again, or move on: your best score is kept.'}` });
-    $('#rsPred', card).value = ''; wsRenderControls(); paint();
-    if (allTried() && !get('sm3').ended) { save(wm[wm.length - 1], { ended: true }); setTimeout(() => openEnding(wm.every(x => get(x.id).best === x.max)), 1400); }
-  };
-  load(cur);
-}
+/* Chapter 6 Part 5: Operation Gummy Lift. One big build; renderGummyLift (4h-glbuild.js) draws the board and 4i-glrun.js runs it. */
+function renderRescueCourse(ch, wm, host, save) { renderGummyLift(ch, wm[0], host, save); }
