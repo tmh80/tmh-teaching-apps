@@ -51,6 +51,8 @@ let pass = 0, fail = 0; const ok = (c, m) => { if (c) pass++; else { fail++; con
   await pg.evaluate(() => renderStop(STOPS.find(s => s.id === 'circuits'), 'review')); await pg.waitForSelector('.ican-peek');
   ok(!(await pg.locator('.ican-peek li').first().isVisible()), 'I can button starts closed');
   await pg.locator('.ican-peek summary').click(); ok(await pg.locator('.ican-peek li').first().isVisible(), 'I can button opens on the review tab too');
+  { const r = await pg.evaluate(() => { Store.data.selfA = {electromagnets: {v: [10, 40, 60, 90], done: true}}; const st = STOPS.find(s => s.id === 'electromagnets'), out = {}; for (const m of ['student', 'blank', 'key']){ showWorksheet(st, m, 'f'); const sc = document.querySelector('#ws-root .ws-selfcheck'); out[m] = sc ? [sc.querySelectorAll('.ws-sa-row').length, sc.querySelectorAll('.ws-sa-line path').length] : null; document.getElementById('ws-root').remove(); } showWorksheet(st, 'student', 'c'); out.c = !!document.querySelector('#ws-root .ws-selfcheck'); document.getElementById('ws-root').remove(); return out; });
+    ok(JSON.stringify(r.student) === '[4,4]', 'student sheet shows the four Xs: ' + r.student); ok(JSON.stringify(r.blank) === '[4,0]', 'blank sheet has empty lines'); ok(r.key && r.key[1] === 0, 'answer key explains it'); ok(r.c === false, 'not on the Challenge sheet'); }
   ok(errs.length === 0, 'no page errors ' + errs[0]);
   await b.close(); console.log(`test-read-and-selfcheck: ${pass} passed, ${fail} failed`); process.exit(fail ? 1 : 0);
 })();

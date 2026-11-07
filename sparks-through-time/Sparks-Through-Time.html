@@ -499,6 +499,7 @@ table.data th{background:var(--panel-2)}
 .ican-peek{margin:12px 0 0; justify-self:start; max-width:100%; background:var(--panel); border:2px solid var(--accent); border-radius:12px; padding:6px 14px; width:fit-content}
 .ican-peek summary{cursor:pointer; font-weight:700; color:var(--accent)} .ican-peek[open]{padding-bottom:10px} .ican-peek[open] summary{margin-bottom:6px}
 .gm-remind{margin:6px 0 10px} .gm-remind summary{cursor:pointer; font-weight:700; color:var(--accent)} .gm-remind ul{margin:6px 0 0; padding-left:1.2em}
+.ws-sa-row{margin:8px 0 10px; break-inside:avoid} .ws-sa-can{margin:0 0 4px; font-weight:700} .ws-sa-line{display:block; max-width:520px}
 .ican-list{margin:0; padding-left:1.2em; font-size:1.2rem; line-height:1.5; font-weight:600}
 .sa-card{border:2px solid var(--accent); border-radius:14px; background:var(--panel); padding:14px 18px; margin:10px 0; display:grid; gap:14px} .sa-card h3,.sa-card p{margin:0}
 .sa-can{font-weight:700; margin-bottom:8px !important}
@@ -6133,6 +6134,7 @@ function buildWorksheet(stop, mode, name, part){
   if (mode!=='key') root.append(h('div',{class:'ws-namebar'}, h('span',{}, 'Name: ', h('b',{class:'ws-name'}, name || '')), h('span',{}, 'Class: ', stu(mode) ? h('b',{class:'ws-name'}, Store.data.studentClass || '') : h('span',{class:'ws-line'})), h('span',{}, 'Date: ', stu(mode) ? h('b',{}, new Date().toLocaleDateString()) : h('span',{class:'ws-line'}))));
   if (mode==='student') root.append(h('p',{class:'ws-student-note'}, 'Everything printed in blue was added by the student in the sim.'));
   root.append(stepsDone(stop, mode, part));
+  if (part==='f' && ICAN[stop.id]) root.append(wsSelfCheck(stop, mode));
   const auto = items.map((it,i)=>[it,i]).filter(([it])=>!SELF(it.t)), self = items.map((it,i)=>[it,i]).filter(([it])=>SELF(it.t));
   root.append(h('h3',{class:'ws-part'}, 'Part A: Show what you know'));
   auto.forEach(([it,i])=>root.append(wsItem(it, i+1, mode, st[i])));
@@ -6157,6 +6159,17 @@ function stepsDone(stop, mode, part){
   return box;
 }
 function stu(mode){ return mode==='student'; }
+/* the self-check before the review, drawn as plain SVG so it prints and saves to PDF the same way */
+function wsSelfCheck(stop, mode){
+  const L = ICAN[stop.id], S = Store.data.selfA && Store.data.selfA[stop.id], fills = ['#fde3d3','#fdf0c4','#d6f0e2','#dbe6fb'];
+  const line = v=>{ const W = 600, H = 52, z = W/4, g = sv('svg',{viewBox:`0 0 ${W} ${H}`, width:'100%', class:'ws-sa-line', role:'img', 'aria-label':v==null ? 'Not marked' : saLevel(v)});
+    SA_LEVELS.forEach((t,k)=>{ g.append(sv('rect',{x:k*z+1, y:1, width:z-2, height:28, fill:fills[k], stroke:'#8a93a8', 'stroke-width':1.2, rx:4})); const tx = sv('text',{x:k*z + z/2, y:46, 'text-anchor':'middle', 'font-size':13, fill:'#3b4256', 'font-family':'Arial, sans-serif'}); tx.textContent = t; g.append(tx); });
+    if (v!=null){ const x = Math.max(12, Math.min(W-12, v/100*W)); g.append(sv('path',{d:`M${x-8} 7 L${x+8} 23 M${x+8} 7 L${x-8} 23`, stroke:'#1d4ed8', 'stroke-width':4, 'stroke-linecap':'round', fill:'none'})); }
+    return g; };
+  const note = mode==='student' ? (S && S.done ? 'Before the review, I placed an X on each line to show how sure I felt.' : 'The self-check was not done in the sim.') : mode==='blank' ? 'Before you start the questions, put an X on each line to show how sure you are right now.' : 'Students place these X marks themselves before the review. They are not marked.';
+  return h('div',{class:'ws-q ws-selfcheck'}, h('div',{class:'ws-qhead'}, h('span',{class:'ws-type'}, 'My self-check before the review')), h('p',{}, note),
+    L.map((t,i)=>h('div',{class:'ws-sa-row'}, h('p',{class:'ws-sa-can'}, t), line(mode==='student' && S ? S.v[i] : null))));
+}
 function progressBox(stop, part){
   const p = prog(stop.id); const LR = (Store.data.lr||{})[stop.id] || {done:{}};
   const learnDone = k=> p.learn || (LR.done && LR.done[lrKey(stop,k)]);
