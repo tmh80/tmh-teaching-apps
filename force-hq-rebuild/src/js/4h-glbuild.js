@@ -16,8 +16,14 @@ const glNewId = t => t[0] + Math.random().toString(36).slice(2, 7);
 const glSnap = (v, s) => Math.round(v / (s || 0.5)) * (s || 0.5);
 const glState = () => (dbGet('chal.' + GLB.ch, {})[GLB.mid]) || {};
 function glSaveRig() { const st = dbGet('chal.' + GLB.ch, {}); st[GLB.mid] = Object.assign(st[GLB.mid] || {}, { rig: GLB.rig, at: Date.now() }); dbSet('chal.' + GLB.ch, st); }
+/* winches are bolted down: they sit on the ground or a platform, so Smooshy can stand at the handle */
+function glSettle() { const g = glGround(GLB.rig).g, pl = glPlatforms(GLB.rig, g);
+  /* an add-on with no spot yet (from an older save or a test rig) parks beside its machine's cable dot */
+  GLB.rig.parts.filter(p => GL_LIFT[p.type]).forEach(m => { const cp = glCablePoint(m, glMachine(m, g, pl)); if (cp) glChainOf(m.id).forEach((id, i) => { const q = glPart(id); if (q.x == null) { q.x = cp.x + 1.6 * (i + 1); q.y = cp.y; } }); });
+  GLB.rig.parts.filter(p => glIsAddon(p) && p.x == null).forEach((p, i) => { p.x = 20 + i * 2; p.y = 12; });
+  GLB.rig.parts.filter(p => p.type === 'winch').forEach(p => { p.y = +(glFloorAt(p.x, g, pl) + 0.75).toFixed(2); }); }
 function glChanged(noHist) {
-  GLB.ev = glEvaluate(GLB.rig, { hints: glState().hints || 0 }); glSaveRig(); glPaintSide(); if (GLB.onChange) GLB.onChange();
+  glSettle(); GLB.ev = glEvaluate(GLB.rig, { hints: glState().hints || 0 }); glSaveRig(); glPaintSide(); if (GLB.onChange) GLB.onChange();
 }
 function glPush() { GLB.hist.push(JSON.stringify(GLB.rig)); if (GLB.hist.length > 40) GLB.hist.shift(); }
 const glPart = id => GLB.rig.parts.find(p => p.id === id);

@@ -15,7 +15,7 @@ Updated after each Opus stage, so it is always current on branch `rescue-rebuild
 |---|---|
 | 1. Rescue maths and height-profile ground | Done |
 | 2. Crater scene and builder | Done |
-| 3. Run Rescue | Not started |
+| 3. Run Rescue | Done |
 | 4. Plumbing (autosave, best run, `rigSnapshot()`) | Not started |
 | 4b. Story half of stage 4 | Sonnet |
 
@@ -50,6 +50,16 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 - Live pull, MA and hand travel stay hidden while building; crystals are shown. Machine faults (too steep, through the ground, top in mid-air, lever MA over 9 and so on) turn the part red and show a plain sentence in its menu.
 - Fixed in passing: the Part switcher at the top of every chapter page now wraps, so phones no longer scroll sideways.
 - Test: `python3 tests/play_rescue.py` builds the top route with real mouse moves (and a touch tap on a phone).
+
+## Stage 3: Run Rescue (`src/js/4i-glrun.js`)
+
+- Before each run the student picks a leg and types a predicted pull (any number unlocks ▶ Run Rescue; no legs means no prediction needed), with an always-visible "Working (not marked)" box (draft autosaves as `draftWork`).
+- The run is a list of beats (`glBuildBeats`); each frame rebuilds the scene from the start, so "Skip to the end" just jumps the clock. Order: dynamite (fuse, boom, ground carves, shake and +15% if within 6 m) → Smooshy squeezes out of the hatch → the boulder (lever or jack tilts it away, a winch drags it, or "too stiff" if over 60 N; a blast shatters it) → if the rock stays on, it rides with the ship (+25%) → each leg: Smooshy walks to the handle (last winch, else block, else the machine; with a bare ramp he pushes from behind), the ship travels with the haul rope, winches spin, crane hooks rise, levers tilt, thrusters flame and the hull scorches when the pull is over 60 N, then a "Leg n: pull" readout appears → stops (broken part flashes red, too heavy, platform buckles and sinks, gap shows the box where the next machine needed to be) → arrival: Smooshy climbs aboard, waves from the window, and the Big Jelly's beam lifts the ship away.
+- Afterwards `glShowResult` shows the stamp (Spotless / Dented / Not yet) and score, prediction feedback, a per-leg receipt (machine, rise, total MA, pull, hand travel, work, with the work-receipt sentence), totals and the scorecard. "🔧 Back to building" returns to the builder.
+- Saved in `chal.c6e.gl`: `runs`, `tried`, `best` (number, used by `challengeState`), `last` (summary), `lastPred`, `bestRun {rig, sum, pred, at}` (best run counts: rescued beats not yet, then higher score, then lower hardest pull), `firstDone` (time of the first rescue that arrived). `glSummary(res)` is the compact form the worksheet should use.
+- **Hooks for Sonnet:** `glFinishRun` calls `glShowEnding(sum, {first, better})` if it exists (the three ending cards and the stopping-point pop-up on `first`), and `rigSnapshot()` on a new best run (stage 4).
+- Pulls are shown with normal rounding to one decimal place, so 56.25 N shows as 56.3 N (the brief's table says 56.2).
+- RMOTION shortens every beat to a quarter of a second and drops the shakes, bobbing and flashes.
 
 ## Still to do (Sonnet)
 

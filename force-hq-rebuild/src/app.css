@@ -856,3 +856,22 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .gltry.on,.gltry:hover{border-color:var(--accent)}
 .gltry.on{background:var(--chip)}
 .glbrief summary{cursor:pointer;font-weight:800;font-size:16px}
+.glrunbox{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.glpred .row{gap:6px;margin-top:6px;flex-wrap:wrap}
+.glpred select,.glpred input,.glwork textarea{font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.glwork summary{cursor:pointer;color:var(--muted);font-weight:700;margin-top:6px}
+.glwork textarea{width:100%;box-sizing:border-box;margin-top:4px}
+.glrunrow{gap:8px;align-items:center;flex-wrap:wrap}
+.glboard.running canvas{cursor:default}
+.glstamp{display:inline-flex;flex-wrap:wrap;gap:10px;align-items:baseline;border-radius:12px;padding:8px 14px;font-size:20px;border:2.5px solid}
+.glstamp.spotless{background:var(--okbg);color:var(--okfg);border-color:var(--okfg)}
+.glstamp.dented{background:var(--hazard-soft);color:var(--hzfg);border-color:var(--hzfg)}
+.glstamp.notyet{background:var(--chip);color:var(--ink);border-color:var(--line)}
+.glstamp em{font-size:14px;font-style:normal;font-weight:800}
+.gltab{overflow-x:auto;max-width:100%}
+.gltab table{border-collapse:collapse;font-size:14px;min-width:520px}
+.gltab th,.gltab td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}
+.gltab tr.stop td{color:var(--nofg);background:var(--nobg)}
+.glsums{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 16px;padding-left:18px;margin:4px 0}
+.glpredfb{background:var(--chip);border-radius:8px;padding:6px 10px}
+.glwork label{display:block;color:var(--muted);font-weight:700;margin-top:6px}

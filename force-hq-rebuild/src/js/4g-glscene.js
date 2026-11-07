@@ -30,7 +30,7 @@ function glDrawSky(c, t) {
 /* the Big Jelly: a huge orange jelly cruiser hovering over the plain, too heavy to land on the crumbly rim */
 function glDrawBigJelly(c, t, beamOn) {
   const u = glU(), bob = RMOTION ? 0 : Math.sin(t * 1.4) * 0.25, x = glSX(86), y = glSY(22 + bob);
-  if (beamOn) { const g = c.createLinearGradient(x, y, x, y + 14 * u); g.addColorStop(0, 'rgba(160,255,214,.55)'); g.addColorStop(1, 'rgba(160,255,214,.08)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 1.2 * u, y + 1.6 * u); c.lineTo(beamOn.x, beamOn.y); c.lineTo(beamOn.x2 || beamOn.x, beamOn.y2 || beamOn.y); c.lineTo(x + 1.2 * u, y + 1.6 * u); c.closePath(); c.fill(); }
+  if (beamOn) { const g = c.createLinearGradient(x, y, x, y + 14 * u); g.addColorStop(0, 'rgba(160,255,214,.7)'); g.addColorStop(1, 'rgba(160,255,214,.22)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 1.2 * u, y + 1.6 * u); c.lineTo(beamOn.x, beamOn.y); c.lineTo(beamOn.x2 || beamOn.x, beamOn.y2 || beamOn.y); c.lineTo(x + 1.2 * u, y + 1.6 * u); c.closePath(); c.fill(); }
   c.save(); c.translate(x, y); c.scale(u / 10, u / 10);
   const g = c.createLinearGradient(0, -38, 0, 18); g.addColorStop(0, '#ffd27a'); g.addColorStop(1, GLC.jelly2); c.fillStyle = g; c.globalAlpha = .93;
   c.beginPath(); c.moveTo(-72, 10); c.quadraticCurveTo(-74, -36, 0, -40); c.quadraticCurveTo(74, -36, 72, 10); c.quadraticCurveTo(0, 22, -72, 10); c.fill(); c.globalAlpha = 1;
@@ -178,6 +178,7 @@ function glDrawWorld(c, o) {
   /* the boulder and the ship sit behind the lifting machines' front parts */
   const rockShown = o.rock !== false && !(run.rockGone);
   if (rockShown && !(o.ship && o.ship.carryRock)) glDrawBoulder(c, run.rockX != null ? run.rockX : 18.7, run.rockY != null ? run.rockY : glAt(g, 18.7), run.rockRot || 0.12, false);
+  if (run.rope && o.ship) glDrawCable(c, run.rope.a, run.rope.b, 0);
   if (o.ship) { glDrawShip(c, o.ship); if (o.ship.carryRock && rockShown) glDrawBoulder(c, o.ship.x + 4.6 * Math.cos(o.ship.tilt || 0), o.ship.y - 4.6 * Math.sin(o.ship.tilt || 0), (o.ship.tilt || 0) + 0.12); }
   rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id]));
   rig.parts.filter(p => p.type === 'lever').forEach(p => glDrawLever(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
@@ -188,7 +189,7 @@ function glDrawWorld(c, o) {
   if (o.cableDrag) glDrawCable(c, o.cableDrag.a, o.cableDrag.b, 0);
   rig.parts.filter(p => p.type === 'block').forEach(p => glDrawBlock(c, p));
   rig.parts.filter(p => p.type === 'winch').forEach(p => glDrawWinch(c, p, false, run.spin));
-  if (o.smoo) drawSmooshy(c, glSX(o.smoo.x), glSY(o.smoo.y + 0.95), 0.0165 * glU(), o.smoo.mood, t);
+  if (o.smoo) drawSmooshy(c, glSX(o.smoo.x), glSY(o.smoo.y + 1.5), 0.026 * glU(), o.smoo.mood, t);
   if (o.hz) glDrawZone(c, o.hz, t, o.hzLabel);
   /* selection ring and cable dots */
   if (o.sel && byId[o.sel]) { const b = glBounds(byId[o.sel], ms[o.sel], g, plats); c.strokeStyle = '#ffe28a'; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.roundRect(glSX(b.x0) - 6, glSY(b.y1) - 6, (b.x1 - b.x0) * glU() + 12, (b.y1 - b.y0) * glU() + 12, 8); c.stroke(); c.setLineDash([]); }
