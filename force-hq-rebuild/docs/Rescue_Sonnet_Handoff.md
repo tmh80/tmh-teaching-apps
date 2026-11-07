@@ -21,7 +21,9 @@ Updated after each Opus stage, so it is always current on branch `rescue-rebuild
 | 5. Hint tree, working boxes, Reminders on top | Done (Sonnet chat 1) |
 | 6. Reflection, My Rescue page, keys, AI text, teacher page | Done (Sonnet chat 1) |
 | 7. Tests | Done (Sonnet chat 1): suite result in the next section |
-| 8 to 10. Docs, worksheets and offline file, merge and send | Sonnet chat 2 |
+| 8. Docs and Project copies | Done (Sonnet chat 2, 7 Nov 2026) |
+| 9. Worksheets and offline file | Done (Sonnet chat 2, 7 Nov 2026) |
+| 10. Merge to `main`, republish, send to Tom | Done (Sonnet chat 2, 7 Nov 2026) |
 
 ## Stage 1: the model (`src/js/4f-gummylift.js`)
 
@@ -100,9 +102,11 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 - `docs/Chapter6_Workshop_Script.md` still describes the old three-stage Part 5, the sm1 to sm3 Rescue report and the sugar-discovery ending; rewrite that section.
 - The score points in `GL_END` and the result card were not changed. Pulls show with normal rounding (56.25 N shows as 56.3 N), as in stage 3.
 
-### Sonnet chat 2: stages 8 to 10
-
-As brief section 12: docs (`Force_HQ_Brief.md`, `Force_HQ_Backlog.md`, `Force_HQ_Handoff.md`, `Force_HQ_Next_Chat_Handoff.md`, `Chapter6_Workshop_Script.md`, the README table, and the Project copies), worksheets (`python3 tools/make_worksheets.py`, copy `dist/toddle-files` and the zip into `worksheets/`), the offline file (`dist/Force-HQ-offline.html` → `Force-HQ-Rebuild-offline.html`), then merge `rescue-rebuild` into `main`, push, republish the preview, send Tom the HTML and tell him to upload it to Toddle. `WORKSHOP_OPEN` stays `true` on merge.
+### Sonnet chat 2: stages 8 to 10 (done, 7 Nov 2026)
+- **Docs (8):** `Chapter6_Workshop_Script.md` Part 5 sections (N, O, O1, P) and the engine notes C4, C6 and C7 rewritten for Operation Gummy Lift; a rescue rebuild build log added to the end of `Force_HQ_Brief.md` with the new file map entries; `Force_HQ_Handoff.md`, `Force_HQ_Next_Chat_Handoff.md`, `Force_HQ_Backlog.md` and the README table updated. The Project copies match (`claude/Force_HQ_Brief.md`, `Force_HQ_Backlog.md`, `Force_HQ_Handoff.md`, `Force_HQ_Next_Chat_Handoff.md`, `Force_HQ_Chapter6_Workshop_Script.md`). `claude/Force_HQ_Workshop_Closed_Note.md` was rewritten to say the Workshop is open (it was not deleted).
+- **Worksheets and offline file (9):** `python3 tools/make_worksheets.py` run; `dist/toddle-files` and the zip copied into `worksheets/`; `dist/Force-HQ-offline.html` copied to `Force-HQ-Rebuild-offline.html`. The Part 5 key shows the top route's picture, the blank shows the empty frame, and the offline file has no external references. `WORKSHOP_OPEN` is `true`.
+- **Merge and send (10):** `rescue-rebuild` merged into `main`, pushed, the preview republished, and the HTML sent to Tom to upload to Toddle.
+- Left as is: `build.py` still writes `dist/test-closed.html` (nothing tests it any more); delete that step if it bothers anyone.
 
 ### Ideas Opus noticed (not required)
 - Optional crater variants (brief, tokens permitting): `GL_PROFILE` is the only thing to swap; re-run `tests/rescue_routes.js` against each.

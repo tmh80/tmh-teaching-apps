@@ -116,7 +116,7 @@ main{max-width:1500px;margin:0 auto;padding:6px max(16px,env(safe-area-inset-lef
 .secrow.done{border-color:var(--good)} .secrow p{font-size:14px;color:var(--muted);margin:0}
 .sechd{display:flex;justify-content:space-between;align-items:baseline;gap:6px;flex-wrap:wrap} .sechd b{font-family:var(--f-display);font-size:19px}
 .secrow .open{align-self:flex-start}
-.partsw{display:inline-flex;gap:4px;background:var(--chip);padding:4px;border-radius:12px;border:1px solid var(--line)}
+.partsw{display:inline-flex;flex-wrap:wrap;max-width:100%;gap:4px;background:var(--chip);padding:4px;border-radius:12px;border:1px solid var(--line)}
 .partsw button{border:0;background:none;border-radius:9px;padding:6px 14px;font-weight:700;font-size:15px;color:var(--muted);display:flex;flex-direction:column;align-items:flex-start;line-height:1.1}
 .partsw button small{font-weight:400;font-size:11.5px}
 .partsw button[aria-pressed="true"]{background:var(--accent);color:#fff}
@@ -877,6 +877,67 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .bttab td.okc{background:rgba(40,160,90,.18)}.bttab td.badc{background:rgba(220,70,70,.18)}
 .tkwork{display:flex;flex-direction:column;gap:3px;margin-top:6px}.tkwork span{font-size:.78rem;font-weight:700;color:var(--muted)}.tkwk{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:.85rem;background:var(--panel);color:var(--ink);resize:vertical}
 .remind{margin-top:8px}.remind .rmgrid{display:grid;gap:4px;font-size:.88rem;line-height:1.45}.remind .rmgrid b{color:var(--ink)}
+
+/* ===== Operation Gummy Lift (Chapter 6 Part 5) ===== */
+.glwrap{gap:10px}
+.glstats{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:15px}
+.glstats .bad{color:var(--nofg);background:var(--nobg);border-radius:6px;padding:2px 6px}
+.glrec summary{cursor:pointer;font-weight:700;color:var(--muted)}
+.glrec ul{list-style:none;margin:6px 0 0;padding:0;font-size:14px;max-width:340px}
+.glrec li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:2px 0}
+.glrec li.tot{font-weight:800;border-bottom:0}
+.glboard{position:relative;border-radius:12px;overflow:hidden;background:#2d1f63}
+.glboard canvas{display:block;width:100%;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+.glzoom{position:absolute;left:8px;top:8px;display:flex;gap:4px}
+.glzoom .ghost{min-width:34px;background:rgba(255,255,255,.88)}
+.glmenu{position:absolute;z-index:5;width:min(290px,calc(100% - 8px));background:var(--panel);border:1.5px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.28);padding:0 10px 10px;font-size:14px}
+.glmenu.placed{position:fixed}
+.glmhd{display:flex;align-items:center;gap:6px;cursor:grab;padding:8px 0 6px;border-bottom:1px solid var(--line);margin-bottom:6px;touch-action:none}
+.glmhd b{flex:1}
+.glx{border:0;background:none;font-size:18px;cursor:pointer;color:var(--muted)}
+.glrow{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}
+.glrow>span{min-width:72px;color:var(--muted);font-weight:700}
+.glrow b{min-width:52px;text-align:center}
+.glmenu .ghost.on,.gltools .ghost.on{border-color:var(--accent);background:var(--chip)}
+.glnote{margin:4px 0;color:var(--muted);font-size:13px}
+.gltray{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
+.gltry{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;cursor:grab;touch-action:none}
+.gltry .ic{font-size:18px;line-height:1}
+.gltry b{font-size:13px}.gltry small{font-size:11px;color:var(--muted)}
+.gltry.on,.gltry:hover{border-color:var(--accent)}
+.gltry.on{background:var(--chip)}
+.glbrief summary{cursor:pointer;font-weight:800;font-size:16px}
+.glrunbox{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.glpred .row{gap:6px;margin-top:6px;flex-wrap:wrap}
+.glpred select,.glpred input,.glwork textarea{font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
+.glwork summary{cursor:pointer;color:var(--muted);font-weight:700;margin-top:6px}
+.glwork textarea{width:100%;box-sizing:border-box;margin-top:4px}
+.glrunrow{gap:8px;align-items:center;flex-wrap:wrap}
+.glboard.running canvas{cursor:default}
+.glstamp{display:inline-flex;flex-wrap:wrap;gap:10px;align-items:baseline;border-radius:12px;padding:8px 14px;font-size:20px;border:2.5px solid}
+.glstamp.spotless{background:var(--okbg);color:var(--okfg);border-color:var(--okfg)}
+.glstamp.dented{background:var(--hazard-soft);color:var(--hzfg);border-color:var(--hzfg)}
+.glstamp.notyet{background:var(--chip);color:var(--ink);border-color:var(--line)}
+.glstamp em{font-size:14px;font-style:normal;font-weight:800}
+.gltab{overflow-x:auto;max-width:100%}
+.gltab table{border-collapse:collapse;font-size:14px;min-width:520px}
+.gltab th,.gltab td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}
+.gltab tr.stop td{color:var(--nofg);background:var(--nobg)}
+.glsums{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 16px;padding-left:18px;margin:4px 0}
+.glpredfb{background:var(--chip);border-radius:8px;padding:6px 10px}
+.glwork label{display:block;color:var(--muted);font-weight:700;margin-top:6px}
+
+/* ---- Part 5 story: warm-up panel and draggable ending pop-ups ---- */
+.glwarm{border:2px solid var(--accent);background:var(--panel)} .glwarm h3{margin:0 0 6px}
+.glwarm .objs{list-style:none;padding:0;margin:8px 0} .glwarm .objs li{display:flex;gap:8px;align-items:flex-start;margin:6px 0}
+.glwlive{border-radius:10px;padding:8px 12px;background:var(--chip);margin:8px 0} .glwlive.good{border:2px solid var(--accent)}
+.glpop{position:fixed;z-index:70;left:50%;top:16%;transform:translateX(-50%);width:min(430px,calc(100% - 24px));max-height:78vh;overflow:auto;background:var(--panel);color:var(--ink);border:2px solid var(--accent);border-radius:14px;box-shadow:0 12px 36px rgba(0,0,0,.4);padding:0 16px 14px}
+.glpop.placed{position:fixed} .glpop.dragging .glpophd{cursor:grabbing}
+.glpophd{cursor:grab;font-weight:800;letter-spacing:.03em;padding:10px 0 6px;font-size:13px;opacity:.85;touch-action:none}
+.glpop h3{margin:4px 0 8px} .glpopsc{font-size:17px}
+.glchips{flex-wrap:wrap;gap:6px;margin:6px 0} .glchip.on{border-color:var(--accent);background:var(--chip)}
+.blank{display:inline-block;min-width:3.2em;border-bottom:2px solid currentColor;vertical-align:baseline;margin:0 2px}
+.glhint .glplug li{margin:4px 0}
 
 </style>
 <header class="top">
@@ -2586,7 +2647,7 @@ function drawHomeArt(c, hit) {
 /* The Workshop (Chapter 6) stays closed to students until the rescue rebuild is finished. To open it, change false to true: this one line
    brings back its chapter card, home page entry, stamps, teacher page rows, Explore Workshop and Build tasks. Students' saved Workshop work is
    never deleted while it is closed. dist/test.html is always built with it open, so the Workshop tests keep working (see build.py). */
-const WORKSHOP_OPEN = false;
+const WORKSHOP_OPEN = true;
 const CHAPTERS = [
   { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
@@ -4316,8 +4377,8 @@ function renderRail() {
     <h2>${st.title}</h2>
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
-    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     ${/^c6/.test(CH.id) && (st.qs || []).some(q => q.type === 'num') ? remindersHTML() : ''}
+    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
@@ -5427,8 +5488,8 @@ function renderShopCourse(ch, wm, host, save) {
   const get = id => (dbGet('chal.' + ch, {})[id]) || {};
   let cur = Math.max(0, wm.findIndex(m => !get(m.id).done)), judged = null;
   const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
-  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>${remindersHTML()}
+  card.innerHTML = `${remindersHTML()}<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
     <div class="gl" id="shCalc" hidden></div><div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
@@ -5473,62 +5534,8 @@ function renderShopCourse(ch, wm, host, save) {
   load(cur);
 }
 
-/* Chapter 6 Part 5: Operation Gummy Lift (sm1 to sm3). Objective scoring (script C7): the score for a stage is the number of objectives met on the student's BEST try,
-   so everyone scores. Before every try the mission computer needs a typed prediction (any number counts). Trying all three stages is enough to finish; the ending then plays. */
-function renderRescueCourse(ch, wm, host, save) {
-  const get = id => (dbGet('chal.' + ch, {})[id]) || {};
-  let cur = Math.max(0, wm.findIndex(m => !get(m.id).tried)), judged = null;
-  if (cur < 0) cur = 0;
-  const card = h('section', { class: 'panel mission', id: 'mi-rescue' }); host.appendChild(card);
-  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a rescue stage"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="rsClues"></div><div class="row"><button type="button" class="ghost sm" id="rsNext">Show a clue</button></div></details>${remindersHTML()}
-    <div class="labhost"></div>
-    <div class="mcomp" id="rsComp"><label for="rsPred"><b>🖥️ Mission computer:</b> <span id="rsQ"></span></label> <input type="number" step="any" id="rsPred" style="width:7em" aria-label="Your prediction"> <b id="rsUnit"></b><p class="scaleNote">Type any number and Smooshy can try it.</p></div>
-    <div class="fb" id="rsFb" hidden></div><ol class="blog" id="rsLog"></ol><ul class="objs" data-o></ul><div class="row" id="rsMore"></div>`;
-  LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
-  placeLab($('.labhost', card)); $('#lab').classList.add('nolc');
-  const predVal = () => { const v = $('#rsPred', card).value; return v === '' || isNaN(+v) ? null : +v; };
-  const allTried = () => wm.every(x => get(x.id).tried);
-  const paint = () => {
-    const m = wm[cur], s = get(m.id), nc = Math.min(s.clues || 0, m.clues.length), live = predVal() != null;
-    $('.mtabs', card).innerHTML = wm.map((x, i) => { const g = get(x.id); return `<button type="button" role="tab" aria-selected="${i === cur}" data-rs="${i}" class="${g.tried ? 'done' : ''}">${g.tried ? '✓ ' : ''}${x.title.split(':')[0]}</button>`; }).join('');
-    $('.mbrief', card).innerHTML = `<h3>${m.title}</h3><p>${m.brief}</p><p class="scaleNote">${m.goal}</p>`;
-    $('#rsQ', card).textContent = m.pred.q; $('#rsUnit', card).textContent = m.pred.unit;
-    $('#rsClues').innerHTML = nc ? m.clues.slice(0, nc).map((t, i) => `<p><b>Clue ${i + 1}.</b> ${t}</p>`).join('') : '<p>Press the button to see the first clue. Each press shows one more.</p>';
-    const nx = $('#rsNext'); nx.hidden = nc >= m.clues.length; nx.textContent = nc ? 'Show the next clue' : 'Show a clue';
-    $('#rsLog').innerHTML = (s.log || []).map((r, i) => `<li class="${r.met === m.objs.length ? 'ok' : ''}">Try ${i + 1}: ${r.desc}. ${r.met} of ${m.objs.length} objectives met.</li>`).join('');
-    const fb = $('#rsFb', card); fb.hidden = !s.msg; fb.className = 'fb ' + (s.best === m.objs.length ? 'ok' : 'hint'); fb.innerHTML = s.msg || '';
-    const oks = s.bestOks || [];
-    $('[data-o]', card).innerHTML = m.objs.map((o, i) => [o.label, o.planned ? (live || oks[i]) : oks[i]]).map(([t, ok]) => `<li class="${ok ? 'ok' : ''}"><span class="box">✓</span>${t}</li>`).join('') + `<li class="scaleNote">Your best try: ${s.best || 0} of ${m.max} points.</li>`;
-    let more = '';
-    if (s.tried) more = cur < wm.length - 1 ? `<button type="button" class="${s.n >= 3 && s.best < m.max ? 'ghost' : 'go'}" data-rs="${cur + 1}">${s.n >= 3 && s.best < m.max ? 'Move on (keeps your best score)' : 'Next stage →'}</button>` : `<button type="button" class="go" data-ctab-go="review">Go to the Check →</button>`;
-    if (allTried()) more += ` <button type="button" class="ghost" id="rsEnd">▶ Watch the ending</button>`;
-    $('#rsMore', card).innerHTML = more;
-    const e = $('#rsEnd', card); if (e) e.addEventListener('click', () => openEnding(wm.every(x => get(x.id).best === x.max)));
-    const pb = $('#wsPull'); if (pb) pb.disabled = WS.busy || !live;
-  };
-  const load = i => {
-    cur = i; const m = wm[cur];
-    shopStage(Object.assign({}, m.setup, { cap: 60, pullLabel: 'Smooshy, try it!' })); S.flags = newFlags(); resetSim(); judged = null;
-    LAB.pullGate = () => predVal() != null; $('#rsPred', card).value = '';
-    LAB.show = new Set(m.show); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Type your prediction, then press Smooshy, try it!';
-    applyPanels(); labChanged(); paint();
-  };
-  $('#rsPred', card).addEventListener('input', () => { wsRenderControls(); paint(); });
-  card.addEventListener('click', e => { const b = e.target.closest('[data-rs]'); if (b) load(+b.dataset.rs); });
-  $('#rsNext', card).addEventListener('click', () => { const m = wm[cur], s = get(m.id); save(m, { clues: Math.min(m.clues.length, (s.clues || 0) + 1) }); paint(); });
-  LAB.tick = () => {
-    if (!WS.done || !WS.last || WS.last === judged) return; judged = WS.last;
-    const m = wm[cur], s = get(m.id), c = WS.last, pred = predVal();
-    const r = { E: c.E, need: c.need, capped: c.capped, rise: c.rise, ma: c.ma, parts: c.parts || 0, cable: c.cable, dist: wsR2(c.ma * WS.lift), turns: WS.mach === 'screw' ? wsR2(WS.lift * 100 / WS.pitch) : null, pred, la: WS.arm, per: WS.per, pitch: WS.pitch, bw: WS.bw, bn: WS.bn, br: WS.br };
-    const oks = m.objs.map(o => !!o.ok(r)), met = oks.filter(Boolean).length, n = (s.n || 0) + 1, better = met > (s.best || 0), best = Math.max(s.best || 0, met), desc = m.desc(r);
-    const log = (s.log || []).concat([{ desc, met, pred, need: c.need, ma: c.ma, E: c.E, capped: !!c.capped, oks }]), sayAll = m.objs.map(o => o.say(r)).join(' ');
-    save(m, { tried: true, n, log, best, bestOks: better || !s.bestOks ? oks : s.bestOks, done: best === m.max, msg: (met === m.objs.length ? `Congratulations! ${m.win} ` : 'Not quite. ') + sayAll + ` You met ${met} of ${m.objs.length} objectives${met === m.objs.length ? '.' : '. Change your plan and try again, or move on: your best score is kept.'}` });
-    $('#rsPred', card).value = ''; wsRenderControls(); paint();
-    if (allTried() && !get('sm3').ended) { save(wm[wm.length - 1], { ended: true }); setTimeout(() => openEnding(wm.every(x => get(x.id).best === x.max)), 1400); }
-  };
-  load(cur);
-}
+/* Chapter 6 Part 5: Operation Gummy Lift. One big build; renderGummyLift (4h-glbuild.js) draws the board and 4i-glrun.js runs it. */
+function renderRescueCourse(ch, wm, host, save) { renderGummyLift(ch, wm[0], host, save); }
 
 /* ===== Chapter 5: the Drop Zone (S.scene = 'drop') =====
    Physics (must match tools/dropzone_model.py): air resistance D = c × airFactor × v², c set from each object's Earth terminal velocity,
@@ -6901,8 +6908,8 @@ function wsSite(c) {
     c.fillStyle = 'rgba(255,255,255,.9)'; [[820, 336], [846, 340], [872, 334]].forEach(([x, y]) => { c.beginPath(); c.moveTo(x, y - 24); c.lineTo(x + 8, y); c.lineTo(x - 8, y); c.closePath(); c.fill(); });
   } else {   // the rescue site: the Gumdrop tipped over on the left, a 15 m scale on the right
     const t = performance.now() / 1000 - (WS.siteT0 || 0), hatch = WS.hatch, out = hatch ? (RMOTION ? 1 : clamp((t - 0.4) / 2.4, 0, 1)) : (WS.noShip ? 0 : 1);
-    drawGumdrop(c, 96, 340, .62, -0.5);
-    if (!WS.noShip) drawSmooshy(c, 96 + 74 * out, 318 - (hatch ? Math.sin(out * Math.PI) * 30 : 0) + 6 * (1 - out), .27, out >= 1 ? 'wave' : 'worried');
+    if (WS.peep) drawGumdropInside(c, 96, 340, .62, -0.5, 'worried', t); else drawGumdrop(c, 96, 340, .62, -0.5);
+    if (!WS.noShip && !WS.peep) drawSmooshy(c, 96 + 74 * out, 318 - (hatch ? Math.sin(out * Math.PI) * 30 : 0) + 6 * (1 - out), .27, out >= 1 ? 'wave' : 'worried');
     c.strokeStyle = '#fffaf2'; c.lineWidth = 2; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(868, 350); c.lineTo(868, 130); c.stroke(); c.setLineDash([]);
     [0, 5, 10, 15].forEach(m => { const y = 350 - m * 14.67; c.beginPath(); c.moveTo(860, y); c.lineTo(876, y); c.stroke(); txt(c, m + ' m', 856, y, '#fffaf2', `700 11px ${C.fb}`, 'right'); });
   }
@@ -7482,14 +7489,15 @@ function picCompoundChain(A, B) {
   return picWrap(W, 160, `Two machines with mechanical advantages ${A} and ${B} give a total of ${A * B} when you multiply`, b, '', 420);
 }
 
-/* ---------- Part 5 picture: the three rescue stages ---------- */
+/* ---------- Part 5 picture: the rescue story in order (peep, squeeze out, pull at each machine, climb aboard) ---------- */
 function picCraterPlan() {
-  const W = 420;
-  let b = `<rect x="0" y="0" width="${W}" height="236" rx="10" fill="#6f55b3"/><polygon points="0,60 90,60 150,196 270,196 330,60 420,60 420,236 0,236" fill="#b9a2e4"/>`;
-  b += `<g transform="rotate(-24 210 170)"><path d="M180 190 Q180 130 210 130 Q240 130 240 190 Z" fill="#e8639b"/><circle cx="210" cy="158" r="8" fill="#bfe6f5"/></g><ellipse cx="258" cy="186" rx="14" ry="10" fill="#8b8f93"/>`;
-  b += `<line x1="330" y1="60" x2="330" y2="196" stroke="#fffaf2" stroke-width="2" stroke-dasharray="4 4"/>` + picArrow(150, 184, 112, 116, '#fffaf2', 3);
-  b += picLabs([picLabel(258, 186, 330, 214, ['Stage 1', 'lever the boulder off'], PIC_C.E, { W }), picLabel(205, 176, 120, 214, ['Stage 2', 'jack the ship level'], PIC_C.L, { W }), picLabel(130, 150, 76, 100, ['Stage 3', 'haul it out'], PIC_C.F, { W }), picNote(372, 108, ['15 m', 'crater wall'], PIC_C.ink, { all: true, W })]);
-  return picWrap(W, 236, 'A cross-section of the crater: the Gumdrop tipped at the bottom with a boulder on its leg, and three stages: lever the boulder off, jack the ship level, and haul it up the 15 m wall', b, '', 420);
+  const W = 420, H = 250;
+  let b = `<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="#6f55b3"/><polygon points="0,60 20,60 40,190 150,190 175,140 195,140 205,128 222,128 240,95 268,60 282,60 320,150 420,150 420,250 0,250" fill="#b9a2e4"/>`;
+  b += `<polygon points="338,104 308,14 412,14 384,104" fill="#bfe6f5" opacity=".38"/><ellipse cx="361" cy="122" rx="44" ry="27" fill="#7fd4a5"/><ellipse cx="361" cy="112" rx="26" ry="9" fill="#bdf0d3" opacity=".8"/>`;
+  b += `<line x1="268" y1="60" x2="420" y2="60" stroke="#fffaf2" stroke-width="2" stroke-dasharray="4 4"/>`;
+  b += `<g transform="rotate(-24 85 170)"><path d="M55 190 Q55 130 85 130 Q115 130 115 190 Z" fill="#e8639b"/><circle cx="85" cy="158" r="8" fill="#bfe6f5"/></g><ellipse cx="128" cy="181" rx="14" ry="10" fill="#8b8f93"/>`;
+  b += picLabs([picLabel(85, 150, 70, 96, ['1. Peeps out of', 'the window'], PIC_C.E, { W }), picLabel(112, 168, 118, 222, ['2. Squeezes out', 'through the hatch'], PIC_C.L, { W }), picLabel(210, 128, 250, 205, ['3. Pulls at each', 'machine, walks on'], PIC_C.F, { W }), picLabel(361, 124, 352, 222, ['4. Climbs aboard,', 'beam lifts the ship'], PIC_C.E, { W }), picNote(364, 36, ['Big Jelly', 'tractor beam'], PIC_C.ink, { all: true, W })]);
+  return picWrap(W, H, 'A cross-section of the crater: the Gumdrop tipped at the bottom with a boulder against its leg, a crumbly wall, and the Big Jelly waiting on the plain with its tractor beam. Four steps: Smooshy peeps out of the window, squeezes out through the hatch, pulls at each machine and walks on to the next, then climbs aboard as the beam lifts the ship', b, '', 420);
 }
 
 /* ---------- Extension pictures: friction, wasted energy and efficiency ---------- */
@@ -7790,13 +7798,14 @@ CHDATA.c6 = {
     /* ================= Part 5: Rescue Captain Smooshy! (c6e) ================= */
     { id: 'v1', title: 'Landing on Glimmer-9', rescue: 'Landed on Glimmer-9. Rescue plan loaded!',
       cards: [
-        { hi: '#cvScene', html: `<p>You've landed on <b>Planet Glimmer-9</b>! Purple sky, two moons, and there is the Gumdrop, tipped over at the bottom of a <b>15 m</b> deep crater with a boulder pinning one landing leg. Captain Smooshy squeezes out through the hatch (gummy bears are very squishy) to do the pulling.</p>` },
-        { html: `<p>On Glimmer-9, ${T('gfs', 'g')} = <b>4.2 N/kg</b>, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear. The rescue has three stages, and you plan each one while Smooshy does the pulling.</p>${picCraterPlan()}` }],
-      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', hatch: 1, cap: 60, bRoutes: [[0, 'Straight up'], [30, 'Steep track'], [45, 'Medium track'], [75, 'Gentle track']] }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Watch Smooshy climb out, then answer the questions',
+        { hi: '#cvScene', html: `<p>You've landed on <b>Planet Glimmer-9</b>! Purple sky, two moons, and there is the Gumdrop, tipped over at the bottom of a <b>15 m</b> deep crater with a boulder jammed against its landing leg. Captain Smooshy is peeping out of the Gumdrop's window, wondering how a gummy bear is going to get his ship home.</p>` },
+        { html: `<p>Here is the plan. The huge repair ship, the <b>Big Jelly</b>, waits on the plain beyond the crater, because the rim is too crumbly for it to come any closer. Its <b>tractor beam</b> can lift the Gumdrop once the ship is level with the crest.</p><p>When the rescue begins, Smooshy squeezes out through the hatch (gummy bears are very squishy), because he has to be outside to pull. He stays at the handle of each machine in your route and walks on to the next one. At the end he climbs aboard, waves from the window, and the tractor beam lifts the ship away.</p>${picCraterPlan()}` },
+        { html: `<p>On Glimmer-9, ${T('gfs', 'g')} = <b>4.2 N/kg</b>, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear. You have <b>475 sugar crystals</b> to spend on machines, platforms and dynamite, and Smooshy has enough oxygen for <b>1,500 m</b> of hand pulling.</p><p>Design a route, press <b>Run Rescue</b>, and watch it work. This challenge is one homework in two sessions: build and test your first route in the first, then improve it in the second.</p>` }],
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', peep: 1, cap: 60, bRoutes: [[0, 'Straight up'], [30, 'Steep track'], [45, 'Medium track'], [75, 'Gentle track']] }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Smooshy is waiting in the Gumdrop. Answer the questions to get ready',
       tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
       qs: [
         { id: 'q1', type: 'num', p: 'The Gumdrop has a mass of 1,500 kg. On Glimmer-9, g = 4.2 N/kg. What does the Gumdrop weigh there?', unit: 'N', units: UNITS_W, ans: 6300, tol: 1, ladder: true, hints: ['Weight = mass × g.', 'Use the mass, 1,500 kg, and Glimmer-9\'s g, 4.2 N/kg.', 'Type 1500 × 4.2 into the calculator.'], work: 'Weight = 1,500 × 4.2 = 6,300 N.', ok: 'Yes, 6,300 N.' },
-        { id: 'q2', type: 'num', p: 'Smooshy can pull with 60 N. What mechanical advantage would he need to lift the 6,300 N Gumdrop straight up?', unit: '', ans: 105, tol: 0.5, ladder: true, hints: ['Mechanical advantage = load ÷ effort.', 'The load is 6,300 N and the effort is 60 N.', 'Type 6300 ÷ 60 into the calculator.'], work: 'Mechanical advantage = 6,300 ÷ 60 = 105. No single Workshop machine comes close, so stage 3 needs a compound machine.', ok: 'Yes, 105. No single machine reaches that, so stage 3 needs a compound machine.' },
+        { id: 'q2', type: 'num', p: 'Smooshy can pull with 60 N. What mechanical advantage would he need to lift the 6,300 N Gumdrop straight up?', unit: '', ans: 105, tol: 0.5, ladder: true, hints: ['Mechanical advantage = load ÷ effort.', 'The load is 6,300 N and the effort is 60 N.', 'Type 6300 ÷ 60 into the calculator.'], work: 'Mechanical advantage = 6,300 ÷ 60 = 105. No single Workshop machine comes close, so the rescue route needs several machines working together.', ok: 'Yes, 105. No single machine reaches that, so the rescue route needs several machines working together.' },
         { id: 'q3', type: 'pick', p: 'If the Gumdrop had crashed on Earth instead, its mass would be {0} and its weight would be {1}.', picks: [[['smaller', 'the same', 'bigger'], 1], [['smaller', 'the same', 'bigger'], 2]], after: 'On Earth it would weigh 1,500 × 9.8 = 14,700 N, so the rescue would need an even bigger mechanical advantage. Lucky Smooshy!' }] },
 
     /* ================= Extension: Real machines waste energy (c6f) ================= */
@@ -7897,9 +7906,13 @@ CHDATA.c6 = {
       opts: ['No, the work stays the same, but the effort gets smaller', 'Yes, a bigger advantage always means less work', 'No, a bigger advantage means he does more work', 'Yes, because the ship weighs less with a bigger machine'], a: 0,
       reasons: ['He pulls with less force over a longer distance, so force × distance stays at 94,500 J', 'A smaller force always means a smaller amount of work done', 'He turns the handle further, so force × distance must be bigger', 'The machine carries part of the ship\'s weight for him'], r: 0,
       why: { a: { 1: 'A smaller effort is paid for with a longer distance, so the work is the same.', 2: 'A bigger advantage makes the effort smaller, and the work stays the same.', 3: 'The ship\'s weight never changes.' }, r: { 1: 'The force is smaller, but the distance is longer, so the work does not shrink.', 2: 'The distance is longer, but the force is smaller, so the work does not grow.', 3: 'The machine changes the effort, not the ship\'s weight.' } } },
-    { id: 'c6r26', obj: ['Dii', 'Diii'], type: 'explain', p: 'The rescue team had two plans. Plan A: dig the gentle 75 m track and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9\'s crater, then say which plan you would choose and why.', words: ['mechanical advantage', 'distance', 'safety', 'cost'],
-      model: 'Plan A uses the track as a ramp, which gives mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and digging a 75 m track takes time and damages more of the crater. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.',
-      check: ['Gives an advantage of Plan A (the track\'s mechanical advantage means a smaller or cheaper crane, or a smaller effort)', 'Gives a disadvantage of Plan A (more cable or distance, more time, or more damage to the crater)', 'Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground)', 'Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails)', 'Makes a choice and gives a reason for it'] },
+    { id: 'c6r26', obj: ['Dii', 'Diii'], type: 'explain', p: 'The rescue team had two plans. Plan A: build long, gentle ramps and use a small crane. Plan B: bring a giant crane to lift the Gumdrop straight up the 15 m wall. Discuss one advantage and one disadvantage of each plan. Think about safety, time, cost or the effect on Glimmer-9\'s crater, then say which plan you would choose and why.', words: ['mechanical advantage', 'distance', 'safety', 'cost'],
+      model: 'Plan A uses the ramps, which give mechanical advantage, so a smaller, cheaper crane and a smaller effort are enough. But it needs much more cable and a longer haul, and building the ramps takes time. Plan B moves the ship a much shorter distance, so it is quicker and hardly disturbs the ground. But the crane needs a much bigger mechanical advantage of its own, so it costs more to build and fly there, and a heavy ship hanging high on one cable is more dangerous if something breaks. I would choose Plan A, because it is safer and cheaper, even though it takes longer.',
+      check: ['Gives an advantage of Plan A (the ramps\' mechanical advantage means a smaller or cheaper crane, or a smaller effort)', 'Gives a disadvantage of Plan A (more cable or distance, or more time)', 'Gives an advantage of Plan B (shorter distance, quicker, or less damage to the ground)', 'Gives a disadvantage of Plan B (needs a bigger mechanical advantage or a more expensive crane, or more dangerous if it fails)', 'Makes a choice and gives a reason for it'] },
+    { id: 'c6r32', obj: ['Aii', 'Di', 'Diii'], type: 'explain', refl: true, p: 'Describe the rescue route you built and how it helped Smooshy. Use your own numbers, then say one change you would make and why.', words: ['load', 'effort', 'mechanical advantage', 'distance', 'work'],
+      model: 'My route used a ramp, a pulley block and a winch on each leg. On my hardest leg the 30 m ramp rose 6 m, so the ramp\'s mechanical advantage was 30 ÷ 6 = 5. With 4 ropes and a ×7 winch the parts multiply, so the total mechanical advantage was 5 × 4 × 7 = 140. Smooshy\'s effort was the load ÷ the mechanical advantage = 6,300 ÷ 140 = 45 N, which is under his 60 N limit, so the thrusters stayed off. The price is distance: his hand moved 140 × 6 = 840 m on that leg. The work was still 6,300 × 6 = 37,800 J, because machines change the effort and the distance but not the work. Next time I would blast the crest lower, because then the ship needs to be lifted less far, which means less work and less hand travel.',
+      mnote: 'Accept any route and mark the numbers against the student\'s My Rescue table (page 1 of the worksheet).',
+      check: ['Names the machines in the route, in order', 'Gives the total mechanical advantage of the hardest leg and says the parts multiply', 'Compares the pull with Smooshy\'s 60 N', 'Explains that a smaller effort means a longer hand distance', 'Gives one improvement with a reason'] },
     /* ---------- Extension Check: real machines waste energy ---------- */
     { id: 'c6r27', obj: ['Aii'], type: 'num', p: 'A colonists\' pulley system takes 2,500 J of work in to do 2,000 J of useful work. What is its efficiency?', unit: '%', ans: 80, tol: 0.5, ladder: true, hints: ['Efficiency = useful work out ÷ work in × 100%.', 'Type 2000 ÷ 2500 into the calculator.', 'Multiply by 100 to get a percentage.'], work: 'Efficiency = 2,000 ÷ 2,500 × 100% = 80%.' },
     { id: 'c6r28', obj: ['Aii'], type: 'reason', sure: true, p: 'Friction in a pulley system makes the effort bigger. What happens to the length of rope you pull to lift the load 1 m?',
@@ -7979,44 +7992,9 @@ CHDATA.c6.challenge = {
   ]
 };
 
-/* ---------- Part 5 Challenge: Operation Gummy Lift (sm1 to sm3), judged by renderRescueCourse in 45-challenge.js ---------- */
-{
-  const tick = ok => ok ? '✓' : '✗', f1 = v => fmt(v, 1);
-  const predOk = (r, v, tol, unit) => r.pred != null && Math.abs(r.pred - v) <= tol + 1e-9;
-  const predSay = (r, v, tol, unit, noun) => r.pred == null ? 'You did not type a prediction. ✗' : `Your prediction: ${fmt(r.pred, 1)}${unit}. ${noun}: ${f1(v)}${unit}. Target: within ${tol}${unit}. ${tick(predOk(r, v, tol))}`;
-  const pushOk = r => !r.capped, pushSay = r => r.capped ? `Smooshy's push would need ${f1(r.need)} N. Target: 60 N or less. ✗` : `Smooshy's push: ${f1(r.E)} N. Target: 60 N or less. ✓`;
-  const planned = { planned: true, label: 'Planned: you typed a prediction', ok: r => r.pred != null, say: r => r.pred != null ? 'Planned ✓.' : 'No prediction typed. ✗' };
-  CHDATA.c6.challenge.missions.push(
-    { id: 'sm1', kind: 'rescue', title: 'Stage 1: Free the landing leg', max: 4,
-      setup: { mach: 'lever', allow: ['lever'], cls: 1, arm: 0.5, lift: 0.25, loads: { lever: WL.boulder }, maxTravel: 1.5, site: 'rescue', world: 'glim', lim: { arm: [0.2, 1.0] } }, show: ['wsctl', 'wspull'],
-      brief: 'A <b>60 kg</b> boulder is pinning the landing leg (g = 4.2 N/kg). Smooshy has a 2 m crowbar and a rock to use as a fulcrum. He can push down with <b>60 N at most</b>, and he can push his end down <b>1.5 m</b> before it hits the ground. The boulder must rise <b>0.25 m</b> to free the leg.',
-      goal: 'Move the fulcrum, type your prediction for the effort, then press Smooshy, try it!',
-      pred: { q: 'What effort will Smooshy need with your fulcrum position?', unit: 'N' },
-      objs: [planned, { label: 'Prediction within 1 N of the effort Smooshy needed', ok: r => predOk(r, r.need, 1), say: r => predSay(r, r.need, 1, ' N', 'Smooshy needed') }, { label: 'Smooshy\'s push is 60 N or less', ok: pushOk, say: pushSay },
-        { label: 'The boulder rises at least 0.25 m', ok: r => !r.capped && r.rise >= 0.25 - 1e-9, say: r => r.capped ? 'The boulder did not move. ✗' : `The boulder rose ${fmt(r.rise, 2)} m. Target: 0.25 m or more. ${tick(r.rise >= 0.25 - 1e-9)}` }],
-      desc: r => `the boulder ${fmt(r.la, 2)} m from the fulcrum`, win: 'The landing leg is free!',
-      clues: ['The boulder weighs 60 × 4.2 = 252 N, so the lever\'s mechanical advantage must be at least 252 ÷ 60 = 4.2.', 'But a big mechanical advantage means the boulder rises only a little: rise = 1.5 m ÷ mechanical advantage. For a 0.25 m rise, the mechanical advantage can be 6 at most.', 'Find a load arm that gives a mechanical advantage between 4.2 and 6. (Mechanical advantage = effort arm ÷ load arm, and effort arm = 2 − load arm.)'] },
-    { id: 'sm2', kind: 'rescue', title: 'Stage 2: Level the ship', max: 4,
-      setup: { mach: 'screw', allow: ['screw'], per: 120, pitch: 1.0, lift: 0.40, loads: { screw: WL.sunk }, site: 'rescue', world: 'glim' }, show: ['wsctl', 'wspull'],
-      brief: 'The Gumdrop\'s sunken side presses down with <b>3,780 N</b>. Smooshy must jack it up <b>40 cm</b>. He can push the handle with <b>60 N at most</b>, and after <b>50 turns</b> his gummy arms go floppy.',
-      goal: 'Choose how far the handle moves in one turn and the gap between threads, type your prediction, then press Smooshy, try it!',
-      pred: { q: 'What effort will Smooshy need on the jack handle?', unit: 'N' },
-      objs: [planned, { label: 'Prediction within 1 N of the effort Smooshy needed', ok: r => predOk(r, r.need, 1), say: r => predSay(r, r.need, 1, ' N', 'Smooshy needed') }, { label: 'Smooshy\'s push is 60 N or less', ok: pushOk, say: pushSay },
-        { label: '50 turns or fewer', ok: r => r.turns <= 50 + 1e-9, say: r => `Turns needed: ${fmt(r.turns, 0)}. Target: 50 or fewer. ${tick(r.turns <= 50 + 1e-9)}` }],
-      desc: r => `${fmt(r.per, 0)} cm per turn and a ${fmt(r.pitch, 1)} cm gap between threads`, win: 'The ship is level!',
-      clues: ['Turns = 40 cm ÷ the gap between threads. Which gaps need 50 turns or fewer?', 'Screw mechanical advantage = distance per turn ÷ gap between threads (use the same unit: 1.2 m = 120 cm).', 'With a 1.0 cm gap, which handle gets the effort to 60 N or less? Effort = 3,780 ÷ mechanical advantage.'] },
-    { id: 'sm3', kind: 'rescue', title: 'Stage 3: Haul out of the crater', max: 5,
-      setup: { mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', world: 'glim', bRoutes: [[0, 'Straight up (15 m)'], [30, 'Steep track (30 m)'], [45, 'Medium track (45 m)'], [75, 'Gentle track (75 m)']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
-      brief: 'Time for the big one! Haul the <b>6,300 N</b> Gumdrop <b>15 m</b> up and out of the crater. Smooshy can pull <b>60 N at most</b>. The winch drum holds <b>240 m of cable</b>, and Smooshy has oxygen for <b>2,400 m of hand travel</b> (about 40 minutes of turning). Choose a route, a pulley block and a winch.',
-      goal: 'Build your machine, type its total mechanical advantage, then press Smooshy, try it!',
-      pred: { q: 'What is the total mechanical advantage of your machine?', unit: '' },
-      objs: [{ label: 'Used a compound machine (two or more parts)', ok: r => r.parts >= 2, say: r => `Parts used: ${r.parts}. Target: 2 or more. ${tick(r.parts >= 2)}` }, { label: 'Total mechanical advantage typed correctly (within 0.5)', ok: r => predOk(r, r.ma, 0.5), say: r => predSay(r, r.ma, 0.5, '', 'The total mechanical advantage was') }, { label: 'Smooshy\'s pull is 60 N or less', ok: pushOk, say: pushSay },
-        { label: 'Cable 240 m or less', ok: r => r.cable <= 240 + 1e-9, say: r => r.cable <= 240 + 1e-9 ? `Cable used: ${fmt(r.cable, 0)} m. Target: 240 m or less. ✓` : `Not enough cable! You would need ${fmt(r.cable, 0)} m. Target: 240 m or less. ✗` },
-        { label: 'Hand travel 2,400 m or less', ok: r => r.dist <= 2400 + 1e-9, say: r => r.dist <= 2400 + 1e-9 ? `Hand travel: ${fmt(r.dist, 0)} m. Target: 2,400 m or less. ✓` : `Smooshy's oxygen would run out after 2,400 m of turning. You would need ${fmt(r.dist, 0)} m. ✗` }],
-      desc: r => `${r.br ? 'the ' + r.br + ' m track' : 'straight up'}, ${r.bn ? r.bn + ' ropes' : 'no block'}, ${r.bw ? 'winch ×' + r.bw : 'no winch'}`, win: 'The Gumdrop is out of the crater!',
-      clues: ['The mechanical advantage you need is 6,300 ÷ 60 = 105. Hand travel = mechanical advantage × 15 m, so the mechanical advantage can be 160 at most.', 'Cable = supporting ropes × route length. The gentle track (75 m) can only take 3 ropes.', 'Each track is a ramp: its mechanical advantage = length ÷ 15 m. The gentle track gives 5, the medium track 3. What must the pulley block and the winch multiply to?'] }
-  );
-}
+/* ---------- Part 5 Challenge: Operation Gummy Lift, one big build in two sessions (docs/Force_HQ_Rescue_Rebuild_Brief.md).
+   Built in 4h-glbuild.js, run in 4i-glrun.js, scored by glScore in 4f-gummylift.js. Best run counts; the score is out of 10. ---------- */
+CHDATA.c6.challenge.missions.push({ id: 'gl', kind: 'rescue', title: 'Operation Gummy Lift', max: 10, mins: 44 });
 
 /* ---------- Extension Challenge: Build Gummy Base One (gb1 to gb3). Real machines (efficiencies multiply) and an energy budget. ---------- */
 CHDATA.c6.challenge.missions.push(
@@ -8165,43 +8143,6 @@ function openTransmission() {
     cancelAnimationFrame(TXRAF); dbSet('ws.briefed', true);
     box.innerHTML = `<div class="tx-head"><span>🛠️ The mission</span></div><p>${RB_SLOTS.filter(s => !s.ext).length} jobs stand between Force HQ and a happy gummy bear:</p><ol class="txlist">${RB_SLOTS.filter(s => !s.ext).map(s => `<li><b>${s.part}: ${s.title}</b></li>`).join('')}</ol><p>The Rescue board at the top of the page tracks every job.</p><div class="row" style="justify-content:flex-end"><button type="button" class="go" data-close>Let's go!</button></div>`;
   });
-}
-
-/* ---------- the ending: the Gumdrop rises out of the crater, the sugar discovery and the victory loop (script C6 and C7) ---------- */
-let ENDRAF = 0;
-function endScene(c, t, W, H) {
-  const sm = (a, b) => clamp((t - a) / (b - a), 0, 1), up = sstep(sm(0.3, 3.8)), rim = H * .5, base = H * .86;
-  drawCrater(c, W, H, { a: true, b: true, c: true, d: true, custom: (cc, w, h) => {
-    /* sugar crystals glitter on the rim */
-    cc.fillStyle = 'rgba(255,255,255,.95)'; [[.58, .5], [.66, .5], [.74, .5]].forEach(([x, y]) => { cc.beginPath(); cc.moveTo(w * x, h * y - 20); cc.lineTo(w * x + 7, h * y); cc.lineTo(w * x - 7, h * y); cc.closePath(); cc.fill(); });
-    if (t < 7.6) { const y = base + (rim - base) * up, tilt = .5 * (1 - up); drawGumdrop(cc, w * .5, y, .52, tilt); }
-    else { const k = sm(7.6, 10.4), a = k * Math.PI * 2, x = w * .5 + Math.sin(a) * w * .14, y = rim - 40 - (1 - Math.cos(a)) * 34 * 1.4;
-      cc.strokeStyle = 'rgba(120,200,255,.8)'; cc.lineWidth = 5; cc.lineCap = 'round'; cc.beginPath(); for (let i = 0; i <= 20; i++) { const b = Math.max(0, a - i * .06), bx = w * .5 + Math.sin(b) * w * .14, by = rim - 40 - (1 - Math.cos(b)) * 34 * 1.4; i ? cc.lineTo(bx, by) : cc.moveTo(bx, by); } cc.stroke();
-      drawGumdrop(cc, x, y, .4, Math.cos(a) * .3); }
-    if (t > 3.8) { const lick = t > 5.6 && t < 7.4; drawSmooshy(cc, w * (lick ? .64 : .24) + (lick ? 0 : Math.sin(t * 6) * 6), rim - 22, .34, t > 5.6 ? 'wave' : 'cheer', t); }
-  } });
-}
-const END_CAPS = [[0, 'The winch hums and the Gumdrop rises up the crater wall...'], [3.8, 'Smooshy does a happy wobble-dance!'], [5.6, 'He leans on a glittering crystal, licks it, and freezes: "Wait... these crystals are SUGAR!"'], [7.4, '"Gummies of the galaxy, I\'ve found us a new home!"'], [8.6, 'The Gumdrop does a victory loop with a blue exhaust trail.']];
-function openEnding(metAll, again) {
-  const card = `<h3>🎉 Mission complete!</h3><p>${metAll ? 'You planned all three stages with the numbers, and Smooshy is out of the crater. Brilliant rescue, Engineer!' : 'With your plan, Smooshy got the Gumdrop part of the way up. Force HQ\'s backup team used your numbers to finish the job. Want to perfect it? You can try the rescue again in Explore.'}</p><p>The Gumdrop is safe, and Glimmer-9 is made of sugar.${secOf('c6f') ? ' <b>Extension unlocked:</b> help the gummy colonists build ' + SMOOSHY.base + '.' : ''}</p><p>Do the debrief questions in the Check to finish your worksheet, with your rescue report on it.</p>`;
-  openModal(`<div class="modal txmodal" role="dialog" aria-label="The rescue ending"><div class="tx-head"><span>🚀 Operation Gummy Lift</span></div><div class="tx-screen"><canvas id="cvEnd" role="img" aria-label="Captain Smooshy's spaceship rises out of the crater, Smooshy dances on the rim, finds that the crystals are sugar, and the Gumdrop does a victory loop."></canvas></div><p id="endCap" class="txrec" aria-live="polite"></p><div id="endCard" hidden>${card}</div><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><button type="button" class="ghost sm" id="endAgain">↺ Watch again</button><button type="button" class="go" data-close>Done</button></div></div>`, () => { cancelAnimationFrame(ENDRAF); });
-  const cv = $('#cvEnd'); let t0 = performance.now();
-  const paint = () => { if (!cv.isConnected) return; const c = fit(cv, 360, 200), t = RMOTION ? 11 : (performance.now() - t0) / 1000; readColors(); endScene(c, t, 360, 200);
-    const cap = END_CAPS.filter(x => t >= x[0]).pop(); $('#endCap').textContent = RMOTION ? 'Smooshy is out of the crater, and the crystals are sugar!' : cap[1]; $('#endCard').hidden = t < 10.6; ENDRAF = requestAnimationFrame(paint); };
-  paint(); $('#endAgain').addEventListener('click', () => { t0 = performance.now(); });
-}
-
-/* ---------- the Rescue report on the Part 5 worksheet: one row per stage, from the student's best try (not marked) ---------- */
-const RR_KEY = { sm1: ['Load arm 0.30 m (boulder 0.30 m from the fulcrum)', '44.5 N', '44.5 N', [1, 1, 1, 1]], sm2: ['120 cm per turn, 1.0 cm between threads', '31.5 N', '31.5 N', [1, 1, 1, 1]], sm3: ['Medium track (45 m), 4 ropes, winch ×10', 'MA 120', 'MA 120, pull 52.5 N', [1, 1, 1, 1, 1]] };
-function rescueReportHTML(mode) {
-  const stu = mode === 'student', key = mode === 'key', ms = CHDATA.c6e.challenge.missions, sv = dbGet('chal.c6e', {}), W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x;
-  const rows = ms.map(m => {
-    const s = sv[m.id] || {}, l = stu && s.log && s.log.length ? (s.log.find(x => x.met === s.best) || s.log[s.log.length - 1]) : null, K = key ? RR_KEY[m.id] : null, oks = K ? K[3] : l && l.oks ? l.oks.map(x => +x) : [];
-    const set = K ? K[0] : l ? l.desc : '', pred = K ? K[1] : l && l.pred != null ? `${fmt(l.pred, 2)} ${m.pred.unit}`.trim() : l ? '–' : '';
-    const need = K ? K[2] : l && l.need != null ? (m.id === 'sm3' ? `MA ${fmt(l.ma, 1)}, pull ${fmt(l.need, 1)} N` : `${fmt(l.need, 1)} N`) : l ? '–' : '';
-    const res = K ? `${m.max} of ${m.max} points` : l ? `${s.best} of ${m.max} points (${s.n} ${s.n === 1 ? 'try' : 'tries'})` : '';
-    return `<tr><td><b>${esc(m.title)}</b></td><td>${set ? W(esc(set)) : ''}</td><td>${pred ? W(esc(pred)) : ''}</td><td>${need ? W(esc(need)) : ''}</td><td>${res ? W(esc(res)) : ''}</td><td>${m.objs.map((o, i) => `<div>${stu || key ? (oks[i] ? W('✓') : stu && l ? W('✗') : '☐') : '☐'} ${o.label}</div>`).join('')}</td></tr>`; }).join('');
-  return `<div class="q"><div class="qh">Rescue report${stu ? '<span>from your best try at each stage in the sim</span>' : ''}</div><table><tr><th>Stage</th><th>My settings</th><th>My prediction</th><th>What Smooshy needed</th><th>Result</th><th>Objectives (✓ met, ✗ not met)</th></tr>${rows}</table><p class="note">${key ? 'These are passing settings. Other settings can pass too. The Rescue report is not marked.' : stu ? 'The Rescue report is not marked. It shows the work done in the Challenge.' : 'The Rescue report is not marked.'}</p></div>`;
 }
 
 /* ===== Build tasks bt1 to bt4: open builds with the machine builder, live checks, a results table, questions about the build and a build sheet =====
@@ -8415,6 +8356,1059 @@ function btClick(e) {
 }
 document.addEventListener('change', e => { const i = e.target.closest && e.target.closest('[data-bttype]'); if (!i) return; const [w, k] = i.dataset.bttype.split(':'), sv = dbGet('btt.bt4', { typed: {} }); sv.typed = sv.typed || {}; sv.typed[w] = Object.assign({}, sv.typed[w], { [k]: i.value.trim() }); dbSet('btt.bt4', sv); if (BT_TAB === 'tasks') btRail(true); });
 
+/* ===== Chapter 6 Part 5: Operation Gummy Lift, the rescue model (stage 1 of docs/Force_HQ_Rescue_Rebuild_Brief.md) =====
+   Pure maths and data, no drawing: the crater's height profile, dynamite blasts, the rig (parts + cables), tracing the legs,
+   pulls, hand travel, work, damage and the score out of 10. The builder (4g) and Run Rescue (4h) read everything from glEvaluate(rig).
+   Units: metres and newtons. x runs left to right across the crater; y is height above the crater floor.
+
+   The rig, as saved in chal.c6e.gl.rig:
+     { parts: [ ...see below ], cables: [ { a: partId|'hand'|'boulder', b: partId|'boulder' } ] }
+   Lift machines (one leg each):
+     ramp   { id, type:'ramp', x1, y1, L, rise }          foot at (x1, y1); head = foot + (√(L² − rise²), rise)
+     crane  { id, type:'crane', x, rise }                 stands on whatever is under x; lifts straight up
+     lever  { id, type:'lever', x, arm, rise, dir }       x = the load end; arm = load arm (fulcrum distance); the beam reaches
+                                                          10 m towards dir (+1 right, −1 left); MA = (10 − arm) ÷ arm
+     jack   { id, type:'jack', x, rise }
+     A lift machine with role:'boulder' works on the boulder instead of the ship.
+   Add-ons, joined to a machine by cables: block { id, type:'block', ropes 1–4 }, winch { id, type:'winch', ratio }.
+     Cable chain for a leg: machine — block — winch — winch (Smooshy holds the last one). Order along the chain does not change the maths.
+   platform { id, type:'platform', size:'S'|'M'|'L', x (centre), h (height above the ground under it) }
+   dyn      { id, type:'dyn', big:true|false, x }       blasts the surface at x, in the order placed
+*/
+const GL = { g: 4.2, ship: 6300, rock: 2100, boulderN: 252, pullOk: 60, budget: 475, oxy: 1500, W: 96, shipX: 14, boulderX: 19,
+  hzX: 3, hzY: 0.5, rampMax: 30, slopeMax: 0.5, beam: 10, leverMAmax: 9, leverRise: 2, jackMA: 120, jackRise: 2, craneRise: 8, platMaxH: 8,
+  winchRatios: [2, 4, 6, 7, 8, 10], ropesMax: 4, winchMax: 2, nearShip: 6, sit: 0.3, bed: 0.6, dig: 0.2, rimFrom: 44, rimTo: 76 };
+const GL_COST = { ramp: 3, crane: 40, lever: 25, jack: 60, rope: 10, winch: 15, cablePer5: 1, small: 20, big: 40 };
+const GL_PLAT = { S: { holds: 4000, base: 10, w: 3, name: 'Small' }, M: { holds: 7000, base: 20, w: 4, name: 'Medium' }, L: { holds: 10000, base: 35, w: 5, name: 'Large' } };
+const GL_WT = { crane: 1000, lever: 500, jack: 400, winch: 100, block: 100, ramp: 0 };
+const GL_BLAST = { small: 1.5, big: 3 };
+const GL_LIFT = { ramp: 1, crane: 1, lever: 1, jack: 1 };
+/* the crater, side-on (tuned so every route in brief section 9 can be built; tests/rescue_numbers.py checks them on this ground) */
+const GL_PROFILE = [[0, 8], [3, 4.5], [6, 0.8], [8, 0], [22, 0], [28, 0.8], [32, 2.2], [35, 4], [37, 5.2], [38.6, 6], [44, 6], [47, 6.5], [50, 7.6],
+  [53, 8.7], [55, 9.1], [57, 9.1], [59, 9.6], [61, 10.6], [63, 11.5], [64, 12], [66, 12], [67, 13.5], [68, 15], [69, 13.5], [70, 12], [72, 10], [75, 8], [96, 8]];
+function glBaseGround() {
+  const h = [];
+  for (let x = 0; x <= GL.W; x++) { let i = 0; while (i < GL_PROFILE.length - 2 && GL_PROFILE[i + 1][0] < x) i++; const [x0, y0] = GL_PROFILE[i], [x1, y1] = GL_PROFILE[i + 1]; h.push(+(y0 + (y1 - y0) * clamp((x - x0) / (x1 - x0), 0, 1)).toFixed(3)); }
+  return h;
+}
+const glAt = (g, x) => { if (x <= 0) return g[0]; if (x >= GL.W) return g[GL.W]; const i = Math.floor(x), f = x - i; return f ? g[i] + (g[i + 1] - g[i]) * f : g[i]; };
+/* a blast carves a round dip like Worms, centred on the surface: no tunnels, no overhangs */
+function glBlast(g, bx, big) {
+  const r = big ? GL_BLAST.big : GL_BLAST.small, by = glAt(g, bx), out = g.slice();
+  for (let x = Math.ceil(bx - r); x <= Math.floor(bx + r); x++) { if (x < 0 || x > GL.W) continue; const d = Math.sqrt(Math.max(0, r * r - (x - bx) * (x - bx))); out[x] = Math.max(0, Math.min(out[x], +(by - d).toFixed(3))); }
+  return { g: out, at: { x: bx, y: by }, r };
+}
+function glGround(rig) { let g = glBaseGround(); const blasts = []; (rig.parts || []).filter(p => p.type === 'dyn').forEach(p => { const b = glBlast(g, p.x, p.big); g = b.g; blasts.push(Object.assign({ id: p.id, big: !!p.big }, b.at, { r: b.r })); }); return { g, blasts }; }
+const glCrest = g => { let m = 0; for (let x = GL.rimFrom; x <= GL.rimTo; x++) m = Math.max(m, g[x]); return m; };
+const glMaxRight = (g, x) => { let m = glAt(g, x); for (let i = Math.ceil(x); i <= GL.W; i++) m = Math.max(m, g[i]); return m; };
+
+/* ---------- supports: the ground, or the top of a platform ---------- */
+function glPlatforms(rig, g) {
+  return (rig.parts || []).filter(p => p.type === 'platform').map(p => { const P = GL_PLAT[p.size] || GL_PLAT.M, x0 = p.x - P.w / 2, x1 = p.x + P.w / 2; let base = 0;
+    for (let x = x0; x <= x1 + 1e-9; x += 0.5) base = Math.max(base, glAt(g, x)); return { id: p.id, part: p, x0, x1, base, top: +(base + p.h).toFixed(3), holds: P.holds }; });
+}
+/* what holds up a point: a platform top it sits on, else the ground (within GL.sit metres), else nothing */
+function glSupport(x, y, g, plats) {
+  const pl = plats.find(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05 && Math.abs(y - q.top) <= GL.sit);
+  if (pl) return { kind: 'platform', id: pl.id, y: pl.top };
+  const gy = glAt(g, x); if (Math.abs(y - gy) <= GL.sit) return { kind: 'ground', y: gy };
+  return null;
+}
+/* the level something standing at x rests on: the highest platform top over x, else the ground */
+function glFloorAt(x, g, plats) { const tops = plats.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).map(q => q.top); return tops.length ? Math.max(...tops) : glAt(g, x); }
+function glFloorKind(x, g, plats) { const pl = plats.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).sort((a, b) => b.top - a.top)[0]; return pl ? { kind: 'platform', id: pl.id, y: pl.top } : { kind: 'ground', y: glAt(g, x) }; }
+
+/* ---------- one machine: its start, end, MA and any rule it breaks ---------- */
+const glRun = p => Math.sqrt(Math.max(0, p.L * p.L - p.rise * p.rise));
+const glLeverMA = p => (GL.beam - p.arm) / p.arm;
+function glMachine(p, g, plats) {
+  const m = { id: p.id, type: p.type, part: p, faults: [] };
+  if (p.type === 'ramp') {
+    const run = glRun(p); m.start = { x: p.x1, y: p.y1 }; m.end = { x: p.x1 + run, y: p.y1 + p.rise }; m.rise = p.rise; m.ma = p.rise > 0 ? p.L / p.rise : 0; m.dist = p.L; m.L = p.L; m.run = run;
+    if (p.L > GL.rampMax + 1e-9) m.faults.push('long');
+    if (p.rise <= 0 || p.rise / p.L > GL.slopeMax + 1e-9) m.faults.push('steep');
+    /* the deck may bed into the ground by a little near each end, never pass through it */
+    for (let t = 0.02; t < 0.98; t += 0.01) { const x = m.start.x + run * t, y = m.start.y + p.rise * t, gy = glAt(g, x), endish = Math.min(t, 1 - t) * p.L < GL.bed;
+      if (gy - y > (endish ? GL.dig + 0.25 : GL.dig)) { m.faults.push('ground'); m.hit = { x, y: gy }; break; } }
+    m.footOn = glSupport(m.start.x, m.start.y, g, plats); m.headOn = glSupport(m.end.x, m.end.y, g, plats);
+    if (!m.headOn) m.faults.push('head');
+    m.base = m.headOn;   // the pulley block and winches bolt on at the top of the ramp
+  } else {
+    const fl = glFloorKind(p.x, g, plats), cap = p.type === 'crane' ? GL.craneRise : p.type === 'lever' ? GL.leverRise : GL.jackRise;
+    m.start = { x: p.x, y: fl.y }; m.rise = p.rise; m.end = { x: p.x, y: +(fl.y + p.rise).toFixed(3) }; m.base = fl; m.dist = p.rise;
+    if (p.rise <= 0 || p.rise > cap + 1e-9) m.faults.push('rise');
+    if (p.type === 'crane') m.ma = 1;
+    if (p.type === 'jack') m.ma = GL.jackMA;
+    if (p.type === 'lever') { m.ma = glLeverMA(p); if (m.ma > GL.leverMAmax + 1e-9 || p.arm <= 0 || p.arm >= GL.beam) m.faults.push('fulcrum'); m.dist = m.ma * p.rise; }
+  }
+  return m;
+}
+/* follow the cables out from a machine: pulley block and winches (any order), stopping at Smooshy's hand */
+function glAddons(rig, id) {
+  const byId = {}; (rig.parts || []).forEach(p => byId[p.id] = p);
+  const nb = n => (rig.cables || []).filter(c => c.a === n || c.b === n).map(c => c.a === n ? c.b : c.a);
+  const seen = new Set([id]), chain = []; let cur = id, guard = 0, faults = [];
+  while (guard++ < 8) { const nx = nb(cur).filter(n => !seen.has(n) && byId[n] && (byId[n].type === 'block' || byId[n].type === 'winch'));
+    if (nx.length > 1) faults.push('tangle'); if (!nx.length) break; seen.add(nx[0]); chain.push(byId[nx[0]]); cur = nx[0]; }
+  const blocks = chain.filter(p => p.type === 'block'), winches = chain.filter(p => p.type === 'winch');
+  if (blocks.length > 1) faults.push('blocks'); if (winches.length > GL.winchMax) faults.push('winches');
+  const ropes = blocks.length ? clamp(blocks[0].ropes | 0, 1, GL.ropesMax) : 1, wm = winches.slice(0, GL.winchMax).reduce((a, w) => a * w.ratio, 1);
+  return { chain, blocks, winches, ropes, wm, faults, cabled: chain.length > 0 };
+}
+
+/* ---------- the whole rig: blasts, boulder, legs in order, run, damage, score ---------- */
+function glEvaluate(rig, opts) {
+  opts = opts || {}; rig = rig || { parts: [], cables: [] };
+  const { g, blasts } = glGround(rig), plats = glPlatforms(rig, g), parts = rig.parts || [];
+  const ship0 = { x: GL.shipX, y: glAt(g, GL.shipX) };
+  /* the boulder: a lever or jack set on it, a rope and winch from it, or a blast that reaches it */
+  const bShip = blasts.filter(b => Math.hypot(b.x - GL.shipX, b.y - ship0.y) <= GL.nearShip);
+  const bRock = blasts.filter(b => Math.abs(b.x - GL.boulderX) <= b.r + 0.6);
+  let boulder = { how: null, pull: null, ok: false, ma: 0 };
+  const bm = parts.find(p => p.role === 'boulder' && (p.type === 'lever' || p.type === 'jack'));
+  const bc = (rig.cables || []).find(c => c.a === 'boulder' || c.b === 'boulder');
+  if (bRock.length) boulder = { how: 'blast', ok: true, pull: 0, ma: 0 };
+  else if (bm) { const ad = glAddons(rig, bm.id), ma = (bm.type === 'jack' ? GL.jackMA : glLeverMA(bm)) * (bm.type === 'jack' ? 1 : ad.ropes * ad.wm); boulder = { how: bm.type, id: bm.id, ma, pull: GL.boulderN / ma, ok: GL.boulderN / ma <= GL.pullOk + 1e-9 }; }
+  else if (bc) { const ad = glAddons({ parts, cables: (rig.cables || []).map(c => ({ a: c.a === 'boulder' ? '__b' : c.a, b: c.b === 'boulder' ? '__b' : c.b })) }, '__b'), ma = ad.ropes * ad.wm; if (ad.cabled) boulder = { how: 'winch', ma, pull: GL.boulderN / ma, ok: GL.boulderN / ma <= GL.pullOk + 1e-9 }; }
+  const rockOn = !boulder.ok, load = GL.ship + (rockOn ? GL.rock : 0);
+  /* the ship's legs: start at the Gumdrop, each next machine must start in the handover zone (3 m across, 0.5 m up or down) of the last end */
+  const ms = parts.filter(p => GL_LIFT[p.type] && p.role !== 'boulder').map(p => glMachine(p, g, plats)), used = new Set(), legs = [];
+  let at = ship0, stop = null, arrived = false;
+  const inZone = (a, b) => Math.abs(a.x - b.x) <= GL.hzX + 1e-9 && Math.abs(a.y - b.y) <= GL.hzY + 1e-9;
+  const beamSees = p => p.y >= glMaxRight(g, p.x) - GL.hzY - 1e-9;   // the Big Jelly's tractor beam needs the Gumdrop level with everything between it and the plain
+  for (let guard = 0; guard < 12; guard++) {
+    if (legs.length && beamSees(at)) { arrived = true; break; }
+    const cand = ms.filter(m => !used.has(m.id) && m.rise > 0 && inZone(at, m.start)).sort((a, b) => (b.end.y - a.end.y) || (Math.hypot(a.start.x - at.x, a.start.y - at.y) - Math.hypot(b.start.x - at.x, b.start.y - at.y)));
+    if (!cand.length) { stop = { why: legs.length ? 'gap' : 'none', at: Object.assign({}, at), leg: legs.length }; break; }
+    const m = cand[0]; used.add(m.id);
+    const ad = glAddons(rig, m.id), faults = m.faults.concat(ad.faults);
+    if (m.type === 'jack' && ad.cabled) faults.push('jackcable');
+    const ma = m.type === 'jack' ? m.ma : m.ma * ad.ropes * ad.wm, pull = load / ma, hand = ma * m.rise;
+    const cable = m.type === 'jack' ? 0 : (m.type === 'crane' || ad.cabled) ? ad.ropes * m.dist : 0;
+    const leg = { i: legs.length, id: m.id, type: m.type, m, start: m.start, end: m.end, rise: +m.rise.toFixed(3), mma: m.ma, ropes: m.type === 'jack' ? 1 : ad.ropes, winches: ad.winches.map(w => w.ratio), ma, load, pull, hand, cable, work: load * Math.max(0, m.rise), faults, addons: ad.chain.map(p => p.id) };
+    legs.push(leg);
+    if (faults.length) { stop = { why: 'broken', at: Object.assign({}, at), leg: leg.i, faults }; leg.stopped = true; break; }
+    if (pull > 180 + 1e-9) { stop = { why: 'heavy', at: Object.assign({}, at), leg: leg.i }; leg.stopped = true; break; }
+    at = m.end;
+  }
+  if (!stop && !arrived) stop = { why: 'gap', at: Object.assign({}, at), leg: legs.length };
+  /* platforms: the Gumdrop (and the rock, if still on) plus every machine standing on it */
+  const onPlat = (pt, pl) => pl && pt && pt.kind === 'platform' && pt.id === pl.id;
+  const loads = plats.map(pl => { let n = 0, ship = false;
+    ms.concat(parts.filter(p => p.role === 'boulder' && GL_LIFT[p.type]).map(p => glMachine(p, g, plats))).forEach(m => { if (m.type !== 'ramp' && onPlat(m.base, pl)) n += GL_WT[m.type]; const ad = glAddons(rig, m.id); if (onPlat(m.base, pl)) n += ad.chain.reduce((a, p) => a + GL_WT[p.type], 0); });
+    legs.forEach(l => { [l.start, l.end].forEach(pt => { const s = glSupport(pt.x, pt.y, g, plats); if (s && s.kind === 'platform' && s.id === pl.id) ship = true; }); });
+    return { id: pl.id, top: pl.top, base: pl.base, x0: pl.x0, x1: pl.x1, holds: pl.holds, machines: n, ship, load: n + (ship ? load : 0) }; });
+  loads.forEach(L => { L.over = L.load > L.holds + 1e-9; });
+  /* the run stops at the first leg that puts the Gumdrop on an overloaded platform (or the first overloaded platform under a machine) */
+  for (const l of legs) { if (stop && l.i > stop.leg) break;
+    const s = glSupport(l.end.x, l.end.y, g, plats), s0 = glSupport(l.start.x, l.start.y, g, plats), base = l.m.base;
+    const bad = [s0, base, s].map(q => q && q.kind === 'platform' && loads.find(L => L.id === q.id && L.over)).find(Boolean);
+    if (bad) { if (!stop || l.i <= stop.leg) { stop = { why: 'collapse', at: Object.assign({}, l.start), leg: l.i, plat: bad.id }; arrived = false; l.stopped = true; } break; } }
+  if (stop && stop.why === 'collapse') { legs.forEach(l => { if (l.i > stop.leg) l.skipped = true; }); }
+  const ran = legs.filter(l => !l.skipped && !(stop && l.i === stop.leg && stop.why !== 'gap'));
+  const done = arrived && !stop;
+  /* numbers for the receipt */
+  const hardest = legs.length ? Math.max(...legs.map(l => l.pull)) : load;
+  const hand = legs.reduce((a, l) => a + l.hand, 0), workJ = legs.reduce((a, l) => a + l.work, 0);
+  let thr = 0; legs.forEach(l => { l.thruster = l.pull > GL.pullOk + 1e-9 ? Math.min(100, (l.pull - GL.pullOk) / 120 * 100) : 0; thr += l.thruster; });
+  const dmg = { thrusters: thr, rock: rockOn ? 25 : 0, blasts: bShip.length * 15 }; dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.blasts);
+  const cost = glCost(rig, legs, boulder), crest = glCrest(g);
+  const res = { ok: done, arrived: done, stop: done ? null : stop, legs, ran, hardest, hand, work: workJ, load, rockOn, boulder, blasts, bShip: bShip.length, dmg, cost, crest, plats: loads, ground: g, ship0,
+    final: legs.length ? legs[legs.length - 1].end : ship0, used: [...used], spare: ms.filter(m => !used.has(m.id)).map(m => m.id) };
+  res.score = glScore(res, opts.hints || 0);
+  return res;
+}
+/* crystals: every part bought counts, used or not */
+function glCost(rig, legs, boulder) {
+  const parts = rig.parts || [], items = []; let total = 0;
+  const add = (what, n) => { items.push([what, n]); total += n; };
+  parts.forEach(p => {
+    if (p.type === 'ramp') add(`Ramp ${fmt(p.L, 1)} m`, Math.ceil(GL_COST.ramp * p.L - 1e-9));
+    else if (p.type === 'crane' || p.type === 'lever' || p.type === 'jack') add(p.type === 'crane' ? 'Crane gantry' : p.type === 'lever' ? 'Lever' : 'Screw jack', GL_COST[p.type]);
+    else if (p.type === 'block') add(`Pulley block, ${p.ropes} rope${p.ropes > 1 ? 's' : ''}`, GL_COST.rope * p.ropes);
+    else if (p.type === 'winch') add(`Winch ×${p.ratio}`, GL_COST.winch);
+    else if (p.type === 'dyn') add(p.big ? 'Big dynamite' : 'Small dynamite', p.big ? GL_COST.big : GL_COST.small);
+    else if (p.type === 'platform') { const P = GL_PLAT[p.size] || GL_PLAT.M; add(`${P.name} platform ${fmt(p.h, 1)} m`, Math.ceil(P.base + 2 * p.h - 1e-9)); }
+  });
+  const cab = legs.reduce((a, l) => a + l.cable, 0);   // the boulder's short rope is free
+  if (cab > 0) add(`Cable ${fmt(cab, 1)} m`, Math.ceil(cab / 5 - 1e-9) * GL_COST.cablePer5);
+  return { total, items, cable: cab };
+}
+/* the score out of 10 (brief section 6). Returns null points and notYet:true for a route that does not finish or pulls over 180 N. */
+const GL_PULL_PTS = p => p > 180 ? null : p > 120 ? 0 : p > 80 ? 1 : p > 60 + 1e-9 ? 2 : p >= 54 ? 5 : p >= 45 ? 4 : 3;
+function glScore(r, hints) {
+  const notYet = !r.arrived || r.hardest > 180 + 1e-9;
+  const pts = { pull: 0, cond: 0, boulder: 0, oxy: 0, budget: 0 };
+  if (!notYet) { pts.pull = GL_PULL_PTS(r.hardest); if (r.rockOn) pts.pull = Math.min(2, pts.pull); }
+  pts.cond = r.dmg.total <= 1e-9 ? 2 : r.dmg.total <= 25 + 1e-9 ? 1 : 0;
+  pts.boulder = r.boulder.ok ? 1 : 0; pts.oxy = r.hand <= GL.oxy + 1e-9 ? 1 : 0; pts.budget = r.cost.total <= GL.budget ? 1 : 0;
+  if (notYet) return { notYet: true, total: null, pts, hintCost: 0, ending: 'notyet' };
+  const raw = pts.pull + pts.cond + pts.boulder + pts.oxy + pts.budget, hintCost = Math.max(0, (hints || 0) - 1), total = Math.max(1, raw - hintCost);
+  return { notYet: false, raw, total, pts, hintCost, ending: r.dmg.total <= 1e-9 ? 'spotless' : 'dented' };
+}
+/* is run a better than run b? (best run counts: rescued beats not yet, then score, then smaller hardest pull) */
+const glBetter = (a, b) => !b || (a.total != null && b.total == null) || (a.total != null && b.total != null && (a.total > b.total || (a.total === b.total && a.hardest < b.hardest)));
+
+/* ===== Operation Gummy Lift: drawing the crater, side-on (stage 2). Same flat, rounded look as the Workshop (4b-shopdraw.js).
+   World units are metres (x across, y up from the crater floor). GLV maps them to canvas pixels, with zoom and pan.
+   glDrawWorld(c, o) draws everything; o = { rig, ev (glEvaluate result), ground, ghost, ship {x,y,tilt,mood,inside,dmg}, smoo {x,y,mood}|null,
+   sel, hz (handover target), ruler, run (stage 3 extras), t } */
+const GLC = { sky0: '#2d1f63', sky1: '#8e6fd6', rock0: '#b9a2e4', rock1: '#7d63ba', crust: '#d6c4f5', deep: '#5f4a99', crys: 'rgba(255,255,255,.9)', wood: '#c9a36a', wood2: '#9c7845', steel: '#8e9ca5', steel2: '#5d6b74',
+  rope: '#f4e7c8', bad: '#ff5d5d', glow: '#7ef0a8', ink: '#1f1d26', label: '#fffaf2', jelly: '#ffb347', jelly2: '#ff8a3d', beam: 'rgba(160,255,214,.35)' };
+const GLV = { LW: 1000, LH: 300, K: 10, z: 1, cx: 48, cy: 12, wide: 300 };
+const glSX = x => GLV.LW / 2 + (x - GLV.cx) * GLV.K * GLV.z, glSY = y => GLV.LH / 2 - (y - GLV.cy) * GLV.K * GLV.z, glU = () => GLV.K * GLV.z;
+const glWX = sx => GLV.cx + (sx - GLV.LW / 2) / glU(), glWY = sy => GLV.cy - (sy - GLV.LH / 2) / glU();
+/* keep the view inside the world: at zoom 1 the whole crater fits */
+function glClampView() {
+  const halfW = GLV.LW / 2 / glU(), halfH = GLV.LH / 2 / glU();
+  GLV.cx = halfW * 2 >= 100 ? 48 : clamp(GLV.cx, -2 + halfW, 98 - halfW);
+  GLV.cy = clamp(GLV.cy, -1.5 + halfH, Math.max(-1.5 + halfH, 30 - halfH));
+}
+const glLbl = (c, s, x, y, col, size, align, bg) => { c.font = `800 ${size || 12}px ${C.fb || 'sans-serif'}`; const w = c.measureText(s).width;
+  if (bg) { c.fillStyle = bg; c.beginPath(); c.roundRect((align === 'left' ? x : align === 'right' ? x - w : x - w / 2) - 5, y - (size || 12) * 0.75, w + 10, (size || 12) * 1.5, 6); c.fill(); }
+  txt(c, s, x, y, col || GLC.label, `800 ${size || 12}px ${C.fb || 'sans-serif'}`, align); };
+/* a few fixed sparkles and crystal clusters (seeded, so they never jump about) */
+const GL_STARS = (() => { const r = rng(9); return Array.from({ length: 70 }, () => [r() * 100 - 2, 14 + r() * 17, 0.6 + r() * 1.4, r() * 6]); })();
+const GL_CRYS = [[2, 1], [10, 0.6], [25, 0.8], [33, 1], [41, 0.7], [49, 0.9], [61, 0.8], [79, 1], [88, 0.7], [93, 0.9]];
+
+function glDrawSky(c, t) {
+  const sk = c.createLinearGradient(0, glSY(31), 0, glSY(0)); sk.addColorStop(0, GLC.sky0); sk.addColorStop(1, GLC.sky1); c.fillStyle = sk; c.fillRect(0, 0, GLV.LW, GLV.LH);
+  GL_STARS.forEach(([x, y, r, ph]) => { c.globalAlpha = RMOTION ? 0.8 : 0.5 + 0.4 * Math.sin(t * 1.3 + ph); c.fillStyle = '#fff'; c.beginPath(); c.arc(glSX(x), glSY(y), r * Math.min(1.6, GLV.z), 0, 7); c.fill(); });
+  c.globalAlpha = 1; const u = glU();
+  c.fillStyle = '#f3e9ff'; c.beginPath(); c.arc(glSX(22), glSY(25), 2.2 * u, 0, 7); c.fill(); c.fillStyle = '#d9c5f5'; c.beginPath(); c.arc(glSX(21.4), glSY(25.5), 0.6 * u, 0, 7); c.fill();
+  c.fillStyle = '#ffd6f0'; c.beginPath(); c.arc(glSX(34), glSY(22.5), 1.1 * u, 0, 7); c.fill();
+}
+/* the Big Jelly: a huge orange jelly cruiser hovering over the plain, too heavy to land on the crumbly rim */
+function glDrawBigJelly(c, t, beamOn) {
+  const u = glU(), bob = RMOTION ? 0 : Math.sin(t * 1.4) * 0.25, x = glSX(86), y = glSY(22 + bob);
+  if (beamOn) { const g = c.createLinearGradient(x, y, x, y + 14 * u); g.addColorStop(0, 'rgba(160,255,214,.7)'); g.addColorStop(1, 'rgba(160,255,214,.22)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 1.2 * u, y + 1.6 * u); c.lineTo(beamOn.x, beamOn.y); c.lineTo(beamOn.x2 || beamOn.x, beamOn.y2 || beamOn.y); c.lineTo(x + 1.2 * u, y + 1.6 * u); c.closePath(); c.fill(); }
+  c.save(); c.translate(x, y); c.scale(u / 10, u / 10);
+  const g = c.createLinearGradient(0, -38, 0, 18); g.addColorStop(0, '#ffd27a'); g.addColorStop(1, GLC.jelly2); c.fillStyle = g; c.globalAlpha = .93;
+  c.beginPath(); c.moveTo(-72, 10); c.quadraticCurveTo(-74, -36, 0, -40); c.quadraticCurveTo(74, -36, 72, 10); c.quadraticCurveTo(0, 22, -72, 10); c.fill(); c.globalAlpha = 1;
+  c.fillStyle = '#e06b2b'; c.beginPath(); c.roundRect(-78, 2, 156, 12, 6); c.fill();
+  c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, 6, 62, 3.6, 4.3); c.stroke();
+  [-40, -14, 12, 38].forEach((wx, i) => { c.fillStyle = '#bfe6f5'; c.beginPath(); c.arc(wx, -14, 8, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 3; c.stroke(); c.fillStyle = ['#ff6fa8', '#7ad66b', '#ffd24d', '#a78bfa'][i]; c.beginPath(); c.arc(wx, -11, 4, 0, 7); c.fill(); c.beginPath(); c.arc(wx - 3, -15, 2, 0, 7); c.arc(wx + 3, -15, 2, 0, 7); c.fill(); });
+  const on = RMOTION || Math.floor(t * 2) % 2 === 0; [-60, 60].forEach(lx => { c.fillStyle = on ? '#7ef0a8' : '#2f8a5b'; c.beginPath(); c.arc(lx, 8, 4, 0, 7); c.fill(); });
+  c.fillStyle = '#5d6b74'; c.beginPath(); c.roundRect(-12, 13, 24, 8, 4); c.fill(); c.fillStyle = beamOn ? '#a0ffd6' : '#3a8f73'; c.beginPath(); c.arc(0, 21, 5, 0, Math.PI); c.fill();
+  c.restore();
+  glLbl(c, 'Big Jelly', x, y - 4.9 * u, '#ffe7b8', Math.max(10, Math.min(14, u * 1.2)));
+}
+function glDrawGround(c, g, ghost) {
+  const u = glU(), bot = GLV.LH + 4, path = arr => { c.beginPath(); c.moveTo(glSX(-2), bot); c.lineTo(glSX(-2), glSY(arr[0])); arr.forEach((y, x) => c.lineTo(glSX(x), glSY(y))); c.lineTo(glSX(98), glSY(arr[arr.length - 1])); c.lineTo(glSX(98), bot); c.closePath(); };
+  if (ghost) { path(ghost); c.fillStyle = 'rgba(214,196,245,.28)'; c.fill(); c.setLineDash([5, 5]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.stroke(); c.setLineDash([]); }
+  path(g); const gr = c.createLinearGradient(0, glSY(15), 0, glSY(-1)); gr.addColorStop(0, GLC.rock0); gr.addColorStop(1, GLC.rock1); c.fillStyle = gr; c.fill();
+  c.save(); c.clip(); c.strokeStyle = GLC.crust; c.lineWidth = Math.max(3, 0.45 * u); c.lineJoin = 'round'; c.beginPath(); g.forEach((y, x) => x ? c.lineTo(glSX(x), glSY(y)) : c.moveTo(glSX(x), glSY(y))); c.stroke();
+  c.fillStyle = 'rgba(95,74,153,.35)'; [[12, -0.8, 3], [30, 1.6, 2], [52, 5.5, 2.4], [70, 6.4, 2], [86, 4.8, 3]].forEach(([x, y, r]) => { c.beginPath(); c.ellipse(glSX(x), glSY(y), r * u, r * 0.45 * u, 0, 0, 7); c.fill(); });
+  c.restore();
+  GL_CRYS.forEach(([x, s]) => { const y = glAt(g, x); c.fillStyle = GLC.crys; [-0.5, 0, 0.45].forEach((dx, i) => { const hh = (i === 1 ? 1.3 : 0.8) * s * u, ww = 0.32 * s * u, X = glSX(x + dx * s), Y = glSY(y); c.beginPath(); c.moveTo(X, Y - hh); c.lineTo(X + ww, Y - hh * 0.3); c.lineTo(X + ww * 0.6, Y + 1); c.lineTo(X - ww * 0.6, Y + 1); c.lineTo(X - ww, Y - hh * 0.3); c.closePath(); c.fill(); }); });
+}
+/* the boulder: a lumpy grey rock wedged against the Gumdrop's right landing leg */
+function glDrawBoulder(c, x, y, rot, cracked) {
+  const u = glU(); c.save(); c.translate(glSX(x), glSY(y)); c.rotate(rot || 0);
+  c.fillStyle = '#8b8f93'; c.beginPath(); c.moveTo(-1.2 * u, 0.2 * u); c.quadraticCurveTo(-1.35 * u, -0.9 * u, -0.5 * u, -1.25 * u); c.quadraticCurveTo(0.4 * u, -1.55 * u, 1.05 * u, -0.85 * u); c.quadraticCurveTo(1.45 * u, -0.2 * u, 1.0 * u, 0.25 * u); c.closePath(); c.fill();
+  c.fillStyle = '#a3a7ab'; c.beginPath(); c.ellipse(-0.35 * u, -0.85 * u, 0.42 * u, 0.22 * u, -0.4, 0, 7); c.fill();
+  if (cracked) { c.strokeStyle = '#4c5257'; c.lineWidth = 2; c.beginPath(); c.moveTo(-0.1 * u, -1.3 * u); c.lineTo(0.15 * u, -0.6 * u); c.lineTo(-0.2 * u, -0.1 * u); c.stroke(); }
+  c.restore();
+}
+/* the Gumdrop at real size (about 5 m across), with damage: scorch marks, cracks and a wobble */
+function glDrawShip(c, s) {
+  const u = glU(), sc = 0.045 * u, dmg = s.dmg || 0, wob = !RMOTION && s.shake ? Math.sin(performance.now() / 30) * 0.06 * u : 0;
+  const X = glSX(s.x) + wob, Y = glSY(s.y);
+  if (s.inside) drawGumdropInside(c, X, Y, sc, s.tilt || 0, s.mood || 'worried'); else drawGumdrop(c, X, Y, sc, s.tilt || 0);
+  if (dmg > 0) { c.save(); c.translate(X, Y); c.rotate(s.tilt || 0); c.scale(sc, sc);
+    c.fillStyle = 'rgba(40,24,20,.45)'; const nS = Math.min(4, Math.ceil(dmg / 25)); for (let i = 0; i < nS; i++) { c.beginPath(); c.ellipse([-30, 26, -12, 36][i], [-18, -30, -60, -10][i], 13, 7, [0.3, -0.5, 0.1, 0.8][i], 0, 7); c.fill(); }
+    c.strokeStyle = '#3b1d2c'; c.lineWidth = 3; const nC = Math.min(3, Math.ceil(dmg / 34)); for (let i = 0; i < nC; i++) { const ox = [-18, 20, 0][i], oy = [-66, -54, -30][i]; c.beginPath(); c.moveTo(ox, oy); c.lineTo(ox + 7, oy + 9); c.lineTo(ox + 2, oy + 16); c.lineTo(ox + 9, oy + 24); c.stroke(); }
+    c.restore(); }
+}
+/* ---------- machines ---------- */
+function glCablePoint(p, m) {
+  if (p.type === 'ramp') { const e = m ? m.end : { x: p.x1 + glRun(p), y: p.y1 + p.rise }; return { x: e.x + 0.6, y: e.y + 1.6 }; }
+  if (p.type === 'crane') return { x: p.x, y: (m ? m.start.y : 0) + p.rise + 2.6 };
+  if (p.type === 'lever') return { x: p.x + (p.dir || 1) * GL.beam, y: (m ? m.start.y : 0) + 1.1 };
+  if (p.type === 'block' || p.type === 'winch') return { x: p.x, y: p.y };
+  return null;
+}
+function glDrawRamp(c, p, m, bad, ground) {
+  const u = glU(), a = m.start, b = m.end, ang = Math.atan2(b.y - a.y, b.x - a.x);
+  /* support legs down to whatever is below the deck */
+  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.18 * u);
+  for (let d = 3; d < p.L - 1; d += 4) { const x = a.x + Math.cos(ang) * d, y = a.y + Math.sin(ang) * d, gy = glAt(ground, x); if (y - gy > 0.4) { c.beginPath(); c.moveTo(glSX(x), glSY(y)); c.lineTo(glSX(x), glSY(gy)); c.stroke(); } }
+  c.save(); c.translate(glSX(a.x), glSY(a.y)); c.rotate(-ang); const L = p.L * u, th = Math.max(5, 0.42 * u);
+  c.fillStyle = bad ? '#e8a0a0' : GLC.wood; c.beginPath(); c.roundRect(0, -th, L, th, th / 3); c.fill();
+  c.fillStyle = bad ? '#c25b5b' : GLC.wood2; for (let d = 1.5; d < p.L; d += 1.5) c.fillRect(d * u, -th, Math.max(1.5, 0.08 * u), th);
+  c.fillStyle = GLC.steel; c.fillRect(0, -th - Math.max(2, 0.1 * u), L, Math.max(2, 0.1 * u));
+  c.restore();
+  c.fillStyle = GLC.steel2; c.beginPath(); c.arc(glSX(b.x), glSY(b.y + 0.3), Math.max(3, 0.35 * u), 0, 7); c.fill();
+}
+function glDrawCrane(c, p, m, bad, hookY) {
+  const u = glU(), by = m.start.y, top = by + p.rise + 2.6, x = p.x, col = bad ? GLC.bad : '#e3a51c';
+  c.strokeStyle = col; c.lineWidth = Math.max(3, 0.3 * u); c.lineCap = 'round';
+  [-1, 1].forEach(sd => { c.beginPath(); c.moveTo(glSX(x + sd * 3.2), glSY(by)); c.lineTo(glSX(x + sd * 2.6), glSY(top)); c.stroke(); c.lineWidth = Math.max(1.5, 0.14 * u); for (let k = 1; k < 4; k++) { const yy = by + (top - by) * k / 4; c.beginPath(); c.moveTo(glSX(x + sd * (3.2 - 0.6 * k / 4)), glSY(yy)); c.lineTo(glSX(x + sd * (3.2 - 0.6 * (k + 1) / 4)), glSY(yy + (top - by) / 4)); c.stroke(); } c.lineWidth = Math.max(3, 0.3 * u); });
+  c.beginPath(); c.moveTo(glSX(x - 3.2), glSY(top)); c.lineTo(glSX(x + 3.2), glSY(top)); c.stroke();
+  c.fillStyle = GLC.steel2; [-1, 1].forEach(sd => { c.beginPath(); c.roundRect(glSX(x + sd * 3.2) - 0.5 * u, glSY(by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
+  const hy = hookY == null ? by + 4.2 : hookY; c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(x), glSY(top)); c.lineTo(glSX(x), glSY(hy)); c.stroke();
+  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.arc(glSX(x), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke();
+  glLbl(c, `↑ ${fmt(p.rise, 1)} m`, glSX(x), glSY(top + 0.9), col === GLC.bad ? GLC.bad : '#ffe7a8', 11, 'center', 'rgba(31,29,38,.55)');
+}
+function glDrawLever(c, p, m, bad, tiltT) {
+  const u = glU(), d = p.dir || 1, by = m.start.y, fx = p.x + d * p.arm, ex = p.x + d * GL.beam, k = tiltT || 0;
+  /* the fulcrum, then the beam: the load end rises by `rise` as tiltT goes 0 → 1 */
+  c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(glSX(fx), glSY(by + 0.9)); c.lineTo(glSX(fx + 0.6), glSY(by)); c.lineTo(glSX(fx - 0.6), glSY(by)); c.closePath(); c.fill();
+  const ly = by + 0.9 + (k * p.rise) * 0.999 - 0.0, ey = by + 0.9 - k * p.rise * (GL.beam - p.arm) / p.arm;
+  c.strokeStyle = bad ? GLC.bad : GLC.wood2; c.lineWidth = Math.max(4, 0.32 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(glSX(p.x), glSY(ly)); c.lineTo(glSX(ex), glSY(Math.max(ey, by - 30))); c.stroke();
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(glSX(fx), glSY(by + 0.9), Math.max(2.5, 0.16 * u), 0, 7); c.fill();
+}
+function glDrawJack(c, p, m, bad, k) {
+  const u = glU(), by = m.start.y, hgt = 0.7 + (k || 0) * p.rise; c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(glSX(p.x - 0.7), glSY(by + 0.35), 1.4 * u, 0.35 * u, 3); c.fill();
+  c.strokeStyle = GLC.steel; c.lineWidth = Math.max(3, 0.28 * u); c.beginPath(); c.moveTo(glSX(p.x), glSY(by + 0.35)); c.lineTo(glSX(p.x), glSY(by + hgt)); c.stroke();
+  c.strokeStyle = '#e3a51c'; c.lineWidth = Math.max(1.2, 0.07 * u); for (let y = by + 0.45; y < by + hgt; y += 0.22) { c.beginPath(); c.moveTo(glSX(p.x - 0.16), glSY(y)); c.lineTo(glSX(p.x + 0.16), glSY(y + 0.1)); c.stroke(); }
+  c.fillStyle = GLC.steel2; c.fillRect(glSX(p.x - 0.5), glSY(by + hgt + 0.12), u, 0.14 * u);
+}
+function glDrawPlatform(c, pl, over) {
+  const u = glU(), x0 = glSX(pl.x0), x1 = glSX(pl.x1), yT = glSY(pl.top), yB = glSY(pl.base - 0.2), col = over ? GLC.bad : '#9fb0ba';
+  c.strokeStyle = col; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.moveTo(x0 + 3, yB); c.lineTo(x0 + 3, yT); c.moveTo(x1 - 3, yB); c.lineTo(x1 - 3, yT); c.stroke();
+  c.lineWidth = Math.max(1, 0.08 * u); const n = Math.max(1, Math.round((pl.top - pl.base) / 1.5)); for (let i = 0; i < n; i++) { const ya = yB + (yT - yB) * i / n, yb = yB + (yT - yB) * (i + 1) / n; c.beginPath(); c.moveTo(x0 + 3, ya); c.lineTo(x1 - 3, yb); c.moveTo(x1 - 3, ya); c.lineTo(x0 + 3, yb); c.stroke(); }
+  c.fillStyle = over ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(x0, yT, x1 - x0, Math.max(4, 0.32 * u), 3); c.fill();
+  c.fillStyle = '#e3a51c'; for (let x = x0 + 4; x < x1 - 6; x += 12) c.fillRect(x, yT + 1, 5, Math.max(2, 0.12 * u));
+}
+function glDrawBlock(c, p, bad) {
+  const u = glU(), r = Math.max(7, 0.5 * u), X = glSX(p.x), Y = glSY(p.y);
+  c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(X - r * 0.5, Y - r * 1.5, r, r * 0.7, 3); c.fill();
+  c.fillStyle = GLC.steel; c.beginPath(); c.arc(X, Y, r, 0, 7); c.fill(); c.fillStyle = GLC.steel2; c.beginPath(); c.arc(X, Y, r * 0.35, 0, 7); c.fill();
+  glLbl(c, `${p.ropes} rope${p.ropes > 1 ? 's' : ''}`, X, Y + r + 9, GLC.label, 10, 'center', 'rgba(31,29,38,.6)');
+}
+function glDrawWinch(c, p, bad, spin) {
+  const u = glU(), r = Math.max(8, 0.55 * u), X = glSX(p.x), Y = glSY(p.y);
+  c.fillStyle = bad ? GLC.bad : '#2a7d48'; c.beginPath(); c.roundRect(X - r * 1.2, Y + r * 0.6, r * 2.4, r * 0.5, 3); c.fill();
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.roundRect(X - r * 0.9, Y - r * 0.7, r * 1.8, r * 1.4, r * 0.4); c.fill();
+  c.strokeStyle = '#8a5a12'; c.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(X + i * r * 0.32, Y - r * 0.7); c.lineTo(X + i * r * 0.32, Y + r * 0.7); c.stroke(); }
+  const a = spin || 0; c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.12 * u); c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * r * 1.5, Y + Math.sin(a) * r * 1.5); c.stroke();
+  c.fillStyle = '#d6402c'; c.beginPath(); c.arc(X + Math.cos(a) * r * 1.5, Y + Math.sin(a) * r * 1.5, r * 0.28, 0, 7); c.fill();
+  glLbl(c, `×${p.ratio}`, X, Y + r + 10, GLC.label, 11, 'center', 'rgba(31,29,38,.6)');
+}
+function glDrawDyn(c, p, g, preview) {
+  const u = glU(), y = glAt(g, p.x), X = glSX(p.x), Y = glSY(y), r = p.big ? GL_BLAST.big : GL_BLAST.small, n = p.big ? 3 : 1;
+  if (preview) { c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,190,120,.9)'; c.lineWidth = 1.5; c.beginPath(); c.arc(X, Y, r * u, 0, 7); c.stroke(); c.setLineDash([]); }
+  for (let i = 0; i < n; i++) { const ox = (i - (n - 1) / 2) * 0.32 * u; c.fillStyle = '#d6402c'; c.beginPath(); c.roundRect(X + ox - 0.14 * u, Y - 0.9 * u, 0.28 * u, 0.9 * u, 2); c.fill(); }
+  c.strokeStyle = '#f4e7c8'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(X, Y - 0.9 * u); c.quadraticCurveTo(X + 0.4 * u, Y - 1.4 * u, X + 0.2 * u, Y - 1.7 * u); c.stroke();
+  c.fillStyle = '#ffd24d'; c.beginPath(); c.arc(X + 0.2 * u, Y - 1.75 * u, Math.max(2, 0.12 * u), 0, 7); c.fill();
+}
+function glDrawCable(c, a, b, slack) {
+  const u = glU(), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - (slack == null ? 0.25 : slack) * Math.min(1, Math.hypot(b.x - a.x, b.y - a.y) / 6);
+  c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(glSX(a.x), glSY(a.y)); c.quadraticCurveTo(glSX(mx), glSY(my), glSX(b.x), glSY(b.y)); c.stroke();
+}
+/* the handover zone: where the next machine must start (3 m across, 0.5 m up or down) */
+function glDrawZone(c, z, t, label) {
+  const u = glU(), pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 4), X0 = glSX(z.x - GL.hzX), X1 = glSX(z.x + GL.hzX), Y0 = glSY(z.y + GL.hzY), Y1 = glSY(z.y - GL.hzY);
+  c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 8 + 10 * pulse; c.strokeStyle = `rgba(126,240,168,${0.55 + 0.4 * pulse})`; c.lineWidth = 2.5; c.setLineDash([6, 4]);
+  c.beginPath(); c.roundRect(X0, Y0, X1 - X0, Math.max(6, Y1 - Y0), 6); c.stroke(); c.restore();
+  c.fillStyle = `rgba(126,240,168,${0.12 + 0.1 * pulse})`; c.beginPath(); c.roundRect(X0, Y0, X1 - X0, Math.max(6, Y1 - Y0), 6); c.fill();
+  if (label) glLbl(c, label, (X0 + X1) / 2, glSY(z.y + 5.4), '#c9ffdc', 11, 'center', 'rgba(31,29,38,.6)');
+}
+function glDrawRuler(c, r) {
+  const u = glU(), A = { x: glSX(r.a.x), y: glSY(r.a.y) }, B = { x: glSX(r.b.x), y: glSY(r.b.y) }, dx = r.b.x - r.a.x, dy = r.b.y - r.a.y;
+  c.setLineDash([3, 3]); c.strokeStyle = 'rgba(255,230,140,.75)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, A.y); c.lineTo(B.x, B.y); c.stroke(); c.setLineDash([]);
+  c.strokeStyle = '#ffe28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.stroke();
+  [A, B].forEach(P => { c.fillStyle = '#ffe28a'; c.beginPath(); c.arc(P.x, P.y, 8, 0, 7); c.fill(); c.fillStyle = GLC.ink; c.beginPath(); c.arc(P.x, P.y, 2.5, 0, 7); c.fill(); });
+  const s = `across ${fmt(Math.abs(dx), 1)} m · up ${fmt(dy, 1)} m · straight ${fmt(Math.hypot(dx, dy), 1)} m`;
+  glLbl(c, s, clamp((A.x + B.x) / 2, 120, GLV.LW - 120), Math.min(A.y, B.y) - 16, GLC.ink, 12, 'center', '#ffe28a');
+}
+/* everything, back to front */
+function glDrawWorld(c, o) {
+  const t = o.t || performance.now() / 1000, ev = o.ev, g = o.ground || (ev && ev.ground) || glBaseGround(), rig = o.rig || { parts: [], cables: [] }, run = o.run || {};
+  readColors(); glDrawSky(c, t); glDrawBigJelly(c, t, run.beam);
+  /* the level the tractor beam can reach: anything at or above the dotted line beside the crest */
+  const crest = glCrest(g); c.setLineDash([2, 6]); c.strokeStyle = 'rgba(160,255,214,.55)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(glSX(40), glSY(crest)); c.lineTo(glSX(80), glSY(crest)); c.stroke(); c.setLineDash([]);
+  glDrawGround(c, g, o.ghost);
+  const plats = ev ? ev.plats : [], P0 = glPlatforms(rig, g), byId = {}; rig.parts.forEach(p => byId[p.id] = p);
+  plats.forEach(pl => glDrawPlatform(c, pl, pl.over));
+  const ms = {}; rig.parts.filter(p => GL_LIFT[p.type]).forEach(p => { ms[p.id] = glMachine(p, g, P0); });
+  rig.parts.filter(p => p.type === 'dyn' && !(run.blown && run.blown.has(p.id))).forEach(p => glDrawDyn(c, p, o.ghost || g, !run.on));
+  const faulty = id => { const m = ms[id]; if (!m) return false; const leg = ev && ev.legs.find(l => l.id === id); return (leg ? leg.faults.length : m.faults.length) > 0; };
+  rig.parts.filter(p => p.type === 'ramp').forEach(p => glDrawRamp(c, p, ms[p.id], faulty(p.id), g));
+  /* the boulder and the ship sit behind the lifting machines' front parts */
+  const rockShown = o.rock !== false && !(run.rockGone);
+  if (rockShown && !(o.ship && o.ship.carryRock)) glDrawBoulder(c, run.rockX != null ? run.rockX : 18.7, run.rockY != null ? run.rockY : glAt(g, 18.7), run.rockRot || 0.12, false);
+  if (run.rope && o.ship) glDrawCable(c, run.rope.a, run.rope.b, 0);
+  if (o.ship) { glDrawShip(c, o.ship); if (o.ship.carryRock && rockShown) glDrawBoulder(c, o.ship.x + 4.6 * Math.cos(o.ship.tilt || 0), o.ship.y - 4.6 * Math.sin(o.ship.tilt || 0), (o.ship.tilt || 0) + 0.12); }
+  rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id]));
+  rig.parts.filter(p => p.type === 'lever').forEach(p => glDrawLever(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
+  rig.parts.filter(p => p.type === 'jack').forEach(p => glDrawJack(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
+  /* cables, then the add-ons on top */
+  const cp = id => { if (id === 'boulder') return { x: 18.9, y: glAt(g, 18.7) + 1.0 }; const p = byId[id]; return p ? glCablePoint(p, ms[id]) : null; };
+  (rig.cables || []).forEach(cb => { const a = cp(cb.a), b = cp(cb.b); if (a && b) glDrawCable(c, a, b); });
+  if (o.cableDrag) glDrawCable(c, o.cableDrag.a, o.cableDrag.b, 0);
+  rig.parts.filter(p => p.type === 'block').forEach(p => glDrawBlock(c, p));
+  rig.parts.filter(p => p.type === 'winch').forEach(p => glDrawWinch(c, p, false, run.spin));
+  if (o.smoo) drawSmooshy(c, glSX(o.smoo.x), glSY(o.smoo.y + 1.5), 0.026 * glU(), o.smoo.mood, t);
+  if (o.hz) glDrawZone(c, o.hz, t, o.hzLabel);
+  /* selection ring and cable dots */
+  if (o.sel && byId[o.sel]) { const b = glBounds(byId[o.sel], ms[o.sel], g, plats); c.strokeStyle = '#ffe28a'; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.roundRect(glSX(b.x0) - 6, glSY(b.y1) - 6, (b.x1 - b.x0) * glU() + 12, (b.y1 - b.y0) * glU() + 12, 8); c.stroke(); c.setLineDash([]); }
+  if (!run.on) rig.parts.filter(p => p.type === 'ramp').forEach(p => { const e = ms[p.id].end; c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y), 7, 0, 7); c.fill(); c.stroke(); });
+  if (!run.on) rig.parts.forEach(p => { const q = glCablePoint(p, ms[p.id]); if (!q) return; c.fillStyle = 'rgba(31,29,38,.55)'; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 7, 0, 7); c.fill(); c.strokeStyle = GLC.rope; c.lineWidth = 2.5; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 5, 0, 7); c.stroke(); });
+  if (o.ruler) glDrawRuler(c, o.ruler);
+  if (run.fx) run.fx(c, t);
+}
+/* a part's box in world metres, for hit tests and the selection ring */
+function glBounds(p, m, g, plats) {
+  if (p.type === 'ramp') { const a = m.start, b = m.end; return { x0: Math.min(a.x, b.x) - 0.3, x1: Math.max(a.x, b.x) + 0.3, y0: Math.min(a.y, b.y) - 0.4, y1: Math.max(a.y, b.y) + 0.6 }; }
+  if (p.type === 'crane') return { x0: p.x - 3.4, x1: p.x + 3.4, y0: m.start.y, y1: m.start.y + p.rise + 2.8 };
+  if (p.type === 'lever') { const d = p.dir || 1, xs = [p.x, p.x + d * GL.beam]; return { x0: Math.min(...xs) - 0.3, x1: Math.max(...xs) + 0.3, y0: m.start.y, y1: m.start.y + 1.4 }; }
+  if (p.type === 'jack') return { x0: p.x - 0.8, x1: p.x + 0.8, y0: m.start.y, y1: m.start.y + 1.2 };
+  if (p.type === 'platform') { const pl = plats.find(q => q.id === p.id); return pl ? { x0: pl.x0, x1: pl.x1, y0: pl.base, y1: pl.top + 0.3 } : { x0: p.x - 2, x1: p.x + 2, y0: 0, y1: 1 }; }
+  if (p.type === 'dyn') { const y = glAt(g, p.x); return { x0: p.x - 0.6, x1: p.x + 0.6, y0: y, y1: y + 1.9 }; }
+  return { x0: p.x - 0.8, x1: p.x + 0.8, y0: p.y - 0.8, y1: p.y + 0.9 };
+}
+
+/* ===== Operation Gummy Lift: the builder (stage 2). Free-form drag and drop like Poly Bridge: a tray of parts, handles,
+   stretchy cables, tap-a-part menus, a ruler, zoom and pan, and the sugar-crystal budget. Mouse and touch (pointer events).
+   The rig autosaves to chal.c6e.gl.rig after every change (stage 4 adds resume details and the snapshot). Run Rescue lives in 4i. */
+const GL_TRAY = [
+  { t: 'ramp', name: 'Ramp', cost: '3 per m', icon: '📐' }, { t: 'crane', name: 'Crane gantry', cost: '40', wt: '1,000 N', icon: '🏗️' },
+  { t: 'lever', name: 'Lever', cost: '25', wt: '500 N', icon: '⚖️' }, { t: 'jack', name: 'Screw jack', cost: '60', wt: '400 N', icon: '🔩' },
+  { t: 'block', name: 'Pulley block', cost: '10 per rope', wt: '100 N', icon: '⚙️' }, { t: 'winch', name: 'Winch', cost: '15', wt: '100 N', icon: '🎡' },
+  { t: 'platS', name: 'Small platform', cost: '10 + 2 per m', icon: '▫️' }, { t: 'platM', name: 'Medium platform', cost: '20 + 2 per m', icon: '◻️' },
+  { t: 'platL', name: 'Large platform', cost: '35 + 2 per m', icon: '⬜' }, { t: 'dynS', name: 'Small dynamite', cost: '20', icon: '🧨' }, { t: 'dynB', name: 'Big dynamite', cost: '40', icon: '💥' }];
+const GL_FAULT = { long: 'This ramp is longer than 30 m.', steep: 'Too steep! A ramp can rise at most half its length.', ground: 'This ramp runs into the ground. Move it, use a platform, or blast the ground away.',
+  head: 'The top of this ramp is floating in mid-air. Rest it on the ground or on a platform.', rise: 'This machine can\'t lift that far.', fulcrum: 'A lever\'s mechanical advantage can be 9 at most. Move the fulcrum.',
+  tangle: 'Its cables branch off two ways. Each machine needs one chain of cables.', blocks: 'Only one pulley block per machine.', winches: 'Two winches per machine at most.', jackcable: 'A screw jack works on its own, with no cable.' };
+const GLR = { on: false };   // Run Rescue state (4i-glrun.js fills it in)
+const GLB = { rig: null, ev: null, hist: [], sel: null, drag: null, ruler: null, rulerOn: false, place: null, cv: null, raf: 0, onChange: null, readOnly: false, mid: 'gl', ch: 'c6e' };
+const glNewId = t => t[0] + Math.random().toString(36).slice(2, 7);
+const glSnap = (v, s) => Math.round(v / (s || 0.5)) * (s || 0.5);
+const glState = () => (dbGet('chal.' + GLB.ch, {})[GLB.mid]) || {};
+function glSaveRig() { const st = dbGet('chal.' + GLB.ch, {}); st[GLB.mid] = Object.assign(st[GLB.mid] || {}, { rig: GLB.rig, at: Date.now(), view: { z: GLV.z, cx: GLV.cx, cy: GLV.cy, LH: GLV.LH } }); dbSet('chal.' + GLB.ch, st); }
+/* winches are bolted down: they sit on the ground or a platform, so Smooshy can stand at the handle */
+function glSettle() { const g = glGround(GLB.rig).g, pl = glPlatforms(GLB.rig, g);
+  /* an add-on with no spot yet (from an older save or a test rig) parks beside its machine's cable dot */
+  GLB.rig.parts.filter(p => GL_LIFT[p.type]).forEach(m => { const cp = glCablePoint(m, glMachine(m, g, pl)); if (cp) glChainOf(m.id).forEach((id, i) => { const q = glPart(id); if (q.x == null) { q.x = cp.x + 1.6 * (i + 1); q.y = cp.y; } }); });
+  GLB.rig.parts.filter(p => glIsAddon(p) && p.x == null).forEach((p, i) => { p.x = 20 + i * 2; p.y = 12; });
+  GLB.rig.parts.filter(p => p.type === 'winch').forEach(p => { p.y = +(glFloorAt(p.x, g, pl) + 0.75).toFixed(2); }); }
+function glChanged(noHist) {
+  glSettle(); GLB.ev = glEvaluate(GLB.rig, { hints: glState().hints || 0 }); glSaveRig(); glPaintSide(); if (GLB.onChange) GLB.onChange();
+}
+function glPush() { GLB.hist.push(JSON.stringify(GLB.rig)); if (GLB.hist.length > 40) GLB.hist.shift(); }
+const glPart = id => GLB.rig.parts.find(p => p.id === id);
+const glGround0 = () => GLB.ev ? GLB.ev.ground : glGround(GLB.rig).g;
+const glPlats0 = () => glPlatforms(GLB.rig, glGround0());
+/* the add-on chain hanging off a machine (or the boulder), in cable order */
+function glChainOf(id) { const ad = glAddons(GLB.rig, id); return ad.chain.map(p => p.id); }
+function glChainEnd(id) { const ch = glChainOf(id); return ch.length ? ch[ch.length - 1] : id; }
+const glIsAddon = p => p && (p.type === 'block' || p.type === 'winch');
+const glOwner = id => { for (const p of GLB.rig.parts) if (GL_LIFT[p.type] && glChainOf(p.id).includes(id)) return p.id; if (glChainOf('boulder').includes(id)) return 'boulder'; return null; };
+function glConnect(a, b) {
+  if (a === b || GLB.rig.cables.some(c => (c.a === a && c.b === b) || (c.a === b && c.b === a))) return false;
+  const pa = glPart(a), pb = glPart(b), mach = x => x === 'boulder' || (glPart(x) && GL_LIFT[glPart(x).type]);
+  if ((mach(a) && mach(b)) || (!glIsAddon(pa) && !glIsAddon(pb))) { toast('Cables join a machine to a pulley block or a winch, or one add-on to the next.'); return false; }
+  GLB.rig.cables.push({ a, b }); return true;
+}
+/* ---------- placing a new part ---------- */
+function glAddPart(t, wx, wy) {
+  const g = glGround0(), pl = glPlats0(), fl = x => glFloorAt(x, g, pl), x = clamp(glSnap(wx), 1, GL.W - 1); let p;
+  if (t === 'ramp') p = { type: 'ramp', x1: x, y1: fl(x), L: 12, rise: 3 };
+  else if (t === 'crane') p = { type: 'crane', x, rise: 4 };
+  else if (t === 'lever') p = { type: 'lever', x, arm: 2, rise: 1, dir: 1 };
+  else if (t === 'jack') p = { type: 'jack', x, rise: 1 };
+  else if (t === 'block') p = { type: 'block', ropes: 2, x: glSnap(wx, 0.25), y: glSnap(wy, 0.25) };
+  else if (t === 'winch') p = { type: 'winch', ratio: 4, x: glSnap(wx, 0.25), y: glSnap(wy, 0.25) };
+  else if (t.startsWith('plat')) p = { type: 'platform', size: t[4], x, h: 2 };
+  else if (t.startsWith('dyn')) p = { type: 'dyn', big: t === 'dynB', x };
+  if (!p) return; glPush(); p.id = glNewId(p.type); GLB.rig.parts.push(p);
+  if (p.type === 'lever' || p.type === 'jack') glBoulderSnap(p);
+  if (glIsAddon(p)) glAutoAttach(p);
+  GLB.sel = p.id; glChanged(); glOpenMenu(p.id);
+}
+/* a lever or jack set down by the boulder works on the boulder */
+function glBoulderSnap(p) { const nearRock = Math.abs(p.x - 18.2) <= 1.6 && glAt(glGround0(), p.x) < 0.5; if (nearRock) { p.role = 'boulder'; p.x = 18.2; if (p.type === 'lever') p.dir = 1; } else delete p.role; }
+/* an add-on dropped near a machine's cable point (or the end of its chain) clips on */
+function glAutoAttach(p) {
+  if (glOwner(p.id)) return; let best = null, bd = 4.5;
+  const g = glGround0(), pl = glPlats0(), byId = {}; GLB.rig.parts.forEach(q => byId[q.id] = q);
+  GLB.rig.parts.filter(q => GL_LIFT[q.type] && q.type !== 'jack').concat([{ id: 'boulder' }]).forEach(q => {
+    const end = glChainEnd(q.id), ep = end === 'boulder' ? { x: 18.9, y: glAt(g, 18.7) + 1 } : glCablePoint(byId[end], GL_LIFT[byId[end].type] ? glMachine(byId[end], g, pl) : null);
+    const d = Math.hypot(ep.x - p.x, ep.y - p.y); if (d < bd) { bd = d; best = { end, ep }; } });
+  if (best) { GLB.rig.cables.push({ a: best.end, b: p.id }); p.x = glSnap(best.ep.x + 1.6, 0.25); p.y = glSnap(best.ep.y + (p.type === 'winch' ? -0.6 : 0.4), 0.25); }
+}
+function glRemove(id) {
+  glPush(); GLB.rig.parts = GLB.rig.parts.filter(p => p.id !== id); GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
+  GLB.sel = null; glCloseMenu(); glChanged();
+}
+/* ---------- the canvas: sizing, the draw loop and hit tests ---------- */
+function glSize() {
+  const cv = GLB.cv; if (!cv) return; const w = cv.getBoundingClientRect().width || 900, narrow = w < 560, LH = narrow ? 760 : GLV.wide;
+  if (GLV.LH !== LH) { GLV.LH = LH; if (narrow) { GLV.z = 3.2; GLV.cx = 24; GLV.cy = 10; } else { GLV.z = 1; GLV.cx = 48; GLV.cy = 12; } }
+  glClampView();
+}
+function glFrameOpts() {
+  const ev = GLB.ev, st = glState(), hz = !ev ? null : ev.arrived ? null : ev.stop ? ev.stop.at : null;
+  return { rig: GLB.rig, ev, ground: ev.ground, ghost: GLB.rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, sel: GLB.sel,
+    ship: { x: GL.shipX, y: glAt(ev.ground, GL.shipX), tilt: 0, inside: true, mood: 'worried', dmg: st.lastDmg || 0 }, rock: !(st.boulderGone),
+    hz, hzLabel: hz ? (ev.legs.length ? 'Start the next machine in here' : 'Start your first machine in here') : '', ruler: GLB.rulerOn ? GLB.ruler : null, cableDrag: GLB.drag && GLB.drag.kind === 'cable' ? GLB.drag.line : null };
+}
+function glLoop() {
+  cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
+    if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH); glDrawWorld(c, glFrameOpts()); }
+    GLB.raf = requestAnimationFrame(step); }; step();
+}
+const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - r.left) * GLV.LW / r.width, sy = (e.clientY - r.top) * GLV.LH / r.height; return { sx, sy, x: glWX(sx), y: glWY(sy) }; };
+function glHit(P) {
+  const g = glGround0(), pl = glPlats0(), byId = {}; GLB.rig.parts.forEach(q => byId[q.id] = q); const ms = {}; GLB.rig.parts.filter(q => GL_LIFT[q.type]).forEach(q => ms[q.id] = glMachine(q, g, pl));
+  const near = (q, r) => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy) <= (r || 14);
+  /* the nearest small target wins: cable dots and ramp-top handles sit close together */
+  let best = null, bd = 14; const cand = (d, r) => { if (d < bd) { bd = d; best = r; } }, dist = q => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy);
+  for (const p of GLB.rig.parts) { const q = glCablePoint(p, ms[p.id]); if (q) cand(dist(q), { id: p.id, what: 'cable', at: q }); if (p.type === 'ramp') cand(dist(ms[p.id].end) - 2, { id: p.id, what: 'head' }); }
+  if (best) return best;
+  const bcp = { x: 18.9, y: glAt(g, 18.7) + 1 }; if (!GLB.drag && near(bcp, 12)) return { id: 'boulder', what: 'cable', at: bcp };
+  for (const pf of pl.slice().reverse()) if (P.x >= pf.x0 && P.x <= pf.x1 && Math.abs(glSY(pf.top) - P.sy) <= 12) return { id: pf.id, what: 'top' };
+  const order = ['block', 'winch', 'dyn', 'jack', 'lever', 'crane', 'ramp', 'platform'];
+  for (const t of order) for (const p of GLB.rig.parts.filter(q => q.type === t).slice().reverse()) {
+    if (t === 'ramp') { const m = ms[p.id], a = m.start, b = m.end, ax = glSX(a.x), ay = glSY(a.y), bx = glSX(b.x), by = glSY(b.y), L2 = (bx - ax) ** 2 + (by - ay) ** 2, k = clamp(((P.sx - ax) * (bx - ax) + (P.sy - ay) * (by - ay)) / L2, 0, 1);
+      if (Math.hypot(ax + k * (bx - ax) - P.sx, ay + k * (by - ay) - P.sy) <= 12) return { id: p.id, what: 'body' }; continue; }
+    const b = glBounds(p, ms[p.id], g, pl); if (P.x >= b.x0 - 0.3 && P.x <= b.x1 + 0.3 && P.y >= b.y0 - 0.4 && P.y <= b.y1 + 0.4) return { id: p.id, what: 'body' };
+  }
+  return null;
+}
+/* ---------- pointer handling on the board ---------- */
+function glBindBoard() {
+  const cv = GLB.cv;
+  cv.addEventListener('pointerdown', e => {
+    if (GLB.readOnly || (GLR && GLR.on)) return; const P = glPt(e); e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    if (GLB.place) { const t = GLB.place; GLB.place = null; glTrayMark(); glAddPart(t, P.x, P.y); return; }
+    if (GLB.rulerOn && GLB.ruler) for (const k of ['a', 'b']) if (Math.hypot(glSX(GLB.ruler[k].x) - P.sx, glSY(GLB.ruler[k].y) - P.sy) <= 16) { GLB.drag = { kind: 'ruler', k, P0: P, moved: false }; return; }
+    const hit = glHit(P);
+    if (!hit) { GLB.drag = { kind: 'pan', P0: P, cx: GLV.cx, cy: GLV.cy, moved: false }; return; }
+    if (hit.what === 'cable') { GLB.drag = { kind: 'cable', from: hit.id, P0: P, line: { a: hit.at, b: { x: P.x, y: P.y } }, moved: false }; return; }
+    const p = glPart(hit.id); GLB.drag = { kind: hit.what, id: hit.id, P0: P, orig: JSON.parse(JSON.stringify(p)), chain: GL_LIFT[p.type] ? glChainOf(p.id).map(i => [i, glPart(i).x, glPart(i).y]) : [], moved: false, pushed: false };
+  });
+  cv.addEventListener('pointermove', e => {
+    const d = GLB.drag; if (!d) return; const P = glPt(e);
+    if (!d.moved && Math.hypot(P.sx - d.P0.sx, P.sy - d.P0.sy) < 6) return; d.moved = true;
+    if (d.kind === 'pan') { if (GLV.z > 1.01 || GLV.LH > GLV.wide) { GLV.cx = d.cx - (P.sx - d.P0.sx) / glU(); GLV.cy = d.cy + (P.sy - d.P0.sy) / glU(); glClampView(); } return; }
+    if (d.kind === 'ruler') { GLB.ruler[d.k] = glRulerSnap(P); return; }
+    if (d.kind === 'cable') { d.line.b = { x: P.x, y: P.y }; return; }
+    const p = glPart(d.id); if (!p) return; if (!d.pushed) { glPush(); d.pushed = true; glCloseMenu(); }
+    const g = glGround0(), pl = glPlats0().filter(q => q.id !== p.id), dx = P.x - d.P0.x;
+    if (d.kind === 'head') { const a = { x: p.x1, y: p.y1 }, vx = Math.max(0.5, P.x - a.x), vy = Math.max(0.5, P.y - a.y); let L = clamp(glSnap(Math.hypot(vx, vy)), 1, GL.rampMax), rise = clamp(glSnap(vy), 0.5, L / 2);
+      GLB.hintLine = Math.hypot(vx, vy) > GL.rampMax + 0.3 ? 'That\'s as long as a ramp can be: 30 m.' : vy > L / 2 + 0.3 ? 'That\'s as steep as a ramp can go: it can rise half its length.' : ''; p.L = L; p.rise = rise; }
+    else if (d.kind === 'top') { const pf = glPlats0().find(q => q.id === p.id); p.h = clamp(glSnap(P.y - pf.base), 0.5, GL.platMaxH); }
+    else if (p.type === 'ramp') { p.x1 = clamp(glSnap(d.orig.x1 + dx), 0.5, GL.W - 2); p.y1 = +glFloorAt(p.x1, g, pl).toFixed(2); }
+    else if (glIsAddon(p)) { p.x = clamp(glSnap(d.orig.x + dx, 0.25), 0, GL.W); p.y = clamp(glSnap(d.orig.y + (P.y - d.P0.y), 0.25), -1, 28); }
+    else { p.x = clamp(glSnap(d.orig.x + dx), 0.5, GL.W - 0.5); if (p.type === 'lever' || p.type === 'jack') glBoulderSnap(p); }
+    /* add-ons ride along with their machine */
+    if (d.chain.length) { const nx = p.type === 'ramp' ? p.x1 - d.orig.x1 : (p.x - d.orig.x), ny = p.type === 'ramp' ? p.y1 - d.orig.y1 : 0; d.chain.forEach(([i, x0, y0]) => { const q = glPart(i); if (q) { q.x = x0 + nx; q.y = y0 + ny; } }); }
+    GLB.ev = glEvaluate(GLB.rig, { hints: glState().hints || 0 });
+  });
+  const up = e => {
+    const d = GLB.drag; GLB.drag = null; if (!d) return; const P = glPt(e); GLB.hintLine = '';
+    if (d.kind === 'cable') { if (!d.moved) { if (d.from !== 'boulder') { GLB.sel = d.from; glOpenMenu(d.from, P); } return; }
+      const hit = glHit(P), to = hit && hit.id !== d.from ? hit.id : null; if (to) { glPush(); if (glConnect(d.from, to)) glChanged(); else GLB.hist.pop(); } return; }
+    if (d.kind === 'pan') { if (!d.moved) { GLB.sel = null; glCloseMenu(); } else glSaveRig(); return; }
+    if (d.kind === 'ruler') return;
+    if (!d.moved) { GLB.sel = d.id; glOpenMenu(d.id, P); return; }
+    const p = glPart(d.id); if (p && glIsAddon(p)) glAutoAttach(p);
+    glChanged();
+  };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', () => { GLB.drag = null; });
+}
+function glRulerSnap(P) { const g = glGround0(); let x = glSnap(P.x, 0.1), y = glSnap(P.y, 0.1); const gy = glAt(g, x); if (Math.abs(y - gy) < 0.5) y = +gy.toFixed(1);
+  glPlats0().forEach(q => { if (x >= q.x0 && x <= q.x1 && Math.abs(y - q.top) < 0.5) y = q.top; }); return { x, y }; }
+/* ---------- the tap-a-part menu ---------- */
+function glCloseMenu() { const m = GLB.menu; if (m) m.hidden = true; }
+function glOpenMenu(id, P) {
+  const p = glPart(id), m = GLB.menu; if (!p || !m) return; const ev = GLB.ev, leg = ev && ev.legs.find(l => l.id === id), g = glGround0(), pl = glPlats0();
+  const mach = GL_LIFT[p.type] ? glMachine(p, g, pl) : null, faults = (leg ? leg.faults : mach ? mach.faults.concat(glAddons(GLB.rig, id).faults) : []).filter((f, i, a) => a.indexOf(f) === i);
+  const pm = (k, lab, val) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-gm="${k}-">−</button><b>${val}</b><button type="button" class="ghost sm" data-gm="${k}+">+</button></div>`;
+  let body = '', title = '';
+  if (p.type === 'ramp') { title = 'Ramp'; body = pm('L', 'Length', `${fmt(p.L, 1)} m`) + `<p class="glnote">Drag the round handle at the top to make it longer or steeper.</p>`; }
+  else if (p.type === 'crane') { title = 'Crane gantry'; body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`); }
+  else if (p.type === 'jack') { title = p.role === 'boulder' ? 'Screw jack (on the boulder)' : 'Screw jack'; body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`); }
+  else if (p.type === 'lever') { title = p.role === 'boulder' ? 'Lever (on the boulder)' : 'Lever'; body = pm('arm', 'Load arm', `${fmt(p.arm, 1)} m`) + `<p class="glnote">Effort arm: <b>${fmt(GL.beam - p.arm, 1)} m</b>. The beam is 10 m long.</p>` + (p.role === 'boulder' ? '' : pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`)) + `<div class="glrow"><button type="button" class="ghost sm" data-gm="flip">↔ Turn it around</button></div>`; }
+  else if (p.type === 'platform') { title = `${GL_PLAT[p.size].name} platform`; body = pm('h', 'Height', `${fmt(p.h, 1)} m`) + `<div class="glrow">${['S', 'M', 'L'].map(s => `<button type="button" class="ghost sm ${p.size === s ? 'on' : ''}" data-gm="size${s}">${GL_PLAT[s].name}</button>`).join('')}</div><p class="glnote">Holds <b>${GL_PLAT[p.size].holds.toLocaleString('en-GB')} N</b>. Drag its top edge to change the height.</p>`; }
+  else if (p.type === 'block') { title = 'Pulley block'; body = `<div class="glrow"><span>Ropes</span>${[1, 2, 3, 4].map(n => `<button type="button" class="ghost sm ${p.ropes === n ? 'on' : ''}" data-gm="ropes${n}">${n}</button>`).join('')}</div>`; }
+  else if (p.type === 'winch') { title = 'Winch'; body = `<div class="glrow wrap"><span>Gear</span>${GL.winchRatios.map(n => `<button type="button" class="ghost sm ${p.ratio === n ? 'on' : ''}" data-gm="ratio${n}">×${n}</button>`).join('')}</div>`; }
+  else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when you press Run Rescue. Careful near the Gumdrop!</p><div class="glrow"><button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button></div>`; }
+  const cabled = GLB.rig.cables.some(c => c.a === id || c.b === id);
+  m.innerHTML = `<div class="glmhd"><span aria-hidden="true">⠿</span> <b>${title}</b><button type="button" class="glx" data-gm="close" aria-label="Close">✕</button></div>${body}
+    ${faults.length ? `<div class="fb hint">${faults.map(f => GL_FAULT[f] || f).join(' ')}</div>` : ''}
+    <div class="glrow">${cabled ? '<button type="button" class="ghost sm" data-gm="cut">✂ Cut its cables</button>' : ''}<button type="button" class="ghost sm" data-gm="del">🗑 Remove</button></div>`;
+  m.hidden = false; m.dataset.id = id;
+  const bd = GLB.cv.getBoundingClientRect(), bx = P ? P.sx * bd.width / GLV.LW : bd.width / 2, by = P ? P.sy * bd.height / GLV.LH : 40;
+  m.style.left = clamp(bx + 14, 4, Math.max(4, bd.width - m.offsetWidth - 4)) + 'px'; m.style.top = clamp(by - 20, 4, Math.max(4, bd.height - m.offsetHeight - 4)) + 'px';
+  m.classList.remove('placed');
+}
+function glMenuAct(k) {
+  const id = GLB.menu.dataset.id, p = glPart(id); if (!p) return;
+  if (k === 'close') { GLB.sel = null; return glCloseMenu(); }
+  if (k === 'del') return glRemove(id);
+  glPush();
+  if (k === 'cut') GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
+  else if (k === 'flip') p.dir = -(p.dir || 1);
+  else if (k === 'big') p.big = !p.big;
+  else if (k.startsWith('size')) p.size = k[4];
+  else if (k.startsWith('ropes')) p.ropes = +k.slice(5);
+  else if (k.startsWith('ratio')) p.ratio = +k.slice(5);
+  else { const key = k.slice(0, -1), up = k.endsWith('+') ? 1 : -1;
+    if (key === 'L') { p.L = clamp(p.L + 0.5 * up, 1, GL.rampMax); p.rise = Math.min(p.rise, p.L / 2); }
+    if (key === 'rise') p.rise = clamp(p.rise + 0.5 * up, 0.5, p.type === 'crane' ? GL.craneRise : p.type === 'lever' ? GL.leverRise : GL.jackRise);
+    if (key === 'arm') p.arm = clamp(p.arm + 0.5 * up, 0.5, 5);
+    if (key === 'h') p.h = clamp(p.h + 0.5 * up, 0.5, GL.platMaxH); }
+  glChanged(); const r = GLB.menu.getBoundingClientRect(), bd = GLB.cv.getBoundingClientRect(), keep = { left: GLB.menu.style.left, top: GLB.menu.style.top };
+  glOpenMenu(id, { sx: (r.left - bd.left - 14) * GLV.LW / bd.width, sy: (r.top - bd.top + 20) * GLV.LH / bd.height }); GLB.menu.style.left = keep.left; GLB.menu.style.top = keep.top;
+}
+/* ---------- the side bits: crystals, the tray, tools ---------- */
+function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
+function glPaintSide() {
+  const ev = GLB.ev, el = $('#glCrys'); if (!el || !ev) return; const c = ev.cost.total, over = c > GL.budget;
+  el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} sugar crystals</span>`;
+  const rc = $('#glReceipt'); if (rc) rc.innerHTML = ev.cost.items.length ? ev.cost.items.map(([w, n]) => `<li><span>${esc(w)}</span><b>${n}</b></li>`).join('') + `<li class="tot"><span>Total</span><b>${c}</b></li>` : '<li>Nothing bought yet.</li>';
+}
+function glToolAct(k) {
+  if (k === 'undo') { const s = GLB.hist.pop(); if (s) { GLB.rig = JSON.parse(s); GLB.sel = null; glCloseMenu(); glChanged(); } else toast('Nothing to undo.'); }
+  else if (k === 'clear') { if (!GLB.rig.parts.length) return; if (!confirm('Clear the whole rig and start again?')) return; glPush(); GLB.rig = { parts: [], cables: [] }; GLB.sel = null; glCloseMenu(); glChanged(); }
+  else if (k === 'ruler') { GLB.rulerOn = !GLB.rulerOn; if (!GLB.ruler) GLB.ruler = { a: { x: glSnap(GLV.cx - 6, 0.1), y: 0 }, b: { x: glSnap(GLV.cx + 4, 0.1), y: 6 } }; if (GLB.rulerOn) { GLB.ruler.a = glRulerSnap({ x: GLB.ruler.a.x, y: GLB.ruler.a.y }); } $('[data-gt=ruler]').classList.toggle('on', GLB.rulerOn); }
+  else if (k === 'zin' || k === 'zout') { GLV.z = clamp(GLV.z * (k === 'zin' ? 1.5 : 1 / 1.5), 1, 4); glClampView(); glSaveRig(); }
+  else if (k === 'zall') { GLV.z = 1; GLV.cx = 48; GLV.cy = GLV.LH > GLV.wide ? 15 : 12; glClampView(); }
+}
+/* the board, built into a host element */
+function glBoardHTML() {
+  return `<div class="glstats"><span id="glCrys"></span><details class="glrec"><summary>Receipt</summary><ul id="glReceipt"></ul></details></div>
+    <div class="glboard"><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
+      <div class="glmenu" hidden></div>
+      <div class="glzoom"><button type="button" class="ghost sm" data-gt="zin" aria-label="Zoom in">＋</button><button type="button" class="ghost sm" data-gt="zout" aria-label="Zoom out">−</button><button type="button" class="ghost sm" data-gt="zall" aria-label="See the whole crater">⤢</button></div></div>
+    <p class="scaleNote" id="glStatus"></p>
+    <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div>
+    <div class="row gltools"><button type="button" class="ghost sm" data-gt="ruler">📏 Ruler</button><button type="button" class="ghost sm" data-gt="undo">↶ Undo</button><button type="button" class="ghost sm" data-gt="clear">Clear all</button></div>`;
+}
+function glMountBoard(host, opts) {
+  opts = opts || {}; host.insertAdjacentHTML('beforeend', glBoardHTML());
+  GLB.cv = $('#glCv', host); GLB.menu = $('.glmenu', host); GLB.onChange = opts.onChange || null; GLB.readOnly = false;
+  const st = glState(); GLB.rig = st.rig ? JSON.parse(JSON.stringify(st.rig)) : { parts: [], cables: [] }; GLB.hist = []; GLB.sel = null;
+  GLB.ev = glEvaluate(GLB.rig, { hints: st.hints || 0 }); glPaintSide(); glTrayMark(); glBindBoard();
+  makeDraggable(GLB.menu, '.glmhd', 'glmenu');
+  GLB.menu.addEventListener('click', e => { const b = e.target.closest('[data-gm]'); if (b) glMenuAct(b.dataset.gm); });
+  host.addEventListener('click', e => { const b = e.target.closest('[data-gt]'); if (b) glToolAct(b.dataset.gt); const a = e.target.closest('[data-add]'); if (a && !GLB.trayDrag) { GLB.place = GLB.place === a.dataset.add ? null : a.dataset.add; glTrayMark(); } });
+  /* drag straight from the tray onto the crater */
+  $('#glTray', host).addEventListener('pointerdown', e => { const a = e.target.closest('[data-add]'); if (!a) return; const t = a.dataset.add, x0 = e.clientX, y0 = e.clientY; GLB.trayDrag = false;
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) GLB.trayDrag = true; };
+    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf);
+      const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
+      setTimeout(() => { GLB.trayDrag = false; }, 0); };
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
+  glSize(); if (st.view && st.view.LH === GLV.LH) { GLV.z = st.view.z; GLV.cx = st.view.cx; GLV.cy = st.view.cy; glClampView(); }
+  glLoop();
+}
+
+/* ---------- the Part 5 Challenge card ---------- */
+function renderGummyLift(ch, m, host, save) {
+  GLB.ch = ch; GLB.mid = m.id; GLB.save = save; const st = glState();
+  const card = h('section', { class: 'panel mission glwrap', id: 'mi-gl' }); host.appendChild(card);
+  card.innerHTML = `${remindersHTML()}<details class="glbrief"${st.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
+      <p>Captain Smooshy's Gumdrop weighs <b>6,300 N</b> on Glimmer-9, and Smooshy can pull with <b>60 N</b> at most. Anything harder than that and he has to fire the Gumdrop's damaged thrusters, which scorch and shake the hull.</p>
+      <p>The Big Jelly can't land on the crumbly rim, so its tractor beam waits beyond the crest. It can grab the Gumdrop once the ship is <b>level with the top of the crest</b> (the dotted line). Build a route of machines from the Gumdrop up to that level. Each machine must start inside the glowing box where the last one finished.</p>
+      <p>You have <b>475 sugar crystals</b> to spend and enough oxygen for <b>1,500 m</b> of hand pulling. Don't forget the boulder jammed against the landing leg!</p></div></details>
+    <div id="glWarmHost"></div><div id="glBoardHost"></div><div id="glHintHost"></div><div id="glRunHost"></div>`;
+  glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
+  if (typeof glMountWarm === 'function') glMountWarm($('#glWarmHost', card));
+  if (typeof glMountHints === 'function') glMountHints($('#glHintHost', card));
+  if (typeof glMountRun === 'function') glMountRun($('#glRunHost', card));
+}
+
+/* ===== Operation Gummy Lift: Run Rescue (stage 3). Predict one leg's pull, then watch it play out leg by leg:
+   blasts, the boulder, Smooshy squeezing out of the hatch and walking machine to machine, thrusters, collapses and the tractor beam.
+   The animation is a list of beats; each frame rebuilds the scene from the start, so Skip simply jumps to the end.
+   Saved in chal.c6e.gl: runs, tried, best (score, for challengeState), bestRun {rig, sum, pred, working, at}, last {sum}. */
+const GL_NAME = { ramp: 'Ramp', crane: 'Crane gantry', lever: 'Lever', jack: 'Screw jack' };
+const GL_STOP = { none: 'Nothing was ready to lift the Gumdrop. A machine needs to start inside the glowing box beside the ship.',
+  gap: 'The Gumdrop got stuck: the next machine wasn\'t waiting inside the glowing box, and the ship isn\'t level with the crest yet.',
+  broken: 'One machine couldn\'t work as built, so the rescue stopped there. Tap the red part to see why.',
+  heavy: 'That leg needed more than 180 N, far too much even with the thrusters roaring. Give it a bigger mechanical advantage.',
+  collapse: 'A platform buckled under too much weight! Its load is the Gumdrop plus every machine standing on it.' };
+const GL_END = { spotless: ['Spotless rescue!', 'The Gumdrop is safe without a single scratch.'], dented: ['Dented, but home!', 'Smooshy is safe, though the Gumdrop needs a little repair.'], notyet: ['Not yet!', 'Smooshy is still in the crater. Fix the part that stopped and run it again.'] };
+const glLegName = l => `${GL_NAME[l.type]}${l.type === 'ramp' ? ` ${fmt(l.m.L, 1)} m` : ''}${l.ropes > 1 ? `, ${l.ropes} ropes` : ''}${l.winches.length ? ', winch ' + l.winches.map(w => '×' + w).join(' ') : ''}`;
+function glSummary(r) {
+  return { legs: r.legs.map(l => ({ type: l.type, name: glLegName(l), rise: +l.rise.toFixed(2), ma: +l.ma.toFixed(2), pull: +l.pull.toFixed(2), hand: +l.hand.toFixed(1), work: Math.round(l.work), stopped: !!l.stopped, thr: +(l.thruster || 0).toFixed(1) })),
+    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, total: +r.dmg.total.toFixed(1) },
+    boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, ending: r.score.ending, load: r.load };
+}
+/* ---------- the panel under the board ---------- */
+function glMountRun(host) {
+  host.innerHTML = `<div class="panel glrunbox"><div class="glpred" id="glPred">
+      <label for="glPLeg"><b>🖥️ Mission computer:</b> before you run it, pick one leg and predict Smooshy's pull on it.</label>
+      <div class="row"><select id="glPLeg" aria-label="Which leg?"></select><input type="number" step="any" id="glPVal" aria-label="Your predicted pull" placeholder="pull" style="width:7em"> <b>N</b></div>
+      <div class="glwork"><label for="glWork">Working (not marked)</label><textarea id="glWork" rows="2" placeholder="Write your working here: the MA of each part, multiplied, then the pull."></textarea></div></div>
+    <div class="row glrunrow"><button type="button" class="go" id="glRun">▶ Run Rescue</button><button type="button" class="ghost" id="glSkip" hidden>Skip to the end ▶▶</button><button type="button" class="ghost" id="glBack" hidden>🔧 Back to building</button><span class="scaleNote" id="glTries"></span></div>
+    <div id="glRes" aria-live="polite"></div></div>`;
+  const st = glState(); $('#glWork').value = st.draftWork != null ? st.draftWork : (st.pred && st.pred.working) || '';
+  const keepPred = () => { const s = dbGet('chal.' + GLB.ch, {}); s[GLB.mid] = Object.assign(s[GLB.mid] || {}, { draftPred: { leg: $('#glPLeg').value, value: $('#glPVal').value } }); dbSet('chal.' + GLB.ch, s); glRunPaint(); };
+  $('#glPVal').addEventListener('input', keepPred); $('#glPLeg').addEventListener('change', keepPred);
+  $('#glWork').addEventListener('input', e => { const s = dbGet('chal.' + GLB.ch, {}); s[GLB.mid] = Object.assign(s[GLB.mid] || {}, { draftWork: e.target.value }); dbSet('chal.' + GLB.ch, s); });
+  $('#glRun').addEventListener('click', glStartRun); $('#glSkip').addEventListener('click', () => { GLR.t0 -= 1e7; });
+  $('#glBack').addEventListener('click', glBackToBuild);
+  glRunPaint(); if (st.draftPred) { if (st.draftPred.leg !== '' && $(`#glPLeg option[value="${st.draftPred.leg}"]`)) $('#glPLeg').value = st.draftPred.leg; $('#glPVal').value = st.draftPred.value || ''; glRunPaint(); }
+  if (st.last) glShowResult(st.last, st.lastPred);
+}
+function glRunPaint() {
+  const sel = $('#glPLeg'); if (!sel || !GLB.ev) return; const legs = GLB.ev.legs, keep = sel.value;
+  sel.innerHTML = legs.length ? legs.map((l, i) => `<option value="${i}">Leg ${i + 1}: ${GL_NAME[l.type].toLowerCase()}</option>`).join('') : '<option value="">No legs yet</option>';
+  if (keep !== '' && +keep < legs.length) sel.value = keep;
+  const v = $('#glPVal').value, ok = !legs.length || (v !== '' && !isNaN(+v));
+  $('#glRun').disabled = GLR.on || !ok; $('#glPVal').disabled = !legs.length;
+  const st = glState(); $('#glTries').textContent = st.runs ? `Runs so far: ${st.runs}. Best: ${st.bestRun && st.bestRun.sum.score != null ? st.bestRun.sum.score + ' of 10' : 'not yet'}.` : (legs.length ? 'Type a prediction to unlock Run Rescue.' : '');
+}
+/* ---------- building the beats ---------- */
+const glLerp = (a, b, k) => a + (b - a) * k, glEase = k => RMOTION ? (k > 0 ? 1 : 0) : sstep(clamp(k, 0, 1));
+function glHandSpot(leg, rig, g, plats, shipAt) {
+  const chain = leg.addons.map(id => rig.parts.find(p => p.id === id)), w = chain.filter(p => p.type === 'winch').pop(), bk = chain.find(p => p.type === 'block');
+  if (w) return { x: w.x - 1.3, y: glFloorAt(w.x - 1.3, g, plats) };
+  if (bk) return { x: bk.x, y: glFloorAt(bk.x, g, plats) };
+  if (leg.type === 'ramp') return null;   // no cable: Smooshy pushes from behind the ship
+  if (leg.type === 'lever') { const x = leg.m.part.x + (leg.m.part.dir || 1) * (GL.beam + 0.6); return { x, y: glFloorAt(x, g, plats) }; }
+  const x = leg.m.part.x + (leg.type === 'crane' ? -3.8 : 1.3); return { x, y: glFloorAt(x, g, plats) };
+}
+function glBuildBeats(res, rig) {
+  const B = [], add = (dur, fn) => { if (!isFinite(dur)) dur = 0.5; B.push({ dur: RMOTION ? Math.min(dur, 0.25) : dur, fn }); };
+  const g0 = glBaseGround(), blasts = res.blasts, plats = glPlatforms(rig, res.ground), parts = rig.parts;
+  let gNow = g0; const shipY0 = res.ship0.y;
+  /* walking from wherever Smooshy is to a spot, at a brisk 9 m/s */
+  let walkFrom = null; const walkTo = (spot, mood) => { const from = walkFrom; walkFrom = spot; if (!from) return; const d = Math.hypot(spot.x - from.x, spot.y - from.y); if (d < 0.3) return;
+    add(clamp(d / 9, 0.4, 2.2), (S, k) => { const e = glEase(k); S.smoo = { x: glLerp(from.x, spot.x, e), y: glLerp(from.y, spot.y, e) + (RMOTION ? 0 : Math.abs(Math.sin(k * d * 2.2)) * 0.25), mood: mood || 'wave' }; }); };
+  add(0.5, (S, k) => { S.msg = 'Run Rescue!'; });
+  /* 1. dynamite, in the order it was placed */
+  blasts.forEach((bl, i) => { const after = glBlast(gNow, bl.x, bl.big).g, near = Math.hypot(bl.x - GL.shipX, bl.y - shipY0) <= GL.nearShip; gNow = after;
+    add(1.4, (S, k) => { S.msg = ''; if (k < 0.4) { S.fx.push({ kind: 'fuse', x: bl.x, y: bl.y, k: k / 0.4 }); return; }
+      S.ground = after; S.blown.add(bl.id); const kk = (k - 0.4) / 0.6; S.fx.push({ kind: 'boom', x: bl.x, y: bl.y, r: bl.r, k: kk });
+      if (near) { S.ship.shake = kk < 0.7; S.ship.dmg += 15; S.bubble = { who: 'ship', s: 'Yikes! Too close!' }; }
+      if (Math.abs(bl.x - GL.boulderX) <= bl.r + 0.6) S.rockGone = true; }); });
+  /* 2. Smooshy squeezes out through the hatch */
+  add(1.3, (S, k) => { S.ship.inside = k < 0.35; S.ship.shake = false; const e = glEase((k - 0.3) / 0.7); S.smoo = { x: GL.shipX + 1.2 + 2.4 * e, y: S.ship.y + 1.6 * (1 - e) + (RMOTION ? 0 : Math.sin(e * Math.PI) * 1.2), mood: 'wave' }; if (k < 0.35) S.smoo = null; S.bubble = k > 0.5 ? { who: 'smoo', s: 'Here goes!' } : null; });
+  walkFrom = { x: GL.shipX + 3.6, y: shipY0 };
+  /* 3. the boulder */
+  const bm = parts.find(p => p.role === 'boulder' && GL_LIFT[p.type]), bt = res.boulder;
+  if (bt.how === 'lever' || bt.how === 'jack') { const spot = bt.how === 'lever' ? { x: bm.x + GL.beam + 0.6, y: glAt(res.ground, bm.x + GL.beam + 0.6) } : { x: bm.x + 1.3, y: glAt(res.ground, bm.x + 1.3) }; walkTo(spot);
+    add(bt.ok ? 1.6 : 1.4, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); if (bt.ok) { S.tilt[bm.id] = Math.min(1, k * 1.6) * (bt.how === 'lever' ? 0.4 : 0.6); const e = glEase((k - 0.35) / 0.65); S.rockX = 18.7 + 3.5 * e; S.rockY = glAt(res.ground, S.rockX) + Math.sin(e * Math.PI) * 0.6; S.rockRot = 0.12 + e * 4; if (k > 0.98) S.rockAway = true; S.bubble = { who: 'smoo', s: 'Boulder off!' }; }
+      else { S.tilt[bm.id] = RMOTION ? 0 : Math.abs(Math.sin(k * 14)) * 0.05; S.bubble = { who: 'smoo', s: `Too stiff! (${fmt(bt.pull, 1)} N)` }; } }); }
+  else if (bt.how === 'winch') { const ch = glAddons({ parts, cables: (rig.cables || []).map(c => ({ a: c.a === 'boulder' ? '__b' : c.a, b: c.b === 'boulder' ? '__b' : c.b })) }, '__b').chain, w = ch.filter(p => p.type === 'winch').pop() || ch[0], spot = { x: w.x - 1.3, y: glFloorAt(w.x - 1.3, res.ground, plats) }; walkTo(spot);
+    add(1.6, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.spin = k * 12; if (bt.ok) { const e = glEase(k); S.rockX = glLerp(18.7, Math.min(w.x - 2, 26), e); S.rockY = glAt(res.ground, S.rockX); S.rockRot = 0.12 + e * 3; S.bubble = { who: 'smoo', s: 'Boulder off!' }; } else S.bubble = { who: 'smoo', s: 'It won\'t budge!' }; }); }
+  const rockOn = res.rockOn; if (rockOn) add(0.9, (S, k) => { S.ship.carryRock = true; S.bubble = { who: 'ship', s: 'The rock is still jammed on!' }; if (k > 0.5 && !S.rockDmg) { S.rockDmg = true; S.ship.dmg += 25; } });
+  /* 4. the legs */
+  const ran = res.legs.filter(l => !l.skipped); let shipAt = { x: GL.shipX, y: shipY0 };
+  const sinkPlat = res.stop && res.stop.why === 'collapse' ? res.stop.plat : null;
+  ran.forEach(l => {
+    const stopHere = res.stop && res.stop.leg === l.i, moves = !stopHere || (res.stop.why === 'collapse' && glPlatOnlyAtEnd(l, res, plats)), push = !glHandSpot(l, rig, res.ground, plats);
+    const spot = push ? { x: l.start.x - 2.6, y: l.start.y } : glHandSpot(l, rig, res.ground, plats); walkTo(spot);
+    const from = Object.assign({}, l.start), to = Object.assign({}, l.end), tilt = l.type === 'ramp' ? -Math.atan2(l.end.y - l.start.y, l.end.x - l.start.x) : 0;
+    const strain = l.pull > GL.pullOk + 1e-9, dur = 1.6 + Math.min(2.2, l.rise * 0.18);
+    if (l.type !== 'ramp') add(0.6, (S, k) => { const e = glEase(k); S.ship.x = glLerp(shipAt.x, from.x, e); S.ship.y = glLerp(shipAt.y, from.y, e); S.ship.tilt = glLerp(S.ship.tilt, 0, e); if (l.type === 'crane') S.hook[l.id] = from.y + 4.2; });
+    else add(0.4, (S, k) => { S.ship.x = from.x; S.ship.y = from.y; S.ship.tilt = glLerp(0, tilt, glEase(k)); });
+    if (moves && !(stopHere && (res.stop.why === 'broken' || res.stop.why === 'heavy'))) {
+      add(dur, (S, k) => { const e = glEase(k); S.ship.x = glLerp(from.x, to.x, e); S.ship.y = glLerp(from.y, to.y, e); S.ship.tilt = tilt * (l.type === 'ramp' ? 1 : 0);
+        if (l.type === 'ramp') S.rope = { a: { x: S.ship.x + 2.2 * Math.cos(tilt), y: S.ship.y + 1.8 - 2.2 * Math.sin(tilt) }, b: { x: to.x, y: to.y + 0.4 } };
+        if (k >= 1) S.rope = null; S.ship.shake = strain; S.flames = strain ? Math.min(1, (l.pull - GL.pullOk) / 120) : 0; S.ship.dmg += (l.thruster || 0) * k; S.spin = k * 30;
+        if (l.type === 'crane') S.hook[l.id] = S.ship.y + 4.2; if (l.type === 'lever' || l.type === 'jack') S.tilt[l.id] = k;
+        S.smoo = push ? { x: S.ship.x - 2.6 * Math.cos(tilt), y: S.ship.y + 2.6 * Math.sin(tilt), mood: 'strain' } : Object.assign({}, spot, { mood: 'strain' });
+        S.bubble = strain ? { who: 'ship', s: 'Thrusters! Hold on!' } : (k < 0.5 ? { who: 'smoo', s: 'Heave!' } : null);
+        if (k >= 1) { S.flames = 0; S.ship.shake = false; S.readouts.push(`Leg ${l.i + 1}: ${fmt(l.pull, 1)} N`); } });
+      shipAt = to;
+    } else { add(1.8, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.ship.shake = !RMOTION; S.flames = res.stop.why === 'heavy' ? 1 : 0; S.bad = l.id; S.bubble = { who: 'smoo', s: res.stop.why === 'heavy' ? 'It\'s far too heavy!' : 'Something\'s wrong here!' }; if (k >= 1) { S.ship.shake = false; S.flames = 0; } }); shipAt = from; }
+    if (stopHere && res.stop.why === 'collapse') add(1.8, (S, k) => { S.sink[sinkPlat] = glEase(k); S.ship.y = shipAt.y - glEase(k) * 1.2; S.ship.tilt = 0.25 * glEase(k); S.bubble = { who: 'smoo', s: 'The platform is buckling!' }; });
+  });
+  /* 5. a gap, or the tractor beam */
+  if (res.stop && res.stop.why === 'gap') add(1.8, (S, k) => { S.bubble = { who: 'smoo', s: 'Where\'s the next machine?' }; S.zone = res.stop.at; });
+  if (res.stop && res.stop.why === 'none') add(1.6, (S, k) => { S.bubble = { who: 'smoo', s: 'There\'s nothing here to pull with!' }; S.zone = res.stop.at; });
+  if (res.arrived) {
+    walkTo({ x: shipAt.x - 1.5, y: shipAt.y });
+    add(1.0, (S, k) => { S.smoo = { x: shipAt.x - 1.5 + 1.5 * glEase(k), y: shipAt.y + Math.sin(k * Math.PI) * 1.4, mood: 'cheer' }; if (k > 0.9) { S.smoo = null; S.ship.inside = true; S.ship.mood = 'cheer'; } });
+    add(4.2, (S, k) => { S.smoo = null; S.ship.inside = true; S.ship.mood = 'wave'; const e = glEase(Math.max(0, (k - 0.25) / 0.75)); S.ship.x = glLerp(shipAt.x, 86, e); S.ship.y = glLerp(shipAt.y, 20.6, e); S.ship.tilt = glLerp(S.ship.tilt, 0, Math.min(1, k * 3));
+      S.beam = { k }; S.bubble = k < 0.5 ? { who: 'ship', s: 'Tractor beam locked on!' } : null; if (k > 0.97) S.shipGone = true; });
+  }
+  return B;
+}
+function glPlatOnlyAtEnd(l, res, plats) { const s = glSupport(l.end.x, l.end.y, res.ground, plats); return s && s.kind === 'platform' && s.id === res.stop.plat; }
+/* ---------- playing it ---------- */
+function glSceneAt(t) {
+  const res = GLR.res, st = glState(), S = { ship: { x: GL.shipX, y: res.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0, carryRock: false, shake: false }, smoo: null, ground: glBaseGround(), blown: new Set(), hook: {}, tilt: {}, sink: {}, readouts: [], fx: [], spin: 0 };
+  let acc = 0; for (const b of GLR.beats) { if (t < acc) break; const k = clamp((t - acc) / b.dur, 0, 1); b.fn(S, k); acc += b.dur; }
+  if (S.rockAway) S.rockGone = true;
+  return S;
+}
+function glRunFrame() {
+  if (!GLR.on) return; const cv = GLB.cv; if (!cv || !cv.isConnected) { GLR.on = false; return; }
+  const t = (performance.now() - GLR.t0) / 1000, S = glSceneAt(t), res = GLR.res, g = S.ground; glSize(); const c = fit(cv, GLV.LW, GLV.LH);
+  const plats = res.plats.map(p => S.sink[p.id] ? Object.assign({}, p, { top: p.top - S.sink[p.id] * (p.top - p.base) * 0.5, over: true }) : p);
+  const ev = Object.assign({}, res, { plats, ground: g, legs: res.legs.map(l => Object.assign({}, l, { faults: S.bad === l.id ? (l.faults.length ? l.faults : ['x']) : [] })) });
+  const shipPx = { x: glSX(S.ship.x), y: glSY(S.ship.y + 2) };
+  glDrawWorld(c, { rig: GLR.rig, ev, ground: g, ghost: null, ship: S.shipGone ? null : Object.assign({}, S.ship, { dmg: Math.min(100, S.ship.dmg) }), smoo: S.smoo, rock: !S.rockGone, t,
+    hz: S.zone || null, hzLabel: S.zone ? 'The next machine needed to start in here' : '',
+    run: { on: true, blown: S.blown, rockGone: S.rockGone, rockX: S.rockX, rockY: S.rockY, rockRot: S.rockRot, hook: S.hook, tilt: S.tilt, spin: S.spin, rope: S.rope,
+      beam: S.beam ? { x: shipPx.x - 3 * glU(), y: shipPx.y + 2.4 * glU(), x2: shipPx.x + 3 * glU(), y2: shipPx.y + 2.4 * glU() } : null,
+      fx: (c2, tt) => glFx(c2, S, tt) } });
+  if (t > GLR.total + 0.1 && !GLR.done) { GLR.done = true; glFinishRun(); }
+  GLR.raf = requestAnimationFrame(glRunFrame);
+}
+function glFx(c, S, t) {
+  const u = glU();
+  if (S.flames && !S.shipGone) { const X = glSX(S.ship.x), Y = glSY(S.ship.y); [-1.6, 1.6].forEach(dx => { const fl = (0.6 + S.flames * 1.6) * u * (RMOTION ? 1 : 0.8 + 0.3 * Math.sin(t * 40 + dx)); const gr = c.createLinearGradient(0, Y, 0, Y + fl); gr.addColorStop(0, '#fff3b0'); gr.addColorStop(0.4, '#ffb02e'); gr.addColorStop(1, 'rgba(214,64,44,0)'); c.fillStyle = gr; c.beginPath(); c.moveTo(X + dx * u - 0.35 * u, Y); c.quadraticCurveTo(X + dx * u, Y + fl * 1.2, X + dx * u + 0.35 * u, Y); c.fill(); }); }
+  S.fx.forEach(f => { const X = glSX(f.x), Y = glSY(f.y);
+    if (f.kind === 'fuse') { c.fillStyle = Math.floor(t * 20) % 2 ? '#fff3b0' : '#ffb02e'; c.beginPath(); c.arc(X + 0.2 * u, Y - (1.75 - f.k * 0.8) * u, Math.max(3, 0.2 * u), 0, 7); c.fill(); }
+    if (f.kind === 'boom') { const R = f.r * u * (0.6 + f.k * 1.4); c.globalAlpha = 1 - f.k; c.fillStyle = '#fff3b0'; c.beginPath(); c.arc(X, Y, R * 0.55, 0, 7); c.fill(); c.fillStyle = '#ff8a3d'; c.beginPath(); c.arc(X, Y, R * 0.8, 0, 7); c.fill(); c.globalAlpha = (1 - f.k) * 0.8;
+      c.fillStyle = '#8a70c4'; for (let i = 0; i < 12; i++) { const a = i * 0.52 + 0.3, d = R * (0.7 + f.k * 1.6); c.beginPath(); c.arc(X + Math.cos(a) * d, Y - Math.abs(Math.sin(a)) * d, Math.max(2, 0.25 * u), 0, 7); c.fill(); } c.globalAlpha = 1;
+      if (!RMOTION && f.k < 0.3) { c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(0, 0, GLV.LW, GLV.LH); } } });
+  if (S.bubble) { const who = S.bubble.who === 'ship' ? (S.shipGone ? null : { x: S.ship.x, y: S.ship.y + 5.2 }) : S.smoo ? { x: S.smoo.x, y: S.smoo.y + 2.8 } : null;
+    if (who) glLbl(c, S.bubble.s, clamp(glSX(who.x), 90, GLV.LW - 90), Math.max(18, glSY(who.y)), GLC.ink, 13, 'center', '#fffaf2'); }
+  if (S.msg) glLbl(c, S.msg, GLV.LW / 2, 34, GLC.ink, 18, 'center', '#ffe28a');
+  S.readouts.forEach((s, i) => glLbl(c, s, 70 + 0, GLV.LH - 18 - i * 22, GLC.ink, 12, 'left', '#c9ffdc'));
+}
+function glStartRun() {
+  if (GLR.on) return; const legs = GLB.ev.legs, li = $('#glPLeg').value, v = $('#glPVal').value;
+  if (legs.length && (v === '' || isNaN(+v))) { toast('Type your predicted pull first. Any number counts!'); return; }
+  const st = glState(); GLR.rig = JSON.parse(JSON.stringify(GLB.rig)); GLR.res = glEvaluate(GLR.rig, { hints: st.hints || 0 });
+  GLR.pred = legs.length ? { leg: +li, value: +v, working: $('#glWork').value } : null;
+  GLR.beats = glBuildBeats(GLR.res, GLR.rig); GLR.total = GLR.beats.reduce((a, b) => a + b.dur, 0); GLR.t0 = performance.now(); GLR.on = true; GLR.done = false;
+  GLB.sel = null; glCloseMenu(); $('#glSkip').hidden = false; $('#glBack').hidden = true; $('#glRun').disabled = true; $('.glboard').classList.add('running');
+  $('#glRes').innerHTML = ''; GLB.cv.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
+  cancelAnimationFrame(GLB.raf); GLR.raf = requestAnimationFrame(glRunFrame);
+}
+/* the run is over: save it (best run counts), show the receipt, then the ending card if there is one */
+function glFinishRun() {
+  const res = GLR.res, sum = glSummary(res), st = glState(), n = (st.runs || 0) + 1, cur = { total: sum.score, hardest: sum.hardest };
+  const firstRescue = !!res.arrived && !st.firstDone;   // read before the save below, which updates this same state object
+  const prevBest = st.bestRun ? { total: st.bestRun.sum.score, hardest: st.bestRun.sum.hardest } : null, better = glBetter(cur, prevBest);
+  const patch = { runs: n, tried: true, last: sum, lastPred: GLR.pred, lastDmg: res.arrived ? 0 : sum.dmg.total, boulderGone: false, pred: GLR.pred };
+  if (better) patch.bestRun = { rig: GLR.rig, sum, pred: GLR.pred, at: Date.now() };
+  patch.best = Math.max(st.best || 0, sum.score || 0);
+  if (res.arrived && !st.firstDone) patch.firstDone = Date.now();
+  GLB.save({ id: GLB.mid }, patch);
+  if (better && typeof rigSnapshot === 'function') rigSnapshot();
+  $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowResult(sum, GLR.pred, better && n > 1); glRunPaint();
+  if (typeof glShowEnding === 'function') glShowEnding(sum, { first: firstRescue, better });
+}
+function glBackToBuild() {
+  GLR.on = false; cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); glRunPaint(); glLoop();
+}
+function glShowResult(sum, pred, newBest) {
+  const host = $('#glRes'); if (!host || !sum) return; const E = GL_END[sum.ending], f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
+  const P = sum.pts, rows = sum.legs.map((l, i) => `<tr class="${l.stopped ? 'stop' : ''}"><td>${i + 1}</td><td>${esc(l.name)}</td><td>${f1(l.rise)} m</td><td>${fmt(l.ma, 1)}</td><td><b>${f1(l.pull)} N</b>${l.pull > 60 + 1e-9 ? ' 🔥' : ''}</td><td>${n0(l.hand)} m</td><td>${n0(l.work)} J</td></tr>`).join('');
+  const pl = pred && sum.legs[pred.leg] ? `<p class="glpredfb">You predicted <b>${f1(pred.value)} N</b> for leg ${pred.leg + 1}. Smooshy's pull on it was <b>${f1(sum.legs[pred.leg].pull)} N</b>. ${Math.abs(pred.value - sum.legs[pred.leg].pull) <= Math.max(1, sum.legs[pred.leg].pull * 0.05) ? 'Spot on, engineer!' : 'Compare your working with the receipt below to see where the numbers split.'}</p>` : '';
+  const pt = (lab, got, max, note) => `<li class="${got === max ? 'ok' : ''}"><span class="box">${got === max ? '✓' : ''}</span>${lab}: <b>${got} of ${max}</b>${note ? ` <small>${note}</small>` : ''}</li>`;
+  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of 10` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + GL_STOP[sum.stop] : ''}</p>${pl}
+    ${rows ? `<div class="gltab"><table><thead><tr><th>Leg</th><th>Machine</th><th>Rise</th><th>Total MA</th><th>Pull</th><th>Hand travel</th><th>Work</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="glnote">Work receipt: each leg's work = ${n0(sum.load)} N × its rise. Change the machines and only the pull and hand travel change; the work only changes when the rise does.</p>` : ''}
+    <ul class="glsums"><li>Hand travel: <b>${n0(sum.hand)} m</b> of 1,500 m oxygen</li><li>Sugar crystals: <b>${sum.cost}</b> of 475</li><li>Final crest height: <b>${f1(sum.crest)} m</b></li><li>Total work: <b>${n0(sum.work)} J</b></li>
+      <li>Ship damage: <b>${f1(sum.dmg.total)}%</b>${sum.dmg.total ? ` <small>(thrusters ${f1(sum.dmg.t)}%, rock ${sum.dmg.r}%, blasts ${sum.dmg.b}%)</small>` : ''}</li><li>Boulder: <b>${{ lever: 'levered off', jack: 'jacked off', winch: 'winched away', blast: 'blasted', stuck: 'still jammed on', left: 'left on' }[sum.boulder]}</b></li></ul>
+    ${sum.score != null ? `<ul class="objs glpts">${pt('Smooshy\'s hardest pull', P.pull, 5, `${f1(sum.hardest)} N. 54 to 60 N earns 5.`)}${pt('Ship condition', P.cond, 2)}${pt('Boulder cleared', P.boulder, 1)}${pt('Oxygen: 1,500 m or less', P.oxy, 1, P.oxy ? '' : 'Force HQ sent extra oxygen.')}${pt('Budget: 475 crystals or less', P.budget, 1, P.budget ? '' : 'Force HQ sent extra crystals.')}${sum.hintCost ? `<li>Hints: <b>−${sum.hintCost}</b></li>` : ''}</ul>` : ''}`;
+}
+/* ===== stage 4 plumbing: the best run's picture for the worksheet's "My Rescue" page =====
+   rigSnapshot() draws the best run's rig over the whole crater (no handles or dots) into a 900 px wide JPEG, kept under about 150 KB,
+   and stores it as chal.c6e.gl.bestRun.snap (best run only, so progress stays small; backups in 70-backup.js carry it as part of DB). */
+/* draws a rig over the whole crater into a JPEG data URL (900 px wide, under about 150 KB); the title is written in the corner */
+function glSnapURL(rig, title) {
+  const keep = { LW: GLV.LW, LH: GLV.LH, z: GLV.z, cx: GLV.cx, cy: GLV.cy };
+  try {
+    const cv = document.createElement('canvas'); cv.width = 900; cv.height = 270; const c = cv.getContext('2d');
+    Object.assign(GLV, { LW: 1000, LH: 300, z: 1, cx: 48, cy: 12 }); c.setTransform(0.9, 0, 0, 0.9, 0, 0);
+    const ev = glEvaluate(rig);
+    glDrawWorld(c, { rig, ev, ground: ev.ground, ghost: rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, t: 0,
+      ship: { x: GL.shipX, y: ev.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0 }, run: { on: true } });
+    c.setTransform(1, 0, 0, 1, 0, 0); glLbl(c, title, 12, 18, GLC.ink, 13, 'left', '#fffaf2');
+    let q = 0.8, url = cv.toDataURL('image/jpeg', q); while (url.length * 0.75 > 150000 && q > 0.35) { q -= 0.1; url = cv.toDataURL('image/jpeg', q); }
+    return url;
+  } catch (e) { return null; } finally { Object.assign(GLV, keep); }
+}
+function rigSnapshot() {
+  const st = glState(), br = st.bestRun; if (!br || !br.rig) return null;
+  const url = glSnapURL(br.rig, `${(dbGet('user', {}) || {}).name || ''}'s best rescue route`.trim()); if (!url) return null;
+  const all = dbGet('chal.' + GLB.ch, {}); if (all[GLB.mid] && all[GLB.mid].bestRun) { all[GLB.mid].bestRun.snap = url; dbSet('chal.' + GLB.ch, all); }
+  return url;
+}
+
+/* ===== Part 5 story: the guided warm-up (lever on the boulder), the three ending cards and the "good place to stop" pop-up ===== */
+
+/* ---------- guided warm-up, about 3 minutes, before the free build ----------
+   State lives in chal.c6e.gl.warm: 'on' while the warm-up is open, 'done' or 'skip' once it is closed.
+   The boulder pull is shown here because it is practice; the ship's leg pulls stay hidden. */
+function glWarmLever() { return GLB.rig && GLB.rig.parts.find(p => p.type === 'lever' && p.role === 'boulder'); }
+function glMountWarm(host) {
+  if (!host) return; const st = glState();
+  if (!st.warm && ((GLB.rig && GLB.rig.parts.length) || st.runs)) GLB.save({ id: GLB.mid }, { warm: 'done' });   // an older save: no warm-up
+  else if (!st.warm) GLB.save({ id: GLB.mid }, { warm: 'on' });
+  host.innerHTML = '<section class="panel glwarm" id="glWarm" hidden></section>';
+  const prev = GLB.onChange; GLB.onChange = () => { if (prev) prev(); glWarmPaint(); };
+  host.addEventListener('click', e => {
+    const b = e.target.closest('[data-gw]'); if (!b) return;
+    GLB.save({ id: GLB.mid }, { warm: b.dataset.gw === 'skip' ? 'skip' : 'done' }); glWarmPaint();
+  });
+  glWarmPaint();
+}
+function glWarmPaint() {
+  const box = $('#glWarm'); if (!box) return; const st = glState();
+  if (st.warm !== 'on' || (GLR && GLR.on)) { box.hidden = true; return; }
+  const lev = glWarmLever(), bo = GLB.ev && GLB.ev.boulder, ok = !!(bo && bo.ok && bo.how === 'lever'), f1 = v => fmt(v, 1);
+  const step = (done, txt) => `<li class="${done ? 'ok' : ''}"><span class="box">${done ? '✓' : ''}</span>${txt}</li>`;
+  let live = '';
+  if (lev && bo && bo.how === 'lever') live = `<p class="glwlive ${ok ? 'good' : ''}">Load arm ${f1(lev.arm)} m, so the lever's mechanical advantage is <b>${f1(bo.ma)}</b>. Smooshy pulls with <b>${f1(bo.pull)} N</b> ${ok ? 'and the boulder rolls free!' : 'and 60 N is his limit.'}</p>`;
+  box.hidden = false;
+  box.innerHTML = `<h3>🔧 Warm-up: free the boulder (about 3 minutes)</h3>
+    <p>The boulder weighs <b>252 N</b> on Glimmer-9 and Smooshy can pull with <b>60 N</b>. A lever can help. Mechanical advantage = effort arm ÷ load arm, and the effort needed = 252 N ÷ mechanical advantage.</p>
+    <ul class="objs">${step(!!lev, 'Tap the ⚖️ Lever in the parts tray, then tap the ground next to the boulder (or drag it in). It snaps onto the boulder.')}
+      ${step(ok, 'Tap the lever and change its load arm until Smooshy\'s pull on the boulder is <b>60 N or less</b>. A shorter load arm gives a bigger mechanical advantage.')}</ul>${live}
+    ${ok ? '<p><b>Boulder cleared!</b> The lever stays in your rig for 25 crystals, so you have 450 left to plan the climb.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>'
+      : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the warm-up</button></div>'}`;
+}
+
+/* ---------- the three ending cards, then the stopping-point pop-up ---------- */
+function glPop(html, key, label) {
+  const old = $('#glPop'); if (old) old.remove();
+  const box = document.createElement('div'); box.id = 'glPop'; box.className = 'glpop'; box.setAttribute('role', 'dialog'); box.setAttribute('aria-label', label);
+  box.innerHTML = `<div class="glpophd" title="Drag me out of the way">⠿ ${esc(label)}</div>${html}`; document.body.appendChild(box);
+  makeDraggable(box, '.glpophd', key); const f = box.querySelector('button.go'); if (f) setTimeout(() => f.focus(), 30);
+  return box;
+}
+function glEndText(sum) {
+  const d = sum.dmg || {}, why = [];
+  if (d.t > 0) why.push('a leg that needed more than 60 N, so the thrusters roared');
+  if (d.r > 0) why.push('the rock left on the boulder');
+  if (d.b > 0) why.push('dynamite going off close to the ship');
+  const dent = why.length ? `The damage came from ${why.join(', ')}.` : '';
+  if (sum.ending === 'spotless') return ['✨', 'Spotless rescue!', 'The tractor beam locks on and the Gumdrop lifts away without a single scratch. Smooshy climbs aboard, waves from the window, and the Big Jelly hums off across the plain. On the way up he spots the crystals on the crater rim glittering in the light of two moons.'];
+  if (sum.ending === 'dented') return ['🛠️', 'Dented, but home!', `The tractor beam lifts the Gumdrop and Smooshy waves from the window, but the hull is scorched and cracked (${fmt(d.total || 0, 1)}% damage). ${dent} Another go can bring the damage down to zero.`];
+  return ['🔄', 'Not yet!', `${GL_STOP[sum.stop && sum.stop !== 'none' ? sum.stop : 'none'] || GL_STOP.none} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
+}
+function glShowEnding(sum, o) {
+  if (!sum) return; o = o || {}; const [ic, ti, tx] = glEndText(sum);
+  const sc = sum.score != null ? `<p class="glpopsc">Score for this run: <b>${sum.score} of 10</b>${o.better ? ' <em>New best run!</em>' : ''}</p>` : '';
+  const box = glPop(`<h3>${ic} ${ti}</h3><p>${tx}</p>${sc}<div class="row"><button type="button" class="go" data-gp="on">${sum.ending === 'spotless' ? 'Brilliant!' : 'Back to my route'}</button></div>`, 'glend', '🚀 Operation Gummy Lift');
+  box.addEventListener('click', e => {
+    if (!e.target.closest('[data-gp]')) return; box.remove();
+    if (sum.ending !== 'spotless' && typeof glBackToBuild === 'function') glBackToBuild();
+    if (o.first) glShowStop();
+  });
+}
+function glShowStop() {
+  const box = glPop(`<h3>🌙 A good place to stop for today</h3><p>You have rescued the Gumdrop once, so this is a great moment to take a break. Your route saves itself after every change and reopens exactly as you left it.</p><p>Next time you can improve it: a gentler pull, no damage, fewer crystals or less hand travel. Then comes the Check.</p><div class="row"><button type="button" class="ghost" data-gp="save">📄 Save my work</button> <button type="button" class="go" data-gp="on">Keep going</button></div>`, 'glstop', 'Time for a break?');
+  box.addEventListener('click', e => {
+    const b = e.target.closest('[data-gp]'); if (!b) return;
+    if (b.dataset.gp === 'save') { const s = $('#saveWorkBtn'); if (s) s.click(); } else box.remove();
+  });
+}
+
+/* ===== Part 5 hint tree (Operation Gummy Lift) =====
+   Hints are spent: chal.c6e.gl.hints counts them, chal.c6e.gl.hintSeen remembers which ones were opened, so reading one again is free.
+   glScore applies "first free, then -1 each, never below 1 if rescued".
+   Tier 1: "What I need to find" (formulas and ideas, no answers). Tier 2: "A number or machine I have" (the student's own rig, a blank to fill).
+   Tier 3: a worked example with different numbers (last resort). */
+const GLH_TOPICS = [['force', 'Smooshy\'s pull'], ['ma', 'Mechanical advantage'], ['hand', 'Hand distance'], ['cable', 'Cable'], ['weight', 'Weight'], ['work', 'Work']];
+const GLH_1 = {
+  force: ['Smooshy\'s pull is the effort. Effort = load ÷ total mechanical advantage.', 'The load is the Gumdrop\'s weight. A boulder still pinning the ship makes the load bigger.', 'Each leg has its own pull. Look at the hardest one: 60 N is Smooshy\'s limit before the thrusters fire.'],
+  ma: ['Mechanical advantage = load ÷ effort.', 'Ramp MA = length ÷ rise. Lever MA = effort arm ÷ load arm. Pulley block MA = number of ropes. Winch MA = its ratio.', 'Parts on the same leg multiply: total MA = ramp MA × ropes × winch. Legs one after another get a pull each, and their heights add.'],
+  hand: ['Hand travel on a leg = total MA × the height that leg lifts.', 'Add the hand travel of every leg. Smooshy\'s oxygen lasts for 1,500 m.', 'A bigger MA means a smaller pull but a longer hand travel.'],
+  cable: ['Cable length = number of ropes × the distance the load moves along the machine.', 'Cable costs 1 crystal for every 5 m.', 'A screw jack uses no cable.'],
+  weight: ['Weight = mass × g.', 'On Glimmer-9, g = 4.2 N/kg and the Gumdrop\'s mass is 1,500 kg.', 'A platform holds the ship\'s weight plus every machine standing on it. Small holds 4,000 N, medium 7,000 N, large 10,000 N.'],
+  work: ['Work = force × distance.', 'The work to lift the ship = its weight × the height it climbs. Going down after the crest needs no work.', 'Different machines change the pull and the hand travel. The total work only changes when the height changes.']
+};
+const GLH_3 = {
+  force: 'Worked example with different numbers: a 3,000 N crate lifted by a machine with a total mechanical advantage of 25 needs an effort of 3,000 ÷ 25 = <b>120 N</b>.',
+  ma: 'Worked example: a ramp 10 m long rising 2 m has MA 10 ÷ 2 = 5. Add 3 ropes and a ×4 winch, and the total MA = 5 × 3 × 4 = <b>60</b>.',
+  hand: 'Worked example: a leg with total MA 60 that lifts the load 2 m needs 60 × 2 = <b>120 m</b> of hand travel. Another leg of 80 m makes 200 m altogether.',
+  cable: 'Worked example: a ramp 10 m long with 3 ropes needs 3 × 10 = <b>30 m</b> of cable, which costs 30 ÷ 5 = 6 crystals.',
+  weight: 'Worked example: an 800 kg crate on Mars (g = 3.7 N/kg) weighs 800 × 3.7 = <b>2,960 N</b>.',
+  work: 'Worked example: lifting a 3,000 N crate through 2 m takes 3,000 × 2 = <b>6,000 J</b>, whichever machine does the lifting.'
+};
+const GLH = { topic: null, leg: '0' };
+const glhSeen = () => glState().hintSeen || {};
+function glhSpend(key) {
+  const seen = glhSeen(); if (seen[key]) return;
+  const st = glState(); seen[key] = true; GLB.save({ id: GLB.mid }, { hints: (st.hints || 0) + 1, hintSeen: seen });
+  GLB.ev = glEvaluate(GLB.rig, { hints: glState().hints || 0 }); if (typeof glPaintSide === 'function') glPaintSide();
+}
+function glhLegName(l) { return l.type === 'ramp' ? `${fmt(l.m.L, 1)} m ramp` : l.type === 'jack' ? 'screw jack' : l.type; }
+function glhOptions(topic) {
+  const E = GLB.ev, o = (E && E.legs ? E.legs : []).map((l, i) => [String(i), `Leg ${i + 1}: ${glhLegName(l)}`]);
+  const bo = E && E.boulder; if ((topic === 'force' || topic === 'ma') && bo && (bo.how === 'lever' || bo.how === 'jack')) o.push(['b', `The boulder's ${bo.how}`]);
+  return o;
+}
+/* the formula with the student's own numbers plugged in, and a blank to fill */
+function glhNumbers(topic, key) {
+  const E = GLB.ev, f = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB'), B = '<span class="blank"></span>';
+  if (topic === 'weight') return [`Weight = mass × g = 1,500 × 4.2 = ${B} N`];
+  if (key === 'b') {
+    const lv = GLB.rig.parts.find(p => p.role === 'boulder');
+    if (lv && lv.type === 'lever') return [`Lever MA = effort arm ÷ load arm = ${f(GL.beam - lv.arm)} ÷ ${f(lv.arm)} = ${B}`, `Pull on the boulder = 252 N ÷ ${B} = ${B} N`];
+    return [`Screw jack MA = ${GL.jackMA}`, `Pull on the boulder = 252 N ÷ ${GL.jackMA} = ${B} N`];
+  }
+  const L = E.legs[+key]; if (!L) return ['Place a machine on the board first, then pick it here.'];
+  const mm = L.type === 'ramp' ? `Ramp MA = length ÷ rise = ${f(L.m.L)} ÷ ${f(L.rise)} = ${B}` : L.type === 'lever' ? `Lever MA = effort arm ÷ load arm = ${f(GL.beam - L.m.part.arm)} ÷ ${f(L.m.part.arm)} = ${B}` : L.type === 'jack' ? `Screw jack MA = ${GL.jackMA}` : 'Crane MA = 1';
+  const tot = `Total MA = ${L.type === 'jack' ? B : B + (L.ropes > 1 ? ' × ' + L.ropes + ' ropes' : '') + L.winches.map(w => ' × ' + w + ' winch').join('')} = ${B}`;
+  if (topic === 'ma') return [mm, tot];
+  if (topic === 'force') return [tot, `Pull = load ÷ total MA = ${n0(L.load)} ÷ ${B} = ${B} N`];
+  if (topic === 'hand') return [tot, `Hand travel = total MA × rise = ${B} × ${f(L.rise)} m = ${B} m`];
+  if (topic === 'cable') return L.type === 'jack' ? ['A screw jack uses no cable.'] : [`Cable = ropes × distance the load moves = ${L.ropes} × ${L.type === 'ramp' ? f(L.m.L) + ' m' : L.type === 'crane' ? f(L.rise) + ' m' : B} = ${B} m`];
+  return [`Work = load × height gained = ${n0(L.load)} × ${f(L.rise)} m = ${B} J`];
+}
+function glMountHints(host) {
+  if (!host) return;
+  host.innerHTML = `<details class="clue glhint" id="glHint"><summary>💡 Need a hint?</summary><div class="gl"><p class="glnote" id="glhCost"></p>
+    <div class="row glchips" role="group" aria-label="What do you need to find?">${GLH_TOPICS.map(t => `<button type="button" class="ghost sm glchip" data-gh="t:${t[0]}">${t[1]}</button>`).join('')}</div><div id="glhBody"></div></div></details>`;
+  host.addEventListener('click', e => {
+    const b = e.target.closest('[data-gh]'); if (!b) return; const [a, v] = b.dataset.gh.split(':');
+    if (a === 't') GLH.topic = v; else if (a === 's1') glhSpend('t1:' + GLH.topic); else if (a === 's2') glhSpend('t2:' + GLH.topic); else if (a === 's3') glhSpend('t3:' + GLH.topic);
+    glhPaint();
+  });
+  host.addEventListener('change', e => { if (e.target.id === 'glhLeg') { GLH.leg = e.target.value; glhPaint(); } });
+  const prev = GLB.onChange; GLB.onChange = () => { if (prev) prev(); if ($('#glHint') && $('#glHint').open) glhPaint(); };
+  glhPaint();
+}
+function glhPaint() {
+  const body = $('#glhBody'); if (!body) return; const st = glState(), n = st.hints || 0, seen = glhSeen(), t = GLH.topic;
+  const cost = n ? 'costs 1 point' : 'is free';
+  $('#glhCost').innerHTML = `Pick what you need to find. Opening a hint is spent: the first one is free, then each new one costs 1 point (you have used <b>${n}</b>). Reading one you have already opened is free.`;
+  document.querySelectorAll('#glHint .glchip').forEach(b => b.classList.toggle('on', b.dataset.gh === 't:' + t));
+  if (!t) { body.innerHTML = ''; return; }
+  const ask = (a, txt) => `<div class="row"><button type="button" class="go sm" data-gh="${a}:">${txt} <small>(${cost})</small></button></div>`;
+  let h = '';
+  if (!seen['t1:' + t]) h = ask('s1', 'Show the hint');
+  else {
+    h += `<ul class="gl">${GLH_1[t].map(x => `<li>${x}</li>`).join('')}</ul>`;
+    if (!seen['t2:' + t]) h += (t === 'weight' || glhOptions(t).length) ? ask('s2', 'Show it with a number or machine I have') : '<p class="glnote">Place a machine on the board first. Then you can ask for a hint that uses your own numbers.</p>';
+    else {
+      const opts = glhOptions(t); if (opts.length && !opts.some(o => o[0] === GLH.leg)) GLH.leg = opts[0][0];
+      h += opts.length || t === 'weight' ? `${t === 'weight' ? '' : `<label>Which one? <select id="glhLeg" aria-label="Which machine or leg">${opts.map(o => `<option value="${o[0]}"${o[0] === GLH.leg ? ' selected' : ''}>${o[1]}</option>`).join('')}</select></label>`}<ul class="gl glplug">${glhNumbers(t, GLH.leg).map(x => `<li>${x}</li>`).join('')}</ul>` : '<p>Place a machine on the board first, then I can use your numbers.</p>';
+    }
+    if (!seen['t3:' + t]) h += ask('s3', 'Show a worked example (last resort)'); else h += `<p class="glwlive">${GLH_3[t]}</p>`;
+  }
+  body.innerHTML = h;
+}
+
+/* ===== Part 5 worksheet page 1: "My Rescue" (best run's screenshot, result, a row per leg, totals, working) =====
+   Student copy: from chal.c6e.gl.bestRun (snap, sum from glSummary, pred.working) plus runs and hints.
+   Blank template: an empty frame and empty boxes. Answer key: the brief's top route (two 24 m ramps, 4 ropes, winch x7, lever on the boulder, crest blasted). */
+const GL_KEY_RIG = (() => {
+  const parts = [{ id: 'bl', type: 'lever', role: 'boulder', x: 19, arm: 1, rise: 0.5, dir: 1 }, { id: 'rA', type: 'ramp', x1: 16, y1: 0, L: 24, rise: 6 }, { id: 'rB', type: 'ramp', x1: 40.76, y1: 6, L: 24, rise: 6 }, { id: 'd1', type: 'dyn', big: true, x: 68 }], cables = [];
+  ['rA', 'rB'].forEach(m => { parts.push({ id: m + 'b', type: 'block', ropes: 4 }, { id: m + 'w', type: 'winch', ratio: 7 }); cables.push({ a: m, b: m + 'b' }, { a: m + 'b', b: m + 'w' }); });
+  return { parts, cables };
+})();
+let GL_KEY_CACHE = null;
+function glKey() {
+  if (!GL_KEY_CACHE) { const res = glEvaluate(GL_KEY_RIG, { hints: 0 }); GL_KEY_CACHE = { sum: glSummary(res), snap: glSnapURL(GL_KEY_RIG, 'Example route: two ramps, a lever and a blasted crest') }; }
+  return GL_KEY_CACHE;
+}
+function myRescueHTML(mode) {
+  const stu = mode === 'student', key = mode === 'key', gl = (dbGet('chal.c6e', {}).gl) || {}, br = gl.bestRun;
+  const K = key ? glKey() : null, S = key ? K.sum : stu && br ? br.sum : null, snap = key ? K.snap : stu && br && br.snap ? br.snap : '';
+  const W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x, f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
+  const frame = snap ? `<div class="rsnap"><img src="${snap}" alt="${key ? 'An example rescue route' : 'My best rescue route'}"></div>` : `<div class="rsnap empty"><span>${stu ? 'Press Run Rescue in the sim and a picture of your best route appears here.' : 'A picture of the best rescue route goes here'}</span></div>`;
+  const E = S ? GL_END[S.ending] : null;
+  const stamp = S ? `<div class="rstamp">Result: ${W('<b>' + esc(E[0]) + '</b>')} &nbsp; Score: ${S.score != null ? W('<b>' + S.score + ' of 10</b>') : W('<b>not yet</b>')} <small>(best run; the rescue is not marked)</small></div>` : '<div class="rstamp">Result: ____________ &nbsp; Score: ____ of 10 <small>(best run; the rescue is not marked)</small></div>';
+  const rows = S ? S.legs.map((l, i) => `<tr><td>${i + 1}</td><td>${W(esc(l.name))}</td><td>${W(f1(l.rise) + ' m')}</td><td>${W(f1(l.ma))}</td><td>${W(f1(l.pull) + ' N')}</td></tr>`).join('') : [1, 2, 3, 4].map(i => `<tr><td>${i}</td><td></td><td></td><td></td><td></td></tr>`).join('');
+  const hints = key ? 0 : gl.hints || 0, tries = key ? 1 : gl.runs || 0;
+  const tot = [['Hand travel', S && n0(S.hand) + ' m'], ['Crystals spent', S && String(S.cost)], ['Final crest height', S && f1(S.crest) + ' m'], ['Total work', S && n0(S.work) + ' J'], ['Ship damage', S && f1(S.dmg.total) + '%'], ['Hints used', S && String(hints)], ['Tries', S && String(tries)]];
+  const work = key ? 'Leg 1: ramp MA = 24 ÷ 6 = 4. Total MA = 4 × 4 ropes × 7 = 112. Pull = 6,300 ÷ 112 = 56.3 N. Leg 2 is the same, so the hardest pull is 56.3 N (under 60 N, no thruster damage). Hand travel = 112 × 6 × 2 legs = 1,344 m. Work = 6,300 × 12 = 75,600 J (the crest was blasted from 15 m to 12 m).' : stu && S ? ((br.pred && br.pred.working) || gl.draftWork || '') : '';
+  return `<div class="rescue"><h2>My Rescue: Operation Gummy Lift</h2>${frame}${stamp}
+    <table class="rtab"><tr><th>Leg</th><th>Machines</th><th>Rise</th><th>Total MA</th><th>Pull</th></tr>${rows}</table>
+    <table class="rtot"><tr>${tot.map(t => `<th>${t[0]}</th>`).join('')}</tr><tr>${tot.map(t => `<td>${t[1] ? W(esc(t[1])) : ''}</td>`).join('')}</tr></table>
+    <div class="rwork"><b>My working</b><div class="box" style="white-space:pre-wrap">${work ? W(esc(work)) : ''}</div></div>
+    <p class="note">${key ? 'This is one example route. Many routes can score well, so check a student\'s numbers against their own table. The rescue is a Challenge, so it is reported here and not marked. The reflection and the Check questions are marked.' : stu ? 'These numbers come from your best run in the sim. The rescue is a Challenge, so it is reported here and not marked.' : 'Students\' best run fills this page. The rescue is a Challenge, so it is reported here and not marked.'}</p></div>`;
+}
+
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
 CHDATA.c1.review = [
   { id: 'r1', obj: ['Ai'], type: 'match', p: 'Match each force to what causes it.', rows: [['Weight', 'The Earth\'s gravity pulling on an object'], ['Normal force', 'A surface pushing back on an object resting on it'], ['Friction', 'Two surfaces rubbing or trying to slide past each other'], ['Tension', 'A stretched rope or string pulling'], ['Air resistance', 'Air pushing against something moving through it']] },
@@ -8592,10 +9586,10 @@ const SECTIONS = [
     goal: 'Describe a compound machine as two or more simple machines working together; find the total mechanical advantage by multiplying; work out the effort and the hand travel for a compound machine; build a machine that meets limits on effort, cable and hand travel.',
     vocab: ['compound machine', 'simple machine', 'mechanical advantage', 'winch', 'pulley'] },
   { id: 'c6e', ch: 'c6', n: 6, title: 'Rescue Captain Smooshy!', part: 'Part 5', stamp: 'Smooshy Saver',
-    blurb: 'Land on Glimmer-9 and use everything you know to free the Gumdrop: lever off the boulder, jack the ship level, then haul it out of the crater.',
-    steps: ['v1'], challenge: ['sm1', 'sm2', 'sm3'], review: ['c6r23', 'c6r24', 'c6r25', 'c6r26'], needs: 'c6d',
-    chalInfo: { title: 'Operation Gummy Lift', intro: 'Operation Gummy Lift is go! Three stages stand between Smooshy and home. Plan each one with the numbers, then let Smooshy try it. Every objective you meet scores a point, and you can try each stage as often as you like.' },
-    goal: 'Use weight, mechanical advantage, effort, work and compound machines to plan a three-stage rescue; predict the effort before each try; explain why a bigger mechanical advantage never reduces the work; weigh up two real-world plans for the rescue.',
+    blurb: 'Land on Glimmer-9 and design a rescue route: free the boulder, build ramps, platforms and machines, blast the crest, and watch Smooshy lift the Gumdrop into the Big Jelly\'s tractor beam.',
+    steps: ['v1'], challenge: ['gl'], review: ['c6r23', 'c6r24', 'c6r25', 'c6r26', 'c6r32'], needs: 'c6d',
+    chalInfo: { title: 'Operation Gummy Lift', intro: 'Design one rescue route that gets the Gumdrop out of the crater and into the Big Jelly\'s tractor beam. Build it, press Run Rescue, then make it even better. Your best run counts, and every run you try helps you move on.' },
+    goal: 'Use weight, mechanical advantage, effort, work and compound machines to design a rescue route of machines; predict the effort before each try; explain why a bigger mechanical advantage never reduces the work; weigh up two real-world plans for the rescue.',
     vocab: ['weight', 'gravitational field strength', 'mechanical advantage', 'compound machine', 'work'] },
   { id: 'c6f', ch: 'c6', n: 6, title: 'Real machines waste energy', part: 'Extension', stamp: 'Colony Engineer', optional: true,
     blurb: 'Switch from perfect to real machines: friction turns work into heat, so find the efficiency of each machine and build Gummy Base One within an energy budget.',
@@ -8617,7 +9611,7 @@ SECTIONS.forEach(sec => {
 });
 /* estimated minutes for each part of a section */
 function secMins(id) {
-  const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);
+  const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.mins || (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3)), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);
   return { learn: Math.round(learn), challenge: Math.round(chal), review: Math.round(rev), total: Math.round(learn + chal + rev) };
 }
 const secOf = id => SECTIONS.find(s => s.id === id) || (typeof BT_SEC !== 'undefined' ? BT_SEC[id] : undefined);
@@ -8671,7 +9665,7 @@ function answerKeyText(chId) {
     const m = plain(markItem(q, i)), mm = m.match(/^Q\d+ \(([^)]*)\): ([\s\S]*)$/), tag = strandsTag(q);
     out.push(mm ? `Q${i + 1} ${QLABEL[q.type]}, ${mm[1]}${tag ? ' [' + tag + ']' : ''}: ${mm[2]}` : m);
   });
-  if (chId === 'c6e') out.push('Rescue report (not marked): The worksheet has a Rescue report (a table of the student\'s three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.');
+  if (chId === 'c6e') out.push('My Rescue page (not marked): Page 1 of the worksheet has a My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg (machines, rise, total MA, pull) and totals for hand travel, crystals, crest height, work, damage, hints and tries. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection on their own route: check the numbers they quote against the My Rescue table.');
   return out.join('\n');
 }
 
@@ -8722,6 +9716,8 @@ const WS_CSS = `
 .ws{font-family:Atkinson Hyperlegible,Segoe UI,system-ui,sans-serif;color:#13212a;background:#fff;font-size:11pt;line-height:1.4;max-width:190mm;margin:0 auto}
 .ws *{box-sizing:border-box}
 .ws .page{page-break-after:always;padding:2mm 0}
+.ws .rsnap{border:1.5px solid #888;border-radius:6px;overflow:hidden;margin:6px 0}.ws .rsnap img{display:block;width:100%;height:auto}.ws .rsnap.empty{height:62mm;display:flex;align-items:center;justify-content:center;border:2px dashed #999;color:#777;text-align:center;padding:8px}
+.ws .rstamp{margin:6px 0;font-size:12pt}.ws .rtab td,.ws .rtab th,.ws .rtot td,.ws .rtot th{padding:4px 6px}.ws .rtab tr td:first-child{width:8%}.ws .rtot td{height:9mm}.ws .rwork .box{min-height:26mm;border:1px solid #888;border-radius:6px;padding:6px;margin-top:4px}
 .ws .page:last-child{page-break-after:auto}
 .ws .hd{display:flex;justify-content:space-between;align-items:stretch;border-radius:6px;overflow:hidden;margin-bottom:6px}
 .ws .hd .l{background:#13212a;color:#fff;padding:8px 14px;flex:1}.ws .hd .l b{font-family:Saira Condensed,Arial Narrow,sans-serif;font-size:20pt;letter-spacing:2px;color:#f0bf4c}
@@ -8833,7 +9829,8 @@ function buildWorksheet(chId, mode) {
   const ch = secOf(chId), R = CHDATA[chId].review, st = dbGet('review.' + chId, {});
   const partA = R.filter(q => !['fbd', 'explain', 'sketch'].includes(q.type)), partB = R.filter(q => ['fbd', 'explain', 'sketch'].includes(q.type));
   const num = q => R.indexOf(q);
-  let h1 = `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}${chId === 'c6e' ? rescueReportHTML(mode) : ''}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
+  const qs = L => L.map(q => wsQuestion(q, num(q), mode, st[q.id])).join(''), partBn = partB.filter(q => !q.refl), refl = partB.filter(q => q.refl);
+  let h1 = chId === 'c6e' ? `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${myRescueHTML(mode)}</div><div class="page">${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${qs(partA)}${partBn.length ? `<h2>Part B: Draw and explain</h2>${qs(partBn)}` : ''}</div>${refl.length ? `<div class="page"><h2>Part C: My rescue reflection</h2>${qs(refl)}</div>` : ''}` : `<div class="page">${wsHeader(ch, `${ch.part} worksheet`, mode)}${stepsSummary(chId, mode)}<h2>Part A: Check your understanding</h2>${partA.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}${partB.length ? `<h2>Part B: Draw and explain</h2>${partB.map(q => wsQuestion(q, num(q), mode, st[q.id])).join('')}` : ''}</div>`;
   if (mode === 'student') h1 += feedbackPage(chId);
   return `<div class="ws">${h1}</div>`;
 }
@@ -8870,13 +9867,13 @@ function markItem(q, i) {
     case 'spot': return `Q${n} (${m} mark${m > 1 ? 's, 1 per moment' : ''}): ` + q.targets.map((t, i) => `${plain(t.ask || 'The marked moment.')} Accept ${fmt(t.t[0], 1)} to ${fmt(t.t[1], 1)} s.`).join(' ');
     case 'sketch': return `Q${n} (${m} marks, 1 per check): ` + q.checks.map(c => c[0]).join('; ') + `. ${q.look || ''} The key shows the right graph.`;
     case 'build': return `Build marks (${m} mark${m > 1 ? 's' : ''}): ${q.p}. ${q.how}`;
-    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}`;
+    case 'explain': return `Q${n} (${m} marks, 1 per point): ${q.words ? `The question gives the words to use (${q.words.join(', ')}); each point is about using one of them correctly. ` : ''}${q.check.map(c => '• ' + c).join(' ')} Model answer: ${q.model}${q.mnote ? ' ' + q.mnote : ''}`;
   }
   return '';
 }
 function schemeHTML(chId) {
   const ch = secOf(chId), R = CHDATA[chId].review, total = R.reduce((a, q) => a + qMarks(q), 0);
-  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>The worksheet has a Rescue report (a table of the student\'s three rescue stages). It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
+  return `<div class="hd"><div class="l"><b>FORCE HQ</b></div><div class="r"><div style="font-size:14pt;font-weight:800">Marking scheme</div><div style="font-size:10pt">Chapter ${ch.n} ${ch.part}: ${ch.title} · teacher only</div></div></div>${sheetStrandHTML(chId)}${markingInstructions(`Chapter ${ch.n} ${ch.part}: ${ch.title}`, total, R.some(q => q.sure))}<h2>Mark scheme</h2>${R.map((q, i) => `<p>${markItem(q, i)} ${strandTagHTML(q)}</p>`).join('')}${chId === 'c6e' ? '<p>Page 1 of the worksheet is the My Rescue page: a picture of the student\'s best rescue route, the result and score, a row for each leg and the totals. It is not marked, because Challenges are not marked, but you may mention it in a strength or the next step. The last question is a reflection: check the numbers a student quotes against their My Rescue table.</p>' : ''}<p><b>Total: ${total} marks.</b></p>`;
 }
 function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [...d.querySelectorAll('h2,p,li')].map(e => (e.tagName === 'LI' ? '• ' : e.tagName === 'H2' ? '\n' : '') + e.textContent).join('\n'); }
 
@@ -9092,6 +10089,7 @@ function teacherPrompt(T1, mins, omins) {
   L.push(`Please create a Toddle task for my ${T1.cls || 'Grade 7/8'} science class using Force HQ, an interactive forces simulation (an HTML file I will attach).`);
   const btn = b => `Build task ${b.id.slice(2)} (${b.title})`; L.push(''); L.push(`Task title: Force HQ: ${[...(req.length ? req.map(nm) : opt.map(nm)), ...bts.map(id => btn(BT_SEC[id]))].join(', ')}`);
   L.push(`Estimated time: approx. ${mins || omins} minutes, ${where}.${opt.length && req.length ? ` There is also an optional extra section of approx. ${omins} minutes for students who want to go further.` : ''}`);
+  if ((typeof all !== 'undefined' ? all : []).some(c => c.id === 'c6e')) L.push('Part 5 (Operation Gummy Lift) works best as two sessions of about 30 minutes, or one homework split over two days. Session 1: the landing questions, a short lever warm-up, then a first build and Run Rescue. Session 2: improve the route, then the reflection and the Check. The sim saves the route after every change, so students reopen the same file and carry on where they stopped.');
   L.push(''); L.push('About the resource: Force HQ is a self-contained simulation. Students open the HTML file in a browser, type their name and class, then work through guided steps in the Force Arenas. Every section makes its own worksheet PDF. Progress saves in the browser, so students should use the same device and browser each time.');
   if (T1.msg) { L.push(''); L.push(`Message from the teacher: ${T1.msg}`); }
   const steps = (c, start) => { let n = start; const out = [`${n++}. On the home page, find Chapter ${c.n} and press "Start ${startWord(c.part)}".`];
