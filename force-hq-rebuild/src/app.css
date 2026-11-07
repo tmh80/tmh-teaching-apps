@@ -930,3 +930,5 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .howexp .example{background:var(--chip);border-radius:8px;padding:6px 10px;margin-top:6px}
 .stepask{border:2px solid var(--accent);border-radius:10px;padding:6px 12px;background:var(--accent-soft);margin:6px 0}.stepask .lbl{color:var(--accent)}.stepask p{margin:2px 0 0;font-weight:700}.stepfin{font-weight:700;color:var(--good);margin:4px 0}
 .cn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#c94a34;color:#fff;font-size:13px;font-weight:800;flex:none}
+.vtshapes{display:grid;grid-template-columns:1fr 1fr;gap:6px}.vtshapes figure{margin:0}.vtshapes figcaption{font-size:13px}.vtshapes .qfig{margin:0}
+.unithint{margin:2px 0 0}

@@ -83,7 +83,7 @@ CHDATA.c4 = {
 
     { id: 'f5', title: 'Mystery push-offs', info: [], floors: ['air'],
       cards: [
-        { html: `<p>Time to use everything. There are <b>four puzzles</b>. For each one:</p><ol class="steps"><li><b>Read the question</b> in the Do this list.</li><li><b>Work it out</b> with the calculator (velocity = force ÷ mass). Show your working in your Journal.</li><li><b>Type your answer</b> and its unit in the box under the puzzle. It is copied into Your turn for you.</li><li><b>Check it</b> in the Space Dome. The velocity you are working out stays hidden until you have answered.</li></ol>` }],
+        { html: `<p>Time to use everything. There are <b>four puzzles</b>. For each one:</p><ol class="steps"><li><b>Read the question</b> in the Do this list.</li><li><b>Work it out</b> with the calculator (velocity = force ÷ mass). Show your working in your Journal.</li><li><b>Type your answer</b> with its unit, like 90 N or 2.5 m/s², in the box under the puzzle. It is copied into Your turn for you.</li><li><b>Check it</b> in the Space Dome. The velocity you are working out stays hidden until you have answered.</li></ol>` }],
       setup() { space(250, 75, 150); }, adds: ['pushf', 'astro', 'mass'], hide: SPACE_HIDE_MAIN.concat(['thrust']), sides: [], pullers: [], idle: 'Set up the puzzle, then press Push off!',
       tasks: [
         ['', () => hasAns('q1'), { q: 'q1' }], ['<b>Check puzzle 1</b> in the Space Dome.', () => sHas(150, 250, 75)],

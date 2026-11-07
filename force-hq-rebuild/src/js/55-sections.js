@@ -103,6 +103,9 @@ SECTIONS.forEach(sec => {
     goal: sec.goal, vocab: sec.vocab
   };
 });
+/* Learn questions share ids (q1, q2…) from step to step, so they all shuffled alike and the right answer kept landing on the same letter.
+   Seeding each with its step id gives every step its own order. Saved answers store the original option number, so nothing saved moves. */
+['c1', 'c2', 'c3', 'c4', 'c5', 'c6'].forEach(c => ((CHDATA[c] && CHDATA[c].steps) || []).forEach(st => (st.qs || []).forEach(q => { if (q.opts && q.seed == null && !q.noShuffle) q.seed = st.id; })));
 /* estimated minutes for each part of a section */
 function secMins(id) {
   const d = CHDATA[id], learn = d.steps.reduce((a, s) => a + (STEPMIN[s.id] || 2), 0), chal = d.challenge ? d.challenge.missions.reduce((a, m) => a + (m.mins || (m.kind === 'build' || m.kind === 'rescue' ? 4 : 3)), 0) : 0, rev = d.review.reduce((a, q) => a + (QMIN[q.type] || 1), 0);

@@ -39,7 +39,7 @@ function renderOnPage() {
 }
 
 function setStep(i) {
-  leaveIntro();
+  leaveIntro(); gateOn(false);
   const chd = CHDATA[CH.id]; GI = clamp(i, 0, chd.steps.length - 1); dbSet('learnAt.' + CH.id, GI);
   const st = chd.steps[GI]; LASTSIG = ''; if (typeof renderFormulas === 'function' && $('#calcForm') && !$('#calcForm').hidden) renderFormulas();   // keep the glowing formulas in step with the chapter
   // arena state

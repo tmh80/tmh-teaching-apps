@@ -23,6 +23,15 @@ function vtSVG(lines, o = {}) {
   if (o.tap) g += `<g class="tapg"></g><rect class="tapzone" x="${x0}" y="${y0}" width="${x1 - x0}" height="${y1 - y0}" fill="transparent" style="cursor:crosshair"/>`;
   return `<div class="qfig noglos"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${o.alt || 'A velocity–time graph'}" ${o.tap ? `data-x0="${x0}" data-x1="${x1}" data-y0="${y0}" data-y1="${y1}" data-w="${W}" data-h="${H}" data-tmax="${tMax}" ` : ''}style="width:100%;max-width:${o.maxW || 440}px;display:block;background:#fff;border-radius:8px${o.tap ? ';touch-action:manipulation' : ''}">${g}</svg></div>`;
 }
+/* Skills audit gaps A and B: how to read a velocity–time graph, taught once with a worked example (c2f i3), then shown as a short reminder (c2x x1, c5f d4) */
+function vtGuideSVG() {   // reading the velocity at 4 s, with the guide lines drawn on
+  const g = '<path d="M286 176V53H46" fill="none" stroke="#e3a51c" stroke-width="3" stroke-dasharray="7 4"/><circle cx="286" cy="53" r="5" fill="#e3a51c"/><text x="292" y="168" font-size="12" font-weight="800" fill="#9a5d1f">1 Find 4 s</text><text x="292" y="116" font-size="12" font-weight="800" fill="#9a5d1f">2 Go up</text><text x="58" y="45" font-size="12" font-weight="800" fill="#9a5d1f">3 Go across: 1.5 m/s</text>';
+  return vtSVG([{ pts: [[0, 0], [1, 0], [2, 1.5], [6, 1.5]] }], { tMax: 6, vMax: 2, vStep: 0.5, maxW: 330, alt: 'A velocity–time graph with guide lines to read the velocity at 4 seconds' }).replace('</svg>', g + '</svg>');
+}
+const VT_SHAPES = [['Flat line above 0', 'steady velocity', [[0, 1], [4, 1]]], ['Line sloping up', 'speeding up', [[0, 0], [4, 2]]], ['Line sloping down', 'slowing down', [[0, 2], [4, 0]]], ['Flat line along 0', 'not moving', [[0, 0], [4, 0]]]];
+const vtShapesFull = () => `<p><b>What the shape of the line tells you.</b></p><div class="vtshapes">${VT_SHAPES.map(([a, b, pts]) => `<figure>${vtSVG([{ pts }], { tMax: 4, vMax: 2, vStep: 1, maxW: 170, alt: a })}<figcaption><b>${a}:</b> ${b}</figcaption></figure>`).join('')}</div>`;
+const vtShapesCard = () => ({ get html() { return teachHTML('vt-shapes', vtShapesFull, () => '<p><b>Remember the shapes.</b> Flat line above 0: steady velocity. Line sloping up: speeding up. Line sloping down: slowing down. Flat line along 0: not moving.</p>'); } });
+const vtReadCard = () => ({ get html() { return teachHTML('vt-read', () => `<p><b>Reading a value off a graph.</b> Worked example: what is the crate's velocity at 4 s?</p>${vtGuideSVG()}<ol><li>Find <b>4 s</b> on the bottom axis.</li><li>Go straight <b>up</b> to the line.</li><li>Then go straight <b>across</b> to the velocity axis: <b>1.5 m/s</b>.</li></ol>`, () => '<p><b>Reading a value off a graph.</b> Find the time on the bottom axis, go straight up to the line, then straight across to the velocity axis.</p>'); } });
 /* record what the student measured, per crate mass, so questions can check their own runs */
 function ch2Record() {
   const F = S.flags; F.sp = F.sp || {}; F.sd = F.sd || {}; F.st = F.st || {};
@@ -69,7 +78,7 @@ CHDATA.c2 = {
         { id: 'q4', type: 'num', p: 'A 96 kg crate has 4 times the mass of the 24 kg crate. The same push gave the 24 kg crate 3.13 m/s. What velocity will it give the 96 kg crate?', unit: 'm/s', ans: 0.78, tol: 0.02, ok: 'Brilliant! 4 times the mass gives a quarter of the velocity: 3.13 ÷ 4 = 0.78 m/s.', hints: ['4 times the mass gives a quarter of the velocity.', 'Type 3.13 ÷ 4 into the calculator.'] }] },
 
     { id: 'i3', title: 'The velocity–time graph', info: ['vt'], floors: ['air'],
-      cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's velocity as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the velocity from the graph instead.</p>` }],
+      cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's velocity as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the velocity from the graph instead.</p>` }, vtReadCard(), vtShapesCard()],
       setup() { S.floor = 'air'; S.mass = 61; }, adds: ['vt'], hide: ['readV'], sides: [], pullers: [], idle: 'Give the crate a push',
       tick() { ch2Record(); },
       tasks: [['Set the crate to <b>61 kg</b> and give it a push. Watch the graph as it moves.', () => sp(61) != null]],
@@ -114,7 +123,7 @@ CHDATA.c2 = {
     /* ---------- Extension ---------- */
     { id: 'x1', title: 'Reading velocity–time graphs', floors: ['air'],
       cards: [
-        { html: `<p>Welcome to the Chapter 2 Extension! Velocity–time graphs tell the whole story of a journey. Each shape of line means something different.</p><div class="example">Flat line: steady velocity. Line sloping up: speeding up. Line sloping down: slowing down. Line along 0: not moving.</div>` },
+        { get html() { return `<p>Welcome to the Chapter 2 Extension! Velocity–time graphs tell the whole story of a journey. Each shape of line means something different.</p>` + teachHTML('vt-shapes', vtShapesFull, () => '<div class="example">Flat line: steady velocity. Line sloping up: speeding up. Line sloping down: slowing down. Line along 0: not moving.</div>'); } },
         { html: `<p>This time the launch velocity is a mystery, so you'll read it from the graph. The free-body diagram is back too, so you can see which forces act at each moment.</p>` }],
       setup() { course(55, 1.8, 30); }, adds: ['launch', 'readD', 'vt', 'fbd', 'readW', 'readN'], hide: ['shove', 'readV'], sides: [], pullers: [], idle: 'Press Launch the crate', mysteryLaunch: true,
       tick() { ch2Record(); },

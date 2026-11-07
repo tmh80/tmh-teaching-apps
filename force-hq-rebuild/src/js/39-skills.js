@@ -35,6 +35,15 @@ function showIntro() {
 function leaveIntro() { if (!INTRO) return; INTRO = false; dbSet('icanSeen.' + CH.id, true); parkIntro(); placeLab($('#learnHost')); LAB.mode = 'guided'; renderPeek(); }
 function renderPeek() { const el = $('#icanPeek'); if (!el) return; el.innerHTML = CH && hasICAN(CH.id) && !INTRO ? `<details class="ican-peek"><summary>My I can statements</summary>${icanListHTML(CH.id)}</details>` : ''; }
 
+/* a teach card as a Learn card: the full worked example the first time a student meets it, then a short reminder with the example one tap away.
+   teachSeen.<id> remembers the step where it was first shown, so re-reading the cards in that same step still shows the full example. */
+function teachHTML(tid, full, reminder) {
+  if (!CH || !CHDATA[CH.id] || !CHDATA[CH.id].steps[GI] || VIEW !== 'vChapter') return full();   // not playing a step (the inventory tool, tests): just the full card
+  const k = 'teachSeen.' + tid, at = CH.id + '.' + CHDATA[CH.id].steps[GI].id, seen = dbGet(k, null);
+  if (!seen) { dbSet(k, at); return full(); }
+  return seen === at ? full() : reminder() + `<details class="teacheg"><summary>Show the worked example</summary>${full()}</details>`;
+}
+
 /* ---------- read-first OK: the rest of a step stays blurred until the student presses OK on its first card ---------- */
 const readKey = () => 'readOK.' + CH.id + '.' + CHDATA[CH.id].steps[GI].id;
 const readNeeded = () => !FAST && !!CH && !stepDone(CH.id, GI) && !dbGet(readKey(), false);
