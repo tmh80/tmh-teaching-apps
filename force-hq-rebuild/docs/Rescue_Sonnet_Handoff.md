@@ -14,7 +14,7 @@ Updated after each Opus stage, so it is always current on branch `rescue-rebuild
 | Stage | Status |
 |---|---|
 | 1. Rescue maths and height-profile ground | Done |
-| 2. Crater scene and builder | Not started |
+| 2. Crater scene and builder | Done |
 | 3. Run Rescue | Not started |
 | 4. Plumbing (autosave, best run, `rigSnapshot()`) | Not started |
 | 4b. Story half of stage 4 | Sonnet |
@@ -40,6 +40,16 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 - **Each blast within 6 m of the Gumdrop adds 15%**; a blast reaching the boulder clears it.
 - **Boulder:** a lever or jack with `role:'boulder'`, a cable from `'boulder'` to a winch chain, or a blast. Cleared only if Smooshy's pull on it is 60 N or less (252 N ÷ MA).
 - **Limits Opus set:** crane rise 8 m, platform height 8 m, ramp lengths and rises meant to snap to 0.5 m in the builder.
+
+## Stage 2: the scene and builder
+
+- `src/js/4g-glscene.js` draws the crater (world in metres, `GLV` maps to the canvas with zoom and pan; uniform scale so angles are honest), the Big Jelly, the Gumdrop (`drawGumdropInside`), the boulder, machines, platforms, cables, add-ons, dynamite with a dashed blast preview, the glowing handover box and the ruler. `glDrawWorld(c, o)` takes a `run` object for stage 3 extras.
+- `src/js/4h-glbuild.js` is the builder: tray (tap then tap the crater, or drag straight in), drag handles (ramp body moves the foot, the white top handle stretches it, snapping to 0.5 m and clamped to 30 m and slope 0.5 with a hint line; platform top edge sets height), stretchy cables from each part's ◉ dot, tap-a-part draggable menus with only that part's actions, a ruler that snaps to the ground and platform tops, zoom and pan (phones start zoomed in on the Gumdrop), undo and Clear all, a live crystal counter with a Receipt.
+- Add-ons clip on automatically when dropped near a machine's cable dot (or the end of its chain), and ride along when the machine moves. A lever or jack dropped by the boulder snaps onto it (`role:'boulder'`).
+- The Part 5 Challenge is now one mission `gl` (max 10) in `CHDATA.c6.challenge`, section `c6e` has `challenge: ['gl']`, and `renderRescueCourse` calls `renderGummyLift` (4h). The old sm1–sm3 data is gone. **`rescueReportHTML`, `RR_KEY` and `openEnding` in `4d-rescue.js` still describe the old three stages**: stage 6 replaces them.
+- Live pull, MA and hand travel stay hidden while building; crystals are shown. Machine faults (too steep, through the ground, top in mid-air, lever MA over 9 and so on) turn the part red and show a plain sentence in its menu.
+- Fixed in passing: the Part switcher at the top of every chapter page now wraps, so phones no longer scroll sideways.
+- Test: `python3 tests/play_rescue.py` builds the top route with real mouse moves (and a touch tap on a phone).
 
 ## Still to do (Sonnet)
 

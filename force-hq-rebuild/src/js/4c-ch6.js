@@ -469,44 +469,9 @@ CHDATA.c6.challenge = {
   ]
 };
 
-/* ---------- Part 5 Challenge: Operation Gummy Lift (sm1 to sm3), judged by renderRescueCourse in 45-challenge.js ---------- */
-{
-  const tick = ok => ok ? '✓' : '✗', f1 = v => fmt(v, 1);
-  const predOk = (r, v, tol, unit) => r.pred != null && Math.abs(r.pred - v) <= tol + 1e-9;
-  const predSay = (r, v, tol, unit, noun) => r.pred == null ? 'You did not type a prediction. ✗' : `Your prediction: ${fmt(r.pred, 1)}${unit}. ${noun}: ${f1(v)}${unit}. Target: within ${tol}${unit}. ${tick(predOk(r, v, tol))}`;
-  const pushOk = r => !r.capped, pushSay = r => r.capped ? `Smooshy's push would need ${f1(r.need)} N. Target: 60 N or less. ✗` : `Smooshy's push: ${f1(r.E)} N. Target: 60 N or less. ✓`;
-  const planned = { planned: true, label: 'Planned: you typed a prediction', ok: r => r.pred != null, say: r => r.pred != null ? 'Planned ✓.' : 'No prediction typed. ✗' };
-  CHDATA.c6.challenge.missions.push(
-    { id: 'sm1', kind: 'rescue', title: 'Stage 1: Free the landing leg', max: 4,
-      setup: { mach: 'lever', allow: ['lever'], cls: 1, arm: 0.5, lift: 0.25, loads: { lever: WL.boulder }, maxTravel: 1.5, site: 'rescue', world: 'glim', lim: { arm: [0.2, 1.0] } }, show: ['wsctl', 'wspull'],
-      brief: 'A <b>60 kg</b> boulder is pinning the landing leg (g = 4.2 N/kg). Smooshy has a 2 m crowbar and a rock to use as a fulcrum. He can push down with <b>60 N at most</b>, and he can push his end down <b>1.5 m</b> before it hits the ground. The boulder must rise <b>0.25 m</b> to free the leg.',
-      goal: 'Move the fulcrum, type your prediction for the effort, then press Smooshy, try it!',
-      pred: { q: 'What effort will Smooshy need with your fulcrum position?', unit: 'N' },
-      objs: [planned, { label: 'Prediction within 1 N of the effort Smooshy needed', ok: r => predOk(r, r.need, 1), say: r => predSay(r, r.need, 1, ' N', 'Smooshy needed') }, { label: 'Smooshy\'s push is 60 N or less', ok: pushOk, say: pushSay },
-        { label: 'The boulder rises at least 0.25 m', ok: r => !r.capped && r.rise >= 0.25 - 1e-9, say: r => r.capped ? 'The boulder did not move. ✗' : `The boulder rose ${fmt(r.rise, 2)} m. Target: 0.25 m or more. ${tick(r.rise >= 0.25 - 1e-9)}` }],
-      desc: r => `the boulder ${fmt(r.la, 2)} m from the fulcrum`, win: 'The landing leg is free!',
-      clues: ['The boulder weighs 60 × 4.2 = 252 N, so the lever\'s mechanical advantage must be at least 252 ÷ 60 = 4.2.', 'But a big mechanical advantage means the boulder rises only a little: rise = 1.5 m ÷ mechanical advantage. For a 0.25 m rise, the mechanical advantage can be 6 at most.', 'Find a load arm that gives a mechanical advantage between 4.2 and 6. (Mechanical advantage = effort arm ÷ load arm, and effort arm = 2 − load arm.)'] },
-    { id: 'sm2', kind: 'rescue', title: 'Stage 2: Level the ship', max: 4,
-      setup: { mach: 'screw', allow: ['screw'], per: 120, pitch: 1.0, lift: 0.40, loads: { screw: WL.sunk }, site: 'rescue', world: 'glim' }, show: ['wsctl', 'wspull'],
-      brief: 'The Gumdrop\'s sunken side presses down with <b>3,780 N</b>. Smooshy must jack it up <b>40 cm</b>. He can push the handle with <b>60 N at most</b>, and after <b>50 turns</b> his gummy arms go floppy.',
-      goal: 'Choose how far the handle moves in one turn and the gap between threads, type your prediction, then press Smooshy, try it!',
-      pred: { q: 'What effort will Smooshy need on the jack handle?', unit: 'N' },
-      objs: [planned, { label: 'Prediction within 1 N of the effort Smooshy needed', ok: r => predOk(r, r.need, 1), say: r => predSay(r, r.need, 1, ' N', 'Smooshy needed') }, { label: 'Smooshy\'s push is 60 N or less', ok: pushOk, say: pushSay },
-        { label: '50 turns or fewer', ok: r => r.turns <= 50 + 1e-9, say: r => `Turns needed: ${fmt(r.turns, 0)}. Target: 50 or fewer. ${tick(r.turns <= 50 + 1e-9)}` }],
-      desc: r => `${fmt(r.per, 0)} cm per turn and a ${fmt(r.pitch, 1)} cm gap between threads`, win: 'The ship is level!',
-      clues: ['Turns = 40 cm ÷ the gap between threads. Which gaps need 50 turns or fewer?', 'Screw mechanical advantage = distance per turn ÷ gap between threads (use the same unit: 1.2 m = 120 cm).', 'With a 1.0 cm gap, which handle gets the effort to 60 N or less? Effort = 3,780 ÷ mechanical advantage.'] },
-    { id: 'sm3', kind: 'rescue', title: 'Stage 3: Haul out of the crater', max: 5,
-      setup: { mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', world: 'glim', bRoutes: [[0, 'Straight up (15 m)'], [30, 'Steep track (30 m)'], [45, 'Medium track (45 m)'], [75, 'Gentle track (75 m)']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
-      brief: 'Time for the big one! Haul the <b>6,300 N</b> Gumdrop <b>15 m</b> up and out of the crater. Smooshy can pull <b>60 N at most</b>. The winch drum holds <b>240 m of cable</b>, and Smooshy has oxygen for <b>2,400 m of hand travel</b> (about 40 minutes of turning). Choose a route, a pulley block and a winch.',
-      goal: 'Build your machine, type its total mechanical advantage, then press Smooshy, try it!',
-      pred: { q: 'What is the total mechanical advantage of your machine?', unit: '' },
-      objs: [{ label: 'Used a compound machine (two or more parts)', ok: r => r.parts >= 2, say: r => `Parts used: ${r.parts}. Target: 2 or more. ${tick(r.parts >= 2)}` }, { label: 'Total mechanical advantage typed correctly (within 0.5)', ok: r => predOk(r, r.ma, 0.5), say: r => predSay(r, r.ma, 0.5, '', 'The total mechanical advantage was') }, { label: 'Smooshy\'s pull is 60 N or less', ok: pushOk, say: pushSay },
-        { label: 'Cable 240 m or less', ok: r => r.cable <= 240 + 1e-9, say: r => r.cable <= 240 + 1e-9 ? `Cable used: ${fmt(r.cable, 0)} m. Target: 240 m or less. ✓` : `Not enough cable! You would need ${fmt(r.cable, 0)} m. Target: 240 m or less. ✗` },
-        { label: 'Hand travel 2,400 m or less', ok: r => r.dist <= 2400 + 1e-9, say: r => r.dist <= 2400 + 1e-9 ? `Hand travel: ${fmt(r.dist, 0)} m. Target: 2,400 m or less. ✓` : `Smooshy's oxygen would run out after 2,400 m of turning. You would need ${fmt(r.dist, 0)} m. ✗` }],
-      desc: r => `${r.br ? 'the ' + r.br + ' m track' : 'straight up'}, ${r.bn ? r.bn + ' ropes' : 'no block'}, ${r.bw ? 'winch ×' + r.bw : 'no winch'}`, win: 'The Gumdrop is out of the crater!',
-      clues: ['The mechanical advantage you need is 6,300 ÷ 60 = 105. Hand travel = mechanical advantage × 15 m, so the mechanical advantage can be 160 at most.', 'Cable = supporting ropes × route length. The gentle track (75 m) can only take 3 ropes.', 'Each track is a ramp: its mechanical advantage = length ÷ 15 m. The gentle track gives 5, the medium track 3. What must the pulley block and the winch multiply to?'] }
-  );
-}
+/* ---------- Part 5 Challenge: Operation Gummy Lift, one big build in two sessions (docs/Force_HQ_Rescue_Rebuild_Brief.md).
+   Built in 4h-glbuild.js, run in 4i-glrun.js, scored by glScore in 4f-gummylift.js. Best run counts; the score is out of 10. ---------- */
+CHDATA.c6.challenge.missions.push({ id: 'gl', kind: 'rescue', title: 'Operation Gummy Lift', max: 10 });
 
 /* ---------- Extension Challenge: Build Gummy Base One (gb1 to gb3). Real machines (efficiencies multiply) and an energy budget. ---------- */
 CHDATA.c6.challenge.missions.push(
