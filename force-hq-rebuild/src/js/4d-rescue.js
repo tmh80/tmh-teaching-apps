@@ -105,30 +105,6 @@ function openTransmission() {
   });
 }
 
-/* ---------- the ending: the Gumdrop rises out of the crater, the sugar discovery and the victory loop (script C6 and C7) ---------- */
-let ENDRAF = 0;
-function endScene(c, t, W, H) {
-  const sm = (a, b) => clamp((t - a) / (b - a), 0, 1), up = sstep(sm(0.3, 3.8)), rim = H * .5, base = H * .86;
-  drawCrater(c, W, H, { a: true, b: true, c: true, d: true, custom: (cc, w, h) => {
-    /* sugar crystals glitter on the rim */
-    cc.fillStyle = 'rgba(255,255,255,.95)'; [[.58, .5], [.66, .5], [.74, .5]].forEach(([x, y]) => { cc.beginPath(); cc.moveTo(w * x, h * y - 20); cc.lineTo(w * x + 7, h * y); cc.lineTo(w * x - 7, h * y); cc.closePath(); cc.fill(); });
-    if (t < 7.6) { const y = base + (rim - base) * up, tilt = .5 * (1 - up); drawGumdrop(cc, w * .5, y, .52, tilt); }
-    else { const k = sm(7.6, 10.4), a = k * Math.PI * 2, x = w * .5 + Math.sin(a) * w * .14, y = rim - 40 - (1 - Math.cos(a)) * 34 * 1.4;
-      cc.strokeStyle = 'rgba(120,200,255,.8)'; cc.lineWidth = 5; cc.lineCap = 'round'; cc.beginPath(); for (let i = 0; i <= 20; i++) { const b = Math.max(0, a - i * .06), bx = w * .5 + Math.sin(b) * w * .14, by = rim - 40 - (1 - Math.cos(b)) * 34 * 1.4; i ? cc.lineTo(bx, by) : cc.moveTo(bx, by); } cc.stroke();
-      drawGumdrop(cc, x, y, .4, Math.cos(a) * .3); }
-    if (t > 3.8) { const lick = t > 5.6 && t < 7.4; drawSmooshy(cc, w * (lick ? .64 : .24) + (lick ? 0 : Math.sin(t * 6) * 6), rim - 22, .34, t > 5.6 ? 'wave' : 'cheer', t); }
-  } });
-}
-const END_CAPS = [[0, 'The winch hums and the Gumdrop rises up the crater wall...'], [3.8, 'Smooshy does a happy wobble-dance!'], [5.6, 'He leans on a glittering crystal, licks it, and freezes: "Wait... these crystals are SUGAR!"'], [7.4, '"Gummies of the galaxy, I\'ve found us a new home!"'], [8.6, 'The Gumdrop does a victory loop with a blue exhaust trail.']];
-function openEnding(metAll, again) {
-  const card = `<h3>🎉 Mission complete!</h3><p>${metAll ? 'You planned all three stages with the numbers, and Smooshy is out of the crater. Brilliant rescue, Engineer!' : 'With your plan, Smooshy got the Gumdrop part of the way up. Force HQ\'s backup team used your numbers to finish the job. Want to perfect it? You can try the rescue again in Explore.'}</p><p>The Gumdrop is safe, and Glimmer-9 is made of sugar.${secOf('c6f') ? ' <b>Extension unlocked:</b> help the gummy colonists build ' + SMOOSHY.base + '.' : ''}</p><p>Do the debrief questions in the Check to finish your worksheet, with your rescue report on it.</p>`;
-  openModal(`<div class="modal txmodal" role="dialog" aria-label="The rescue ending"><div class="tx-head"><span>🚀 Operation Gummy Lift</span></div><div class="tx-screen"><canvas id="cvEnd" role="img" aria-label="Captain Smooshy's spaceship rises out of the crater, Smooshy dances on the rim, finds that the crystals are sugar, and the Gumdrop does a victory loop."></canvas></div><p id="endCap" class="txrec" aria-live="polite"></p><div id="endCard" hidden>${card}</div><div class="row" style="justify-content:space-between;flex-wrap:wrap;gap:8px"><button type="button" class="ghost sm" id="endAgain">↺ Watch again</button><button type="button" class="go" data-close>Done</button></div></div>`, () => { cancelAnimationFrame(ENDRAF); });
-  const cv = $('#cvEnd'); let t0 = performance.now();
-  const paint = () => { if (!cv.isConnected) return; const c = fit(cv, 360, 200), t = RMOTION ? 11 : (performance.now() - t0) / 1000; readColors(); endScene(c, t, 360, 200);
-    const cap = END_CAPS.filter(x => t >= x[0]).pop(); $('#endCap').textContent = RMOTION ? 'Smooshy is out of the crater, and the crystals are sugar!' : cap[1]; $('#endCard').hidden = t < 10.6; ENDRAF = requestAnimationFrame(paint); };
-  paint(); $('#endAgain').addEventListener('click', () => { t0 = performance.now(); });
-}
-
 /* ---------- the Rescue report on the Part 5 worksheet: one row per stage, from the student's best try (not marked) ---------- */
 const RR_KEY = { sm1: ['Load arm 0.30 m (boulder 0.30 m from the fulcrum)', '44.5 N', '44.5 N', [1, 1, 1, 1]], sm2: ['120 cm per turn, 1.0 cm between threads', '31.5 N', '31.5 N', [1, 1, 1, 1]], sm3: ['Medium track (45 m), 4 ropes, winch ×10', 'MA 120', 'MA 120, pull 52.5 N', [1, 1, 1, 1, 1]] };
 function rescueReportHTML(mode) {

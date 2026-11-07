@@ -244,7 +244,8 @@ function renderGummyLift(ch, m, host, save) {
       <p>Captain Smooshy's Gumdrop weighs <b>6,300 N</b> on Glimmer-9, and Smooshy can pull with <b>60 N</b> at most. Anything harder than that and he has to fire the Gumdrop's damaged thrusters, which scorch and shake the hull.</p>
       <p>The Big Jelly can't land on the crumbly rim, so its tractor beam waits beyond the crest. It can grab the Gumdrop once the ship is <b>level with the top of the crest</b> (the dotted line). Build a route of machines from the Gumdrop up to that level. Each machine must start inside the glowing box where the last one finished.</p>
       <p>You have <b>475 sugar crystals</b> to spend and enough oxygen for <b>1,500 m</b> of hand pulling. Don't forget the boulder jammed against the landing leg!</p></div></details>
-    <div id="glBoardHost"></div><div id="glRunHost"></div>`;
+    <div id="glWarmHost"></div><div id="glBoardHost"></div><div id="glRunHost"></div>`;
   glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
+  if (typeof glMountWarm === 'function') glMountWarm($('#glWarmHost', card));
   if (typeof glMountRun === 'function') glMountRun($('#glRunHost', card));
 }
