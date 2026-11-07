@@ -5,7 +5,7 @@ Updated after each Opus stage, so it is always current on branch `rescue-rebuild
 ## Agreed split (Tom, 7 Nov 2026)
 
 - **Opus:** stages 1 to 3, plus the stage 4 plumbing: autosave and resume, saving the best run, `rigSnapshot()`. The tractor-beam finale is part of the Run Rescue animation.
-- **Sonnet, chat 1:** stage 4b (the story half of stage 4: Part 5 opening cards replacing `picCraterPlan()`, the guided warm-up, the three ending cards, the stopping-point pop-up), then stages 5 to 7.
+- **Sonnet, chat 1 (done):** stage 4b (the story half of stage 4: Part 5 opening cards replacing `picCraterPlan()`, the guided warm-up, the three ending cards, the stopping-point pop-up), then stages 5 to 7.
 - **Sonnet, chat 2:** stages 8 to 10.
 - Token rules from brief section 12 still apply: search rather than read whole files, no subagents, no full test suite until stage 7.
 
@@ -17,7 +17,11 @@ Updated after each Opus stage, so it is always current on branch `rescue-rebuild
 | 2. Crater scene and builder | Done |
 | 3. Run Rescue | Done |
 | 4. Plumbing (autosave, best run, `rigSnapshot()`) | Done |
-| 4b. Story half of stage 4 | Sonnet |
+| 4b. Story half of stage 4 | Done (Sonnet chat 1) |
+| 5. Hint tree, working boxes, Reminders on top | Done (Sonnet chat 1) |
+| 6. Reflection, My Rescue page, keys, AI text, teacher page | Done (Sonnet chat 1) |
+| 7. Tests | Done (Sonnet chat 1): suite result in the next section |
+| 8 to 10. Docs, worksheets and offline file, merge and send | Sonnet chat 2 |
 
 ## Stage 1: the model (`src/js/4f-gummylift.js`)
 
@@ -64,25 +68,37 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 ## Stage 4 plumbing
 
 - **Autosave and resume:** every change saves the rig (`chal.c6e.gl.rig`) and the view (zoom and pan, `view`); the prediction (`draftPred`) and working (`draftWork`) save as they are typed; the last result shows again on return. A reload reopens everything exactly as left (tested).
-- **`rigSnapshot()`** (end of `4i-glrun.js`) draws the best run's rig over the whole crater, without handles, into a 900 × 270 JPEG titled "<name>'s best rescue route", stepping the quality down until it is under 150 KB (about 60–90 KB in tests), and stores it as `chal.c6e.gl.bestRun.snap`. It runs automatically after any run that becomes the new best. `bkPack()` backups carry it (tested). **Not yet checked: the PDF route** (`61-pdf.js` renders pages with html2canvas; a `data:` JPEG `<img>` should survive, but check it when the My Rescue page exists in stage 6).
+- **`rigSnapshot()`** (end of `4i-glrun.js`) draws the best run's rig over the whole crater, without handles, into a 900 × 270 JPEG titled "<name>'s best rescue route", stepping the quality down until it is under 150 KB (about 60–90 KB in tests), and stores it as `chal.c6e.gl.bestRun.snap`. It runs automatically after any run that becomes the new best. `bkPack()` backups carry it (tested). The PDF route was checked in stage 6 (the JPEG survives on the student copy and the key).
 - `WORKSHOP_OPEN` is now `true` on this branch (as `docs/Force_HQ_Handoff.md` asks), so the preview shows the Workshop. `tests/workshop_closed.py` checks the closed version and will need updating or retiring in stage 7.
 
-## Still to do (Sonnet)
+## Stages 4b to 7 (Sonnet chat 1): what was built and the small choices made
 
-Read the brief, then this file. Search rather than reading whole files (`grep -n`, `cut -c1-200`). No subagents. Tests while working: `python3 build.py && python3 tests/rescue_numbers.py && python3 tests/play_rescue.py`.
+**Full suite:** `SUITE_RESULT`
 
-### Sonnet chat 1: stage 4b, then stages 5 to 7
+### Stage 4b: story, warm-up, endings
+- **Opening cards** (`src/js/4c-ch6.js`, step `v1`): three cards in the brief's story order (Smooshy peeping from the window, the Big Jelly and its tractor beam, squeezing out through the hatch, staying at each handle, climbing aboard and waving, 475 crystals, 1,500 m of oxygen, two sessions). `picCraterPlan()` (`4bb-shoppics.js`) now draws the crater, Big Jelly and beam with four numbered steps. The v1 scene shows Smooshy peeping out from inside the Gumdrop (`WS.peep` in `4b-shopdraw.js`, drawn with `drawGumdropInside`) instead of climbing out. The "stage 3 needs a compound machine" wording in v1 q2 is gone.
+- **Warm-up** (`src/js/4j-glstory.js`, `glMountWarm`): a panel above the board for a student who has not built anything. State is `chal.c6e.gl.warm` (`on`, `done` or `skip`; an older save that already has parts or runs is set to `done`). It walks through placing a lever on the boulder and shows the live boulder pull (that practice number only; the ship's leg pulls stay hidden). It completes when `GLB.ev.boulder` is a cleared lever, says the lever stays in the rig (25 crystals), and has a Skip button. Never gates anything.
+- **Endings** (`glShowEnding(sum, {first, better})` in `4j-glstory.js`): three draggable cards (`.glpop`, drag handle `.glpophd`) from `sum.ending`. Dented lists the causes of the damage (thrusters, rock, blasts); Not yet uses `GL_STOP` and says every go counts and the Check is never blocked. The first rescue then opens the "good place to stop for today" pop-up with Save my work (it clicks `#saveWorkBtn`). The old `openEnding`, `END_CAPS`, `endScene` and `ENDRAF` are deleted from `4d-rescue.js`, which also removed the sugar-crystal discovery scene; the spotless card only hints at the glittering crystals, which the Extension (`p5a`) picks up.
 
-**4b. Story half of stage 4**
-- Part 5 opening cards: the `c6e` step `v1` in `src/js/4c-ch6.js` (search `Part 5: Rescue Captain Smooshy`) still describes three stages, and `picCraterPlan()` (`src/js/4bb-shoppics.js`) draws a three-stage plan. Rewrite both in the brief section 2 order: Smooshy peeps from the window; he squeezes out through the hatch when the rescue starts; he stays at the handle of each machine and walks to the next; at the end he climbs aboard and waves as the tractor beam lifts the ship. Mention the Big Jelly, the crumbly rim, the tractor beam needing the Gumdrop level with the crest, 475 crystals, 1,500 m of oxygen, and that the challenge is two sessions.
-- Guided warm-up, about 3 minutes, before free build: place a lever on the boulder. Useful hooks: `GLB.rig`, `glAddPart(type, x, y)`, `glPart(id)`, `GLB.ev.boulder` (`{how, ok, pull, ma}`), `GLB.onChange`. A lever dropped within about 1.6 m of x = 18.2 on the floor snaps onto the boulder. Load arm 2 m (MA 4) gives 63 N and fails; 1.5 m (MA 5.7) works. The boulder pull may be shown in the warm-up, since it is practice; keep the ship's leg pulls hidden. If tokens are short, keep this plain (brief section 12).
-- Endings: define `glShowEnding(sum, {first, better})` (called by `glFinishRun` in `4i-glrun.js`). Three draggable ending cards from `sum.ending`: **spotless**, **dented**, **not yet** (not yet invites another go and never blocks the Check). When `first` is true (the first run that reached the beam), add the friendly "good place to stop for today" pop-up with the "Save my work" button. Replace the old `openEnding`, `END_CAPS` and `endScene` in `src/js/4d-rescue.js` (search for callers first).
+### Stage 5: hints, working, Reminders
+- **Hint tree** (`src/js/4k-glhints.js`, a "💡 Need a hint?" fold-out between the board and the Run panel). Six topics (Smooshy's pull, mechanical advantage, hand distance, cable, weight, work). Tier 1 shows formulas and ideas, tier 2 plugs in the student's own leg or boulder lever with blanks (`<span class="blank">`), tier 3 is a worked example with different numbers. Choosing a topic is free. Opening each tier for a topic spends one hint the first time (`chal.c6e.gl.hints`, `hintSeen` keys `t1:topic` etc.); reading it again is free. Tier 2 does not spend if there is no machine to use. `glScore` already applies first free, then −1.
+- The Working (not marked) box was already in the Run panel (stage 3). **Reminders** now sit above "Do this" on guided pages (`40-guided.js`) and first in the shop course card (`45-challenge.js`); Part 5 already had them first.
 
-**5. Hint tree, working boxes, Reminders on top.** Hints are spent: store the count in `chal.c6e.gl.hints`; `glChanged` and `glStartRun` already pass it to `glEvaluate`, and `glScore` applies "first free, then −1, never below 1". Use the student's own rig for tier 2 (`GLB.ev.legs`: `type, mma, ropes, winches, rise, m.L`). Move `remindersHTML()` above "Do this" on every page where it appears (`40-guided.js` around line 121, the shop course in `45-challenge.js`; Part 5 already has it at the top).
+### Stage 6: reflection, My Rescue, keys, text
+- **Reflection:** new Check question `c6r32` (explain, `refl: true`) is last in Part 5's Check. The old `c6r26` (two plans) no longer mentions the 75 m track. `mnote` is a new optional question field printed at the end of an explain question's marking line; `c6r32` uses it for "accept any route and mark the numbers against the My Rescue table".
+- **Worksheet pages for `c6e`** (`buildWorksheet`): page 1 My Rescue; page 2 steps summary, Part A and Part B; page 3 Part C, the reflection, on its own page.
+- **My Rescue** (`src/js/4l-glreport.js`, `myRescueHTML(mode)`): the best run's screenshot, result stamp and score, a row per leg (leg, machines, rise, total MA, pull), totals (hand travel, crystals, crest height, work, damage, hints, tries) and the student's working. Blank: an empty dashed frame and empty boxes. Key: the top route (`GL_KEY_RIG`: two 24 m ramps, 4 ropes, winch ×7, lever on the boulder, crest blasted), drawn live with the new `glSnapURL(rig, title)` (split out of `rigSnapshot`). Checked through the real PDF download: the JPEG survives `61-pdf.js` on the student copy and the key.
+- **Not marked:** the scheme note, `58-myp.js` AI text (first line unchanged) and the key all say My Rescue is reported and not marked; the reflection and Check are marked.
+- **Teacher page** (`62-teacher.js`): a two-session note appears when Part 5 is selected. **`secMins`** now honours a mission's `mins`; the `gl` mission has `mins: 44`, so Part 5 shows about 60 minutes (4 learn + 44 challenge + 12 check).
 
-**6. Reflection, My Rescue page, keys and teacher text.** Replace `rescueReportHTML` and `RR_KEY` (`4d-rescue.js`, used in `60-worksheet.js` around line 118) with the My Rescue page: `chal.c6e.gl.bestRun.snap` (the screenshot), `bestRun.sum` (from `glSummary`: `legs[] {name, rise, ma, pull, hand, work}`, `hardest, hand, cost, crest, work, dmg.total, boulder, score, ending`), `runs` (tries), `hints`, and `bestRun.pred.working`. Blank template: empty frame; answer key: the top route (two 24 m ramps, 4 ropes, winch ×7, crest blasted, lever on the boulder: 56.3 N per leg, 1,344 m, 358 crystals, crest 12.2 m, 75,600 J, 0%, 10 of 10). Check the JPEG survives `61-pdf.js`. Add the `explain` reflection as the last Part 5 Check question on its own page (brief section 8). Update the AI text in `58-myp.js` (line around 50; keep its first line), the marking scheme, the teacher page two-session note, and set `secMins` for `c6e` to approx. 60.
+### Stage 7: tests
+- Part 5 rewritten in `tests/play_c6.py` (top route run, ending card, stopping pop-up, snapshot, a worse try never lowers the best, five Check questions with the reflection last) and the My Rescue checks in `tests/play_bt.py`.
+- New: `tests/play_story.py` (opening text, warm-up, endings, stop pop-up), `tests/play_hints.py` (spending rules, own numbers, Reminders order), `tests/play_myrescue.py` (three worksheet modes, reflection page, scheme, AI text, 60 minutes, real PDFs). `rescue_numbers.py` (the brief's section 9 routes), `play_rescue.py` and these three are in `tests/run_all.sh`.
+- `tests/workshop_closed.py` is retired (the Workshop stays open: `WORKSHOP_OPEN = true`). `docs/Force_HQ_Workshop_Closed_Note.md` in the Project describes the old closed state and should be removed or rewritten in stage 8.
 
-**7. Tests.** Rewrite Part 5 in `tests/play_c6.py` and `tests/play_bt.py` (they still play sm1–sm3). Add `tests/rescue_numbers.py` and `tests/play_rescue.py` to `tests/run_all.sh`, plus tests for hints and working. `tests/workshop_closed.py` expects `WORKSHOP_OPEN = false`: update or retire it. Then run `bash tests/run_all.sh` in the background and fix what fails.
+### Things stage 8 should know
+- `docs/Chapter6_Workshop_Script.md` still describes the old three-stage Part 5, the sm1 to sm3 Rescue report and the sugar-discovery ending; rewrite that section.
+- The score points in `GL_END` and the result card were not changed. Pulls show with normal rounding (56.25 N shows as 56.3 N), as in stage 3.
 
 ### Sonnet chat 2: stages 8 to 10
 

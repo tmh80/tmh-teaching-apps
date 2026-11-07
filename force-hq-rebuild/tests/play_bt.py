@@ -81,13 +81,12 @@ with sync_playwright() as p:
     box = pg.locator('#btQs .qitem[data-q=bt4q2]'); box.scroll_into_view_if_needed(); box.locator('input').first.fill('10.7'); box.locator('.qchk').first.click(); pg.wait_for_timeout(200); chk('bt4 q2: 10.7', '1 of 1 point' in box.inner_text(), box.inner_text()[:200])
     pg.screenshot(path=OUT + 'bt4.png')
     st = ev("btWorksheet('bt4','student')"); chk('bt4 sheet: weights, MAs and builds are printed', '3,920' in st or '3920' in st and '65.3' in st and 'Mars' in st and 'Winch ×6' in st, st[:200])
-    # ---- the Rescue report on the Part 5 worksheet ----
-    ev("dbSet('chal.c6e',{sm1:{tried:true,n:2,best:4,log:[{desc:'the boulder 0.80 m from the fulcrum',met:2,pred:10,need:19.2,oks:[true,false,false,false]},{desc:'the boulder 0.30 m from the fulcrum',met:4,pred:44.5,need:44.5,oks:[true,true,true,true]}]}})"); 
-    rr = ev("buildWorksheet('c6e','student')"); chk('Rescue report (student): stage 1 best try with prediction, need and ticks', 'Rescue report' in rr and '0.30 m from the fulcrum' in rr and '44.5 N' in rr and '4 of 4 points (2 tries)' in rr and '✓' in rr, rr[rr.find('Rescue report'):][:300])
-    chk('Rescue report (student): the untried stages are blank rows', 'Stage 2: Level the ship' in rr and 'Stage 3: Haul out of the crater' in rr)
-    chk('Rescue report (blank): empty boxes, no answers', 'Rescue report' in ev("buildWorksheet('c6e','blank')") and '44.5' not in ev("buildWorksheet('c6e','blank')"))
-    ky = ev("buildWorksheet('c6e','key')"); chk('Rescue report (key): passing settings for all three stages', 'Medium track (45 m), 4 ropes, winch ×10' in ky and '120 cm per turn' in ky and '0.30 m' in ky)
-    chk('c6e marking scheme and AI text say the Rescue report is not marked', 'Rescue report' in ev("schemeText('c6e')") and 'not marked' in ev("answerKeyText('c6e')"))
+    # ---- My Rescue on the Part 5 worksheet ----
+    ev("dbSet('chal.c6e',{gl:{tried:true,runs:2,hints:1,best:10,bestRun:{rig:{parts:[],cables:[]},snap:'data:image/jpeg;base64,/9j/AAAA',pred:{working:'4x4x7=112'},sum:{legs:[{name:'24 m ramp, 4 ropes, winch x7',rise:6,ma:112,pull:56.25,hand:672,work:37800}],hardest:56.25,hand:672,cost:358,crest:12.2,work:75600,dmg:{t:0,r:0,b:0,total:0},score:10,ending:'spotless'}}}})")
+    rr = ev("buildWorksheet('c6e','student')"); chk('My Rescue (student): screenshot, result, leg row, totals, tries, hints and working', all(k in rr for k in ['My Rescue', 'data:image/jpeg', 'Spotless', '10 of 10', '56.3 N', '112', '358', '75,600 J', '4x4x7=112']) and 'Hints used' in rr, rr[rr.find('My Rescue'):][:300])
+    bl = ev("buildWorksheet('c6e','blank')"); chk('My Rescue (blank): an empty frame and boxes, no answers', 'My Rescue' in bl and 'rsnap empty' in bl and '56.3' not in bl and '358' not in bl)
+    ky = ev("buildWorksheet('c6e','key')"); chk('My Rescue (key): the example route with its numbers', 'example' in ky.lower() and '56.3 N' in ky and '1,344 m' in ky and '358' in ky)
+    chk('c6e marking scheme and AI text say the My Rescue page is not marked', 'My Rescue' in ev("schemeText('c6e')") and 'not marked' in ev("answerKeyText('c6e')"))
     # ---- the teacher page ----
     ev("dbSet('user',{name:'Teacher',teacher:true}); dbSet('unlocked',true)"); ev("show('vTeacher'); renderTeacher()"); pg.wait_for_timeout(300)
     pg.locator('[data-bt=bt1]').check(); pg.locator('[data-bt=bt4]').check(); pg.wait_for_timeout(300)
