@@ -51,7 +51,7 @@ Written so they can be lifted into the skill (section 11). The Sparks comment or
 
 **Added from Tom's Sparks play-through**
 21. Make students read the instructions first. Everything below the message stays blurred until they press OK. (Tom: helps students recognise that they should read this first.)
-22. Open each chapter with clear I can statements on their own first screen, and Next opens step 1. Immediately before its review, students place an X on a Beginning, Developing, Proficient, Mastering scale for each statement. Print the self-check on the worksheet too, so teachers and parents can see it.
+22. Open each chapter with clear I can statements on their own first screen, and Next opens step 1. Immediately before its review, students place an X on a Beginning, Developing, Proficient, Mastering scale for each statement. Print the self-check at the top of the worksheet, so teachers and parents can see it, and tell the AI marker it is an unmarked self-review.
 23. Shuffle the display order of anything students classify, sort or match, with a stable order across reloads. (Tom: IV, DV, CV rows matched his lab report order, so position gave away the answer.)
 24. Keep the I can statements one click away on every tab. (Tom: they should always be available to refer to.)
 25. Students make graphs themselves as well as read them: choose the type, write the title and axis labels, set the scale and plot the points, using the Paper Plane Lab graph maker. Teach it with a worked example from the sim's subject that isn't tied to one concept (Sparks uses a bulb's temperature against current). Teach scatter or bar as its own skill: a number you changed needs a scatter graph, and a name or group needs a bar graph, with practice questions before students make a graph. If a paragraph uses the same data, give it as a table, so the paragraph cannot reveal the graph. (Tom: "The paper plane virtual lab does a great job of this.")
@@ -199,7 +199,7 @@ A judgement says: "I would choose…", gives facts on both sides from at least t
 **Whole-app changes, for every section including Chapter 1**
 10. Read-first OK: the rest of the step stays blurred until the student presses OK. Remembered once pressed, and skipped on finished steps.
 11. I can statements: 3 or 4 for each Foundation, Extension and Skills section, in Grade 7/8 language, covering the skills as well as the science (for example, "I can make a graph and describe what it shows"). They have their own first screen before step 1, with Next to move on and Back on step 1 to return. A "My I can statements" button sits above the steps on every tab. Reuse the Sparks version (`ICAN`, `icanCard`, `showIntro`, `.ican-peek`).
-12. Self-check: an X on a Beginning, Developing, Proficient, Mastering line for each statement, immediately before that section's Check, with the questions hidden until it is done. The answers are saved, and the self-check stays in a fold-out above the Check. Students part-way through a Check and teacher mode are not blocked. It prints on that section's worksheet: the student's Xs on their sheet, empty lines on the blank sheet, and a not-marked note on the answer key. Reuse the Sparks version (`selfAssessCard`, `saScale`, `saStore`, `wsSelfCheck`).
+12. Self-check: an X on a Beginning, Developing, Proficient, Mastering line for each statement, immediately before that section's Check, with the questions hidden until it is done. The answers are saved, and the self-check stays in a fold-out above the Check. Students part-way through a Check and teacher mode are not blocked. It prints at the top of that section's worksheet, straight under the name: the student's Xs on their sheet, empty lines on the blank sheet, and a not-marked note on the answer key. Reuse the Sparks version (`selfAssessCard`, `saScale`, `saStore`, `wsSelfCheck`).
 13. Shuffled display order for any table, sort or match question, using the Sparks fix (`gridRowOrder`, `keepRows` for true sequences, order questions never start correct), and check Force HQ's own shuffle spreads right answers across A to D.
 14. Larger Pip text across the app (rule 27).
 
@@ -245,7 +245,7 @@ Added 7 Nov 2026 (Tom: "include the same skills"):
 - Scatter or bar is taught with practice questions before students make a graph.
 - I can statements on their own first screen and behind a button on every tab; the self-check comes immediately before every Check.
 - Larger Pip text throughout.
-- The self-check prints on worksheets, so teachers and parents can see it (Tom, 7 Nov).
+- The self-check prints at the top of worksheets, so teachers and parents can see it, and the AI marking text says it is an unmarked self-review (Tom, 7 Nov).
 
 ## Sources for wording
 

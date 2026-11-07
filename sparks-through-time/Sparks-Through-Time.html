@@ -6132,9 +6132,9 @@ function buildWorksheet(stop, mode, name, part){
     mode==='student' ? h('div',{class:'ws-stamps'}, part==='c' ? stampSVG(stop,'C',prog(stop.id).challenge,54) : stampSVG(stop,'L',prog(stop.id).learn,54)) : null);
   root.append(head);
   if (mode!=='key') root.append(h('div',{class:'ws-namebar'}, h('span',{}, 'Name: ', h('b',{class:'ws-name'}, name || '')), h('span',{}, 'Class: ', stu(mode) ? h('b',{class:'ws-name'}, Store.data.studentClass || '') : h('span',{class:'ws-line'})), h('span',{}, 'Date: ', stu(mode) ? h('b',{}, new Date().toLocaleDateString()) : h('span',{class:'ws-line'}))));
+  if (part==='f' && ICAN[stop.id]) root.append(wsSelfCheck(stop, mode));
   if (mode==='student') root.append(h('p',{class:'ws-student-note'}, 'Everything printed in blue was added by the student in the sim.'));
   root.append(stepsDone(stop, mode, part));
-  if (part==='f' && ICAN[stop.id]) root.append(wsSelfCheck(stop, mode));
   const auto = items.map((it,i)=>[it,i]).filter(([it])=>!SELF(it.t)), self = items.map((it,i)=>[it,i]).filter(([it])=>SELF(it.t));
   root.append(h('h3',{class:'ws-part'}, 'Part A: Show what you know'));
   auto.forEach(([it,i])=>root.append(wsItem(it, i+1, mode, st[i])));
@@ -8197,6 +8197,7 @@ function aiFeedbackText(sheets, tasks, challengeOptional){
   L.push(...howToMarkLines());
   if (optSheets.length) L.push(`- Optional sheets in this task: ${optSheets.map(({stop, part})=>`\u201c${stop.title}\u201d ${PART_NAME[part]} worksheet`).join(', ')}. An optional sheet that wasn\u2019t submitted is not counted: don\u2019t give it 0 and don\u2019t mention it.`);
   L.push('', ...feedbackStyleLines(), '');
+  if (sheets.some(({stop, part})=>part==='f' && ICAN[stop.id])) L.push('SELF-CHECK: the top of each Foundation worksheet shows "My self-check before the review". This is the student\u2019s own self-review: before the questions, they placed an X for each I can statement on a line from Beginning to Developing, Proficient and Mastering. It is not marked and earns no marks. Do not grade or correct it. In the feedback you may add one short sentence comparing how sure they felt with how they did, for example praising a fair self-check or noting where they were more confident than their answers showed.', '');
   const entries = sheets.flatMap(({stop, part})=>sheetEntries(stop, part)).concat(tasks.flatMap(({t})=>taskEntries(t)));
   const strands = strandsOf(sheets.map(({stop, part})=>sheetStrands(stop, part)).concat(tasks.map(({t})=>taskStrands(t))));
   L.push(...mypLevelLines(strands));
