@@ -247,8 +247,8 @@ function renderShopCourse(ch, wm, host, save) {
   const get = id => (dbGet('chal.' + ch, {})[id]) || {};
   let cur = Math.max(0, wm.findIndex(m => !get(m.id).done)), judged = null;
   const card = h('section', { class: 'panel mission', id: 'mi-shop' }); host.appendChild(card);
-  card.innerHTML = `<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
-    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>${remindersHTML()}
+  card.innerHTML = `${remindersHTML()}<div class="mtabs" role="tablist" aria-label="Choose a loading job"></div><div class="mbrief gl"></div>
+    <details class="clue"><summary>Need a clue?</summary><div class="gl" id="shClues"></div><div class="row"><button type="button" class="ghost sm" id="shNext">Show a clue</button></div></details>
     <div class="gl" id="shCalc" hidden></div><div class="labhost"></div><div class="fb" id="shFb" hidden></div><ol class="blog" id="shLog"></ol><ul class="objs" data-o></ul><div class="row" id="shMore"></div>`;
   LAB.mode = 'challenge'; LAB.showRes = false; LAB.onChange = null;
   placeLab($('.labhost', card)); $('#lab').classList.add('nolc');

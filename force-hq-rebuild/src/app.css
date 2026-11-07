@@ -884,3 +884,6 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glpop.placed{position:fixed} .glpop.dragging .glpophd{cursor:grabbing}
 .glpophd{cursor:grab;font-weight:800;letter-spacing:.03em;padding:10px 0 6px;font-size:13px;opacity:.85;touch-action:none}
 .glpop h3{margin:4px 0 8px} .glpopsc{font-size:17px}
+.glchips{flex-wrap:wrap;gap:6px;margin:6px 0} .glchip.on{border-color:var(--accent);background:var(--chip)}
+.blank{display:inline-block;min-width:3.2em;border-bottom:2px solid currentColor;vertical-align:baseline;margin:0 2px}
+.glhint .glplug li{margin:4px 0}
