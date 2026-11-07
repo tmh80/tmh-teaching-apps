@@ -73,7 +73,7 @@ The rig format is documented at the top of the file. Tests: `python3 tests/rescu
 
 ## Stages 4b to 7 (Sonnet chat 1): what was built and the small choices made
 
-**Full suite:** `SUITE_RESULT`
+**Full suite:** `bash tests/run_all.sh` ran start to finish with no failures, after three fixes. (1) A real bug: `glFinishRun` read `st.firstDone` after saving into the same state object, so the stopping-point pop-up never appeared after a real rescue; it now captures `firstRescue` before the save. (2) `tests/play_c6.py` selected the first fold-out in the shop card, which is now Reminders, so it targets the clue fold-out (`details.clue:not(.remind)`). (3) `play_c6.py` expected the h3 builder to open straight after the weight check, but the app asks the student to press "Open the builder →" first (this was already failing before this chat); the test now presses it. Note: `run_all.sh` shows only the last four lines of each test, so a traceback can hide behind a retry message; run a test by itself if a section looks short.
 
 ### Stage 4b: story, warm-up, endings
 - **Opening cards** (`src/js/4c-ch6.js`, step `v1`): three cards in the brief's story order (Smooshy peeping from the window, the Big Jelly and its tractor beam, squeezing out through the hatch, staying at each handle, climbing aboard and waving, 475 crystals, 1,500 m of oxygen, two sessions). `picCraterPlan()` (`4bb-shoppics.js`) now draws the crater, Big Jelly and beam with four numbered steps. The v1 scene shows Smooshy peeping out from inside the Gumdrop (`WS.peep` in `4b-shopdraw.js`, drawn with `drawGumdropInside`) instead of climbing out. The "stage 3 needs a compound machine" wording in v1 q2 is gone.

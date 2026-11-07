@@ -156,6 +156,7 @@ function glStartRun() {
 /* the run is over: save it (best run counts), show the receipt, then the ending card if there is one */
 function glFinishRun() {
   const res = GLR.res, sum = glSummary(res), st = glState(), n = (st.runs || 0) + 1, cur = { total: sum.score, hardest: sum.hardest };
+  const firstRescue = !!res.arrived && !st.firstDone;   // read before the save below, which updates this same state object
   const prevBest = st.bestRun ? { total: st.bestRun.sum.score, hardest: st.bestRun.sum.hardest } : null, better = glBetter(cur, prevBest);
   const patch = { runs: n, tried: true, last: sum, lastPred: GLR.pred, lastDmg: res.arrived ? 0 : sum.dmg.total, boulderGone: false, pred: GLR.pred };
   if (better) patch.bestRun = { rig: GLR.rig, sum, pred: GLR.pred, at: Date.now() };
@@ -164,7 +165,7 @@ function glFinishRun() {
   GLB.save({ id: GLB.mid }, patch);
   if (better && typeof rigSnapshot === 'function') rigSnapshot();
   $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowResult(sum, GLR.pred, better && n > 1); glRunPaint();
-  if (typeof glShowEnding === 'function') glShowEnding(sum, { first: res.arrived && !st.firstDone, better });
+  if (typeof glShowEnding === 'function') glShowEnding(sum, { first: firstRescue, better });
 }
 function glBackToBuild() {
   GLR.on = false; cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); glRunPaint(); glLoop();
