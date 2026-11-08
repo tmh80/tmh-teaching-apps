@@ -890,15 +890,15 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glboard canvas{display:block;width:100%;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
 .glzoom{position:absolute;left:8px;top:8px;display:flex;gap:4px}
 .glzoom .ghost{min-width:34px;background:rgba(255,255,255,.88)}
-.glmenu{position:absolute;z-index:5;width:min(290px,calc(100% - 8px));background:var(--panel);border:1.5px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.28);padding:0 10px 10px;font-size:14px}
-.glmenu.placed{position:fixed}
+.glmenu,.lsmenu{position:absolute;z-index:5;width:min(290px,calc(100% - 8px));background:var(--panel);border:1.5px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.28);padding:0 10px 10px;font-size:14px}
+.glmenu.placed,.lsmenu.placed{position:fixed}
 .glmhd{display:flex;align-items:center;gap:6px;cursor:grab;padding:8px 0 6px;border-bottom:1px solid var(--line);margin-bottom:6px;touch-action:none}
 .glmhd b{flex:1}
 .glx{border:0;background:none;font-size:18px;cursor:pointer;color:var(--muted)}
 .glrow{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}
 .glrow>span{min-width:72px;color:var(--muted);font-weight:700}
 .glrow b{min-width:52px;text-align:center}
-.glmenu .ghost.on,.gltools .ghost.on{border-color:var(--accent);background:var(--chip)}
+.glmenu .ghost.on,.lsmenu .ghost.on,.gltools .ghost.on{border-color:var(--accent);background:var(--chip)}
 .glnote{margin:4px 0;color:var(--muted);font-size:13px}
 .gltray{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:6px}
 .gltry{display:flex;flex-direction:column;align-items:flex-start;gap:1px;text-align:left;background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:6px 8px;cursor:grab;touch-action:none}
@@ -983,6 +983,14 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .cn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#c94a34;color:#fff;font-size:13px;font-weight:800;flex:none}
 .vtshapes{display:grid;grid-template-columns:1fr 1fr;gap:6px}.vtshapes figure{margin:0}.vtshapes figcaption{font-size:13px}.vtshapes .qfig{margin:0}
 .unithint{margin:2px 0 0}
+
+/* lesson mode (4m-lesson.js): the parts tray and menu share the rescue builder's look */
+#lsTray{order:1;margin:8px 0 0;grid-template-columns:repeat(auto-fill,minmax(150px,200px))} #lsTray[hidden],#lsStatus[hidden]{display:none}
+.lsstatus{order:1;margin:6px 0 0}
+.lsit{position:relative} .lsit .gltry{width:100%;min-height:54px} .lsit .gltry:disabled{opacity:.65;cursor:default}
+.lsq{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);font-weight:800;font-size:14px;line-height:1;cursor:pointer;padding:0}
+.lsmenu{position:fixed;z-index:60}
+#cvScene.shopscene{cursor:default}
 
 </style>
 <header class="top">
@@ -1155,6 +1163,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
         <canvas id="cvScene" role="img" aria-label="The Main Arena tug-of-war, with the crate in the middle. Drop pullers here to add them to a team."></canvas>
+        <div class="lstray gltray" id="lsTray" hidden role="toolbar" aria-label="Parts tray: drag a piece onto the bench"></div>
+        <p class="scaleNote lsstatus" id="lsStatus" hidden></p>
         <div class="scenebar">
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
@@ -1206,6 +1216,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 </div>
 </div>
 
+<div class="lsmenu placed" id="lsMenu" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <button type="button" class="calcFab" id="calcFab" aria-label="Open the calculator">🧮<span> Calculator</span></button>
 <div class="calc" id="calc" hidden role="dialog" aria-label="Calculator"></div>
@@ -1816,7 +1827,7 @@ function spacePush() { if (S.msg || S.pushEndT != null || S.shoveT >= 0) { if (S
 function thrust(dir) { if (S.thrT >= 0) return false; if (S.msg) resetSim(); S.thrDir = dir; S.thrT = 0; S.lastThr = dir * SP_THR_F; S.lastKind = 'thr'; S.flags.thrUsed = true; S.running = true; syncRun(); return true; }
 function shove() { if (S.scene === 'space') return spacePush(); if (S.msg) resetSim(); S.shoveT = 0; S.flags.shoved = true; S.running = true; syncRun(); }
 function launch() { resetSim(); S.launchN = (S.launchN || 0) + 1; S.launchMass = S.mass; S.flags.stopped = false; S.v = S.v0; S.running = true; S.flags.launched = true; S.flags.moved = true; syncRun(); }
-function clearCh2() { if (S.scene === 'shop') S.running = false; if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } if (S.scene === 'heli') S.running = false; S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
+function clearCh2() { if (typeof lsOff === 'function') lsOff(); if (S.scene === 'shop') S.running = false; if (S.scene === 'drop') { dzFinishRuns('reset'); S.running = false; } if (S.scene === 'heli') S.running = false; S.scene = null; S.warp = 1; S.noAstro = false; S.pushF = 100; S.astro = 100; if (typeof LAB !== 'undefined') LAB.sledHi = null; if (typeof LAB !== 'undefined') LAB.bmarks = null; S.target = null; S.x0 = 0; S.v0 = 2; S.brakeX = null; S.brakeF = 40; S.brakeFrom = null; S.brakeT = null; }
 /* after a braked run aimed at a target distance, move the too-high / too-low markers */
 function brakeMark(B, d, F) { if (!B) return; if (d == null || d > B.target + B.tol) B.lo = B.lo == null ? F : Math.max(B.lo, F); else if (d < B.target - B.tol) B.hi = B.hi == null ? F : Math.min(B.hi, F); }
 
@@ -2962,6 +2973,7 @@ const TERMS = {
   weight: ['Weight', 'The pull of gravity on an object, measured in newtons. Weight = mass × g, and on Earth g = 9.8 N/kg.', ['weight']],
   mass: ['Mass', 'How much matter (stuff) is in an object, measured in kilograms (kg). Your mass is the same on Earth and on the Moon.', ['mass']],
   gravity: ['Gravity', 'The non-contact force that pulls objects towards each other. Earth\'s gravity pulls everything towards its centre.', ['gravity']],
+  sugarcrystal: ['Sugar crystal', 'Gummy money on Glimmer-9. You spend sugar crystals to buy machines, platforms and dynamite.', []],
   gfs: ['Gravitational field strength (g)', 'How strongly gravity pulls on each kilogram. On Earth, g = 9.8 newtons for every kilogram (9.8 N/kg).', ['gravitational field strength']],
   normal: ['Normal force', 'The push from a surface back up against an object resting on it. "Normal" means "at right angles", because it pushes straight out of the surface.', ['normal force', 'normal forces']],
   tension: ['Tension', 'The pulling force in a stretched rope, string or cable.', ['tension']],
@@ -3098,7 +3110,7 @@ function drawCard() {
   ch.hidden = false; unhi();
   ch.innerHTML = `<div class="chead" title="Drag to move this card"><span class="qgrip" aria-hidden="true">⠿</span><span class="lbl">${esc(opt.title || '')}${cards.length > 1 ? ` · card ${k + 1} of ${cards.length}` : ''}</span><button type="button" class="cx" aria-label="Close these cards">✕</button></div>
     <div class="gbody gl">${c.html}${opt.readGate && k === 0 && opt.readGate() ? '<button type="button" class="go say-ok" data-cb="ok">OK</button>' : ''}</div>
-    <div class="cnav">${k ? '<button type="button" class="ghost" data-cb="back">‹ Back</button>' : ''}<span class="cdots">${cards.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</span><button type="button" class="go" data-cb="next">${last ? (opt.journal === false ? 'Got it ✓' : 'Save to my Journal ✓') : 'Next ›'}</button></div>`;
+    <div class="cnav">${k ? '<button type="button" class="ghost" data-cb="back">‹ Back</button>' : ''}<span class="cdots">${cards.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</span><button type="button" class="go" data-cb="next">${last ? (opt.journal === false ? 'Got it ✓' : 'Save to my Journal ✓') : (opt.nextLabel || 'Next ›')}</button></div>`;
   makeDraggable(ch, '.chead', 'cards'); dragPlace(ch, 'cards', '.chead');
   if (c.hi) $$(c.hi).forEach(e => { if (e.offsetParent) e.classList.add('coachhi'); });
   ch.querySelector('[data-cb=next]').addEventListener('click', () => { if (k === 0 && opt.readOK) opt.readOK(); if (last) finishCards(); else { CARDS.k++; drawCard(); } });
@@ -4795,7 +4807,7 @@ function playStepCards() {
 }
 function cardsDone() {
   const st = CHDATA[CH.id].steps[GI]; const seen = dbGet('cardsSeen.' + CH.id, {}); seen[st.id] = true; dbSet('cardsSeen.' + CH.id, seen); CARDS_SEEN = true;
-  checkStep(true);
+  checkStep(true); if (typeof lsAfterCards === 'function') lsAfterCards();
   if (st.tour && !dbGet('tourDone')) setTimeout(startTour, 200);
 }
 /* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)
@@ -7404,7 +7416,8 @@ function wsRenderControls() {
   $('#wsRopesN').textContent = WS.ropes; $('#wsRopesDn').disabled = WS.ropes <= 1; $('#wsRopesUp').disabled = WS.ropes >= (WS.lim.ropesMax || 6);
   const ax = $('#wsAxleRow'); if (ax) { ax.hidden = !WS.axleEdit || WS.mach !== 'winch'; num('#wsAxleNum', fmt(WS.axle, 2)); }
   $('#wsClsRow').hidden = !WS.classPick || WS.mach !== 'lever'; $('#wsHRow').hidden = !WS.rampH || WS.mach !== 'ramp'; $('#wsLiftRow').hidden = !WS.lifts || WS.lifts.pick !== true || !['pulley'].includes(WS.mach);
-  const pb = $('#wsPull'); if (pb) { pb.textContent = WS.pullLabel || WS_VERB[WS.mach]; pb.disabled = WS.busy || !!(LAB.pullGate && !LAB.pullGate()); }
+  const pb = $('#wsPull'); if (pb) { pb.textContent = (LS.on ? '▶ ' : '') + (WS.pullLabel || WS_VERB[WS.mach]); pb.disabled = WS.busy || !!(LAB.pullGate && !LAB.pullGate()); }
+  if (LS.on) lsRender();
   const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the jack ${fmt(WS.pitch, 1)} cm (the gap between threads).` : '';
 }
 function initShop() {
@@ -7769,13 +7782,14 @@ function wsRulers(c, rise, eDist, t1, t2) {
 
 /* ---------- the whole scene ---------- */
 function drawShopScene(c) {
-  wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
+  if (WS.site === 'mission') { glDrawMission(c); return; }   // Part 5, step v1: Mission Control (no bench, no LIVE inset)
+  if (LS.on) lsRoom(c); else wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
-  if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
+  if (LS.on) ep = lsDrawMachine(c, cur, riseNow); else if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
   wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
-  wsMonitor(c);
+  if (!LS.on || LS.o.live !== false) wsMonitor(c);   // Captain Smooshy coaches by video from the crater (Parts 1 to 4)
   /* readouts */
   const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], [WS.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
   if (WS.mach === 'build') { rows[2] = ['Your hand moved', mk.has('bTravel') ? '?' : fmt(wsR2(cur.ma * riseNow), 2) + ' m']; if (wsHas('bTotMA') || wsHas('readMA')) rows.push(['Total mechanical advantage', mk.has('bTotMA') || mk.has('readMA') ? '?' : fmt(cur.ma, 2)]); if (wsHas('bCable')) rows.push(['Cable needed', mk.has('bCable') ? '?' : fmt(cur.cable, 0) + ' m']); }
@@ -7793,6 +7807,7 @@ function drawShopScene(c) {
   else if (!WS.busy && !WS.shown) { const m = `Press ${WS_VERB[WS.mach]} to work the machine`; c.font = `700 13px ${C.fb}`; const iw = c.measureText(m).width + 28; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(450 + 30 - iw / 2, 6, iw, 28, 8); c.fill(); txt(c, m, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`); }   /* light pill: the beam behind is dark */
   if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, 418, C.line, 'right');
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
+  if (LS.on) lsOverlay(c);
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
     wsRulers(c, WS.c.rise, WS.c.eDist, WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)');
@@ -8165,9 +8180,9 @@ CHDATA.c6 = {
         { html: `<p>When a job is too hard, engineers use a ${T('machine', 'machine')}: something that helps a small force do a big job. Your first machine is a ${T('lever', 'lever')}. It is a strong bar resting on a pivot, and the pivot is called the ${T('fulcrum', 'fulcrum')}.</p>${picBar()}` },
         { html: `<p>The thing a lever moves is called the ${T('load', 'load')}. In the Workshop, the load is the rock.</p>${picLever({ show: 'FL', focus: 'L' })}` },
         { html: `<p>Your pull on the other end of the bar is called the ${T('effort', 'effort')}. So every lever has three parts: the fulcrum, the load and the effort.</p>${picLever({ focus: 'E' })}` }],
-      setup() { shopStage({ mach: 'hand', allow: ['hand', 'lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { hand: WL.rock, lever: WL.rock }, maxTravel: 1.5 }); }, adds: ['wsctl', 'wspull', 'wsmach'], sides: [], pullers: [], idle: 'Press Lift! to lift the rock by hand',
-      tasks: [['Choose <b>By hand</b> and press <b>Lift!</b>', () => shopHas({ mach: 'hand' })], ['', () => hasAns('q1'), { q: 'q1' }],
-        ['Now choose the <b>Lever</b>. The fulcrum starts in the middle of the bar. Press <b>Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+      setup() { lessonStage({ mach: 'hand', allow: ['hand', 'lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { hand: WL.rock, lever: WL.rock }, maxTravel: 1.5, lesson: { tray: ['lever'], pre: [], lock: [] } }); }, adds: ['wspull'], sides: [], pullers: [], idle: 'Press ▶ Lift! to lift the rock with just a rope',
+      tasks: [['Press <b>▶ Lift!</b> with just the rope.', () => shopHas({ mach: 'hand' })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Now drag the <b>lever</b> from the tray under the rock. The fulcrum starts in the middle of the bar. Press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 })], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'Lifting the rock by hand, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'hand' }), need: () => shopHas({ mach: 'hand' }), needMsg: 'Lift the rock by hand first. Your runs are in the Journal.', ok: 'Right, 294 N. That\'s nearly five times more than Smooshy\'s 60 N!' },
         { id: 'q2', type: 'reading', p: 'With the lever and the fulcrum in the middle, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 1 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 1 }), needMsg: 'Pull with the lever first. Your runs are in the Journal.', ok: '294 N again! With the fulcrum in the middle, the lever doesn\'t make the job any easier yet. You\'ll change that in the next step.' },
@@ -8175,12 +8190,12 @@ CHDATA.c6 = {
 
     { id: 'lv2', title: 'Move the fulcrum', rescue: 'Fulcrum trick learned.',
       cards: [
-        { hi: '[data-panel="wsctl"]', html: `<p>Here's where a lever gets clever. Use the slider to move the fulcrum along the bar. The labels above the bar show how far the rock is from the fulcrum, and how far your hand is from it. After each move, press <b>Pull!</b> and read the newtonmeter.</p>` },
+        { hi: '#cvScene', html: `<p>Here's where a lever gets clever. Drag the fulcrum (the triangle) along the bar. The labels on the bar show how far the rock is from the fulcrum, and how far your hand is from it. After each move, press <b>▶ Pull!</b> and read the newtonmeter.</p>` },
         CFACT('The Greek scientist Archimedes, over 2,200 years ago, said that with a long enough lever and a place to stand, he could move the Earth.')],
       predict: { q: 'You move the fulcrum closer to the rock. What will happen to the effort you need?', opts: ['It gets smaller, because more of the bar is on your side', 'It gets bigger, because the rock is now closer to the fulcrum', 'It stays the same, because the rock\'s weight hasn\'t changed', 'It drops to zero, because the fulcrum now holds up the rock'], then: 'Test it! Move the fulcrum close to the rock and pull.' },
-      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5 }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to work the lever',
+      setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: [], sides: [], pullers: [], idle: 'Press ▶ Pull! to work the lever',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Move the fulcrum so the rock is <b>0.4 m</b> from it, then press <b>Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Drag the fulcrum so the rock is <b>0.4 m</b> from it, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
         ['Find a fulcrum position where the effort is <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'lever' && r.cls === 1 && !r.capped && r.E <= 60)]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the rock 0.4 m from the fulcrum, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Pull with the rock 0.4 m from the fulcrum first. Your runs are in the Journal.', ok: 'Yes, 73.5 N. That\'s four times smaller than lifting the rock by hand.' },
@@ -8190,7 +8205,7 @@ CHDATA.c6 = {
     { id: 'lv3', title: 'The catch', rescue: 'The big rule is in the mission log: a smaller effort, or a bigger distance.',
       cards: [
         { hi: '#cvScene', html: `<p>Is there a catch to this trick? Let's find out. After each pull, two rulers appear under the bench. The <b style="color:#2a7d48">green ruler</b> shows how far the rock rose. The <b style="color:#d6402c">red ruler</b> shows how far your hand moved. Compare them carefully. You'll try three fulcrum positions.</p>` }],
-      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 0.4, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5 }); }, adds: ['rulers'], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! and look at both rulers',
+      setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 0.4, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: ['rulers'], sides: [], pullers: [], idle: 'Press ▶ Pull! and look at both rulers',
       tasks: [['Pull with the rock <b>0.4 m</b> from the fulcrum and look at both rulers.', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
         ['Now move the fulcrum so the rock is <b>0.2 m</b> from it, and pull again.', () => shopHas({ mach: 'lever', cls: 1, la: 0.2 })], ['', () => hasAns('q2'), { q: 'q2' }],
         ['Last one: move the fulcrum close to <b>your hand</b>, so the rock is <b>1.6 m</b> from it. Pull, and compare the rulers again.', () => shopHas({ mach: 'lever', cls: 1, la: 1.6 })], ['', () => hasAns('q3'), { q: 'q3' }]],
@@ -8204,12 +8219,12 @@ CHDATA.c6 = {
     { id: 'lv4', title: 'Three ways to build a lever', rescue: 'Three lever designs tested.',
       cards: [
         { html: `<p>Here's the big rule you found. Remember it: it works for every machine in the Workshop.</p><div class="law">A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it!</div><p>Close to the rock, the fulcrum gives you a <b>smaller effort</b>. Close to your hand, it gives the rock a <b>bigger distance</b>. It can't do both at once.</p>` },
-        { hi: '#wsClsRow', html: `<p>So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Use the new buttons to try each design. Pull, then check the newtonmeter and the two rulers.</p>${picThree()}` }],
+        { hi: '#cvScene', html: `<p>So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Tap the lever to open its menu and choose a design. Then press <b>▶ Pull!</b> and check the newtonmeter and the two rulers.</p>${picThree()}` }],
       predict: { q: 'With the effort in the middle, your hand pulls up close to the fulcrum and the rock sits at the far end. How will the effort compare with the rock\'s weight?', opts: ['The effort will be bigger than the rock\'s weight', 'The effort will be smaller than the rock\'s weight', 'The effort will be equal to the rock\'s weight', 'The effort will be zero, because the fulcrum holds it'], then: 'Try the load in the middle first, then the effort in the middle.' },
-      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Choose a design, then press Pull!',
+      setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: [], sides: [], pullers: [], idle: 'Tap the lever to choose a design, then press ▶ Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Choose <b>Load in the middle</b>. Put the rock <b>0.5 m</b> from the fulcrum and pull.', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 })],
-        ['Choose <b>Effort in the middle</b>. Put your hand <b>0.5 m</b> from the fulcrum and pull.', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
+        ['Tap the lever and choose <b>Load in the middle</b>. Drag the rock so it is <b>0.5 m</b> from the fulcrum, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 })],
+        ['Tap the lever and choose <b>Effort in the middle</b>. Drag your hand so it is <b>0.5 m</b> from the fulcrum, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the effort in the middle, what did the newtonmeter read?', unit: 'N', tol: 2, live: () => shopE({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle and your hand 0.5 m from the fulcrum first.', ok: '1,176 N: four times the rock\'s weight!' },
         { id: 'q2', type: 'reading', p: 'With the effort in the middle, the rock rose 0.40 m. How far did your hand move? Use the red ruler.', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle first.', ok: 'Only 0.10 m. A small movement of your hand swung the rock four times as far.' },
@@ -8222,8 +8237,8 @@ CHDATA.c6 = {
         { html: `<p>A wheelbarrow is a <b>class 2</b> lever. The wheel is the fulcrum, the heavy soil in the middle is the load, and you lift the handles at the end.</p>${picWheelbarrow()}` },
         { html: `<p>Chopsticks are a <b>class 3</b> lever. They pivot where they rest in your hand, your fingers squeeze in the middle, and the food is at the tips.</p>${picChopsticks()}` },
         { html: `<p>Watch a class 3 lever in action. The effort is big, but your hand only moves a little, and the far end swings a long way.</p>${picClass3Anim()}` }],
-      setup() { shopStage({ mach: 'lever', allow: ['lever'], cls: 3, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true, clsNames: true }); }, adds: [], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to work the class 3 lever',
-      tasks: [['The buttons now show the class names. Build a <b>class 3</b> lever with your hand <b>1.0 m</b> from the fulcrum and pull. Watch the far end swing.', () => shopHas({ mach: 'lever', cls: 3, ea: 1 })]],
+      setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 3, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true, clsNames: true, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: [], sides: [], pullers: [], idle: 'Press ▶ Pull! to work the class 3 lever',
+      tasks: [['The lever menu now shows the class names. Build a <b>class 3</b> lever with your hand <b>1.0 m</b> from the fulcrum and press <b>▶ Pull!</b>. Watch the far end swing.', () => shopHas({ mach: 'lever', cls: 3, ea: 1 })]],
       qs: [
         { id: 'q1', type: 'pick', p: 'In a class 2 lever, the {0} is in the middle. In a class 3 lever, the {1} is in the middle.', picks: [[['fulcrum', 'load', 'effort'], 1], [['fulcrum', 'load', 'effort'], 2]] },
         { id: 'q2', type: 'mcq', p: 'Chopsticks are a class 3 lever. Why are they so useful?', opts: ['A small squeeze of your fingers moves the tips a long way', 'Your fingers squeeze with less force than the food\'s weight', 'The food gets lighter when you hold it at the tips', 'Class 3 levers can work without any fulcrum at all'], a: 0, ok: 'Yes! Small finger movements open and close the tips wide.', why: { 1: 'In a class 3 lever the effort is bigger than the load.', 2: 'The food\'s weight is mass × g, which never changes.', 3: 'Chopsticks pivot where they rest in your hand: that\'s the fulcrum.' } }] },
@@ -8378,10 +8393,10 @@ CHDATA.c6 = {
     /* ================= Part 5: Rescue Captain Smooshy! (c6e) ================= */
     { id: 'v1', title: 'Landing on Glimmer-9', rescue: 'Landed on Glimmer-9. Rescue plan loaded!',
       cards: [
-        { hi: '#cvScene', html: `<p>You've landed on <b>Planet Glimmer-9</b>! Purple sky, two moons, and there is the Gumdrop, tipped over at the bottom of a <b>15 m</b> deep crater with a boulder jammed against its landing leg. Captain Smooshy is peeping out of the Gumdrop's window, wondering how a gummy bear is going to get his ship home.</p>` },
-        { html: `<p>Here is the plan. The huge repair ship, the <b>Big Jelly</b>, waits on the plain beyond the crater, because the rim is too crumbly for it to come any closer. Its <b>tractor beam</b> can lift the Gumdrop once the ship is level with the crest.</p><p>When the rescue begins, Smooshy squeezes out through the hatch (gummy bears are very squishy), because he has to be outside to pull. He stays at the handle of each machine in your route and walks on to the next one. At the end he climbs aboard, waves from the window, and the tractor beam lifts the ship away.</p>${picCraterPlan()}` },
-        { html: `<p>On Glimmer-9, ${T('gfs', 'g')} = <b>4.2 N/kg</b>, so things weigh less than on Earth, but the ship is still far too heavy for a 60 N gummy bear. You have <b>475 sugar crystals</b> to spend on machines, platforms and dynamite, and Smooshy has enough oxygen for <b>1,500 m</b> of hand pulling.</p><p>Design a route, press <b>Run Rescue</b>, and watch it work. This challenge is one homework in two sessions: build and test your first route in the first, then improve it in the second.</p>` }],
-      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'rescue', peep: 1, cap: 60, bRoutes: [[0, 'Straight up'], [30, 'Steep track'], [45, 'Medium track'], [75, 'Gentle track']] }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Smooshy is waiting in the Gumdrop. Answer the questions to get ready',
+        { hi: '#cvScene', html: `<p>Welcome to Gummy Mission Control! 🛰️ This is <b>Planet Glimmer-9</b>. The Gumdrop has crashed at the bottom of a <b>15 m</b> deep crater, and a boulder is stuck against its landing leg. Captain Smooshy is safe inside. Let's get him home!</p>` },
+        { html: `<p>Here's the plan. The <b>Big Jelly</b> is a huge repair ship. It can't land close to the crater, so it waits nearby. Its <b>tractor beam</b> can lift the Gumdrop once the ship reaches the top of the crater. Smooshy will climb out and work each machine you build. When the Gumdrop reaches the top, he climbs back in and the beam carries the ship home.</p>${picCraterPlan()}` },
+        { html: `<p>Gravity on Glimmer-9 is weaker than on Earth: ${T('gfs', 'g')} = <b>4.2 N/kg</b>. The ship is still far too heavy for a 60 N gummy bear, so you'll need machines. 💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money, and you have <b>475</b> to spend on machines, platforms and dynamite. Smooshy has enough oxygen for <b>1,500 m</b> of pulling. This mission takes two homework sessions: build and test a route in the first, then improve it in the second.</p>` }],
+      setup() { shopStage({ mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'mission', cap: 60, bRoutes: [[0, 'Straight up'], [30, 'Steep track'], [45, 'Medium track'], [75, 'Gentle track']] }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Smooshy is waiting in the Gumdrop. Answer the questions to get ready',
       tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
       qs: [
         { id: 'q1', type: 'num', p: 'The Gumdrop has a mass of 1,500 kg. On Glimmer-9, g = 4.2 N/kg. What does the Gumdrop weigh there?', unit: 'N', units: UNITS_W, ans: 6300, tol: 1, ladder: true, hints: ['Weight = mass × g.', 'Use the mass, 1,500 kg, and Glimmer-9\'s g, 4.2 N/kg.', 'Type 1500 × 4.2 into the calculator.'], work: 'Weight = 1,500 × 4.2 = 6,300 N.', ok: 'Yes, 6,300 N.' },
@@ -9326,8 +9341,19 @@ function glDrawWorld(c, o) {
   if (o.sel && byId[o.sel]) { const b = glBounds(byId[o.sel], ms[o.sel], g, plats); c.strokeStyle = '#ffe28a'; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.roundRect(glSX(b.x0) - 6, glSY(b.y1) - 6, (b.x1 - b.x0) * glU() + 12, (b.y1 - b.y0) * glU() + 12, 8); c.stroke(); c.setLineDash([]); }
   if (!run.on) rig.parts.filter(p => p.type === 'ramp').forEach(p => { const e = ms[p.id].end; c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y), 7, 0, 7); c.fill(); c.stroke(); });
   if (!run.on) rig.parts.forEach(p => { const q = glCablePoint(p, ms[p.id]); if (!q) return; c.fillStyle = 'rgba(31,29,38,.55)'; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 7, 0, 7); c.fill(); c.strokeStyle = GLC.rope; c.lineWidth = 2.5; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 5, 0, 7); c.stroke(); });
+  if (o.labels) glDrawLabels(c, o, g, crest);
   if (o.ruler) glDrawRuler(c, o.ruler);
   if (run.fx) run.fx(c, t);
+}
+/* the board labels (Tom, 8 Nov 2026): the boulder and the Gumdrop with their weights, the dotted line in words, and a "Drop here" glow on the boulder while a lever or jack is being dragged */
+function glDrawLabels(c, o, g, crest) {
+  const u = glU(), by = glAt(g, GL.boulderX - 0.3), sz = Math.max(10, Math.min(13, u * 1.15));
+  if (o.rock !== false) {
+    if (o.dropGlow) { const t = o.t || performance.now() / 1000, pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 6); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
+      c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); glLbl(c, 'Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), '#c9ffdc', sz + 1, 'center', 'rgba(31,29,38,.7)'); }
+    else glLbl(c, 'Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), GLC.label, sz, 'center', 'rgba(31,29,38,.6)'); }
+  if (o.ship && !o.ship.hideLabel) glLbl(c, 'Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 7.2), GLC.label, sz, 'center', 'rgba(31,29,38,.6)');
+  glLbl(c, 'The beam reaches here', glSX(60), glSY(crest + 0.9), '#c9ffdc', sz, 'center', 'rgba(31,29,38,.55)');
 }
 /* a part's box in world metres, for hit tests and the selection ring */
 function glBounds(p, m, g, plats) {
@@ -9338,6 +9364,26 @@ function glBounds(p, m, g, plats) {
   if (p.type === 'platform') { const pl = plats.find(q => q.id === p.id); return pl ? { x0: pl.x0, x1: pl.x1, y0: pl.base, y1: pl.top + 0.3 } : { x0: p.x - 2, x1: p.x + 2, y0: 0, y1: 1 }; }
   if (p.type === 'dyn') { const y = glAt(g, p.x); return { x0: p.x - 0.6, x1: p.x + 0.6, y0: y, y1: y + 1.9 }; }
   return { x0: p.x - 0.8, x1: p.x + 0.8, y0: p.y - 0.8, y1: p.y + 0.9 };
+}
+
+/* ---------- Mission Control (step v1): the whole crater on a big mission-control screen, console lights round the edge.
+   It reuses glDrawWorld, so it looks exactly like the builder's crater. Nothing to build here (Tom, 8 Nov 2026). c is the 900 x 430 Workshop canvas. ---------- */
+function glDrawMission(c) {
+  const t = performance.now() / 1000, SX = 20, SY = 34, SW = 860, SH = 372, g = glBaseGround(), keep = Object.assign({}, GLV);
+  c.fillStyle = '#1b1830'; c.fillRect(0, 0, 900, 430);
+  c.fillStyle = '#2a2547'; c.beginPath(); c.roundRect(4, 4, 892, 422, 16); c.fill();
+  c.fillStyle = '#0d0b1a'; c.beginPath(); c.roundRect(SX - 6, SY - 6, SW + 12, SH + 12, 14); c.fill();
+  c.save(); c.beginPath(); c.roundRect(SX, SY, SW, SH, 10); c.clip(); c.translate(SX, SY);
+  Object.assign(GLV, { LW: SW, LH: SH, K: SW / 100, z: 1, cx: 48, cy: 14.2 });
+  try { glDrawWorld(c, { rig: { parts: [], cables: [] }, ground: g, ev: null, ship: { x: GL.shipX, y: glAt(g, GL.shipX), tilt: 0, inside: true, mood: 'worried', dmg: 0 }, rock: true, labels: true, t }); }
+  finally { Object.assign(GLV, keep); }
+  c.restore();
+  /* the console: a title strip, then rows of blinking lights along the top and bottom edges and down both sides */
+  txt(c, 'GUMMY MISSION CONTROL · PLANET GLIMMER-9', 450, 18, '#ffe7b8', `800 13px ${C.fb}`);
+  const cols = ['#7ef0a8', '#ffd24d', '#ff6fa8', '#8ec5ff'];
+  const led = (x, y, i) => { const on = RMOTION || Math.floor(t * 1.5 + i * 0.7) % 3 !== 0; c.fillStyle = on ? cols[i % 4] : '#3a3554'; c.beginPath(); c.arc(x, y, 3.4, 0, 7); c.fill(); };
+  for (let i = 0; i < 28; i++) { led(40 + i * 29.5, 418, i); if (i % 3 === 0 && i < 8) led(40 + i * 29.5, 12, i + 1); if (i > 19 && i % 3 === 0) led(40 + i * 29.5, 12, i); }
+  for (let j = 0; j < 11; j++) { led(10, 50 + j * 32, j); led(890, 50 + j * 32, j + 2); }
 }
 
 /* ===== Operation Gummy Lift: the builder (stage 2). Free-form drag and drop like Poly Bridge: a tray of parts, handles,
@@ -9398,8 +9444,16 @@ function glAddPart(t, wx, wy) {
   if (glIsAddon(p)) glAutoAttach(p);
   GLB.sel = p.id; glChanged(); glOpenMenu(p.id);
 }
-/* a lever or jack set down by the boulder works on the boulder */
-function glBoulderSnap(p) { const nearRock = Math.abs(p.x - 18.2) <= 1.6 && glAt(glGround0(), p.x) < 0.5; if (nearRock) { p.role = 'boulder'; p.x = 18.2; if (p.type === 'lever') p.dir = 1; } else delete p.role; }
+/* a lever or jack works on the boulder when ANY part of it overlaps the boulder (Tom, 8 Nov 2026: it used to test only the lever's load end, so a bar lying across the boulder did not snap).
+   Returns true the moment it newly snaps on, so the caller can show the tick. */
+const GL_ROCK = { x0: 17.4, x1: 20.3 };
+function glOverRock(p) {
+  const d = p.dir || 1, a = p.type === 'lever' ? Math.min(p.x, p.x + d * GL.beam) - 0.3 : p.x - 0.8, b = p.type === 'lever' ? Math.max(p.x, p.x + d * GL.beam) + 0.3 : p.x + 0.8;
+  return a <= GL_ROCK.x1 && b >= GL_ROCK.x0 && glAt(glGround0(), 18.2) < 0.5;
+}
+function glBoulderSnap(p) { const was = p.role === 'boulder';
+  if (glOverRock(p)) { p.role = 'boulder'; p.x = 18.2; if (p.type === 'lever') p.dir = 1; if (!was) { toast(`✓ ${p.type === 'lever' ? 'Lever' : 'Screw jack'} on the boulder!`); return true; } } else delete p.role;
+  return false; }
 /* an add-on dropped near a machine's cable point (or the end of its chain) clips on */
 function glAutoAttach(p) {
   if (glOwner(p.id)) return; let best = null, bd = 4.5;
@@ -9423,7 +9477,7 @@ function glFrameOpts() {
   const ev = GLB.ev, st = glState(), hz = !ev ? null : ev.arrived ? null : ev.stop ? ev.stop.at : null;
   return { rig: GLB.rig, ev, ground: ev.ground, ghost: GLB.rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, sel: GLB.sel,
     ship: { x: GL.shipX, y: glAt(ev.ground, GL.shipX), tilt: 0, inside: true, mood: 'worried', dmg: st.lastDmg || 0 }, rock: !(st.boulderGone),
-    hz, hzLabel: hz ? (ev.legs.length ? 'Start the next machine in here' : 'Start your first machine in here') : '', ruler: GLB.rulerOn ? GLB.ruler : null, cableDrag: GLB.drag && GLB.drag.kind === 'cable' ? GLB.drag.line : null };
+    hz, hzLabel: hz ? (ev.legs.length ? 'Start the next machine in here' : 'Start your first machine in here') : '', labels: true, dropGlow: !!((GLB.trayType && (GLB.trayType === 'lever' || GLB.trayType === 'jack')) || (GLB.drag && GLB.drag.moved && GLB.drag.id && glPart(GLB.drag.id) && ['lever', 'jack'].includes(glPart(GLB.drag.id).type) && !GLB.drag.kind.match(/cable|pan|ruler/))), ruler: GLB.rulerOn ? GLB.ruler : null, cableDrag: GLB.drag && GLB.drag.kind === 'cable' ? GLB.drag.line : null };
 }
 function glLoop() {
   cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
@@ -9434,6 +9488,11 @@ const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - 
 function glHit(P) {
   const g = glGround0(), pl = glPlats0(), byId = {}; GLB.rig.parts.forEach(q => byId[q.id] = q); const ms = {}; GLB.rig.parts.filter(q => GL_LIFT[q.type]).forEach(q => ms[q.id] = glMachine(q, g, pl));
   const near = (q, r) => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy) <= (r || 14);
+  /* dynamite first: its tap area is at least 22 px across on screen (44 px for a finger), tested before cable dots and platform edges
+     (Tom, 8 Nov 2026: it was only 1.2 m wide, tiny on a phone, and a cable dot or a ramp handle beside it won the tap) */
+  { const sc = (GLB.cv.getBoundingClientRect().width || GLV.LW) / GLV.LW, minL = (GLB.touch ? 44 : 22) / sc, u = glU();
+    for (const p of GLB.rig.parts.filter(q => q.type === 'dyn').slice().reverse()) { const cx = glSX(p.x), y0 = glSY(glAt(g, p.x)), y1 = glSY(glAt(g, p.x) + 1.9), w = Math.max(1.2 * u, minL) / 2, mid = (y0 + y1) / 2, h = Math.max(Math.abs(y0 - y1), minL) / 2;
+      if (Math.abs(P.sx - cx) <= w && Math.abs(P.sy - mid) <= h) return { id: p.id, what: 'body' }; } }
   /* the nearest small target wins: cable dots and ramp-top handles sit close together */
   let best = null, bd = 14; const cand = (d, r) => { if (d < bd) { bd = d; best = r; } }, dist = q => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy);
   for (const p of GLB.rig.parts) { const q = glCablePoint(p, ms[p.id]); if (q) cand(dist(q), { id: p.id, what: 'cable', at: q }); if (p.type === 'ramp') cand(dist(ms[p.id].end) - 2, { id: p.id, what: 'head' }); }
@@ -9452,7 +9511,7 @@ function glHit(P) {
 function glBindBoard() {
   const cv = GLB.cv;
   cv.addEventListener('pointerdown', e => {
-    if (GLB.readOnly || (GLR && GLR.on)) return; const P = glPt(e); e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    if (GLB.readOnly || (GLR && GLR.on)) return; GLB.touch = e.pointerType === 'touch' || e.pointerType === 'pen'; const P = glPt(e); e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
     if (GLB.place) { const t = GLB.place; GLB.place = null; glTrayMark(); glAddPart(t, P.x, P.y); return; }
     if (GLB.rulerOn && GLB.ruler) for (const k of ['a', 'b']) if (Math.hypot(glSX(GLB.ruler[k].x) - P.sx, glSY(GLB.ruler[k].y) - P.sy) <= 16) { GLB.drag = { kind: 'ruler', k, P0: P, moved: false }; return; }
     const hit = glHit(P);
@@ -9539,7 +9598,7 @@ function glMenuAct(k) {
 function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
 function glPaintSide() {
   const ev = GLB.ev, el = $('#glCrys'); if (!el || !ev) return; const c = ev.cost.total, over = c > GL.budget;
-  el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} sugar crystals</span>`;
+  el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} ${T('sugarcrystal', 'sugar crystals')} (gummy money)</span>`;
   const rc = $('#glReceipt'); if (rc) rc.innerHTML = ev.cost.items.length ? ev.cost.items.map(([w, n]) => `<li><span>${esc(w)}</span><b>${n}</b></li>`).join('') + `<li class="tot"><span>Total</span><b>${c}</b></li>` : '<li>Nothing bought yet.</li>';
 }
 function glToolAct(k) {
@@ -9569,8 +9628,8 @@ function glMountBoard(host, opts) {
   host.addEventListener('click', e => { const b = e.target.closest('[data-gt]'); if (b) glToolAct(b.dataset.gt); const a = e.target.closest('[data-add]'); if (a && !GLB.trayDrag) { GLB.place = GLB.place === a.dataset.add ? null : a.dataset.add; glTrayMark(); } });
   /* drag straight from the tray onto the crater */
   $('#glTray', host).addEventListener('pointerdown', e => { const a = e.target.closest('[data-add]'); if (!a) return; const t = a.dataset.add, x0 = e.clientX, y0 = e.clientY; GLB.trayDrag = false;
-    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) GLB.trayDrag = true; };
-    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf);
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { GLB.trayDrag = true; GLB.trayType = t; } };
+    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); GLB.trayType = null;
       const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
       setTimeout(() => { GLB.trayDrag = false; }, 0); };
     document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
@@ -9583,9 +9642,10 @@ function renderGummyLift(ch, m, host, save) {
   GLB.ch = ch; GLB.mid = m.id; GLB.save = save; const st = glState();
   const card = h('section', { class: 'panel mission glwrap', id: 'mi-gl' }); host.appendChild(card);
   card.innerHTML = `${remindersHTML()}<details class="glbrief"${st.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
-      <p>Captain Smooshy's Gumdrop weighs <b>6,300 N</b> on Glimmer-9, and Smooshy can pull with <b>60 N</b> at most. Anything harder than that and he has to fire the Gumdrop's damaged thrusters, which scorch and shake the hull.</p>
-      <p>The Big Jelly can't land on the crumbly rim, so its tractor beam waits beyond the crest. It can grab the Gumdrop once the ship is <b>level with the top of the crest</b> (the dotted line). Build a route of machines from the Gumdrop up to that level. Each machine must start inside the glowing box where the last one finished.</p>
-      <p>You have <b>475 sugar crystals</b> to spend and enough oxygen for <b>1,500 m</b> of hand pulling. Don't forget the boulder jammed against the landing leg!</p></div></details>
+      <p>The Gumdrop weighs <b>6,300 N</b>. Smooshy can only pull <b>60 N</b>. If he has to pull harder, he fires the broken thrusters, and they damage the ship.</p>
+      <p>The tractor beam can lift the Gumdrop once it reaches the dotted line at the top of the crater. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
+      <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
+      <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p></div></details>
     <div id="glWarmHost"></div><div id="glBoardHost"></div><div id="glHintHost"></div><div id="glRunHost"></div>`;
   glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
   if (typeof glMountWarm === 'function') glMountWarm($('#glWarmHost', card));
@@ -9987,6 +10047,214 @@ function myRescueHTML(mode) {
     <table class="rtot"><tr>${tot.map(t => `<th>${t[0]}</th>`).join('')}</tr><tr>${tot.map(t => `<td>${t[1] ? W(esc(t[1])) : ''}</td>`).join('')}</tr></table>
     <div class="rwork"><b>My working</b><div class="box" style="white-space:pre-wrap">${work ? W(esc(work)) : ''}</div></div>
     <p class="note">${key ? 'This is one example route. Many routes can score well, so check a student\'s numbers against their own table. The rescue is a Challenge, so it is reported here and not marked. The reflection and the Check questions are marked.' : stu ? 'These numbers come from your best run in the sim. The rescue is a Challenge, so it is reported here and not marked.' : 'Students\' best run fills this page. The rescue is a Challenge, so it is reported here and not marked.'}</p></div>`;
+}
+
+/* ===== Chapter 6: lesson mode (Tom, 8 Nov 2026: "the engine they use when learning about a ramp, lever, pulley should be the same as the rescue") =====
+   Spec: docs/Workshop_Lesson_Mode_Spec.md. A small version of the rescue builder on the Workshop bench: a parts tray (drag a piece in, tap a piece for its menu),
+   things you drag on the board, and the same flat style. EVERY change goes through the Workshop's own model (wsSet / wsSetMach in 4a-workshop.js), so every number, task check
+   and answer stays exactly as it was. The ▶ button is the Workshop's own #wsPull button and calls wsPull().
+   The board is the Workshop canvas (900 x 430 units, 120 px per metre). The builder's colours (GLC) and the builder's menu and tray styles are shared; the lever is drawn here
+   because the bench lever has three set-ups and a 2 m bar. A step switches lesson mode on with lessonStage({ ...wsSetup options, lesson: { tray: [...], pre: [...], lock: [...] } }).
+   To add a piece for Parts 2 to 4: add it to LS_PIECES (name, icon, three cards), draw it in lsDrawMachine, give it a hit test in lsHit and a drop rule in lsDrop.
+   Names to avoid reusing elsewhere (one shared scope): LS, LS_*, ls*, lessonStage. */
+const LS = { on: false, o: null, drag: null, place: null, dragPiece: null, menu: false, bound: false, flash: 0, tdrag: false };
+const LS_K = 120, LS_X0 = 214, LS_FLOOR = 350;
+const lsCap = s => s.replace(/^./, ch => ch.toUpperCase());
+/* every piece: its tray tile and its three "first time" cards (the exact student text is in the spec, section 4) */
+const LS_PIECES = {
+  lever: { name: 'Lever', icon: '⚖️', note: 'drag it under the rock',
+    cards: [
+      { t: 'This is a lever: a long bar that turns on a <b>fulcrum</b> (the triangle).', ghost: 'point' },
+      { t: 'Drag the fulcrum along the bar. Watch the two numbers: how far the rock is from the fulcrum, and how far your hand is.', ghost: 'drag' },
+      { t: 'Press <b>▶ Pull!</b> to push down on the end. In the rescue, a lever under the boulder will knock it clear.', ghost: 'press', hi: '#wsPull' }] }
+};
+const lsSeen = () => dbGet('lsSeen', {});
+const lsHas = t => t === 'lever' ? WS.mach === 'lever' : false;
+const lsLocked = t => !!(LS.o && (LS.o.lock || []).includes(t));
+const lsCanvas = () => $('#cvScene');
+function lessonStage(o) {
+  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; lsCloseMenu();
+  const cv = lsCanvas(); if (cv) cv.style.touchAction = 'none';
+  lsRender();
+}
+function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; lsCloseMenu(); const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); }
+
+/* ---------- the tray and the status line ---------- */
+function lsRender() {
+  const tr = $('#lsTray'), st = $('#lsStatus'); if (!tr) return;
+  const on = LS.on && S.scene === 'shop' && !!LS.o; tr.hidden = !(on && LS.o.tray.length > 0); if (st) st.hidden = !on;
+  if (!on) return;
+  const sig = LS.o.tray.map(t => t + lsHas(t) + (LS.place === t)).join('|');
+  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = LS.o.tray.map(t => { const P = LS_PIECES[t], has = lsHas(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
+  if (st) st.textContent = LS.place ? 'Now tap the rock to put the lever there.' : lsStatus();
+  if (LS.menu) lsOpenMenu(LS.menu.t, true);
+}
+function lsStatus() {
+  const o = LS.o; if (!o) return '';
+  if (o.tray.includes('lever') && !lsHas('lever')) return 'Just a rope: Smooshy pulls the rock straight up. Drag the ⚖️ Lever from the tray under the rock to try a machine.';
+  if (WS.mach === 'lever') return WS.cls === 1 ? 'Drag the fulcrum (the triangle) along the bar. Tap the lever for its menu.' : WS.cls === 2 ? 'Drag the rock along the bar. Tap the lever for its menu.' : 'Drag your hand along the bar. Tap the lever for its menu.';
+  return '';
+}
+
+/* ---------- where things are on the bench (same numbers as the old bench: 120 px per metre) ---------- */
+function lsLever(riseNow, cur) {
+  const k = LS_K, X0 = LS_X0, cls = WS.cls, la = cur.la, ea = cur.ea, fx = cls === 1 ? X0 + la * k : X0, fy = cls === 1 ? 140 : 296;
+  const th = cls === 1 ? riseNow / la : cls === 2 ? -riseNow / la : -riseNow / 2, P = d => ({ x: fx + d * k * Math.cos(th), y: fy + d * k * Math.sin(th) });
+  const d0 = cls === 1 ? -la : 0, d1 = cls === 1 ? ea : WS_BAR, dl = cls === 1 ? -la : cls === 2 ? la : WS_BAR, de = cls === 1 ? ea : cls === 2 ? WS_BAR : ea;
+  return { k, X0, fx, fy, th, a: P(d0), b: P(d1), L: P(dl), E: P(de), la, ea };
+}
+const lsDropZone = () => ({ x0: 200, x1: 540, y0: 190, y1: 372 });   // where the lever can go: under and around the rock
+const lsInZone = (x, y) => { const z = lsDropZone(); return x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1; };
+
+/* ---------- drawing ---------- */
+function lsRoom(c) {
+  const sk = c.createLinearGradient(0, 0, 0, 350); sk.addColorStop(0, GLC.sky0); sk.addColorStop(1, GLC.sky1); c.fillStyle = sk; c.fillRect(0, 0, 900, WS_H);
+  c.fillStyle = 'rgba(255,255,255,.75)'; [[190, 30], [260, 70], [330, 22], [430, 58], [520, 24], [590, 66], [800, 30], [850, 76]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 1.6, 0, 7); c.fill(); });
+  /* the floor of the Workshop at Gummy Base One: the same crust and crystals as the crater */
+  const gr = c.createLinearGradient(0, 350, 0, WS_H); gr.addColorStop(0, GLC.rock0); gr.addColorStop(1, GLC.rock1); c.fillStyle = gr; c.fillRect(0, 350, 900, WS_H - 350);
+  c.fillStyle = GLC.crust; c.fillRect(0, 348, 900, 5);
+  c.fillStyle = 'rgba(255,255,255,.9)'; [[640, 350, 1], [668, 350, .7], [850, 350, .9], [878, 350, .6]].forEach(([x, y, s]) => { [-.5, 0, .45].forEach((dx, i) => { const hh = (i === 1 ? 26 : 16) * s, ww = 7 * s, X = x + dx * 26 * s; c.beginPath(); c.moveTo(X, y - hh); c.lineTo(X + ww, y - hh * .3); c.lineTo(X + ww * .6, y + 1); c.lineTo(X - ww * .6, y + 1); c.lineTo(X - ww, y - hh * .3); c.closePath(); c.fill(); }); });
+  txt(c, 'THE WORKSHOP · GUMMY BASE ONE', 14, 418, '#fffaf2', `800 11px ${C.fb}`, 'left');
+}
+function lsLoadBox(c, x, y, label) {   // the load with its weight: "Rock 294 N" (x, y = the middle of the bottom edge)
+  c.font = `800 12px ${C.fn}`; const w = Math.max(62, c.measureText(label).width + 22);
+  wsLoadBlock(c, x, y, w, 40, WS.loadId, ''); txt(c, label, x, y - 20, '#fffaf2', `800 12px ${C.fn}`);
+}
+const lsLoadLabel = () => `${lsCap(WS.loadShort)} ${fmt(WS.load, WS.load % 1 ? 1 : 0)} N`;
+function lsBarAndFulcrum(c, G) {
+  c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(G.fx, G.fy + 8); c.lineTo(G.fx + 30, LS_FLOOR); c.lineTo(G.fx - 30, LS_FLOOR); c.closePath(); c.fill();   // the fulcrum: a triangle, like the rescue's lever
+  c.strokeStyle = GLC.wood2; c.lineWidth = 14; c.lineCap = 'round'; c.beginPath(); c.moveTo(G.a.x, G.a.y); c.lineTo(G.b.x, G.b.y); c.stroke(); c.strokeStyle = GLC.wood; c.lineWidth = 7; c.beginPath(); c.moveTo(G.a.x, G.a.y - 1); c.lineTo(G.b.x, G.b.y - 1); c.stroke();
+  c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(G.fx, G.fy, 7, 0, 7); c.fill();
+}
+function lsDrawLever(c, cur, riseNow) {
+  const G = lsLever(riseNow, cur), { fx, fy, L, E } = G, cls = WS.cls, yb = cls === 1 ? 58 : 318;
+  wsBracket(c, Math.min(L.x, fx), Math.max(L.x, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(cur.la, 2)} m`, WSC.green, true);   // the two distances along the bar, in plain words
+  wsBracket(c, Math.min(fx, E.x), Math.max(fx, E.x), yb, `hand to fulcrum ${fmt(cur.ea, 2)} m`, WSC.red, true);
+  lsBarAndFulcrum(c, G); lsLoadBox(c, L.x, L.y - 7, lsLoadLabel());
+  const down = cls === 1, hy = down ? Math.min(E.y + 84, 330) : Math.max(E.y - 84, 52);
+  wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
+  if (down) wsLabel(c, 'fulcrum', fx, 338, WSC.steel2, 'center', [fx, 322]); else wsLabel(c, 'fulcrum', fx - 34, 334, WSC.steel2, 'right', [fx - 14, 330]);
+  return { x: E.x, y: hy };
+}
+/* just a rope: it runs from the rock up to Smooshy's hand, with the newtonmeter in the line */
+function lsDrawRope(c, riseNow) {
+  const cx = 360, by = LS_FLOOR - riseNow * 300;
+  lsLoadBox(c, cx, by, lsLoadLabel());
+  c.strokeStyle = GLC.rope; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx, by - 40); c.lineTo(cx, by - 76); c.stroke();
+  wsSpring(c, cx, by - 76, cx, by - 150, 'pull up'); wsLabel(c, 'just a rope', cx + 60, by - 20, WSC.steel2, 'left', [cx + 4, by - 56]);
+  return { x: cx, y: by - 150 };
+}
+function lsDrawMachine(c, cur, riseNow) { return WS.mach === 'lever' ? lsDrawLever(c, cur, riseNow) : lsDrawRope(c, riseNow); }
+
+/* the things drawn on top of the bench: what can be dragged, the "Drop here" glow, and the ghost hand of the first-time cards */
+function lsOverlay(c) {
+  if (!LS.on || !LS.o) return; const t = performance.now() / 1000, pulse = RMOTION ? .5 : .5 + .5 * Math.sin(t * 5), cur = WS.c || wsCalc();
+  if (WS.mach === 'lever' && !WS.busy) {   // a dashed ring and arrows on the part you can drag
+    const G = lsLever(0, cur), p = lsGrab(G);
+    c.save(); c.strokeStyle = `rgba(255,226,138,${.55 + .4 * pulse})`; c.lineWidth = 2.5; c.setLineDash([6, 4]); c.beginPath(); c.arc(p.x, p.y, 33, 0, 7); c.stroke(); c.setLineDash([]);
+    c.fillStyle = 'rgba(31,29,38,.7)'; c.beginPath(); c.roundRect(p.x - 27, p.y + 26, 54, 17, 8); c.fill(); txt(c, '◀ drag ▶', p.x, p.y + 35, '#ffe28a', `800 10px ${C.fb}`); c.restore();
+  }
+  if ((LS.dragPiece || LS.place) && !lsHas(LS.dragPiece || LS.place)) {   // the glow where the lever goes
+    const z = lsDropZone(); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${.6 + .4 * pulse})`; c.lineWidth = 3; c.setLineDash([7, 5]); c.beginPath(); c.roundRect(z.x0, z.y0, z.x1 - z.x0, z.y1 - z.y0, 12); c.stroke(); c.restore();
+    c.fillStyle = `rgba(126,240,168,${.1 + .1 * pulse})`; c.beginPath(); c.roundRect(z.x0, z.y0, z.x1 - z.x0, z.y1 - z.y0, 12); c.fill(); wsLabel(c, 'Drop here', (z.x0 + z.x1) / 2, z.y0 - 12, '#2a7d48', 'center');
+  }
+  if (LS.flash && performance.now() - LS.flash < 900) wsLabel(c, 'The lever goes under the rock', 360, 200, WSC.red, 'center');
+  if (typeof CARDS !== 'undefined' && CARDS && CARDS.opt && CARDS.opt.lsPiece) lsGhost(c, CARDS.opt.lsPiece, CARDS.cards[CARDS.k].ghost, t);
+}
+const lsGrab = G => WS.cls === 1 ? { x: G.fx, y: G.fy + 40 } : WS.cls === 2 ? { x: G.L.x, y: G.L.y - 27 } : { x: G.E.x, y: G.E.y - 40 };   // the part you drag
+function lsGhost(c, piece, kind, t) {
+  if (piece !== 'lever') return;
+  const real = WS.mach === 'lever', cur = real ? (WS.c || wsCalc()) : { la: 1, ea: 1 };
+  if (!real) { c.save(); c.globalAlpha = .5; lsBarAndFulcrum(c, lsLever(0, cur)); c.restore(); }   // the lever is not on the bench yet: show a faint one under the rock
+  const G = lsLever(0, cur), g = real ? lsGrab(G) : { x: G.fx, y: G.fy + 40 };
+  let x = g.x + 6, y = g.y + 14 + 5 * Math.sin(t * 5), down = false;
+  if (kind === 'drag') {   // grab the part and slide it along the bar and back
+    const X = g.x + 0.5 * LS_K * Math.sin(t * 1.7); x = X + 6; y = g.y + 14; down = true;
+    if (!real) { c.save(); c.globalAlpha = .45; c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(X, G.fy + 8); c.lineTo(X + 30, LS_FLOOR); c.lineTo(X - 30, LS_FLOOR); c.closePath(); c.fill(); c.restore(); }
+  } else if (kind === 'press') { const bt = $('#wsPull'); if (bt && bt.offsetParent) { const r = bt.getBoundingClientRect(), cr = lsCanvas().getBoundingClientRect(); x = clamp((r.left + r.width / 2 - cr.left) * 900 / cr.width, 40, 860); y = clamp((r.top - cr.top) * WS_H / cr.height - 12, 20, 410); } }
+  c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(down ? '✊' : '👆', x, y); c.restore();
+}
+
+/* ---------- the pointer: tap, drag, and drop from the tray ---------- */
+const lsXY = e => { const r = lsCanvas().getBoundingClientRect(); return { x: (e.clientX - r.left) * 900 / r.width, y: (e.clientY - r.top) * WS_H / r.height }; };
+function lsHit(p) {   // what is under the pointer on the lever
+  if (WS.mach !== 'lever') return null; const G = lsLever(0, wsCalc()), cls = WS.cls, near = (x, y, rx, up, dn) => Math.abs(p.x - x) <= rx && p.y >= y - up && p.y <= y + dn;
+  if (cls === 1 && near(G.fx, G.fy, 34, 18, LS_FLOOR - G.fy + 4)) return { what: 'part', v0: WS.arm, x0: p.x };
+  if (cls === 2 && near(G.L.x, G.L.y, 44, 58, 14)) return { what: 'part', v0: WS.arm, x0: p.x };
+  if (cls === 3 && near(G.E.x, G.E.y, 36, 96, 14)) return { what: 'part', v0: WS.arm, x0: p.x };
+  if (p.x >= G.a.x - 12 && p.x <= G.b.x + 12 && Math.abs(p.y - G.a.y) <= 34) return { what: 'bar' };
+  return null;
+}
+function lsBind() {
+  if (LS.bound) return; LS.bound = true; const cv = lsCanvas();
+  cv.addEventListener('pointerdown', e => {
+    if (!LS.on || S.scene !== 'shop' || WS.busy) return; const p = lsXY(e);
+    if (LS.place) { const t = LS.place; LS.place = null; lsRender(); lsDrop(t, p.x, p.y); return; }
+    const h = lsHit(p); if (!h) { lsCloseMenu(); return; }
+    e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    LS.drag = Object.assign({ p0: p, moved: false, id: e.pointerId }, h);
+  });
+  cv.addEventListener('pointermove', e => {
+    const d = LS.drag; if (!d || e.pointerId !== d.id) return; const p = lsXY(e);
+    if (!d.moved && Math.hypot(p.x - d.p0.x, p.y - d.p0.y) < 5) return; if (d.what !== 'part') return; d.moved = true; lsCloseMenu();
+    wsSet('arm', d.v0 + (p.x - d.x0) / LS_K);   // the same call the old slider made: it snaps to 0.05 m and keeps to the limits
+  });
+  const up = e => { const d = LS.drag; if (!d || e.pointerId !== d.id) return; LS.drag = null; if (!d.moved) lsOpenMenu('lever'); };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', () => { LS.drag = null; });
+  /* drag straight from the tray onto the bench; a tap picks the piece up, then tap the rock */
+  const tr = $('#lsTray');
+  tr.addEventListener('pointerdown', e => { const a = e.target.closest('[data-lsadd]'); if (!a || a.disabled) return; const t = a.dataset.lsadd, x0 = e.clientX, y0 = e.clientY; LS.tdrag = false;
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { LS.tdrag = true; LS.dragPiece = t; } };
+    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); const r = cv.getBoundingClientRect(); LS.dragPiece = null;
+      if (LS.tdrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const p = lsXY(ev2); lsDrop(t, p.x, p.y); }
+      setTimeout(() => { LS.tdrag = false; }, 0); };
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
+  tr.addEventListener('click', e => {
+    const q = e.target.closest('[data-lsq]'); if (q) { lsShowCards(q.dataset.lsq); return; }
+    const a = e.target.closest('[data-lsadd]'); if (a && !a.disabled && !LS.tdrag) { LS.place = LS.place === a.dataset.lsadd ? null : a.dataset.lsadd; tr.dataset.sig = ''; lsRender(); }
+  });
+  const m = $('#lsMenu'); makeDraggable(m, '.glmhd', 'lsmenu');
+  m.addEventListener('click', e => { const b = e.target.closest('[data-lm]'); if (b) lsMenuAct(b.dataset.lm); });
+}
+function initLesson() { if ($('#lsTray')) lsBind(); }
+/* a piece dropped on the bench: the lever has to go under the rock (the glowing box) */
+function lsDrop(t, x, y) {
+  if (t !== 'lever' || lsHas('lever')) return;
+  if (!lsInZone(x, y)) { LS.flash = performance.now(); toast('Drop the lever under the rock. It glows where it goes.'); return; }
+  wsSetMach('lever'); toast('✓ Lever under the rock!', 'ok'); lsRender();
+  if (!lsSeen().lever && !FAST) lsShowCards('lever'); else lsOpenMenu('lever');
+}
+
+/* ---------- the lever's menu: the same pop-up as the rescue's ---------- */
+function lsCloseMenu() { LS.menu = false; const m = $('#lsMenu'); if (m) m.hidden = true; }
+function lsOpenMenu(t, keep) {
+  const m = $('#lsMenu'); if (!m || t !== 'lever' || WS.mach !== 'lever') { if (!keep) lsCloseMenu(); return; }
+  const first = !LS.menu; LS.menu = { t };
+  const pm = (k, lab, val) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-lm="${k}-" aria-label="Less">−</button><b>${val}</b><button type="button" class="ghost sm" data-lm="${k}+" aria-label="More">+</button></div>`;
+  const lab = WS.cls === 1 ? 'Fulcrum' : WS.cls === 2 ? `${lsCap(WS.loadShort)} to fulcrum` : 'Hand to fulcrum';
+  const cls = WS.classPick ? `<div class="glrow wrap"><span>Set-up</span></div><div class="glrow wrap" style="margin-top:0">${[1, 2, 3].map(n => `<button type="button" class="ghost sm ${WS.cls === n ? 'on' : ''}" data-lm="cls${n}">${WS.clsNames ? `Class ${n}: ` : ''}${lsCap(WS_SETUP[n])}</button>`).join('')}</div>` : '';
+  m.innerHTML = `<div class="glmhd"><span aria-hidden="true">⠿</span> <b>Lever</b><button type="button" class="glx" data-lm="close" aria-label="Close">✕</button></div>${cls}${pm('arm', lab, fmt(WS.arm, 2) + ' m')}
+    <p class="glnote">Drag it on the bench, or use − and +. It moves 0.05 m at a time.</p>${lsLocked('lever') ? '' : '<div class="glrow"><button type="button" class="ghost sm" data-lm="del">🗑 Remove</button></div>'}`;
+  m.hidden = false;
+  if (first) { const r = lsCanvas().getBoundingClientRect(), G = lsLever(0, wsCalc()), x = r.left + (G.b.x + 20) * r.width / 900, y = r.top + 30 * r.height / WS_H;
+    m.style.left = clamp(x, 4, Math.max(4, innerWidth - m.offsetWidth - 4)) + 'px'; m.style.top = clamp(y, 4, Math.max(4, innerHeight - m.offsetHeight - 4)) + 'px'; }
+}
+function lsMenuAct(k) {
+  if (k === 'close') return lsCloseMenu();
+  if (k === 'del') { if (!lsLocked('lever') && WS.allow.includes('hand')) { wsSetMach('hand'); lsCloseMenu(); lsRender(); } return; }
+  if (k.startsWith('cls')) return wsSet('cls', +k.slice(3));
+  if (k === 'arm-' || k === 'arm+') wsSet('arm', WS.arm + (k === 'arm+' ? 0.05 : -0.05));
+}
+
+/* ---------- first-time cards: three short cards with OK, and a ghost hand on the board (a "?" on each tray tile plays them again) ---------- */
+function lsShowCards(piece) {
+  const P = LS_PIECES[piece]; if (!P) return; lsCloseMenu();
+  showCards(P.cards.map(c => ({ html: `<p>${c.t}</p>`, ghost: c.ghost, hi: c.hi })), { title: `New piece: ${P.name}`, journal: false, nextLabel: 'OK', lsPiece: piece, onDone: () => { const s = lsSeen(); s[piece] = true; dbSet('lsSeen', s); lsAfterCards(); } });
+}
+/* after a step's own cards: the pieces already on the bench that this student has not met yet */
+function lsAfterCards() {
+  if (!LS.on || FAST || S.scene !== 'shop' || !LS.o) return; const seen = lsSeen(), p = (LS.o.pre || []).find(t => LS_PIECES[t] && !seen[t]);
+  if (p) lsShowCards(p);
 }
 
 /* ===== Review questions (data drives the sim, worksheets, answer keys and marking schemes) ===== */
@@ -10850,7 +11118,7 @@ function openExplore() {
 const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
 const exploreSwitch = cur => { const w = typeof exploreShopOpen === 'function' && exploreShopOpen(); return `<div class="seg ${w ? 'two' : 'three'} exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button><button type="button" data-exscene="heli" aria-pressed="${cur === 'heli'}">Helicopter</button>${w ? `<button type="button" data-exscene="shop" aria-pressed="${cur === 'shop'}">Workshop</button>` : ''}</div>`; };
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initShop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initShop(); initLesson(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);
