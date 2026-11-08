@@ -20,14 +20,14 @@ function drawGumdropInside(c, x, y, s, tilt, mood, tt) {
 /* The Rescue board's picture, in the Part 5 art: Glimmer-9's crater from the builder (glDrawWorld at board size), the Gumdrop with Smooshy in the window,
    and the Big Jelly waiting above the plain. When Part 5 is done the Gumdrop rises in the Big Jelly's tractor beam. */
 function drawCrater(c, w, h, st, t) {
-  const keep = Object.assign({}, GLV), g = glBaseGround(), done = !!st.e;
+  const keep = Object.assign({}, GLV), lbk = Object.assign({}, LBL), g = glBaseGround(), done = !!st.e;   // lbk: this small picture must not wipe the board's labels (they share LBL)
   Object.assign(GLV, { LW: w, LH: h, K: w / 100, z: 1, cx: 48, cy: 12.5 });
   try {
     const u = glU(), rise = !done ? 0 : RMOTION ? 0.7 : (t * 0.2) % 1, sx = done ? 86 : 14, sy = done ? 8 + 4.6 * rise * rise * (3 - 2 * rise) : glAt(g, 14), X = glSX(sx), Y = glSY(sy);
     glDrawWorld(c, { rig: { parts: [], cables: [] }, ground: g, ev: null, ship: null, rock: !done, t,
       run: done ? { beam: { x: X - 2.6 * u, y: Y + 1.2 * u, x2: X + 2.6 * u, y2: Y + 1.2 * u } } : {} });
     drawGumdropInside(c, X, Y, 0.8, 0, done ? 'cheer' : 'wave', t);
-  } finally { Object.assign(GLV, keep); }
+  } finally { Object.assign(GLV, keep); Object.assign(LBL, lbk); }
 }
 function renderRescue() {
   const host = $('#rescueBoard'); if (!host) return;
@@ -49,7 +49,7 @@ function rbDraw() {
 /* ---------- the transmission: Smooshy's live call from the Gumdrop. The ship crashes into the crater, then the camera pushes in on the round window and he waves ---------- */
 let TXRAF = 0;
 function txCrash(c, t) {
-  const W = 360, H = 200, keep = Object.assign({}, GLV), g = glBaseGround(), ez = x => x * x * (3 - 2 * x);
+  const W = 360, H = 200, keep = Object.assign({}, GLV), lbk = Object.assign({}, LBL), g = glBaseGround(), ez = x => x * x * (3 - 2 * x);
   const k = RMOTION ? 1 : clamp((t - 2.6) / 0.9, 0, 1), e = ez(k), z = 3.2 + (12 - 3.2) * e, cy = 7 + (1.7 - 7) * e;
   const shake = !RMOTION && t > 1.8 && t < 2.3 ? Math.sin(t * 90) * 3 * (2.3 - t) * 2 : 0;
   Object.assign(GLV, { LW: W, LH: H, K: W / 100, z, cx: 14, cy });
@@ -74,7 +74,7 @@ function txCrash(c, t) {
       txt(c, 'LIVE · THE GUMDROP', 34, 22.5, '#fffaf2', `800 10px ${C.fb}`, 'left');
       if (t > 3.5) { const wr = 0.61 * glU(), wx = glSX(14) - wr - 8, wy = glSY(1.9); c.fillStyle = '#fffaf2'; c.beginPath(); c.roundRect(wx - 98, wy - 38, 98, 26, 10); c.fill(); c.beginPath(); c.moveTo(wx - 6, wy - 16); c.lineTo(wx + 6, wy - 4); c.lineTo(wx - 22, wy - 14); c.closePath(); c.fill(); txt(c, 'Hi, GASA!', wx - 49, wy - 24.5, '#1f1d26', `800 12px ${C.fb}`); }
     }
-  } finally { Object.assign(GLV, keep); }
+  } finally { Object.assign(GLV, keep); Object.assign(LBL, lbk); }
 }
 function openTransmission() {
   const first = `<div class="tx-head"><span>📡 Incoming call · GASA Mission Control</span></div>
