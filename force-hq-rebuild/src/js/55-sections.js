@@ -70,7 +70,7 @@ const SECTIONS = [
   { id: 'c6c', ch: 'c6', n: 6, title: 'Mechanical advantage and work', part: 'Part 3', stamp: 'Advantage Ace',
     blurb: 'Give every machine a number (mechanical advantage), predict the effort from its shape, and measure work in joules: the catch, in numbers.',
     steps: ['u1', 'u2', 'u3'], challenge: ['y1', 'y2', 'y3'], review: ['c6r12', 'c6r13', 'c6r14', 'c6r15', 'c6r16', 'c6r17'], needs: 'c6b',
-    chalInfo: { title: 'Launch-day loading', intro: 'Smooshy\'s rescue rocket, <b>Gummy Rescue One</b>, is on the launch pad at Force HQ, and it needs loading! Practise like Smooshy: no pull may be more than <b>60 N</b>. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!' },
+    chalInfo: { title: 'Loading the Big Jelly', intro: 'The Big Jelly, GASA\'s repair ship, is on the launch pad at Force HQ, and it needs loading before it flies to Glimmer-9! Practise like Smooshy: no pull may be more than <b>60 N</b>. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!' },
     goal: 'Work out mechanical advantage as load ÷ effort; predict the effort for a lever, winch, ramp or pulley system from its shape; calculate work as force × distance in joules; explain that a perfect machine does the same work however much it reduces the effort.',
     vocab: ['mechanical advantage', 'work', 'joule'] },
   { id: 'c6d', ch: 'c6', n: 6, title: 'Compound machines', part: 'Part 4', stamp: 'Master Builder',

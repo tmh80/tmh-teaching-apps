@@ -214,9 +214,9 @@ function glDrawLabels(c, o, g, crest, ev) {
   if (o.rock !== false) {
     if (o.dropGlow) { const t = o.t || performance.now() / 1000, pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 6); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
       c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); lblAdd('Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), { size: sz + 1, col: '#c9ffdc', bg: 'rgba(31,29,38,.7)', prio: 2 }); }
-    else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3 }); }
-  if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4 });
-  if (o.ship && ev && ev.ghosts) ev.ghosts.forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4 }));
+    else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3, tx: glSX(GL.boulderX), ty: glSY(by + 0.9) }); }
+  if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4, tx: glSX(o.ship.x), ty: glSY(o.ship.y + 4.5) });
+  if (o.ship && ev && ev.ghosts) ev.ghosts.forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4, tx: glSX(gh.x), ty: glSY(gh.y + 4.5) }));
 }
 /* where the Gumdrop is for a machine or add-on: at the start of the leg it belongs to, else waiting as the ghost (or still at the start) */
 function glShipSpot(ev, id, g) {

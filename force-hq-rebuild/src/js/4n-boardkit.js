@@ -5,7 +5,7 @@
 
 /* ---------- board labels ----------
    Draw code calls lblAdd() for each label and lblAvoid() for each handle or dot; lblFlush() then places every label in the first free spot
-   (the label's own spot, then above, below and to the sides), draws it, and leaves the boxes in LBL.boxes (the tests read them). */
+   (the label's own spot, then above, below and to the sides), draws it (with a thin leader line to its object when it was pushed away: give the label tx, ty), and leaves the boxes in LBL.boxes (the tests read them). */
 const LBL = { list: [], avoid: [], boxes: [] };
 function lblBegin() { LBL.list = []; LBL.avoid = []; }
 function lblAvoid(x, y, r) { LBL.avoid.push({ x0: x - r, y0: y - r, x1: x + r, y1: y + r }); }
@@ -21,7 +21,12 @@ function lblFlush(c, W, H, fade) {
       if (!clash(b)) { best = b; break; } } if (best) break; }
     if (!best) best = { x0: clamp(bx, 2, Math.max(2, W - w - 2)), y0: clamp(by, 2, Math.max(2, H - h - 2)), x1: 0, y1: 0 };
     best.x1 = best.x0 + w; best.y1 = best.y0 + h; placed.push(best); LBL.boxes.push({ text: l.text, x0: best.x0, y0: best.y0, x1: best.x1, y1: best.y1 });
-    c.save(); c.globalAlpha = fade == null || l.nofade ? 1 : fade; c.fillStyle = l.bg; c.beginPath(); c.roundRect(best.x0, best.y0, w, h, 6); c.fill(); if (l.border) { c.strokeStyle = l.border; c.lineWidth = 1.5; c.stroke(); }
+    c.save(); c.globalAlpha = fade == null || l.nofade ? 1 : fade;
+    if (l.tx != null) {   // a label that has been pushed away from its object gets a thin leader line to it (Tom, 8 Nov 2026)
+      const nx = clamp(l.tx, best.x0, best.x1), ny = clamp(l.ty, best.y0, best.y1);
+      if (Math.hypot(l.tx - nx, l.ty - ny) > 14) { c.strokeStyle = l.border || l.col; c.globalAlpha *= .8; c.lineWidth = 1.2; c.beginPath(); c.moveTo(nx, ny); c.lineTo(l.tx, l.ty); c.stroke(); c.fillStyle = l.border || l.col; c.beginPath(); c.arc(l.tx, l.ty, 2.2, 0, 7); c.fill(); c.globalAlpha = fade == null || l.nofade ? 1 : fade; }
+    }
+    c.fillStyle = l.bg; c.beginPath(); c.roundRect(best.x0, best.y0, w, h, 6); c.fill(); if (l.border) { c.strokeStyle = l.border; c.lineWidth = 1.5; c.stroke(); }
     txt(c, l.text, best.x0 + w / 2, best.y0 + h / 2 + 0.5, l.col, `800 ${l.size}px ${C.fb || 'sans-serif'}`, 'center'); c.restore();
   });
 }

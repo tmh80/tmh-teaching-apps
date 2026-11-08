@@ -117,7 +117,7 @@ CHDATA.c6 = {
         { id: 'q2', type: 'reading', p: 'With the effort in the middle, the rock rose 0.40 m. How far did your hand move? Use the red ruler.', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle first.', ok: 'Only 0.10 m. A small movement of your hand swung the rock four times as far.' },
         { id: 'q3', type: 'pick', p: 'With the effort in the middle, the effort was {0} the rock\'s weight, but the rock moved {1} your hand.', picks: [[['smaller than', 'the same as', 'bigger than'], 2], [['less far than', 'the same distance as', 'further than'], 2]], after: 'It\'s the catch again, the other way round: a bigger effort, but a bigger distance at the load.' }] },
 
-    { id: 'lv5', title: 'The three classes of lever', rescue: 'All three classes of lever logged. The lever kit is packed!',
+    { id: 'lv5', title: 'The three classes of lever', rescue: 'All three classes of lever logged. The lever kit is packed on the Big Jelly!',
       cards: [
         { html: `<p>Scientists give the three designs names. They are the three <b>classes</b> of lever, and you name each one by what is in the middle.</p>${picThree({ classes: true })}` },
         { html: `<p>Here's an everyday example of each one. A seesaw is a <b>class 1</b> lever: the fulcrum is in the middle.</p>${picSeesaw()}` },
@@ -131,7 +131,7 @@ CHDATA.c6 = {
         { id: 'q2', type: 'mcq', p: 'Chopsticks are a class 3 lever. Why are they so useful?', opts: ['A small squeeze of your fingers moves the tips a long way', 'Your fingers squeeze with less force than the food\'s weight', 'The food gets lighter when you hold it at the tips', 'Class 3 levers can work without any fulcrum at all'], a: 0, ok: 'Yes! Small finger movements open and close the tips wide.', why: { 1: 'In a class 3 lever the effort is bigger than the load.', 2: 'The food\'s weight is mass × g, which never changes.', 3: 'Chopsticks pivot where they rest in your hand: that\'s the fulcrum.' } }] },
 
     /* ================= Part 2: Pulleys, wheels and ramps (c6b) ================= */
-    { id: 'pl1', title: 'Pulleys', rescue: 'Pulley blocks packed in the toolkit.',
+    { id: 'pl1', title: 'Pulleys', rescue: 'Pulley blocks packed on the Big Jelly.',
       cards: [
         { html: `<p>Welcome to Part 2! Remember the big rule from the lever:</p><div class="law">A machine can make the effort you need smaller, or let you move something a bigger distance, depending on how you use it!</div><p>Every machine in Part 2 follows it. Watch for the catch: a smaller effort means your hand moves further.</p>${picCatch()}` },
         { hi: '#cvScene', html: `<p>A ${T('pulley', 'pulley')} is a wheel with a rope running round it. A flagpole has one at the top: you pull the rope down, and the flag goes up.</p>${picFlagpole()}` },
@@ -146,7 +146,7 @@ CHDATA.c6 = {
         { id: 'q3', type: 'pick', p: 'Each extra supporting rope made the effort {0} and the length of rope you pulled {1}.', picks: [[['bigger', 'the same', 'smaller'], 2], [['shorter', 'the same', 'longer'], 2]], after: 'The catch again: less force, more rope.' },
         { id: 'q4', type: 'mcq', p: 'A flagpole has just one pulley, so the pull you need is the same as the flag\'s weight. Why is the pulley still useful?', opts: ['You can stand at the bottom and pull down to raise the flag to the top', 'It makes the flag lighter, so it is easier to lift to the top', 'It halves the pull you need to raise the flag to the top', 'It stops the flag from ever sliding back down the pole'], a: 0, ok: 'Exactly. One pulley changes the direction of your pull, so you pull down and the flag goes up.', why: { 1: 'The flag\'s weight doesn\'t change.', 2: 'With 1 supporting rope, the effort was the full weight of the crate.', 3: 'Let go of the rope and the flag slides down. The pulley only changes the direction.' } }] },
 
-    { id: 'pl2', title: 'Wheel and axle', rescue: 'A winch packed in the toolkit.',
+    { id: 'pl2', title: 'Wheel and axle', rescue: 'A winch packed on the Big Jelly.',
       cards: [
         { html: `<p>A ${T('wheelaxle', 'wheel and axle')} is a big wheel fixed to a thin rod, called the axle, so they turn together. A screwdriver is one: the fat handle is the wheel, and the thin metal shaft is the axle.</p>${picScrewdriver()}` },
         { hi: '#cvScene', html: `<p>The Workshop's ${T('winch', 'winch')} is a wheel and axle too. You turn the handle, and the thin axle winds up the rope to lift the bucket. Try a short handle, then a long one.</p>` }],
@@ -158,7 +158,7 @@ CHDATA.c6 = {
         { id: 'q1', type: 'reading', p: 'With a handle radius of 0.25 m, what effort lifted the 196 N bucket?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'winch', R: 0.25 }), need: () => shopHas({ mach: 'winch', R: 0.25 }), needMsg: 'Lift the bucket with a handle radius of 0.25 m first. Your runs are in the Journal.', ok: 'Yes, 39.2 N. The long handle made your force five times bigger at the axle.' },
         { id: 'q2', type: 'pick', p: 'The longer handle made the effort {0}, and your hand moved {1} as it turned the handle.', picks: [[['bigger', 'the same', 'smaller'], 2], [['less far', 'the same distance', 'further'], 2]], after: 'Your hand travels round a bigger circle, so a smaller force does the job.' }] },
 
-    { id: 'pl3', title: 'Ramps', rescue: 'A folding ramp packed in the toolkit.',
+    { id: 'pl3', title: 'Ramps', rescue: 'A folding ramp packed on the Big Jelly.',
       cards: [
         { hi: '#cvScene', html: `<p>A ramp lets you raise a load without lifting it straight up. You'll see ramps at school entrances, for wheelchairs and trolleys. Scientists call a ramp an ${T('incline', 'inclined plane')}.</p>${picRamp()}` }],
       predict: { q: 'You pull a 490 N cart up onto a 1 m high platform. Which ramp will need the smallest pull?', opts: ['The longest ramp, 5 m long and gentle', 'The shortest ramp, 2 m long and steep', 'Every ramp needs exactly the same pull', 'The middle ramp, 4 m long and medium'], then: 'Try the 2 m ramp, then the 5 m ramp.' },
@@ -169,7 +169,7 @@ CHDATA.c6 = {
         { id: 'q1', type: 'reading', p: 'What pull got the 490 N cart up the 5 m ramp?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'ramp', L: 5, h: 1 }), need: () => shopHas({ mach: 'ramp', L: 5, h: 1 }), needMsg: 'Pull the cart up the 5 m ramp first.', ok: '98 N, a fifth of the cart\'s weight. You pulled it 5 m to raise it 1 m.' },
         { id: 'q2', type: 'mcq', p: 'Why does the 5 m ramp need a smaller pull than the 2 m ramp?', opts: ['The cart travels a longer distance, so each metre needs less force', 'The cart weighs less when it sits on a long, gentle ramp', 'The long ramp has less friction, so the cart rolls more easily', 'The steep ramp pushes back on the cart and makes it heavier'], a: 0, ok: 'Yes! Less force, more distance, again.', why: { 1: 'The cart\'s weight is mass × g on any ramp.', 2: 'Workshop machines have no friction at all.', 3: 'The cart\'s weight doesn\'t change with the slope.' } }] },
 
-    { id: 'pl4', title: 'Ramps in disguise', rescue: 'Wedges and a screw jack packed. The toolkit is ready!',
+    { id: 'pl4', title: 'Ramps in disguise', rescue: 'Wedges and a screw jack packed. The Big Jelly\'s toolkit is ready!',
       cards: [
         { hi: '#cvScene', html: `<p>Two more simple machines are ramps in disguise. A ${T('wedge', 'wedge')} is two ramps back to back. Push it down into a log and its sloping sides push the two halves apart. A knife and a doorstop are wedges.</p>${picWedge()}` },
         { hi: '[data-panel="wsmach"]', html: `<p>A ${T('screw', 'screw')} is a ramp wrapped round a rod, and the spiral ramp is called the <b>thread</b>. A car jack uses a screw: each turn of the handle lifts the car by the small gap between two threads.</p>${picScrewIdea()}` }],
@@ -415,15 +415,15 @@ CHDATA.c6 = {
   ]
 };
 
-/* ---------- Part 3 Challenge: Launch-day loading (y1 to y3). renderShopCourse in 45-challenge.js judges each Pull! ---------- */
+/* ---------- Part 3 Challenge: Loading the Big Jelly (y1 to y3). renderShopCourse in 45-challenge.js judges each Pull! ---------- */
 const shMark = ok => ok ? '✓' : '✗';
 const shObjE = lim => ({ label: `Pull with ${lim} N or less`, ok: r => !r.capped && r.E <= lim, say: r => r.capped ? `Your pull would need ${r.need.toFixed(1)} N. Target: ${lim} N or less. ✗` : `Your pull: ${r.E.toFixed(1)} N. Target: ${lim} N or less. ${shMark(r.E <= lim)}` });
 const shObjW = lim => ({ label: `Work in ${fmt(lim, 0)} J or less`, ok: r => r.workIn <= lim + 1e-9, say: r => r.capped ? `The work in cannot be measured because the pull is too big. ✗` : `Work in: ${fmt(r.workIn, 0)} J. Target: ${fmt(lim, 0)} J or less. ${shMark(r.workIn <= lim + 1e-9)}` });
 const shObjC = lim => ({ label: `Use ${lim} m of cable or less`, ok: r => r.cable <= lim + 1e-9, say: r => `Cable used: ${fmt(r.cable, 1)} m. Target: ${lim} m or less. ${shMark(r.cable <= lim + 1e-9)}` });
 const shObjT = lim => ({ label: `Move your hand ${lim} m or less`, ok: r => r.dist <= lim + 1e-9, say: r => `Hand travel: ${fmt(r.dist, 1)} m. Target: ${lim} m or less. ${shMark(r.dist <= lim + 1e-9)}` });
 CHDATA.c6.challenge = {
-  title: 'Launch-day loading',
-  intro: 'Smooshy\'s rescue rocket, <b>Gummy Rescue One</b>, is on the launch pad at Force HQ, and it needs loading! Practise like Smooshy: no pull may be more than <b>60 N</b>. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!',
+  title: 'Loading the Big Jelly',
+  intro: 'The Big Jelly, GASA\'s repair ship, is on the launch pad at Force HQ, and it needs loading before it flies to Glimmer-9! Practise like Smooshy: no pull may be more than <b>60 N</b>. Work out the mechanical advantage you need first, then choose your setting. Try to get each one right first time!',
   missions: [
     { id: 'y1', kind: 'shop', title: 'Mission 1: Oxygen tank', cap: 60,
       setup: { mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 3, loads: { pulley: WL.tank }, lim: { ropesMax: 6 } }, show: ['wsctl', 'wspull', 'readMA'],
@@ -446,7 +446,7 @@ CHDATA.c6.challenge = {
       objs: [shObjE(60), { label: 'Use a handle radius of 0.5 m or less', ok: r => r.R <= 0.5 + 1e-9, say: r => `Handle radius: ${fmt(r.R, 2)} m. Target: 0.5 m or less. ${shMark(r.R <= 0.5 + 1e-9)}` }],
       clues: ['The mechanical advantage you need is 490 ÷ 60 = 8.2.', 'For a winch, mechanical advantage = handle radius ÷ 0.05 m, so the handle must be at least 8.2 × 0.05 m.', 'That is at least 0.41 m. Which handles fit by the wall?'],
       give: 'A 0.45 m handle (54.4 N) or a 0.5 m handle (49.0 N) works.',
-      after: 'Gummy Rescue One is fully loaded! Next, Part 4: machines inside machines.' },
+      after: 'The Big Jelly is fully loaded! Next, Part 4: machines inside machines.' },
     /* ---- Part 4 Challenge: Build the rescue kit (h1 to h3). The student builds a compound machine with the builder; every pull counts (same scoring as y1 to y3). ---- */
     { id: 'h1', kind: 'shop', title: 'Mission 1: Hoist the nose cone', cap: 100,
       setup: { mach: 'build', allow: ['build'], lift: 6, loads: { build: WL.cone }, bRoutes: [[0, 'Straight up']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
@@ -470,7 +470,7 @@ CHDATA.c6.challenge = {
       objs: [shObjE(60), shObjC(40), shObjT(250)],
       clues: ['Weight = 300 × 4.2 = 1,260 N, so the mechanical advantage you need is 1,260 ÷ 60 = 21, and at most 250 ÷ 10 = 25.', 'Cable = supporting ropes × 10 m, so 4 ropes at most.', 'Which ropes and winch multiply to between 21 and 25?'],
       give: '3 ropes with winch ×8 (52.5 N, 30 m of cable, 240 m of travel) works.',
-      after: 'The crane kit is built and packed. Next stop: Glimmer-9!' }
+      after: 'The crane kit is built and packed on the Big Jelly. Next stop: Glimmer-9!' }
   ]
 };
 
@@ -498,7 +498,7 @@ CHDATA.c6.challenge.missions.push(
     goal: 'Choose a winch and a pulley block, then press Turn!', objs: [shObjE(60), shObjW(2000)],
     clues: ['Useful work out = 300 × 6 = 1,800 J, so the efficiency must be at least 90%.', 'Which single part is 90% efficient or better and can give enough mechanical advantage?', 'Sometimes the simplest machine wins. Try the winch on its own.'],
     give: 'The winch on its own at ×6 (55.6 N, 2,000 J), ×8 or ×10 works.',
-    after: 'Gummy Base One is open! Smooshy: "Thank you, Force HQ engineers. Come and visit any time. We\'ll save you a sugar crystal."' }
+    after: 'Gummy Base One is open! Smooshy: "Thank you, GASA engineers. Come and visit any time. We\'ll save you a sugar crystal."' }
 );
 
 /* ---------- Fun facts: the last card of the step where the idea comes up (each one checked, 2 Nov 2026; the Archimedes fact sits in lv2) ---------- */

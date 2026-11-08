@@ -66,14 +66,15 @@ const lsDropZone = () => ({ x0: 200, x1: 540, y0: 190, y1: 372 });   // where th
 const lsInZone = (x, y) => { const z = lsDropZone(); return x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1; };
 
 /* ---------- drawing ---------- */
-function lsRoom(c) {
-  const sk = c.createLinearGradient(0, 0, 0, 350); sk.addColorStop(0, GLC.sky0); sk.addColorStop(1, GLC.sky1); c.fillStyle = sk; c.fillRect(0, 0, 900, WS_H);
-  c.fillStyle = 'rgba(255,255,255,.75)'; [[190, 30], [260, 70], [330, 22], [430, 58], [520, 24], [590, 66], [800, 30], [850, 76]].forEach(([x, y]) => { c.beginPath(); c.arc(x, y, 1.6, 0, 7); c.fill(); });
-  /* the floor of the Workshop at Gummy Base One: the same crust and crystals as the crater */
-  const gr = c.createLinearGradient(0, 350, 0, WS_H); gr.addColorStop(0, GLC.rock0); gr.addColorStop(1, GLC.rock1); c.fillStyle = gr; c.fillRect(0, 350, 900, WS_H - 350);
-  c.fillStyle = GLC.crust; c.fillRect(0, 348, 900, 5);
-  c.fillStyle = 'rgba(255,255,255,.9)'; [[640, 350, 1], [668, 350, .7], [850, 350, .9], [878, 350, .6]].forEach(([x, y, s]) => { [-.5, 0, .45].forEach((dx, i) => { const hh = (i === 1 ? 26 : 16) * s, ww = 7 * s, X = x + dx * 26 * s; c.beginPath(); c.moveTo(X, y - hh); c.lineTo(X + ww, y - hh * .3); c.lineTo(X + ww * .6, y + 1); c.lineTo(X - ww * .6, y + 1); c.lineTo(X - ww, y - hh * .3); c.closePath(); c.fill(); }); });
-  txt(c, 'THE WORKSHOP · GUMMY BASE ONE', 14, 418, '#fffaf2', `800 11px ${C.fb}`, 'left');
+function lsRoom(c) {   // the GASA Training Simulator: an indoor room with a faint blue grid, in the builder's flat style (no Glimmer-9 sky or crystals)
+  c.fillStyle = '#eef4fa'; c.fillRect(0, 0, 900, WS_H);
+  c.strokeStyle = 'rgba(70,130,200,.13)'; c.lineWidth = 1; c.beginPath();
+  for (let x = LS_X0 % 30 + 0.5; x < 900; x += 30) { c.moveTo(x, 0); c.lineTo(x, 350); }
+  for (let y = 350.5; y > 0; y -= 30) { c.moveTo(0, y); c.lineTo(900, y); }
+  c.stroke();
+  c.fillStyle = '#d7e3ee'; c.fillRect(0, 350, 900, WS_H - 350); c.strokeStyle = 'rgba(70,130,200,.18)'; c.beginPath(); for (let x = 0.5; x < 900; x += 60) { c.moveTo(x, 354); c.lineTo(x, WS_H); } c.stroke();
+  c.fillStyle = '#9db4c8'; c.fillRect(0, 348, 900, 5);
+  txt(c, 'GASA TRAINING SIMULATOR · THE WORKSHOP', 14, 418, '#3d6a99', `800 11px ${C.fb}`, 'left');
 }
 function lsLoadBox(c, x, y, label, hookOn) {   // the load with its weight: "Rock 294 N" (x, y = the middle of the bottom edge) and its hook ◉ on top
   c.font = `800 12px ${C.fn}`; const w = Math.max(62, c.measureText(label).width + 22);
@@ -97,7 +98,7 @@ function lsBarAndFulcrum(c, G) { drawLeverShape(c, { a: G.a, b: G.b, fx: G.fx, f
 /* a measuring bracket along the bar; its words go through the label placer so they never overlap */
 function lsBracket(c, x1, x2, y, label, col) {
   c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
-  lblAdd(label, (x1 + x2) / 2, y - 14, { size: 11, col, bg: '#fff', border: col, prio: 3 });
+  lblAdd(label, (x1 + x2) / 2, y - 14, { size: 11, col, bg: '#fff', border: col, prio: 3, tx: (x1 + x2) / 2, ty: y });
 }
 function lsDrawLever(c, cur, riseNow) {
   const G = lsLever(riseNow, cur), { fx, fy, L, E } = G, cls = WS.cls, yb = cls === 1 ? 58 : 318;
