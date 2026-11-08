@@ -1,8 +1,9 @@
-/* ===== Home illustration: the Force HQ arena complex (900 × 420 logical px) =====
+/* ===== Home illustration: the Force HQ arena complex (1030 × 420 logical px; HOME_W) =====
    Flat, outline-free shapes with simple two-tone shading; light comes from the upper left.
    The picture uses its own fixed daytime palette in both themes, because it sits in the dark hero card. */
+const HOME_W = 1030;
 function drawHomeArt(c, hit) {
-  const W = 900, H = 420, R = rng(11);
+  const W = HOME_W, H = 420, R = rng(11);
   const E = (x, y, rx, ry, a0 = 0, a1 = Math.PI * 2) => { c.beginPath(); c.ellipse(x, y, rx, ry, 0, a0, a1); };
   const F = (col, a = 1) => { c.globalAlpha = a; c.fillStyle = col; c.fill(); c.globalAlpha = 1; };
   const lin = (x0, y0, x1, y1, stops) => { const g = c.createLinearGradient(x0, y0, x1, y1); stops.forEach(([o, col]) => g.addColorStop(o, col)); return g; };
@@ -13,15 +14,15 @@ function drawHomeArt(c, hit) {
   const sg = c.createRadialGradient(170, 70, 6, 170, 70, 120); sg.addColorStop(0, 'rgba(255,248,214,1)'); sg.addColorStop(.18, 'rgba(255,240,190,.9)'); sg.addColorStop(.45, 'rgba(255,236,180,.28)'); sg.addColorStop(1, 'rgba(255,236,180,0)');
   c.fillStyle = sg; c.fillRect(40, 0, 260, 200);
   const cloud = (x, y, k) => { c.fillStyle = 'rgba(255,255,255,.95)'; E(x, y, 30 * k, 11 * k); c.fill(); E(x - 20 * k, y + 3 * k, 18 * k, 8 * k); c.fill(); E(x + 22 * k, y + 2 * k, 20 * k, 9 * k); c.fill(); E(x + 2 * k, y - 8 * k, 16 * k, 11 * k); c.fill(); c.fillStyle = 'rgba(160,190,210,.25)'; E(x, y + 7 * k, 40 * k, 4 * k); c.fill(); };
-  cloud(330, 52, 1.1); cloud(560, 34, .8); cloud(820, 70, 1); cloud(470, 96, .6);
+  cloud(330, 52, 1.1); cloud(560, 34, .8); cloud(820, 70, 1); cloud(965, 40, .7); cloud(470, 96, .6);
 
   /* mountains: far, then near with snow caps on the left */
-  c.fillStyle = '#b8d2e1'; poly([[0, 205], [70, 128], [130, 168], [210, 110], [300, 178], [390, 140], [470, 185], [560, 150], [650, 190], [740, 135], [830, 175], [900, 150], [900, 250], [0, 250]]); c.fill();
-  c.fillStyle = '#a2c1d3'; poly([[0, 230], [60, 170], [120, 205], [190, 150], [260, 212], [330, 196], [420, 222], [900, 222], [900, 250], [0, 250]]); c.fill();
+  c.fillStyle = '#b8d2e1'; poly([[0, 205], [70, 128], [130, 168], [210, 110], [300, 178], [390, 140], [470, 185], [560, 150], [650, 190], [740, 135], [830, 175], [900, 150], [960, 120], [1030, 165], [1030, 250], [0, 250]]); c.fill();
+  c.fillStyle = '#a2c1d3'; poly([[0, 230], [60, 170], [120, 205], [190, 150], [260, 212], [330, 196], [420, 222], [1030, 222], [1030, 250], [0, 250]]); c.fill();
   c.fillStyle = '#f7fbfd'; for (const [x, y, w] of [[60, 170, 18], [190, 150, 22], [210, 110, 16], [70, 128, 12]]) { poly([[x, y], [x - w, y + w * .9], [x - w * .4, y + w * .65], [x, y + w * .9], [x + w * .45, y + w * .6], [x + w, y + w * .9]]); c.fill(); }
 
   /* ground: lawn, then the plaza and paths */
-  c.fillStyle = lin(0, 228, 0, H, [[0, '#b9dca1'], [.5, '#a6d08b'], [1, '#93c27a']]); poly([[0, 238], [180, 226], [420, 232], [650, 224], [900, 232], [900, H], [0, H]]); c.fill();
+  c.fillStyle = lin(0, 228, 0, H, [[0, '#b9dca1'], [.5, '#a6d08b'], [1, '#93c27a']]); poly([[0, 238], [180, 226], [420, 232], [650, 224], [1030, 232], [1030, H], [0, H]]); c.fill();
   c.fillStyle = 'rgba(255,255,255,.18)'; for (let i = 0; i < 70; i++) { const x = R() * W, y = 250 + R() * 160; c.fillRect(x, y, 2, 1); }
   c.fillStyle = '#ece3cf'; E(430, 372, 360, 58); c.fill();
   c.fillStyle = '#e0d5bd'; E(430, 378, 330, 46); c.fill();
@@ -90,6 +91,24 @@ function drawHomeArt(c, hit) {
   c.strokeStyle = '#3d4a52'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(cx2 - 42, wy - 34); c.lineTo(cx2 - 42, wy - 6); c.stroke(); c.fillStyle = '#c99a5b'; c.fillRect(cx2 - 50, wy - 6, 16, 14); c.strokeStyle = '#7a5426'; c.lineWidth = 1.5; c.strokeRect(cx2 - 50, wy - 6, 16, 14);
   hit.push({ x0: 650, x1: 880, y0: 270, y1: 400, id: 'workshop' });
 
+  /* ---------- Mission Control (front far right, beside the Workshop): a dome with a dish aerial and the GASA badge ---------- */
+  const mx = 950, mb = 404;
+  c.fillStyle = 'rgba(30,50,40,.22)'; E(mx + 8, mb + 3, 66, 8); c.fill();
+  c.fillStyle = '#e4ebf0'; c.fillRect(mx - 48, mb - 46, 96, 46); c.fillStyle = '#c3d0d9'; c.fillRect(mx + 22, mb - 46, 26, 46); c.fillStyle = '#9fb0bd'; c.fillRect(mx - 52, mb - 50, 104, 6);
+  c.fillStyle = '#26364a'; c.beginPath(); c.roundRect(mx - 40, mb - 34, 44, 14, 4); c.fill(); c.fillStyle = '#7ef0a8'; for (let k = 0; k < 4; k++) c.fillRect(mx - 35 + k * 10, mb - 30, 6, 6);
+  c.fillStyle = '#13212a'; c.beginPath(); c.roundRect(mx + 8, mb - 24, 22, 24, [10, 10, 0, 0]); c.fill(); c.fillStyle = '#e3a51c'; c.fillRect(mx + 8, mb - 28, 22, 3);
+  // the dome on the roof
+  c.fillStyle = lin(mx - 40, 0, mx + 20, 0, [[0, '#ffffff'], [.6, '#dde7ee'], [1, '#b3c4d0']]); E(mx - 16, mb - 50, 32, 30, Math.PI, 0); c.fill();
+  c.strokeStyle = 'rgba(120,150,170,.55)'; c.lineWidth = 1.2; for (let i = 1; i < 4; i++) { E(mx - 16, mb - 50, 32 * i / 4, 30, Math.PI, 0); c.stroke(); } c.beginPath(); c.moveTo(mx - 48, mb - 50); c.lineTo(mx + 16, mb - 50); c.stroke();
+  c.fillStyle = '#26364a'; c.beginPath(); c.roundRect(mx - 24, mb - 66, 16, 12, [8, 8, 2, 2]); c.fill(); c.fillStyle = '#bfe3f2'; c.fillRect(mx - 21, mb - 63, 10, 6);
+  // the dish aerial on its mast, with signal arcs
+  c.strokeStyle = '#6f8894'; c.lineWidth = 3; c.beginPath(); c.moveTo(mx + 34, mb - 50); c.lineTo(mx + 34, mb - 66); c.stroke();
+  c.save(); c.translate(mx + 34, mb - 70); c.rotate(-0.6); c.fillStyle = '#f4f7ff'; E(0, 0, 18, 8, 0, Math.PI); c.fill(); c.fillStyle = '#c3d0d9'; E(0, 0, 18, 8, 0, Math.PI); c.lineWidth = 1.5; c.strokeStyle = '#8aa1ac'; c.stroke(); c.strokeStyle = '#8aa1ac'; c.lineWidth = 2; c.beginPath(); c.moveTo(0, 0); c.lineTo(0, -12); c.stroke(); c.fillStyle = '#e04b3a'; c.beginPath(); c.arc(0, -13, 2.6, 0, 7); c.fill(); c.restore();
+  c.strokeStyle = 'rgba(255,255,255,.9)'; c.lineWidth = 2; c.lineCap = 'round'; for (let i = 0; i < 2; i++) { c.beginPath(); c.arc(mx + 34, mb - 70, 24 + i * 9, -2.35, -1.45); c.stroke(); }
+  // the GASA badge: a round gummy-bear face, our own simple design
+  c.fillStyle = '#e8639b'; c.beginPath(); c.arc(mx - 24, mb - 10, 11, 0, 7); c.fill(); c.fillStyle = '#ff9ec4'; for (const sd of [-1, 1]) { c.beginPath(); c.arc(mx - 24 + sd * 8, mb - 18, 4, 0, 7); c.fill(); } c.fillStyle = '#fffaf2'; c.beginPath(); c.arc(mx - 24, mb - 10, 7, 0, 7); c.fill(); c.fillStyle = '#e8639b'; c.fillRect(mx - 27, mb - 13, 2, 3); c.fillRect(mx - 23, mb - 13, 2, 3); c.beginPath(); c.arc(mx - 24, mb - 8, 3, 0.2, Math.PI - 0.2); c.fill();
+  hit.push({ x0: 886, x1: 1022, y0: 290, y1: 414, id: 'mission' });
+
   /* ---------- Main Arena: a proper stadium (front centre) ---------- */
   const ax = 420, rimY = 214, rx = 212, ry = 46, baseY = 318;
   c.fillStyle = 'rgba(30,50,40,.25)'; E(ax + 16, baseY + 6, rx + 18, 30); c.fill();
@@ -131,5 +150,5 @@ function drawHomeArt(c, hit) {
 
   /* labels: a pill with a little pointer */
   const label = (s, x, y, dark) => { c.font = `800 14px ${C.fd}`; const w = c.measureText(s).width + 22; c.save(); c.shadowColor = 'rgba(10,25,35,.25)'; c.shadowBlur = 8; c.shadowOffsetY = 2; c.fillStyle = dark ? '#13212a' : 'rgba(255,255,255,.96)'; c.beginPath(); c.roundRect(x - w / 2, y - 13, w, 26, 13); c.fill(); c.restore(); c.fillStyle = dark ? '#13212a' : 'rgba(255,255,255,.96)'; poly([[x - 6, y + 12], [x + 6, y + 12], [x, y + 19]]); c.fill(); txt(c, s, x, y + .5, dark ? '#e3a51c' : '#13212a', `800 14px ${C.fd}`); };
-  label('SNOW ARENA', 106, 182); label('DROP ZONE', 690, 30); label('SPACE DOME', 812, 152); label('WORKSHOP', 740, 274);
+  label('SNOW ARENA', 106, 182); label('DROP ZONE', 690, 30); label('SPACE DOME', 812, 152); label('WORKSHOP', 740, 268); label('MISSION CONTROL', 930, 300);
 }

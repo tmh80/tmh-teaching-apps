@@ -91,16 +91,20 @@ function wsRoom(c) {
 }
 function wsMonitor(c) {
   const x = 12, y = 30, w = 146, h = 112, tt = performance.now() / 1000;
-  c.fillStyle = '#1f2a30'; c.beginPath(); c.roundRect(x, y, w, h, 9); c.fill(); c.fillStyle = '#26364a'; c.beginPath(); c.roundRect(x + 6, y + 6, w - 12, h - 12, 6); c.fill();
-  c.save(); c.beginPath(); c.roundRect(x + 6, y + 6, w - 12, h - 12, 6); c.clip();
-  const sk = c.createLinearGradient(0, y, 0, y + h); sk.addColorStop(0, '#5d3f99'); sk.addColorStop(1, '#8b6bd0'); c.fillStyle = sk; c.fillRect(x, y, w, h);
-  c.fillStyle = 'rgba(255,255,255,.7)'; [[24, 46], [140, 52], [118, 40], [40, 66]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 1.5, 0, 7); c.fill(); });
-  const bub = WS.bubble && performance.now() - WS.bubbleAt < 5200, last = WS.last, mood = WS.busy ? (WS.c && WS.c.capped ? 'strain' : 'strain') : bub ? (last && !last.capped && last.E <= SMOOSHY.pull ? 'cheer' : 'worried') : 'wave';
-  drawSmooshy(c, x + 68, y + 66, 0.62, mood, tt); c.restore();
+  /* the live link from the Gumdrop: Smooshy in the ship's cabin, framed by the round window */
+  c.fillStyle = '#1f2a30'; c.beginPath(); c.roundRect(x, y, w, h, 9); c.fill(); c.fillStyle = '#4a5c6b'; c.beginPath(); c.roundRect(x + 6, y + 6, w - 12, h - 12, 6); c.fill();
+  c.fillStyle = 'rgba(255,255,255,.1)'; c.fillRect(x + 6, y + 6, w - 12, 5); c.fillStyle = '#e3a51c'; [[14, 14], [w - 14, 14], [14, h - 14]].forEach(([a, b]) => { c.beginPath(); c.arc(x + a, y + b, 2.2, 0, 7); c.fill(); });
+  const bub = WS.bubble && performance.now() - WS.bubbleAt < 5200, last = WS.last, mood = WS.busy ? 'strain' : bub ? (last && !last.capped && last.E <= SMOOSHY.pull ? 'cheer' : 'worried') : 'wave', cx = x + w / 2, cyy = y + h / 2 + 1, wr = 49;
+  c.save(); c.beginPath(); c.arc(cx, cyy, wr, 0, 7); c.clip();
+  const sk = c.createLinearGradient(0, cyy - wr, 0, cyy + wr); sk.addColorStop(0, '#5d3f99'); sk.addColorStop(1, '#8b6bd0'); c.fillStyle = sk; c.fillRect(cx - wr, cyy - wr, wr * 2, wr * 2);
+  c.fillStyle = 'rgba(255,255,255,.7)'; [[-30, -34], [28, -28], [-8, -42], [38, -8]].forEach(([a, b]) => { c.beginPath(); c.arc(cx + a, cyy + b, 1.4, 0, 7); c.fill(); });
+  drawSmooshy(c, cx, cyy + 14, 0.62, mood, tt);
+  c.fillStyle = 'rgba(255,255,255,.14)'; c.beginPath(); c.ellipse(cx - 24, cyy - 26, 10, 26, 0.7, 0, 7); c.fill(); c.restore();
+  c.strokeStyle = '#e8639b'; c.lineWidth = 9; c.beginPath(); c.arc(cx, cyy, wr + 4, 0, 7); c.stroke(); c.strokeStyle = '#fffaf2'; c.lineWidth = 4; c.beginPath(); c.arc(cx, cyy, wr - 0.5, 0, 7); c.stroke();
   if (!RMOTION && !bub) { c.fillStyle = 'rgba(255,255,255,.07)'; c.fillRect(x + 6, y + ((tt * 40) % (h - 12)) + 6, w - 12, 3); }
   /* the sticky note */
   c.save(); c.translate(x + w - 12, y + h - 6); c.rotate(.12); c.fillStyle = '#f6e27a'; c.fillRect(-52, -22, 56, 30); txt(c, '60 N max!', -24, -7, '#5a4a10', `800 11px ${C.fb}`); c.restore();
-  { c.font = `800 10px ${C.fb}`; const lw = c.measureText('CAPTAIN SMOOSHY · LIVE').width + 12; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(x + 2, y - 20, lw, 15, 7); c.fill(); txt(c, 'CAPTAIN SMOOSHY · LIVE', x + 8, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left'); }   /* on a light pill: the ceiling beam behind it is dark (Tom, 3 Nov 2026) */
+  { c.font = `800 10px ${C.fb}`; const lw = c.measureText('LIVE · THE GUMDROP').width + 12; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(x + 2, y - 20, lw, 15, 7); c.fill(); txt(c, 'LIVE · THE GUMDROP', x + 8, y - 9, WSC.ink, `800 10px ${C.fb}`, 'left'); }   /* on a light pill: the ceiling beam behind it is dark (Tom, 3 Nov 2026) */
   if (bub) wsBubbleDraw(c, WS.bubble, x, y + h + 10, w);
 }
 function wsBubbleDraw(c, s, x, y, w) {

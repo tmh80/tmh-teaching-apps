@@ -9,7 +9,7 @@ const CHAPTERS = [
   { id: 'c3', n: 3, title: 'F = ma', blurb: 'Resultant forces, the formula triangle and lots of maths practice: Newton\'s second law.', stamp: 'Formula Pro', ready: true, arena: 'Snow Arena', icon: 'tri' },
   { id: 'c4', n: 4, title: 'Action and reaction', blurb: 'Forces always come in pairs: Newton\'s third law in the Space Dome.', stamp: 'Pair Finder', ready: true, arena: 'Space Dome', icon: 'pair' },
   { id: 'c5', n: 5, title: 'Balanced forces', blurb: 'Drop things from a helicopter: air resistance, terminal velocity, parachutes, other worlds and a hovering helicopter in the Drop Zone.', stamp: 'Balance Master', ready: true, arena: 'Drop Zone', icon: 'chute' },
-  { id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work, and a rescue mission: save Captain Smooshy\'s spaceship!', stamp: 'Smooshy Saver', ready: WORKSHOP_OPEN, arena: 'Workshop', icon: 'gear' }
+  { id: 'c6', n: 6, title: 'The Workshop', blurb: 'Simple and compound machines, mechanical advantage and work. Train on the GASA simulator, then plan Captain Smooshy\'s rescue at Mission Control.', stamp: 'Smooshy Saver', ready: WORKSHOP_OPEN, arena: 'Workshop', icon: 'gear' }
 ];
 /* "Start Part 1" / "Start the Extension": Chapter 6 uses Part 1 to Part 4 and an Extension instead of Foundation and Extension */
 const startWord = p => /^Part \d/.test(p) ? p : 'the ' + p;
@@ -86,7 +86,7 @@ function renderHome() {
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
   $('#workshopCard').hidden = !WORKSHOP_OPEN; $('#workshopCard').parentElement.style.gridTemplateColumns = WORKSHOP_OPEN ? '' : 'minmax(0,1fr)';
   if (WORKSHOP_OPEN) { const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
-    $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop</span><h3>Save Captain Smooshy!</h3><p>A gummy bear astronaut is stuck in a crater and only has 60 N of pull. Learn how levers, pulleys, ramps, wedges and screws work, then use them to rescue his spaceship.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
+    $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop and Mission Control</span><h3>Save Captain Smooshy!</h3><p>Captain Smooshy is stuck in a crater on Glimmer-9 with only 60 N of pull. Train on the GASA simulator in the Workshop, then plan his rescue at Mission Control.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
   $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
     + SECTIONS.map(s => `<div class="sbitem"><div class="stamp ${stamps[s.id] ? 'on' : 'ghoststamp'}" title="${s.stamp}">${s.stamp}</div><span>${stamps[s.id] ? s.stamp : `Chapter ${s.n} ${s.part}`}</span></div>`).join('')
     + CHAPTERS.filter(c => !c.ready).map(c => `<div class="sbitem soon"><div class="stamp ghoststamp">${c.stamp}</div><span>Chapter ${c.n}</span></div>`).join('') + '</div>';
@@ -105,18 +105,21 @@ function awardStamp(id) {
 /* the arena complex, drawn up close */
 const HOMEHIT = [];
 function drawHome() {
-  const cv = $('#cvHome'); if (!cv || !cv.offsetParent) return; readColors(); const c = fit(cv, 900, 420); HOMEHIT.length = 0;
+  const cv = $('#cvHome'); if (!cv || !cv.offsetParent) return; readColors(); const c = fit(cv, HOME_W, 420); HOMEHIT.length = 0;
   drawHomeArt(c, HOMEHIT);
-  HOMEHIT.sort((a, b) => ['workshop', 'drop', 'space', 'snow', 'main'].indexOf(a.id) - ['workshop', 'drop', 'space', 'snow', 'main'].indexOf(b.id));   // smaller targets win where they overlap
+  HOMEHIT.sort((a, b) => ['mission', 'workshop', 'drop', 'space', 'snow', 'main'].indexOf(a.id) - ['mission', 'workshop', 'drop', 'space', 'snow', 'main'].indexOf(b.id));   // smaller targets win where they overlap
 }
+/* Mission Control (Part 5) opens once Part 4 is finished in the Workshop; teachers can always go in */
+const mcOpen = () => isTeacher() || !!dbGet('stamps', {}).c6d;
 function homeClick(e) {
-  const r = $('#cvHome').getBoundingClientRect(), x = (e.clientX - r.left) * 900 / r.width, y = (e.clientY - r.top) * 420 / r.height;
+  const r = $('#cvHome').getBoundingClientRect(), x = (e.clientX - r.left) * HOME_W / r.width, y = (e.clientY - r.top) * 420 / r.height;
   const hit = HOMEHIT.find(hh => x >= hh.x0 && x <= hh.x1 && y >= hh.y0 && y <= hh.y1); if (!hit) return;
   if (hit.id === 'main') { $('#chapterCards').scrollIntoView({ behavior: RMOTION ? 'auto' : 'smooth', block: 'start' }); return; }
   if (hit.id === 'snow' && CHDATA.c3f) { openChapter('c3f'); return; }
   if (hit.id === 'space' && CHDATA.c4f) { openChapter('c4f'); return; }
   if (hit.id === 'workshop' && WORKSHOP_OPEN) { openChapter('c6a'); return; }
-  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is still being built, and it will open soon!' }[hit.id]);
+  if (hit.id === 'mission' && WORKSHOP_OPEN) { if (CHDATA.c6e && mcOpen()) openChapter('c6e'); else toast('Mission Control opens when you finish Part 4 in the Workshop.'); return; }
+  toast({ snow: 'The Snow Arena opens in Chapter 3, with the husky sled race.', drop: 'The Drop Zone opens in Chapter 5.', workshop: 'The Workshop is still being built, and it will open soon!', mission: 'Mission Control opens soon.' }[hit.id]);
 }
 
 /* ---------- modal helpers ---------- */
