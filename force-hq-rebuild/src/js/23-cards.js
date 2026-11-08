@@ -10,7 +10,7 @@ function drawCard() {
   ch.hidden = false; unhi();
   ch.innerHTML = `<div class="chead" title="Drag to move this card"><span class="qgrip" aria-hidden="true">⠿</span><span class="lbl">${esc(opt.title || '')}${cards.length > 1 ? ` · card ${k + 1} of ${cards.length}` : ''}</span><button type="button" class="cx" aria-label="Close these cards">✕</button></div>
     <div class="gbody gl">${c.html}${opt.readGate && k === 0 && opt.readGate() ? '<button type="button" class="go say-ok" data-cb="ok">OK</button>' : ''}</div>
-    <div class="cnav">${k ? '<button type="button" class="ghost" data-cb="back">‹ Back</button>' : ''}<span class="cdots">${cards.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</span><button type="button" class="go" data-cb="next">${last ? (opt.journal === false ? 'Got it ✓' : 'Save to my Journal ✓') : 'Next ›'}</button></div>`;
+    <div class="cnav">${k ? '<button type="button" class="ghost" data-cb="back">‹ Back</button>' : ''}<span class="cdots">${cards.map((_, i) => `<i class="${i === k ? 'on' : ''}"></i>`).join('')}</span><button type="button" class="go" data-cb="next">${last ? (opt.journal === false ? 'Got it ✓' : 'Save to my Journal ✓') : (opt.nextLabel || 'Next ›')}</button></div>`;
   makeDraggable(ch, '.chead', 'cards'); dragPlace(ch, 'cards', '.chead');
   if (c.hi) $$(c.hi).forEach(e => { if (e.offsetParent) e.classList.add('coachhi'); });
   ch.querySelector('[data-cb=next]').addEventListener('click', () => { if (k === 0 && opt.readOK) opt.readOK(); if (last) finishCards(); else { CARDS.k++; drawCard(); } });

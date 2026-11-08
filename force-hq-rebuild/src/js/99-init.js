@@ -18,7 +18,7 @@ function openExplore() {
 const exploreHead = (a, b) => { const l = $('#vExplore .chhead .lbl'), t = $('#vExplore .chhead h1'); if (l) l.textContent = a; if (t) t.textContent = b; };
 const exploreSwitch = cur => { const w = typeof exploreShopOpen === 'function' && exploreShopOpen(); return `<div class="seg ${w ? 'two' : 'three'} exsw" role="group" aria-label="Choose where to play"><button type="button" data-exscene="main" aria-pressed="${cur === 'main'}">Tug-of-war</button><button type="button" data-exscene="drop" aria-pressed="${cur === 'drop'}">Drop Zone</button><button type="button" data-exscene="heli" aria-pressed="${cur === 'heli'}">Helicopter</button>${w ? `<button type="button" data-exscene="shop" aria-pressed="${cur === 'shop'}">Workshop</button>` : ''}</div>`; };
 function init() {
-  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initShop(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
+  readColors(); buildReads(); initPal(); initControls(); initDrop(); initHeli(); initShop(); initLesson(); initCalc(); initGlossary(); updateJCount(); refreshWho(); initJournal(); initRuns();
   try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { readColors(); for (const k in ICONS) delete ICONS[k]; renderPal(); drawHome(); }); } catch (e) { }
   window.addEventListener('resize', () => { if (VIEW === 'vHome') drawHome(); });
   $('#cvHome').addEventListener('click', homeClick);

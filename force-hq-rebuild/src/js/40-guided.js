@@ -71,7 +71,7 @@ function playStepCards() {
 }
 function cardsDone() {
   const st = CHDATA[CH.id].steps[GI]; const seen = dbGet('cardsSeen.' + CH.id, {}); seen[st.id] = true; dbSet('cardsSeen.' + CH.id, seen); CARDS_SEEN = true;
-  checkStep(true);
+  checkStep(true); if (typeof lsAfterCards === 'function') lsAfterCards();
   if (st.tour && !dbGet('tourDone')) setTimeout(startTour, 200);
 }
 /* A task can carry a third item {q:'q1'}: the question it is about. The question is shown in the task (so the student always knows what to work out)

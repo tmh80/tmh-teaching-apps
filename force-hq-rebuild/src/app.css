@@ -932,3 +932,11 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .cn{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#c94a34;color:#fff;font-size:13px;font-weight:800;flex:none}
 .vtshapes{display:grid;grid-template-columns:1fr 1fr;gap:6px}.vtshapes figure{margin:0}.vtshapes figcaption{font-size:13px}.vtshapes .qfig{margin:0}
 .unithint{margin:2px 0 0}
+
+/* lesson mode (4m-lesson.js): the parts tray and menu share the rescue builder's look */
+#lsTray{order:1;margin:8px 0 0;grid-template-columns:repeat(auto-fill,minmax(150px,200px))} #lsTray[hidden],#lsStatus[hidden]{display:none}
+.lsstatus{order:1;margin:6px 0 0}
+.lsit{position:relative} .lsit .gltry{width:100%;min-height:54px} .lsit .gltry:disabled{opacity:.65;cursor:default}
+.lsq{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);font-weight:800;font-size:14px;line-height:1;cursor:pointer;padding:0}
+.lsmenu{position:fixed;z-index:60}
+#cvScene.shopscene{cursor:default}

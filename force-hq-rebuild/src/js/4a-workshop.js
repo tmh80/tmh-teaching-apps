@@ -199,7 +199,8 @@ function wsRenderControls() {
   $('#wsRopesN').textContent = WS.ropes; $('#wsRopesDn').disabled = WS.ropes <= 1; $('#wsRopesUp').disabled = WS.ropes >= (WS.lim.ropesMax || 6);
   const ax = $('#wsAxleRow'); if (ax) { ax.hidden = !WS.axleEdit || WS.mach !== 'winch'; num('#wsAxleNum', fmt(WS.axle, 2)); }
   $('#wsClsRow').hidden = !WS.classPick || WS.mach !== 'lever'; $('#wsHRow').hidden = !WS.rampH || WS.mach !== 'ramp'; $('#wsLiftRow').hidden = !WS.lifts || WS.lifts.pick !== true || !['pulley'].includes(WS.mach);
-  const pb = $('#wsPull'); if (pb) { pb.textContent = WS.pullLabel || WS_VERB[WS.mach]; pb.disabled = WS.busy || !!(LAB.pullGate && !LAB.pullGate()); }
+  const pb = $('#wsPull'); if (pb) { pb.textContent = (LS.on ? '▶ ' : '') + (WS.pullLabel || WS_VERB[WS.mach]); pb.disabled = WS.busy || !!(LAB.pullGate && !LAB.pullGate()); }
+  if (LS.on) lsRender();
   const tn = $('#wsTurnNote'); if (tn) tn.textContent = WS.mach === 'screw' ? `One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the jack ${fmt(WS.pitch, 1)} cm (the gap between threads).` : '';
 }
 function initShop() {

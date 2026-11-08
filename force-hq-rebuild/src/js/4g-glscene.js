@@ -238,5 +238,4 @@ function glDrawMission(c) {
   const led = (x, y, i) => { const on = RMOTION || Math.floor(t * 1.5 + i * 0.7) % 3 !== 0; c.fillStyle = on ? cols[i % 4] : '#3a3554'; c.beginPath(); c.arc(x, y, 3.4, 0, 7); c.fill(); };
   for (let i = 0; i < 28; i++) { led(40 + i * 29.5, 418, i); if (i % 3 === 0 && i < 8) led(40 + i * 29.5, 12, i + 1); if (i > 19 && i % 3 === 0) led(40 + i * 29.5, 12, i); }
   for (let j = 0; j < 11; j++) { led(10, 50 + j * 32, j); led(890, 50 + j * 32, j + 2); }
-  txt(c, 'Our rescue plan starts here', 450, 427, '#b9a2e4', `700 9px ${C.fb}`);
 }

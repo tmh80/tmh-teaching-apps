@@ -168,6 +168,8 @@
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
         <canvas id="cvScene" role="img" aria-label="The Main Arena tug-of-war, with the crate in the middle. Drop pullers here to add them to a team."></canvas>
+        <div class="lstray gltray" id="lsTray" hidden role="toolbar" aria-label="Parts tray: drag a piece onto the bench"></div>
+        <p class="scaleNote lsstatus" id="lsStatus" hidden></p>
         <div class="scenebar">
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
@@ -219,6 +221,7 @@
 </div>
 </div>
 
+<div class="glmenu placed lsmenu" id="lsMenu" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <button type="button" class="calcFab" id="calcFab" aria-label="Open the calculator">🧮<span> Calculator</span></button>
 <div class="calc" id="calc" hidden role="dialog" aria-label="Calculator"></div>

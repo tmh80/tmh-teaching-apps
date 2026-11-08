@@ -348,13 +348,13 @@ function wsRulers(c, rise, eDist, t1, t2) {
 /* ---------- the whole scene ---------- */
 function drawShopScene(c) {
   if (WS.site === 'mission') { glDrawMission(c); return; }   // Part 5, step v1: Mission Control (no bench, no LIVE inset)
-  wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
+  if (LS.on) lsRoom(c); else wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
-  if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
+  if (LS.on) ep = lsDrawMachine(c, cur, riseNow); else if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
   wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
-  wsMonitor(c);
+  if (!LS.on || LS.o.live !== false) wsMonitor(c);   // Captain Smooshy coaches by video from the crater (Parts 1 to 4)
   /* readouts */
   const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], [WS.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
   if (WS.mach === 'build') { rows[2] = ['Your hand moved', mk.has('bTravel') ? '?' : fmt(wsR2(cur.ma * riseNow), 2) + ' m']; if (wsHas('bTotMA') || wsHas('readMA')) rows.push(['Total mechanical advantage', mk.has('bTotMA') || mk.has('readMA') ? '?' : fmt(cur.ma, 2)]); if (wsHas('bCable')) rows.push(['Cable needed', mk.has('bCable') ? '?' : fmt(cur.cable, 0) + ' m']); }
@@ -372,6 +372,7 @@ function drawShopScene(c) {
   else if (!WS.busy && !WS.shown) { const m = `Press ${WS_VERB[WS.mach]} to work the machine`; c.font = `700 13px ${C.fb}`; const iw = c.measureText(m).width + 28; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(450 + 30 - iw / 2, 6, iw, 28, 8); c.fill(); txt(c, m, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`); }   /* light pill: the beam behind is dark */
   if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, 418, C.line, 'right');
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
+  if (LS.on) lsOverlay(c);
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
     wsRulers(c, WS.c.rise, WS.c.eDist, WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)');
