@@ -4,7 +4,7 @@ and each run record is compared with wsRecord for the same settings set directly
 Run after build.py:  python3 tests/lesson_engine.py     Screenshots (desktop 1440x900 and phone 390x844): /tmp/fhq-shots/lesson/"""
 import pathlib, json
 from playwright.sync_api import sync_playwright
-F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/lesson/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
+F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/stage3/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
 fails = []
 def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
@@ -148,7 +148,9 @@ with sync_playwright() as p:
         r = lastrun(); exp = json.loads(ev("(()=>{const keep=Object.assign({},WS); %s; const rec=wsRecord(wsCalc()); Object.assign(WS,keep); wsRenderControls(); return JSON.stringify(rec)})()" % js))
         bad = [k for k in KEYS if (exp.get(k) or 0) != (r.get(k) or 0)]
         chk(f'{label}: the board run equals wsRecord for the same settings set directly', not bad, [(k, exp.get(k), r.get(k)) for k in bad])
-    def seeshot(nm): shot(nm); 
+    def both(name):   # one desktop (1440x900) and one phone (390x844) picture of the same moment
+        pg.screenshot(path=OUT + name + '_1440.png'); vp0 = pg.viewport_size; pg.set_viewport_size({'width': 390, 'height': 844}); pg.wait_for_timeout(350)
+        pg.screenshot(path=OUT + name + '_390.png'); pg.set_viewport_size(vp0); pg.wait_for_timeout(300)
     # ----- pl1: the crane, then the pulley block -----
     start(pg, {'width': 1440, 'height': 900}, 0, 'c6b')
     chk('pl1: lesson mode, crane pre-placed and roped to the crate, 1 rope', ev("[LS.on, WS.mach, WS.ropes, !!LS.pl.crane, JSON.stringify(LS.cab)]") == [True, 'pulley', 1, True, '[["load","top"]]'])
@@ -160,7 +162,7 @@ with sync_playwright() as p:
     tray_drop('block', (780, 60)); chk('pl1: a block dropped far from the hooks is not placed', ev("!!LS.pl.block") is False)
     tray_drop('block', end('top')); chk('pl1: dragging the block onto the crane hook clips it on with 2 ropes and ropes it up', ev("[!!LS.pl.block, WS.ropes, JSON.stringify(LS.cab)]") == [True, 2, '[["blk","top"]]'], ev("JSON.stringify(LS.cab)"))
     chk('pl1: the tray tile shows the block is on', pg.locator('#lsTray [data-lsadd=block]').is_disabled())
-    shot('pl1_block')
+    both('pl1_block')
     rope_end = end('blk'); drag(end('blk'), (780, 60), 8); chk('pl1: dragging the block\'s rope off its ◉ takes the rope off and ▶ goes off', ev("lsGate()") is False and pg.locator('#wsPull').is_disabled())
     rope('blk', 'top'); chk('pl1: dragging from ◉ to ◉ ropes it again', ev("lsGate()") is True)
     for n in (2, 3, 4):
@@ -169,7 +171,7 @@ with sync_playwright() as p:
     chk('pl1: task 2 ticks (1, 2, 3 and 4 ropes)', task(1))
     dk('rm:block'); chk('pl1: Remove takes the block off: 1 rope, roped straight to the crane', ev("[!!LS.pl.block, WS.ropes, JSON.stringify(LS.cab)]") == [False, 1, '[["load","top"]]'])
     tray_drop('block', end('load')); chk('pl1: the block also clips onto the crate\'s hook', ev("!!LS.pl.block") is True)
-    shot('pl1_block', False)
+    pass
     # ----- pl2: the winch -----
     start(pg, {'width': 1440, 'height': 900}, 1, 'c6b')
     chk('pl2: ▶ is off until a winch is on the rope end', pg.locator('#wsPull').is_disabled() and ev("lsGate()") is False)
@@ -178,7 +180,7 @@ with sync_playwright() as p:
     chk('pl2: the handle radius is in the panel', 'Handle radius' in pg.inner_text('#lsDock') and '0.1 m' in pg.inner_text('#lsDock'))
     pull(); chk('pl2: handle 0.1 m reads 98 N', abs(ev("shopE({mach:'winch',R:0.1})") - 98) < 1e-6); run_equals('pl2 R 0.1', "wsSet('R',0.1)")
     for _ in range(3): dk('R+')
-    chk('pl2: + three times is 0.25 m', abs(ev("WS.R") - 0.25) < 1e-9); shot('pl2_winch')
+    chk('pl2: + three times is 0.25 m', abs(ev("WS.R") - 0.25) < 1e-9); both('pl2_winch')
     pull(); chk('pl2: handle 0.25 m reads 39.2 N', abs(ev("shopE({mach:'winch',R:0.25})") - 39.2) < 1e-6); run_equals('pl2 R 0.25', "wsSet('R',0.25)"); chk('pl2: task 2 ticks', task(1))
     # ----- pl3: the ramp, the white handle, the rope to the cart -----
     start(pg, {'width': 1440, 'height': 900}, 2, 'c6b')
@@ -189,26 +191,26 @@ with sync_playwright() as p:
     rope('load', 'top'); chk('pl3: dragging from the cart\'s ◉ to the ramp top ◉ ropes it', ev("lsGate()") is True)
     pull(); chk('pl3: the 2 m ramp needs 245 N', abs(ev("shopE({mach:'ramp',L:2,h:1})") - 245) < 1e-6); run_equals('pl3 L 2', "wsSet('L',2)")
     g = J("lsGeoRamp(0)"); drag((g['tx'], g['ty']), (g['fx'] + 4.899 * 50, g['ty']), 12)
-    chk('pl3: dragging the white top handle makes the ramp 5 m (snapped to whole metres)', ev("WS.L") == 5, ev("WS.L")); shot('pl3_ramp')
+    chk('pl3: dragging the white top handle makes the ramp 5 m (snapped to whole metres)', ev("WS.L") == 5, ev("WS.L")); both('pl3_ramp')
     pull(); chk('pl3: the 5 m ramp needs 98 N', abs(ev("shopE({mach:'ramp',L:5,h:1})") - 98) < 1e-6); run_equals('pl3 L 5', "wsSet('L',5)"); chk('pl3: task 2 ticks', task(1))
     dk('rm:ramp'); chk('pl3: Remove takes the ramp off again', ev("!!LS.pl.ramp") is False and pg.locator('#wsPull').is_disabled())
     # ----- pl4: the wedge demonstration, then the screw jack under the car -----
     start(pg, {'width': 1440, 'height': 900}, 3, 'c6b')
     chk('pl4: the wedge is the demonstration and ▶ says Push!', ev("WS.mach") == 'wedge' and pg.locator('#wsPull').inner_text() == '▶ Push!' and 'Thickness' in pg.inner_text('#lsDock'))
     dk('thick:5'); pull(); chk('pl4: 5 cm wedge splits the 1,200 N log', ev("shopHas({mach:'wedge',thick:5,load:1200})") is True); run_equals('pl4 wedge 5', "wsSet('thick',5)")
-    dk('thick:2'); pull(); chk('pl4: 2 cm wedge', ev("shopHas({mach:'wedge',thick:2,load:1200})") is True); run_equals('pl4 wedge 2', "wsSet('thick',2)"); shot('pl4_wedge')
+    dk('thick:2'); pull(); chk('pl4: 2 cm wedge', ev("shopHas({mach:'wedge',thick:2,load:1200})") is True); run_equals('pl4 wedge 2', "wsSet('thick',2)"); both('pl4_wedge')
     dk('tab:screw'); chk('pl4: the Screw jack tab switches the bench to the car, with no jack yet', ev("[WS.mach, !!LS.pl.jack]") == ['screw', False] and pg.locator('#wsPull').is_disabled())
     tray_drop('jack', (780, 60)); chk('pl4: a jack dropped far away is refused', ev("!!LS.pl.jack") is False)
     tray_drop('jack', zc('jack')); chk('pl4: the jack snaps under the car', ev("[!!LS.pl.jack, WS.mach]") == [True, 'screw'])
     chk('pl4: the handle circle and the thread gap are in the panel', 'Handle circle' in pg.inner_text('#lsDock') and 'Gap between threads' in pg.inner_text('#lsDock'))
     dk('pitch:1'); pull(); chk('pl4: 1 cm gap', ev("shopHas({mach:'screw',pitch:1})") is True); run_equals('pl4 jack 1', "wsSetMach('screw');wsSet('pitch',1)")
-    dk('pitch:0.5'); pull(); chk('pl4: 0.5 cm gap, 40 turns', ev("shopRun({mach:'screw',pitch:0.5}).turns") == 40); run_equals('pl4 jack 0.5', "wsSetMach('screw');wsSet('pitch',0.5)"); shot('pl4_jack')
+    dk('pitch:0.5'); pull(); chk('pl4: 0.5 cm gap, 40 turns', ev("shopRun({mach:'screw',pitch:0.5}).turns") == 40); run_equals('pl4 jack 0.5', "wsSetMach('screw');wsSet('pitch',0.5)"); both('pl4_jack')
     # ----- u1: crane, block -----
     start(pg, {'width': 1440, 'height': 900}, 0, 'c6c')
     tray_drop('block', end('top'))
     while ev("WS.ropes") < 3: dk('ropes+')
     chk('u1: the panel hides the MA until the question is answered', 'MA' not in pg.inner_text('#lsDock').replace('Machine', ''))
-    pull(); chk('u1: 3 ropes reads 98 N', abs(ev("shopE({mach:'pulley',ropes:3})") - 98) < 1e-6); run_equals('u1 3 ropes', "wsSet('ropes',3)"); shot('u1_block')
+    pull(); chk('u1: 3 ropes reads 98 N', abs(ev("shopE({mach:'pulley',ropes:3})") - 98) < 1e-6); run_equals('u1 3 ropes', "wsSet('ropes',3)"); both('u1_block')
     # ----- u2: winch and ramp on one bench -----
     start(pg, {'width': 1440, 'height': 900}, 1, 'c6c')
     chk('u2: tabs for Winch and Ramp are visible', pg.locator('#lsDock [data-lm="tab:winch"]').is_visible() and pg.locator('#lsDock [data-lm="tab:ramp"]').is_visible())
@@ -220,37 +222,37 @@ with sync_playwright() as p:
     for _ in range(4): dk('L+')
     dk('h-'); chk('u2: length 4 m and height 0.8 m from the panel', ev("[WS.L, WS.h]") == [4, 0.8])
     g = J("lsGeoRamp(0)"); drag((g['tx'] + 40, g['ty']), (g['tx'] + 40, g['ty'] + 10), 6); chk('u2: dragging the platform\'s top edge lowers it to 0.6 m', abs(ev("WS.h") - 0.6) < 1e-9, ev("WS.h"))
-    dk('h+'); pull(); chk('u2: ramp 4 m, 0.8 m reads 98 N', abs(ev("shopE({mach:'ramp',L:4,h:0.8})") - 98) < 1e-6); run_equals('u2 ramp', "wsSetMach('ramp');wsSet('L',4);wsSet('h',0.8)"); shot('u2_ramp')
+    dk('h+'); pull(); chk('u2: ramp 4 m, 0.8 m reads 98 N', abs(ev("shopE({mach:'ramp',L:4,h:0.8})") - 98) < 1e-6); run_equals('u2 ramp', "wsSetMach('ramp');wsSet('L',4);wsSet('h',0.8)"); both('u2_ramp')
     # ----- u3: lift height in the crane's panel -----
     start(pg, {'width': 1440, 'height': 900}, 2, 'c6c')
     chk('u3: the crane\'s panel has the lift height', 'Lift height' in pg.inner_text('#lsDock') and ev("WS.ropes") == 1)
     dk('lift:2'); tray_drop('block', end('top'))
     while ev("WS.ropes") < 6: dk('ropes+')
-    pull(); chk('u3: 6 ropes, 2 m: effort 49 N and 12 m of rope', ev("shopHas({mach:'pulley',ropes:6,rise:2})") is True and abs(ev("shopDist({mach:'pulley',ropes:6,rise:2})") - 12) < 1e-6); run_equals('u3 6 ropes 2 m', "wsSet('lift',2);wsSet('ropes',6)"); chk('u3: task 2 ticks', task(1)); shot('u3_lift')
+    pull(); chk('u3: 6 ropes, 2 m: effort 49 N and 12 m of rope', ev("shopHas({mach:'pulley',ropes:6,rise:2})") is True and abs(ev("shopDist({mach:'pulley',ropes:6,rise:2})") - 12) < 1e-6); run_equals('u3 6 ropes 2 m', "wsSet('lift',2);wsSet('ropes',6)"); chk('u3: task 2 ticks', task(1)); both('u3_lift')
     # ----- k1: a finished crane, look only -----
     start(pg, {'width': 1440, 'height': 900}, 0, 'c6d'); pg.wait_for_timeout(200)
     chk('k1: a finished crane (gantry, block, winch), all locked, roped', ev("[!!LS.pl.crane, !!LS.pl.block, !!LS.pl.winch, JSON.stringify(LS.cab)]") == [True, True, True, '[["blk","top"],["top","wd"]]'] and 'Remove' not in pg.inner_text('#lsDock'))
-    shot('k1_crane')
+    both('k1_crane')
     # ----- k2: the crane, clip the block, then the winch -----
     start(pg, {'width': 1440, 'height': 900}, 1, 'c6d')
     tray_drop('block', end('top')); tray_drop('winch', end('wd'))
     chk('k2: block and winch clipped on and roped', ev("[!!LS.pl.block, !!LS.pl.winch, WS.bn, WS.bw, JSON.stringify(LS.cab)]") == [True, True, 2, 2, '[["blk","top"],["top","wd"]]'], ev("JSON.stringify(LS.cab)"))
     dk('bn:3'); dk('bw:4'); pull(); chk('k2: winch ×4, 3 ropes reads 98 N', abs(ev("shopE({mach:'build',bw:4,bn:3})") - 98) < 1e-6); run_equals('k2 4x3', "wsSet('bn',3);wsSet('bw',4)")
-    dk('bn:4'); dk('bw:6'); pull(); run_equals('k2 6x4', "wsSet('bn',4);wsSet('bw',6)"); shot('k2_crane')
+    dk('bn:4'); dk('bw:6'); pull(); run_equals('k2 6x4', "wsSet('bn',4);wsSet('bw',6)"); both('k2_crane')
     # ----- k3: ramp, block, winch, then the two-leg practice -----
     start(pg, {'width': 1440, 'height': 900}, 2, 'c6d')
     chk('k3: nothing to run before a route is chosen', pg.locator('#wsPull').is_disabled() and 'choose' in pg.inner_text('#lsDock').lower())
     tray_drop('ramp', zc('ramp')); chk('k3: the ramp sets br to 6', ev("[!!LS.pl.ramp, WS.br]") == [True, 6])
     rope('load', 'top'); tray_drop('block', end('top')); tray_drop('winch', zc('winch')); dk('bw:4')
     chk('k3: ramp, block (2 ropes) and winch ×4, roped', ev("[WS.br, WS.bn, WS.bw, lsGate()]") == [6, 2, 4, True], ev("[WS.br, WS.bn, WS.bw, lsGate(), JSON.stringify(LS.cab)]"))
-    pull(); chk('k3: the old task check (bw 4, bn 2, br 6) passes', task(0) and task(2)); run_equals('k3 ramp route', "wsSet('br',6);wsSet('bn',2);wsSet('bw',4)"); shot('k3_ramp')
+    pull(); chk('k3: the old task check (bw 4, bn 2, br 6) passes', task(0) and task(2)); run_equals('k3 ramp route', "wsSet('br',6);wsSet('bn',2);wsSet('bw',4)"); both('k3_ramp')
     dk('two:start'); pg.wait_for_timeout(200)
     chk('k3 practice: the two-leg board, the ▶ button hidden, a ramp and a crane in the tray', ev("LS.stage") == 'two' and not pg.locator('#wsPull').is_visible() and pg.locator('#lsTray [data-lsadd=ramp]').is_visible() and pg.locator('#lsTray [data-lsadd=crane]').is_visible())
     tray_drop('crane', (400, 250)); chk('k3 practice: a crane before leg 1 is refused', ev("!!LS.two.crane") is False)
     tray_drop('ramp', zc('ramp')); chk('k3 practice: the ramp goes in the glowing box and is roped to the crate', ev("[!!LS.two.ramp, lsJoined('c','rt')]") == [True, True])
-    shot('k3_leg1'); tray_drop('crane', zc('crane')); chk('k3 practice: the crane goes in the box over the ghost crate', ev("!!LS.two.crane") is True)
+    both('k3_leg1'); tray_drop('crane', zc('crane')); chk('k3 practice: the crane goes in the box over the ghost crate', ev("!!LS.two.crane") is True)
     chk('k3 practice: not finished until the ghost crate is roped to the crane', ev("lsK3Done()") is False)
-    rope('g', 'ch'); chk('k3 practice: roping the ghost crate to the crane finishes it', ev("lsK3Done()") is True and task(5), ev("lsK3Done()")); shot('k3_two_legs')
+    rope('g', 'ch'); chk('k3 practice: roping the ghost crate to the crane finishes it', ev("lsK3Done()") is True and task(5), ev("lsK3Done()")); both('k3_two_legs')
     dk('two:back'); chk('k3 practice: back to the generator keeps its set-up', ev("[LS.stage, WS.br, WS.bn, WS.bw, JSON.stringify(LS.cab)]")[:4] == ['main', 6, 2, 4])
     # ----- first-time cards for every new piece (FAST off), and the ? replays -----
     CARDS = {'crane': ('c6b', 0, 'This is a crane gantry: a tall frame with a hook at the top.'), 'block': ('c6b', 0, 'A pulley block is a set of wheels that hangs from a hook.'), 'winch': ('c6b', 1, 'A winch is a wheel and axle. The rope wraps round the small axle, and Smooshy turns the big handle.'),
@@ -258,7 +260,7 @@ with sync_playwright() as p:
     for piece, (sec, st, line) in CARDS.items():
         start(pg, {'width': 1440, 'height': 900}, st, sec); ev("dbSet('lsSeen',{lever:true})"); ev("FAST=false"); ev("lsShowCards('%s')" % piece); pg.wait_for_timeout(250); ch = pg.locator('#chunk')
         chk(f'cards {piece}: card 1 has the exact text and an OK button', ch.is_visible() and line in ch.inner_text() and pg.locator('#chunk [data-cb=next]').inner_text() == 'OK', ch.inner_text() if ch.is_visible() else 'hidden')
-        if piece in ('crane', 'block', 'ramp', 'jack', 'cables'): shot('cards_' + piece + '_1')
+        if piece in ('crane', 'block', 'ramp', 'jack', 'cables'): both('cards_' + piece + '_1')
         for _ in range(3): pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(120)
         chk(f'cards {piece}: after the third OK the piece is marked seen', ev(f"dbGet('lsSeen',{{}}).{piece}") is True); ev("hideCards()"); ev("FAST=true")
     start(pg, {'width': 1440, 'height': 900}, 0, 'c6b'); ev("dbSet('lsSeen',{lever:true})"); ev("FAST=false"); ev("setStep(GI)"); pg.wait_for_timeout(300); ev("hideCards()"); ev("lsAfterCards()"); pg.wait_for_timeout(250)
