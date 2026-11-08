@@ -39,6 +39,22 @@ with sync_playwright() as p:
         pg.locator(f'#rail .tkans[data-qid={qid}] .tkin').fill(str(v)); pg.locator(f'#rail .tkans[data-qid={qid}] [data-chkq]').click(); pg.wait_for_timeout(150)
         return pg.locator(f'#rail .tkans[data-qid={qid}] .tkmsg').inner_text()
     def predict(i): pg.locator('#rail [data-pred]').nth(i).click(); pg.wait_for_timeout(150)
+    # --- lesson mode: the Workshop board is driven with real pointer moves (Part 1) ---
+    def bxy(x, y):
+        pg.evaluate("window.scrollTo(0, document.querySelector('#cvScene').getBoundingClientRect().top + scrollY - 16)"); pg.wait_for_timeout(60)
+        bb = pg.locator('#cvScene').bounding_box(); return bb['x'] + x * bb['width'] / 900, bb['y'] + y * bb['height'] / 430
+    def bdrag(a, b2, steps=12):
+        ax, ay = bxy(*a); bx, by = bxy(*b2); pg.mouse.move(ax, ay); pg.mouse.down()
+        for i in range(1, steps + 1): pg.mouse.move(ax + (bx - ax) * i / steps, ay + (by - ay) * i / steps)
+        pg.mouse.up(); pg.wait_for_timeout(120)
+    def lgeo(): return json.loads(ev("JSON.stringify([lsLever(0,wsCalc()), lsGrab(lsLever(0,wsCalc()))])"))
+    def lever_on():   # drag the lever from the tray under the rock
+        pg.evaluate("window.scrollTo(0, document.querySelector('#cvScene').getBoundingClientRect().top + scrollY - 16)"); a = pg.locator('#lsTray [data-lsadd=lever]').bounding_box()
+        pg.mouse.move(a['x'] + 20, a['y'] + 20); pg.mouse.down(); pg.mouse.move(*bxy(360, 300), steps=10); pg.mouse.up(); pg.wait_for_timeout(200)
+    def arm_to(v):    # drag the fulcrum (or the rock, or your hand) to a distance, like a student
+        G, g = lgeo(); bdrag((g['x'], g['y']), (g['x'] + (v - ev("WS.arm")) * 120, g['y']))
+    def lever_menu():  # tap the bar, away from the part you drag
+        G, g = lgeo(); x = G['b']['x'] - 40 if abs(G['b']['x'] - 40 - g['x']) > 60 else G['a']['x'] + 30; pgx, pgy = bxy(x, G['a']['y']); pg.mouse.click(pgx, pgy); pg.wait_for_timeout(150)
 
     def pick(qid, *vals, R=None):
         loc = R if R is not None else q(qid)
@@ -68,12 +84,12 @@ with sync_playwright() as p:
 
     # ================= lv1: too heavy, meet the lever =================
     cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200); pg.screenshot(path=OUT + 'lv1_start.png')
-    chk('lv1: the machine picker offers By hand and Lever; no rulers yet', pg.locator('#wsMachs button').count() == 2 and ev("WS.mach") == 'hand' and not ev("LAB.show.has('rulers')"))
-    chk('lv1: the class picker is not there yet', not pg.locator('#wsCls').is_visible())
+    chk('lv1: just a rope to start, the lever waits in the tray; no rulers yet and no old panels', pg.locator('#lsTray [data-lsadd=lever]').count() == 1 and ev("WS.mach") == 'hand' and not ev("LAB.show.has('rulers')") and not pg.locator('#wsMachs').is_visible())
+    chk('lv1: the class choice is not there yet', not pg.locator('#lsMenu').is_visible())
     pull(); chk('lv1: lifting by hand reads 294 N', abs(ev("shopE({mach:'hand'})") - 294) < 1e-6)
     chk('lv1: the run sentence says no machine', 'no machine' in ev("runText(runsAll().slice(-1)[0])"), ev("runText(runsAll().slice(-1)[0])"))
     chk('lv1 q1', 'Right' in tkans('q1', 294))
-    pg.locator('#wsMachs [data-mach="lever"]').click(); pg.wait_for_timeout(150); pull()
+    lever_on(); pull()
     chk('lv1: the lever with the fulcrum in the middle reads 294 N', abs(ev("shopE({mach:'lever',cls:1,la:1})") - 294) < 1e-6)
     chk('lv1: lever sentence is plain English', 'fulcrum in the middle' in ev("runText(runsAll().slice(-1)[0])") and 'load arm' not in ev("runText(runsAll().slice(-1)[0])"), ev("runText(runsAll().slice(-1)[0])"))
     chk('lv1 q2', '294 N again' in tkans('q2', 294))
@@ -82,12 +98,11 @@ with sync_playwright() as p:
 
     # ================= lv2: move the fulcrum =================
     cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200)
-    chk('lv2: the slider is called Move the fulcrum, in plain words', pg.locator('#wsArmTitle').inner_text() == 'Move the fulcrum' and 'fulcrum' in pg.locator('#wsArmNote').inner_text(), pg.locator('#wsArmTitle').inner_text())
-    chk('lv2: the machine picker is hidden', not pg.locator('#wsMachs').is_visible())
+    chk('lv2: the lever is on the bench, the fulcrum is dragged (no slider panel)', ev("LS.on") is True and ev("WS.mach") == 'lever' and not pg.locator('#wsArm').is_visible())
     predict(0)
-    setnum('#wsArmNum', 0.4); pull(); chk('lv2: 73.5 N at 0.4 m', abs(ev("shopE({mach:'lever',cls:1,la:0.4})") - 73.5) < 1e-6)
+    arm_to(0.4); pull(); chk('lv2: 73.5 N at 0.4 m', abs(ev("shopE({mach:'lever',cls:1,la:0.4})") - 73.5) < 1e-6)
     chk('lv2 q1', 'Yes' in tkans('q1', 73.5)); pg.screenshot(path=OUT + 'lv2_04.png')
-    setnum('#wsArmNum', 0.3); pull(); chk('lv2: a position at 60 N or less ticks the task', ev("CHDATA.c6.steps[1].tasks[3][1]()") is True)
+    arm_to(0.3); pull(); chk('lv2: a position at 60 N or less ticks the task', ev("CHDATA.c6.steps[1].tasks[3][1]()") is True)
     dock(); pick('q2', 2); chk('lv2 q2', ptsq('q2').startswith('1 of 1'), ptsq('q2'))
     mcq('q3', 0); chk('lv2 q3', ptsq('q3').startswith('1 of 1'), ptsq('q3'))
     finish('lv2')
@@ -96,10 +111,10 @@ with sync_playwright() as p:
     cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200)
     chk('lv3: the rulers are switched on', ev("LAB.show.has('rulers')") is True)
     pull(); chk('lv3 q1: hand moved 0.40 m', '0.40 m' in tkans('q1', 0.4)); pg.screenshot(path=OUT + 'lv3_rulers.png')
-    setnum('#wsArmNum', 0.2); pull(); pg.screenshot(path=OUT + 'lv3_02.png')
+    arm_to(0.2); pull(); pg.screenshot(path=OUT + 'lv3_02.png')
     chk('lv3: at 0.2 m the hand moved 0.90 m', abs(ev("shopDist({mach:'lever',cls:1,la:0.2})") - 0.9) < 1e-6)
     chk('lv3 q2', '0.90 m' in tkans('q2', 0.9))
-    setnum('#wsArmNum', 1.6); pull(); pg.screenshot(path=OUT + 'lv3_16.png')
+    arm_to(1.6); pull(); pg.screenshot(path=OUT + 'lv3_16.png')
     chk('lv3: fulcrum close to the hand: 1176 N, the rock rises 0.40 m and the hand moves 0.10 m', abs(ev("shopE({mach:'lever',cls:1,la:1.6})") - 1176) < 1e-6 and abs(ev("shopRun({mach:'lever',cls:1,la:1.6}).rise") - 0.4) < 1e-6 and abs(ev("shopDist({mach:'lever',cls:1,la:1.6})") - 0.1) < 1e-6)
     chk('lv3 q3', 'Only 0.10 m' in tkans('q3', 0.1))
     dock(); pick('q4', 0, 2); chk('lv3 q4', ptsq('q4') == '2 of 2 points', ptsq('q4'))
@@ -110,11 +125,11 @@ with sync_playwright() as p:
     chk('lv4: the first card states the big rule', 'bigger distance' in pg.locator('#chunk').inner_text() and pg.locator('#chunk .law').count() == 1, pg.locator('#chunk').inner_text()[:200])
     pg.locator('#chunk').screenshot(path=OUT + 'lv4_rule.png')
     cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200)
-    chk('lv4: the design buttons name what is in the middle, with no class numbers yet', pg.locator('#wsCls').is_visible() and 'Load in the middle' in pg.locator('#wsCls').inner_text() and 'Class' not in pg.locator('#wsCls').inner_text(), pg.locator('#wsCls').inner_text())
-    predict(0)
-    pg.locator('#wsCls [data-cls="2"]').click(); pg.wait_for_timeout(120); chk('lv4: load in the middle: the slider moves the rock', pg.locator('#wsArmTitle').inner_text() == 'Move the rock')
-    setnum('#wsArmNum', 0.5); pull(); pg.screenshot(path=OUT + 'lv4_c2.png')
-    pg.locator('#wsCls [data-cls="3"]').click(); pg.wait_for_timeout(120); chk('lv4: effort in the middle: the slider moves your hand', pg.locator('#wsArmTitle').inner_text() == 'Move your hand' and ev("WS.arm") == 0.5)
+    predict(0); lever_menu(); mt = pg.locator('#lsMenu').inner_text()
+    chk('lv4: the lever menu names what is in the middle, with no class numbers yet', pg.locator('#lsMenu').is_visible() and 'Load in the middle' in mt and 'Class' not in mt, mt)
+    pg.locator('#lsMenu [data-lm="cls2"]').click(); pg.wait_for_timeout(120); pg.locator('#lsMenu [data-lm=close]').click(); chk('lv4: load in the middle: the rock is the part you drag', ev("WS.cls") == 2 and 'Drag the rock' in pg.locator('#lsStatus').inner_text())
+    arm_to(0.5); pull(); pg.screenshot(path=OUT + 'lv4_c2.png')
+    lever_menu(); pg.locator('#lsMenu [data-lm="cls3"]').click(); pg.wait_for_timeout(120); pg.locator('#lsMenu [data-lm=close]').click(); chk('lv4: effort in the middle: your hand is the part you drag', ev("WS.cls") == 3 and 'Drag your hand' in pg.locator('#lsStatus').inner_text() and ev("WS.arm") == 0.5)
     pull(); pg.screenshot(path=OUT + 'lv4_c3.png')
     chk('lv4: class 3 run: 1176 N, rock up 0.40 m, hand 0.10 m', abs(ev("shopE({mach:'lever',cls:3,ea:0.5})") - 1176) < 1e-6 and abs(ev("shopRun({mach:'lever',cls:3,ea:0.5}).rise") - 0.4) < 1e-6)
     chk('lv4 q1', '1,176' in tkans('q1', 1176)); chk('lv4 q2', '0.10 m' in tkans('q2', 0.1))
@@ -128,8 +143,8 @@ with sync_playwright() as p:
         if n.count() and n.is_visible(): n.click(); pg.wait_for_timeout(120)
         else: break
     cards(); dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200)
-    chk('lv5: the buttons now show the class names', 'Class 3' in pg.locator('#wsCls').inner_text(), pg.locator('#wsCls').inner_text())
-    setnum('#wsArmNum', 1.0); pull(); chk('lv5: class 3 at 1.0 m ticks the task', ev("shopHas({mach:'lever',cls:3,ea:1})") is True)
+    lever_menu(); chk('lv5: the lever menu now shows the class names', 'Class 3' in pg.locator('#lsMenu').inner_text(), pg.locator('#lsMenu').inner_text()); pg.locator('#lsMenu [data-lm=close]').click()
+    arm_to(1.0); pull(); chk('lv5: class 3 at 1.0 m ticks the task', ev("shopHas({mach:'lever',cls:3,ea:1})") is True)
     dock(); pick('q1', 1, 2); chk('lv5 q1', ptsq('q1') == '2 of 2 points', ptsq('q1'))
     mcq('q2', 0); chk('lv5 q2: chopsticks', ptsq('q2').startswith('1 of 1'), ptsq('q2'))
     finish('lv5')
