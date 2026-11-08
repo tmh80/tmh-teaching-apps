@@ -32,7 +32,7 @@ def run(vp, tag, full):
         chk(f'{tag}: the board is labelled GUMMY MISSION CONTROL · RESCUE SIMULATOR', 'GUMMY MISSION CONTROL · RESCUE SIMULATOR' in pg.inner_text('.glmchd'))
         chk(f'{tag}: the Mission computer prediction box and the old warm-up are gone', ev("!document.querySelector('#glPred, #glWarm, #glPVal, #glWork, #glHint')") is True)
         chk(f'{tag}: the guided start shows with its steps and a Skip', pg.locator('#glGuide').is_visible() and pg.locator('#glGuide [data-gw=skip]').count() == 1 and 'Drag a lever from the tray onto the boulder' in pg.inner_text('#glGuide'))
-        chk(f'{tag}: the strip is above the board and Send to GASA is off until there is a route', ev("document.querySelector('#glStrip').getBoundingClientRect().bottom <= document.querySelector('.glboard').getBoundingClientRect().top") is True and pg.locator('#glSend').is_disabled())
+        chk(f'{tag}: the strip is below the board and Send to GASA is off until there is a route', ev("document.querySelector('#glStrip').getBoundingClientRect().top >= document.querySelector('.glboard').getBoundingClientRect().bottom") is True and pg.locator('#glSend').is_disabled())
         chk(f'{tag}: ▶ Test in simulator is inside the board', pg.evaluate("document.querySelector('#glRun').parentElement.classList.contains('glboard')"))
         shot('#glGuide', 'guided_start')
         if full:

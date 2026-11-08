@@ -39,7 +39,7 @@ function glhTier3(row) {
 function glhBoxHTML(row) {
   const st = glState(), n = st.hints || 0, seen = glhSeen(), k = t => `lh:${row.key}:${t}`, cost = n ? 'costs 1 point' : 'is free';
   const ask = (t, txt) => `<div class="row"><button type="button" class="go sm" data-glw="spend:${row.key}:${t}">${txt} <small>(${cost})</small></button></div>`;
-  let h = `<p class="glnote">Opening a hint is spent: the first one is free, then each new one costs 1 point (you have used <b>${n}</b>). Reading one you have already opened is free.</p>`;
+  let h = `<p class="glnote">The first hint is free. Each new hint after that costs 1 point (you have used <b>${n}</b>). Opening one again is free.</p>`;
   if (!seen[k(1)]) return h + ask(1, 'Show the formulas');
   h += `<ul class="gl">${glhTier1(row).map(x => `<li>${x}</li>`).join('')}</ul>`;
   h += seen[k(2)] ? `<p class="glnote"><b>With this ${row.kind === 'boulder' ? 'boulder' : 'leg'}\'s numbers:</b></p><ul class="gl glplug">${glhTier2(row).map(x => `<li>${x}</li>`).join('')}</ul>` : ask(2, 'Show it with my numbers');

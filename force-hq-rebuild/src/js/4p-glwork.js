@@ -80,9 +80,9 @@ function glwRowHTML(r, e) {
 }
 function glwPaint() {
   const host = $('#glStrip'); if (!host || !GLB.ev) return; const rows = glwRows(), W = glwSync(rows), n = glwHints();
-  const body = rows.length ? rows.map(r => glwRowHTML(r, glwEntry(W, r))).join('') : '<p class="glnote">Build a route in the simulator below. Each leg of the route gets a row here, and so does the boulder.</p>';
+  const body = rows.length ? rows.map(r => glwRowHTML(r, glwEntry(W, r))).join('') : '<p class="glnote">Build a route in the simulator above. Each leg of the route gets a row here, and so does the boulder.</p>';
   host.innerHTML = `<div class="glw-top"><h3>🛰️ My working: the route strip</h3><span class="glw-hints" id="glwHints">💡 Hints used: <b>${n}</b>${n ? '' : ' (the first is free)'}</span></div>
-    <p class="glnote">GASA checks your maths before the rescue launches. Work out every box for each leg, then send it. Test your route in the simulator below first. It shows where the route works, but no numbers.</p>
+    <p class="glnote">GASA checks your maths before the rescue launches. Test your route in the simulator first: it shows where the route works, but no numbers. Then work out every box for each leg and send it.</p>
     <div class="glw-rows">${body}</div>
     <div class="glw-send"><button type="button" class="go" id="glSend">📨 Send to GASA</button><span class="glnote" id="glwWhy"></span></div><p class="glw-msg ${GLW.msg ? GLW.msg.cls : ''}" id="glwMsg" aria-live="polite">${GLW.msg ? esc(GLW.msg.text) : ''}</p>`;
   glwSendState(rows, W);

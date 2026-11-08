@@ -298,7 +298,7 @@ function renderGummyLift(ch, m, host, save) {
       <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
       <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p>
       <p>Test your route in the simulator, work out the maths for every leg in your route strip, then send it to GASA. When GASA approves your maths, the rescue launches!</p></div></details>
-    <div id="glGuideHost"></div><div id="glStripHost"></div><div id="glBoardHost"></div><div id="glRunHost"></div>`;
+    <div id="glGuideHost"></div><div id="glBoardHost"></div><div id="glStripHost"></div><div id="glRunHost"></div>`;
   glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
   if (typeof glMountGuide === 'function') glMountGuide($('#glGuideHost', card));
   if (typeof glMountStrip === 'function') glMountStrip($('#glStripHost', card));
