@@ -78,24 +78,24 @@ function glCablePoint(p, m) {
   return null;
 }
 function glDrawRamp(c, p, m, bad, ground) {
-  const u = glU(), a = m.start, b = m.end, ang = Math.atan2(b.y - a.y, b.x - a.x);
+  const u = glU(), us = u * (p.s || 1), a = m.start, b = m.end, ang = Math.atan2(b.y - a.y, b.x - a.x);
   /* support legs down to whatever is below the deck */
-  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.18 * u);
+  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.18 * us);
   for (let d = 3; d < p.L - 1; d += 4) { const x = a.x + Math.cos(ang) * d, y = a.y + Math.sin(ang) * d, gy = glAt(ground, x); if (y - gy > 0.4) { c.beginPath(); c.moveTo(glSX(x), glSY(y)); c.lineTo(glSX(x), glSY(gy)); c.stroke(); } }
-  c.save(); c.translate(glSX(a.x), glSY(a.y)); c.rotate(-ang); const L = p.L * u, th = Math.max(5, 0.42 * u);
+  c.save(); c.translate(glSX(a.x), glSY(a.y)); c.rotate(-ang); const L = p.L * u, th = Math.max(5, 0.42 * us);
   c.fillStyle = bad ? '#e8a0a0' : GLC.wood; c.beginPath(); c.roundRect(0, -th, L, th, th / 3); c.fill();
-  c.fillStyle = bad ? '#c25b5b' : GLC.wood2; for (let d = 1.5; d < p.L; d += 1.5) c.fillRect(d * u, -th, Math.max(1.5, 0.08 * u), th);
-  c.fillStyle = GLC.steel; c.fillRect(0, -th - Math.max(2, 0.1 * u), L, Math.max(2, 0.1 * u));
+  c.fillStyle = bad ? '#c25b5b' : GLC.wood2; for (let d = 1.5; d < p.L; d += 1.5) c.fillRect(d * u, -th, Math.max(1.5, 0.08 * us), th);
+  c.fillStyle = GLC.steel; c.fillRect(0, -th - Math.max(2, 0.1 * us), L, Math.max(2, 0.1 * us));
   c.restore();
-  c.fillStyle = GLC.steel2; c.beginPath(); c.arc(glSX(b.x), glSY(b.y + 0.3), Math.max(3, 0.35 * u), 0, 7); c.fill();
+  c.fillStyle = GLC.steel2; c.beginPath(); c.arc(glSX(b.x), glSY(b.y + 0.3), Math.max(3, 0.35 * us), 0, 7); c.fill();
 }
 function glDrawCrane(c, p, m, bad, hookY) {
-  const u = glU(), by = m.start.y, top = by + p.rise + 2.6, x = p.x, col = bad ? GLC.bad : '#e3a51c';
+  const sc = p.s || 1, u = glU() * sc, by = m.start.y, top = by + p.rise + 2.6 * sc, x = p.x, col = bad ? GLC.bad : '#e3a51c';
   c.strokeStyle = col; c.lineWidth = Math.max(3, 0.3 * u); c.lineCap = 'round';
-  [-1, 1].forEach(sd => { c.beginPath(); c.moveTo(glSX(x + sd * 3.2), glSY(by)); c.lineTo(glSX(x + sd * 2.6), glSY(top)); c.stroke(); c.lineWidth = Math.max(1.5, 0.14 * u); for (let k = 1; k < 4; k++) { const yy = by + (top - by) * k / 4; c.beginPath(); c.moveTo(glSX(x + sd * (3.2 - 0.6 * k / 4)), glSY(yy)); c.lineTo(glSX(x + sd * (3.2 - 0.6 * (k + 1) / 4)), glSY(yy + (top - by) / 4)); c.stroke(); } c.lineWidth = Math.max(3, 0.3 * u); });
-  c.beginPath(); c.moveTo(glSX(x - 3.2), glSY(top)); c.lineTo(glSX(x + 3.2), glSY(top)); c.stroke();
-  c.fillStyle = GLC.steel2; [-1, 1].forEach(sd => { c.beginPath(); c.roundRect(glSX(x + sd * 3.2) - 0.5 * u, glSY(by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
-  const hy = hookY == null ? by + 4.2 : hookY; c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(x), glSY(top)); c.lineTo(glSX(x), glSY(hy)); c.stroke();
+  [-1, 1].forEach(sd => { c.beginPath(); c.moveTo(glSX(x + sd * 3.2 * sc), glSY(by)); c.lineTo(glSX(x + sd * 2.6 * sc), glSY(top)); c.stroke(); c.lineWidth = Math.max(1.5, 0.14 * u); for (let k = 1; k < 4; k++) { const yy = by + (top - by) * k / 4; c.beginPath(); c.moveTo(glSX(x + sd * (3.2 - 0.6 * k / 4) * sc), glSY(yy)); c.lineTo(glSX(x + sd * (3.2 - 0.6 * (k + 1) / 4) * sc), glSY(yy + (top - by) / 4)); c.stroke(); } c.lineWidth = Math.max(3, 0.3 * u); });
+  c.beginPath(); c.moveTo(glSX(x - 3.2 * sc), glSY(top)); c.lineTo(glSX(x + 3.2 * sc), glSY(top)); c.stroke();
+  c.fillStyle = GLC.steel2; [-1, 1].forEach(sd => { c.beginPath(); c.roundRect(glSX(x + sd * 3.2 * sc) - 0.5 * u, glSY(by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
+  const hy = hookY == null ? by + 4.2 * sc : hookY; c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(x), glSY(top)); c.lineTo(glSX(x), glSY(hy)); c.stroke();
   c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.arc(glSX(x), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke();
 }
 function glDrawLever(c, p, m, bad, tiltT) {
@@ -105,30 +105,30 @@ function glDrawLever(c, p, m, bad, tiltT) {
   drawLeverShape(c, { a: { x: glSX(p.x), y: glSY(ly) }, b: { x: glSX(ex), y: glSY(Math.max(ey, by - 30)) }, fx: glSX(fx), fy: glSY(by + 0.9), floor: glSY(by), thick: Math.max(4, 0.32 * u), bad });
 }
 function glDrawJack(c, p, m, bad, k) {
-  const u = glU(), by = m.start.y, hgt = 0.7 + (k || 0) * p.rise; c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(glSX(p.x - 0.7), glSY(by + 0.35), 1.4 * u, 0.35 * u, 3); c.fill();
-  c.strokeStyle = GLC.steel; c.lineWidth = Math.max(3, 0.28 * u); c.beginPath(); c.moveTo(glSX(p.x), glSY(by + 0.35)); c.lineTo(glSX(p.x), glSY(by + hgt)); c.stroke();
-  c.strokeStyle = '#e3a51c'; c.lineWidth = Math.max(1.2, 0.07 * u); for (let y = by + 0.45; y < by + hgt; y += 0.22) { c.beginPath(); c.moveTo(glSX(p.x - 0.16), glSY(y)); c.lineTo(glSX(p.x + 0.16), glSY(y + 0.1)); c.stroke(); }
-  c.fillStyle = GLC.steel2; c.fillRect(glSX(p.x - 0.5), glSY(by + hgt + 0.12), u, 0.14 * u);
+  const sc = p.s || 1, u = glU() * sc, by = m.start.y, hgt = (0.7 + (k || 0) * p.rise * (p.vis || 1)) * sc, gp = (p.gap || 0.22) * sc; c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(glSX(p.x) - 0.7 * u, glSY(by + 0.35 * sc), 1.4 * u, 0.35 * u, 3); c.fill();
+  c.strokeStyle = GLC.steel; c.lineWidth = Math.max(3, 0.28 * u); c.beginPath(); c.moveTo(glSX(p.x), glSY(by + 0.35 * sc)); c.lineTo(glSX(p.x), glSY(by + hgt)); c.stroke();
+  c.strokeStyle = '#e3a51c'; c.lineWidth = Math.max(1.2, 0.07 * u); for (let y = by + 0.45 * sc; y < by + hgt; y += gp) { c.beginPath(); c.moveTo(glSX(p.x) - 0.16 * u, glSY(y)); c.lineTo(glSX(p.x) + 0.16 * u, glSY(y + 0.1 * sc)); c.stroke(); }
+  c.fillStyle = GLC.steel2; c.fillRect(glSX(p.x) - 0.5 * u, glSY(by + hgt + 0.12 * sc), u, 0.14 * u);
 }
 function glDrawPlatform(c, pl, over) {
-  const u = glU(), x0 = glSX(pl.x0), x1 = glSX(pl.x1), yT = glSY(pl.top), yB = glSY(pl.base - 0.2), col = over ? GLC.bad : '#9fb0ba';
+  const u = glU() * (pl.s || 1), x0 = glSX(pl.x0), x1 = glSX(pl.x1), yT = glSY(pl.top), yB = glSY(pl.base - 0.2), col = over ? GLC.bad : '#9fb0ba';
   c.strokeStyle = col; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.moveTo(x0 + 3, yB); c.lineTo(x0 + 3, yT); c.moveTo(x1 - 3, yB); c.lineTo(x1 - 3, yT); c.stroke();
   c.lineWidth = Math.max(1, 0.08 * u); const n = Math.max(1, Math.round((pl.top - pl.base) / 1.5)); for (let i = 0; i < n; i++) { const ya = yB + (yT - yB) * i / n, yb = yB + (yT - yB) * (i + 1) / n; c.beginPath(); c.moveTo(x0 + 3, ya); c.lineTo(x1 - 3, yb); c.moveTo(x1 - 3, ya); c.lineTo(x0 + 3, yb); c.stroke(); }
   c.fillStyle = over ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(x0, yT, x1 - x0, Math.max(4, 0.32 * u), 3); c.fill();
   c.fillStyle = '#e3a51c'; for (let x = x0 + 4; x < x1 - 6; x += 12) c.fillRect(x, yT + 1, 5, Math.max(2, 0.12 * u));
 }
 function glDrawBlock(c, p, bad) {
-  const u = glU(), r = Math.max(7, 0.5 * u), X = glSX(p.x), Y = glSY(p.y);
+  const u = glU() * (p.s || 1), r = Math.max(7, 0.5 * u), X = glSX(p.x), Y = glSY(p.y);
   c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(X - r * 0.5, Y - r * 1.5, r, r * 0.7, 3); c.fill();
   c.fillStyle = GLC.steel; c.beginPath(); c.arc(X, Y, r, 0, 7); c.fill(); c.fillStyle = GLC.steel2; c.beginPath(); c.arc(X, Y, r * 0.35, 0, 7); c.fill();
 }
 function glDrawWinch(c, p, bad, spin) {
-  const u = glU(), r = Math.max(8, 0.55 * u), X = glSX(p.x), Y = glSY(p.y);
+  const u = glU() * (p.s || 1), r = Math.max(8, 0.55 * u), X = glSX(p.x), Y = glSY(p.y), cl = p.crank || 1.5;
   c.fillStyle = bad ? GLC.bad : '#2a7d48'; c.beginPath(); c.roundRect(X - r * 1.2, Y + r * 0.6, r * 2.4, r * 0.5, 3); c.fill();
   c.fillStyle = '#e3a51c'; c.beginPath(); c.roundRect(X - r * 0.9, Y - r * 0.7, r * 1.8, r * 1.4, r * 0.4); c.fill();
   c.strokeStyle = '#8a5a12'; c.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(X + i * r * 0.32, Y - r * 0.7); c.lineTo(X + i * r * 0.32, Y + r * 0.7); c.stroke(); }
-  const a = spin || 0; c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.12 * u); c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * r * 1.5, Y + Math.sin(a) * r * 1.5); c.stroke();
-  c.fillStyle = '#d6402c'; c.beginPath(); c.arc(X + Math.cos(a) * r * 1.5, Y + Math.sin(a) * r * 1.5, r * 0.28, 0, 7); c.fill();
+  const a = spin || 0; c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.12 * u); c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl); c.stroke();
+  c.fillStyle = '#d6402c'; c.beginPath(); c.arc(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl, r * 0.28, 0, 7); c.fill();
 }
 function glDrawDyn(c, p, g, preview) {
   const u = glU(), y = glAt(g, p.x), X = glSX(p.x), Y = glSY(y), r = p.big ? GL_BLAST.big : GL_BLAST.small, n = p.big ? 3 : 1;
