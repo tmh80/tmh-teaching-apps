@@ -56,8 +56,16 @@ function glAddPart(t, wx, wy) {
   if (glIsAddon(p)) glAutoAttach(p);
   GLB.sel = p.id; glChanged(); glOpenMenu(p.id);
 }
-/* a lever or jack set down by the boulder works on the boulder */
-function glBoulderSnap(p) { const nearRock = Math.abs(p.x - 18.2) <= 1.6 && glAt(glGround0(), p.x) < 0.5; if (nearRock) { p.role = 'boulder'; p.x = 18.2; if (p.type === 'lever') p.dir = 1; } else delete p.role; }
+/* a lever or jack works on the boulder when ANY part of it overlaps the boulder (Tom, 8 Nov 2026: it used to test only the lever's load end, so a bar lying across the boulder did not snap).
+   Returns true the moment it newly snaps on, so the caller can show the tick. */
+const GL_ROCK = { x0: 17.4, x1: 20.3 };
+function glOverRock(p) {
+  const d = p.dir || 1, a = p.type === 'lever' ? Math.min(p.x, p.x + d * GL.beam) - 0.3 : p.x - 0.8, b = p.type === 'lever' ? Math.max(p.x, p.x + d * GL.beam) + 0.3 : p.x + 0.8;
+  return a <= GL_ROCK.x1 && b >= GL_ROCK.x0 && glAt(glGround0(), 18.2) < 0.5;
+}
+function glBoulderSnap(p) { const was = p.role === 'boulder';
+  if (glOverRock(p)) { p.role = 'boulder'; p.x = 18.2; if (p.type === 'lever') p.dir = 1; if (!was) { toast(`✓ ${p.type === 'lever' ? 'Lever' : 'Screw jack'} on the boulder!`); return true; } } else delete p.role;
+  return false; }
 /* an add-on dropped near a machine's cable point (or the end of its chain) clips on */
 function glAutoAttach(p) {
   if (glOwner(p.id)) return; let best = null, bd = 4.5;
@@ -81,7 +89,7 @@ function glFrameOpts() {
   const ev = GLB.ev, st = glState(), hz = !ev ? null : ev.arrived ? null : ev.stop ? ev.stop.at : null;
   return { rig: GLB.rig, ev, ground: ev.ground, ghost: GLB.rig.parts.some(p => p.type === 'dyn') ? glBaseGround() : null, sel: GLB.sel,
     ship: { x: GL.shipX, y: glAt(ev.ground, GL.shipX), tilt: 0, inside: true, mood: 'worried', dmg: st.lastDmg || 0 }, rock: !(st.boulderGone),
-    hz, hzLabel: hz ? (ev.legs.length ? 'Start the next machine in here' : 'Start your first machine in here') : '', ruler: GLB.rulerOn ? GLB.ruler : null, cableDrag: GLB.drag && GLB.drag.kind === 'cable' ? GLB.drag.line : null };
+    hz, hzLabel: hz ? (ev.legs.length ? 'Start the next machine in here' : 'Start your first machine in here') : '', labels: true, dropGlow: !!((GLB.trayType && (GLB.trayType === 'lever' || GLB.trayType === 'jack')) || (GLB.drag && GLB.drag.moved && GLB.drag.id && glPart(GLB.drag.id) && ['lever', 'jack'].includes(glPart(GLB.drag.id).type) && !GLB.drag.kind.match(/cable|pan|ruler/))), ruler: GLB.rulerOn ? GLB.ruler : null, cableDrag: GLB.drag && GLB.drag.kind === 'cable' ? GLB.drag.line : null };
 }
 function glLoop() {
   cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
@@ -92,6 +100,11 @@ const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - 
 function glHit(P) {
   const g = glGround0(), pl = glPlats0(), byId = {}; GLB.rig.parts.forEach(q => byId[q.id] = q); const ms = {}; GLB.rig.parts.filter(q => GL_LIFT[q.type]).forEach(q => ms[q.id] = glMachine(q, g, pl));
   const near = (q, r) => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy) <= (r || 14);
+  /* dynamite first: its tap area is at least 22 px across on screen (44 px for a finger), tested before cable dots and platform edges
+     (Tom, 8 Nov 2026: it was only 1.2 m wide, tiny on a phone, and a cable dot or a ramp handle beside it won the tap) */
+  { const sc = (GLB.cv.getBoundingClientRect().width || GLV.LW) / GLV.LW, minL = (GLB.touch ? 44 : 22) / sc, u = glU();
+    for (const p of GLB.rig.parts.filter(q => q.type === 'dyn').slice().reverse()) { const cx = glSX(p.x), y0 = glSY(glAt(g, p.x)), y1 = glSY(glAt(g, p.x) + 1.9), w = Math.max(1.2 * u, minL) / 2, mid = (y0 + y1) / 2, h = Math.max(Math.abs(y0 - y1), minL) / 2;
+      if (Math.abs(P.sx - cx) <= w && Math.abs(P.sy - mid) <= h) return { id: p.id, what: 'body' }; } }
   /* the nearest small target wins: cable dots and ramp-top handles sit close together */
   let best = null, bd = 14; const cand = (d, r) => { if (d < bd) { bd = d; best = r; } }, dist = q => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy);
   for (const p of GLB.rig.parts) { const q = glCablePoint(p, ms[p.id]); if (q) cand(dist(q), { id: p.id, what: 'cable', at: q }); if (p.type === 'ramp') cand(dist(ms[p.id].end) - 2, { id: p.id, what: 'head' }); }
@@ -110,7 +123,7 @@ function glHit(P) {
 function glBindBoard() {
   const cv = GLB.cv;
   cv.addEventListener('pointerdown', e => {
-    if (GLB.readOnly || (GLR && GLR.on)) return; const P = glPt(e); e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
+    if (GLB.readOnly || (GLR && GLR.on)) return; GLB.touch = e.pointerType === 'touch' || e.pointerType === 'pen'; const P = glPt(e); e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
     if (GLB.place) { const t = GLB.place; GLB.place = null; glTrayMark(); glAddPart(t, P.x, P.y); return; }
     if (GLB.rulerOn && GLB.ruler) for (const k of ['a', 'b']) if (Math.hypot(glSX(GLB.ruler[k].x) - P.sx, glSY(GLB.ruler[k].y) - P.sy) <= 16) { GLB.drag = { kind: 'ruler', k, P0: P, moved: false }; return; }
     const hit = glHit(P);
@@ -197,7 +210,7 @@ function glMenuAct(k) {
 function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
 function glPaintSide() {
   const ev = GLB.ev, el = $('#glCrys'); if (!el || !ev) return; const c = ev.cost.total, over = c > GL.budget;
-  el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} sugar crystals</span>`;
+  el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} ${T('sugarcrystal', 'sugar crystals')} (gummy money)</span>`;
   const rc = $('#glReceipt'); if (rc) rc.innerHTML = ev.cost.items.length ? ev.cost.items.map(([w, n]) => `<li><span>${esc(w)}</span><b>${n}</b></li>`).join('') + `<li class="tot"><span>Total</span><b>${c}</b></li>` : '<li>Nothing bought yet.</li>';
 }
 function glToolAct(k) {
@@ -227,8 +240,8 @@ function glMountBoard(host, opts) {
   host.addEventListener('click', e => { const b = e.target.closest('[data-gt]'); if (b) glToolAct(b.dataset.gt); const a = e.target.closest('[data-add]'); if (a && !GLB.trayDrag) { GLB.place = GLB.place === a.dataset.add ? null : a.dataset.add; glTrayMark(); } });
   /* drag straight from the tray onto the crater */
   $('#glTray', host).addEventListener('pointerdown', e => { const a = e.target.closest('[data-add]'); if (!a) return; const t = a.dataset.add, x0 = e.clientX, y0 = e.clientY; GLB.trayDrag = false;
-    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) GLB.trayDrag = true; };
-    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf);
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { GLB.trayDrag = true; GLB.trayType = t; } };
+    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); GLB.trayType = null;
       const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
       setTimeout(() => { GLB.trayDrag = false; }, 0); };
     document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
@@ -241,9 +254,10 @@ function renderGummyLift(ch, m, host, save) {
   GLB.ch = ch; GLB.mid = m.id; GLB.save = save; const st = glState();
   const card = h('section', { class: 'panel mission glwrap', id: 'mi-gl' }); host.appendChild(card);
   card.innerHTML = `${remindersHTML()}<details class="glbrief"${st.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
-      <p>Captain Smooshy's Gumdrop weighs <b>6,300 N</b> on Glimmer-9, and Smooshy can pull with <b>60 N</b> at most. Anything harder than that and he has to fire the Gumdrop's damaged thrusters, which scorch and shake the hull.</p>
-      <p>The Big Jelly can't land on the crumbly rim, so its tractor beam waits beyond the crest. It can grab the Gumdrop once the ship is <b>level with the top of the crest</b> (the dotted line). Build a route of machines from the Gumdrop up to that level. Each machine must start inside the glowing box where the last one finished.</p>
-      <p>You have <b>475 sugar crystals</b> to spend and enough oxygen for <b>1,500 m</b> of hand pulling. Don't forget the boulder jammed against the landing leg!</p></div></details>
+      <p>The Gumdrop weighs <b>6,300 N</b>. Smooshy can only pull <b>60 N</b>. If he has to pull harder, he fires the broken thrusters, and they damage the ship.</p>
+      <p>The tractor beam can lift the Gumdrop once it reaches the dotted line at the top of the crater. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
+      <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
+      <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p></div></details>
     <div id="glWarmHost"></div><div id="glBoardHost"></div><div id="glHintHost"></div><div id="glRunHost"></div>`;
   glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
   if (typeof glMountWarm === 'function') glMountWarm($('#glWarmHost', card));

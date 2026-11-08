@@ -347,6 +347,7 @@ function wsRulers(c, rise, eDist, t1, t2) {
 
 /* ---------- the whole scene ---------- */
 function drawShopScene(c) {
+  if (WS.site === 'mission') { glDrawMission(c); return; }   // Part 5, step v1: Mission Control (no bench, no LIVE inset)
   wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
   if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);

@@ -13,6 +13,7 @@ const TERMS = {
   weight: ['Weight', 'The pull of gravity on an object, measured in newtons. Weight = mass × g, and on Earth g = 9.8 N/kg.', ['weight']],
   mass: ['Mass', 'How much matter (stuff) is in an object, measured in kilograms (kg). Your mass is the same on Earth and on the Moon.', ['mass']],
   gravity: ['Gravity', 'The non-contact force that pulls objects towards each other. Earth\'s gravity pulls everything towards its centre.', ['gravity']],
+  sugarcrystal: ['Sugar crystal', 'Gummy money on Glimmer-9. You spend sugar crystals to buy machines, platforms and dynamite.', []],
   gfs: ['Gravitational field strength (g)', 'How strongly gravity pulls on each kilogram. On Earth, g = 9.8 newtons for every kilogram (9.8 N/kg).', ['gravitational field strength']],
   normal: ['Normal force', 'The push from a surface back up against an object resting on it. "Normal" means "at right angles", because it pushes straight out of the surface.', ['normal force', 'normal forces']],
   tension: ['Tension', 'The pulling force in a stretched rope, string or cable.', ['tension']],

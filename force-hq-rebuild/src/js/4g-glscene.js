@@ -195,8 +195,19 @@ function glDrawWorld(c, o) {
   if (o.sel && byId[o.sel]) { const b = glBounds(byId[o.sel], ms[o.sel], g, plats); c.strokeStyle = '#ffe28a'; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.roundRect(glSX(b.x0) - 6, glSY(b.y1) - 6, (b.x1 - b.x0) * glU() + 12, (b.y1 - b.y0) * glU() + 12, 8); c.stroke(); c.setLineDash([]); }
   if (!run.on) rig.parts.filter(p => p.type === 'ramp').forEach(p => { const e = ms[p.id].end; c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y), 7, 0, 7); c.fill(); c.stroke(); });
   if (!run.on) rig.parts.forEach(p => { const q = glCablePoint(p, ms[p.id]); if (!q) return; c.fillStyle = 'rgba(31,29,38,.55)'; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 7, 0, 7); c.fill(); c.strokeStyle = GLC.rope; c.lineWidth = 2.5; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 5, 0, 7); c.stroke(); });
+  if (o.labels) glDrawLabels(c, o, g, crest);
   if (o.ruler) glDrawRuler(c, o.ruler);
   if (run.fx) run.fx(c, t);
+}
+/* the board labels (Tom, 8 Nov 2026): the boulder and the Gumdrop with their weights, the dotted line in words, and a "Drop here" glow on the boulder while a lever or jack is being dragged */
+function glDrawLabels(c, o, g, crest) {
+  const u = glU(), by = glAt(g, GL.boulderX - 0.3), sz = Math.max(10, Math.min(13, u * 1.15));
+  if (o.rock !== false) {
+    if (o.dropGlow) { const t = o.t || performance.now() / 1000, pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 6); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
+      c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); glLbl(c, 'Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), '#c9ffdc', sz + 1, 'center', 'rgba(31,29,38,.7)'); }
+    else glLbl(c, 'Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), GLC.label, sz, 'center', 'rgba(31,29,38,.6)'); }
+  if (o.ship && !o.ship.hideLabel) glLbl(c, 'Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 7.2), GLC.label, sz, 'center', 'rgba(31,29,38,.6)');
+  glLbl(c, 'The beam reaches here', glSX(60), glSY(crest + 0.9), '#c9ffdc', sz, 'center', 'rgba(31,29,38,.55)');
 }
 /* a part's box in world metres, for hit tests and the selection ring */
 function glBounds(p, m, g, plats) {
@@ -207,4 +218,25 @@ function glBounds(p, m, g, plats) {
   if (p.type === 'platform') { const pl = plats.find(q => q.id === p.id); return pl ? { x0: pl.x0, x1: pl.x1, y0: pl.base, y1: pl.top + 0.3 } : { x0: p.x - 2, x1: p.x + 2, y0: 0, y1: 1 }; }
   if (p.type === 'dyn') { const y = glAt(g, p.x); return { x0: p.x - 0.6, x1: p.x + 0.6, y0: y, y1: y + 1.9 }; }
   return { x0: p.x - 0.8, x1: p.x + 0.8, y0: p.y - 0.8, y1: p.y + 0.9 };
+}
+
+/* ---------- Mission Control (step v1): the whole crater on a big mission-control screen, console lights round the edge.
+   It reuses glDrawWorld, so it looks exactly like the builder's crater. Nothing to build here (Tom, 8 Nov 2026). c is the 900 x 430 Workshop canvas. ---------- */
+function glDrawMission(c) {
+  const t = performance.now() / 1000, SX = 20, SY = 34, SW = 860, SH = 372, g = glBaseGround(), keep = Object.assign({}, GLV);
+  c.fillStyle = '#1b1830'; c.fillRect(0, 0, 900, 430);
+  c.fillStyle = '#2a2547'; c.beginPath(); c.roundRect(4, 4, 892, 422, 16); c.fill();
+  c.fillStyle = '#0d0b1a'; c.beginPath(); c.roundRect(SX - 6, SY - 6, SW + 12, SH + 12, 14); c.fill();
+  c.save(); c.beginPath(); c.roundRect(SX, SY, SW, SH, 10); c.clip(); c.translate(SX, SY);
+  Object.assign(GLV, { LW: SW, LH: SH, K: SW / 100, z: 1, cx: 48, cy: 14.2 });
+  try { glDrawWorld(c, { rig: { parts: [], cables: [] }, ground: g, ev: null, ship: { x: GL.shipX, y: glAt(g, GL.shipX), tilt: 0, inside: true, mood: 'worried', dmg: 0 }, rock: true, labels: true, t }); }
+  finally { Object.assign(GLV, keep); }
+  c.restore();
+  /* the console: a title strip, then rows of blinking lights along the top and bottom edges and down both sides */
+  txt(c, 'GUMMY MISSION CONTROL · PLANET GLIMMER-9', 450, 18, '#ffe7b8', `800 13px ${C.fb}`);
+  const cols = ['#7ef0a8', '#ffd24d', '#ff6fa8', '#8ec5ff'];
+  const led = (x, y, i) => { const on = RMOTION || Math.floor(t * 1.5 + i * 0.7) % 3 !== 0; c.fillStyle = on ? cols[i % 4] : '#3a3554'; c.beginPath(); c.arc(x, y, 3.4, 0, 7); c.fill(); };
+  for (let i = 0; i < 28; i++) { led(40 + i * 29.5, 418, i); if (i % 3 === 0 && i < 8) led(40 + i * 29.5, 12, i + 1); if (i > 19 && i % 3 === 0) led(40 + i * 29.5, 12, i); }
+  for (let j = 0; j < 11; j++) { led(10, 50 + j * 32, j); led(890, 50 + j * 32, j + 2); }
+  txt(c, 'Our rescue plan starts here', 450, 427, '#b9a2e4', `700 9px ${C.fb}`);
 }

@@ -7,7 +7,7 @@ def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
     if not cond: fails.append(name)
 src = pathlib.Path('dist/test.html').read_text()
-chk('opening mentions the window, hatch, handle and tractor beam', all(k in src for k in ['peeping out of the Gumdrop', 'squeezes out through the hatch', 'handle of each machine', 'tractor beam']))
+chk('opening mentions Mission Control, Smooshy working each machine, climbing back in and the tractor beam', all(k in src for k in ['Welcome to Gummy Mission Control', 'work each machine you build', 'climbs back in', 'tractor beam']))
 chk('no three-stage wording is left in Part 5', 'three stages' not in src and 'stage 3 needs' not in src)
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1300, 'height': 950}); errs = []
