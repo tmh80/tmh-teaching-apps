@@ -196,9 +196,9 @@ function glDrawWorld(c, o) {
   /* every load wears a hook: the Gumdrop, the ghost Gumdrop waiting for the next machine, and the boulder */
   if (!run.on && o.ship) {
     const hk = (sp, ghost) => { const X = glSX(sp.x), Y = glSY(sp.y + GL_HOOK); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u0); c.beginPath(); c.moveTo(X, glSY(sp.y + 4.5)); c.lineTo(X, Y); c.stroke(); drawHookDot(c, X, Y, { glow: o.hookGlow }); lblAvoid(X, Y, 12); };
-    var u0 = glU(); const gh = ev && ev.ghost;
-    if (gh) { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y), sc, 0); c.restore();
-      c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(glSX(gh.x), glSY(gh.y + 2.2), 3.2 * u0, 2.6 * u0, 0, 0, 7); c.stroke(); c.setLineDash([]); hk(gh, true); }
+    var u0 = glU();
+    ((ev && ev.ghosts) || []).forEach(gh => { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y), sc, 0); c.restore();
+      c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(glSX(gh.x), glSY(gh.y + 2.2), 3.2 * u0, 2.6 * u0, 0, 0, 7); c.stroke(); c.setLineDash([]); hk(gh, true); });
     hk(o.ship);
   }
   if (!run.on && o.rock !== false) { const b = { x: GL.boulderX - 0.1, y: glAt(g, 18.7) + 1.0 }; drawHookDot(c, glSX(b.x), glSY(b.y), { glow: o.hookGlow }); lblAvoid(glSX(b.x), glSY(b.y), 12); }
@@ -216,7 +216,7 @@ function glDrawLabels(c, o, g, crest, ev) {
       c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); lblAdd('Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), { size: sz + 1, col: '#c9ffdc', bg: 'rgba(31,29,38,.7)', prio: 2 }); }
     else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3 }); }
   if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4 });
-  if (o.ship && ev && ev.ghost) lblAdd(`Gumdrop after leg ${ev.stop.leg}`, glSX(ev.ghost.x), glSY(ev.ghost.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4 });
+  if (o.ship && ev && ev.ghosts) ev.ghosts.forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4 }));
 }
 /* where the Gumdrop is for a machine or add-on: at the start of the leg it belongs to, else waiting as the ghost (or still at the start) */
 function glShipSpot(ev, id, g) {

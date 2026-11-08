@@ -949,3 +949,4 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .lsit{position:relative} .lsit .gltry{width:100%;min-height:54px} .lsit .gltry:disabled{opacity:.65;cursor:default}
 .lsq{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);font-weight:800;font-size:14px;line-height:1;cursor:pointer;padding:0}
 #cvScene.shopscene{cursor:default}
+@media (max-width:640px){.glplay,.inboard{font-size:14px;padding:6px 10px;right:6px;bottom:6px}}

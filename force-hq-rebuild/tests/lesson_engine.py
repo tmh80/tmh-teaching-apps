@@ -61,8 +61,8 @@ with sync_playwright() as p:
     same_as_direct('lv1 lever', "wsSetMach('lever')"); ev("wsSetMach('lever')")
     shot('lv1_lever')
     # take it off again from its menu: back to just a rope
-    g = geo(); tap(g['b']['x'] - 30, g['b']['y']); chk('lv1: tapping the lever opens its menu with Remove', pg.locator('#lsMenu').is_visible() and pg.locator('#lsMenu [data-lm=del]').count() == 1)
-    pg.locator('#lsMenu [data-lm=del]').click(); pg.wait_for_timeout(100); chk('lv1: Remove goes back to just a rope', ev("WS.mach") == 'hand')
+    g = geo(); tap(g['b']['x'] - 30, g['b']['y']); chk('lv1: tapping the lever opens its menu with Remove', pg.locator('#lsDock').is_visible() and pg.locator('#lsDock [data-lm=del]').count() == 1)
+    pg.locator('#lsDock [data-lm=del]').click(); pg.wait_for_timeout(100); chk('lv1: Remove goes back to just a rope', ev("WS.mach") == 'hand')
 
     # ---------- lv2: drag the fulcrum ----------
     start(pg, {'width': 1440, 'height': 900}, 1)
@@ -76,9 +76,9 @@ with sync_playwright() as p:
     pull(); chk('lv2: a position at 60 N or less ticks the last task', task(3))
     g = geo(); drag((g['fx'], g['fy'] + 40), (g['fx'] - 5 * 120, g['fy'] + 40)); chk('lv2: dragging far past the end stops at the limit (0.20 m)', abs(ev("WS.arm") - 0.2) < 1e-9, ev("WS.arm"))
     g = geo(); drag((g['fx'], g['fy'] + 40), (g['fx'] + 8 * 120, g['fy'] + 40)); chk('lv2: and at 1.80 m the other way', abs(ev("WS.arm") - 1.8) < 1e-9, ev("WS.arm"))
-    g = geo(); tap(g['a']['x'] + 40, g['fy']); chk('lv2: the menu has no Remove (the lever is locked) and no class choice', pg.locator('#lsMenu').is_visible() and pg.locator('#lsMenu [data-lm=del]').count() == 0 and pg.locator('#lsMenu [data-lm=cls2]').count() == 0)
-    pg.locator('#lsMenu [data-lm="arm-"]').click(); chk('lv2: the menu − button moves the fulcrum 0.05 m', abs(ev("WS.arm") - 1.75) < 1e-9, ev("WS.arm"))
-    pg.locator('#lsMenu [data-lm=close]').click()
+    g = geo(); tap(g['a']['x'] + 40, g['fy']); chk('lv2: the menu has no Remove (the lever is locked) and no class choice', pg.locator('#lsDock').is_visible() and pg.locator('#lsDock [data-lm=del]').count() == 0 and pg.locator('#lsDock [data-lm=cls2]').count() == 0)
+    pg.locator('#lsDock [data-lm="arm-"]').click(); chk('lv2: the menu − button moves the fulcrum 0.05 m', abs(ev("WS.arm") - 1.75) < 1e-9, ev("WS.arm"))
+   
 
     # ---------- lv3: rulers ----------
     start(pg, {'width': 1440, 'height': 900}, 2)
@@ -95,14 +95,14 @@ with sync_playwright() as p:
     # ---------- lv4: tap the lever, choose a design from its menu, drag the rock or the hand ----------
     start(pg, {'width': 1440, 'height': 900}, 3)
     chk('lv4: the lever menu offers the three designs by what is in the middle, with no class numbers yet', True)
-    g = geo(); tap(g['b']['x'] - 40, g['b']['y']); m = pg.locator('#lsMenu').inner_text()
+    g = geo(); tap(g['b']['x'] - 40, g['b']['y']); m = pg.locator('#lsDock').inner_text()
     chk('lv4: menu names Fulcrum / Load / Effort in the middle and no class numbers', all(k in m for k in ['Fulcrum in the middle', 'Load in the middle', 'Effort in the middle']) and 'Class 2' not in m, m)
-    pg.locator('#lsMenu [data-lm=cls2]').click(); pg.wait_for_timeout(100); chk('lv4: choosing Load in the middle sets class 2', ev("[WS.cls, WS.arm]") == [2, 1])
-    pg.locator('#lsMenu [data-lm=close]').click(); g = geo(); shot('lv4_c2')
+    pg.locator('#lsDock [data-lm=cls2]').click(); pg.wait_for_timeout(100); chk('lv4: choosing Load in the middle sets class 2', ev("[WS.cls, WS.arm]") == [2, 1])
+    g = geo(); shot('lv4_c2')
     drag((g['L']['x'], g['L']['y'] - 27), (g['L']['x'] - 0.5 * 120, g['L']['y'] - 27)); chk('lv4: dragging the rock sets the rock-to-fulcrum distance to 0.5 m', abs(ev("WS.arm") - 0.5) < 1e-9, ev("WS.arm"))
     pull(); chk('lv4: class 2 with the rock 0.5 m from the fulcrum is task 2', task(1))
     same_as_direct('lv4 class 2', "wsSetMach('lever');wsSet('cls',2);wsSet('arm',0.5)"); ev("wsSet('cls',2);wsSet('arm',0.5)")
-    g = geo(); tap(g['b']['x'] - 40, g['b']['y'] + 0); pg.locator('#lsMenu [data-lm=cls3]').click(); pg.wait_for_timeout(100); pg.locator('#lsMenu [data-lm=close]').click()
+    g = geo(); tap(g['b']['x'] - 40, g['b']['y'] + 0); pg.locator('#lsDock [data-lm=cls3]').click(); pg.wait_for_timeout(100)
     chk('lv4: Effort in the middle sets class 3 with the hand 0.5 m from the fulcrum', ev("[WS.cls, WS.arm]") == [3, 0.5])
     g = geo(); drag((g['E']['x'], g['E']['y'] - 40), (g['E']['x'] + 0.2 * 120, g['E']['y'] - 40)); chk('lv4: dragging the hand changes the hand-to-fulcrum distance', abs(ev("WS.arm") - 0.7) < 1e-9, ev("WS.arm"))
     g = geo(); drag((g['E']['x'], g['E']['y'] - 40), (g['E']['x'] - 0.2 * 120, g['E']['y'] - 40)); chk('lv4: and back to 0.5 m', abs(ev("WS.arm") - 0.5) < 1e-9, ev("WS.arm"))
@@ -112,9 +112,9 @@ with sync_playwright() as p:
 
     # ---------- lv5: class names in the menu ----------
     start(pg, {'width': 1440, 'height': 900}, 4)
-    g = geo(); tap(g['b']['x'] - 40, g['b']['y']); m = pg.locator('#lsMenu').inner_text()
+    g = geo(); tap(g['b']['x'] - 40, g['b']['y']); m = pg.locator('#lsDock').inner_text()
     chk('lv5: the menu now shows the class names', 'Class 1:' in m and 'Class 2:' in m and 'Class 3:' in m, m)
-    pg.locator('#lsMenu [data-lm=close]').click(); pull(); chk('lv5: class 3 with the hand 1.0 m from the fulcrum ticks the task', task(0))
+    pull(); chk('lv5: class 3 with the hand 1.0 m from the fulcrum ticks the task', task(0))
     same_as_direct('lv5 class 3', "wsSetMach('lever');wsSet('cls',3);wsSet('arm',1)"); ev("wsSet('cls',3);wsSet('arm',1)"); shot('lv5_c3')
 
     # ---------- first-time cards: three short cards with OK, a ghost hand, seen once; the ? replays them ----------
@@ -128,7 +128,7 @@ with sync_playwright() as p:
     chk('cards: card 3 text and the Pull button glows', 'Press ▶ Pull! to push down on the end. In the rescue, a lever under the boulder will knock it clear.' in ch.inner_text() and 'coachhi' in (pg.locator('#wsPull').get_attribute('class') or ''))
     shot('lv1_card3'); pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150)
     chk('cards: after the last OK they close and the piece is marked seen', ch.is_hidden() and ev("dbGet('lsSeen',{}).lever") is True)
-    g = geo(); tap(g['b']['x'] - 30, g['b']['y']); pg.locator('#lsMenu [data-lm=del]').click(); pg.wait_for_timeout(100)
+    g = geo(); tap(g['b']['x'] - 30, g['b']['y']); pg.locator('#lsDock [data-lm=del]').click(); pg.wait_for_timeout(100)
     a = pg.locator('#lsTray [data-lsadd=lever]').bounding_box(); pg.mouse.move(a['x'] + 20, a['y'] + 20); pg.mouse.down(); pg.mouse.move(*xy(360, 300), steps=10); pg.mouse.up(); pg.wait_for_timeout(250)
     chk('cards: the second time they do not show again', ch.is_hidden() and ev("WS.mach") == 'lever')
     pg.locator('#lsTray [data-lsq=lever]').click(); pg.wait_for_timeout(200); chk('cards: the ? on the tray tile plays them again', ch.is_visible() and 'new piece: lever' in ch.inner_text().lower())
@@ -159,20 +159,20 @@ with sync_playwright() as p:
     chk('rescue: a lever whose bar overlaps the boulder snaps onto it', lv.get('role') == 'boulder' and lv['x'] == 18.2, lv)
     chk('rescue: a tick toast says Lever on the boulder!', 'Lever on the boulder!' in pg2.locator('#toast').inner_text(), pg2.locator('#toast').inner_text())
     chk('rescue: the glow is off again', B.ev("glFrameOpts().dropGlow") is False)
-    pg2.click('.glmenu [data-gm=close]')
+    pg2.click('#glDock')
     chk('rescue: the board labels are drawn (Boulder, Gumdrop, the beam line)', B.ev("glFrameOpts().labels") is True)
     pg2.locator('#glCv').screenshot(path=OUT + 'rescue_labels.png')
     # dynamite: a click 1.3 m beside it (about 16 px on screen) still picks it, even with a ramp's handle and cable dot right next to it
     B.ev("(()=>{GLB.rig={parts:[],cables:[]};glChanged();})()")
-    r1 = B.add('ramp', 16, 0); pg2.click('.glmenu [data-gm=close]'); head = B.evr(f'glMachine(glPart("{r1}"),GLB.ev.ground,[]).end')
-    d = B.add('dynS', round(head['x']), 0); pg2.click('.glmenu [data-gm=close]'); dp = B.evr(f'glPart("{d}")'); gy = B.evr(f'glAt(GLB.ev.ground,{dp["x"]})')
+    r1 = B.add('ramp', 16, 0); pg2.click('#glDock'); head = B.evr(f'glMachine(glPart("{r1}"),GLB.ev.ground,[]).end')
+    d = B.add('dynS', round(head['x']), 0); pg2.click('#glDock'); dp = B.evr(f'glPart("{d}")'); gy = B.evr(f'glAt(GLB.ev.ground,{dp["x"]})')
     B.ev("GLB.sel=null;glCloseMenu()"); B.tap(dp['x'] + 0.85, gy + 0.9)
     chk('rescue: the dynamite is picked when tapped, not the ramp handle beside it', B.ev('GLB.sel') == d, B.ev('GLB.sel'))
     B.ev("GLB.sel=null;glCloseMenu()"); B.tap(dp['x'] + 2.5, gy + 0.9); chk('rescue: but a tap well away from it does not pick it', B.ev('GLB.sel') != d)
     # on a phone: a finger tap 18 px beside the dynamite (44 px area) picks it
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True); pg3 = ctx.new_page(); pg3.on('pageerror', lambda e: errs.append('ERR ' + str(e)))
-    ns['open_part5'](pg3); B3 = ns['Board'](pg3); d3 = B3.ev("(()=>{glAddPart('dynS',30,0);return GLB.sel})()"); B3.ev("GLB.sel=null;glCloseMenu();GLV.cx=30;glClampView()"); pg3.wait_for_timeout(300)
-    dx, dy = B3.xy(30, B3.evr("glAt(GLB.ev.ground,30)") + 0.9); pg3.touchscreen.tap(dx + 18, dy); pg3.wait_for_timeout(200)
+    ns['open_part5'](pg3); B3 = ns['Board'](pg3); d3 = B3.ev("(()=>{glAddPart('dynS',30,0);return GLB.sel})()"); B3.ev("GLB.sel=null;glCloseMenu();GLV.cx=30;glClampView()"); pg3.wait_for_timeout(300); pg3.locator('#glCv').scroll_into_view_if_needed(); pg3.wait_for_timeout(100)
+    dx, dy = B3.xy(30, B3.evr("glAt(GLB.ev.ground,30)") + 0.9); pg3.touchscreen.tap(dx - 18, dy); pg3.wait_for_timeout(200)
     chk('rescue: on a phone, a finger tap 18 px beside the dynamite picks it', B3.ev('GLB.sel') == d3, [B3.ev('GLB.sel'), d3, B3.ev('GLB.touch')])
     ctx.close()
     chk('no page errors', not errs, errs)

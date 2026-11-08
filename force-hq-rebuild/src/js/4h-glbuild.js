@@ -47,13 +47,13 @@ function glConnect(a, b) {
 }
 /* ---------- placing a new part ---------- */
 /* the loads a machine can be roped to: the Gumdrop at the start, and the ghost Gumdrop after the last leg that works */
-function glLoadSpots() { const ev = GLB.ev, out = [{ x: ev.ship0.x, y: ev.ship0.y, leg: 0 }]; if (ev.ghost) out.push({ x: ev.ghost.x, y: ev.ghost.y, leg: ev.stop.leg }); return out; }
+function glLoadSpots() { const ev = GLB.ev; return [{ x: ev.ship0.x, y: ev.ship0.y, leg: 0 }].concat((ev.ghosts || []).map(g => ({ x: g.x, y: g.y, leg: g.after }))); }
 const glShipDots = () => glLoadSpots().map(sp => ({ x: sp.x, y: sp.y + GL_HOOK, spot: sp }));
 /* would a platform here sit under a machine that is already placed? (machines that stand on THIS platform are fine) */
 function glPlatBlocked(c) {
   const g = glGround0(), others = GLB.rig.parts.filter(p => p.id !== c.id), pl0 = glPlatforms({ parts: others, cables: [] }, g), P = GL_PLAT[c.size] || GL_PLAT.M, x0 = c.x - P.w / 2, x1 = c.x + P.w / 2; let base = 0;
   for (let x = x0; x <= x1 + 1e-9; x += 0.5) base = Math.max(base, glAt(g, x)); const top = base + c.h;
-  return others.filter(p => GL_LIFT[p.type]).some(p => { const m = glMachine(p, g, pl0), mine = [m.base, m.footOn, m.headOn].some(q => q && q.id === c.id);
+  return others.filter(p => GL_LIFT[p.type]).some(p => { const m = glMachine(p, g, pl0), mine = !!c.id && [m.base, m.footOn, m.headOn].some(q => q && q.id === c.id);
     if (mine) return false;
     if (p.type === 'ramp') { for (let t = 0; t <= 1.0001; t += 0.02) { const x = m.start.x + (m.end.x - m.start.x) * t, y = m.start.y + (m.end.y - m.start.y) * t; if (x >= x0 - 0.1 && x <= x1 + 0.1 && y >= base - 0.2 && y <= top + 0.35) return true; } return false; }
     const b = glBounds(p, m, g, pl0); return b.x1 >= x0 && b.x0 <= x1 && b.y1 >= base && b.y0 <= top + 0.3; });

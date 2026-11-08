@@ -172,7 +172,9 @@ function glEvaluate(rig, opts) {
   const dmg = { thrusters: thr, rock: rockOn ? 25 : 0, blasts: bShip.length * 15 }; dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.blasts);
   const cost = glCost(rig, legs, boulder), crest = glCrest(g);
   const ghost = !done && stop && stop.leg >= 1 ? Object.assign({}, stop.at) : null;   // where the Gumdrop waits for the next machine
-  const res = { ok: done, arrived: done, stop: done ? null : stop, ghost, legs, ran, hardest, hand, work: workJ, load, rockOn, boulder, blasts, bShip: bShip.length, dmg, cost, crest, plats: loads, ground: g, ship0,
+  const ghosts = []; const addG = (q, after) => { if (!ghosts.some(g => Math.hypot(g.x - q.x, g.y - q.y) < 0.01)) ghosts.push({ x: q.x, y: q.y, after }); };
+  legs.forEach(l => { if (l.i >= 1) addG(l.at, l.i); }); if (ghost) addG(ghost, stop.leg);   // a ghost Gumdrop at the start of every leg after the first
+  const res = { ok: done, arrived: done, stop: done ? null : stop, ghost, ghosts, legs, ran, hardest, hand, work: workJ, load, rockOn, boulder, blasts, bShip: bShip.length, dmg, cost, crest, plats: loads, ground: g, ship0,
     final: legs.length ? legs[legs.length - 1].end : ship0, used: [...used], spare: ms.filter(m => !used.has(m.id)).map(m => m.id) };
   res.score = glScore(res, opts.hints || 0);
   return res;
