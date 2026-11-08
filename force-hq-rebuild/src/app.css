@@ -44,7 +44,7 @@ main{max-width:1500px;margin:0 auto;padding:6px max(16px,env(safe-area-inset-lef
 /* home */
 .teachrow{display:flex;justify-content:flex-end}
 .hero{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);overflow:hidden}
-.hero canvas{width:100%;aspect-ratio:900/420;display:block}
+.hero canvas{width:100%;aspect-ratio:1030/420;display:block}
 .herotext{padding:22px 24px;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .herotext h1{font-size:40px}
 .herotext p{font-size:17px}
@@ -429,8 +429,9 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .go.big:active{transform:translateY(4px);box-shadow:0 1px 0 #9c6c0d}
 .whoLine{margin:0;color:#c3d1d8;font-size:14.5px}.whoLine:empty{display:none}
 .linkbtn{background:none;border:0;color:var(--hazard);text-decoration:underline;text-underline-offset:3px;padding:0;font-weight:700}
+.herosub{margin:4px 0 12px;font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:#cfe3ef}
 .heroart{display:flex;flex-direction:column;justify-content:center;gap:12px;padding:22px 22px 22px 0;min-width:0}
-.heroart canvas{width:100%;aspect-ratio:900/420;display:block;border-radius:14px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 16px 30px -14px rgba(0,0,0,.6)}
+.heroart canvas{width:100%;aspect-ratio:1030/420;display:block;border-radius:14px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 16px 30px -14px rgba(0,0,0,.6)}
 .herostats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .herostats div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:8px 12px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .herostats b{font-family:var(--f-display);font-size:28px;font-weight:800;color:#fff;line-height:1}
@@ -803,13 +804,15 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 
 /* ===== Chapter 6: the Rescue board and the transmission ===== */
 .rescueboard{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:0;padding:0;overflow:hidden;margin-bottom:12px} .rescueboard[hidden]{display:none}
-#cvRescue{width:100%;aspect-ratio:520/190;display:block}
+#cvRescue{width:100%;aspect-ratio:520/200;display:block}
 .rbside{padding:12px 16px;display:flex;flex-direction:column;gap:6px}
 .rbhd h2{font-family:var(--f-display);font-size:22px;margin:0}
 .rbslots{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.rbslots li{display:flex;gap:8px;align-items:center;border:2px solid var(--line);border-radius:10px;padding:5px 8px;background:var(--chip);font-size:14px}
-.rbslots li small{display:block;color:var(--muted);font-size:12px}
-.rbslots li.on{border-color:var(--good);background:var(--okbg)} .rbslots li.soon{opacity:.6;border-style:dashed}
+.rbslots li{margin:0}
+.rbslot{display:flex;gap:8px;align-items:center;width:100%;min-height:44px;text-align:left;font:inherit;font-size:14px;color:inherit;cursor:pointer;border:2px solid var(--line);border-radius:10px;padding:5px 8px;background:var(--chip)}
+.rbslot small{display:block;color:var(--muted);font-size:12px}
+.rbslot:hover:not(:disabled){border-color:var(--accent)} .rbslot:disabled{cursor:not-allowed}
+.rbslots li.on .rbslot{border-color:var(--good);background:var(--okbg)} .rbslots li.soon .rbslot{opacity:.6;border-style:dashed}
 .rbtick{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:800;font-family:var(--f-num)} .rbslots li.on .rbtick{background:var(--good);color:#fff}
 .rbnext{margin:2px 0;font-weight:700}
 @media (max-width:760px){.rescueboard{grid-template-columns:1fr}.rbslots{grid-template-columns:1fr}}
