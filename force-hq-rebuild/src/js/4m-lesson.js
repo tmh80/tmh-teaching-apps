@@ -77,8 +77,9 @@ function lsRoom(c) {   // the GASA Training Simulator: an indoor room with a fai
   c.stroke();
   c.fillStyle = '#d7e3ee'; c.fillRect(0, 350, 900, WS_H - 350); c.strokeStyle = 'rgba(70,130,200,.18)'; c.beginPath(); for (let x = 0.5; x < 900; x += 60) { c.moveTo(x, 354); c.lineTo(x, WS_H); } c.stroke();
   c.fillStyle = '#9db4c8'; c.fillRect(0, 348, 900, 5);
-  txt(c, 'GASA TRAINING SIMULATOR · THE WORKSHOP', 14, 418, '#3d6a99', `800 11px ${C.fb}`, 'left');
 }
+/* the board label sits in the strip under the rulers (y 419 to 430), and is drawn last so nothing can cover it */
+function lsBoardLabel(c) { txt(c, 'GASA TRAINING SIMULATOR · THE WORKSHOP', 14, 424.5, '#3d6a99', `800 10px ${C.fb}`, 'left'); }
 function lsLoadBox(c, x, y, label, hookOn) {   // the load with its weight: "Rock 294 N" (x, y = the middle of the bottom edge) and its hook ◉ on top
   c.font = `800 12px ${C.fn}`; const w = Math.max(62, c.measureText(label).width + 22);
   wsLoadBlock(c, x, y, w, 40, WS.loadId, ''); txt(c, label, x, y - 20, '#fffaf2', `800 12px ${C.fn}`);
@@ -140,8 +141,16 @@ function lsOverlay(c) {
   }
   if (LS.ropeLine) { drawRopePx(c, LS.ropeLine.a, LS.ropeLine.b, 3, 0); }
   if (lsSc() || lsIsTwo()) lsOverlaySc(c, pulse);
-  if (LS.flash && performance.now() - LS.flash < 900) wsLabel(c, LS.flashMsg || 'The lever goes under the rock', 450, 200, WSC.red, 'center');
+  lsFlashHint(c);
   if (typeof CARDS !== 'undefined' && CARDS && CARDS.opt && CARDS.opt.lsPiece) lsGhost(c, CARDS.opt.lsPiece, CARDS.cards[CARDS.k].ghost, t);
+}
+/* the red "drop it here" hint after a missed drop: a little note in the free strip on the left, under the video. It goes as soon as the piece is placed, and never sits over the newtonmeter or other labels. */
+function lsFlashHint(c) {
+  if (!LS.flash || performance.now() - LS.flash > 1800) return; const piece = LS.flashPiece || 'lever'; if (lsHas(piece)) { LS.flash = 0; return; }
+  const msg = LS.flashMsg || 'The lever goes under the rock'; c.save(); c.font = `700 11px ${C.fn}`; const W = 150, lines = []; let cur = '';
+  msg.split(' ').forEach(w => { if (c.measureText(cur ? cur + ' ' + w : w).width > W - 14 && cur) { lines.push(cur); cur = w; } else cur = cur ? cur + ' ' + w : w; }); if (cur) lines.push(cur);
+  const h = lines.length * 15 + 10, y0 = 162; c.fillStyle = '#fff'; c.beginPath(); c.roundRect(8, y0, W, h, 6); c.fill(); c.strokeStyle = WSC.red; c.lineWidth = 1.5; c.stroke();
+  c.fillStyle = WSC.red; c.textAlign = 'left'; c.textBaseline = 'middle'; lines.forEach((l, i) => c.fillText(l, 15, y0 + 14 + i * 15)); c.restore();
 }
 const lsGrab = G => WS.cls === 1 ? { x: G.fx, y: G.fy + 40 } : WS.cls === 2 ? { x: G.L.x, y: G.L.y - 27 } : { x: G.E.x, y: G.E.y - 40 };   // the part you drag
 function lsGhost(c, piece, kind, t) {
@@ -215,8 +224,8 @@ function initLesson() { if ($('#lsTray')) lsBind(); }
 function lsDrop(t, x, y) {
   if (t !== 'lever') return lsDropSc(t, x, y);
   if (lsHas('lever')) return; LS.flashMsg = null;
-  if (!lsInZone(x, y)) { LS.flash = performance.now(); toast('Drop the lever under the rock. It glows where it goes.'); return; }
-  wsSetMach('lever'); toast('✓ Lever under the rock!', 'ok'); lsRender();
+  if (!lsInZone(x, y)) { LS.flash = performance.now(); LS.flashPiece = 'lever'; toast('Drop the lever under the rock. It glows where it goes.'); return; }
+  LS.flash = 0; wsSetMach('lever'); toast('✓ Lever under the rock!', 'ok'); lsRender();
   if (!lsSeen().lever && !FAST) lsShowCards('lever');
 }
 

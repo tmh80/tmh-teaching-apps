@@ -357,7 +357,7 @@ function drawShopScene(c) {
   let ep;
   if (LS.on) ep = lsDrawMachine(c, cur, riseNow); else if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
-  if (LS.on && lsIsTwo()) { wsMonitor(c); lsOverlay(c); lblFlush(c, 900, WS_H, LS.drag && LS.drag.moved || LS.tdrag || LS.dragPiece ? 0.2 : 1); return; }   // the k3 two-leg practice: no dial or readouts
+  if (LS.on && lsIsTwo()) { wsMonitor(c); lsOverlay(c); lblFlush(c, 900, WS_H, LS.drag && LS.drag.moved || LS.tdrag || LS.dragPiece ? 0.2 : 1); lsBoardLabel(c); return; }   // the k3 two-leg practice: no dial or readouts
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
   wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
   if (!LS.on || LS.o.live !== false) wsMonitor(c);   // Captain Smooshy coaches by video from the crater (Parts 1 to 4)
@@ -384,4 +384,5 @@ function drawShopScene(c) {
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
     wsRulers(c, WS.c.rise, WS.c.eDist, WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)');
   }
+  if (LS.on) lsBoardLabel(c);   // last, so the rulers can never cover it
 }

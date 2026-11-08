@@ -199,11 +199,11 @@ const lsZoneMsg = t => ({ block: 'Drop the pulley block on a ◉ hook. It glows 
 function lsDropSc(t, x, y) {
   if (lsIsTwo()) return lsTwoDrop(t, x, y);
   if (lsHasP(t)) return;
-  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashMsg = lsZoneMsg(t); toast(lsZoneMsg(t)); return; }
+  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = lsZoneMsg(t); toast(lsZoneMsg(t)); return; }
   lsPlace(t);
 }
 function lsPlace(t) {
-  const m = WS.mach, r = lsRoute();
+  LS.flash = 0; const m = WS.mach, r = lsRoute();
   if (t === 'block') { LS.pl.block = true; if (m === 'pulley') wsSet('ropes', Math.max(2, WS.ropes)); else if (m === 'build') wsSet('bn', WS.bn || 2); if (r === 'crane') { lsUnropePair('load', 'top'); lsRope('blk', 'top'); } }
   else if (t === 'winch') { LS.pl.winch = true; if (m === 'build') wsSet('bw', WS.bw || 2); lsRope('top', 'wd'); }
   else if (t === 'ramp') { LS.pl.ramp = true; LS.pl.crane = false; if (m === 'build') { wsSet('br', 6); LS.cab = LS.cab.filter(q => !(q.includes('blk'))); if (lsJoined('load', 'top')) LS.cab = LS.cab.filter(q => !(q.includes('top') && q.includes('load'))); } }
@@ -356,8 +356,8 @@ function lsTwoZones(t) {
 function lsTwoDrop(t, x, y) {
   if (!LS.two || LS.two[t]) return;
   if (t === 'crane' && !LS.two.ramp) { toast('Build leg 1 first: drag the ramp from the crate up to the platform.'); return; }
-  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashMsg = t === 'ramp' ? 'Put the foot of the ramp by the crate, in the glowing box.' : 'Put the crane in the glowing box, over the ghost crate.'; toast(LS.flashMsg); return; }
-  LS.two[t] = true; if (t === 'ramp') lsRope('c', 'rt'); toast(`✓ ${t === 'ramp' ? 'Ramp' : 'Crane gantry'} in the box!`, 'ok'); lsTwoCheck(); lsRender();
+  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = t === 'ramp' ? 'Put the foot of the ramp by the crate, in the glowing box.' : 'Put the crane in the glowing box, over the ghost crate.'; toast(LS.flashMsg); return; }
+  LS.flash = 0; LS.two[t] = true; if (t === 'ramp') lsRope('c', 'rt'); toast(`✓ ${t === 'ramp' ? 'Ramp' : 'Crane gantry'} in the box!`, 'ok'); lsTwoCheck(); lsRender();
 }
 const lsTwoPairs = () => LS.two ? [LS.two.ramp ? ['c', 'rt'] : null, LS.two.crane ? ['g', 'ch'] : null].filter(Boolean) : [];
 function lsTwoEnds() { const g = lsTwoGeo(), E = { c: g.cHook }; if (LS.two && LS.two.ramp) { E.rt = g.rampTop; E.g = g.gHook; } if (LS.two && LS.two.crane) E.ch = g.craneHook; return E; }
