@@ -236,3 +236,15 @@ Every screen, card, label and worksheet uses these names and this arc. Student t
 | 5 | **Tom plays Parts 2–5** | Tom |
 | 6 | Extension and build tasks converted, old bench deleted; worksheets and docs | Sonnet low effort, then Haiku |
 | 7 | Fresh read of all changed student text | Opus, new agent |
+
+## 13. Consistency fixes from Opus's screenshot review (8 Nov, after stages 2 and 2b)
+
+Do these in stage 3, before converting Parts 2–4, so every converted step inherits them.
+
+- **Lesson board look.** It still shows "THE WORKSHOP · GUMMY BASE ONE", a Glimmer-9 purple sky with crystals, and its own old "CAPTAIN SMOOSHY · LIVE" inset with Smooshy outside in space. Change to: label "GASA TRAINING SIMULATOR · THE WORKSHOP"; an indoor simulator look (light background with a faint blue grid, in the builder's flat style; no Glimmer-9 sky or crystals); and the shared live inset from `4b-shopdraw.js` ("LIVE · THE GUMDROP", Smooshy inside the cabin window). Lesson mode must call that one inset function, not draw its own.
+- **Labels pushed away from their object** (for example "Gumdrop 6,300 N" ending up far to the left of the ship) get a thin leader line to the object, or stay touching it.
+- **Story lines in `4c-ch6.js` and `55-sections.js`:**
+  - Line ~501 "Force HQ engineers" becomes "GASA engineers".
+  - The Part 3 challenge "Launch-day loading" (`55-sections.js` ~73, `4c-ch6.js` ~426 and ~449): Gummy Rescue One is replaced by the Big Jelly, so the challenge becomes "Loading the Big Jelly", with the intro "The Big Jelly, GASA's repair ship, is on the launch pad at Force HQ, and it needs loading before it flies to Glimmer-9! Practise like Smooshy: no pull may be more than **60 N**." and the ending "The Big Jelly is fully loaded! Next, Part 4: machines inside machines." Numbers unchanged.
+  - Toolkit lines (~120, 134, 149, 161, 172, 473): "packed in the toolkit" becomes "packed on the Big Jelly" (for example "Pulley blocks packed on the Big Jelly.", "Wedges and a screw jack packed. The Big Jelly's toolkit is ready!").
+  - `4bb-shoppics.js` ~271–279 (Part 5 picture: Smooshy squeezes out through the hatch for the real rescue) stays: it describes the launch, when he does climb out.
