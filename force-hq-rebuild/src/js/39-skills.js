@@ -18,7 +18,7 @@ const ICAN = {
   c6b: ["I can describe how pulleys, wheels and axles, ramps, wedges and screws help a small effort move a big load.", "I can say how more ropes, a longer handle or a longer ramp changes the effort.", "I can explain why a smaller effort needs a bigger distance."],
   c6c: ["I can work out mechanical advantage as load ÷ effort.", "I can find mechanical advantage from a machine's shape and use it to predict the effort.", "I can calculate work in joules using work = force × distance.", "I can explain why a perfect machine does the same work, however much it reduces the effort."],
   c6d: ["I can describe a compound machine as simple machines working together.", "I can multiply mechanical advantages to find the total.", "I can work out the effort and the hand travel for a compound machine."],
-  c6e: ["I can design a route of machines to rescue a spaceship.", "I can predict the effort before I test my machine.", "I can explain why a bigger mechanical advantage never reduces the work.", "I can weigh up two plans and choose one with reasons."],
+  c6e: ["I can design a route of machines to rescue a spaceship.", "I can work out the effort for each leg before GASA checks my maths.", "I can explain why a bigger mechanical advantage never reduces the work.", "I can weigh up two plans and choose one with reasons."],
   c6f: ["I can explain how friction wastes energy in a machine.", "I can calculate the efficiency of a machine.", "I can choose a machine that is strong enough and wastes little energy."],
 };
 /* the statements, as shown on the first screen and behind the "My I can statements" button */

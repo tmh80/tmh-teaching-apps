@@ -838,9 +838,9 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glrec ul{list-style:none;margin:6px 0 0;padding:0;font-size:14px;max-width:340px}
 .glrec li{display:flex;justify-content:space-between;gap:12px;border-bottom:1px dashed var(--line);padding:2px 0}
 .glrec li.tot{font-weight:800;border-bottom:0}
-.glboard{position:relative;border-radius:12px;overflow:hidden;background:#2d1f63}
+.glboard{position:relative;border-radius:12px;overflow:hidden;background:#2d1f63;border:4px solid #2a2547;box-shadow:0 0 0 2px #0d0b1a}
 .glboard canvas{display:block;width:100%;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
-.glzoom{position:absolute;left:8px;top:8px;display:flex;gap:4px}
+.glzoom{position:absolute;left:8px;top:38px;display:flex;gap:4px}
 .glzoom .ghost{min-width:34px;background:rgba(255,255,255,.88)}
 /* the docked settings panel (rescue #glDock, lesson mode #lsDock): beside the board, below it on a phone */
 .glarea{display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:10px;align-items:start}
@@ -870,10 +870,6 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .gltry.on{background:var(--chip)}
 .glbrief summary{cursor:pointer;font-weight:800;font-size:16px}
 .glrunbox{padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.glpred .row{gap:6px;margin-top:6px;flex-wrap:wrap}
-.glpred select,.glpred input,.glwork textarea{font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)}
-.glwork summary{cursor:pointer;color:var(--muted);font-weight:700;margin-top:6px}
-.glwork textarea{width:100%;box-sizing:border-box;margin-top:4px}
 .glrunrow{gap:8px;align-items:center;flex-wrap:wrap}
 .glboard.running canvas{cursor:default}
 .glstamp{display:inline-flex;flex-wrap:wrap;gap:10px;align-items:baseline;border-radius:12px;padding:8px 14px;font-size:20px;border:2.5px solid}
@@ -886,8 +882,6 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .gltab th,.gltab td{border-bottom:1px solid var(--line);padding:4px 8px;text-align:left}
 .gltab tr.stop td{color:var(--nofg);background:var(--nobg)}
 .glsums{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:4px 16px;padding-left:18px;margin:4px 0}
-.glpredfb{background:var(--chip);border-radius:8px;padding:6px 10px}
-.glwork label{display:block;color:var(--muted);font-weight:700;margin-top:6px}
 
 /* ---- Part 5 story: warm-up panel and draggable ending pop-ups ---- */
 .glwarm{border:2px solid var(--accent);background:var(--panel)} .glwarm h3{margin:0 0 6px}
@@ -897,9 +891,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glpop.placed{position:fixed} .glpop.dragging .glpophd{cursor:grabbing}
 .glpophd{cursor:grab;font-weight:800;letter-spacing:.03em;padding:10px 0 6px;font-size:13px;opacity:.85;touch-action:none}
 .glpop h3{margin:4px 0 8px} .glpopsc{font-size:17px}
-.glchips{flex-wrap:wrap;gap:6px;margin:6px 0} .glchip.on{border-color:var(--accent);background:var(--chip)}
+.glplug li{margin:4px 0}
 .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid currentColor;vertical-align:baseline;margin:0 2px}
-.glhint .glplug li{margin:4px 0}
 
 /* ===== whole-app reading and self-review: I can screen, read-first OK, self-check ===== */
 .ican-card{border:2px solid var(--accent);border-radius:14px;background:var(--panel);padding:14px 20px;margin:12px 0;max-width:760px}.ican-card h3{margin:0 0 6px;font-family:var(--f-display);font-size:24px}.ican-next{margin-top:12px}
@@ -953,3 +946,35 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .lsq{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);font-weight:800;font-size:14px;line-height:1;cursor:pointer;padding:0}
 #cvScene.shopscene{cursor:default}
 @media (max-width:640px){.glplay,.inboard{font-size:14px;padding:6px 10px;right:6px;bottom:6px}}
+
+/* ===== stage 4: Mission Control framing, the route strip (My working), 💡 hints, Send to GASA, the guided start ===== */
+.glmchd{display:flex;align-items:center;justify-content:center;gap:8px;background:#1b1830;color:#ffe7b8;font:800 12px/1 var(--f-body,sans-serif);letter-spacing:.06em;padding:7px 10px;border-bottom:2px solid #0d0b1a;text-align:center}
+.glmchd span{flex:0 1 auto}
+.glled{width:8px;height:8px;border-radius:50%;background:#7ef0a8;flex:none;animation:glled 1.6s infinite}
+.glled:nth-child(2){background:#ffd24d;animation-delay:.4s}.glled:nth-last-child(2){background:#ff6fa8;animation-delay:.8s}.glled:last-child{background:#8ec5ff;animation-delay:1.2s}
+@keyframes glled{0%,70%{opacity:1}85%{opacity:.25}100%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.glled{animation:none}}
+.glaccept{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;background:#fffaf2;color:#1f1d26;border:3px solid #2a7d48;border-radius:16px;padding:14px 26px;text-align:center;box-shadow:0 8px 30px rgba(0,0,0,.45);display:flex;flex-direction:column;gap:2px}
+.glaccept[hidden]{display:none}.glaccept b{font-size:26px}.glaccept span{font-size:15px;font-weight:700}
+.glstrip{border:2px solid var(--accent);background:var(--panel);display:flex;flex-direction:column;gap:8px}
+.glw-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 14px}.glw-top h3{margin:0}.glw-hints{font-weight:800}
+.glw-rows{display:flex;flex-direction:column;gap:10px}
+.glw-row{border:1.5px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--panel2,var(--panel))}.glw-row.boulder{border-style:dashed}
+.glw-hd{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px}.glw-hd>b{font-size:16px}.glw-desc{flex:1 1 220px;min-width:0;color:var(--muted);font-weight:700;font-size:14px}.glw-load{font-weight:800;font-size:13px;background:var(--chip);border-radius:8px;padding:2px 8px}
+.glw-warn{font-size:13px;font-weight:800;color:var(--nofg);background:var(--nobg);border-radius:8px;padding:2px 8px}.glw-hbtn{margin-left:auto}
+.glw-cells{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.glw-cell{display:flex;flex-direction:column;gap:2px;font-size:12.5px;font-weight:700;color:var(--muted);width:112px}
+.glw-in{position:relative;display:block}.glw-in input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;color:var(--ink);padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel)}
+.glw-mk{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-style:normal;font-weight:900;font-size:13px}
+.glw-cell.ok input{border-color:var(--okfg);background:var(--okbg)}.glw-cell.ok .glw-mk{color:var(--okfg)}
+.glw-cell.bad input{border-color:var(--nofg);background:var(--nobg)}.glw-cell.bad .glw-mk{color:var(--nofg)}
+.glw-cell.helped input{border-color:var(--hzfg);background:var(--hazard-soft);padding-right:52px}.glw-cell.helped .glw-mk{color:var(--hzfg);font-size:11px}
+.glw-help{margin-top:8px;background:var(--hazard-soft);border-radius:8px;padding:6px 10px;font-size:14px}.glw-help ul{margin:2px 0 0;padding-left:18px}
+.glw-hint{margin-top:8px;border:1.5px dashed var(--accent);border-radius:10px;padding:6px 12px;background:var(--panel)}
+.glw-send{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.glw-send .go{font-size:17px}
+.glw-msg{margin:0;font-weight:800;min-height:1.2em}.glw-msg.no{color:var(--nofg)}.glw-msg.ok{color:var(--okfg)}
+@media (max-width:640px){.glw-cell{width:calc(50% - 4px)}.glw-hbtn{margin-left:0}.glmchd{font-size:10.5px;letter-spacing:.03em;padding:6px 6px}.glaccept b{font-size:20px}}
+.glwarm .glsteps li.cur{background:var(--chip);border-radius:8px;padding:4px 6px}.glwhy{display:block;color:var(--muted);font-weight:600;margin-top:2px}
+.glstamp.test{background:var(--chip);color:var(--ink);border-color:var(--accent)}
+.gltest{list-style:none;padding:0;margin:8px 0}.gltest li{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.gltest li.no{color:var(--nofg)}.gltest li.ok{color:var(--okfg)}
+.gltest .box{flex:none;width:20px;text-align:center;font-weight:900}

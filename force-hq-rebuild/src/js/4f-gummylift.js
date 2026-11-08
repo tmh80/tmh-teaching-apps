@@ -1,6 +1,6 @@
 /* ===== Chapter 6 Part 5: Operation Gummy Lift, the rescue model (stage 1 of docs/Force_HQ_Rescue_Rebuild_Brief.md) =====
    Pure maths and data, no drawing: the crater's height profile, dynamite blasts, the rig (parts + cables), tracing the legs,
-   pulls, hand travel, work, damage and the score out of 10. The builder (4g) and Run Rescue (4h) read everything from glEvaluate(rig).
+   pulls, hand travel, work, damage and the score out of 11 (GL_MAX). The builder (4g) and Run Rescue (4h) read everything from glEvaluate(rig).
    Units: metres and newtons. x runs left to right across the crater; y is height above the crater floor.
 
    The rig, as saved in chal.c6e.gl.rig:
@@ -176,7 +176,7 @@ function glEvaluate(rig, opts) {
   legs.forEach(l => { if (l.i >= 1) addG(l.at, l.i); }); if (ghost) addG(ghost, stop.leg);   // a ghost Gumdrop at the start of every leg after the first
   const res = { ok: done, arrived: done, stop: done ? null : stop, ghost, ghosts, legs, ran, hardest, hand, work: workJ, load, rockOn, boulder, blasts, bShip: bShip.length, dmg, cost, crest, plats: loads, ground: g, ship0,
     final: legs.length ? legs[legs.length - 1].end : ship0, used: [...used], spare: ms.filter(m => !used.has(m.id)).map(m => m.id) };
-  res.score = glScore(res, opts.hints || 0);
+  res.score = glScore(res, opts.hints || 0, !!opts.maths);   // maths: GASA approved the student's working (Send to GASA, 4p-glwork.js)
   return res;
 }
 /* crystals: every part bought counts, used or not */
@@ -195,17 +195,19 @@ function glCost(rig, legs, boulder) {
   if (cab > 0) add(`Cable ${fmt(cab, 1)} m`, Math.ceil(cab / 5 - 1e-9) * GL_COST.cablePer5);
   return { total, items, cable: cab };
 }
-/* the score out of 10 (brief section 6). Returns null points and notYet:true for a route that does not finish or pulls over 180 N. */
+/* the score out of 11: the brief's ten points plus one for "Maths approved by GASA" (stage 4, spec section 11). Hints (including cells GASA had to help with)
+   cost 1 point each after the first. Returns null points and notYet:true for a route that does not finish or pulls over 180 N. */
+const GL_MAX = 11;
 const GL_PULL_PTS = p => p > 180 ? null : p > 120 ? 0 : p > 80 ? 1 : p > 60 + 1e-9 ? 2 : p >= 54 ? 5 : p >= 45 ? 4 : 3;
-function glScore(r, hints) {
+function glScore(r, hints, maths) {
   const notYet = !r.arrived || r.hardest > 180 + 1e-9;
-  const pts = { pull: 0, cond: 0, boulder: 0, oxy: 0, budget: 0 };
+  const pts = { pull: 0, cond: 0, boulder: 0, oxy: 0, budget: 0, maths: maths ? 1 : 0 };
   if (!notYet) { pts.pull = GL_PULL_PTS(r.hardest); if (r.rockOn) pts.pull = Math.min(2, pts.pull); }
   pts.cond = r.dmg.total <= 1e-9 ? 2 : r.dmg.total <= 25 + 1e-9 ? 1 : 0;
   pts.boulder = r.boulder.ok ? 1 : 0; pts.oxy = r.hand <= GL.oxy + 1e-9 ? 1 : 0; pts.budget = r.cost.total <= GL.budget ? 1 : 0;
-  if (notYet) return { notYet: true, total: null, pts, hintCost: 0, ending: 'notyet' };
-  const raw = pts.pull + pts.cond + pts.boulder + pts.oxy + pts.budget, hintCost = Math.max(0, (hints || 0) - 1), total = Math.max(1, raw - hintCost);
-  return { notYet: false, raw, total, pts, hintCost, ending: r.dmg.total <= 1e-9 ? 'spotless' : 'dented' };
+  if (notYet) return { notYet: true, total: null, pts, hintCost: 0, hints: hints || 0, ending: 'notyet' };
+  const raw = pts.pull + pts.cond + pts.boulder + pts.oxy + pts.budget + pts.maths, hintCost = Math.max(0, (hints || 0) - 1), total = Math.max(1, raw - hintCost);
+  return { notYet: false, raw, total, pts, hintCost, hints: hints || 0, ending: r.dmg.total <= 1e-9 ? 'spotless' : 'dented' };
 }
 /* is run a better than run b? (best run counts: rescued beats not yet, then score, then smaller hardest pull) */
 const glBetter = (a, b) => !b || (a.total != null && b.total == null) || (a.total != null && b.total != null && (a.total > b.total || (a.total === b.total && a.hardest < b.hardest)));

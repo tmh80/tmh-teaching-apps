@@ -6,6 +6,14 @@ F = pathlib.Path('dist/test.html').resolve().as_uri(); fails = []
 def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
     if not cond: fails.append(name)
+def send_right(pg):
+    """Fill every box of the route strip with the right numbers and press Send to GASA."""
+    R = json.loads(pg.evaluate("c=>__fhq.ev(c)", "JSON.stringify(glwRows().map(r=>({key:r.key,cells:r.cells.map(c=>({k:c.k,exp:c.exp,d:c.d}))})))"))
+    for r in R:
+        for c in r['cells']:
+            sel = f'[data-glw-in="{r["key"]}|{c["k"]}"]'
+            if pg.locator(sel).is_enabled(): pg.fill(sel, str(round(c['exp'], c['d'])))
+    pg.click('#glSend')
 routes = pathlib.Path('tests/rescue_routes.js').read_text()
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1300, 'height': 950}); errs = []
@@ -16,11 +24,11 @@ with sync_playwright() as p:
     html0 = ev("buildWorksheet('c6e','student')")
     chk('before any run the student page shows an empty frame and no score', 'rsnap empty' in html0 and 'My Rescue' in html0)
     pg.evaluate('c=>__fhq.ev(c)', routes + ";(()=>{GLB.rig=ROUTES.top(); glChanged(); glRunPaint();})()"); pg.wait_for_timeout(100)
-    pg.fill('#glPVal', '56'); pg.fill('#glWork', '4 x 4 x 7 = 112, 6300 / 112 = 56.25'); pg.click('#glRun'); pg.wait_for_timeout(300); ev('GLR.t0 -= 1e7'); pg.wait_for_timeout(700)
-    s = json.loads(ev("JSON.stringify((__fhq.dbGet('chal.c6e',{}).gl||{}).bestRun.sum.score)")); chk('top route scores 10', s == 10, s)
+    send_right(pg); pg.wait_for_timeout(1000); ev('GLR.t0 -= 1e7'); pg.wait_for_timeout(700)
+    s = json.loads(ev("JSON.stringify((__fhq.dbGet('chal.c6e',{}).gl||{}).bestRun.sum.score)")); chk('top route scores 11', s == 11, s)
     for pop in pg.locator('#glPop').all(): pass
     html = ev("buildWorksheet('c6e','student')")
-    chk('student My Rescue has the screenshot, stamp, score, a row per leg, totals and working', 'data:image/jpeg' in html and 'Spotless' in html and '10 of 10' in html and html.count('<td>1</td>') >= 1 and '1,344 m' in html and '75,600 J' in html and '4 x 4 x 7 = 112' in html, re.sub('<[^>]+>', ' ', html)[:500])
+    chk('student My Rescue has the screenshot, stamp, score, a row per leg, totals and working', 'data:image/jpeg' in html and 'Spotless' in html and '11 of 11' in html and html.count('<td>1</td>') >= 1 and '1,344 m' in html and '75,600 J' in html and '112' in html, re.sub('<[^>]+>', ' ', html)[:500])
     chk('student page 1 comes before Part A, reflection on its own page', html.index('My Rescue') < html.index('Part A') < html.index('Part C: My rescue reflection') and html.count('class="page"') >= 3)
     chk('reflection is the last Check question', ev("CHDATA.c6e.review.slice(-1)[0].id") == 'c6r32' and ev("CHDATA.c6e.review.slice(-1)[0].type") == 'explain')
     blank = ev("buildWorksheet('c6e','blank')"); chk('blank template has an empty frame and no numbers', 'rsnap empty' in blank and 'data:image' not in blank and '1,344' not in blank)

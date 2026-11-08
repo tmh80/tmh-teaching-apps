@@ -215,7 +215,7 @@ function glPaintDock() {
   else if (p.type === 'platform') { title = `${GL_PLAT[p.size].name} platform`; icon = '◻️'; body = pm('h', 'Height', `${fmt(p.h, 1)} m`) + `<div class="glrow">${['S', 'M', 'L'].map(s => `<button type="button" class="ghost sm ${p.size === s ? 'on' : ''}" data-gm="size${s}">${GL_PLAT[s].name}</button>`).join('')}</div><p class="glnote">Holds <b>${GL_PLAT[p.size].holds.toLocaleString('en-GB')} N</b>. Drag its top edge to change the height. The Gumdrop lands on platforms.</p>`; }
   else if (p.type === 'block') { title = 'Pulley block'; icon = '⚙️'; body = `<div class="glrow"><span>Ropes</span>${[1, 2, 3, 4].map(n => `<button type="button" class="ghost sm ${p.ropes === n ? 'on' : ''}" data-gm="ropes${n}">${n}</button>`).join('')}</div><p class="glnote">${p.ropes} supporting rope${p.ropes > 1 ? 's' : ''}.</p>`; }
   else if (p.type === 'winch') { title = 'Winch'; icon = '🎡'; body = `<div class="glrow wrap"><span>Gear</span>${GL.winchRatios.map(n => `<button type="button" class="ghost sm ${p.ratio === n ? 'on' : ''}" data-gm="ratio${n}">×${n}</button>`).join('')}</div>`; }
-  else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; icon = p.big ? '💥' : '🧨'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when you press Run Rescue. Careful near the Gumdrop!</p>`; acts += `<button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button>`; }
+  else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; icon = p.big ? '💥' : '🧨'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when the rescue launches. Careful near the Gumdrop!</p>`; acts += `<button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button>`; }
   if (cabled) acts += '<button type="button" class="ghost sm" data-gm="cut">✂ Cut its cables</button>';
   acts += '<button type="button" class="ghost sm" data-gm="del">🗑 Remove</button>';
   dkSet(d, dkHTML({ icon, title, help, body, fb, actions: acts }));
@@ -262,9 +262,9 @@ function glToolAct(k) {
 /* the board, built into a host element */
 function glBoardHTML() {
   return `<div class="glstats"><span id="glCrys"></span><details class="glrec"><summary>Receipt</summary><ul id="glReceipt"></ul></details></div>
-    <div class="glarea"><div class="glboard"><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
+    <div class="glarea"><div class="glboard"><div class="glmchd" aria-hidden="true"><i class="glled"></i><i class="glled"></i><span>GUMMY MISSION CONTROL · RESCUE SIMULATOR</span><i class="glled"></i><i class="glled"></i></div><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
       <div class="glzoom"><button type="button" class="ghost sm" data-gt="zin" aria-label="Zoom in">＋</button><button type="button" class="ghost sm" data-gt="zout" aria-label="Zoom out">−</button><button type="button" class="ghost sm" data-gt="zall" aria-label="See the whole crater">⤢</button></div>
-      <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button></div>
+      <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button><div class="glaccept" id="glAccept" role="status" hidden><b>Mission accepted 🚀</b><span>GASA approves your maths!</span></div></div>
       <aside class="dock" id="glDock" aria-label="Settings for the machine you tapped" aria-live="polite"></aside></div>
     <p class="scaleNote" id="glStatus"></p>
     <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div>
@@ -296,10 +296,11 @@ function renderGummyLift(ch, m, host, save) {
       <p>The Gumdrop weighs <b>6,300 N</b>. Smooshy can only pull <b>60 N</b>. If he has to pull harder, he fires the broken thrusters, and they damage the ship.</p>
       <p>The tractor beam can lift the Gumdrop once it reaches the dotted line at the top of the crater. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
       <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
-      <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p></div></details>
-    <div id="glWarmHost"></div><div id="glBoardHost"></div><div id="glHintHost"></div><div id="glRunHost"></div>`;
+      <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p>
+      <p>Test your route in the simulator, work out the maths for every leg in your route strip, then send it to GASA. When GASA approves your maths, the rescue launches!</p></div></details>
+    <div id="glGuideHost"></div><div id="glStripHost"></div><div id="glBoardHost"></div><div id="glRunHost"></div>`;
   glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
-  if (typeof glMountWarm === 'function') glMountWarm($('#glWarmHost', card));
-  if (typeof glMountHints === 'function') glMountHints($('#glHintHost', card));
+  if (typeof glMountGuide === 'function') glMountGuide($('#glGuideHost', card));
+  if (typeof glMountStrip === 'function') glMountStrip($('#glStripHost', card));
   if (typeof glMountRun === 'function') glMountRun($('#glRunHost', card));
 }

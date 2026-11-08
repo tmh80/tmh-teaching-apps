@@ -1,6 +1,6 @@
 """Operation Gummy Lift (Chapter 6 Part 5): build the brief's top route with real mouse moves in the builder, then check the rig.
 Run after build.py:  python3 tests/play_rescue.py     Screenshots: /tmp/fhq-shots/rescue/
-Stage 3 adds Run Rescue; stage 4 adds resume and the snapshot. Uses the test hook (__fhq) only to read state and convert metres to pixels."""
+Stage 4 reworked the run: Test in simulator, the route strip, Send to GASA. Uses the test hook (__fhq) only to read state and convert metres to pixels."""
 import json, pathlib, sys
 from playwright.sync_api import sync_playwright
 F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/rescue/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
@@ -12,11 +12,19 @@ def open_part5(pg):
     pg.goto(F); pg.wait_for_timeout(300); pg.fill('#whoName', 'Sam'); pg.click('#whoGo'); pg.evaluate("__fhq.dbSet('tourDone',true)")
     pg.evaluate("__fhq.ev('DB.user.teacher=true')"); pg.evaluate("__fhq.openChapter('c6e','challenge')"); pg.wait_for_timeout(500)
     pg.evaluate("__fhq.ev('closeModal()')"); pg.wait_for_timeout(200); pg.locator('#glCv').scroll_into_view_if_needed()
+def send_right(pg, wrong=None):
+    """Fill every box of the route strip with the right numbers, as a student would work them out, and press Send to GASA."""
+    R = json.loads(pg.evaluate("c=>__fhq.ev(c)", "JSON.stringify(glwRows().map(r=>({key:r.key,cells:r.cells.map(c=>({k:c.k,exp:c.exp,d:c.d}))})))"))
+    for r in R:
+        for c in r['cells']:
+            sel = f'[data-glw-in="{r["key"]}|{c["k"]}"]'
+            if pg.locator(sel).is_enabled(): pg.fill(sel, str(round(c['exp'], c['d'])))
+    pg.click('#glSend')
 class Board:
     def __init__(s, pg): s.pg = pg
     def ev(s, code): return s.pg.evaluate('c=>__fhq.ev(c)', code)
     def xy(s, x, y):
-        bb = s.pg.locator('#glCv').bounding_box(); sx, sy, LW, LH = s.ev(f'[glSX({x}),glSY({y}),GLV.LW,GLV.LH]')
+        s.pg.evaluate("document.querySelector('#glCv').scrollIntoView({block:'center'})"); bb = s.pg.locator('#glCv').bounding_box(); sx, sy, LW, LH = s.ev(f'[glSX({x}),glSY({y}),GLV.LW,GLV.LH]')
         return bb['x'] + sx * bb['width'] / LW, bb['y'] + sy * bb['height'] / LH
     def tap(s, x, y): px, py = s.xy(x, y); s.pg.mouse.click(px, py); s.pg.wait_for_timeout(120)
     def drag(s, a, b, steps=12):
@@ -31,7 +39,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1300, 'height': 950}); errs = []
     pg.on('pageerror', lambda e: errs.append('ERR ' + str(e))); pg.on('console', lambda m: m.type == 'error' and errs.append(m.text))
     open_part5(pg); B = Board(pg)
-    chk('one Challenge mission, out of 10', B.evr("CHDATA.c6.challenge.missions.filter(m=>m.kind==='rescue').map(m=>[m.id,m.max])") == [['gl', 10]])
+    chk('one Challenge mission, out of 11 (ten points and Maths approved by GASA)', B.evr("CHDATA.c6.challenge.missions.filter(m=>m.kind==='rescue').map(m=>[m.id,m.max])") == [['gl', 11]])
     chk('board starts empty with 0 crystals spent', B.evr('[GLB.rig.parts.length, GLB.ev.cost.total]') == [0, 0])
     chk('handover box starts at the Gumdrop', B.evr('GLB.ev.stop.at') == {'x': 14, 'y': 0})
     # leg 1: ramp from the floor, stretched by its head handle to 24 m rising 6 m
@@ -81,32 +89,31 @@ with sync_playwright() as p:
     ph.tap('#glTray [data-add=jack]'); x, y = P.xy(16, 0); ph.touchscreen.tap(x, y); ph.wait_for_timeout(200)
     chk('phone: tap the tray, tap the crater places a jack', P.evr("GLB.rig.parts.filter(p=>p.type==='jack').length") >= 1)
     ph.screenshot(path=OUT + 'phone.png')
-    # Run Rescue: predict, run, skip to the end, then check what was saved
-    pg.click('[data-gt=ruler]'); pg.select_option('#glPLeg', '1'); chk('Run is locked until a prediction is typed', pg.locator('#glRun').is_disabled())
-    pg.fill('#glPVal', '55'); pg.fill('#glWork', 'MA = 4 x 4 x 7 = 112, 6300 / 112'); chk('a typed prediction unlocks Run', pg.locator('#glRun').is_enabled())
-    pg.click('#glRun'); pg.wait_for_timeout(2500); pg.screenshot(path=OUT + 'run-mid.png', clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 420})
+    # the test, then Send to GASA and the rescue: skip to the end, then check what was saved
+    pg.click('[data-gt=ruler]'); chk('Send to GASA is locked until every box is filled', pg.locator('#glSend').is_disabled())
+    pg.click('#glRun'); pg.wait_for_timeout(300); pg.click('#glSkip'); pg.wait_for_timeout(500); chk('a simulator test counts as tried but is not a rescue', B.evr("[__fhq.dbGet('chal.c6e',{}).gl.tests, __fhq.dbGet('chal.c6e',{}).gl.runs||0]") == [1, 0]); pg.click('#glBack')
+    send_right(pg); pg.wait_for_timeout(1000)
+    pg.wait_for_timeout(2000); pg.screenshot(path=OUT + 'run-mid.png', clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 420})
     B.ev('GLR.t0 = performance.now() - (GLR.total - 2.2) * 1000'); pg.wait_for_timeout(150); pg.screenshot(path=OUT + 'run-beam.png', clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 420})
     pg.click('#glSkip'); pg.wait_for_timeout(600)
     s = B.evr("__fhq.dbGet('chal.c6e',{}).gl")
-    chk('run saved: tried, 1 run, best 10', s.get('tried') and s.get('runs') == 1 and s.get('best') == 10, {k: s.get(k) for k in ('tried', 'runs', 'best')})
-    chk('best run keeps its rig, summary and prediction', s.get('bestRun') and s['bestRun']['sum']['score'] == 10 and s['bestRun']['pred']['value'] == 55 and len(s['bestRun']['rig']['parts']) == len(s['rig']['parts']))
+    chk('run saved: tried, 1 run, best 11', s.get('tried') and s.get('runs') == 1 and s.get('best') == 11, {k: s.get(k) for k in ('tried', 'runs', 'best')})
+    chk('best run keeps its rig, summary and route strip', s.get('bestRun') and s['bestRun']['sum']['score'] == 11 and s['bestRun']['work']['approved'] and len(s['bestRun']['rig']['parts']) == len(s['rig']['parts']))
     chk('Challenge counts as tried', B.evr("challengeDone('c6e')") is True)
-    t = pg.inner_text('#glRes'); chk('result shows the spotless stamp and 10 of 10', 'Spotless rescue!' in t and '10 of 10' in t, t[:200])
+    t = pg.inner_text('#glRes'); chk('result shows the spotless stamp and 11 of 11', 'Spotless rescue!' in t and '11 of 11' in t, t[:200])
     chk('the receipt fills in every leg', '56.3 N' in t and '37,800 J' in t, t)
-    chk('prediction feedback names the leg', 'for leg 2' in t)
     pg.screenshot(path=OUT + 'run-end.png', full_page=False, clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 900})
     pg.click('#glBack'); pg.wait_for_timeout(200); chk('back to building', pg.evaluate('GLR=undefined') if False else B.evr('GLR.on') is False)
     # a run that stops: remove ramp 2, so the route has a gap
-    B.ev(f'glRemove("{r2}")'); pg.fill('#glPVal', '50'); pg.click('#glRun'); pg.wait_for_timeout(300); pg.click('#glSkip'); pg.wait_for_timeout(600)
+    B.ev(f'glRemove("{r2}")'); send_right(pg); pg.wait_for_timeout(1000); pg.click('#glSkip'); pg.wait_for_timeout(600)
     s = B.evr("__fhq.dbGet('chal.c6e',{}).gl"); t = pg.inner_text('#glRes')
-    chk('a gap gives Not yet, and the best run stays 10', 'Not yet!' in t and s['best'] == 10 and s['bestRun']['sum']['score'] == 10 and s['runs'] == 2, (t[:120], s.get('best')))
+    chk('a gap gives Not yet, and the best run stays 11', 'Not yet!' in t and s['best'] == 11 and s['bestRun']['sum']['score'] == 11 and s['runs'] == 2, (t[:120], s.get('best')))
     # every section 9 route (and a collapsing platform) plays through the animation without errors and saves its score
     routes = pathlib.Path('tests/rescue_routes.js').read_text(); pg.click('#glBack'); pg.wait_for_timeout(100)
     for k in ['crane', 'long', 'single', 'over', 'dynb', 'weak', 'rock', 'none', 'collapse']:
         mk = "ROUTES.crane(); g.parts.find(p=>p.id==='p2').size='S'" if k == 'collapse' else f"ROUTES.{k}()"
         pg.evaluate('c=>__fhq.ev(c)', routes + f";(()=>{{const g={mk}; GLB.rig=g; glChanged(); glRunPaint();}})()"); pg.wait_for_timeout(80)
-        if pg.locator('#glPVal').is_enabled(): pg.fill('#glPVal', '60')
-        pg.click('#glRun'); pg.wait_for_timeout(250); B.ev('GLR.t0 -= 1e7'); pg.wait_for_timeout(400)
+        B.ev("glStartRun('launch')"); pg.wait_for_timeout(250); B.ev('GLR.t0 -= 1e7'); pg.wait_for_timeout(400)
         last = B.evr("__fhq.dbGet('chal.c6e',{}).gl.last"); exp = {'collapse': None}.get(k, B.evr(routes + f";EXPECT.{k}[2]") if False else None)
         chk(f'route {k} plays through and saves', last and (last['stop'] == 'collapse' if k == 'collapse' else True), last and (last['score'], last['stop']))
         if not pg.locator('#glBack').is_visible(): print('STUCK', k, B.evr('[GLR.on,GLR.done,GLR.total]'), errs); break
@@ -115,13 +122,13 @@ with sync_playwright() as p:
     snap = B.evr("(__fhq.dbGet('chal.c6e',{}).gl.bestRun||{}).snap||''")
     chk('best run has a JPEG snapshot under 150 KB', snap.startswith('data:image/jpeg') and len(snap) * 0.75 < 150000, len(snap))
     pathlib.Path(OUT + 'snapshot.jpg').write_bytes(__import__('base64').b64decode(snap.split(',', 1)[1]))
-    B.ev("glToolAct('zin')"); pg.fill('#glPVal', '42'); pg.fill('#glWork', 'my working'); before = B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]')
+    B.ev("glToolAct('zin')"); pg.fill('[data-glw-in^="L:"]', '42'); before = B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]')
     pg.reload(); pg.wait_for_timeout(400); pg.evaluate("__fhq.openChapter('c6e','challenge')"); pg.wait_for_timeout(500); pg.evaluate("__fhq.ev('closeModal()')")
     chk('reload reopens the rig and the view exactly as left', B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]') == before, (before, B.evr('[GLB.rig.parts.length, GLV.z, GLV.cx]')))
-    chk('reload keeps the prediction and working', pg.input_value('#glPVal') == '42' and pg.input_value('#glWork') == 'my working')
+    chk('reload keeps what was typed in the route strip', pg.locator('[data-glw-in^="L:"]').first.input_value() == '42')
     chk('reload shows the last result again', len(pg.inner_text('#glRes')) > 20)
     chk('a backup carries the snapshot', 'data:image/jpeg' in B.ev('bkPack().text'))
-    chk('best run is still the 10', B.evr("__fhq.dbGet('chal.c6e',{}).gl.bestRun.sum.score") == 10)
+    chk('best run is still the 11', B.evr("__fhq.dbGet('chal.c6e',{}).gl.bestRun.sum.score") == 11)
     chk('no page errors', not errs, errs)
     b.close()
 print(f'{len(fails)} failed' if fails else 'all passed'); sys.exit(1 if fails else 0)

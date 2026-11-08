@@ -1,35 +1,41 @@
-/* ===== Part 5 story: the guided warm-up (lever on the boulder), the three ending cards and the "good place to stop" pop-up ===== */
+/* ===== Part 5 story: the guided start (two legs), the three ending cards and the "good place to stop" pop-up ===== */
 
-/* ---------- guided warm-up, about 3 minutes, before the free build ----------
-   State lives in chal.c6e.gl.warm: 'on' while the warm-up is open, 'done' or 'skip' once it is closed.
-   The boulder pull is shown here because it is practice; the ship's leg pulls stay hidden. */
+/* ---------- the guided start, about 5 minutes, before the free build (stage 4, spec section 11) ----------
+   It replaces the old lever warm-up and the "Mission computer" prediction box. Skip is always allowed and nothing waits on it.
+   The student frees the boulder with a lever, builds leg 1 (ramp, pulley block, winch) up to the shelf, then drops leg 2 beside the ghost Gumdrop, then fills in the route strip
+   and tests it in the simulator. Each step ticks itself from the rig. State lives in chal.c6e.gl.guide: 'on' while it is open, 'done' or 'skip' once it is closed.
+   The boulder pull is shown here because it is practice; after this the strip is where the student works out every number. */
 function glWarmLever() { return GLB.rig && GLB.rig.parts.find(p => p.type === 'lever' && p.role === 'boulder'); }
-function glMountWarm(host) {
+const glgLeg = i => GLB.ev && GLB.ev.legs[i];
+const GLG_STEPS = [
+  { t: 'First, free the Gumdrop. Drag a <b>lever</b> from the tray onto the boulder. It glows when it\'s in the right place.', why: 'A lever turns on a fulcrum. It gives a mechanical advantage, so Smooshy needs less pull.', done: () => !!glWarmLever() },
+  { t: 'Tap the lever and make its <b>load arm</b> shorter until Smooshy\'s pull on the boulder is <b>60 N or less</b>.', why: 'Lever MA = effort arm ÷ load arm. Smooshy\'s pull = 252 N ÷ MA. A shorter load arm gives a bigger MA.', done: () => { const b = GLB.ev && GLB.ev.boulder; return !!(b && b.ok && b.how === 'lever'); }, live: true },
+  { t: 'Leg 1. Drag a <b>ramp</b> next to the Gumdrop. It snaps on, and its rope clips onto the Gumdrop\'s ◉ hook.', why: 'A ramp lets Smooshy pull the Gumdrop up a slope instead of lifting it straight up.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.roped); } },
+  { t: 'Drag the white handle at the top of the ramp up to the shelf, 6 m up.', why: 'Ramp MA = length ÷ rise. A longer ramp means a smaller pull, but a longer way to pull.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.end.y >= 5.9 && !l.faults.length); } },
+  { t: 'Clip a <b>pulley block</b> onto the ramp\'s ◉ dot at the top, then tap it and choose <b>4 ropes</b>.', why: 'Each supporting rope shares the load, so the pulley block\'s MA is its number of ropes.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.addons.some(id => { const q = glPart(id); return q && q.type === 'block' && q.ropes >= 3; })); } },
+  { t: 'Clip a <b>winch</b> onto the end of the pulley block\'s rope, then tap it and choose <b>×7</b>.', why: 'A winch multiplies the MA by its gear ratio. The total MA of a leg is every machine\'s MA multiplied together.', done: () => { const l = glgLeg(0); return !!(l && l.winches.some(w => w >= 6)); } },
+  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. Each machine starts in the glowing box where the last one finished.', done: () => { const l = glgLeg(1); return !!(l && l.roped); } },
+  { t: 'Fill in your route strip, then press <b>▶ Test in simulator</b>.', why: 'The strip is where GASA checks your maths. The simulator shows where the route works, with no numbers.', done: () => !!(glState().tests || glState().runs) }
+];
+function glMountGuide(host) {
   if (!host) return; const st = glState();
-  if (!st.warm && ((GLB.rig && GLB.rig.parts.length) || st.runs)) GLB.save({ id: GLB.mid }, { warm: 'done' });   // an older save: no warm-up
-  else if (!st.warm) GLB.save({ id: GLB.mid }, { warm: 'on' });
-  host.innerHTML = '<section class="panel glwarm" id="glWarm" hidden></section>';
-  const prev = GLB.onChange; GLB.onChange = () => { if (prev) prev(); glWarmPaint(); };
-  host.addEventListener('click', e => {
-    const b = e.target.closest('[data-gw]'); if (!b) return;
-    GLB.save({ id: GLB.mid }, { warm: b.dataset.gw === 'skip' ? 'skip' : 'done' }); glWarmPaint();
-  });
-  glWarmPaint();
+  if (!st.guide) GLB.save({ id: GLB.mid }, { guide: ((GLB.rig && GLB.rig.parts.length) || st.runs || st.warm) ? 'done' : 'on' });   // an older save, or one with a rig already: no guided start
+  host.innerHTML = '<section class="panel glwarm" id="glGuide" hidden aria-label="Guided start"></section>';
+  const prev = GLB.onChange; GLB.onChange = () => { if (prev) prev(); glGuidePaint(); };
+  host.addEventListener('click', e => { const b = e.target.closest('[data-gw]'); if (!b) return; GLB.save({ id: GLB.mid }, { guide: b.dataset.gw === 'skip' ? 'skip' : 'done' }); glGuidePaint(); });
+  glGuidePaint();
 }
-function glWarmPaint() {
-  const box = $('#glWarm'); if (!box) return; const st = glState();
-  if (st.warm !== 'on' || (GLR && GLR.on)) { box.hidden = true; return; }
-  const lev = glWarmLever(), bo = GLB.ev && GLB.ev.boulder, ok = !!(bo && bo.ok && bo.how === 'lever'), f1 = v => fmt(v, 1);
-  const step = (done, txt) => `<li class="${done ? 'ok' : ''}"><span class="box">${done ? '✓' : ''}</span>${txt}</li>`;
+function glGuidePaint() {
+  const box = $('#glGuide'); if (!box) return; const st = glState();
+  if (st.guide !== 'on' || (GLR && GLR.on)) { box.hidden = true; return; }
+  const done = GLG_STEPS.map(s => { try { return !!s.done(); } catch (_) { return false; } }), cur = done.indexOf(false), all = cur < 0, f1 = v => fmt(v, 1);
   let live = '';
-  if (lev && bo && bo.how === 'lever') live = `<p class="glwlive ${ok ? 'good' : ''}">Load arm ${f1(lev.arm)} m, so the lever's mechanical advantage is <b>${f1(bo.ma)}</b>. Smooshy pulls with <b>${f1(bo.pull)} N</b> ${ok ? 'and the boulder rolls free!' : 'and 60 N is his limit.'}</p>`;
+  if (cur <= 2 && glWarmLever()) { const lev = glWarmLever(), bo = GLB.ev && GLB.ev.boulder; if (lev && bo && bo.how === 'lever') live = `<p class="glwlive ${bo.ok ? 'good' : ''}">Load arm ${f1(lev.arm)} m, so the lever's mechanical advantage is <b>${f1(bo.ma)}</b>. Smooshy pulls with <b>${f1(bo.pull)} N</b> ${bo.ok ? 'and the boulder rolls free!' : 'and 60 N is his limit.'}</p>`; }
   box.hidden = false;
-  box.innerHTML = `<h3>🔧 Warm-up: free the boulder (about 3 minutes)</h3>
-    <p>The boulder weighs <b>252 N</b> on Glimmer-9 and Smooshy can pull with <b>60 N</b>. A lever can help. Mechanical advantage = effort arm ÷ load arm, and the effort needed = 252 N ÷ mechanical advantage.</p>
-    <ul class="objs">${step(!!lev, 'Tap the ⚖️ Lever in the parts tray, then tap the ground next to the boulder (or drag it in). It snaps onto the boulder.')}
-      ${step(ok, 'Tap the lever and change its load arm until Smooshy\'s pull on the boulder is <b>60 N or less</b>. A shorter load arm gives a bigger mechanical advantage.')}</ul>${live}
-    ${ok ? '<p><b>Boulder cleared!</b> The lever stays in your rig for 25 crystals, so you have 450 left to plan the climb.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>'
-      : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the warm-up</button></div>'}`;
+  box.innerHTML = `<h3>🧭 Guided start: your first two legs</h3>
+    <p>Welcome to Mission Control! Build the first part of a rescue route with me. You can skip this at any time.</p>
+    <ol class="objs glsteps">${GLG_STEPS.map((s, i) => `<li class="${done[i] ? 'ok' : i === cur ? 'cur' : ''}"><span class="box">${done[i] ? '✓' : ''}</span><span>${s.t}${i === cur ? `<small class="glwhy">${s.why}</small>` : ''}</span></li>`).join('')}</ol>${live}
+    ${all ? '<p><b>Well done, engineer!</b> You have the start of a route. Now keep building it up to the dotted line at the top of the crater.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
 }
 
 /* ---------- the three ending cards, then the stopping-point pop-up ---------- */
@@ -52,7 +58,7 @@ function glEndText(sum) {
 }
 function glShowEnding(sum, o) {
   if (!sum) return; o = o || {}; const [ic, ti, tx] = glEndText(sum);
-  const sc = sum.score != null ? `<p class="glpopsc">Score for this run: <b>${sum.score} of 10</b>${o.better ? ' <em>New best run!</em>' : ''}</p>` : '';
+  const sc = sum.score != null ? `<p class="glpopsc">Score for this run: <b>${sum.score} of ${sum.max || GL_MAX}</b>${o.better ? ' <em>New best run!</em>' : ''}</p>` : '';
   const box = glPop(`<h3>${ic} ${ti}</h3><p>${tx}</p>${sc}<div class="row"><button type="button" class="go" data-gp="on">${sum.ending === 'spotless' ? 'Brilliant!' : 'Back to my route'}</button></div>`, 'glend', '🚀 Operation Gummy Lift');
   box.addEventListener('click', e => {
     if (!e.target.closest('[data-gp]')) return; box.remove();

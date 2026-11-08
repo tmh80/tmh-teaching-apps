@@ -476,8 +476,8 @@ CHDATA.c6.challenge = {
 };
 
 /* ---------- Part 5 Challenge: Operation Gummy Lift, one big build in two sessions (docs/Force_HQ_Rescue_Rebuild_Brief.md).
-   Built in 4h-glbuild.js, run in 4i-glrun.js, scored by glScore in 4f-gummylift.js. Best run counts; the score is out of 10. ---------- */
-CHDATA.c6.challenge.missions.push({ id: 'gl', kind: 'rescue', title: 'Operation Gummy Lift', max: 10, mins: 44 });
+   Built in 4h-glbuild.js, run in 4i-glrun.js, scored by glScore in 4f-gummylift.js. Best run counts; the score is out of 11 (ten points for the rescue and one for Maths approved by GASA). ---------- */
+CHDATA.c6.challenge.missions.push({ id: 'gl', kind: 'rescue', title: 'Operation Gummy Lift', max: 11, mins: 44 });
 
 /* ---------- Extension Challenge: Build Gummy Base One (gb1 to gb3). Real machines (efficiencies multiply) and an energy budget. ---------- */
 CHDATA.c6.challenge.missions.push(
