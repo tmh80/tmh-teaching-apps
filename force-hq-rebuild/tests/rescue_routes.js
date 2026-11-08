@@ -4,7 +4,7 @@
 // Section 9 routes as rigs (shared by the node harness and tests/rescue_numbers.py)
 const BL = [{ id: 'bl', type: 'lever', role: 'boulder', x: 19, arm: 1, rise: 0.5, dir: 1 }];
 const chainOf = (m, ropes, ws) => { const parts = [], cables = []; let prev = m; if (ropes > 1) { parts.push({ id: m + 'b', type: 'block', ropes }); cables.push({ a: prev, b: m + 'b' }); prev = m + 'b'; } ws.forEach((r, i) => { parts.push({ id: m + 'w' + i, type: 'winch', ratio: r }); cables.push({ a: prev, b: m + 'w' + i }); prev = m + 'w' + i; }); return { parts, cables }; };
-function rig(machines, extra) { const parts = [], cables = []; machines.forEach(([p, ropes, ws]) => { parts.push(p); const c = chainOf(p.id, ropes, ws); parts.push(...c.parts); cables.push(...c.cables); }); return { parts: parts.concat(extra || []), cables }; }
+function rig(machines, extra) { const parts = [], cables = []; machines.forEach(([p, ropes, ws]) => { parts.push(p); if (p.type === 'ramp' || p.type === 'crane') cables.push({ a: p.id, b: 'ship' }); /* roped to the Gumdrop's hook */ const c = chainOf(p.id, ropes, ws); parts.push(...c.parts); cables.push(...c.cables); }); return { v: 2, parts: parts.concat(extra || []), cables }; }
 const R24a = x => ({ id: 'rA', type: 'ramp', x1: x, y1: 0, L: 24, rise: 6 });
 const R24b = (x, y) => ({ id: 'rB', type: 'ramp', x1: x, y1: y || 6, L: 24, rise: 6 });
 const CREST = { id: 'd1', type: 'dyn', big: true, x: 68 };
@@ -18,6 +18,6 @@ const ROUTES = {
   dynb: () => rig([[R24a(16), 4, [7]], [R24b(40.76), 4, [7]]], [CREST, { id: 'd2', type: 'dyn', big: false, x: 19 }]),
   weak: () => rig([[R24a(16), 4, [7]], [R24b(40.76), 4, [4]]], BL.concat([CREST])),
   rock: () => rig([[R24a(16), 4, [7]], [R24b(40.76), 4, [7]]], [CREST]),
-  none: () => ({ parts: BL.slice(), cables: [] })
+  none: () => ({ v: 2, parts: BL.slice(), cables: [] })
 };
 const EXPECT = { top: [56.25, 1344, 10], crane: [58.33, 1336, 10], long: [56.25, 1680, 9], single: [45.0, 1680, 8], over: [39.375, 1920, 7], dynb: [56.25, 1344, 9], weak: [98.44, 1056, 4], rock: [75.0, 1344, 4], none: [6300, 0, null] };

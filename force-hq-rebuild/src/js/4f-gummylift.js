@@ -4,7 +4,10 @@
    Units: metres and newtons. x runs left to right across the crater; y is height above the crater floor.
 
    The rig, as saved in chal.c6e.gl.rig:
-     { parts: [ ...see below ], cables: [ { a: partId|'hand'|'boulder', b: partId|'boulder' } ] }
+     { v: 2, parts: [ ...see below ], cables: [ { a: partId|'hand'|'boulder'|'ship', b: partId|'boulder'|'ship' } ] }
+   'ship' is the Gumdrop's hook: the ship at the start of the leg that the other end of the cable belongs to (the real ship for leg 1, the ghost Gumdrop after that).
+   A ramp or a crane only lifts the Gumdrop when a cable joins the machine (or one of its add-ons) to 'ship'. A lever or a screw jack carries the Gumdrop on its end, so it needs no rope.
+   Rigs saved before ropes existed have no v: glMigrate() ropes every ramp and crane to 'ship' so they still work.
    Lift machines (one leg each):
      ramp   { id, type:'ramp', x1, y1, L, rise }          foot at (x1, y1); head = foot + (√(L² − rise²), rise)
      crane  { id, type:'crane', x, rise }                 stands on whatever is under x; lifts straight up
@@ -25,6 +28,8 @@ const GL_PLAT = { S: { holds: 4000, base: 10, w: 3, name: 'Small' }, M: { holds:
 const GL_WT = { crane: 1000, lever: 500, jack: 400, winch: 100, block: 100, ramp: 0 };
 const GL_BLAST = { small: 1.5, big: 3 };
 const GL_LIFT = { ramp: 1, crane: 1, lever: 1, jack: 1 };
+const GL_ROPED = { ramp: 1, crane: 1 };   // the machines that must be roped to the Gumdrop's hook
+const GL_HOOK = 5.6;   // the Gumdrop's hook is this many metres above its base
 /* the crater, side-on (tuned so every route in brief section 9 can be built; tests/rescue_numbers.py checks them on this ground) */
 const GL_PROFILE = [[0, 8], [3, 4.5], [6, 0.8], [8, 0], [22, 0], [28, 0.8], [32, 2.2], [35, 4], [37, 5.2], [38.6, 6], [44, 6], [47, 6.5], [50, 7.6],
   [53, 8.7], [55, 9.1], [57, 9.1], [59, 9.6], [61, 10.6], [63, 11.5], [64, 12], [66, 12], [67, 13.5], [68, 15], [69, 13.5], [70, 12], [72, 10], [75, 8], [96, 8]];
@@ -98,6 +103,15 @@ function glAddons(rig, id) {
   return { chain, blocks, winches, ropes, wm, faults, cabled: chain.length > 0 };
 }
 
+/* is a cable joining this machine (or an add-on in its chain) to the Gumdrop's hook? */
+function glRoped(rig, id, ad) { const ids = new Set([id].concat(ad.chain.map(p => p.id))); return (rig.cables || []).some(c => (c.a === 'ship' && ids.has(c.b)) || (c.b === 'ship' && ids.has(c.a))); }
+/* old saves had no ropes to the Gumdrop: add them so a route that worked before still works */
+function glMigrate(rig) {
+  if (!rig || rig.v >= 2) return rig; rig.cables = rig.cables || [];
+  (rig.parts || []).forEach(p => { if (GL_ROPED[p.type] && !rig.cables.some(c => (c.a === 'ship' && c.b === p.id) || (c.b === 'ship' && c.a === p.id))) rig.cables.push({ a: p.id, b: 'ship' }); });
+  rig.v = 2; return rig;
+}
+
 /* ---------- the whole rig: blasts, boulder, legs in order, run, damage, score ---------- */
 function glEvaluate(rig, opts) {
   opts = opts || {}; rig = rig || { parts: [], cables: [] };
@@ -127,9 +141,11 @@ function glEvaluate(rig, opts) {
     if (m.type === 'jack' && ad.cabled) faults.push('jackcable');
     const ma = m.type === 'jack' ? m.ma : m.ma * ad.ropes * ad.wm, pull = load / ma, hand = ma * m.rise;
     const cable = m.type === 'jack' ? 0 : (m.type === 'crane' || ad.cabled) ? ad.ropes * m.dist : 0;
-    const leg = { i: legs.length, id: m.id, type: m.type, m, start: m.start, end: m.end, rise: +m.rise.toFixed(3), mma: m.ma, ropes: m.type === 'jack' ? 1 : ad.ropes, winches: ad.winches.map(w => w.ratio), ma, load, pull, hand, cable, work: load * Math.max(0, m.rise), faults, addons: ad.chain.map(p => p.id) };
+    const roped = GL_ROPED[m.type] ? glRoped(rig, m.id, ad) : true;
+    const leg = { i: legs.length, id: m.id, roped, at: Object.assign({}, at), type: m.type, m, start: m.start, end: m.end, rise: +m.rise.toFixed(3), mma: m.ma, ropes: m.type === 'jack' ? 1 : ad.ropes, winches: ad.winches.map(w => w.ratio), ma, load, pull, hand, cable, work: load * Math.max(0, m.rise), faults, addons: ad.chain.map(p => p.id) };
     legs.push(leg);
     if (faults.length) { stop = { why: 'broken', at: Object.assign({}, at), leg: leg.i, faults }; leg.stopped = true; break; }
+    if (!roped) { stop = { why: 'norope', at: Object.assign({}, at), leg: leg.i }; leg.stopped = true; break; }
     if (pull > 180 + 1e-9) { stop = { why: 'heavy', at: Object.assign({}, at), leg: leg.i }; leg.stopped = true; break; }
     at = m.end;
   }
@@ -155,7 +171,8 @@ function glEvaluate(rig, opts) {
   let thr = 0; legs.forEach(l => { l.thruster = l.pull > GL.pullOk + 1e-9 ? Math.min(100, (l.pull - GL.pullOk) / 120 * 100) : 0; thr += l.thruster; });
   const dmg = { thrusters: thr, rock: rockOn ? 25 : 0, blasts: bShip.length * 15 }; dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.blasts);
   const cost = glCost(rig, legs, boulder), crest = glCrest(g);
-  const res = { ok: done, arrived: done, stop: done ? null : stop, legs, ran, hardest, hand, work: workJ, load, rockOn, boulder, blasts, bShip: bShip.length, dmg, cost, crest, plats: loads, ground: g, ship0,
+  const ghost = !done && stop && stop.leg >= 1 ? Object.assign({}, stop.at) : null;   // where the Gumdrop waits for the next machine
+  const res = { ok: done, arrived: done, stop: done ? null : stop, ghost, legs, ran, hardest, hand, work: workJ, load, rockOn, boulder, blasts, bShip: bShip.length, dmg, cost, crest, plats: loads, ground: g, ship0,
     final: legs.length ? legs[legs.length - 1].end : ship0, used: [...used], spare: ms.filter(m => !used.has(m.id)).map(m => m.id) };
   res.score = glScore(res, opts.hints || 0);
   return res;

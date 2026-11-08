@@ -338,9 +338,9 @@ function wsRuler(c, x, y, w, dist, title, col, len, zoom) {
 }
 /* both rulers use ONE scale, so a longer bar is a longer bar. A bar under 40 px gets an extra zoomed ruler above it. */
 function wsRulers(c, rise, eDist, t1, t2) {
-  const len = Math.max(0.5, Math.ceil(Math.max(rise, eDist) * 2 - 1e-9) / 2), W = 430, pxm = (W - 20) / len;
-  wsRuler(c, 14, 376, W, Math.max(rise, 0.01), t1, WSC.green, len); wsRuler(c, 456, 376, W, Math.max(eDist, 0.01), t2, WSC.red, len);
-  [[rise, 14, WSC.green], [eDist, 456, WSC.red]].forEach(([d, x, col]) => {
+  const len = Math.max(0.5, Math.ceil(Math.max(rise, eDist) * 2 - 1e-9) / 2), W = LS.on ? 380 : 430, pxm = (W - 20) / len, X2 = LS.on ? 400 : 456;   // lesson mode leaves the bottom-right corner for the ▶ button
+  wsRuler(c, 14, 376, W, Math.max(rise, 0.01), t1, WSC.green, len); wsRuler(c, X2, 376, W, Math.max(eDist, 0.01), t2, WSC.red, len);
+  [[rise, 14, WSC.green], [eDist, X2, WSC.red]].forEach(([d, x, col]) => {
     if (d > 0 && d * pxm < 40) { const zl = d <= 0.5 ? 0.5 : Math.ceil(d), zy = 312; wsRuler(c, x, zy, 200, d, `🔍 Zoomed in: 0 to ${zl} m`, col, zl, true); }
   });
 }
@@ -348,6 +348,7 @@ function wsRulers(c, rise, eDist, t1, t2) {
 /* ---------- the whole scene ---------- */
 function drawShopScene(c) {
   if (WS.site === 'mission') { glDrawMission(c); return; }   // Part 5, step v1: Mission Control (no bench, no LIVE inset)
+  if (LS.on) { lblBegin(); [[0, 0, 172, 150], [596, 86, 724, 238], [726, 4, 898, 340], [300, 4, 640, 36]].forEach(([x0, y0, x1, y1]) => LBL.avoid.push({ x0, y0, x1, y1 })); }   // the video, newtonmeter and readouts keep their places
   if (LS.on) lsRoom(c); else wsRoom(c); const cur = WS.c || wsCalc(), riseNow = WS.c && !WS.c.capped ? WS.c.rise * WS.prog : 0, prog = WS.c && !WS.c.capped ? WS.prog : 0, mk = wsMasked();
   let ep;
   if (LS.on) ep = lsDrawMachine(c, cur, riseNow); else if (WS.mach === 'hand') ep = wsDrawHand(c, cur, riseNow); else if (WS.mach === 'lever') ep = wsDrawLever(c, cur, riseNow); else if (WS.mach === 'pulley') ep = wsDrawPulley(c, cur, riseNow, prog); else if (WS.mach === 'winch') ep = wsDrawWinch(c, cur, riseNow); else if (WS.mach === 'build') ep = wsDrawBuild(c, cur, riseNow, prog);
@@ -370,9 +371,10 @@ function drawShopScene(c) {
   /* messages */
   if (WS.done && WS.msg) { const bad = WS.c && (WS.c.capped || WS.c.short); const w = Math.min(560, c.measureText(WS.msg).width + 40); c.font = `700 14px ${C.fb}`; const ww = clamp(c.measureText(WS.msg).width + 36, 110, 520); c.fillStyle = bad ? WSC.amber : WSC.green; c.beginPath(); c.roundRect(450 - ww / 2 + 30, 6, ww, 30, 8); c.fill(); txt(c, WS.msg, 450 + 30, 21.5, '#fff', `700 14px ${C.fb}`, 'center'); }
   else if (!WS.busy && !WS.shown) { const m = `Press ${WS_VERB[WS.mach]} to work the machine`; c.font = `700 13px ${C.fb}`; const iw = c.measureText(m).width + 28; c.fillStyle = 'rgba(255,255,255,.94)'; c.beginPath(); c.roundRect(450 + 30 - iw / 2, 6, iw, 28, 8); c.fill(); txt(c, m, 450 + 30, 21, WSC.ink, `700 13px ${C.fb}`); }   /* light pill: the beam behind is dark */
-  if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, 418, C.line, 'right');
+  if (WS.world !== 'earth') hudBox(c, `${WS_WORLDS[WS.world].n} · g = ${WS_WORLDS[WS.world].g} N/kg`, 890, LS.on ? 392 : 418, C.line, 'right');
   if (!WS.lim.noGhost && WS.real) txt(c, 'Real machine: friction on', 450, 418, WSC.red, `700 12px ${C.fb}`);
   if (LS.on) lsOverlay(c);
+  if (LS.on) lblFlush(c, 900, WS_H, LS.drag && LS.drag.moved || LS.tdrag || LS.dragPiece ? 0.2 : 1);   // board labels: placed so they never overlap, faded while something is dragged
   /* rulers */
   if (WS.done && WS.c && !WS.c.capped && wsHas('rulers')) {
     wsRulers(c, WS.c.rise, WS.c.eDist, WS.mach === 'wedge' ? 'HALVES OPENED (m)' : 'LOAD RISE (m)', WS.mach === 'pulley' ? 'ROPE YOU PULLED (m)' : 'HOW FAR YOUR HAND MOVED (m)');

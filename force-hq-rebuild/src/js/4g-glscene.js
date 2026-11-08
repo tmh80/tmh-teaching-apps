@@ -97,15 +97,12 @@ function glDrawCrane(c, p, m, bad, hookY) {
   c.fillStyle = GLC.steel2; [-1, 1].forEach(sd => { c.beginPath(); c.roundRect(glSX(x + sd * 3.2) - 0.5 * u, glSY(by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
   const hy = hookY == null ? by + 4.2 : hookY; c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(x), glSY(top)); c.lineTo(glSX(x), glSY(hy)); c.stroke();
   c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.arc(glSX(x), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke();
-  glLbl(c, `↑ ${fmt(p.rise, 1)} m`, glSX(x), glSY(top + 0.9), col === GLC.bad ? GLC.bad : '#ffe7a8', 11, 'center', 'rgba(31,29,38,.55)');
 }
 function glDrawLever(c, p, m, bad, tiltT) {
+  /* the same drawing as the Workshop bench lever (drawLeverShape in 4n): a bar on a triangle fulcrum. The load end rises by `rise` as tiltT goes 0 → 1 */
   const u = glU(), d = p.dir || 1, by = m.start.y, fx = p.x + d * p.arm, ex = p.x + d * GL.beam, k = tiltT || 0;
-  /* the fulcrum, then the beam: the load end rises by `rise` as tiltT goes 0 → 1 */
-  c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(glSX(fx), glSY(by + 0.9)); c.lineTo(glSX(fx + 0.6), glSY(by)); c.lineTo(glSX(fx - 0.6), glSY(by)); c.closePath(); c.fill();
-  const ly = by + 0.9 + (k * p.rise) * 0.999 - 0.0, ey = by + 0.9 - k * p.rise * (GL.beam - p.arm) / p.arm;
-  c.strokeStyle = bad ? GLC.bad : GLC.wood2; c.lineWidth = Math.max(4, 0.32 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(glSX(p.x), glSY(ly)); c.lineTo(glSX(ex), glSY(Math.max(ey, by - 30))); c.stroke();
-  c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(glSX(fx), glSY(by + 0.9), Math.max(2.5, 0.16 * u), 0, 7); c.fill();
+  const ly = by + 0.9 + k * p.rise, ey = by + 0.9 - k * p.rise * (GL.beam - p.arm) / p.arm;
+  drawLeverShape(c, { a: { x: glSX(p.x), y: glSY(ly) }, b: { x: glSX(ex), y: glSY(Math.max(ey, by - 30)) }, fx: glSX(fx), fy: glSY(by + 0.9), floor: glSY(by), thick: Math.max(4, 0.32 * u), bad });
 }
 function glDrawJack(c, p, m, bad, k) {
   const u = glU(), by = m.start.y, hgt = 0.7 + (k || 0) * p.rise; c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(glSX(p.x - 0.7), glSY(by + 0.35), 1.4 * u, 0.35 * u, 3); c.fill();
@@ -124,7 +121,6 @@ function glDrawBlock(c, p, bad) {
   const u = glU(), r = Math.max(7, 0.5 * u), X = glSX(p.x), Y = glSY(p.y);
   c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(X - r * 0.5, Y - r * 1.5, r, r * 0.7, 3); c.fill();
   c.fillStyle = GLC.steel; c.beginPath(); c.arc(X, Y, r, 0, 7); c.fill(); c.fillStyle = GLC.steel2; c.beginPath(); c.arc(X, Y, r * 0.35, 0, 7); c.fill();
-  glLbl(c, `${p.ropes} rope${p.ropes > 1 ? 's' : ''}`, X, Y + r + 9, GLC.label, 10, 'center', 'rgba(31,29,38,.6)');
 }
 function glDrawWinch(c, p, bad, spin) {
   const u = glU(), r = Math.max(8, 0.55 * u), X = glSX(p.x), Y = glSY(p.y);
@@ -133,7 +129,6 @@ function glDrawWinch(c, p, bad, spin) {
   c.strokeStyle = '#8a5a12'; c.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(X + i * r * 0.32, Y - r * 0.7); c.lineTo(X + i * r * 0.32, Y + r * 0.7); c.stroke(); }
   const a = spin || 0; c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.12 * u); c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * r * 1.5, Y + Math.sin(a) * r * 1.5); c.stroke();
   c.fillStyle = '#d6402c'; c.beginPath(); c.arc(X + Math.cos(a) * r * 1.5, Y + Math.sin(a) * r * 1.5, r * 0.28, 0, 7); c.fill();
-  glLbl(c, `×${p.ratio}`, X, Y + r + 10, GLC.label, 11, 'center', 'rgba(31,29,38,.6)');
 }
 function glDrawDyn(c, p, g, preview) {
   const u = glU(), y = glAt(g, p.x), X = glSX(p.x), Y = glSY(y), r = p.big ? GL_BLAST.big : GL_BLAST.small, n = p.big ? 3 : 1;
@@ -160,17 +155,18 @@ function glDrawRuler(c, r) {
   c.strokeStyle = '#ffe28a'; c.lineWidth = 3; c.beginPath(); c.moveTo(A.x, A.y); c.lineTo(B.x, B.y); c.stroke();
   [A, B].forEach(P => { c.fillStyle = '#ffe28a'; c.beginPath(); c.arc(P.x, P.y, 8, 0, 7); c.fill(); c.fillStyle = GLC.ink; c.beginPath(); c.arc(P.x, P.y, 2.5, 0, 7); c.fill(); });
   const s = `across ${fmt(Math.abs(dx), 1)} m · up ${fmt(dy, 1)} m · straight ${fmt(Math.hypot(dx, dy), 1)} m`;
-  glLbl(c, s, clamp((A.x + B.x) / 2, 120, GLV.LW - 120), Math.min(A.y, B.y) - 16, GLC.ink, 12, 'center', '#ffe28a');
+  lblAdd(s, clamp((A.x + B.x) / 2, 120, GLV.LW - 120), Math.min(A.y, B.y) - 16, { col: GLC.ink, bg: '#ffe28a', prio: 1 });
 }
 /* everything, back to front */
 function glDrawWorld(c, o) {
   const t = o.t || performance.now() / 1000, ev = o.ev, g = o.ground || (ev && ev.ground) || glBaseGround(), rig = o.rig || { parts: [], cables: [] }, run = o.run || {};
-  readColors(); glDrawSky(c, t); glDrawBigJelly(c, t, run.beam);
+  readColors(); lblBegin(); glDrawSky(c, t); glDrawBigJelly(c, t, run.beam);
   /* the level the tractor beam can reach: anything at or above the dotted line beside the crest */
   const crest = glCrest(g); c.setLineDash([2, 6]); c.strokeStyle = 'rgba(160,255,214,.55)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(glSX(40), glSY(crest)); c.lineTo(glSX(80), glSY(crest)); c.stroke(); c.setLineDash([]);
   glDrawGround(c, g, o.ghost);
   const plats = ev ? ev.plats : [], P0 = glPlatforms(rig, g), byId = {}; rig.parts.forEach(p => byId[p.id] = p);
-  plats.forEach(pl => glDrawPlatform(c, pl, pl.over));
+  plats.forEach(pl => { const bad = o.badPlat && pl.id === o.badPlat; glDrawPlatform(c, pl, pl.over || bad); if (bad) lblAdd(GL_PLATMSG, glSX((pl.x0 + pl.x1) / 2), glSY(pl.top) - 22, { col: '#fff', bg: '#c0392b', prio: 0, nofade: true }); });
+  if (o.flashPlat) { const fp = glPlatforms({ parts: [Object.assign({ id: '_f' }, o.flashPlat)] }, g)[0]; glDrawPlatform(c, fp, true); lblAdd(GL_PLATMSG, glSX((fp.x0 + fp.x1) / 2), glSY(fp.top) - 22, { col: '#fff', bg: '#c0392b', prio: 0, nofade: true }); }
   const ms = {}; rig.parts.filter(p => GL_LIFT[p.type]).forEach(p => { ms[p.id] = glMachine(p, g, P0); });
   rig.parts.filter(p => p.type === 'dyn' && !(run.blown && run.blown.has(p.id))).forEach(p => glDrawDyn(c, p, o.ghost || g, !run.on));
   const faulty = id => { const m = ms[id]; if (!m) return false; const leg = ev && ev.legs.find(l => l.id === id); return (leg ? leg.faults.length : m.faults.length) > 0; };
@@ -185,7 +181,9 @@ function glDrawWorld(c, o) {
   rig.parts.filter(p => p.type === 'jack').forEach(p => glDrawJack(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
   /* cables, then the add-ons on top */
   const cp = id => { if (id === 'boulder') return { x: 18.9, y: glAt(g, 18.7) + 1.0 }; const p = byId[id]; return p ? glCablePoint(p, ms[id]) : null; };
-  (rig.cables || []).forEach(cb => { const a = cp(cb.a), b = cp(cb.b); if (a && b) glDrawCable(c, a, b); });
+  (rig.cables || []).forEach(cb => {
+    if (cb.a === 'ship' || cb.b === 'ship') { if (run.on) return; const oth = cb.a === 'ship' ? cb.b : cb.a, P = cp(oth); if (!P) return; const S = glShipSpot(ev, oth, g); glDrawCable(c, { x: S.x, y: S.y + GL_HOOK }, P, 0.4); return; }
+    const a = cp(cb.a), b = cp(cb.b); if (a && b) glDrawCable(c, a, b); });
   if (o.cableDrag) glDrawCable(c, o.cableDrag.a, o.cableDrag.b, 0);
   rig.parts.filter(p => p.type === 'block').forEach(p => glDrawBlock(c, p));
   rig.parts.filter(p => p.type === 'winch').forEach(p => glDrawWinch(c, p, false, run.spin));
@@ -193,21 +191,37 @@ function glDrawWorld(c, o) {
   if (o.hz) glDrawZone(c, o.hz, t, o.hzLabel);
   /* selection ring and cable dots */
   if (o.sel && byId[o.sel]) { const b = glBounds(byId[o.sel], ms[o.sel], g, plats); c.strokeStyle = '#ffe28a'; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.roundRect(glSX(b.x0) - 6, glSY(b.y1) - 6, (b.x1 - b.x0) * glU() + 12, (b.y1 - b.y0) * glU() + 12, 8); c.stroke(); c.setLineDash([]); }
-  if (!run.on) rig.parts.filter(p => p.type === 'ramp').forEach(p => { const e = ms[p.id].end; c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y), 7, 0, 7); c.fill(); c.stroke(); });
-  if (!run.on) rig.parts.forEach(p => { const q = glCablePoint(p, ms[p.id]); if (!q) return; c.fillStyle = 'rgba(31,29,38,.55)'; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 7, 0, 7); c.fill(); c.strokeStyle = GLC.rope; c.lineWidth = 2.5; c.beginPath(); c.arc(glSX(q.x), glSY(q.y), 5, 0, 7); c.stroke(); });
-  if (o.labels) glDrawLabels(c, o, g, crest);
+  if (!run.on) rig.parts.filter(p => p.type === 'ramp').forEach(p => { const e = ms[p.id].end; lblAvoid(glSX(e.x), glSY(e.y), 14); c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y), 7, 0, 7); c.fill(); c.stroke(); });
+  if (!run.on) rig.parts.forEach(p => { const q = glCablePoint(p, ms[p.id]); if (!q) return; lblAvoid(glSX(q.x), glSY(q.y), 12); drawHookDot(c, glSX(q.x), glSY(q.y), { glow: o.hookGlow && GL_ROPED[p.type] }); });
+  /* every load wears a hook: the Gumdrop, the ghost Gumdrop waiting for the next machine, and the boulder */
+  if (!run.on && o.ship) {
+    const hk = (sp, ghost) => { const X = glSX(sp.x), Y = glSY(sp.y + GL_HOOK); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u0); c.beginPath(); c.moveTo(X, glSY(sp.y + 4.5)); c.lineTo(X, Y); c.stroke(); drawHookDot(c, X, Y, { glow: o.hookGlow }); lblAvoid(X, Y, 12); };
+    var u0 = glU(); const gh = ev && ev.ghost;
+    if (gh) { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y), sc, 0); c.restore();
+      c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(glSX(gh.x), glSY(gh.y + 2.2), 3.2 * u0, 2.6 * u0, 0, 0, 7); c.stroke(); c.setLineDash([]); hk(gh, true); }
+    hk(o.ship);
+  }
+  if (!run.on && o.rock !== false) { const b = { x: GL.boulderX - 0.1, y: glAt(g, 18.7) + 1.0 }; drawHookDot(c, glSX(b.x), glSY(b.y), { glow: o.hookGlow }); lblAvoid(glSX(b.x), glSY(b.y), 12); }
   if (o.ruler) glDrawRuler(c, o.ruler);
+  if (o.labels) glDrawLabels(c, o, g, crest, ev);
+  lblFlush(c, GLV.LW, GLV.LH, o.fade);
   if (run.fx) run.fx(c, t);
 }
-/* the board labels (Tom, 8 Nov 2026): the boulder and the Gumdrop with their weights, the dotted line in words, and a "Drop here" glow on the boulder while a lever or jack is being dragged */
-function glDrawLabels(c, o, g, crest) {
+/* the board labels (Tom, 8 Nov 2026): only the weights of the loads (the Gumdrop, the boulder) and the ghost Gumdrop's caption, plus "Drop here" while a lever or jack is being dragged.
+   Rope counts, winch ratios and lifts are in the settings panel. lblFlush places them so they never overlap each other or a handle. */
+function glDrawLabels(c, o, g, crest, ev) {
   const u = glU(), by = glAt(g, GL.boulderX - 0.3), sz = Math.max(10, Math.min(13, u * 1.15));
   if (o.rock !== false) {
     if (o.dropGlow) { const t = o.t || performance.now() / 1000, pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 6); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
-      c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); glLbl(c, 'Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), '#c9ffdc', sz + 1, 'center', 'rgba(31,29,38,.7)'); }
-    else glLbl(c, 'Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), GLC.label, sz, 'center', 'rgba(31,29,38,.6)'); }
-  if (o.ship && !o.ship.hideLabel) glLbl(c, 'Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 7.2), GLC.label, sz, 'center', 'rgba(31,29,38,.6)');
-  glLbl(c, 'The beam reaches here', glSX(60), glSY(crest + 0.9), '#c9ffdc', sz, 'center', 'rgba(31,29,38,.55)');
+      c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); lblAdd('Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), { size: sz + 1, col: '#c9ffdc', bg: 'rgba(31,29,38,.7)', prio: 2 }); }
+    else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3 }); }
+  if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4 });
+  if (o.ship && ev && ev.ghost) lblAdd(`Gumdrop after leg ${ev.stop.leg}`, glSX(ev.ghost.x), glSY(ev.ghost.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4 });
+}
+/* where the Gumdrop is for a machine or add-on: at the start of the leg it belongs to, else waiting as the ghost (or still at the start) */
+function glShipSpot(ev, id, g) {
+  if (ev && ev.legs) { const l = ev.legs.find(q => q.id === id || (q.addons || []).includes(id)); if (l && l.at) return l.at; if (ev.ghost) return ev.ghost; if (ev.ship0) return ev.ship0; }
+  return { x: GL.shipX, y: glAt(g || glBaseGround(), GL.shipX) };
 }
 /* a part's box in world metres, for hit tests and the selection ring */
 function glBounds(p, m, g, plats) {

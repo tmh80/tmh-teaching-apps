@@ -5,8 +5,14 @@
    The board is the Workshop canvas (900 x 430 units, 120 px per metre). The builder's colours (GLC) and the builder's menu and tray styles are shared; the lever is drawn here
    because the bench lever has three set-ups and a 2 m bar. A step switches lesson mode on with lessonStage({ ...wsSetup options, lesson: { tray: [...], pre: [...], lock: [...] } }).
    To add a piece for Parts 2 to 4: add it to LS_PIECES (name, icon, three cards), draw it in lsDrawMachine, give it a hit test in lsHit and a drop rule in lsDrop.
+   ROPES TO THE LOAD (Tom, 8 Nov 2026): every load wears a hook ◉. A machine that pulls on the load needs a rope joining its rope end to that hook: LS.cab is the list of ropes
+   the student has joined, [[endA, endB], ...], and lsEnds() lists every rope end on the bench this frame ({ id: {x, y} }; the load's hook is 'load'). lsNeedRopes() lists the pairs the current
+   machine needs; the ▶ button stays off until they are all joined (LAB.pullGate). Drag from one ◉ to another to rope them, drag a rope off its ◉ into empty space to take it off, or use the
+   panel's button. lsAutoRope(a, b) is for a drop rule that snaps a piece beside the load and clips its rope on. The lever needs none: the rock sits on the bar. A new piece adds its ends to
+   lsEnds(), its pairs to lsNeedRopes() and its drawing to lsDrawMachine().
+   THE PANEL: #lsDock beside the board (below it on a phone) always shows the step's piece (lsDockHTML), with its settings, "?" replay and Remove. No floating menus.
    Names to avoid reusing elsewhere (one shared scope): LS, LS_*, ls*, lessonStage. */
-const LS = { on: false, o: null, drag: null, place: null, dragPiece: null, menu: false, bound: false, flash: 0, tdrag: false };
+const LS = { on: false, o: null, drag: null, place: null, dragPiece: null, bound: false, flash: 0, tdrag: false, cab: [], ropeMach: null, ropeLine: null };
 const LS_K = 120, LS_X0 = 214, LS_FLOOR = 350;
 const lsCap = s => s.replace(/^./, ch => ch.toUpperCase());
 /* every piece: its tray tile and its three "first time" cards (the exact student text is in the spec, section 4) */
@@ -22,26 +28,30 @@ const lsHas = t => t === 'lever' ? WS.mach === 'lever' : false;
 const lsLocked = t => !!(LS.o && (LS.o.lock || []).includes(t));
 const lsCanvas = () => $('#cvScene');
 function lessonStage(o) {
-  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; lsCloseMenu();
+  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LAB.pullGate = lsGate;
   const cv = lsCanvas(); if (cv) cv.style.touchAction = 'none';
   lsRender();
 }
-function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; lsCloseMenu(); const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); }
+function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); }
 
 /* ---------- the tray and the status line ---------- */
 function lsRender() {
   const tr = $('#lsTray'), st = $('#lsStatus'); if (!tr) return;
   const on = LS.on && S.scene === 'shop' && !!LS.o; tr.hidden = !(on && LS.o.tray.length > 0); if (st) st.hidden = !on;
+  const row = $('#boardRow'), dk = $('#lsDock'), pb = $('#wsPull'), bx = $('#boardBox'); if (row) row.classList.toggle('ls', on); if (dk) dk.hidden = !on;
+  if (pb && bx) { if (on && pb.parentElement !== bx) { pb.classList.add('inboard'); bx.appendChild(pb); } else if (!on && pb.parentElement === bx) { pb.classList.remove('inboard'); const bar = $('.scenebar'); if (bar) bar.insertBefore(pb, $('#dzPause')); } }   // ▶ sits inside the board, bottom right
   if (!on) return;
+  if (LS.ropeMach !== WS.mach) { LS.ropeMach = WS.mach; LS.cab = WS.mach === 'hand' ? [['load', 'end']] : []; }   // just a rope starts roped; take it off and the ▶ stays off until it goes back on
   const sig = LS.o.tray.map(t => t + lsHas(t) + (LS.place === t)).join('|');
   if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = LS.o.tray.map(t => { const P = LS_PIECES[t], has = lsHas(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
   if (st) st.textContent = LS.place ? 'Now tap the rock to put the lever there.' : lsStatus();
-  if (LS.menu) lsOpenMenu(LS.menu.t, true);
+  if (dk) dkSet(dk, lsDockHTML());
 }
 function lsStatus() {
   const o = LS.o; if (!o) return '';
   if (o.tray.includes('lever') && !lsHas('lever')) return 'Just a rope: Smooshy pulls the rock straight up. Drag the ⚖️ Lever from the tray under the rock to try a machine.';
-  if (WS.mach === 'lever') return WS.cls === 1 ? 'Drag the fulcrum (the triangle) along the bar. Tap the lever for its menu.' : WS.cls === 2 ? 'Drag the rock along the bar. Tap the lever for its menu.' : 'Drag your hand along the bar. Tap the lever for its menu.';
+  if (WS.mach === 'lever') return WS.cls === 1 ? 'Drag the fulcrum (the triangle) along the bar, or use the Lever panel.' : WS.cls === 2 ? 'Drag the rock along the bar, or use the Lever panel.' : 'Drag your hand along the bar, or use the Lever panel.';
+  if (!lsGate()) return 'The rock isn\'t roped to the newtonmeter yet. Drag a rope from one ◉ to the other.';
   return '';
 }
 
@@ -65,32 +75,49 @@ function lsRoom(c) {
   c.fillStyle = 'rgba(255,255,255,.9)'; [[640, 350, 1], [668, 350, .7], [850, 350, .9], [878, 350, .6]].forEach(([x, y, s]) => { [-.5, 0, .45].forEach((dx, i) => { const hh = (i === 1 ? 26 : 16) * s, ww = 7 * s, X = x + dx * 26 * s; c.beginPath(); c.moveTo(X, y - hh); c.lineTo(X + ww, y - hh * .3); c.lineTo(X + ww * .6, y + 1); c.lineTo(X - ww * .6, y + 1); c.lineTo(X - ww, y - hh * .3); c.closePath(); c.fill(); }); });
   txt(c, 'THE WORKSHOP · GUMMY BASE ONE', 14, 418, '#fffaf2', `800 11px ${C.fb}`, 'left');
 }
-function lsLoadBox(c, x, y, label) {   // the load with its weight: "Rock 294 N" (x, y = the middle of the bottom edge)
+function lsLoadBox(c, x, y, label, hookOn) {   // the load with its weight: "Rock 294 N" (x, y = the middle of the bottom edge) and its hook ◉ on top
   c.font = `800 12px ${C.fn}`; const w = Math.max(62, c.measureText(label).width + 22);
   wsLoadBlock(c, x, y, w, 40, WS.loadId, ''); txt(c, label, x, y - 20, '#fffaf2', `800 12px ${C.fn}`);
+  lblAvoid(x, y - 20, Math.max(w / 2 + 2, 34)); lsHookDot(c, x, y - 47, hookOn);
 }
+/* a hook: glows while a rope is being dragged, and shows green once a rope is on it */
+function lsHookDot(c, X, Y, roped) { lblAvoid(X, Y, 14); drawHookDot(c, X, Y, { glow: !!LS.ropeLine, roped }); }
+const lsRopeGeo = riseNow => { const cx = 360, by = LS_FLOOR - (riseNow || 0) * 300; return { cx, by, load: { x: cx, y: by - 47 }, end: { x: cx, y: by - 78 } }; };
+/* every rope end on the bench right now (canvas units) */
+function lsEnds() { const e = {}; if (WS.mach === 'hand') { const g = lsRopeGeo(0); e.load = g.load; e.end = g.end; } else if (WS.mach === 'lever') { const G = lsLever(0, WS.c || wsCalc()); e.load = { x: G.L.x, y: G.L.y - 54 }; } return e; }
+const lsNeedRopes = () => WS.mach === 'hand' ? [['load', 'end']] : [];
+const lsJoined = (a, b) => LS.cab.some(c => (c[0] === a && c[1] === b) || (c[0] === b && c[1] === a));
+const lsGate = () => lsNeedRopes().every(([a, b]) => lsJoined(a, b));
+function lsRope(a, b) { const need = lsNeedRopes().some(([x, y]) => (x === a && y === b) || (x === b && y === a)); if (!need || lsJoined(a, b)) return false; LS.cab.push([a, b]); WS.shown = true; wsRenderControls(); return true; }
+const lsAutoRope = (a, b) => { if (lsRope(a, b)) toast('✓ Roped!', 'ok'); };
+function lsUnrope(a) { const n = LS.cab.length; LS.cab = LS.cab.filter(c => c[0] !== a && c[1] !== a); if (LS.cab.length !== n) wsRenderControls(); return LS.cab.length !== n; }
 const lsLoadLabel = () => `${lsCap(WS.loadShort)} ${fmt(WS.load, WS.load % 1 ? 1 : 0)} N`;
-function lsBarAndFulcrum(c, G) {
-  c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(G.fx, G.fy + 8); c.lineTo(G.fx + 30, LS_FLOOR); c.lineTo(G.fx - 30, LS_FLOOR); c.closePath(); c.fill();   // the fulcrum: a triangle, like the rescue's lever
-  c.strokeStyle = GLC.wood2; c.lineWidth = 14; c.lineCap = 'round'; c.beginPath(); c.moveTo(G.a.x, G.a.y); c.lineTo(G.b.x, G.b.y); c.stroke(); c.strokeStyle = GLC.wood; c.lineWidth = 7; c.beginPath(); c.moveTo(G.a.x, G.a.y - 1); c.lineTo(G.b.x, G.b.y - 1); c.stroke();
-  c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(G.fx, G.fy, 7, 0, 7); c.fill();
+/* the lever is drawn by drawLeverShape (4n-boardkit.js), the same function the crater uses, at this bench's scale */
+function lsBarAndFulcrum(c, G) { drawLeverShape(c, { a: G.a, b: G.b, fx: G.fx, fy: G.fy, floor: LS_FLOOR, thick: 14 }); }
+/* a measuring bracket along the bar; its words go through the label placer so they never overlap */
+function lsBracket(c, x1, x2, y, label, col) {
+  c.strokeStyle = col; c.lineWidth = 2; c.beginPath(); c.moveTo(x1, y - 5); c.lineTo(x1, y + 5); c.moveTo(x2, y - 5); c.lineTo(x2, y + 5); c.moveTo(x1, y); c.lineTo(x2, y); c.stroke();
+  lblAdd(label, (x1 + x2) / 2, y - 14, { size: 11, col, bg: '#fff', border: col, prio: 3 });
 }
 function lsDrawLever(c, cur, riseNow) {
   const G = lsLever(riseNow, cur), { fx, fy, L, E } = G, cls = WS.cls, yb = cls === 1 ? 58 : 318;
-  wsBracket(c, Math.min(L.x, fx), Math.max(L.x, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(cur.la, 2)} m`, WSC.green, true);   // the two distances along the bar, in plain words
-  wsBracket(c, Math.min(fx, E.x), Math.max(fx, E.x), yb, `hand to fulcrum ${fmt(cur.ea, 2)} m`, WSC.red, true);
+  lsBracket(c, Math.min(L.x, fx), Math.max(L.x, fx), yb + 26, `${WS.loadShort} to fulcrum ${fmt(cur.la, 2)} m`, WSC.green);   // the two distances along the bar, in plain words
+  lsBracket(c, Math.min(fx, E.x), Math.max(fx, E.x), yb, `hand to fulcrum ${fmt(cur.ea, 2)} m`, WSC.red);
   lsBarAndFulcrum(c, G); lsLoadBox(c, L.x, L.y - 7, lsLoadLabel());
   const down = cls === 1, hy = down ? Math.min(E.y + 84, 330) : Math.max(E.y - 84, 52);
-  wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, down ? 'pull down' : 'pull up');
-  if (down) wsLabel(c, 'fulcrum', fx, 338, WSC.steel2, 'center', [fx, 322]); else wsLabel(c, 'fulcrum', fx - 34, 334, WSC.steel2, 'right', [fx - 14, 330]);
+  wsSpring(c, E.x, E.y + (down ? 6 : -6), E.x, hy, null);
+  { const uy = down ? 1 : -1, ay = E.y + (down ? 6 : -6), Lh = Math.abs(hy - ay), hook = Math.min(14, Lh * .18), body = Math.max(26, Math.min(58, Lh - hook - 22)); lblAdd(down ? 'pull down' : 'pull up', E.x + 16, ay + uy * (hook + body / 2), { size: 11, col: WSC.red, bg: '#fff', border: WSC.red, align: 'left', prio: 3 }); }
+  lblAdd('fulcrum', down ? fx : fx - 34, 338, { size: 11, col: WSC.steel2, bg: '#fff', border: WSC.steel2, align: down ? 'center' : 'right', prio: 4 });
   return { x: E.x, y: hy };
 }
 /* just a rope: it runs from the rock up to Smooshy's hand, with the newtonmeter in the line */
 function lsDrawRope(c, riseNow) {
-  const cx = 360, by = LS_FLOOR - riseNow * 300;
-  lsLoadBox(c, cx, by, lsLoadLabel());
-  c.strokeStyle = GLC.rope; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(cx, by - 40); c.lineTo(cx, by - 76); c.stroke();
-  wsSpring(c, cx, by - 76, cx, by - 150, 'pull up'); wsLabel(c, 'just a rope', cx + 60, by - 20, WSC.steel2, 'left', [cx + 4, by - 56]);
+  const g = lsRopeGeo(riseNow), cx = g.cx, by = g.by, roped = lsJoined('load', 'end');
+  lsLoadBox(c, cx, by, lsLoadLabel(), roped);
+  if (roped) drawRopePx(c, g.load, g.end, 4, 0);
+  wsSpring(c, cx, by - 76, cx, by - 150, null); lsHookDot(c, g.end.x, g.end.y, roped);
+  lblAdd('pull up', cx + 16, by - 109, { size: 11, col: WSC.red, bg: '#fff', border: WSC.red, align: 'left', prio: 3 });
+  lblAdd('just a rope', cx + 60, by - 20, { size: 11, col: WSC.steel2, bg: '#fff', border: WSC.steel2, align: 'left', prio: 4 });
   return { x: cx, y: by - 150 };
 }
 function lsDrawMachine(c, cur, riseNow) { return WS.mach === 'lever' ? lsDrawLever(c, cur, riseNow) : lsDrawRope(c, riseNow); }
@@ -99,7 +126,7 @@ function lsDrawMachine(c, cur, riseNow) { return WS.mach === 'lever' ? lsDrawLev
 function lsOverlay(c) {
   if (!LS.on || !LS.o) return; const t = performance.now() / 1000, pulse = RMOTION ? .5 : .5 + .5 * Math.sin(t * 5), cur = WS.c || wsCalc();
   if (WS.mach === 'lever' && !WS.busy) {   // a dashed ring and arrows on the part you can drag
-    const G = lsLever(0, cur), p = lsGrab(G);
+    const G = lsLever(0, cur), p = lsGrab(G); lblAvoid(p.x, p.y, 34); lblAvoid(p.x, p.y + 35, 28);
     c.save(); c.strokeStyle = `rgba(255,226,138,${.55 + .4 * pulse})`; c.lineWidth = 2.5; c.setLineDash([6, 4]); c.beginPath(); c.arc(p.x, p.y, 33, 0, 7); c.stroke(); c.setLineDash([]);
     c.fillStyle = 'rgba(31,29,38,.7)'; c.beginPath(); c.roundRect(p.x - 27, p.y + 26, 54, 17, 8); c.fill(); txt(c, '◀ drag ▶', p.x, p.y + 35, '#ffe28a', `800 10px ${C.fb}`); c.restore();
   }
@@ -107,6 +134,7 @@ function lsOverlay(c) {
     const z = lsDropZone(); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${.6 + .4 * pulse})`; c.lineWidth = 3; c.setLineDash([7, 5]); c.beginPath(); c.roundRect(z.x0, z.y0, z.x1 - z.x0, z.y1 - z.y0, 12); c.stroke(); c.restore();
     c.fillStyle = `rgba(126,240,168,${.1 + .1 * pulse})`; c.beginPath(); c.roundRect(z.x0, z.y0, z.x1 - z.x0, z.y1 - z.y0, 12); c.fill(); wsLabel(c, 'Drop here', (z.x0 + z.x1) / 2, z.y0 - 12, '#2a7d48', 'center');
   }
+  if (LS.ropeLine) { drawRopePx(c, LS.ropeLine.a, LS.ropeLine.b, 3, 0); }
   if (LS.flash && performance.now() - LS.flash < 900) wsLabel(c, 'The lever goes under the rock', 360, 200, WSC.red, 'center');
   if (typeof CARDS !== 'undefined' && CARDS && CARDS.opt && CARDS.opt.lsPiece) lsGhost(c, CARDS.opt.lsPiece, CARDS.cards[CARDS.k].ghost, t);
 }
@@ -139,17 +167,26 @@ function lsBind() {
   cv.addEventListener('pointerdown', e => {
     if (!LS.on || S.scene !== 'shop' || WS.busy) return; const p = lsXY(e);
     if (LS.place) { const t = LS.place; LS.place = null; lsRender(); lsDrop(t, p.x, p.y); return; }
-    const h = lsHit(p); if (!h) { lsCloseMenu(); return; }
+    const dot = lsDotAt(p);
+    if (dot) { e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {} LS.drag = { what: 'rope', from: dot, p0: p, moved: false, id: e.pointerId }; return; }
+    const h = lsHit(p); if (!h) return;
     e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
     LS.drag = Object.assign({ p0: p, moved: false, id: e.pointerId }, h);
   });
   cv.addEventListener('pointermove', e => {
     const d = LS.drag; if (!d || e.pointerId !== d.id) return; const p = lsXY(e);
-    if (!d.moved && Math.hypot(p.x - d.p0.x, p.y - d.p0.y) < 5) return; if (d.what !== 'part') return; d.moved = true; lsCloseMenu();
+    if (!d.moved && Math.hypot(p.x - d.p0.x, p.y - d.p0.y) < 5) return;
+    if (d.what === 'rope') { d.moved = true; const A = lsEnds()[d.from]; LS.ropeLine = { a: { x: A.x, y: A.y }, b: p }; return; }
+    if (d.what !== 'part') return; d.moved = true;
     wsSet('arm', d.v0 + (p.x - d.x0) / LS_K);   // the same call the old slider made: it snaps to 0.05 m and keeps to the limits
   });
-  const up = e => { const d = LS.drag; if (!d || e.pointerId !== d.id) return; LS.drag = null; if (!d.moved) lsOpenMenu('lever'); };
-  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', () => { LS.drag = null; });
+  const up = e => { const d = LS.drag; if (!d || e.pointerId !== d.id) return; LS.drag = null; LS.ropeLine = null;
+    if (d.what === 'rope') { const to = lsDotAt(lsXY(e), d.from);
+      if (!d.moved) { if (WS.mach === 'lever') toast('The rock sits on the lever, so it needs no rope.'); return; }
+      if (to) { if (!lsRope(d.from, to)) toast(lsJoined(d.from, to) ? 'Those two are already roped.' : 'Those two don\'t go together. Rope the rock to the newtonmeter.'); else toast('✓ Roped!', 'ok'); }
+      else if (!lsUnrope(d.from)) toast('Drop the rope on another ◉ to join them.');
+      return; } };
+  cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', () => { LS.drag = null; LS.ropeLine = null; });
   /* drag straight from the tray onto the bench; a tap picks the piece up, then tap the rock */
   const tr = $('#lsTray');
   tr.addEventListener('pointerdown', e => { const a = e.target.closest('[data-lsadd]'); if (!a || a.disabled) return; const t = a.dataset.lsadd, x0 = e.clientX, y0 = e.clientY; LS.tdrag = false;
@@ -162,42 +199,43 @@ function lsBind() {
     const q = e.target.closest('[data-lsq]'); if (q) { lsShowCards(q.dataset.lsq); return; }
     const a = e.target.closest('[data-lsadd]'); if (a && !a.disabled && !LS.tdrag) { LS.place = LS.place === a.dataset.lsadd ? null : a.dataset.lsadd; tr.dataset.sig = ''; lsRender(); }
   });
-  const m = $('#lsMenu'); makeDraggable(m, '.glmhd', 'lsmenu');
-  m.addEventListener('click', e => { const b = e.target.closest('[data-lm]'); if (b) lsMenuAct(b.dataset.lm); });
+  const dk = $('#lsDock');
+  dk.addEventListener('click', e => { const b = e.target.closest('[data-lm]'); if (b) lsMenuAct(b.dataset.lm); const q = e.target.closest('[data-dk^="help:"]'); if (q) lsShowCards(q.dataset.dk.slice(5)); });
 }
+/* the rope end under a point (a hook ◉ within 18 units), apart from the one it started on */
+function lsDotAt(p, not) { const E = lsEnds(); let best = null, bd = 18; Object.keys(E).forEach(k => { if (k === not) return; const d = Math.hypot(E[k].x - p.x, E[k].y - p.y); if (d < bd) { bd = d; best = k; } }); return best; }
 function initLesson() { if ($('#lsTray')) lsBind(); }
 /* a piece dropped on the bench: the lever has to go under the rock (the glowing box) */
 function lsDrop(t, x, y) {
   if (t !== 'lever' || lsHas('lever')) return;
   if (!lsInZone(x, y)) { LS.flash = performance.now(); toast('Drop the lever under the rock. It glows where it goes.'); return; }
   wsSetMach('lever'); toast('✓ Lever under the rock!', 'ok'); lsRender();
-  if (!lsSeen().lever && !FAST) lsShowCards('lever'); else lsOpenMenu('lever');
+  if (!lsSeen().lever && !FAST) lsShowCards('lever');
 }
 
-/* ---------- the lever's menu: the same pop-up as the rescue's ---------- */
-function lsCloseMenu() { LS.menu = false; const m = $('#lsMenu'); if (m) m.hidden = true; }
-function lsOpenMenu(t, keep) {
-  const m = $('#lsMenu'); if (!m || t !== 'lever' || WS.mach !== 'lever') { if (!keep) lsCloseMenu(); return; }
-  const first = !LS.menu; LS.menu = { t };
+/* ---------- the docked settings panel: always the step's piece ---------- */
+function lsDockHTML() {
   const pm = (k, lab, val) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-lm="${k}-" aria-label="Less">−</button><b>${val}</b><button type="button" class="ghost sm" data-lm="${k}+" aria-label="More">+</button></div>`;
-  const lab = WS.cls === 1 ? 'Fulcrum' : WS.cls === 2 ? `${lsCap(WS.loadShort)} to fulcrum` : 'Hand to fulcrum';
-  const cls = WS.classPick ? `<div class="glrow wrap"><span>Set-up</span></div><div class="glrow wrap" style="margin-top:0">${[1, 2, 3].map(n => `<button type="button" class="ghost sm ${WS.cls === n ? 'on' : ''}" data-lm="cls${n}">${WS.clsNames ? `Class ${n}: ` : ''}${lsCap(WS_SETUP[n])}</button>`).join('')}</div>` : '';
-  m.innerHTML = `<div class="glmhd"><span aria-hidden="true">⠿</span> <b>Lever</b><button type="button" class="glx" data-lm="close" aria-label="Close">✕</button></div>${cls}${pm('arm', lab, fmt(WS.arm, 2) + ' m')}
-    <p class="glnote">Drag it on the bench, or use − and +. It moves 0.05 m at a time.</p>${lsLocked('lever') ? '' : '<div class="glrow"><button type="button" class="ghost sm" data-lm="del">🗑 Remove</button></div>'}`;
-  m.hidden = false;
-  if (first) { const r = lsCanvas().getBoundingClientRect(), G = lsLever(0, wsCalc()), x = r.left + (G.b.x + 20) * r.width / 900, y = r.top + 30 * r.height / WS_H;
-    m.style.left = clamp(x, 4, Math.max(4, innerWidth - m.offsetWidth - 4)) + 'px'; m.style.top = clamp(y, 4, Math.max(4, innerHeight - m.offsetHeight - 4)) + 'px'; }
+  if (WS.mach === 'lever') {
+    const lab = WS.cls === 1 ? 'Fulcrum' : WS.cls === 2 ? `${lsCap(WS.loadShort)} to fulcrum` : 'Hand to fulcrum';
+    const cls = WS.classPick ? `<div class="glrow wrap"><span>Set-up</span></div><div class="glrow wrap" style="margin-top:0">${[1, 2, 3].map(n => `<button type="button" class="ghost sm ${WS.cls === n ? 'on' : ''}" data-lm="cls${n}">${WS.clsNames ? `Class ${n}: ` : ''}${lsCap(WS_SETUP[n])}</button>`).join('')}</div>` : '';
+    return dkHTML({ icon: '⚖️', title: 'Lever', help: 'lever', body: `${cls}${pm('arm', lab, fmt(WS.arm, 2) + ' m')}<p class="glnote">Drag it on the bench, or use − and +. It moves 0.05 m at a time. The ${WS.loadShort} sits on the bar, so it needs no rope.</p>`, actions: lsLocked('lever') ? '' : '<button type="button" class="ghost sm" data-lm="del">🗑 Remove</button>' });
+  }
+  const roped = lsGate();
+  return dkHTML({ icon: '🪢', title: 'Just a rope', body: `<div class="glrow"><span>Rope</span><b class="dkrope ${roped ? 'ok' : 'no'}">${roped ? '✓ rock roped to the newtonmeter' : 'not roped yet'}</b></div><p class="glnote">The rope joins the ${WS.loadShort}'s ◉ to the newtonmeter in Smooshy's hand. Drag from one ◉ to the other to rope them, and drag a rope off to take it away.</p>`,
+    actions: roped ? '<button type="button" class="ghost sm" data-lm="unrope">✂ Take the rope off</button>' : '<button type="button" class="ghost sm" data-lm="rope">🪢 Rope the rock</button>' });
 }
 function lsMenuAct(k) {
-  if (k === 'close') return lsCloseMenu();
-  if (k === 'del') { if (!lsLocked('lever') && WS.allow.includes('hand')) { wsSetMach('hand'); lsCloseMenu(); lsRender(); } return; }
+  if (k === 'del') { if (!lsLocked('lever') && WS.allow.includes('hand')) { wsSetMach('hand'); lsRender(); } return; }
+  if (k === 'rope') { lsAutoRope('load', 'end'); return; }
+  if (k === 'unrope') { lsUnrope('load'); return; }
   if (k.startsWith('cls')) return wsSet('cls', +k.slice(3));
   if (k === 'arm-' || k === 'arm+') wsSet('arm', WS.arm + (k === 'arm+' ? 0.05 : -0.05));
 }
 
 /* ---------- first-time cards: three short cards with OK, and a ghost hand on the board (a "?" on each tray tile plays them again) ---------- */
 function lsShowCards(piece) {
-  const P = LS_PIECES[piece]; if (!P) return; lsCloseMenu();
+  const P = LS_PIECES[piece]; if (!P) return;
   showCards(P.cards.map(c => ({ html: `<p>${c.t}</p>`, ghost: c.ghost, hi: c.hi })), { title: `New piece: ${P.name}`, journal: false, nextLabel: 'OK', lsPiece: piece, onDone: () => { const s = lsSeen(); s[piece] = true; dbSet('lsSeen', s); lsAfterCards(); } });
 }
 /* after a step's own cards: the pieces already on the bench that this student has not met yet */

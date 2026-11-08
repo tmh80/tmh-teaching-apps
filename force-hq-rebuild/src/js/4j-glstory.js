@@ -48,7 +48,7 @@ function glEndText(sum) {
   const dent = why.length ? `The damage came from ${why.join(', ')}.` : '';
   if (sum.ending === 'spotless') return ['✨', 'Spotless rescue!', 'The tractor beam locks on and the Gumdrop lifts away without a single scratch. Smooshy climbs aboard, waves from the window, and the Big Jelly hums off across the plain. On the way up he spots the crystals on the crater rim glittering in the light of two moons.'];
   if (sum.ending === 'dented') return ['🛠️', 'Dented, but home!', `The tractor beam lifts the Gumdrop and Smooshy waves from the window, but the hull is scorched and cracked (${fmt(d.total || 0, 1)}% damage). ${dent} Another go can bring the damage down to zero.`];
-  return ['🔄', 'Not yet!', `${GL_STOP[sum.stop && sum.stop !== 'none' ? sum.stop : 'none'] || GL_STOP.none} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
+  return ['🔄', 'Not yet!', `${(sum.stop && sum.stop !== 'none' ? glStopText(sum.stop, sum.stopLeg) : '') || GL_STOP.none} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
 }
 function glShowEnding(sum, o) {
   if (!sum) return; o = o || {}; const [ic, ti, tx] = glEndText(sum);

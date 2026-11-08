@@ -7,13 +7,15 @@ const GL_STOP = { none: 'Nothing was ready to lift the Gumdrop. A machine needs 
   gap: 'The Gumdrop got stuck: the next machine wasn\'t waiting inside the glowing box, and the ship isn\'t level with the crest yet.',
   broken: 'One machine couldn\'t work as built, so the rescue stopped there. Tap the red part to see why.',
   heavy: 'That leg needed more than 180 N, far too much even with the thrusters roaring. Give it a bigger mechanical advantage.',
-  collapse: 'A platform buckled under too much weight! Its load is the Gumdrop plus every machine standing on it.' };
+  collapse: 'A platform buckled under too much weight! Its load is the Gumdrop plus every machine standing on it.',
+  norope: 'A machine wasn\'t roped to the Gumdrop, so nothing was pulling it. Drag a rope from the machine\'s ◉ to the Gumdrop\'s ◉.' };
+const glStopText = (why, leg) => why === 'norope' && leg != null ? `Leg ${leg + 1}'s machine isn't roped to the Gumdrop.` : GL_STOP[why] || '';
 const GL_END = { spotless: ['Spotless rescue!', 'The Gumdrop is safe without a single scratch.'], dented: ['Dented, but home!', 'Smooshy is safe, though the Gumdrop needs a little repair.'], notyet: ['Not yet!', 'Smooshy is still in the crater. Fix the part that stopped and run it again.'] };
 const glLegName = l => `${GL_NAME[l.type]}${l.type === 'ramp' ? ` ${fmt(l.m.L, 1)} m` : ''}${l.ropes > 1 ? `, ${l.ropes} ropes` : ''}${l.winches.length ? ', winch ' + l.winches.map(w => '×' + w).join(' ') : ''}`;
 function glSummary(r) {
   return { legs: r.legs.map(l => ({ type: l.type, name: glLegName(l), rise: +l.rise.toFixed(2), ma: +l.ma.toFixed(2), pull: +l.pull.toFixed(2), hand: +l.hand.toFixed(1), work: Math.round(l.work), stopped: !!l.stopped, thr: +(l.thruster || 0).toFixed(1) })),
     hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, total: +r.dmg.total.toFixed(1) },
-    boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, ending: r.score.ending, load: r.load };
+    boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, stopLeg: r.stop ? r.stop.leg : null, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, ending: r.score.ending, load: r.load };
 }
 /* ---------- the panel under the board ---------- */
 function glMountRun(host) {
@@ -21,7 +23,7 @@ function glMountRun(host) {
       <label for="glPLeg"><b>🖥️ Mission computer:</b> before you run it, pick one leg and predict Smooshy's pull on it.</label>
       <div class="row"><select id="glPLeg" aria-label="Which leg?"></select><input type="number" step="any" id="glPVal" aria-label="Your predicted pull" placeholder="pull" style="width:7em"> <b>N</b></div>
       <div class="glwork"><label for="glWork">Working (not marked)</label><textarea id="glWork" rows="2" placeholder="Write your working here: the MA of each part, multiplied, then the pull."></textarea></div></div>
-    <div class="row glrunrow"><button type="button" class="go" id="glRun">▶ Run Rescue</button><button type="button" class="ghost" id="glSkip" hidden>Skip to the end ▶▶</button><button type="button" class="ghost" id="glBack" hidden>🔧 Back to building</button><span class="scaleNote" id="glTries"></span></div>
+    <div class="row glrunrow"><button type="button" class="ghost" id="glSkip" hidden>Skip to the end ▶▶</button><button type="button" class="ghost" id="glBack" hidden>🔧 Back to building</button><span class="scaleNote" id="glTries"></span></div>
     <div id="glRes" aria-live="polite"></div></div>`;
   const st = glState(); $('#glWork').value = st.draftWork != null ? st.draftWork : (st.pred && st.pred.working) || '';
   const keepPred = () => { const s = dbGet('chal.' + GLB.ch, {}); s[GLB.mid] = Object.assign(s[GLB.mid] || {}, { draftPred: { leg: $('#glPLeg').value, value: $('#glPVal').value } }); dbSet('chal.' + GLB.ch, s); glRunPaint(); };
@@ -150,7 +152,7 @@ function glStartRun() {
   GLR.pred = legs.length ? { leg: +li, value: +v, working: $('#glWork').value } : null;
   GLR.beats = glBuildBeats(GLR.res, GLR.rig); GLR.total = GLR.beats.reduce((a, b) => a + b.dur, 0); GLR.t0 = performance.now(); GLR.on = true; GLR.done = false;
   GLB.sel = null; glCloseMenu(); $('#glSkip').hidden = false; $('#glBack').hidden = true; $('#glRun').disabled = true; $('.glboard').classList.add('running');
-  $('#glRes').innerHTML = ''; GLB.cv.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
+  $('#glRes').innerHTML = ''; $('.glarea').classList.add('running'); GLB.cv.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
   cancelAnimationFrame(GLB.raf); GLR.raf = requestAnimationFrame(glRunFrame);
 }
 /* the run is over: save it (best run counts), show the receipt, then the ending card if there is one */
@@ -168,14 +170,14 @@ function glFinishRun() {
   if (typeof glShowEnding === 'function') glShowEnding(sum, { first: firstRescue, better });
 }
 function glBackToBuild() {
-  GLR.on = false; cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); glRunPaint(); glLoop();
+  GLR.on = false; cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop();
 }
 function glShowResult(sum, pred, newBest) {
   const host = $('#glRes'); if (!host || !sum) return; const E = GL_END[sum.ending], f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
   const P = sum.pts, rows = sum.legs.map((l, i) => `<tr class="${l.stopped ? 'stop' : ''}"><td>${i + 1}</td><td>${esc(l.name)}</td><td>${f1(l.rise)} m</td><td>${fmt(l.ma, 1)}</td><td><b>${f1(l.pull)} N</b>${l.pull > 60 + 1e-9 ? ' 🔥' : ''}</td><td>${n0(l.hand)} m</td><td>${n0(l.work)} J</td></tr>`).join('');
   const pl = pred && sum.legs[pred.leg] ? `<p class="glpredfb">You predicted <b>${f1(pred.value)} N</b> for leg ${pred.leg + 1}. Smooshy's pull on it was <b>${f1(sum.legs[pred.leg].pull)} N</b>. ${Math.abs(pred.value - sum.legs[pred.leg].pull) <= Math.max(1, sum.legs[pred.leg].pull * 0.05) ? 'Spot on, engineer!' : 'Compare your working with the receipt below to see where the numbers split.'}</p>` : '';
   const pt = (lab, got, max, note) => `<li class="${got === max ? 'ok' : ''}"><span class="box">${got === max ? '✓' : ''}</span>${lab}: <b>${got} of ${max}</b>${note ? ` <small>${note}</small>` : ''}</li>`;
-  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of 10` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + GL_STOP[sum.stop] : ''}</p>${pl}
+  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of 10` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + glStopText(sum.stop, sum.stopLeg) : ''}</p>${pl}
     ${rows ? `<div class="gltab"><table><thead><tr><th>Leg</th><th>Machine</th><th>Rise</th><th>Total MA</th><th>Pull</th><th>Hand travel</th><th>Work</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="glnote">Work receipt: each leg's work = ${n0(sum.load)} N × its rise. Change the machines and only the pull and hand travel change; the work only changes when the rise does.</p>` : ''}
     <ul class="glsums"><li>Hand travel: <b>${n0(sum.hand)} m</b> of 1,500 m oxygen</li><li>Sugar crystals: <b>${sum.cost}</b> of 475</li><li>Final crest height: <b>${f1(sum.crest)} m</b></li><li>Total work: <b>${n0(sum.work)} J</b></li>

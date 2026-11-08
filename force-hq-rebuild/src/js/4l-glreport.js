@@ -4,7 +4,8 @@
 const GL_KEY_RIG = (() => {
   const parts = [{ id: 'bl', type: 'lever', role: 'boulder', x: 19, arm: 1, rise: 0.5, dir: 1 }, { id: 'rA', type: 'ramp', x1: 16, y1: 0, L: 24, rise: 6 }, { id: 'rB', type: 'ramp', x1: 40.76, y1: 6, L: 24, rise: 6 }, { id: 'd1', type: 'dyn', big: true, x: 68 }], cables = [];
   ['rA', 'rB'].forEach(m => { parts.push({ id: m + 'b', type: 'block', ropes: 4 }, { id: m + 'w', type: 'winch', ratio: 7 }); cables.push({ a: m, b: m + 'b' }, { a: m + 'b', b: m + 'w' }); });
-  return { parts, cables };
+  cables.push({ a: 'rA', b: 'ship' }, { a: 'rB', b: 'ship' });
+  return { v: 2, parts, cables };
 })();
 let GL_KEY_CACHE = null;
 function glKey() {
