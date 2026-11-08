@@ -158,3 +158,81 @@ Add `sugarcrystal` to the glossary ("Gummy money on Glimmer-9. You spend sugar c
 | 6 | Extension (p5a, p5b) and build tasks 1–4 converted; old bench code deleted | Sonnet, low effort |
 | 7 | Worksheets, offline file, docs and Project copies after stages 2, 4 and 6 | Haiku |
 | 8 | A fresh read of all changed student text | Opus, new agent |
+
+---
+
+# Refinements after Tom's play-through (8 Nov 2026, evening)
+
+These replace anything above that disagrees with them. Part 1 played well; the comments below came from Parts 4 and 5 and the story screens.
+
+## 9. The story guide (one story, from the home page to the rescue)
+
+Every screen, card, label and worksheet uses these names and this arc. Student text stays Grade 7–8, short and enthusiastic.
+
+- **Force HQ** is **GASA's Research and Development Centre**. GASA is the **Gummy Aeronautics and Space Agency**. Chapters 1 to 5 keep their arenas and content; only the home page framing changes.
+- **The student** is a new GASA engineer.
+- **Captain Smooshy** is a blue gummy bear astronaut (from the Grade 6 "Intergalactic Space Fluids" lab). His ship is **the Gumdrop**. It has crashed in a 15 m crater on **Planet Glimmer-9** (g = 4.2 N/kg). He is **safe inside the ship the whole time** and talks to GASA on a **live link from the Gumdrop**, seen through its round window. His squishy gummy arms pull 60 N at most. He only climbs out during the real rescue.
+- **The Workshop** (Parts 1 to 4 and the Extension) holds the **GASA Training Simulator**. Every Learn step's board is labelled "GASA TRAINING SIMULATOR · THE WORKSHOP" and has a faint blue simulator grid on the floor, in the builder's flat style.
+- **Mission Control** is a new building on the home map, next to the Workshop. Part 5 happens there. Its board is the **Rescue Simulator**, framed like the Mission Control screen in step v1 and labelled "GUMMY MISSION CONTROL · RESCUE SIMULATOR".
+- **The Big Jelly** is GASA's repair ship. Its tractor beam lifts the Gumdrop once it reaches the top of the crater.
+- **💎 Sugar crystals** are gummy money.
+- **The arc:** Smooshy's live call reaches Mission Control (the opening transmission) → GASA sends the student to train on the simulator in the Workshop (Parts 1 to 4) → at Mission Control the student designs a rescue, tests it in the simulator, does the maths, and sends it to GASA; once GASA approves the maths, the real rescue launches (Part 5) → the Extension helps gummy colonists build Gummy Base One with the sugar crystals.
+
+**Transmission (replaces the black box recording).** Header "📡 Incoming call · GASA Mission Control"; sub-header "Live from the Gumdrop · Planet Glimmer-9"; the animation ends on Smooshy inside the Gumdrop, waving through the window.
+- "Captain Smooshy here, the bravest gummy bear in the universe! The Grade 6 scientists at WAB found the Intergalactic Space Fluid that carried me to a galaxy thousands of light years away. Then disaster struck: the Gumdrop crashed into a deep crater on Planet Glimmer-9. I'm safe inside, but the ship won't budge."
+- "My squishy gummy arms can only pull with **60 N**, and the Gumdrop weighs thousands of newtons. GASA engineers, please train on the simulator in the Workshop, then plan a rescue to get me out. Over and out!"
+- Buttons: "↺ Watch the crash again" and "Accept the mission!". The mission brief that follows says "jobs stand between GASA and a happy gummy bear".
+
+**Rescue board** (top of every Chapter 6 page). Redrawn with the Part 5 art: the crater from the builder (`glDrawWorld` at board size), the Gumdrop with Smooshy in the window, the Big Jelly waiting. When Part 5 is done, the Gumdrop rises in the beam. The old toolkit pictures and the black box beacon go. Every slot is a button that opens its Part. Slots:
+- Part 1 "Lever training", next: "Next: Part 1 trains you on the lever in the simulator."
+- Part 2 "Toolkit training", next: "Next: Part 2 trains you on the crane gantry, pulley block, winch, ramp and screw jack."
+- Part 3 "Maths check ready", next: "Next: Part 3 teaches the maths GASA checks before it approves a mission."
+- Part 4 "Route training", next: "Next: Part 4 trains you to join machines into a route."
+- Part 5 "Smooshy saved!", next: "Next: Part 5 is the rescue, planned at Mission Control."
+- Extension "Gummy Base One built" (unchanged).
+
+**Live inset** (everywhere it appears): labelled "LIVE · THE GUMDROP"; shows Smooshy inside the Gumdrop's cabin, framed by the round window, with his moods and bubbles as now and the "60 N max!" note.
+
+**Home page.** Under the Force HQ title: "GASA Research and Development Centre". The map gains a **MISSION CONTROL** building beside the Workshop (a dome with a dish aerial, same art style), which opens Part 5 (`c6e`), or, while Part 5 is locked, says "Mission Control opens when you finish Part 4 in the Workshop." The Chapter 6 card: kicker "Chapter 6 · The Workshop and Mission Control", title "Save Captain Smooshy!", text "Captain Smooshy is stuck in a crater on Glimmer-9 with only 60 N of pull. Train on the GASA simulator in the Workshop, then plan his rescue at Mission Control." Chapter 6 blurb: "Simple and compound machines, mechanical advantage and work. Train on the GASA simulator, then plan Captain Smooshy's rescue at Mission Control."
+
+## 10. Shared builder changes (both lesson mode and the rescue)
+
+**Ropes to the load.** Every load (rock, crate, bucket, cart, car, engine block, generator, the Gumdrop) has a hook ◉. A machine only lifts a load when a rope joins its rope end (the crane's hook, a pulley block's lower hook, a ramp's top, a winch's drum) to the load's hook. Dropping a machine or block near a load snaps it into place and clips its rope on automatically, with the rope drawn; students can also drag the rope from ◉ to ◉, and drag it off again.
+- Lesson mode: pl1 starts with the crane gantry roped to the crate (1 rope); the student drops the pulley block on the crate's hook, and its rope runs up to the crane's hook. In pl3 the student joins the cart's hook to the top of the ramp.
+- Rescue: the Gumdrop's hook joins leg 1's machine. For later legs, the glowing box shows a **ghost Gumdrop** ("Gumdrop after leg 1") with its own hook: students drop the next machine by it (it snaps into place: a ramp's foot at the ship, a crane standing over it) and rope it to the ghost's hook. The ghost replaces the label "Start the next machine in here".
+- Model: a cable endpoint `'ship'` (the ship at the start of the leg it joins). A leg with no rope to the ship stops the run with a plain reason: "Leg 2's machine isn't roped to the Gumdrop." Saved rigs that worked before get the ropes added on load, so nobody's route breaks. Update `tests/rescue_routes.js` and `rescue_numbers.py` rigs.
+
+**Settings panel, docked.** No floating menus. Each piece's settings sit in a panel beside the board (below it on phones), titled with the piece's name and icon, with its "?" replay and 🗑 Remove. In lesson mode it always shows the step's piece without tapping (for the lever: the set-up choice and the fulcrum distance with − and +). In the rescue it shows the piece last tapped, or "Tap a machine to change it". Drag handles on the board are never covered.
+
+**Labels.** On the board: short weight labels on loads ("Gumdrop 6,300 N", "Boulder 252 N", "Crate 235 N") and the ghost Gumdrop's caption only. Rope counts, winch ratios and rises move to the settings panel and My working. Labels are placed so they never overlap each other or a drag handle, and fade while something is being dragged.
+
+**One drawing per piece.** Lesson mode and the rescue use the same drawing for each piece at different scales: the lever is a bar on a triangle fulcrum in both; crane gantry, pulley block, winch, ramp, screw jack and platforms likewise.
+
+**Platform rule.** A platform can't be dropped under a machine that's already placed: it shows red with "Move the machine first, then add the platform." Platforms are where the ship lands; a machine standing on a platform keeps working.
+
+**▶ inside the board.** The run button sits inside the board in the bottom-right corner (lesson mode: the Lift!/Pull!/Turn! button; rescue: ▶ Test in simulator).
+
+## 11. Part 5: design, test, check the maths, get approval, launch
+
+- **Route strip (My working)** above the board: one row per leg, filled in from the rig ("Leg 1: crane gantry + pulley block (4 ropes) + winch ×6 · up 4 m · lands on the medium platform ✓"), plus a Boulder row. Each leg row has inputs for each machine's MA, the total MA, Smooshy's pull, the hand distance and the work. Nothing is pre-calculated. Changing a machine clears that leg's inputs.
+- **💡 Hint on each leg row**, three tiers as the existing hint tree (tier 1 the formulas, tier 2 this leg's own numbers with blanks, tier 3 a worked example with different numbers). Each tier opened counts as a hint the first time (first hint free, then −1 point each, as `glScore` does now). The total hints used shows on the strip.
+- **▶ Test in simulator** (inside the board) runs the route quickly and shows where it worked or failed per leg ("Leg 2: too hard for Smooshy ✗", "Leg 3 isn't roped to the Gumdrop") with **no** leg numbers, so they can't be copied.
+- **📨 Send to GASA** (on the route strip, enabled once every leg row is filled in): GASA checks every number. Wrong cells are flagged and the message says which ("Mission not accepted yet: check leg 2's pull."). Students fix and resend as often as they like. A cell rejected twice is shown with its right value and working, marked "helped", and counts as a hint.
+- **Mission accepted 🚀**: the full rescue animation plays (Smooshy climbs out, works each machine, the Big Jelly's beam lifts the ship), then the result card (Spotless, Dented or Not yet).
+- **Score:** "Maths approved by GASA" is a scored objective alongside pull, oxygen, crystals and damage; hints (including "helped" cells) reduce the total. Attempting is enough to move on, and the Check is never blocked.
+- **Guided start (two legs):** the boulder lever; leg 1 (crane or ramp roped to the Gumdrop, pulley block, winch); then the ghost Gumdrop on the platform and leg 2's machine roped to it; then "Fill in your route strip and test it in the simulator." Skip allowed.
+- **My Rescue page** prints the route strip with ✓ and "helped" marks, the hints used and whether GASA approved.
+- **Part 4 (k3)** practises a two-leg route with a crate in the Training Simulator (ramp to a platform, then a crane roped to the crate on the platform), so the handover is not new in Part 5.
+
+## 12. Order (replaces section 7)
+
+| Stage | Job | Who |
+|---|---|---|
+| 2 | Shared builder changes (section 10) | Sonnet, medium effort, branch `reading-writing` |
+| 2b | Story and art (section 9) at the same time, in its own worktree on branch `story-art`, then merged | Sonnet, medium effort |
+| 2c | Opus looks at screenshots of every board and story screen together for consistency | Opus |
+| 3 | Parts 2–4 converted (with ropes to loads, simulator labels and the k3 two-leg practice) | Sonnet, medium effort |
+| 4 | Part 5 (section 11) | Sonnet, medium effort |
+| 5 | **Tom plays Parts 2–5** | Tom |
+| 6 | Extension and build tasks converted, old bench deleted; worksheets and docs | Sonnet low effort, then Haiku |
+| 7 | Fresh read of all changed student text | Opus, new agent |
