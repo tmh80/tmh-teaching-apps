@@ -200,11 +200,11 @@ const fixOrder = q => shuffled(q.fix.opts.map((_, i) => i), hashStr(q.id) + 11);
 const fixTol = f => f.tol != null ? f.tol : Math.max(0.6, Math.abs(f.ans) * 0.01);
 const fixNumOk = (q, raw, u) => { const f = q.fix, n = parseNum(raw); return !isNaN(n) && near(n, f.ans, fixTol(f)) && (!(f.units && f.units.length) || u === f.unit); };
 QT.fix = {
-  html(q, s) {
-    const v = (s && s.v) || {}, f = q.fix, U = f.units && f.units.length;
+  html(q, s, api) {
+    const v = (s && s.v) || {}, f = q.fix, U = f.units && f.units.length, D = api && api.draft ? api.draft.get() || {} : {}, dk = api && api.draft ? ` data-draft="${api.draft.key}"` : '';
     const lines = q.lines.map((t, i) => `<button type="button" class="fixline" data-l="${i}"><span class="fixn">${i + 1}</span><span class="fixt">${t}</span></button>`).join('');
     const part2 = f.kind === 'num'
-      ? `<div class="tq">${f.ask || 'Now correct it. Type the right answer.'}</div><div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your correction" value="${esc(s && s.done && v.fix != null ? v.fix : '')}">${U ? `<select class="unitsel" aria-label="Unit"><option value="">unit?</option>${f.units.map(u => `<option value="${esc(u)}"${s && s.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${f.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div>`
+      ? `<div class="tq">${f.ask || 'Now correct it. Type the right answer.'}</div><div class="numin"><input class="ansin" inputmode="decimal" autocomplete="off" aria-label="Your correction" value="${esc(s && s.done && v.fix != null ? v.fix : '')}">${U ? `<select class="unitsel" aria-label="Unit"><option value="">unit?</option>${f.units.map(u => `<option value="${esc(u)}"${s && s.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select><span class="unit"></span>` : `<span class="unit">${f.unit || ''}</span>`}<button type="button" class="ghost sm qchk">Check</button></div><label class="numwork"><span class="lbl">Working (optional, not marked)</span><textarea class="numworkin" rows="3" aria-label="Your working"${dk} data-dk="w" placeholder="Work out the right answer here, one line at a time">${esc((s && s.w != null) ? s.w : D.w || '')}</textarea></label>`
       : `<div class="tq">${f.ask || 'Now correct it. Choose the line that should replace it.'}</div><div class="opts rF">${fixOrder(q).map(i => `<button type="button" data-o="${i}">${f.opts[i]}</button>`).join('')}</div>`;
     return `<div class="fixbox"><div class="fixwho">${q.who ? esc(q.who) + '’s answer' : 'The answer'}</div>${lines}</div><div class="fix2"${v.line != null ? '' : ' hidden'}>${part2}</div>`;
   },
@@ -222,7 +222,7 @@ QT.fix = {
       if (!lineOk) parts.push(`The mistake was in line ${q.bad + 1}.`);
       if (!fixOk) parts.push(f.kind === 'num' ? (!isNaN(parseNum(vfix)) && near(parseNum(vfix), f.ans, fixTol(f)) ? `The number is right, but the unit should be ${f.unit}.` : `The right answer is ${fmt(f.ans, 2)} ${f.unit || ''}.`) : `The right line is ${qq(f.opts[f.a])}.`);
       const msg = (ok ? (q.ok || 'Spot on! You found the mistake and fixed it.') : 'Whoops! ' + parts.join(' ')) + ' ' + (q.why || '') + afterTxt(q);
-      api.answer({ line, fix: vfix }, ok, msg.replace(/\s+/g, ' ').trim(), { score: (lineOk ? 1 : 0) + (fixOk ? 1 : 0), u: u || undefined });
+      const wk = $('.numworkin', el); api.answer({ line, fix: vfix }, ok, msg.replace(/\s+/g, ' ').trim(), { score: (lineOk ? 1 : 0) + (fixOk ? 1 : 0), u: u || undefined, w: wk ? wk.value : undefined });
     };
     if (f.kind === 'num') {
       const go = () => {
@@ -231,6 +231,7 @@ QT.fix = {
         if (U && !u && !api.auto) { api.say('Choose a unit for your answer first.', 'no'); return; }
         finish(raw, fixNumOk(q, raw, u), u);
       };
+      if (api.draft) { const wk = $('.numworkin', el); if (wk) wk.addEventListener('input', e => { if (!api.locked()) api.draft.set('w', e.target.value, e.target); }); }   // the working box, saved like a number question's
       $('.qchk', el).addEventListener('click', go); $('.ansin', el).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
       api.reg({ blank: () => line == null, check: go });
     } else { api.reg({ blank: () => line == null, check: () => { if (line != null) finish(null, false); } }); el.addEventListener('click', e => { const b = e.target.closest('.rF [data-o]'); if (!b || api.locked() || line == null) return; const i = +b.dataset.o; finish(i, i === f.a); }); }
