@@ -1,6 +1,8 @@
 # Force HQ (rebuild): backlog
 
 ## Next milestones (from the rebuild brief)
+**NEXT (Saturday 14 Nov 2026): rebuild the Part 5 rescue on real pulling physics, per `docs/Workshop_Lesson_Mode_Spec.md` section 15.** The Workshop (Chapter 6) is closed to students (`WORKSHOP_OPEN = false`) until that is finished. Every other chapter is ready for class (Tom, 9 Nov 2026).
+
 **Now (3 Nov 2026): Chapter 6 is built in full: Parts 1 to 5, the optional Extension (`c6f`) and Build tasks bt1 to bt4, with the Explore Workshop scene. Tom to play Parts 4 and 5, the Extension and the Build tasks.** Next job: Explore "Draw what's happening now" (item 7 below).
 
 1. Tom and a colleague test Chapter 1 for information overload, then fix what they find.

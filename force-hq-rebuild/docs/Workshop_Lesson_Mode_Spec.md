@@ -265,7 +265,7 @@ Do these in stage 3, before converting Parts 2–4, so every converted step inhe
 2. **Part 3 `u3` (Work and the catch)** gets one new unmarked practice task after its existing ones: "Lift the crate 2 m, then move it 3 m across and set it down on the shelf. Did moving it across add any work?" with a one-tap reveal: "No. Work = force × distance moved *upwards* against its weight. Moving across adds no lifting work." No marks or ids change.
 3. **The Part 3 Challenge "Loading the Big Jelly" (y1–y3)** moves onto the shared builder. The Big Jelly sits on the launch pad at Force HQ, and each mission builds a crane from the tray, then lifts and trolleys the cargo into its hold. y1 is a crane plus a pulley block (the oxygen tank, 3 m up into the hatch). y2 stays a ramp (the fuel barrel onto the loading bay), with the crane not needed. y3 is a crane plus a winch (the spare engine, 2 m into the cargo bay). Each mission's targets, objectives, clues, marks and answers stay the same; only the board and the controls change, plus the set-down into the hold.
 4. **The Part 4 Challenge (h1–h3)** moves onto the shared builder too (a compound crane: gantry, pulley block and winch; h2 has a ramp-route option). Same targets and marks.
-5. **The `k3` two-leg practice** becomes: leg 1, the crane lifts the crate and the trolley sets it on a shelf; leg 2, a ramp from the shelf up to the platform. So a handover *from* a crane has been practised before Part 5.
+5. **The two-leg practice (now its own last step, `k4`, 9 Nov 2026)** becomes: leg 1, the crane lifts the crate and the trolley sets it on a shelf; leg 2, a ramp from the shelf up to the platform. So a handover *from* a crane has been practised before Part 5.
 6. **Part 5**: the crane's panel has Move across; the guided start mentions it in one line; the route strip maths doesn't change.
 
 **Story fixes in the same round.**
@@ -277,3 +277,25 @@ Do these in stage 3, before converting Parts 2–4, so every converted step inhe
 - y1, h1 and h2 say "the rocket". Change it to the Big Jelly (for example "up into the Big Jelly's hatch", "the Big Jelly's 200 kg nose cone", "onto the Big Jelly's deck").
 
 **Also in this round (stage 6 as planned):** Extension p5a/p5b and Build tasks 1–4 move onto the shared builder, then the old bench code is deleted.
+
+## 15. NEXT (Saturday 14 Nov 2026): the rescue on real pulling physics. The Workshop stays closed until this is done.
+
+**Tom's playtest (9 Nov):** "I've lifted it up and got it near the ramp, but I can't get the ramp next to the platform because then it doesn't count as the machine starting in the right place. I also can't place a platform over a lever, which seems odd. And when I place the ramp on the platform, since next to it won't work, it blocks the Gumdrop from moving. Very punishing of creative ideas and will result in students quitting or building the most boring thing they can. They should be able, theoretically, to just build a load of pulleys and drag the Gumdrop to the ship. That would wreck the Gumdrop and give a really bad score, but it should be possible with the physics. It should only be impossible if there is a big wall stopping it moving in the direction the rope is pulling it. Small walls or bumps, we should be able to drag the Gumdrop over at a small or large cost, depending on how much it's pulled over rough terrain and uneven builds."
+
+**Cause.** The rescue model (`4f-gummylift.js`, about 220 lines) is a strict chain of legs. Each machine must start inside a 3 m × 0.5 m handover box (`GL.hzX`, `GL.hzY`, `inZone`). Pieces block by overlap rules, and the Gumdrop never moves except along a machine's own path.
+
+**The plan Tom agreed (build on Saturday):**
+1. **The Gumdrop is a body pulled by ropes.** Any machine whose rope reaches the Gumdrop can pull it, in the direction of its rope. It slides, rolls or lifts over the ground, platform tops and ramp surfaces. The handover box goes: whatever the Gumdrop rests on, the next rope picks it up.
+2. **Only real walls stop it.** A step taller than about 1 m, or a near-vertical face, in the direction of the pull. Smaller bumps, lumpy builds and the edges of pieces can be dragged over.
+3. **Pull needed = slope part + friction part.** Dragging on rough crater ground needs a bigger pull than rolling up a smooth ramp; lifting on a crane has no friction. Each leg's force comes from the simulator.
+4. **Hull damage**, a new scored objective. Dragging over rough ground and bumps scrapes the hull: the more distance dragged and the rougher the ground, the more damage. Crane lifts and smooth ramps do none. "Lots of pulleys, drag it out" works but scores badly.
+5. **Pieces only block as walls.** A platform may sit over a lever. A ramp resting on a platform doesn't block the Gumdrop: it can roll from the platform onto the ramp.
+6. **GASA maths stays at Year 7–8 level.** For a dragging leg, the route strip gives the force ("Dragging here needs 2,100 N"); students still do MA, effort = force ÷ MA, hand distance and work. No friction maths for students.
+7. **Keep:** Smooshy's 60 N limit, sugar crystals, oxygen, the route strip, hints, Send to GASA, the launch, the guided start (rewrite it for the new rules), the report. Old saved rigs must still load (glMigrate).
+8. **Tests:** the existing rescue route tests are rewritten. A new test proves a drag-only route reaches the beam with heavy hull damage; a wall stops a drag; a ramp beside a platform hands over; a platform over a lever is allowed.
+
+**Not affected:** Parts 1 to 4, the Challenges and the Check keep their numbers and marks, because they don't use this engine.
+
+**When it's done:** set `WORKSHOP_OPEN = true` in `src/js/20-shell.js`, rebuild, and Tom plays Part 5 again.
+
+**Estimate:** 2 to 3 hours of builder time. Use one Sonnet agent with this section as the brief, and Opus to review screenshots.
