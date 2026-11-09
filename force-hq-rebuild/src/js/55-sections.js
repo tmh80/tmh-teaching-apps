@@ -75,7 +75,7 @@ const SECTIONS = [
     vocab: ['mechanical advantage', 'work', 'joule'] },
   { id: 'c6d', ch: 'c6', n: 6, title: 'Compound machines', part: 'Part 4', stamp: 'Master Builder',
     blurb: 'Join simple machines into a crane and multiply their mechanical advantages, then use the machine builder to plan three jobs for the rescue kit.',
-    steps: ['k1', 'k2', 'k3'], challenge: ['h1', 'h2', 'h3'], review: ['c6r18', 'c6r19', 'c6r20', 'c6r21', 'c6r22'], needs: 'c6c',
+    steps: ['k1', 'k2', 'k3', 'k4'], challenge: ['h1', 'h2', 'h3'], review: ['c6r18', 'c6r19', 'c6r20', 'c6r21', 'c6r22'], needs: 'c6c',
     chalInfo: { title: 'Build the rescue kit', intro: 'The rescue kit needs three jobs done in the Workshop. Each one needs a compound machine. Plan it with the numbers, then test it. Every job has an effort limit, a cable limit and a hand-travel limit.' },
     goal: 'Describe a compound machine as two or more simple machines working together; find the total mechanical advantage by multiplying; work out the effort and the hand travel for a compound machine; build a machine that meets limits on effort, cable and hand travel.',
     vocab: ['compound machine', 'simple machine', 'mechanical advantage', 'winch', 'pulley'] },
@@ -92,7 +92,7 @@ const SECTIONS = [
     goal: 'Explain that friction turns some of the work put into a real machine into heat; calculate efficiency as useful work out ÷ work in × 100%; compare the efficiency of different machines and choose one that is strong enough and wastes little energy.',
     vocab: ['friction', 'wasted energy', 'efficiency', 'lubricant', 'terraform'] }
 ].filter(s => WORKSHOP_OPEN || s.ch !== 'c6');
-const STEPMIN = { sk1: 7, sk2: 6, s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5, u1: 4, u2: 4, u3: 5, k1: 4, k2: 5, k3: 5, v1: 4, p5a: 6, p5b: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2, graph: 3, mark: 2, para: 3 };
+const STEPMIN = { sk1: 7, sk2: 6, s0: 3, s4: 3, s9: 3, s10: 4, i1: 3, i4: 3, x1: 3, x2: 4, a1: 3, a3: 3, a5: 3, a6: 5, e1: 3, e2: 3, f1: 3, f2: 4, f3: 4, f4: 3, f5: 5, g1: 4, g2: 4, d1: 4, d2: 5, d3: 4, d4: 5, p1: 4, p2: 5, p3: 3, lv1: 5, lv2: 5, lv3: 5, lv4: 5, lv5: 4, pl1: 6, pl2: 4, pl3: 4, pl4: 5, u1: 4, u2: 4, u3: 5, k1: 4, k2: 5, k3: 5, k4: 6, v1: 4, p5a: 6, p5b: 5 }, QMIN = { mcq: .5, tap: .5, tick: 1, num: 1.5, reading: 1, gap: 1, match: 1.5, sort: 1.5, table: 2, fbd: 3.5, desk: 3.5, explain: 3, order: 1.5, calcorder: 3, pick: 1, reason: 1, fix: 1.5, freeze: 3, spot: 1, sketch: 2, graph: 3, mark: 2, para: 3 };
 CHDATA.c1.review.push({ id: 'r12', obj: ['Aii'], seed: '1', type: 'mcq', p: 'On a free-body diagram drawn to scale, a 600 N weight arrow is 3 cm long. How long should the arrow for a 200 N pull be?', opts: ['1 cm', '2 cm', '3 cm', '6 cm'], a: 0, work: '600 N is 3 cm, so every 200 N is 1 cm. A 200 N force gets an arrow 1 cm long.', why: { 1: 'Work out how many newtons each centimetre stands for first.', 2: 'A smaller force needs a shorter arrow.', 3: 'A smaller force needs a shorter arrow, not a longer one.' } });
 SECTIONS.forEach(sec => {
   const C = CHDATA[sec.ch];

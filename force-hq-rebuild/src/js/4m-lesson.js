@@ -29,12 +29,12 @@ const lsLocked = t => !!(LS.o && (LS.o.lock || []).includes(t));
 const lsCanvas = () => $('#cvScene');
 function lessonStage(o) {
   shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LS.cardQ = []; LS.used = null; LS.needKey = ''; LAB.pullGate = lsGate;
-  LS.pl = {}; (LS.o.pre || []).forEach(t => { LS.pl[t] = true; }); LS.stage = 'main'; LS.two = null; LS.cabBy = {}; LS.cabMain = null; LS.flashMsg = null; LS.across = 0; LS.adir = 0;
+  LS.pl = {}; (LS.o.pre || []).forEach(t => { LS.pl[t] = true; }); LS.stage = 'main'; LS.two = null; LS.run = null; LS.cabBy = {}; LS.cabMain = null; LS.flashMsg = null; LS.across = 0; LS.adir = 0;
   if (WS.mach === 'pulley' && !LS.pl.block && LS.o.tray.includes('block')) WS.ropes = 1;   // no pulley block on the bench yet: the crane alone gives 1 rope
   const cv = lsCanvas(); if (cv) cv.style.touchAction = 'none';
   lsRender();
 }
-function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.pl = {}; LS.stage = 'main'; LS.two = null; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); ndApply([], [$('#lsTray'), $('#lsDock')]); }
+function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.pl = {}; LS.stage = 'main'; LS.two = null; LS.run = null; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); ndApply([], [$('#lsTray'), $('#lsDock')]); }
 
 /* ---------- the tray and the status line ---------- */
 function lsRender() {

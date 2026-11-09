@@ -12,7 +12,7 @@ fails = []
 def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
     if not cond: fails.append(name)
-STEPS = [('c6a', 0, 'lv1'), ('c6a', 1, 'lv2'), ('c6a', 2, 'lv3'), ('c6a', 3, 'lv4'), ('c6a', 4, 'lv5'), ('c6b', 0, 'pl1'), ('c6b', 1, 'pl2'), ('c6b', 2, 'pl3'), ('c6b', 3, 'pl4'), ('c6c', 0, 'u1'), ('c6c', 1, 'u2'), ('c6c', 2, 'u3'), ('c6d', 0, 'k1'), ('c6d', 1, 'k2'), ('c6d', 2, 'k3')]
+STEPS = [('c6a', 0, 'lv1'), ('c6a', 1, 'lv2'), ('c6a', 2, 'lv3'), ('c6a', 3, 'lv4'), ('c6a', 4, 'lv5'), ('c6b', 0, 'pl1'), ('c6b', 1, 'pl2'), ('c6b', 2, 'pl3'), ('c6b', 3, 'pl4'), ('c6c', 0, 'u1'), ('c6c', 1, 'u2'), ('c6c', 2, 'u3'), ('c6d', 0, 'k1'), ('c6d', 1, 'k2'), ('c6d', 2, 'k3'), ('c6d', 3, 'k4')]
 def fresh(pg, vp=None, fast=True, seen=False):
     pg.set_viewport_size(vp or {'width': 1440, 'height': 900}); pg.goto(F); pg.evaluate('localStorage.clear()'); pg.goto(F); pg.wait_for_timeout(300); pg.fill('#whoName', 'Sam'); pg.click('#whoGo'); pg.evaluate("__fhq.dbSet('tourDone',true)")
     if seen: pg.evaluate("__fhq.dbSet('lsSeen',{lever:true,crane:true,block:true,winch:true,ramp:true,jack:true,cables:true,platform:true})")
@@ -87,11 +87,11 @@ with sync_playwright() as p:
     chk('lv1: after the first lift and its answer, the lever tile throbs', throbbing(pg) == ['lever'], throbbing(pg)); scroll_board(); both('lv1_lever_next')
     fresh(pg, seen=True); step(pg, 'c6a', 0); scroll_board(); both('lv1_start')
     fresh(pg, seen=True); step(pg, 'c6d', 1); scroll_board(); both('k2_start')
-    # the k3 two-leg practice
-    fresh(pg, seen=True); step(pg, 'c6d', 2); ev("S.flags.k3built=true"); ev("lsTwoStart()"); pg.wait_for_timeout(400)
-    chk('k3 two-leg practice: the crane tile throbs first (leg 1)', throbbing(pg) == ['crane'], throbbing(pg)); ev("LS.two.crane=true;lsRope('c','ch');lsRender()"); pg.wait_for_timeout(300)
-    chk('k3 two-leg practice: then Move across (+)', throbbing(pg) == ['across+'], throbbing(pg)); ev("LS.across=3;lsRender()"); pg.wait_for_timeout(300)
-    chk('k3 two-leg practice: then the ramp tile (leg 2)', throbbing(pg) == ['ramp'], throbbing(pg))
+    # the k4 two-leg practice
+    fresh(pg, seen=True); step(pg, 'c6d', 3); pg.wait_for_timeout(400)
+    chk('k4 two-leg practice: the crane tile throbs first (leg 1)', throbbing(pg) == ['crane'], throbbing(pg)); ev("LS.two.crane=true;lsRope('c','ch');lsRender()"); pg.wait_for_timeout(300)
+    chk('k4 two-leg practice: then the 1.5 m lift height', throbbing(pg) == ['lift:1.5'], throbbing(pg)); ev("WS.lift=1.5;lsRender()"); pg.wait_for_timeout(300); chk('k4 two-leg practice: then Move across (+)', throbbing(pg) == ['across+'], throbbing(pg)); ev("LS.across=3;lsRender()"); pg.wait_for_timeout(300)
+    chk('k4 two-leg practice: then the ramp tile (leg 2)', throbbing(pg) == ['ramp'], throbbing(pg)); ev("LS.two.ramp=true;lsRope('g','rt');lsRender()"); pg.wait_for_timeout(300); chk('k4 two-leg practice: then Run both legs!', throbbing(pg) == ['two:run'], throbbing(pg))
     # more steps in order: pl2, u1 and k2 go crane -> block/winch
     fresh(pg, seen=True); step(pg, 'c6d', 1); scroll_board(); tray_drop('crane', zc('crane')); chk('k2: after the crane the block throbs', throbbing(pg) == ['block'], throbbing(pg))
     e = J("lsEnds()")['top']; tray_drop('block', (e['x'], e['y'])); chk('k2: then the winch', throbbing(pg) == ['winch'], throbbing(pg))

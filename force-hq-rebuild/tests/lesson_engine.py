@@ -253,18 +253,20 @@ with sync_playwright() as p:
     rope('load', 'top'); tray_drop('block', end('top')); tray_drop('winch', zc('winch')); dk('bw:4')
     chk('k3: ramp, block (2 ropes) and winch ×4, roped', ev("[WS.br, WS.bn, WS.bw, lsGate()]") == [6, 2, 4, True], ev("[WS.br, WS.bn, WS.bw, lsGate(), JSON.stringify(LS.cab)]"))
     pull(); chk('k3: the old task check (bw 4, bn 2, br 6) passes', task(0) and task(2)); run_equals('k3 ramp route', "wsSet('br',6);wsSet('bn',2);wsSet('bw',4)"); both('k3_ramp')
-    dk('two:start'); pg.wait_for_timeout(200)
-    chk('k3 practice: the two-leg board, the ▶ button hidden, a crane and a ramp in the tray (crane first)', ev("LS.stage") == 'two' and not pg.locator('#wsPull').is_visible() and pg.locator('#lsTray [data-lsadd=ramp]').is_visible() and pg.locator('#lsTray [data-lsadd=crane]').is_visible() and ev("document.querySelector('#lsTray [data-lsadd]').dataset.lsadd") == 'crane')
-    tray_drop('ramp', (400, 250)); chk('k3 practice: a ramp before leg 1 is refused', ev("!!LS.two.ramp") is False)
-    tray_drop('crane', zc('crane')); chk('k3 practice: the crane goes in the box over the crate and is roped to it', ev("[!!LS.two.crane, lsJoined('c','ch')]") == [True, True])
-    chk('k3 practice: Move across is in the panel, 0 m to start', 'Move across' in pg.inner_text('#lsDock') and ev("lsTwoAcross()") == 0)
-    dk('across+'); dk('across+'); dk('across+'); dk('across+'); chk('k3 practice: 4 taps of + is 2 m across: not on the shelf yet, so leg 2 is refused', ev("[lsTwoAcross(), lsTwoAcrossOk()]") == [2, False] or ev("[lsTwoAcross(), lsTwoAcrossOk()]") == [2, True])
-    dk('across+'); dk('across+'); chk('k3 practice: 3 m across puts the crate on the shelf', ev("[lsTwoAcross(), lsTwoAcrossOk()]") == [3, True], ev("[lsTwoAcross(), lsTwoAcrossOk()]"))
-    dk('adir:-1'); chk('k3 practice: Left sends it the wrong way (3 m left, nothing to set it on)', ev("[lsTwoAcross(), lsTwoAcrossOk()]") == [-3, False]); dk('adir:1'); chk('k3 practice: Right turns it back', ev("lsTwoAcrossOk()") is True)
-    both('k3_leg1'); tray_drop('ramp', zc('ramp')); chk('k3 practice: the ramp goes in the box on the shelf', ev("!!LS.two.ramp") is True)
-    chk('k3 practice: not finished until the crate on the shelf is roped to the ramp', ev("lsK3Done()") is False)
-    rope('g', 'rt'); chk('k3 practice: roping the crate on the shelf to the ramp finishes it', ev("lsK3Done()") is True and task(5), ev("lsK3Done()")); both('k3_two_legs')
-    dk('two:back'); chk('k3 practice: back to the generator keeps its set-up', ev("[LS.stage, WS.br, WS.bn, WS.bw, JSON.stringify(LS.cab)]")[:4] == ['main', 6, 2, 4])
+    chk('k3: no Two-leg button any more (the practice is its own step, k4)', pg.locator('[data-lm="two:start"]').count() == 0 and 'Two-leg' not in pg.inner_text('#lsDock'))
+    # ----- k4: the two-leg practice, its own step -----
+    start(pg, {'width': 1440, 'height': 900}, 3, 'c6d'); pg.wait_for_timeout(200)
+    chk('k4: the two-leg board, the in-board ▶ hidden, a crane and a ramp in the tray (crane first), Run both legs! in the panel', ev("LS.stage") == 'two' and not pg.locator('#wsPull').is_visible() and pg.locator('#lsTray [data-lsadd=ramp]').is_visible() and ev("document.querySelector('#lsTray [data-lsadd]').dataset.lsadd") == 'crane' and 'Run both legs' in pg.inner_text('#lsDock'))
+    tray_drop('ramp', (400, 250)); chk('k4: a ramp before leg 1 is refused', ev("!!LS.two.ramp") is False)
+    tray_drop('crane', zc('crane')); chk('k4: the crane goes in the box over the crate and is roped to it', ev("[!!LS.two.crane, lsJoined('c','ch')]") == [True, True])
+    chk('k4: Move across and Lift height are in the panel, 0 m to start', 'Move across' in pg.inner_text('#lsDock') and 'Lift height' in pg.inner_text('#lsDock') and ev("lsTwoAcross()") == 0)
+    dk('lift:1.5'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); chk('k4: 2 m across is on the shelf but the ramp would start too far away', ev("[lsTwoAcross(), lsTwoAcrossOk(), lsTwoGapOk()]") == [2, True, False], ev("[lsTwoAcross(), lsTwoAcrossOk(), lsTwoGapOk()]"))
+    dk('across+'); dk('across+'); chk('k4: 3 m across puts the crate on the shelf', ev("[lsTwoAcross(), lsTwoAcrossOk()]") == [3, True], ev("[lsTwoAcross(), lsTwoAcrossOk()]"))
+    dk('adir:-1'); chk('k4: Left sends it the wrong way (3 m left, nothing to set it on)', ev("[lsTwoAcross(), lsTwoAcrossOk()]") == [-3, False]); dk('adir:1'); chk('k4: Right turns it back', ev("lsTwoAcrossOk()") is True)
+    both('k4_leg1'); tray_drop('ramp', zc('ramp')); chk('k4: the ramp goes in the box on the shelf', ev("!!LS.two.ramp") is True)
+    chk('k4: the build is not finished until the crate on the shelf is roped to the ramp', ev("lsK3Done()") is False)
+    rope('g', 'rt'); chk('k4: roping the crate on the shelf to the ramp finishes the build (k3two)', ev("lsK3Done()") is True and task(2), ev("lsK3Done()")); both('k4_two_legs')
+    chk('k4: the run is still to do', task(3) is False)
     # ----- first-time cards for every new piece (FAST off), and the ? replays -----
     CARDS = {'crane': ('c6b', 0, 'This is a crane gantry: a tall frame with a hook at the top.'), 'block': ('c6b', 0, 'A pulley block is a set of wheels that hangs from a hook.'), 'winch': ('c6b', 1, 'A winch is a wheel and axle. The rope wraps round the small axle, and Smooshy turns the big handle.'),
              'ramp': ('c6b', 2, 'A ramp lets you push or pull a load up a slope instead of lifting it straight up.'), 'jack': ('c6b', 3, 'A screw jack is a ramp wrapped round a pole, called a thread.'), 'cables': ('c6d', 1, 'Machines can work together. Every machine has a ◉ dot where its rope comes out.')}
@@ -282,7 +284,7 @@ with sync_playwright() as p:
     start(pg, {'width': 1440, 'height': 900}, 0, 'c6b'); pg.locator('#lsTray [data-lsq=block]').click(); pg.wait_for_timeout(200); chk('cards: the ? on the tray tile plays them again (pulley block)', pg.locator('#chunk').is_visible() and 'new piece: pulley block' in pg.locator('#chunk').inner_text().lower()); pg.locator('#chunk .cx').click(); ev("FAST=true")
     pg.locator('#lsDock [data-dk="help:block"]').dispatch_event('click'); pg.wait_for_timeout(200); chk('cards: the ? in the panel plays them too', pg.locator('#chunk').is_visible()); pg.locator('#chunk .cx').click()
     # phone screenshots and the per-step screenshots at 390 x 844
-    for sec, st, nm in [('c6b', 0, 'pl1'), ('c6b', 1, 'pl2'), ('c6b', 2, 'pl3'), ('c6b', 3, 'pl4'), ('c6c', 0, 'u1'), ('c6c', 1, 'u2'), ('c6c', 2, 'u3'), ('c6d', 0, 'k1'), ('c6d', 1, 'k2'), ('c6d', 2, 'k3')]:
+    for sec, st, nm in [('c6b', 0, 'pl1'), ('c6b', 1, 'pl2'), ('c6b', 2, 'pl3'), ('c6b', 3, 'pl4'), ('c6c', 0, 'u1'), ('c6c', 1, 'u2'), ('c6c', 2, 'u3'), ('c6d', 0, 'k1'), ('c6d', 1, 'k2'), ('c6d', 2, 'k3'), ('c6d', 3, 'k4')]:
         start(pg, {'width': 390, 'height': 844}, st, sec); pg.wait_for_timeout(250); shot(nm + '_start', True)
 
     # ---------- Part 5: Mission Control ----------

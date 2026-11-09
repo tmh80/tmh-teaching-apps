@@ -64,7 +64,7 @@ with sync_playwright() as p:
     for _ in range(8): pg.click('#glDock [data-gm="across+"]')
     cid = E('GLB.sel'); part = json.loads(E('JSON.stringify(glPart(GLB.sel))'))
     chk('Move across steps in 0.5 m: Left then 8 taps is 4 m left, lift 2 m', part.get('across') == -4 and part['rise'] == 2, part)
-    chk("the panel says 4 m left", "4 m left" in pg.locator("#glDock").inner_text(), pg.locator("#glDock").inner_text())
+    chk("the panel says 4 m (Left is on the button, not in the number)", "4 m" in pg.locator("#glDock").inner_text() and "4 m left" not in pg.locator("#glDock").inner_text(), pg.locator("#glDock").inner_text())
     pg.click('#glDock [data-gm="dirR"]'); chk('Right turns it round to 4 m right', json.loads(E('JSON.stringify(glPart(GLB.sel))'))['across'] == 4)
     pg.click('#glDock [data-gm="dirL"]'); chk('Left turns it back', json.loads(E('JSON.stringify(glPart(GLB.sel))'))['across'] == -4)
     pg.click('#glTray [data-add=platL]'); sx, sy, LW, LH = E('[glSX(10),glSY(3),GLV.LW,GLV.LH]'); pg.mouse.click(bb['x'] + sx * bb['width'] / LW, bb['y'] + sy * bb['height'] / LH); pg.wait_for_timeout(200)

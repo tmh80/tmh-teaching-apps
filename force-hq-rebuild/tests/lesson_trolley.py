@@ -1,4 +1,4 @@
-"""Lesson mode and the crane trolley (spec section 14): the u3 unmarked practice task with its reveal, and the k3 two-leg practice (crane, then ramp).
+"""Lesson mode and the crane trolley (spec section 14): the u3 unmarked practice task with its reveal, and the k4 two-leg practice (crane, then ramp).
 Run after build.py:  python3 tests/lesson_trolley.py     Screenshots: /tmp/fhq-shots/trolley/"""
 import json, pathlib
 from playwright.sync_api import sync_playwright
@@ -53,12 +53,12 @@ with sync_playwright() as p:
     t = pg.inner_text('#rail .tkrev'); chk('u3: one tap shows "No. Work = force × distance moved upwards against its weight. Moving across adds no lifting work."', t.startswith('No. Work = force × distance moved upwards against its weight. Moving across adds no lifting work.'), t)
     chk('u3: now the task ticks', task(last) is True)
     # ---------- k3: crane, then ramp (screenshot of leg 1 and the finished route) ----------
-    start('c6d', 'k3'); ev("S.flags.k3built=true"); ev("lsTwoStart()"); pg.wait_for_timeout(300)
-    tray_drop('crane', zc('crane')); dk('across+'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); pg.wait_for_timeout(200)
-    chk('k3: leg 1 is set (crane over the crate, 3 m across onto the shelf)', ev("lsTwoLeg1()") is True)
+    start('c6d', 'k4'); pg.wait_for_timeout(300)
+    tray_drop('crane', zc('crane')); dk('lift:1.5'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); pg.wait_for_timeout(200)
+    chk('k4: leg 1 is set (crane over the crate, 3 m across onto the shelf)', ev("lsTwoLeg1()") is True)
     tray_drop('ramp', zc('ramp')); drag(end('g'), end('rt')); pg.wait_for_timeout(200)
-    chk('k3: crane then ramp saves k3two', ev("lsK3Done() && dbGet('k3two', false)") is True)
-    pg.screenshot(path=OUT + '05_k3_crane_then_ramp.png')
+    chk('k4: crane then ramp saves k3two (built); the run is still to do', ev("lsK3Done() && dbGet('k3two', false) && !dbGet('k4run', false)") is True)
+    pg.screenshot(path=OUT + '05_k4_crane_then_ramp.png')
     chk('no page errors', not errs, errs)
     b.close()
 print('lesson trolley:', 'ALL PASS' if not fails else f'{len(fails)} FAIL'); print('errors', errs)
