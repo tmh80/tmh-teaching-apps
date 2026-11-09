@@ -226,7 +226,7 @@ function glPaintDock() {
     if (!roped && !faults.length) fb = GL_FAULT.norope + (fb ? ' ' + fb : ''); }
   if (p.type === 'ramp') { title = 'Ramp'; icon = '📐'; body = pm('L', 'Length', `${fmt(p.L, 1)} m`) + `<p class="glnote">Drag the round handle at the top to make it longer or steeper.</p>` + body; }
   else if (p.type === 'crane') { title = 'Crane gantry'; icon = '🏗️'; const ac = p.across || 0, ad = p.adir || (ac < 0 ? -1 : 1);
-    body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`) + pm('across', 'Move across', ac ? `${fmt(Math.abs(ac), 1)} m ${ac < 0 ? 'left' : 'right'}` : '0 m')
+    body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`) + pm('across', 'Move across', ac ? `${fmt(Math.abs(ac), 1)} m` : '0 m')
       + `<div class="glrow"><span>Direction</span><button type="button" class="ghost sm ${ad < 0 ? 'on' : ''}" data-gm="dirL">Left</button><button type="button" class="ghost sm ${ad > 0 ? 'on' : ''}" data-gm="dirR">Right</button></div>`
       + `<p class="glnote">${ac ? 'The trolley carries the load across, then sets it down on the glowing spot. Carrying it across adds no lifting work.' : 'The trolley rolls along the top beam. Move across, then it sets the load down on a shelf or platform.'}</p>` + body; }
   else if (p.type === 'jack') { title = p.role === 'boulder' ? 'Screw jack (on the boulder)' : 'Screw jack'; icon = '🔩'; body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`); }
