@@ -995,3 +995,6 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 
 .glclearask{margin:6px 0;padding:8px 12px;border:2px solid var(--hazard);border-radius:10px;background:var(--hazard-soft);align-items:center;gap:8px}
 .glrunctl{position:absolute;right:8px;top:36px;z-index:4;display:flex;gap:6px}.glrunctl[hidden]{display:none}.glrunctl .ghost{background:rgba(255,255,255,.92)}
+
+.twostep { display: block; margin-top: 6px; font-size: .86em; font-weight: 600; color: #5a4a12; background: #fff7dc; border-left: 3px solid #e2b33c; padding: 4px 8px; border-radius: 4px; }
+:root[data-theme="dark"] .twostep { color: #f3e2a8; background: #3a3218; }

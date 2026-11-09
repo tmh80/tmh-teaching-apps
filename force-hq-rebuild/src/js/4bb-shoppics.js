@@ -294,3 +294,14 @@ function picLube() {
   b += picLabs([picLabel(115, 109, 100, 40, ['Lubricant', 'a thin layer of oil or grease'], '#b07d00', { W }), picNote(115, 186, ['Moving parts slide past each other', 'with less friction'], PIC_C.E, { W }), picNote(300, 164, ['an oil can'], PIC_C.ink, { all: true, W })]);
   return picWrap(W, 206, 'A layer of oil between two metal parts rubbing past each other, and an oil can, show how a lubricant reduces friction', b, '', 400);
 }
+/* Two steps to the effort: find the mechanical advantage from the shape, then divide the load by it (Part 1's lever as the example). */
+function picTwoStep() {
+  const W = 440;
+  const T = (x, y, s, col, str, w) => `<text x="${x}" y="${y}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="${s}" font-weight="${w || 700}" fill="${col}">${str}</text>`;
+  let b = `<rect x="8" y="10" width="190" height="118" rx="12" fill="${PIC_C.soft}" stroke="${PIC_C.F}" stroke-width="2"/>`;
+  b += T(103, 34, 14, PIC_C.F, 'STEP 1') + T(103, 56, 14, PIC_C.ink, 'Find the mechanical') + T(103, 74, 14, PIC_C.ink, 'advantage from the shape') + T(103, 108, 16, PIC_C.F, 'MA = 1.6 ÷ 0.4 = 4', 800);
+  b += `<path d="M206 69 h22" stroke="${PIC_C.ink}" stroke-width="3"/><path d="M226 61 l10 8 -10 8z" fill="${PIC_C.ink}"/>`;
+  b += `<rect x="242" y="10" width="190" height="118" rx="12" fill="#fff4f2" stroke="${PIC_C.E}" stroke-width="2"/>`;
+  b += T(337, 34, 14, PIC_C.E, 'STEP 2') + T(337, 56, 15, PIC_C.ink, 'Divide the load by it') + T(337, 82, 15, PIC_C.L, '294 N load ÷ 4') + T(337, 110, 18, PIC_C.E, '= 73.5 N effort', 800);
+  return picWrap(W, 140, 'Two steps: first find the mechanical advantage from the shape (1.6 ÷ 0.4 = 4), then divide the 294 N load by it to get a 73.5 N effort', b, '', 440);
+}
