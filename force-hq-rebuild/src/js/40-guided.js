@@ -127,7 +127,7 @@ function renderRail() {
     <button type="button" class="rerun" id="gReread">Show the information cards again</button>
     ${st.predict ? predictBox(st) : ''}
     ${/^c6/.test(CH.id) && (st.qs || []).some(q => q.type === 'num') ? remindersHTML() : ''}
-    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
+    ${st.tasks && st.tasks.length ? `<div class="lbl">Do this</div><ul class="tasks gl">${st.tasks.map((t, i) => { const q = taskQ(t); if (q && !taskNum(q) && !t[0]) return '';   /* a pick, tick or fix question lives only in Your turn (Tom, 9 Nov 2026: a Do this line that only says 'answer it in Your turn' is clutter) */ return `<li id="tk${i}"><span class="box">✓</span><span class="tkbody">${taskHTML(t)}${q && t[2].box !== false && taskNum(q) ? tkAnsHTML(q) : ''}</span></li>`; }).join('')}</ul>` : ''}
     <div id="stepDoneBox"></div>
     <button type="button" class="jbtn" data-journal><span>📓 My Journal</span></button>
     <div class="gnav"><button type="button" class="ghost" id="gPrev" ${GI === 0 && !hasICAN(CH.id) ? 'disabled' : ''}>← Back</button>${GI < chd.steps.length - 1 ? '<button type="button" class="go" id="gNext">Next →</button>' : `<button type="button" class="go" id="gNext">${chd.challenge ? 'To the Challenge →' : 'To the Check →'}</button>`}</div>`;
