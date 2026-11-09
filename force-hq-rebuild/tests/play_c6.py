@@ -417,10 +417,10 @@ with sync_playwright() as p:
     # ================= Part 4: compound machines (k1 to k3, Challenge h1 to h3, Check c6r18 to c6r22) =================
     ev("openChapter('c6d')"); pg.wait_for_timeout(500)
     if pg.locator('#modal').is_visible() and pg.locator('#modal [data-close]').count(): pg.locator('#modal [data-close]').first.click(); pg.wait_for_timeout(200)
-    chk('Part 4: three Learn steps', ev("CHDATA.c6d.steps.length") == 3)
+    chk('Part 4: four Learn steps (k4 is the two-leg practice)', ev("CHDATA.c6d.steps.length") == 4)
     cardshots('k1'); cards()
     rt = pg.locator('#rail').inner_text()
-    chk('k1: the Do-this list shows no raw {0} gaps', '{' not in rt and '___' in rt, rt[:200])
+    chk('k1: the Do-this list shows no raw {0} gaps, and pick questions live only in Your turn', '{' not in rt and '___' not in rt and 'Answer it in' not in rt, rt[:200])
     chk('k1: no number box under the pick and tick tasks', pg.locator('#rail .tkans').count() == 0)
     chk('k1: no empty builder panel while only reading cards', pg.locator('#lab [data-panel=builder]').is_hidden())
     dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200); pg.screenshot(path=OUT + 'k1_start.png')
@@ -445,8 +445,10 @@ with sync_playwright() as p:
     pull(14); chk('k3: the generator run needs 98 N, 12 m of cable and 48 m of hand travel', abs(ev("shopE({mach:'build',bw:4,bn:2,br:6})") - 98) < 1e-6 and abs(ev("shopDist({mach:'build',bw:4,bn:2,br:6})") - 48) < 1e-6 and abs(ev("shopRun({mach:'build',bw:4,bn:2,br:6}).cable") - 12) < 1e-6)
     chk('k3 q2: 48 m', 'Yes' in tkansu('q2', 48, 'm'))
     dock(); R3 = q('q3'); R3.locator('.fixline').nth(2).click(); pg.wait_for_timeout(100); R3.locator('.fix2 .ansin').fill('90'); R3.locator('.fix2 .unitsel').select_option('N'); R3.locator('.qchk').click(); pg.wait_for_timeout(150)
-    ev("dbSet('k3two', true); checkStep()")   # the unmarked two-leg practice (lesson_engine.py plays it with real pointer moves)
-    finish('k3')
+    finish('k3')   # k3 completes without the two-leg practice
+    cards(); ev("(()=>{lsTwoRun()})()"); chk('k4: Run both legs! with nothing built says what is missing', 'crane' in ev("LS.run.msg") and not stepDone())
+    ev("LS.run=null;LS.two.crane=true;lsRope('c','ch');wsSet('lift',1.5);LS.across=3;LS.adir=1;LS.two.ramp=true;lsRope('g','rt');lsRender();lsTwoRun()"); ev("LS.run.t0=performance.now()-30000"); pg.wait_for_timeout(300)
+    chk('k4: the run ends on the platform', ev("[LS.run.ok, dbGet('k4run', false)]") == [True, True]); ev("(()=>{dbSet(stepKey(CH.id,GI)+'.q1',{done:true,ok:true});checkStep(true)})()"); finish('k4')
     # ---- Part 4 Challenge ----
     ev("openChapter('c6d','challenge')"); pg.wait_for_timeout(500)
     chk('challenge 4: three jobs', pg.locator('#mi-shop [role=tab]').count() == 3)
