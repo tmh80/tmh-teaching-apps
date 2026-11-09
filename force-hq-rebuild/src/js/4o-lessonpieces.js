@@ -295,7 +295,7 @@ function lsGhostNew(c, piece, kind, t) {
   else if (kind === 'drag') { x = A.x + 34 * Math.sin(t * 1.7) + 6; y = A.y + 14; down = true; }
   else if (kind === 'cable') { const E = lsEndsSc(), ks = Object.keys(E); if (ks.length > 1) { const a = E[ks[0]], b = E[ks[1]], k = (t % 2.4) / 2.4; x = a.x + (b.x - a.x) * k + 6; y = a.y + (b.y - a.y) * k + 14; down = true; drawRopePx(c, a, { x: x - 6, y: y - 14 }, 3, 0); } }
   else if (kind === 'press') { const bt = $('#wsPull'); if (bt && bt.offsetParent) { const r = bt.getBoundingClientRect(), cr = lsCanvas().getBoundingClientRect(); x = clamp((r.left + r.width / 2 - cr.left) * 900 / cr.width, 40, 860); y = clamp((r.top - cr.top) * WS_H / cr.height - 12, 20, 410); } }
-  c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(down ? '✊' : '👆', x, y); c.restore();
+  c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; if (down) { c.strokeStyle = 'rgba(255,190,40,.95)'; c.lineWidth = 3; c.beginPath(); c.arc(x - 4, y - 16, 11, 0, 7); c.stroke(); } c.fillText('👆', x, y); c.restore();   /* pressing: a ring at the fingertip (never a fist emoji) */
 }
 
 /* ---------- the drag ghost: the piece's own board drawing, alone on a clear board, at the board's screen scale (ndGhostBegin in 4n-boardkit.js) ---------- */

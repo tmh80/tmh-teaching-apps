@@ -164,7 +164,7 @@ function lsGhost(c, piece, kind, t) {
     const X = g.x + 0.5 * LS_K * Math.sin(t * 1.7); x = X + 6; y = g.y + 14; down = true;
     if (!real) { c.save(); c.globalAlpha = .45; c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(X, G.fy + 8); c.lineTo(X + 30, LS_FLOOR); c.lineTo(X - 30, LS_FLOOR); c.closePath(); c.fill(); c.restore(); }
   } else if (kind === 'press') { const bt = $('#wsPull'); if (bt && bt.offsetParent) { const r = bt.getBoundingClientRect(), cr = lsCanvas().getBoundingClientRect(); x = clamp((r.left + r.width / 2 - cr.left) * 900 / cr.width, 40, 860); y = clamp((r.top - cr.top) * WS_H / cr.height - 12, 20, 410); } }
-  c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(down ? '✊' : '👆', x, y); c.restore();
+  c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; if (down) { c.strokeStyle = 'rgba(255,190,40,.95)'; c.lineWidth = 3; c.beginPath(); c.arc(x - 4, y - 16, 11, 0, 7); c.stroke(); } c.fillText('👆', x, y); c.restore();   /* pressing: a ring at the fingertip (never a fist emoji) */
 }
 
 /* ---------- the pointer: tap, drag, and drop from the tray ---------- */
