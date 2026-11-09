@@ -44,8 +44,9 @@ with sync_playwright() as p:
         jclick('#wsPull'); pg.wait_for_timeout(200); ev(f"(()=>{{for(let i=0;i<{int(secs/0.02)};i++)wsUpdate(0.02)}})()"); pg.wait_for_timeout(150)
     def setnum(sel, v): pg.fill(sel, str(v)); pg.press(sel, 'Enter'); pg.wait_for_timeout(120)
     def ws(k, v): ev(f"wsSet('{k}',{v});lsTouch();lsRender()")   # the same settings a student makes in the lesson panel
-    def lp(t): ev(f"lsHasP('{t}')||lsPlace('{t}')")   # put a piece on the bench if it is not there yet (this also ropes it up)
+    def lp(t): ev(f"(()=>{{const T='{t}';if(['block','winch'].includes(T)&&(LS.o.tray||[]).includes('crane')&&!lsHasP('crane'))lsPlace('crane');if(!lsHasP(T))lsPlace(T)}})()")   # put a piece on the bench if it is not there yet (this also ropes it up)
     def ropes(n):
+        lp('crane') if ev("(LS.o.tray||[]).includes('crane')") else None
         if n >= 2: lp('block')
         ws('ropes', n)
     def tkans(qid, v):
@@ -323,7 +324,8 @@ with sync_playwright() as p:
     cardshots('u3'); cards()
     chk('u3: the predict box is offered after the cards', pg.locator('#rail [data-pred]').count() == 4)
     dock(); ev("qPlace('hidden')"); pg.wait_for_timeout(200); predict(0)
-    chk('u3: the lift picker (1 m or 2 m) is on, work readout on, rulers on', 'lift height' in pg.inner_text('#lsDock').lower() and ev("LAB.show.has('readWork')") is True and ev("LAB.show.has('rulers')") is True)
+    lp('crane'); pg.wait_for_timeout(200)
+    chk('u3: the lift picker is on, work readout on, rulers on', 'lift height' in pg.inner_text('#lsDock').lower() and ev("LAB.show.has('readWork')") is True and ev("LAB.show.has('rulers')") is True)
     lp('block'); ws('ropes', 6); ws('lift', 2); pull(); pg.screenshot(path=OUT + 'u3_lift.png')
     chk('u3: 6 ropes, 2 m: 49 N and 12 m of rope', abs(ev("shopE({mach:'pulley',ropes:6,rise:2})") - 49) < 1e-6 and abs(ev("shopDist({mach:'pulley',ropes:6,rise:2})") - 12) < 1e-6)
     chk('u3: the work readouts are hidden until q2 and q3 are answered', ev("wsMasked().has('readWork')") is True)

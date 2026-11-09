@@ -79,9 +79,9 @@ function glBuildBeats(res, rig, o) {
   ran.forEach(l => {
     const stopHere = res.stop && res.stop.leg === l.i, moves = !stopHere || (res.stop.why === 'collapse' && glPlatOnlyAtEnd(l, res, plats)), push = !glHandSpot(l, rig, res.ground, plats);
     const spot = push ? { x: l.start.x - 2.6, y: l.start.y } : glHandSpot(l, rig, res.ground, plats); walkTo(spot);
-    const from = Object.assign({}, l.start), to = Object.assign({}, l.end), tilt = l.type === 'ramp' ? -Math.atan2(l.end.y - l.start.y, l.end.x - l.start.x) : 0;
+    const prev = shipAt, from = Object.assign({}, l.start), to = Object.assign({}, l.end), tilt = l.type === 'ramp' ? -Math.atan2(l.end.y - l.start.y, l.end.x - l.start.x) : 0;
     const strain = l.pull > GL.pullOk + 1e-9, dur = 1.6 + Math.min(2.2, l.rise * 0.18);
-    if (l.type !== 'ramp') add(0.6, (S, k) => { const e = glEase(k); S.ship.x = glLerp(shipAt.x, from.x, e); S.ship.y = glLerp(shipAt.y, from.y, e); S.ship.tilt = glLerp(S.ship.tilt, 0, e); if (l.type === 'crane') S.hook[l.id] = from.y + 4.2; });
+    if (l.type !== 'ramp') add(0.6, (S, k) => { const e = glEase(k); S.ship.x = glLerp(prev.x, from.x, e); S.ship.y = glLerp(prev.y, from.y, e); S.ship.tilt = glLerp(S.ship.tilt, 0, e); if (l.type === 'crane') S.hook[l.id] = from.y + 4.2; });
     else add(0.4, (S, k) => { S.ship.x = from.x; S.ship.y = from.y; S.ship.tilt = glLerp(0, tilt, glEase(k)); });
     if (moves && !(stopHere && (res.stop.why === 'broken' || res.stop.why === 'heavy'))) {
       add(dur, (S, k) => { const e = glEase(k); S.ship.x = glLerp(from.x, to.x, e); S.ship.y = glLerp(from.y, to.y, e); S.ship.tilt = tilt * (l.type === 'ramp' ? 1 : 0);
@@ -107,6 +107,8 @@ function glBuildBeats(res, rig, o) {
   return B;
 }
 function glPlatOnlyAtEnd(l, res, plats) { const s = glSupport(l.end.x, l.end.y, res.ground, plats); return s && s.kind === 'platform' && s.id === res.stop.plat; }
+/* Tom, 9 Nov 2026: the Gumdrop used to flash at the top of the crane, then drop back, before a leg's lift. A beat read shipAt when it PLAYED, after all the beats were built, so it saw the end spot. Each beat now keeps
+   the spot it starts from (prev). The Gumdrop stays at its start until its leg's lift beat moves it. */
 /* ---------- playing it ---------- */
 function glSceneAt(t) {
   const res = GLR.res, st = glState(), S = { ship: { x: GL.shipX, y: res.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0, carryRock: false, shake: false }, smoo: null, ground: glBaseGround(), blown: new Set(), hook: {}, tilt: {}, sink: {}, readouts: [], fx: [], spin: 0 };

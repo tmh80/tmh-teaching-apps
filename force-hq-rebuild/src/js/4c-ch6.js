@@ -195,9 +195,9 @@ CHDATA.c6 = {
 
     /* ================= Part 3: Mechanical advantage and work (c6c) =================
        Re-pitched 2 Nov 2026 against the pacing rules (script section A2): one new word per card, a labelled picture for each new idea, plain words, nothing in a card gives a prediction away. */
-    { id: 'u1', title: 'Mechanical advantage', rescue: 'The mission computer has learned mechanical advantage.',
+    { id: 'u1', title: 'Mechanical advantage', rescue: 'GASA\'s maths check has learned mechanical advantage.',
       cards: [
-        { hi: '#cvScene', html: `<p>📡 ${SMOOSHY.name}: "My mission computer can't understand 'easier'. It needs a <b>number</b>!"</p><p>Engineers use ${T('mechadv', 'mechanical advantage')}: how many times bigger the load is than the effort. In Part 2, the crate needed an effort of 58.8 N with 4 supporting ropes. The load, 235.2 N, is 4 times bigger than the effort, so the mechanical advantage is 4.</p>${picMA()}<div class="law">mechanical advantage = load ÷ effort</div><p>Newtons divided by newtons leaves a plain number, so mechanical advantage has no unit.</p>` },
+        { hi: '#cvScene', html: `<p>📡 ${SMOOSHY.name}: "GASA's maths check can't understand 'easier'. It needs a <b>number</b>!"</p><p>Engineers use ${T('mechadv', 'mechanical advantage')}: how many times bigger the load is than the effort. In Part 2, the crate needed an effort of 58.8 N with 4 supporting ropes. The load, 235.2 N, is 4 times bigger than the effort, so the mechanical advantage is 4.</p>${picMA()}<div class="law">mechanical advantage = load ÷ effort</div><p>Newtons divided by newtons leaves a plain number, so mechanical advantage has no unit.</p>` },
         { html: `<p>A flagpole has just one pulley, and the effort is the same as the flag's weight. The load is not bigger than the effort at all, so the mechanical advantage is 1. That means no help with the force.</p>${picFlagpole()}` }],
       setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 }, lesson: { tray: ['crane', 'block'], pre: [], lock: [] } }); }, adds: ['wspull', 'readMA'], hide: ['wsctl', 'wsmach', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
       mask: [{ q: 'q1', keys: ['readMA'], when: r => r.mach === 'pulley' && r.ropes === 3 }, { q: 'q2', keys: ['readMA'], when: r => r.mach === 'pulley' && r.ropes === 6 }],
@@ -208,7 +208,7 @@ CHDATA.c6 = {
         { id: 'q2', type: 'num', p: 'Use your newtonmeter reading for 6 supporting ropes. What is the mechanical advantage?', unit: '', ans: 6, tol: 0.1, need: () => shopHas({ mach: 'pulley', ropes: 6 }), needMsg: 'Lift the crate with 6 supporting ropes first. Your runs are in the Journal.', ladder: true, hints: ['Find your effort reading for 6 ropes in the Journal.', 'Divide the load, 294 N, by that effort.', 'Type 294 ÷ 49 into the calculator.'], work: '294 ÷ 49 = 6.', ok: 'Yes, 6. For a pulley system, the mechanical advantage is the number of supporting ropes.' },
         { id: 'q3', type: 'pick', p: 'A machine with a mechanical advantage of 1 needs an effort {0} the load. A machine with a mechanical advantage of 5 needs an effort {1} the load.', picks: [[['smaller than', 'the same as', 'bigger than'], 1], [['5 times smaller than', 'the same as', '5 times bigger than'], 0]], after: 'Mechanical advantage = load ÷ effort, so a mechanical advantage of 5 means the effort is 5 times smaller than the load.' }] },
 
-    { id: 'u2', title: 'Mechanical advantage from the shape', rescue: 'The mission computer can predict the effort for any simple machine.',
+    { id: 'u2', title: 'Mechanical advantage from the shape', rescue: 'GASA\'s maths check can predict the effort for any simple machine.',
       cards: [
         { html: `<p>You can find a machine's mechanical advantage from its shape, before you lift anything. For a lever, divide your hand's distance from the fulcrum by the rock's distance from the fulcrum.</p>${picLeverDims()}<div class="law">lever: mechanical advantage = (your hand to fulcrum) ÷ (rock to fulcrum)</div>` },
         { html: `<p>Once you know the mechanical advantage, you can work out the effort before you pull. In Part 1, the 294 N rock needed 73.5 N with this lever. That is the same number!</p>${picLeverDims({ calc: true })}<div class="law">effort = load ÷ mechanical advantage</div>` },
@@ -223,7 +223,7 @@ CHDATA.c6 = {
         { id: 'q2', type: 'num', p: 'A ramp is 4 m long and 0.8 m high. What pull does the 490 N cart need?', unit: 'N', units: UNITS_W, ans: 98, tol: 0.5, ladder: true, hints: ['Find the mechanical advantage first: length of the ramp ÷ height.', '4 ÷ 0.8 = 5. Then effort = load ÷ mechanical advantage.', 'Type 490 ÷ 5 into the calculator.'], work: 'Mechanical advantage = 4 ÷ 0.8 = 5, so the pull is 490 ÷ 5 = 98 N.', ok: 'Yes, 98 N. Now check it with the newtonmeter.' },
         { id: 'q3', type: 'pick', p: 'To find the mechanical advantage of a pulley system, count the {0}. A ramp 6 m long and 1.5 m high has a mechanical advantage of {1}.', picks: [[['supporting ropes', 'pulley wheels', 'metres of rope'], 0], [['4', '9', '0.25'], 0]], after: 'A pulley system\'s mechanical advantage is its number of supporting ropes. The ramp is 6 ÷ 1.5 = 4.' }] },
 
-    { id: 'u3', title: 'Work and the catch', rescue: 'The mission computer now checks the work for every plan.',
+    { id: 'u3', title: 'Work and the catch', rescue: 'GASA\'s maths check now checks the work for every plan.',
       cards: [
         { hi: '#cvScene', html: `<p>You know that a smaller effort means your hand moves further. In this step you will measure exactly how much further, and add it up like a scientist.</p>` },
         { html: `<p>When a force moves something, scientists say the force does ${T('work', 'work')}. You find it by multiplying the force by the distance.</p>${picWork()}<div class="law">work = force × distance</div>` },
@@ -435,7 +435,7 @@ CHDATA.c6.challenge = {
   missions: [
     { id: 'y1', kind: 'shop', title: 'Mission 1: Oxygen tank', cap: 60,
       setup: { mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 3, loads: { pulley: WL.tank }, lim: { ropesMax: 6 } }, show: ['wsctl', 'wspull', 'readMA'],
-      brief: 'Lift the 25 kg oxygen tank (245 N) <b>3 m</b> up into the rocket\'s hatch. Your pull must be <b>60 N or less</b>, and there are only <b>15 m of rope</b>.',
+      brief: 'Lift the 25 kg oxygen tank (245 N) <b>3 m</b> up into the Big Jelly\'s hatch. Your pull must be <b>60 N or less</b>, and there are only <b>15 m of rope</b>.',
       goal: 'Choose the number of supporting ropes, then press Pull!',
       objs: [shObjE(60), { label: 'Pull 15 m of rope or less', ok: r => r.dist <= 15, say: r => `Rope pulled: ${fmt(r.dist, 1)} m. Target: 15 m or less. ${shMark(r.dist <= 15)}` }],
       clues: ['What mechanical advantage gets the effort under 60 N? 245 ÷ 60 = 4.08.', 'Each choice also needs rope: the rope pulled = supporting ropes × 3 m.', '4 ropes need 61.3 N, and 6 ropes need 18 m of rope. Which number is left?'],
@@ -458,14 +458,14 @@ CHDATA.c6.challenge = {
     /* ---- Part 4 Challenge: Build the rescue kit (h1 to h3). The student builds a compound machine with the builder; every pull counts (same scoring as y1 to y3). ---- */
     { id: 'h1', kind: 'shop', title: 'Mission 1: Hoist the nose cone', cap: 100,
       setup: { mach: 'build', allow: ['build'], lift: 6, loads: { build: WL.cone }, bRoutes: [[0, 'Straight up']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
-      brief: 'Hoist the rocket\'s 200 kg nose cone (1,960 N) <b>6 m</b> up. The crane operator can pull <b>100 N at most</b>. There is <b>30 m of cable</b>, and the job must take <b>150 m of hand travel or less</b>.',
+      brief: 'Hoist the Big Jelly\'s 200 kg nose cone (1,960 N) <b>6 m</b> up. The crane operator can pull <b>100 N at most</b>. There is <b>30 m of cable</b>, and the job must take <b>150 m of hand travel or less</b>.',
       goal: 'Choose a winch and a pulley block, then press Turn!',
       objs: [shObjE(100), shObjC(30), shObjT(150)],
       clues: ['The mechanical advantage you need is 1,960 ÷ 100 = 19.6. Hand travel = mechanical advantage × 6 m, so the mechanical advantage must be 25 or less.', 'No single machine here reaches 19.6. Which pairs multiply to between 19.6 and 25?', 'Try 2 ropes with winch ×10, or 3 ropes with winch ×8.'],
       give: '2 ropes with winch ×10 (98 N, 12 m of cable, 120 m of travel) works.' },
     { id: 'h2', kind: 'shop', title: 'Mission 2: Load the Gummy Rover', cap: 80,
       setup: { mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.rover }, bRoutes: [[0, 'Straight up'], [4, '4 m ramp'], [6, '6 m ramp'], [10, '10 m ramp']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
-      brief: 'Get the 400 kg Gummy Rover (3,920 N) onto the rocket\'s deck, <b>2 m</b> up. The pull must be <b>80 N or less</b>, there is <b>40 m of cable</b>, and the job must take <b>120 m of hand travel or less</b>.',
+      brief: 'Get the 400 kg Gummy Rover (3,920 N) onto the Big Jelly\'s deck, <b>2 m</b> up. The pull must be <b>80 N or less</b>, there is <b>40 m of cable</b>, and the job must take <b>120 m of hand travel or less</b>.',
       goal: 'Choose a route, a pulley block and a winch, then press Turn!',
       objs: [shObjE(80), shObjC(40), shObjT(120)],
       clues: ['The mechanical advantage you need is 3,920 ÷ 80 = 49, and at most 120 ÷ 2 = 60.', 'Cable = supporting ropes × route length, so long ramps and lots of ropes use cable fast.', 'The 10 m ramp has a mechanical advantage of 5. What do the pulley block and the winch need to multiply to?'],

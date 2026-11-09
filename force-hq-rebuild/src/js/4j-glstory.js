@@ -37,7 +37,7 @@ function glMountGuide(host) {
 }
 function glGuidePaint() {
   const box = $('#glGuide'); if (!box) return; const st = glState();
-  if (st.guide !== 'on' || (GLR && GLR.on)) { box.hidden = true; return; }
+  if (st.guide !== 'on' || (GLR && GLR.on)) { box.hidden = true; if (typeof glGuideThrob === 'function') glGuideThrob(); return; }
   const done = GLG_STEPS.map(s => { try { return !!s.done(); } catch (_) { return false; } }), cur = done.indexOf(false), all = cur < 0, f1 = v => fmt(v, 1);
   let live = '';
   if (cur <= 2 && glWarmLever()) { const lev = glWarmLever(), bo = GLB.ev && GLB.ev.boulder; if (lev && bo && bo.how === 'lever') live = `<p class="glwlive ${bo.ok ? 'good' : ''}">Load arm ${f1(lev.arm)} m, so the lever's mechanical advantage is <b>${f1(bo.ma)}</b>. Smooshy pulls with <b>${f1(bo.pull)} N</b> ${bo.ok ? 'and the boulder rolls free!' : 'and 60 N is his limit.'}</p>`; }

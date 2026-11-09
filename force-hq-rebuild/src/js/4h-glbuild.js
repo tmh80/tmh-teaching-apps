@@ -110,8 +110,8 @@ function glRemove(id) {
 function glDropOrphans() {
   const rig = GLB.rig, ids = new Set(rig.parts.map(p => p.id).concat(['ship', 'boulder']));
   rig.cables = (rig.cables || []).filter(c => ids.has(c.a) && ids.has(c.b));
-  const held = new Set(['ship', 'boulder'].concat(rig.parts.filter(p => GL_LIFT[p.type]).map(p => p.id))); let grew = true;
-  while (grew) { grew = false; rig.cables.forEach(c => { if (held.has(c.a) !== held.has(c.b)) { held.add(c.a); held.add(c.b); grew = true; } }); }
+  const held = new Set(rig.parts.filter(p => GL_LIFT[p.type]).map(p => p.id)); let grew = true;   // only a machine holds an add-on up: a rope to the Gumdrop or the boulder is a load, not a support
+  while (grew) { grew = false; rig.cables.forEach(c => { if (!ids.has(c.a) || !ids.has(c.b) || c.a === 'ship' || c.b === 'ship' || c.a === 'boulder' || c.b === 'boulder') return; if (held.has(c.a) !== held.has(c.b)) { held.add(c.a); held.add(c.b); grew = true; } }); }
   const orphans = rig.parts.filter(p => glIsAddon(p) && !held.has(p.id)); if (!orphans.length) return [];
   const g = glGround(rig).g, pl = glPlatforms(rig, g), now = performance.now(); GLB.fall = GLB.fall || {};
   orphans.forEach(p => { const y1 = +(glFloorAt(p.x, g, pl) + (p.type === 'winch' ? 0.7 : 0.8)).toFixed(2); if (y1 < p.y - 1e-6) { if (!RMOTION) GLB.fall[p.id] = { y0: p.y, t0: now, dur: Math.min(900, 300 + 140 * Math.sqrt(p.y - y1)) }; p.y = y1; } });

@@ -986,9 +986,9 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .gltest .box{flex:none;width:20px;text-align:center;font-weight:900}
 
 /* "do this next": the one tray tile or panel control the current task needs (ndApply in 4n-boardkit.js). Static glow ring always; the pulse only when motion is allowed. */
-.ndneed{border-color:#e0a010!important;box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 14px 3px rgba(240,180,30,.4)!important;position:relative;z-index:2}
-.gltry.ndpulse{animation:ndthrob 1.4s ease-in-out infinite}
-.ndneed.ndpulse:not(.gltry){animation:ndglow 1.4s ease-in-out infinite}
+.ndneed{border-color:#e0a010!important;box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 14px 3px rgba(240,180,30,.4);position:relative;z-index:2}
+.ndneed:not(.ndpulse){box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 14px 3px rgba(240,180,30,.4)!important}
+.ndneed.ndpulse{animation:ndglow 1.4s ease-in-out infinite}   /* a glow ring only: no transform, so the tile stays put and is easy to hit (and to click in tests) */
 @keyframes ndthrob{0%,100%{transform:scale(1);box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 10px 2px rgba(240,180,30,.3)}50%{transform:scale(1.045);box-shadow:0 0 0 4px rgba(240,180,30,.8),0 0 20px 6px rgba(240,180,30,.5)}}
 @keyframes ndglow{0%,100%{box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 8px 2px rgba(240,180,30,.3)}50%{box-shadow:0 0 0 4px rgba(240,180,30,.85),0 0 16px 5px rgba(240,180,30,.5)}}
 @media (prefers-reduced-motion:reduce){.ndneed.ndpulse{animation:none!important}}
