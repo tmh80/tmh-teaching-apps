@@ -51,7 +51,7 @@ with sync_playwright() as p:
     chk('pl1: a block dropped while the crane cards are open does not replace them', (read_cards() or '').startswith('New piece: Crane gantry') and ev("!!LS.pl.block") is True, read_cards())
     while read_cards():
         order.append(read_cards()); pg.evaluate("document.querySelector('#chunk [data-cb=next]').click()"); pg.wait_for_timeout(120)
-    chk('pl1: crane cards (3) come first, then the pulley block cards (3), nothing else', order == ['New piece: Crane gantry'] * 3 + ['New piece: Pulley block'] * 3, order)
+    chk('pl1: crane cards (4) come first, then the pulley block cards (3), nothing else', order == ['New piece: Crane gantry'] * 4 + ['New piece: Pulley block'] * 3, order)
     chk('pl1: both are marked seen', ev("[lsSeen().crane, lsSeen().block]") == [True, True])
 
     # ---------- 2. the throb: crane first, then the block ----------
@@ -89,8 +89,9 @@ with sync_playwright() as p:
     fresh(pg, seen=True); step(pg, 'c6d', 1); scroll_board(); both('k2_start')
     # the k3 two-leg practice
     fresh(pg, seen=True); step(pg, 'c6d', 2); ev("S.flags.k3built=true"); ev("lsTwoStart()"); pg.wait_for_timeout(400)
-    chk('k3 two-leg practice: the ramp tile throbs first', throbbing(pg) == ['ramp'], throbbing(pg)); ev("LS.two.ramp=true;lsRender()"); pg.wait_for_timeout(300)
-    chk('k3 two-leg practice: then the crane tile', throbbing(pg) == ['crane'], throbbing(pg))
+    chk('k3 two-leg practice: the crane tile throbs first (leg 1)', throbbing(pg) == ['crane'], throbbing(pg)); ev("LS.two.crane=true;lsRope('c','ch');lsRender()"); pg.wait_for_timeout(300)
+    chk('k3 two-leg practice: then Move across (+)', throbbing(pg) == ['across+'], throbbing(pg)); ev("LS.across=3;lsRender()"); pg.wait_for_timeout(300)
+    chk('k3 two-leg practice: then the ramp tile (leg 2)', throbbing(pg) == ['ramp'], throbbing(pg))
     # more steps in order: pl2, u1 and k2 go crane -> block/winch
     fresh(pg, seen=True); step(pg, 'c6d', 1); scroll_board(); tray_drop('crane', zc('crane')); chk('k2: after the crane the block throbs', throbbing(pg) == ['block'], throbbing(pg))
     e = J("lsEnds()")['top']; tray_drop('block', (e['x'], e['y'])); chk('k2: then the winch', throbbing(pg) == ['winch'], throbbing(pg))

@@ -89,14 +89,28 @@ function glDrawRamp(c, p, m, bad, ground) {
   c.restore();
   c.fillStyle = GLC.steel2; c.beginPath(); c.arc(glSX(b.x), glSY(b.y + 0.3), Math.max(3, 0.35 * us), 0, 7); c.fill();
 }
-function glDrawCrane(c, p, m, bad, hookY) {
+function glDrawCrane(c, p, m, bad, hookY, trolX) {
   const sc = p.s || 1, u = glU() * sc, by = m.start.y, top = by + p.rise + 2.6 * sc, x = p.x, col = bad ? GLC.bad : '#e3a51c';
+  /* the gantry stands at x; with Move across its span grows to cover the set-down spot too (m.legL and m.legR, set in glMachine) */
+  const legs = m.legL ? [{ bx: m.legL.x, by: m.legL.y, tx: m.legL.x + 0.6, sd: 1 }, { bx: m.legR.x, by: m.legR.y, tx: m.legR.x - 0.6, sd: -1 }]
+    : [-1, 1].map(sd => ({ bx: x + sd * 3.2 * sc, by, tx: x + sd * 2.6 * sc, sd: -sd }));
   c.strokeStyle = col; c.lineWidth = Math.max(3, 0.3 * u); c.lineCap = 'round';
-  [-1, 1].forEach(sd => { c.beginPath(); c.moveTo(glSX(x + sd * 3.2 * sc), glSY(by)); c.lineTo(glSX(x + sd * 2.6 * sc), glSY(top)); c.stroke(); c.lineWidth = Math.max(1.5, 0.14 * u); for (let k = 1; k < 4; k++) { const yy = by + (top - by) * k / 4; c.beginPath(); c.moveTo(glSX(x + sd * (3.2 - 0.6 * k / 4) * sc), glSY(yy)); c.lineTo(glSX(x + sd * (3.2 - 0.6 * (k + 1) / 4) * sc), glSY(yy + (top - by) / 4)); c.stroke(); } c.lineWidth = Math.max(3, 0.3 * u); });
-  c.beginPath(); c.moveTo(glSX(x - 3.2 * sc), glSY(top)); c.lineTo(glSX(x + 3.2 * sc), glSY(top)); c.stroke();
-  c.fillStyle = GLC.steel2; [-1, 1].forEach(sd => { c.beginPath(); c.roundRect(glSX(x + sd * 3.2 * sc) - 0.5 * u, glSY(by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
-  const hy = hookY == null ? by + 4.2 * sc : hookY; c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(x), glSY(top)); c.lineTo(glSX(x), glSY(hy)); c.stroke();
-  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.arc(glSX(x), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke();
+  legs.forEach(L => { c.beginPath(); c.moveTo(glSX(L.bx), glSY(L.by)); c.lineTo(glSX(L.tx), glSY(top)); c.stroke(); c.lineWidth = Math.max(1.5, 0.14 * u);
+    for (let k = 1; k < 4; k++) { const f0 = k / 4, f1 = (k + 1) / 4, y0 = L.by + (top - L.by) * f0, y1 = L.by + (top - L.by) * f1; c.beginPath(); c.moveTo(glSX(L.bx + (L.tx - L.bx) * f0), glSY(y0)); c.lineTo(glSX(L.bx + (L.tx - L.bx) * f1), glSY(y1)); c.stroke(); } c.lineWidth = Math.max(3, 0.3 * u); });
+  const bl = legs[0].bx, br = legs[1].bx; c.beginPath(); c.moveTo(glSX(Math.min(bl, br)), glSY(top)); c.lineTo(glSX(Math.max(bl, br)), glSY(top)); c.stroke();
+  c.fillStyle = GLC.steel2; legs.forEach(L => { c.beginPath(); c.roundRect(glSX(L.bx) - 0.5 * u, glSY(L.by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
+  const tx = trolX == null ? x : trolX, hy = hookY == null ? by + 4.2 * sc : hookY;
+  if (m.legL) { c.fillStyle = GLC.steel; c.beginPath(); c.roundRect(glSX(tx) - 0.55 * u, glSY(top) - 0.3 * u, 1.1 * u, 0.6 * u, 3); c.fill(); }   // the trolley on the top beam
+  c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(tx), glSY(top)); c.lineTo(glSX(tx), glSY(hy)); c.stroke();
+  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.arc(glSX(tx), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke();
+}
+/* "Set down here": where a crane's trolley puts the load, before the run (red when nothing is under it to set it on) */
+function glDrawSetDown(c, m, t, bad) {
+  const u = glU(), pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 5), e = m.end, X = glSX(e.x), Y = glSY(e.y), col = bad ? '255,120,110' : '126,240,168';
+  c.save(); c.shadowColor = bad ? '#ff7a70' : GLC.glow; c.shadowBlur = 8 + 12 * pulse; c.strokeStyle = `rgba(${col},${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
+  c.beginPath(); c.ellipse(X, Y - 0.2 * u, 2.7 * u, 0.9 * u, 0, 0, 7); c.stroke(); c.restore();
+  c.fillStyle = `rgba(${col},${0.14 + 0.1 * pulse})`; c.beginPath(); c.ellipse(X, Y - 0.2 * u, 2.7 * u, 0.9 * u, 0, 0, 7); c.fill();
+  lblAdd(bad ? 'Nothing to set it on' : 'Set down here', X, Y - 2.2 * u, { size: 12, col: bad ? '#fff' : '#c9ffdc', bg: bad ? '#c0392b' : 'rgba(31,29,38,.75)', prio: 2 });
 }
 function glDrawLever(c, p, m, bad, tiltT) {
   /* the same drawing as the Workshop bench lever (drawLeverShape in 4n): a bar on a triangle fulcrum. The load end rises by `rise` as tiltT goes 0 → 1 */
@@ -176,7 +190,8 @@ function glDrawWorld(c, o) {
   if (rockShown && !(o.ship && o.ship.carryRock)) glDrawBoulder(c, run.rockX != null ? run.rockX : 18.7, run.rockY != null ? run.rockY : glAt(g, 18.7), run.rockRot || 0.12, false);
   if (run.rope && o.ship) glDrawCable(c, run.rope.a, run.rope.b, 0);
   if (o.ship) { glDrawShip(c, o.ship); if (o.ship.carryRock && rockShown) glDrawBoulder(c, o.ship.x + 4.6 * Math.cos(o.ship.tilt || 0), o.ship.y - 4.6 * Math.sin(o.ship.tilt || 0), (o.ship.tilt || 0) + 0.12); }
-  rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id]));
+  rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id], run.trol && run.trol[p.id]));
+  if (!run.on && o.setdown !== false) rig.parts.filter(p => p.type === 'crane' && p.across).forEach(p => glDrawSetDown(c, ms[p.id], t, ms[p.id].faults.includes('drop')));
   rig.parts.filter(p => p.type === 'lever').forEach(p => glDrawLever(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
   rig.parts.filter(p => p.type === 'jack').forEach(p => glDrawJack(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
   /* cables, then the add-ons on top */
@@ -227,7 +242,7 @@ function glShipSpot(ev, id, g) {
 /* a part's box in world metres, for hit tests and the selection ring */
 function glBounds(p, m, g, plats) {
   if (p.type === 'ramp') { const a = m.start, b = m.end; return { x0: Math.min(a.x, b.x) - 0.3, x1: Math.max(a.x, b.x) + 0.3, y0: Math.min(a.y, b.y) - 0.4, y1: Math.max(a.y, b.y) + 0.6 }; }
-  if (p.type === 'crane') return { x0: p.x - 3.4, x1: p.x + 3.4, y0: m.start.y, y1: m.start.y + p.rise + 2.8 };
+  if (p.type === 'crane') return { x0: Math.min(p.x, p.x + (p.across || 0)) - 3.4, x1: Math.max(p.x, p.x + (p.across || 0)) + 3.4, y0: m.start.y, y1: m.start.y + p.rise + 2.8 };
   if (p.type === 'lever') { const d = p.dir || 1, xs = [p.x, p.x + d * GL.beam]; return { x0: Math.min(...xs) - 0.3, x1: Math.max(...xs) + 0.3, y0: m.start.y, y1: m.start.y + 1.4 }; }
   if (p.type === 'jack') return { x0: p.x - 0.8, x1: p.x + 0.8, y0: m.start.y, y1: m.start.y + 1.2 };
   if (p.type === 'platform') { const pl = plats.find(q => q.id === p.id); return pl ? { x0: pl.x0, x1: pl.x1, y0: pl.base, y1: pl.top + 0.3 } : { x0: p.x - 2, x1: p.x + 2, y0: 0, y1: 1 }; }

@@ -35,6 +35,11 @@ class Board:
     def menu(s, k): s.pg.click(f'#glDock [data-gm="{k}"]'); s.pg.wait_for_timeout(80)
     def part(s, i): return s.ev(f'JSON.stringify(glPart("{i}"))')
     def evr(s, code): return json.loads(s.ev('JSON.stringify(' + code + ')'))
+def skip(pg):
+    for sel in ('[data-gr=skip]', '#glSkip'):
+        if pg.locator(sel).is_visible(): pg.click(sel); return
+    return
+
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1300, 'height': 950}); errs = []
     pg.on('pageerror', lambda e: errs.append('ERR ' + str(e))); pg.on('console', lambda m: m.type == 'error' and errs.append(m.text))
@@ -91,11 +96,11 @@ with sync_playwright() as p:
     ph.screenshot(path=OUT + 'phone.png')
     # the test, then Send to GASA and the rescue: skip to the end, then check what was saved
     pg.click('[data-gt=ruler]'); chk('Send to GASA is locked until every box is filled', pg.locator('#glSend').is_disabled())
-    pg.click('#glRun'); pg.wait_for_timeout(300); pg.click('#glSkip'); pg.wait_for_timeout(500); chk('a simulator test counts as tried but is not a rescue', B.evr("[__fhq.dbGet('chal.c6e',{}).gl.tests, __fhq.dbGet('chal.c6e',{}).gl.runs||0]") == [1, 0]); pg.click('#glBack')
+    pg.click('#glRun'); pg.wait_for_timeout(300); skip(pg); pg.wait_for_timeout(500); chk('a simulator test counts as tried but is not a rescue', B.evr("[__fhq.dbGet('chal.c6e',{}).gl.tests, __fhq.dbGet('chal.c6e',{}).gl.runs||0]") == [1, 0]); pg.click('#glBack')
     send_right(pg); pg.wait_for_timeout(1000)
     pg.wait_for_timeout(2000); pg.screenshot(path=OUT + 'run-mid.png', clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 420})
     B.ev('GLR.t0 = performance.now() - (GLR.total - 2.2) * 1000'); pg.wait_for_timeout(150); pg.screenshot(path=OUT + 'run-beam.png', clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 420})
-    pg.click('#glSkip'); pg.wait_for_timeout(600)
+    skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000)
     s = B.evr("__fhq.dbGet('chal.c6e',{}).gl")
     chk('run saved: tried, 1 run, best 11', s.get('tried') and s.get('runs') == 1 and s.get('best') == 11, {k: s.get(k) for k in ('tried', 'runs', 'best')})
     chk('best run keeps its rig, summary and route strip', s.get('bestRun') and s['bestRun']['sum']['score'] == 11 and s['bestRun']['work']['approved'] and len(s['bestRun']['rig']['parts']) == len(s['rig']['parts']))
@@ -105,7 +110,7 @@ with sync_playwright() as p:
     pg.screenshot(path=OUT + 'run-end.png', full_page=False, clip={'x': 0, 'y': pg.locator('#glCv').bounding_box()['y'] - 10, 'width': 1300, 'height': 900})
     pg.click('#glBack'); pg.wait_for_timeout(200); chk('back to building', pg.evaluate('GLR=undefined') if False else B.evr('GLR.on') is False)
     # a run that stops: remove ramp 2, so the route has a gap
-    B.ev(f'glRemove("{r2}")'); send_right(pg); pg.wait_for_timeout(1000); pg.click('#glSkip'); pg.wait_for_timeout(600)
+    B.ev(f'glRemove("{r2}")'); send_right(pg); pg.wait_for_timeout(1000); skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000)
     s = B.evr("__fhq.dbGet('chal.c6e',{}).gl"); t = pg.inner_text('#glRes')
     chk('a gap gives Not yet, and the best run stays 11', 'Not yet!' in t and s['best'] == 11 and s['bestRun']['sum']['score'] == 11 and s['runs'] == 2, (t[:120], s.get('best')))
     # every section 9 route (and a collapsing platform) plays through the animation without errors and saves its score

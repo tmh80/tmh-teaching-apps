@@ -44,6 +44,7 @@ function glGuidePaint() {
   box.hidden = false;
   box.innerHTML = `<h3>🧭 Guided start: your first two legs</h3>
     <p>Welcome to Mission Control! Build the first part of a rescue route with me. You can skip this at any time.</p>
+    <p class="glnote">Tip: a crane gantry has <b>Move across</b>. Its trolley carries the Gumdrop sideways, then sets it down on a shelf or platform.</p>
     <ol class="objs glsteps">${GLG_STEPS.map((s, i) => `<li class="${done[i] ? 'ok' : i === cur ? 'cur' : ''}"><span class="box">${done[i] ? '✓' : ''}</span><span>${s.t}${i === cur ? `<small class="glwhy">${s.why}</small>` : ''}</span></li>`).join('')}</ol>${live}
     ${all ? '<p><b>Well done, engineer!</b> Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly\'s tractor beam pulls it in. You don\'t need to move it across.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
   glGuideThrob();

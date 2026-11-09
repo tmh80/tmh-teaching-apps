@@ -8,6 +8,14 @@ F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/sta
 ROUTES = pathlib.Path('tests/rescue_routes.js').read_text()
 ns = {}; exec(open('tests/play_rescue.py').read().split('with sync_playwright')[0], ns)
 fails = []
+def back(pg):
+    if pg.locator('#glBack').is_visible(): pg.click('#glBack')
+    pg.evaluate("__fhq.ev('if (GLR.on) { GLR.done = true; glBackToBuild(); }')"); pg.wait_for_timeout(150)
+def skip(pg):
+    for sel in ('[data-gr=skip]', '#glSkip'):
+        if pg.locator(sel).is_visible(): pg.click(sel); return
+    return
+
 def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
     if not cond: fails.append(name)
@@ -33,7 +41,7 @@ def run(vp, tag, full):
         chk(f'{tag}: the Mission computer prediction box and the old warm-up are gone', ev("!document.querySelector('#glPred, #glWarm, #glPVal, #glWork, #glHint')") is True)
         chk(f'{tag}: the guided start shows with its steps and a Skip', pg.locator('#glGuide').is_visible() and pg.locator('#glGuide [data-gw=skip]').count() == 1 and 'Drag a lever from the tray onto the boulder' in pg.inner_text('#glGuide'))
         chk(f'{tag}: the strip is below the board and Send to GASA is off until there is a route', ev("document.querySelector('#glStrip').getBoundingClientRect().top >= document.querySelector('.glboard').getBoundingClientRect().bottom") is True and pg.locator('#glSend').is_disabled())
-        chk(f'{tag}: ▶ Test in simulator is inside the board', pg.evaluate("document.querySelector('#glRun').parentElement.classList.contains('glboard')"))
+        chk(f'{tag}: ▶ Test in simulator is inside the board', pg.evaluate("!!document.querySelector('#glRun').closest('.glboard')"))
         shot('#glGuide', 'guided_start')
         if full:
             # guided steps tick from the rig: lever on the boulder, then the arm
@@ -78,18 +86,18 @@ def run(vp, tag, full):
         pg.locator('#glCv').scroll_into_view_if_needed(); pg.click('#glRun'); pg.wait_for_timeout(500)
         chk(f'{tag}: the test is running on the board', ev('GLR.on') is True and ev('GLR.mode') == 'test')
         shot('.glboard', 'test_running')
-        pg.click('#glSkip'); pg.wait_for_timeout(500); t = pg.inner_text('#glRes')
+        skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000); t = pg.inner_text('#glRes')
         chk(f'{tag}: the test says where each leg worked', 'Leg 1: worked' in t and 'Leg 2: worked' in t and 'tractor beam' in t, t)
         chk(f'{tag}: the test shows NO numbers (no pull, hand distance, work, MA)', not re.search(r'\d+(\.\d+)?\s*(N|J|m)\b', t.replace('No score', '')) and '56' not in t and '1,344' not in t and 'score' in t.lower(), t)
         s = evj("glState()"); chk(f'{tag}: a test saves no run and no score, but counts as tried', s.get('tests') == 1 and not s.get('runs') and s.get('tried') is True and not s.get('best'), {k: s.get(k) for k in ('tests', 'runs', 'tried', 'best')})
         chk(f'{tag}: the animation had no leg readouts', ev("GLR.beats.length>0") is True)
         # a leg that fails shows why, still no numbers
-        pg.click('#glBack'); setrig("(()=>{const g=ROUTES.top(); g.parts.find(p=>p.id==='rBw0').ratio=4; g.cables=g.cables.filter(c=>!(c.a==='rB'&&c.b==='ship')); return g})()")
-        pg.click('#glRun'); pg.wait_for_timeout(300); pg.click('#glSkip'); pg.wait_for_timeout(500); t = pg.inner_text('#glRes')
+        back(pg); setrig("(()=>{const g=ROUTES.top(); g.parts.find(p=>p.id==='rBw0').ratio=4; g.cables=g.cables.filter(c=>!(c.a==='rB'&&c.b==='ship')); return g})()")
+        pg.click('#glRun'); pg.wait_for_timeout(300); skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000); t = pg.inner_text('#glRes')
         chk(f'{tag}: a leg with no rope says so, a leg that is too hard says so', "Leg 2 isn't roped to the Gumdrop" in t, t)
-        pg.click('#glBack'); setrig("(()=>{const g=ROUTES.weak(); return g})()"); pg.click('#glRun'); pg.wait_for_timeout(300); pg.click('#glSkip'); pg.wait_for_timeout(500); t = pg.inner_text('#glRes')
+        back(pg); setrig("(()=>{const g=ROUTES.weak(); return g})()"); pg.click('#glRun'); pg.wait_for_timeout(300); skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000); t = pg.inner_text('#glRes')
         chk(f'{tag}: "Leg 2: too hard for Smooshy" with no numbers', 'Leg 2: too hard for Smooshy' in t and '98' not in t, t)
-        pg.click('#glBack'); setrig('ROUTES.top()')
+        back(pg); setrig('ROUTES.top()')
         # ---------- Send to GASA: a wrong cell is rejected ----------
         fill_all(wrong=('L:rB', 'pull')); chk(f'{tag}: every box filled turns Send on', pg.locator('#glSend').is_enabled())
         pg.click('#glSend'); pg.wait_for_timeout(200); m = pg.inner_text('#glwMsg')
@@ -118,7 +126,7 @@ def run(vp, tag, full):
         pg.wait_for_function("GLR_ON()" if False else "true"); pg.wait_for_timeout(1900)
         chk(f'{tag}: then the rescue animation plays', ev("GLR.on") is True and ev("GLR.mode") == 'launch')
         pg.wait_for_timeout(1200); shot('.glboard', 'rescue_running')
-        pg.click('#glSkip'); pg.wait_for_timeout(700); t = pg.inner_text('#glRes'); ev('FAST=true')
+        skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000); t = pg.inner_text('#glRes'); ev('FAST=true')
         s = evj("glState()"); sm = s['bestRun']['sum']
         chk(f'{tag}: the result card shows Maths approved by GASA as a scored objective', 'Maths approved by GASA: 1 of 1' in t.replace('\n', ' ') and ' of 11' in t, t[:900])
         chk(f'{tag}: the run is saved: 1 run, 11 max, maths point earned', s['runs'] == 1 and sm['max'] == 11 and sm['pts']['maths'] == 1, sm)

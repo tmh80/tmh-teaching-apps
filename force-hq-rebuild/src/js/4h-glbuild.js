@@ -9,7 +9,8 @@ const GL_TRAY = [
   { t: 'platL', name: 'Large platform', cost: '35 + 2 per m', icon: '⬜' }, { t: 'dynS', name: 'Small dynamite', cost: '20', icon: '🧨' }, { t: 'dynB', name: 'Big dynamite', cost: '40', icon: '💥' }];
 const GL_FAULT = { long: 'This ramp is longer than 30 m.', steep: 'Too steep! A ramp can rise at most half its length.', ground: 'This ramp runs into the ground. Move it, use a platform, or blast the ground away.',
   head: 'The top of this ramp is floating in mid-air. Rest it on the ground or on a platform.', rise: 'This machine can\'t lift that far.', fulcrum: 'A lever\'s mechanical advantage can be 9 at most. Move the fulcrum.',
-  norope: 'This machine isn\'t roped to the Gumdrop yet. Drag a rope from its ◉ to the Gumdrop\'s ◉, or press the rope button.', tangle: 'Its cables branch off two ways. Each machine needs one chain of cables.', blocks: 'Only one pulley block per machine.', winches: 'Two winches per machine at most.', jackcable: 'A screw jack works on its own, with no cable.' };
+  norope: 'This machine isn\'t roped to the Gumdrop yet. Drag a rope from its ◉ to the Gumdrop\'s ◉, or press the rope button.', tangle: 'Its cables branch off two ways. Each machine needs one chain of cables.', blocks: 'Only one pulley block per machine.', winches: 'Two winches per machine at most.', jackcable: 'A screw jack works on its own, with no cable.',
+  across: 'The trolley only rolls 8 m across.', drop: 'The trolley has nothing to set the load on there. Put the set down spot on the ground, a shelf or a platform, no more than 0.5 m up or down from the lifted height.' };
 const GLR = { on: false };   // Run Rescue state (4i-glrun.js fills it in)
 const GL_PLATMSG = 'Move the machine first, then add the platform.';
 const GLB = { rig: null, ev: null, dockId: null, flash: null, hist: [], sel: null, drag: null, ruler: null, rulerOn: false, place: null, cv: null, raf: 0, onChange: null, readOnly: false, mid: 'gl', ch: 'c6e' };
@@ -56,6 +57,7 @@ function glPlatBlocked(c) {
   return others.filter(p => GL_LIFT[p.type]).some(p => { const m = glMachine(p, g, pl0), mine = !!c.id && [m.base, m.footOn, m.headOn].some(q => q && q.id === c.id);
     if (mine) return false;
     if (p.type === 'ramp') { for (let t = 0; t <= 1.0001; t += 0.02) { const x = m.start.x + (m.end.x - m.start.x) * t, y = m.start.y + (m.end.y - m.start.y) * t; if (x >= x0 - 0.1 && x <= x1 + 0.1 && y >= base - 0.2 && y <= top + 0.35) return true; } return false; }
+    if (p.type === 'crane' && m.legL) return [m.legL.x, m.legR.x].some(lx => lx + 0.5 >= x0 && lx - 0.5 <= x1 && m.start.y + p.rise + 2.8 >= base && Math.min(m.legL.y, m.legR.y) <= top + 0.3);   // a trolley gantry blocks only at its two legs, so a shelf can go between them
     const b = glBounds(p, m, g, pl0); return b.x1 >= x0 && b.x0 <= x1 && b.y1 >= base && b.y0 <= top + 0.3; });
 }
 function glPlatFlash(c) { GLB.flash = { c, until: performance.now() + 1800 }; toast(GL_PLATMSG); }
@@ -223,7 +225,10 @@ function glPaintDock() {
     acts += roped ? '' : '<button type="button" class="ghost sm" data-gm="rope">🪢 Rope it to the Gumdrop</button>';
     if (!roped && !faults.length) fb = GL_FAULT.norope + (fb ? ' ' + fb : ''); }
   if (p.type === 'ramp') { title = 'Ramp'; icon = '📐'; body = pm('L', 'Length', `${fmt(p.L, 1)} m`) + `<p class="glnote">Drag the round handle at the top to make it longer or steeper.</p>` + body; }
-  else if (p.type === 'crane') { title = 'Crane gantry'; icon = '🏗️'; body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`) + body; }
+  else if (p.type === 'crane') { title = 'Crane gantry'; icon = '🏗️'; const ac = p.across || 0, ad = p.adir || (ac < 0 ? -1 : 1);
+    body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`) + pm('across', 'Move across', ac ? `${fmt(Math.abs(ac), 1)} m ${ac < 0 ? 'left' : 'right'}` : '0 m')
+      + `<div class="glrow"><span>Direction</span><button type="button" class="ghost sm ${ad < 0 ? 'on' : ''}" data-gm="dirL">Left</button><button type="button" class="ghost sm ${ad > 0 ? 'on' : ''}" data-gm="dirR">Right</button></div>`
+      + `<p class="glnote">${ac ? 'The trolley carries the load across, then sets it down on the glowing spot. Carrying it across adds no lifting work.' : 'The trolley rolls along the top beam. Move across, then it sets the load down on a shelf or platform.'}</p>` + body; }
   else if (p.type === 'jack') { title = p.role === 'boulder' ? 'Screw jack (on the boulder)' : 'Screw jack'; icon = '🔩'; body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`); }
   else if (p.type === 'lever') { title = p.role === 'boulder' ? 'Lever (on the boulder)' : 'Lever'; icon = '⚖️'; help = 'lever'; body = pm('arm', 'Load arm', `${fmt(p.arm, 1)} m`) + `<p class="glnote">Effort arm: <b>${fmt(GL.beam - p.arm, 1)} m</b>. The beam is 10 m long.</p>` + (p.role === 'boulder' ? '' : pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`)); acts += '<button type="button" class="ghost sm" data-gm="flip">↔ Turn it around</button>'; }
   else if (p.type === 'platform') { title = `${GL_PLAT[p.size].name} platform`; icon = '◻️'; body = pm('h', 'Height', `${fmt(p.h, 1)} m`) + `<div class="glrow">${['S', 'M', 'L'].map(s => `<button type="button" class="ghost sm ${p.size === s ? 'on' : ''}" data-gm="size${s}">${GL_PLAT[s].name}</button>`).join('')}</div><p class="glnote">Holds <b>${GL_PLAT[p.size].holds.toLocaleString('en-GB')} N</b>. Drag its top edge to change the height. The Gumdrop lands on platforms.</p>`; }
@@ -243,6 +248,7 @@ function glMenuAct(k) {
   if (k === 'cut') GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
   else if (k === 'rope') { if (!GLB.rig.cables.some(c => (c.a === 'ship' && c.b === id) || (c.b === 'ship' && c.a === id))) GLB.rig.cables.push({ a: 'ship', b: id }); }
   else if (k === 'flip') p.dir = -(p.dir || 1);
+  else if (k === 'dirL' || k === 'dirR') { p.adir = k === 'dirL' ? -1 : 1; if (p.across) p.across = Math.abs(p.across) * p.adir; }
   else if (k === 'big') p.big = !p.big;
   else if (k.startsWith('size')) p.size = k[4];
   else if (k.startsWith('ropes')) p.ropes = +k.slice(5);
@@ -250,6 +256,7 @@ function glMenuAct(k) {
   else { const key = k.slice(0, -1), up = k.endsWith('+') ? 1 : -1;
     if (key === 'L') { p.L = clamp(p.L + 0.5 * up, 1, GL.rampMax); p.rise = Math.min(p.rise, p.L / 2); }
     if (key === 'rise') p.rise = clamp(p.rise + 0.5 * up, 0.5, p.type === 'crane' ? GL.craneRise : p.type === 'lever' ? GL.leverRise : GL.jackRise);
+    if (key === 'across') { const d = p.adir || (p.across < 0 ? -1 : 1), mag = clamp(Math.abs(p.across || 0) + 0.5 * up, 0, GL.craneAcross); p.across = mag ? mag * d : 0; if (!p.adir) p.adir = d; }
     if (key === 'arm') p.arm = clamp(p.arm + 0.5 * up, 0.5, 5);
     if (key === 'h') p.h = clamp(p.h + 0.5 * up, 0.5, GL.platMaxH); }
   glChanged();

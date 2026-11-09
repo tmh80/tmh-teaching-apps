@@ -10,7 +10,9 @@
    Rigs saved before ropes existed have no v: glMigrate() ropes every ramp and crane to 'ship' so they still work.
    Lift machines (one leg each):
      ramp   { id, type:'ramp', x1, y1, L, rise }          foot at (x1, y1); head = foot + (√(L² − rise²), rise)
-     crane  { id, type:'crane', x, rise }                 stands on whatever is under x; lifts straight up
+     crane  { id, type:'crane', x, rise, across }         stands on whatever is under x; the hook lifts by rise, then the trolley carries the load `across` metres
+                                                          (signed: + right, − left, default 0, at most GL.craneAcross) and sets it down on the ground, a shelf or a platform
+                                                          there. The set-down must be within GL.hzY of the lifted height. The gantry's span grows to cover both spots.
      lever  { id, type:'lever', x, arm, rise, dir }       x = the load end; arm = load arm (fulcrum distance); the beam reaches
                                                           10 m towards dir (+1 right, −1 left); MA = (10 − arm) ÷ arm
      jack   { id, type:'jack', x, rise }
@@ -21,7 +23,7 @@
    dyn      { id, type:'dyn', big:true|false, x }       blasts the surface at x, in the order placed
 */
 const GL = { g: 4.2, ship: 6300, rock: 2100, boulderN: 252, pullOk: 60, budget: 475, oxy: 1500, W: 96, shipX: 14, boulderX: 19,
-  hzX: 3, hzY: 0.5, rampMax: 30, slopeMax: 0.5, beam: 10, leverMAmax: 9, leverRise: 2, jackMA: 120, jackRise: 2, craneRise: 8, platMaxH: 8,
+  hzX: 3, hzY: 0.5, rampMax: 30, slopeMax: 0.5, beam: 10, leverMAmax: 9, leverRise: 2, jackMA: 120, jackRise: 2, craneRise: 8, craneAcross: 8, platMaxH: 8,
   winchRatios: [2, 4, 6, 7, 8, 10], ropesMax: 4, winchMax: 2, nearShip: 6, sit: 0.3, bed: 0.6, dig: 0.2, rimFrom: 44, rimTo: 76 };
 const GL_COST = { ramp: 3, crane: 40, lever: 25, jack: 60, rope: 10, winch: 15, cablePer5: 1, small: 20, big: 40 };
 const GL_PLAT = { S: { holds: 4000, base: 10, w: 3, name: 'Small' }, M: { holds: 7000, base: 20, w: 4, name: 'Medium' }, L: { holds: 10000, base: 35, w: 5, name: 'Large' } };
@@ -84,7 +86,13 @@ function glMachine(p, g, plats) {
     const fl = glFloorKind(p.x, g, plats), cap = p.type === 'crane' ? GL.craneRise : p.type === 'lever' ? GL.leverRise : GL.jackRise;
     m.start = { x: p.x, y: fl.y }; m.rise = p.rise; m.end = { x: p.x, y: +(fl.y + p.rise).toFixed(3) }; m.base = fl; m.dist = p.rise;
     if (p.rise <= 0 || p.rise > cap + 1e-9) m.faults.push('rise');
-    if (p.type === 'crane') m.ma = 1;
+    if (p.type === 'crane') { m.ma = 1; const ac = p.across || 0; m.across = ac;
+      if (ac) { /* the trolley: lift by rise, roll across, set down on whatever is under the load there (the hand-over rule, made visible) */
+        const lx = p.x + ac, ly = m.end.y, dn = glFloorKind(lx, g, plats); m.lifted = { x: p.x, y: ly };
+        if (Math.abs(ac) > GL.craneAcross + 1e-9) m.faults.push('across');
+        if (lx < 0 || lx > GL.W || Math.abs(dn.y - ly) > GL.hzY + 1e-9) m.faults.push('drop');
+        m.end = { x: +lx.toFixed(3), y: +dn.y.toFixed(3) }; m.down = dn;
+        m.legL = { x: Math.min(p.x, lx) - 3.2, y: glFloorAt(Math.min(p.x, lx) - 3.2, g, plats) }; m.legR = { x: Math.max(p.x, lx) + 3.2, y: glFloorAt(Math.max(p.x, lx) + 3.2, g, plats) }; } }
     if (p.type === 'jack') m.ma = GL.jackMA;
     if (p.type === 'lever') { m.ma = glLeverMA(p); if (m.ma > GL.leverMAmax + 1e-9 || p.arm <= 0 || p.arm >= GL.beam) m.faults.push('fulcrum'); m.dist = m.ma * p.rise; }
   }

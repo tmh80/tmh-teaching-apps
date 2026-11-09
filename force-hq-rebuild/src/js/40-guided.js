@@ -79,7 +79,10 @@ function cardsDone() {
 const taskQ = t => (t[2] && t[2].q) ? ((CHDATA[CH.id].steps[GI].qs || []).find(q => q.id === t[2].q) || null) : null;
 /* The number box only suits a typed number. A pick, tick, fix or reason question has real answer controls that live in "Your turn", so its task shows the sentence with ___ for each gap and says where to answer (Tom, 3 Nov 2026: the {0} gaps and an empty tick list were confusing). */
 const taskNum = q => !!q && (q.type === 'num' || q.type === 'reading');
-const taskHTML = t => { const q = taskQ(t); if (!q) return t[0] ? `<span class="tkdo">${t[0]}</span>` : '';
+/* a task with { reveal: flagName, answer } has a one-tap "Show the answer" (the answer stays once shown; it ticks the task together with its done()) */
+const taskReveal = t => { const o = t[2] || {}; if (!o.reveal) return ''; const on = !!S.flags[o.reveal];
+  return ` <button type="button" class="ghost sm" data-tkrev="${o.reveal}" ${on ? 'hidden' : ''}>Show the answer</button><span class="tkrev" ${on ? '' : 'hidden'}><b>${o.answer}</b></span>`; };
+const taskHTML = t => { const q = taskQ(t); if (!q) return t[0] ? `<span class="tkdo">${t[0]}</span>${taskReveal(t)}` : '';
   const p = taskNum(q) ? q.p : String(q.p).replace(/\{\d+\}/g, '___');
   return (t[2].ask !== false ? `<span class="tkq">${p}</span>` : '') + (t[0] ? `<span class="tkdo">${t[0]}</span>` : '') + (!taskNum(q) && t[2].ask !== false ? `<span class="tkdo">${q.type === 'pick' ? 'Choose the words' : q.type === 'tick' ? 'Tick your answers' : 'Answer it'} in <b>Your turn</b>: press <b>Next: questions</b>.</span>` : ''); };
 const taskPlain = t => plain(taskHTML(t).replace(/<\/span><span/g, '</span> <span'));
@@ -131,6 +134,7 @@ function renderRail() {
   $('#gReread').addEventListener('click', playStepCards);
   bindTkAns();
   { const st = CHDATA[CH.id].steps[GI]; if (st && st.predict && st.predict.kind === 'sketch' && !predSketch()) predSketchBind(st.predict); }
+  $$('#rail [data-tkrev]').forEach(b => b.addEventListener('click', () => { S.flags[b.dataset.tkrev] = true; renderRail(); checkStep(); }));
   $$('#rail [data-pred]').forEach(b => b.addEventListener('click', () => { dbSet(stepKey(CH.id, GI) + '.pred', +b.dataset.pred); renderRail(); checkStep(); }));
   $('#gPrev').addEventListener('click', () => { if (GI === 0) { if (hasICAN(CH.id)) showIntro(); } else setStep(GI - 1); });
   $('#gNext').addEventListener('click', tryNext);

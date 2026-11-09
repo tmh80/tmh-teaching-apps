@@ -274,9 +274,11 @@ function renderShopCourse(ch, wm, host, save) {
   };
   const load = i => {
     cur = i; const m = wm[cur];
-    shopStage(Object.assign({}, m.setup, { cap: m.cap })); S.flags = newFlags(); resetSim(); judged = null;
-    LAB.show = new Set(m.show); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = 'Choose your setting, then press the button';
-    applyPanels(); labChanged(); paint();
+    /* a mission with setup.lesson builds on the shared builder (lesson mode): the tray, the crane's trolley and the panel replace the old setting boxes. The maths and the judging below are the same. */
+    if (m.setup.lesson) lessonStage(Object.assign({}, m.setup, { cap: m.cap, lesson: Object.assign({ tray: [], pre: [], lock: [] }, m.setup.lesson, { mid: m.id, ch }) })); else shopStage(Object.assign({}, m.setup, { cap: m.cap }));
+    S.flags = newFlags(); resetSim(); judged = null;
+    LAB.show = new Set(m.show); LAB.sides = []; LAB.pullers = []; LAB.floors = ['air']; LAB.idle = m.idle || 'Choose your setting, then press the button';
+    applyPanels(); labChanged(); if (m.setup.lesson && typeof lsRender === 'function') lsRender(); paint();
   };
   card.addEventListener('click', e => { const b = e.target.closest('[data-sr]'); if (b) load(+b.dataset.sr); });
   $('#shNext', card).addEventListener('click', () => { const m = wm[cur], s = get(m.id); save(m, { clues: Math.min(m.clues.length, (s.clues || 0) + 1) }); paint(); });

@@ -14,7 +14,8 @@ Object.assign(LS_PIECES, {
   crane: { name: 'Crane gantry', icon: '🏗️', note: 'drag it over the load', mach: null,
     cards: [{ t: 'This is a crane gantry: a tall frame with a hook at the top.', ghost: 'point' },
       { t: 'The rope goes from the load, up over the top, and down to Smooshy. When he pulls down, the load goes straight up.', ghost: 'point' },
-      { t: 'On its own it doesn\'t make the pull smaller. Hang a pulley block on its hook to do that.', ghost: 'point' }] },
+      { t: 'On its own it doesn\'t make the pull smaller. Hang a pulley block on its hook to do that.', ghost: 'point' },
+      { t: 'The trolley rolls along the top beam. It carries the load across, then sets it down on a shelf or platform.', ghost: 'point' }] },
   block: { name: 'Pulley block', icon: '🪢', note: 'hang it on a hook', mach: 'pulley',
     cards: [{ t: 'A pulley block is a set of wheels that hangs from a hook.', ghost: 'point' },
       { t: 'Drag it onto the crane\'s hook (the ◉ dot). It glows and clips on.', ghost: 'drop' },
@@ -62,7 +63,7 @@ function lsNeed() {
   if (lsPutWinch()) A.push(['top', 'wd']);
   return A;
 }
-function lsReady() { const m = WS.mach; if ((m === 'pulley' || m === 'winch') && !LS.pl.crane) return false; return m === 'winch' ? !!LS.pl.winch : m === 'ramp' ? !!LS.pl.ramp : m === 'build' ? lsRoute() !== 'none' : m === 'screw' ? !!LS.pl.jack : true; }
+function lsReady() { const m = WS.mach; if ((m === 'pulley' || m === 'winch') && !LS.pl.crane) return false; if (lsTro() && !lsTroOk()) return false; return m === 'winch' ? !!LS.pl.winch : m === 'ramp' ? !!LS.pl.ramp : m === 'build' ? lsRoute() !== 'none' : m === 'screw' ? !!LS.pl.jack : true; }
 function lsInitCab(m) {
   if (m === 'hand') return [['load', 'end']];
   if (m === 'pulley' || m === 'winch') return LS.pl.crane ? [['load', 'top']] : [];
@@ -76,16 +77,32 @@ function lsGL(K, fn) {
 }
 const lsFlat = () => new Array(100).fill(0);
 
+/* ---------- the trolley in lesson mode (spec section 14) ----------
+   A step with lesson: { trolley: { shelf: { across, h, w } } } gives the crane Move across (LS.across, signed metres) and puts a shelf on the bench. The load lifts by the lift height, the trolley carries it
+   across, then sets it down on whatever is under it there: the shelf (if the spot is over it) or the floor. It must be within GL.hzY (0.5 m) of the lifted height, like the rescue. The maths (WS) does not change. */
+/* a pull that carried the load across onto the shelf is what ticks the u3 practice (the maths record is untouched) */
+function lsAfterPull() { const T = lsTro(); if (T && lsAcross() && lsTroOk() && lsTroSurface(lsAcross()) === T.shelf.h) S.flags.u3carried = true; }
+const lsTro = () => (LS.on && LS.o && LS.o.trolley && (WS.mach === 'pulley' || WS.mach === 'winch' || (WS.mach === 'build' && !LS.pl.ramp)) && LS.pl.crane) ? LS.o.trolley : null;
+const lsVf = () => Math.min(1, 2.4 / Math.max(WS.lift, 2.4));   // a tall lift (the 6 m and 10 m jobs) is drawn squashed so it fits the bench: the board shows the real height in words
+const lsHoldName = () => { const T = lsTro(); return (T && T.shelf.name) || 'shelf'; };
+const lsAcross = () => lsTro() ? (LS.across || 0) : 0;
+function lsTroSurface(a) { const T = lsTro(), sh = T && T.shelf; return sh && Math.abs(a - sh.across) <= sh.w / 2 + 1e-9 ? sh.h : 0; }
+const lsTroOk = () => { const T = lsTro(); if (!T) return true; const a = lsAcross(); if (!a) return !T.required; return Math.abs(lsTroSurface(a) - WS.lift) <= GL.hzY + 1e-9; };
+function lsTroStep(k) { const d = LS.adir || (LS.across < 0 ? -1 : 1), mag = clamp(Math.abs(LS.across || 0) + (k === 'across+' ? 0.5 : -0.5), 0, 4); LS.across = mag ? mag * d : 0; LS.adir = d; }
+/* where the load is at a point in the pull: lift (0 to 0.6), roll across (0.6 to 0.85), lower (0.85 to 1) */
+function lsTroPhase(prog) { const a = lsAcross(); if (!a) return { lift: prog, dx: 0, low: 0 }; return { lift: clamp(prog / 0.6, 0, 1), dx: clamp((prog - 0.6) / 0.25, 0, 1), low: clamp((prog - 0.85) / 0.15, 0, 1) }; }
+
 /* ---------- where things are: a crane (or gantry) lift ---------- */
-function lsGeoCrane(riseNow, prog) {
-  const K = LS_KC, R = lsRmax(), topY = Math.max(52, LS_FLOOR - R * K - 168), cx = LS_CX, hw = 1.6 * K, ly = LS_FLOOR - (riseNow || 0) * K, useB = lsUseBlock(), n = WS.mach === 'pulley' ? WS.ropes : (WS.bn || 1);
-  const load = { x: cx, y: ly - 47 }, blkC = { x: cx, y: load.y - 26 }, blk = { x: cx, y: blkC.y - 15 }, top = { x: cx, y: topY + 26 }, xr = cx + hw + 6, slot = lsWinchSlot(), winch = lsPutWinch();
+function lsGeoCrane(riseNow, prog, dx) {
+  const K = LS_KC, f = lsVf(), R = lsRmax() * f, topY = Math.max(52, LS_FLOOR - R * K - 168), cx = LS_CX, hw = 1.6 * K, ly = LS_FLOOR - (riseNow || 0) * K * f, hiPx = Math.max(0, lsAcross()) * K, useB = lsUseBlock(), n = WS.mach === 'pulley' ? WS.ropes : (WS.bn || 1), tx = cx + (dx || 0);   // tx: the trolley
+  const load = { x: tx, y: ly - 47 }, blkC = { x: tx, y: load.y - 26 }, blk = { x: tx, y: blkC.y - 15 }, top = { x: tx, y: topY + 26 }, xr = cx + hw + 6 + hiPx, slot = lsWinchSlot(), winch = lsPutWinch();
   const wc = { x: xr + 66, y: LS_FLOOR - 44 }, T = { x: xr, y: slot ? 250 + (prog || 0) * 50 : topY + 36 + (prog || 0) * 100 }, wd = winch ? { x: wc.x, y: wc.y } : { x: xr, y: slot ? 292 : T.y };
-  return { K, R, topY, cx, hw, ly, load, blkC, blk, top, xr, n, useB, slot, winch, wc, T, wd };
+  return { K, R, topY, cx, tx, hw, ly, load, blkC, blk, top, xr, n, useB, slot, winch, wc, T, wd };
 }
 /* a lift up a ramp: the foot on the floor, the top resting on the platform */
 function lsGeoRamp(prog) {
-  const K = LS_KR, build = WS.mach === 'build', L = build ? 6 : WS.L, h = build ? WS.lift : WS.h, run = Math.sqrt(Math.max(.01, L * L - h * h)), fx = LS_FX, tx = fx + run * K, ty = LS_FLOOR - h * K;
+  const build = WS.mach === 'build', L = build ? (WS.br || 6) : WS.L, h = build ? WS.lift : WS.h, run = Math.sqrt(Math.max(.01, L * L - h * h)), K = Math.min(LS_KR, 540 / Math.max(run, 1)), fx = LS_FX,   // a long ramp (the 18 m job) is drawn smaller so it fits the bench
+    tx = fx + run * K, ty = LS_FLOOR - h * K;
   const lp = Math.hypot(tx - fx, ty - LS_FLOOR), cs = (tx - fx) / lp, sn = (ty - LS_FLOOR) / lp, placed = !!LS.pl.ramp, t = placed ? clamp(prog || 0, 0, 1) : 0, d = 34 + (lp - 68) * t;
   const th = Math.max(5, 0.42 * K * 0.32), nx = sn, ny = -cs;   // the normal that points up the screen
   const cart = placed ? { x: fx + cs * d + nx * (th + 17), y: LS_FLOOR + sn * d + ny * (th + 17) } : { x: fx + 44, y: LS_FLOOR - 17 }, ang = placed ? Math.atan2(sn, cs) : 0;
@@ -109,18 +126,24 @@ function lsSheaves(c, cx, y, n, s) {
   lsGL(K, () => { for (let i = 0; i < n; i++) glDrawBlock(c, { x: (cx - w / 2 + i * 18) / K, y: (LS_FLOOR - y) / K, s: s || 0.3 }, false); });
 }
 function lsDrawCraneScene(c, cur, riseNow, prog) {
-  const g = lsGeoCrane(riseNow, prog), K = g.K, roped = g.useB ? lsJoined('blk', 'top') : lsJoined('load', 'top'), showCrane = !!LS.pl.crane;
+  const tro = lsTro(), ac = lsAcross(), ph = lsTroPhase(prog || 0), tdx = ac ? ac * LS_KC * ph.dx : 0;
+  if (ac) { riseNow = (riseNow || 0) ? WS.lift * ph.lift : 0; if (ph.low) riseNow = WS.lift + (lsTroSurface(ac) - WS.lift) * ph.low; prog = ph.lift; }   // the rope only winds while the load goes up
+  const g = lsGeoCrane(riseNow, prog, tdx), K = g.K, roped = g.useB ? lsJoined('blk', 'top') : lsJoined('load', 'top'), showCrane = !!LS.pl.crane;
   if (!showCrane) { lsLoadBox(c, g.cx, g.ly, lsLoadLabel(), false); return { x: g.cx, y: 200 }; }
-  lsGL(K, () => glDrawCrane(c, { x: g.cx / K, rise: (LS_FLOOR - g.topY) / K - 1.3, s: 0.5 }, { start: { x: 0, y: 0 } }, false, (LS_FLOOR - g.top.y) / K));
-  lsLoadBox(c, g.cx, g.ly, lsLoadLabel(), g.useB ? lsJoined('blk', 'top') : roped);
+  if (tro) lsGL(K, () => { const sh = tro.shelf, x0 = (g.cx + (sh.across - sh.w / 2) * K) / K, x1 = (g.cx + (sh.across + sh.w / 2) * K) / K; glDrawPlatform(c, { x0, x1, top: sh.h * lsVf(), base: 0, s: 0.32 }, false);
+    if ((ac || tro.required) && !prog) glDrawSetDown(c, { end: { x: (g.cx + (ac || sh.across) * K) / K, y: lsTroSurface(ac || sh.across) * lsVf() } }, performance.now() / 1000, !!ac && !lsTroOk()); });
+  if (tro && tro.shelf.name) lblAdd(`${tro.shelf.name}${tro.shelf.h > 2.4 ? ' (' + fmt(tro.shelf.h, 0) + ' m up)' : ''}`, g.cx + tro.shelf.across * K, LS_FLOOR - tro.shelf.h * lsVf() * K - 44, { size: 11, col: '#fff', bg: 'rgba(80,60,140,.85)', prio: 3 });
+  const half = 1.6, lo = Math.min(0, ac) * K, hi = Math.max(0, ac) * K, legs = ac ? { legL: { x: (g.cx + lo) / K - half, y: 0 }, legR: { x: (g.cx + hi) / K + half, y: 0 } } : {};
+  lsGL(K, () => glDrawCrane(c, { x: g.cx / K, rise: (LS_FLOOR - g.topY) / K - 1.3, s: 0.5 }, Object.assign({ start: { x: 0, y: 0 } }, legs), false, (LS_FLOOR - g.top.y) / K, ac ? g.tx / K : undefined));
+  lsLoadBox(c, g.tx, g.ly, lsLoadLabel(), g.useB ? lsJoined('blk', 'top') : roped);
   if (g.useB) {   // the pulley block hangs on the load's hook; N strands run up to the crane's hook
     c.strokeStyle = GLC.rope; c.lineWidth = 3; c.beginPath(); c.moveTo(g.load.x, g.load.y); c.lineTo(g.blkC.x, g.blkC.y + 6); c.stroke();
-    lsSheaves(c, g.cx, g.top.y + 18, g.n); lsSheaves(c, g.cx, g.blkC.y + 6, g.n);
-    if (roped) { const w = (g.n - 1) * 18; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.lineCap = 'round'; for (let i = 0; i < g.n; i++) { const x = g.cx - w / 2 + i * 18; c.beginPath(); c.moveTo(x, g.blkC.y - 8); c.lineTo(x, g.top.y + 26); c.stroke(); } }
+    lsSheaves(c, g.tx, g.top.y + 18, g.n); lsSheaves(c, g.tx, g.blkC.y + 6, g.n);
+    if (roped) { const w = (g.n - 1) * 18; c.strokeStyle = '#d9c28a'; c.lineWidth = 3; c.lineCap = 'round'; for (let i = 0; i < g.n; i++) { const x = g.tx - w / 2 + i * 18; c.beginPath(); c.moveTo(x, g.blkC.y - 8); c.lineTo(x, g.top.y + 26); c.stroke(); } }
   } else if (lsJoined('load', 'top')) drawRopePx(c, g.load, g.top, 4, 0);
   let ep, tail = roped, winchOn = g.winch && lsJoined('top', 'wd');
   if (tail) {   // over the top and down the right-hand side
-    c.strokeStyle = '#d9c28a'; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(g.top.x, g.top.y); c.lineTo(g.cx, g.topY); c.lineTo(g.xr, g.topY);
+    c.strokeStyle = '#d9c28a'; c.lineWidth = 4; c.lineCap = 'round'; c.beginPath(); c.moveTo(g.top.x, g.top.y); c.lineTo(g.tx, g.topY); c.lineTo(g.xr + (ac > 0 ? hi : 0), g.topY);
     if (winchOn) c.lineTo(g.wc.x, g.wc.y - 20); else c.lineTo(g.xr, g.T.y); c.stroke();
   }
   if (g.winch) {
@@ -290,6 +313,9 @@ function lsGhostDraw(t, c) {
 const lsGhostStart = t => { const cv = lsCanvas(); if (!cv) return; ndGhostBegin(900, WS_H, cv.getBoundingClientRect().width / 900, c => lsGhostDraw(t, c)); };
 
 /* ---------- the docked panel ---------- */
+const lsTroRows = () => { const a = lsAcross(), d = LS.adir || (a < 0 ? -1 : 1);
+  return lsPM('across', 'Move across', a ? `${fmt(Math.abs(a), 1)} m ${a < 0 ? 'left' : 'right'}` : '0 m', !a, Math.abs(a) >= 4 - 1e-9) + `<div class="glrow"><span>Direction</span><button type="button" class="ghost sm ${d < 0 ? 'on' : ''}" data-lm="adir:-1">Left</button><button type="button" class="ghost sm ${d > 0 ? 'on' : ''}" data-lm="adir:1">Right</button></div>`
+    + (a ? (lsTroOk() ? '<p class="glnote">The trolley carries the load across, then sets it down on the glowing spot. Carrying it across adds no lifting work.</p>' : `<p class="glnote">Nothing to set it on there. Move across until the glow is on the ${lsHoldName()}${WS.lifts && WS.lifts.pick ? ', and lift the same height as it' : ''}.</p>`) : `<p class="glnote">The trolley rolls along the top beam. Move across, then it sets the load down on the ${lsHoldName()}.</p>`); };
 const lsPM = (k, lab, val, atMin, atMax) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-lm="${k}-" aria-label="Less" ${atMin ? 'disabled' : ''}>−</button><b>${val}</b><button type="button" class="ghost sm" data-lm="${k}+" aria-label="More" ${atMax ? 'disabled' : ''}>+</button></div>`;
 const lsChoice = (k, lab, opts, cur) => `<div class="glrow wrap"><span>${lab}</span></div><div class="glrow wrap" style="margin-top:0">${opts.map(([v, l]) => `<button type="button" class="ghost sm ${String(v) === String(cur) ? 'on' : ''}" data-lm="${k}:${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join('')}</div>`;
 const lsRm = t => lsLocked(t) ? '' : `<button type="button" class="ghost sm" data-lm="rm:${t}">🗑 Remove</button>`;
@@ -312,19 +338,20 @@ function lsDockSc() {
   const r = lsRoute(), out = [];
   const cw = lsNoCrane(), cwNote = `<p class="glnote">${lsWaitMsg()}</p>`, craneNone = `<p class="glnote">Drag the 🏗️ crane gantry from the tray over the ${WS.loadShort}. It snaps on and ropes to the hook.</p>`;
   if (m === 'pulley') {
-    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the crate is roped to the hook') .replace('the crate', `the ${WS.loadShort}`) + (WS.lifts && WS.lifts.pick ? lsChoice('lift', 'Lift height', [[1, '1 m'], [2, '2 m']], WS.lift) : '') + '<p class="glnote">The rope goes from the load, up over the top, and down to Smooshy.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
+    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the crate is roped to the hook') .replace('the crate', `the ${WS.loadShort}`) + (WS.lifts && WS.lifts.pick ? lsChoice('lift', 'Lift height', [[1, '1 m'], [2, '2 m']], WS.lift) : '') + (lsTro() ? lsTroRows() : '') + '<p class="glnote">The rope goes from the load, up over the top, and down to Smooshy.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
     out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsPM('ropes', 'Supporting ropes', WS.ropes, WS.ropes <= 1, WS.ropes >= (WS.lim.ropesMax || 6)) + (ml ? `<div class="glrow"><span>MA</span><b>×${WS.ropes}</b></div>` : '') + '<p class="glnote">More supporting ropes share the load, so Smooshy pulls less (and pulls more rope).</p>' : cw ? cwNote : `<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook. With no block there is 1 rope.</p>`, LS.pl.block ? lsRm('block') : ''));
   } else if (m === 'winch') {
-    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the rope runs to the winch') + '<p class="glnote">The rope runs from the load, up over the top, and down to the ◉ rope end.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
+    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the rope runs to the winch') + (lsTro() ? lsTroRows() : '') + '<p class="glnote">The rope runs from the load, up over the top, and down to the ◉ rope end.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
     out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsPM('R', 'Handle radius', fmt(WS.R, 2) + ' m', WS.R <= wsLimits('R').min + 1e-9, WS.R >= wsLimits('R').max - 1e-9) + (WS.axleEdit ? lsPM('axle', 'Axle radius', fmt(WS.axle, 2) + ' m', WS.axle <= 0.04 + 1e-9, WS.axle >= 0.1 - 1e-9) : `<div class="glrow"><span>Axle radius</span><b>${fmt(WS.axle, 2)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">A bigger handle means an easier turn, but more turning.</p>' : cw ? cwNote : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
   } else if (m === 'ramp') {
     const lm = wsLimits('L'), hm = wsLimits('h');
     out.push(sec('📐', 'Ramp', 'ramp', LS.pl.ramp ? lsPM('L', 'Length', fmt(WS.L, 1) + ' m', WS.L <= lm.min + 1e-9, WS.L >= lm.max - 1e-9) + (WS.rampH ? lsPM('h', 'Height', fmt(WS.h, 1) + ' m', WS.h <= hm.min + 1e-9, WS.h >= hm.max - 1e-9) : `<div class="glrow"><span>Height</span><b>${fmt(WS.h, 1)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + lsRopeRow('the cart is roped to the top') + '<p class="glnote">Drag the white handle at the top of the ramp, or use − and +. A longer ramp means a smaller pull, but further to go.</p>' : '<p class="glnote">Drag the 📐 ramp from the tray in. Its foot sits on the floor and its top rests on the platform.</p>', (LS.pl.ramp ? lsRopeAct() : '') + (LS.pl.ramp ? lsRm('ramp') : '')));
   } else if (m === 'build') {
-    const tot = wsCalc(); out.push(sec('🔗', 'Machine chain', 'cables', `<div class="glrow"><span>Route</span><b>${r === 'ramp' ? '6 m ramp' : r === 'crane' ? 'crane gantry' : LS.o.tray.includes('ramp') ? 'choose one' : 'add the crane gantry'}</b></div>` + lsRopeRow() + ((wsHas('bTotMA') || wsHas('readMA')) && !wsMasked(wsRecord(tot)).has('bTotMA') && !wsMasked(wsRecord(tot)).has('readMA') ? `<div class="glrow"><span>Total MA</span><b>${fmt(tot.ma, 2)}</b></div>` : '') + '<p class="glnote">Drag from one ◉ to the next to join them. Smooshy works the last machine in the chain.</p>', lsRopeAct() + (r !== 'none' && !lsLocked(r) ? lsRm(r) : '')));
+    const tot = wsCalc(); out.push(sec('🔗', 'Machine chain', 'cables', `<div class="glrow"><span>Route</span><b>${r === 'ramp' ? '6 m ramp' : r === 'crane' ? 'crane gantry' : LS.o.tray.includes('ramp') ? 'choose one' : 'add the crane gantry'}</b></div>` + lsRopeRow() + (lsTro() ? lsTroRows() : '') + ((wsHas('bTotMA') || wsHas('readMA')) && !wsMasked(wsRecord(tot)).has('bTotMA') && !wsMasked(wsRecord(tot)).has('readMA') ? `<div class="glrow"><span>Total MA</span><b>${fmt(tot.ma, 2)}</b></div>` : '') + '<p class="glnote">Drag from one ◉ to the next to join them. Smooshy works the last machine in the chain.</p>', lsRopeAct() + (r !== 'none' && !lsLocked(r) ? lsRm(r) : '')));
+    if (LS.pl.ramp && WS.bRoutes.filter(q => q[0] > 0).length > 1) out.push(sec('📐', 'Ramp', 'ramp', lsChoice('br', 'Ramp length', WS.bRoutes.filter(q => q[0] > 0).map(q => [q[0], q[0] + ' m']), WS.br) + '<p class="glnote">A longer ramp means a smaller pull, but more cable.</p>', ''));
     if (LS.o.tray.includes('block') || LS.pl.block) out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsChoice('bn', 'Supporting ropes', WS.bRopes.filter(v => v > 0).map(v => [v, String(v)]), WS.bn) + '<p class="glnote">More supporting ropes share the load.</p>' : cw ? cwNote : '<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook.</p>', LS.pl.block ? lsRm('block') : ''));
     if (LS.o.tray.includes('winch') || LS.pl.winch) out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsChoice('bw', 'Winch ×', WS.bWinches.map(v => [v, '×' + v]), WS.bw) + '<p class="glnote">Smooshy turns the winch handle. Its rope winds round the axle.</p>' : cw ? cwNote : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
-    if (LS.o.tray.includes('ramp') && LS.stage !== 'two') out.push(`<button type="button" class="go sm" data-lm="two:start" style="margin-top:8px" ${lsK3Open() ? '' : 'disabled'}>➡ Two-leg practice</button><p class="glnote">${lsK3Open() ? 'Next: a crate goes up a ramp, then a crane lifts it.' : 'Finish the generator job first.'}</p>`);
+    if (LS.o.tray.includes('ramp') && LS.stage !== 'two') out.push(`<button type="button" class="go sm" data-lm="two:start" style="margin-top:8px" ${lsK3Open() ? '' : 'disabled'}>➡ Two-leg practice</button><p class="glnote">${lsK3Open() ? 'Next: a crane lifts a crate onto a shelf, then a ramp takes it up.' : 'Finish the generator job first.'}</p>`);
   }
   return tabs + out.join('<hr class="dkhr">');
 }
@@ -332,7 +359,9 @@ function lsSceneAct(k) {
   const [a, v] = k.split(':'), num = +v;
   if (a === 'tab') { wsSetMach(v); lsRender(); return true; }
   if (a === 'rm') { lsRemove(v); return true; }
-  if (a === 'thick' || a === 'per' || a === 'pitch' || a === 'lift' || a === 'bn' || a === 'bw') { wsSet(a, num); return true; }
+  if (a === 'thick' || a === 'per' || a === 'pitch' || a === 'lift' || a === 'bn' || a === 'bw' || a === 'br') { wsSet(a, num); return true; }
+  if (k === 'across-' || k === 'across+') { lsTroStep(k); wsRenderControls(); lsRender(); return true; }
+  if (a === 'adir') { LS.adir = num; if (LS.across) LS.across = Math.abs(LS.across) * num; wsRenderControls(); lsRender(); return true; }
   if (k === 'two:start') { lsTwoStart(); return true; }
   if (k === 'two:back') { lsTwoBack(); return true; }
   if (k === 'ropes-' || k === 'ropes+') { wsSet('ropes', WS.ropes + (k === 'ropes+' ? 1 : -1)); return true; }
@@ -348,6 +377,7 @@ function lsStatusSc() {
   const m = WS.mach, o = LS.o;
   if (lsIsTwo()) return lsTwoStatus();
   if (lsNoCrane() && !LS.o.tray.includes('ramp')) return `Drag the 🏗️ crane gantry from the tray over the ${WS.loadShort}.`;
+  if (lsTro() && !lsTroOk()) return lsAcross() ? `Nothing to set the load on there. Move across until the glow is on the ${lsHoldName()}${WS.lifts && WS.lifts.pick ? ', and lift the same height as it' : ''}.` : `Move across until the glow sits on the ${lsHoldName()}, then press the button.`;
   if (m === 'wedge') return 'The wedge is a demonstration: pick a thickness in the panel, then press ▶ Push!';
   if (m === 'screw') return LS.pl.jack ? 'Pick the handle circle and the thread gap in the panel, then press ▶ Turn!' : 'Drag the ⚙ screw jack from the tray under the car.';
   if (m === 'winch' && !LS.pl.winch) return 'Drag the ⚙ winch from the tray onto the ◉ end of the rope.';
@@ -358,63 +388,73 @@ function lsStatusSc() {
   return m === 'ramp' ? 'Drag the white handle at the top of the ramp to change its length.' : m === 'build' ? 'Pick the winch and the supporting ropes in the panel, then press ▶ Turn!' : '';
 }
 
-/* ---------- the k3 two-leg practice: a crate goes up a ramp to a platform, then a crane on the platform lifts it (spec section 11, last bullet) ---------- */
+/* ---------- the k3 two-leg practice (spec section 14): leg 1, the crane lifts the crate and its trolley sets it on a shelf; leg 2, a ramp from the shelf up to the platform ---------- */
 const lsK3Open = () => !!(typeof shopHas === 'function' && shopHas({ mach: 'build', bw: 4, bn: 2, br: 6 })) || !!S.flags.k3built;
 const lsK3Done = () => !!dbGet('k3two', false);
 function lsTwoGeo() {
-  const K = 36, fx = 238, h = 1.5, L = 4, run = Math.sqrt(L * L - h * h), tx = fx + run * K, ty = LS_FLOOR - h * K, gx = tx + 78;
-  return { K, fx, h, L, run, tx, ty, gx, plx1: tx + 160, crate: { x: 204, y: LS_FLOOR }, cHook: { x: 204, y: LS_FLOOR - 47 }, rampTop: { x: tx + 10, y: ty - 26 }, gHook: { x: gx, y: ty - 47 }, craneHook: { x: gx, y: ty - 100 }, goalY: ty - 72 };
+  const K = 36, cr = 170, h1 = 1.5, h2 = 3, sAc = 3, sw = 2.5, sx = cr + sAc * K, ty = LS_FLOOR - h1 * K, L = 4, rise = h2 - h1, run = Math.sqrt(L * L - rise * rise), fx = sx + 14, tx = fx + run * K, py = LS_FLOOR - h2 * K;
+  return { K, cr, h1, h2, sAc, sw, sx, ty, L, rise, run, fx, tx, py, plx1: tx + 150, crate: { x: cr, y: LS_FLOOR }, cHook: { x: cr, y: LS_FLOOR - 47 }, craneHook: { x: cr, y: 244 }, gHook: { x: sx, y: ty - 47 },
+    rampTop: { x: tx + 10, y: py - 26 }, craneRise: 2.4 };
 }
+const lsTwoAcross = () => (lsIsTwo() && LS.across) || 0;
+/* the set-down must be on the shelf (the only surface within 0.5 m of the 1.5 m lift) */
+const lsTwoAcrossOk = () => { const g = lsTwoGeo(), a = lsTwoAcross(); return a > 0 && Math.abs(a - g.sAc) <= g.sw / 2 + 1e-9; };
+const lsTwoLeg1 = () => !!(LS.two && LS.two.crane && lsJoined('c', 'ch') && lsTwoAcrossOk());
 function lsTwoStart() {
-  if (!lsK3Open()) return; LS.cabMain = LS.cab; LS.cab = []; LS.stage = 'two'; LS.two = { ramp: false, crane: false }; LS.place = null;
+  if (!lsK3Open()) return; LS.cabMain = LS.cab; LS.cab = []; LS.stage = 'two'; LS.two = { ramp: false, crane: false }; LS.place = null; LS.across = 0; LS.adir = 0;
   wsResetLoad(); lsRender(); if (!FAST && !lsSeen().platform) lsShowCards('platform');
 }
-function lsTwoBack() { LS.stage = 'main'; LS.two = null; LS.cab = LS.cabMain || []; LS.place = null; wsResetLoad(); wsRenderControls(); lsRender(); }
+function lsTwoBack() { LS.stage = 'main'; LS.two = null; LS.across = 0; LS.adir = 0; LS.cab = LS.cabMain || []; LS.place = null; wsResetLoad(); wsRenderControls(); lsRender(); }
 function lsTwoZones(t) {
   const g = lsTwoGeo(), Z = [];
-  if (t === 'ramp') Z.push({ x0: g.fx - 40, x1: g.fx + 40, y0: LS_FLOOR - 50, y1: LS_FLOOR + 6 });
-  if (t === 'crane' && LS.two && LS.two.ramp) Z.push({ x0: g.gx - 58, x1: g.gx + 58, y0: g.ty - 44, y1: g.ty + 8 });
+  if (t === 'crane') Z.push({ x0: g.cr - 70, x1: g.cr + 70, y0: LS_FLOOR - 120, y1: LS_FLOOR + 6 });
+  if (t === 'ramp' && lsTwoLeg1()) Z.push({ x0: g.sx - 40, x1: g.sx + 70, y0: g.ty - 44, y1: g.ty + 8 });
   return Z;
 }
 function lsTwoDrop(t, x, y) {
   if (!LS.two || LS.two[t]) return;
-  if (t === 'crane' && !LS.two.ramp) { toast('Build leg 1 first: drag the ramp from the crate up to the platform.'); return; }
-  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = t === 'ramp' ? 'Put the foot of the ramp by the crate, in the glowing box.' : 'Put the crane in the glowing box, over the ghost crate.'; toast(LS.flashMsg); return; }
-  LS.flash = 0; LS.two[t] = true; if (t === 'ramp') lsRope('c', 'rt'); toast(`✓ ${t === 'ramp' ? 'Ramp' : 'Crane gantry'} in the box!`, 'ok'); lsTwoCheck(); lsRender();
+  if (t === 'ramp' && !lsTwoLeg1()) { toast('Build leg 1 first: the crane lifts the crate, and Move across sets it on the shelf.'); return; }
+  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = t === 'crane' ? 'Put the crane in the glowing box, over the crate.' : 'Put the foot of the ramp in the glowing box, on the shelf.'; toast(LS.flashMsg); return; }
+  LS.flash = 0; LS.two[t] = true; if (t === 'crane') lsRope('c', 'ch'); toast(`✓ ${t === 'ramp' ? 'Ramp' : 'Crane gantry'} in the box!`, 'ok'); lsTwoCheck(); lsRender();
 }
-const lsTwoPairs = () => LS.two ? [LS.two.ramp ? ['c', 'rt'] : null, LS.two.crane ? ['g', 'ch'] : null].filter(Boolean) : [];
-function lsTwoEnds() { const g = lsTwoGeo(), E = { c: g.cHook }; if (LS.two && LS.two.ramp) { E.rt = g.rampTop; E.g = g.gHook; } if (LS.two && LS.two.crane) E.ch = g.craneHook; return E; }
+const lsTwoPairs = () => LS.two ? [LS.two.crane ? ['c', 'ch'] : null, LS.two.ramp ? ['g', 'rt'] : null].filter(Boolean) : [];
+function lsTwoEnds() { const g = lsTwoGeo(), E = { c: g.cHook }; if (LS.two && LS.two.crane) E.ch = g.craneHook; if (lsTwoLeg1()) E.g = g.gHook; if (LS.two && LS.two.ramp) E.rt = g.rampTop; return E; }
 function lsTwoCheck() {
-  if (!LS.two || lsK3Done()) return; if (LS.two.ramp && LS.two.crane && lsJoined('c', 'rt') && lsJoined('g', 'ch')) { dbSet('k3two', true); toast('✓ Two-leg route built! The crate goes up the ramp, then the crane lifts it.', 'ok'); if (typeof checkStep === 'function') checkStep(); }
+  if (!LS.two || lsK3Done()) return; if (lsTwoLeg1() && LS.two.ramp && lsJoined('g', 'rt')) { dbSet('k3two', true); toast('✓ Two-leg route built! The crane sets the crate on the shelf, then the ramp takes it up.', 'ok'); if (typeof checkStep === 'function') checkStep(); }
 }
 function lsTwoStatus() {
   const T = LS.two || {};
-  if (!T.ramp) return 'Leg 1: drag the 📐 ramp into the glowing box beside the crate. Its top rests on the platform.';
-  if (!T.crane) return 'Leg 2: the ghost crate shows where leg 1 ends. Drag the 🏗️ crane gantry into the glowing box over it.';
-  if (!lsJoined('g', 'ch')) return 'Rope the ghost crate to the crane: drag from its ◉ to the crane\'s ◉ hook.';
-  return 'Two legs built: the ramp, then the crane. In the rescue you will build routes like this.';
+  if (!T.crane) return 'Leg 1: drag the 🏗️ crane gantry into the glowing box over the crate.';
+  if (!lsJoined('c', 'ch')) return 'Rope the crate to the crane: drag from its ◉ to the crane\'s ◉ hook.';
+  if (!lsTwoAcrossOk()) return 'Use Move across in the panel until the glow sits on the shelf.';
+  if (!T.ramp) return 'Leg 2: the crate on the shelf is where leg 1 ends. Drag the 📐 ramp into the glowing box beside it.';
+  if (!lsJoined('g', 'rt')) return 'Rope the crate on the shelf to the top of the ramp: drag from one ◉ to the other.';
+  return 'Two legs built: the crane, then the ramp. In the rescue you will build routes like this.';
 }
 function lsTwoDock() {
-  const T = LS.two || {}, row = (ok, s) => `<div class="glrow"><b class="dkrope ${ok ? 'ok' : 'no'}" style="text-align:left">${ok ? '✓' : '○'} ${s}</b></div>`;
-  return dkHTML({ icon: '🟩', title: 'Two-leg practice', help: 'platform', body: row(T.ramp, 'Leg 1: ramp from the crate to the platform') + row(lsJoined('c', 'rt'), 'The crate is roped to the ramp\'s top') + row(T.crane, 'Leg 2: crane in the glowing box') + row(lsJoined('g', 'ch'), 'The ghost crate is roped to the crane\'s hook') + (lsK3Done() ? '<p class="glnote">Done! Nothing here is marked. It is practice for the rescue.</p>' : '<p class="glnote">Nothing here is marked. It is practice for the rescue.</p>'),
+  const T = LS.two || {}, a = lsTwoAcross(), d = LS.adir || (a < 0 ? -1 : 1), row = (ok, s) => `<div class="glrow"><b class="dkrope ${ok ? 'ok' : 'no'}" style="text-align:left">${ok ? '✓' : '○'} ${s}</b></div>`;
+  const mv = T.crane ? lsPM('across', 'Move across', a ? `${fmt(Math.abs(a), 1)} m ${a < 0 ? 'left' : 'right'}` : '0 m', !a, Math.abs(a) >= 4 - 1e-9) + `<div class="glrow"><span>Direction</span><button type="button" class="ghost sm ${d < 0 ? 'on' : ''}" data-lm="adir:-1">Left</button><button type="button" class="ghost sm ${d > 0 ? 'on' : ''}" data-lm="adir:1">Right</button></div>` + `<p class="glnote">The crane lifts the crate 1.5 m, to the height of the shelf.</p>` : '';
+  return dkHTML({ icon: '🟩', title: 'Two-leg practice', help: 'platform', body: row(T.crane, 'Leg 1: crane gantry over the crate') + row(lsJoined('c', 'ch'), 'The crate is roped to the crane\'s hook') + mv + row(lsTwoAcrossOk(), 'Move across: the crate is set down on the shelf')
+      + row(T.ramp, 'Leg 2: ramp from the shelf to the platform') + row(lsJoined('g', 'rt'), 'The crate on the shelf is roped to the ramp\'s top') + (lsK3Done() ? '<p class="glnote">Done! Nothing here is marked. It is practice for the rescue.</p>' : '<p class="glnote">Nothing here is marked. It is practice for the rescue.</p>'),
     actions: '<button type="button" class="ghost sm" data-lm="two:back">◀ Back to the generator</button>' });
 }
 function lsTwoDraw(c) {
-  const g = lsTwoGeo(), K = g.K, T = LS.two || {}, t = performance.now() / 1000;
-  lsGL(K, () => { glDrawPlatform(c, { x0: g.tx / K, x1: g.plx1 / K, top: g.h, base: 0, s: 0.32 }, false);
-    if (T.ramp) glDrawRamp(c, { L: g.L, rise: g.h, x1: g.fx / K, y1: 0, s: 0.32 }, { start: { x: g.fx / K, y: 0 }, end: { x: g.fx / K + g.run, y: g.h } }, false, lsFlat());
+  const g = lsTwoGeo(), K = g.K, T = LS.two || {}, t = performance.now() / 1000, a = lsTwoAcross(), ok = lsTwoAcrossOk();
+  lsGL(K, () => { glDrawPlatform(c, { x0: (g.sx - g.sw * K / 2) / K, x1: (g.sx + g.sw * K / 2) / K, top: g.h1, base: 0, s: 0.32 }, false);   // the shelf
+    glDrawPlatform(c, { x0: g.tx / K, x1: g.plx1 / K, top: g.h2, base: 0, s: 0.32 }, false);   // the platform
+    if (T.ramp) glDrawRamp(c, { L: g.L, rise: g.rise, x1: g.fx / K, y1: g.h1, s: 0.32 }, { start: { x: g.fx / K, y: g.h1 }, end: { x: g.fx / K + g.run, y: g.h2 } }, false, lsFlat());
     const keep = [GL.hzX, GL.hzY]; GL.hzX = 1.6; GL.hzY = 0.6;
-    try { if (T.ramp && !T.crane) glDrawZone(c, { x: g.gx / K, y: g.h }, t, null); else if (!T.ramp) glDrawZone(c, { x: g.fx / K, y: 0.4 }, t, null); } finally { GL.hzX = keep[0]; GL.hzY = keep[1]; }
-    if (T.crane) glDrawCrane(c, { x: g.gx / K, rise: 2.2, s: 0.5 }, { start: { x: 0, y: g.h } }, false, (LS_FLOOR - g.craneHook.y) / K); });
-  // the crate, the ghost crate with its hook, and the goal line
-  lsLoadBox(c, g.crate.x, g.crate.y, 'Crate 235 N', lsJoined('c', 'rt'));
-  if (T.ramp) { lsGL(K, () => { c.save(); c.strokeStyle = 'rgba(255,255,255,.7)'; c.setLineDash([4, 4]); c.lineWidth = 1.5; c.beginPath(); c.ellipse(g.gx, g.ty - 20, 54, 38, 0, 0, 7); c.stroke(); c.restore(); });
-    c.save(); c.globalAlpha = .5; wsLoadBlock(c, g.gx, g.ty, 66, 40, 'crate', ''); c.restore(); c.strokeStyle = GLC.rope; c.lineWidth = 2; c.beginPath(); c.moveTo(g.gx, g.ty - 40); c.lineTo(g.gHook.x, g.gHook.y); c.stroke();
-    lblAdd('Crate after leg 1', g.gx, g.ty - 86 + (T.crane ? 40 : 0), { size: 11, col: '#c9ffdc', prio: 4, tx: g.gx, ty: g.ty - 24 }); }
+    try { if (!T.crane) glDrawZone(c, { x: g.cr / K, y: 0.4 }, t, null); else if (ok && !T.ramp && lsJoined('c', 'ch')) glDrawZone(c, { x: (g.sx + 30) / K, y: g.h1 }, t, null); } finally { GL.hzX = keep[0]; GL.hzY = keep[1]; }
+    if (T.crane) { const lo = Math.min(0, a) * K, hi = Math.max(0, a) * K;
+      glDrawCrane(c, { x: g.cr / K, rise: g.craneRise, s: 0.5 }, { start: { x: 0, y: 0 }, legL: { x: (g.cr + lo) / K - 1.6, y: 0 }, legR: { x: (g.cr + hi) / K + 1.6, y: 0 } }, false, (LS_FLOOR - g.craneHook.y) / K, a ? undefined : undefined);
+      if (a) glDrawSetDown(c, { end: { x: (g.cr + a * K) / K, y: ok ? g.h1 : 0 } }, t, !ok); } });
+  // the crate, the crate on the shelf (where leg 1 ends) with its hook, and the goal line
+  lsLoadBox(c, g.crate.x, g.crate.y, 'Crate 235 N', lsJoined('c', 'ch'));
+  if (lsTwoLeg1()) { c.save(); c.globalAlpha = .5; wsLoadBlock(c, g.sx, g.ty, 66, 40, 'crate', ''); c.restore(); c.strokeStyle = GLC.rope; c.lineWidth = 2; c.beginPath(); c.moveTo(g.sx, g.ty - 40); c.lineTo(g.gHook.x, g.gHook.y); c.stroke();
+    lblAdd('Crate after leg 1', g.sx, g.ty - 86, { size: 11, col: '#c9ffdc', prio: 4, tx: g.sx, ty: g.ty - 24 }); }
   if (T.ramp) { lblAvoid(g.rampTop.x, g.rampTop.y, 14); }
-  if (T.ramp && lsJoined('c', 'rt')) drawRopePx(c, g.cHook, g.rampTop, 3, 0);
-  if (T.crane && lsJoined('g', 'ch')) drawRopePx(c, g.gHook, g.craneHook, 3, 0);
-  if (T.crane) { c.save(); c.setLineDash([2, 6]); c.strokeStyle = 'rgba(70,130,200,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(g.gx - 100, g.goalY); c.lineTo(g.gx + 100, g.goalY); c.stroke(); c.restore(); }
+  if (T.crane && lsJoined('c', 'ch')) drawRopePx(c, g.cHook, g.craneHook, 3, 0);
+  if (T.ramp && lsJoined('g', 'rt')) drawRopePx(c, g.gHook, g.rampTop, 3, 0);
   const E = lsTwoEnds(); Object.keys(E).forEach(k => lsHookDot(c, E[k].x, E[k].y, lsTwoPairs().some(q => q.includes(k))));
 }
 function lsTwoOverlay(c, pulse) { /* the glowing boxes are drawn with the scene (glDrawZone) */ }

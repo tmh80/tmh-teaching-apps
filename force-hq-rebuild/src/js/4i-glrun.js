@@ -46,7 +46,7 @@ function glHandSpot(leg, rig, g, plats, shipAt) {
   if (bk) return { x: bk.x, y: glFloorAt(bk.x, g, plats) };
   if (leg.type === 'ramp') return null;   // no cable: Smooshy pushes from behind the ship
   if (leg.type === 'lever') { const x = leg.m.part.x + (leg.m.part.dir || 1) * (GL.beam + 0.6); return { x, y: glFloorAt(x, g, plats) }; }
-  const x = leg.m.part.x + (leg.type === 'crane' ? -3.8 : 1.3); return { x, y: glFloorAt(x, g, plats) };
+  const x = leg.type === 'crane' ? Math.min(leg.m.part.x, leg.m.part.x + (leg.m.part.across || 0)) - 3.8 : leg.m.part.x + 1.3; return { x, y: glFloorAt(x, g, plats) };
 }
 function glBuildBeats(res, rig, o) {
   o = o || {}; const B = [], add = (dur, fn) => { if (!isFinite(dur)) dur = 0.5; B.push({ dur: RMOTION ? Math.min(dur, 0.25) : dur, fn }); };
@@ -80,11 +80,16 @@ function glBuildBeats(res, rig, o) {
     const stopHere = res.stop && res.stop.leg === l.i, moves = !stopHere || (res.stop.why === 'collapse' && glPlatOnlyAtEnd(l, res, plats)), push = !glHandSpot(l, rig, res.ground, plats);
     const spot = push ? { x: l.start.x - 2.6, y: l.start.y } : glHandSpot(l, rig, res.ground, plats); walkTo(spot);
     const prev = shipAt, from = Object.assign({}, l.start), to = Object.assign({}, l.end), tilt = l.type === 'ramp' ? -Math.atan2(l.end.y - l.start.y, l.end.x - l.start.x) : 0;
-    const strain = l.pull > GL.pullOk + 1e-9, dur = 1.6 + Math.min(2.2, l.rise * 0.18);
+    const strain = l.pull > GL.pullOk + 1e-9, dur0 = 1.6 + Math.min(2.2, l.rise * 0.18), tro = l.type === 'crane' && l.m.lifted ? l.m : null, acDur = tro ? 0.4 + Math.abs(tro.across) * 0.25 : 0, dur = dur0 + acDur + (tro ? 0.7 : 0);   // a trolley leg: lift, roll across, lower
     if (l.type !== 'ramp') add(0.6, (S, k) => { const e = glEase(k); S.ship.x = glLerp(prev.x, from.x, e); S.ship.y = glLerp(prev.y, from.y, e); S.ship.tilt = glLerp(S.ship.tilt, 0, e); if (l.type === 'crane') S.hook[l.id] = from.y + 4.2; });
     else add(0.4, (S, k) => { S.ship.x = from.x; S.ship.y = from.y; S.ship.tilt = glLerp(0, tilt, glEase(k)); });
     if (moves && !(stopHere && (res.stop.why === 'broken' || res.stop.why === 'heavy'))) {
       add(dur, (S, k) => { const e = glEase(k); S.ship.x = glLerp(from.x, to.x, e); S.ship.y = glLerp(from.y, to.y, e); S.ship.tilt = tilt * (l.type === 'ramp' ? 1 : 0);
+        if (tro) { const tt = k * dur, up = tro.lifted;
+          if (tt < dur0) { S.ship.x = from.x; S.ship.y = glLerp(from.y, up.y, glEase(tt / dur0)); }
+          else if (tt < dur0 + acDur) { S.ship.x = glLerp(up.x, to.x, glEase((tt - dur0) / acDur)); S.ship.y = up.y; }
+          else { S.ship.x = to.x; S.ship.y = glLerp(up.y, to.y, glEase((tt - dur0 - acDur) / (dur - dur0 - acDur))); }
+          S.trol[l.id] = S.ship.x; }
         if (l.type === 'ramp') S.rope = { a: { x: S.ship.x + 2.2 * Math.cos(tilt), y: S.ship.y + 1.8 - 2.2 * Math.sin(tilt) }, b: { x: to.x, y: to.y + 0.4 } };
         if (k >= 1) S.rope = null; S.ship.shake = strain; S.flames = strain ? Math.min(1, (l.pull - GL.pullOk) / 120) : 0; S.ship.dmg += (l.thruster || 0) * k; S.spin = k * 30;
         if (l.type === 'crane') S.hook[l.id] = S.ship.y + 4.2; if (l.type === 'lever' || l.type === 'jack') S.tilt[l.id] = k;
@@ -111,7 +116,7 @@ function glPlatOnlyAtEnd(l, res, plats) { const s = glSupport(l.end.x, l.end.y, 
    the spot it starts from (prev). The Gumdrop stays at its start until its leg's lift beat moves it. */
 /* ---------- playing it ---------- */
 function glSceneAt(t) {
-  const res = GLR.res, st = glState(), S = { ship: { x: GL.shipX, y: res.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0, carryRock: false, shake: false }, smoo: null, ground: glBaseGround(), blown: new Set(), hook: {}, tilt: {}, sink: {}, readouts: [], fx: [], spin: 0 };
+  const res = GLR.res, st = glState(), S = { ship: { x: GL.shipX, y: res.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0, carryRock: false, shake: false }, smoo: null, ground: glBaseGround(), blown: new Set(), hook: {}, trol: {}, tilt: {}, sink: {}, readouts: [], fx: [], spin: 0 };
   let acc = 0; for (const b of GLR.beats) { if (t < acc) break; const k = clamp((t - acc) / b.dur, 0, 1); b.fn(S, k); acc += b.dur; }
   if (S.rockAway) S.rockGone = true;
   return S;
@@ -129,7 +134,7 @@ function glRunFrame1() {
   const shipPx = { x: glSX(S.ship.x), y: glSY(S.ship.y + 2) };
   glDrawWorld(c, { rig: GLR.rig, ev, ground: g, ghost: null, ship: S.shipGone ? null : Object.assign({}, S.ship, { dmg: Math.min(100, S.ship.dmg) }), smoo: S.smoo, rock: !S.rockGone, t,
     hz: S.zone || null, hzLabel: S.zone ? 'The next machine needed to start in here' : '',
-    run: { on: true, blown: S.blown, rockGone: S.rockGone, rockX: S.rockX, rockY: S.rockY, rockRot: S.rockRot, hook: S.hook, tilt: S.tilt, spin: S.spin, rope: S.rope,
+    run: { on: true, blown: S.blown, rockGone: S.rockGone, rockX: S.rockX, rockY: S.rockY, rockRot: S.rockRot, hook: S.hook, trol: S.trol, tilt: S.tilt, spin: S.spin, rope: S.rope,
       beam: S.beam ? { x: shipPx.x - 3 * glU(), y: shipPx.y + 2.4 * glU(), x2: shipPx.x + 3 * glU(), y2: shipPx.y + 2.4 * glU() } : null,
       fx: (c2, tt) => glFx(c2, S, tt) } });
   if (t > GLR.total + 0.1 && !GLR.done) { GLR.done = true; if (GLR.mode === 'test') glFinishTest(); else glFinishRun(); }

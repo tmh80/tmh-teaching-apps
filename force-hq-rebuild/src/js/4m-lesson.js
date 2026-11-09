@@ -29,7 +29,7 @@ const lsLocked = t => !!(LS.o && (LS.o.lock || []).includes(t));
 const lsCanvas = () => $('#cvScene');
 function lessonStage(o) {
   shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LS.cardQ = []; LS.used = null; LS.needKey = ''; LAB.pullGate = lsGate;
-  LS.pl = {}; (LS.o.pre || []).forEach(t => { LS.pl[t] = true; }); LS.stage = 'main'; LS.two = null; LS.cabBy = {}; LS.cabMain = null; LS.flashMsg = null;
+  LS.pl = {}; (LS.o.pre || []).forEach(t => { LS.pl[t] = true; }); LS.stage = 'main'; LS.two = null; LS.cabBy = {}; LS.cabMain = null; LS.flashMsg = null; LS.across = 0; LS.adir = 0;
   if (WS.mach === 'pulley' && !LS.pl.block && LS.o.tray.includes('block')) WS.ropes = 1;   // no pulley block on the bench yet: the crane alone gives 1 rope
   const cv = lsCanvas(); if (cv) cv.style.touchAction = 'none';
   lsRender();
@@ -39,14 +39,14 @@ function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = nul
 /* ---------- the tray and the status line ---------- */
 function lsRender() {
   const tr = $('#lsTray'), st = $('#lsStatus'); if (!tr) return;
-  const on = LS.on && S.scene === 'shop' && !!LS.o, TL = on ? (lsIsTwo() ? ['ramp', 'crane'] : LS.o.tray) : []; tr.hidden = !(on && TL.length > 0); if (st) st.hidden = !on;
+  const on = LS.on && S.scene === 'shop' && !!LS.o, TL = on ? (lsIsTwo() ? ['crane', 'ramp'] : LS.o.tray) : []; tr.hidden = !(on && TL.length > 0); if (st) st.hidden = !on;
   const row = $('#boardRow'), dk = $('#lsDock'), pb = $('#wsPull'), bx = $('#boardCv'); if (row) row.classList.toggle('ls', on); if (dk) dk.hidden = !on;
   if (pb && bx) { if (on && pb.parentElement !== bx) { pb.classList.add('inboard'); bx.appendChild(pb); } else if (!on && pb.parentElement === bx) { pb.classList.remove('inboard'); const bar = $('.scenebar'); if (bar) bar.insertBefore(pb, $('#dzPause')); } }   // ▶ sits inside the board, bottom right
   if (!on) return;
   if (pb) pb.style.display = lsIsTwo() ? 'none' : '';
   if (LS.ropeMach !== WS.mach && !lsIsTwo()) { if (LS.ropeMach) LS.cabBy[LS.ropeMach] = LS.cab; LS.ropeMach = WS.mach; LS.cab = LS.cabBy[WS.mach] || lsInitCab(WS.mach); }   // just a rope starts roped; take it off and the ▶ stays off until it goes back on
   const sig = TL.map(t => t + lsHas(t) + lsWait(t) + (LS.place === t)).join('|') + (lsIsTwo() ? 'two' : '');
-  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = TL.map(t => { const P = LS_PIECES[t], has = lsHas(t), wt = lsWait(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has || wt ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : wt ? lsWaitNote() : lsIsTwo() ? (t === 'ramp' ? 'leg 1' : 'leg 2') : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
+  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = TL.map(t => { const P = LS_PIECES[t], has = lsHas(t), wt = lsWait(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has || wt ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : wt ? lsWaitNote() : lsIsTwo() ? (t === 'crane' ? 'leg 1' : 'leg 2') : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
   if (st) st.textContent = LS.place ? (LS.place === 'lever' ? 'Now tap the rock to put the lever there.' : `Now tap the glowing spot to put the ${LS_PIECES[LS.place].name.toLowerCase()} there.`) : lsStatus();
   if (dk) dkSet(dk, lsDockHTML());
   lsThrob();
@@ -91,7 +91,7 @@ function lsHookDot(c, X, Y, roped) { lblAvoid(X, Y, 14); drawHookDot(c, X, Y, { 
 const lsRopeGeo = riseNow => { const cx = 360, by = LS_FLOOR - (riseNow || 0) * 300; return { cx, by, load: { x: cx, y: by - 47 }, end: { x: cx, y: by - 78 } }; };
 /* every rope end on the bench right now (canvas units) */
 function lsEnds() { if (lsIsTwo()) return lsTwoEnds(); if (lsSc()) return lsEndsSc(); const e = {}; if (WS.mach === 'hand') { const g = lsRopeGeo(0); e.load = g.load; e.end = g.end; } else if (WS.mach === 'lever') { const G = lsLever(0, WS.c || wsCalc()); e.load = { x: G.L.x, y: G.L.y - 54 }; } return e; }
-const lsNeedRopes = () => lsIsTwo() ? [['c', 'rt'], ['g', 'ch']] : lsSc() ? lsNeed() : WS.mach === 'hand' ? [['load', 'end']] : [];
+const lsNeedRopes = () => lsIsTwo() ? [['c', 'ch'], ['g', 'rt']] : lsSc() ? lsNeed() : WS.mach === 'hand' ? [['load', 'end']] : [];
 const lsJoined = (a, b) => LS.cab.some(c => (c[0] === a && c[1] === b) || (c[0] === b && c[1] === a));
 const lsGate = () => !lsIsTwo() && (!lsSc() || lsReady()) && lsNeedRopes().every(([a, b]) => lsJoined(a, b));
 function lsRope(a, b) { const need = lsNeedRopes().some(([x, y]) => (x === a && y === b) || (x === b && y === a)); if (!need || lsJoined(a, b)) return false; LS.cab.push([a, b]); WS.shown = true; wsRenderControls(); if (lsIsTwo()) lsTwoCheck(); return true; }
@@ -279,6 +279,8 @@ function lsAfterCards() {
 const lsMark = k => { LS.used = { ctl: (String(k).match(/^[A-Za-z]+/) || [''])[0], key: LS.needKey }; };
 const lsRoped = () => lsNeed().every(([a, b]) => lsJoined(a, b));
 function lsNeedTask() {
+  /* a challenge mission on the shared builder (y1 to y3, h1 to h3, spec section 14): its lesson.need list throbs until the mission is done */
+  if (typeof VIEW !== 'undefined' && VIEW === 'vChapter' && typeof CTAB !== 'undefined' && CTAB === 'challenge' && LS.o && LS.o.need) { const d = (dbGet('chal.' + LS.o.ch, {}) || {})[LS.o.mid] || {}; return d.done ? null : { i: 0, need: LS.o.need }; }
   if (typeof VIEW === 'undefined' || VIEW !== 'vChapter' || CTAB !== 'learn' || !CH) return null;
   const st = CHDATA[CH.id].steps[GI]; if (!st || !st.tasks || stepDone(CH.id, GI)) return null; const two = lsIsTwo(), ts = taskState();
   for (let i = 0; i < st.tasks.length; i++) { const o = st.tasks[i][2] || {};

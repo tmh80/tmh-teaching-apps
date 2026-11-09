@@ -113,6 +113,7 @@ function wsPull() {
   if (WS.busy || (LAB.pullGate && !LAB.pullGate())) return false; wsResetLoad(); const c = wsCalc(); WS.c = c; WS.busy = true; WS.ph = 1; WS.pt = 0; WS.done = false; WS.msg = ''; WS.prog = 0; WS.reading = 0;
   WS.T2 = RMOTION ? 0.3 : clamp(1.6 + Math.min(c.rise || 1, 3) * 0.4, 1.8, 3.4);
   S.running = false; runMark('pull'); if (RUN) Object.assign(RUN, wsRecord(c), { scene: 'shop' });
+  if (typeof lsAfterPull === 'function') lsAfterPull();
   S.flags.shopRan = true; WS.shown = true; return true;
 }
 function wsUpdate(dt) {
