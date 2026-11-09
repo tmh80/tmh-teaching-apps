@@ -44,9 +44,9 @@ with sync_playwright() as p:
         jclick('#wsPull'); pg.wait_for_timeout(200); ev(f"(()=>{{for(let i=0;i<{int(secs/0.02)};i++)wsUpdate(0.02)}})()"); pg.wait_for_timeout(150)
     def setnum(sel, v): pg.fill(sel, str(v)); pg.press(sel, 'Enter'); pg.wait_for_timeout(120)
     def ws(k, v): ev(f"wsSet('{k}',{v});lsTouch();lsRender()")   # the same settings a student makes in the lesson panel
-    def lp(t): ev(f"(()=>{{const T='{t}';if(['block','winch'].includes(T)&&(LS.o.tray||[]).includes('crane')&&!lsHasP('crane'))lsPlace('crane');if(!lsHasP(T))lsPlace(T)}})()")   # put a piece on the bench if it is not there yet (this also ropes it up)
+    def lp(t): ev(f"(()=>{{const T='{t}';if(['block','winch'].includes(T)&&(LS.o.tray||[]).includes('crane')&&!lsHasP('crane')&&!lsHasP('ramp'))lsPlace('crane');if(!lsHasP(T))lsPlace(T);if(LS.o.mid)for(let i=0;i<4;i++)lsMenuAct('rope')}})()")   # put a piece on the bench if it is not there yet (this also ropes it up)
     def hb(w, n, r=0):   # a Part 4 job on the shared builder: the crane (and its trolley) or the ramp, then the pulley block and winch if wanted, then the numbers
-        if r: lp('ramp')
+        if r: ev("if(lsHasP('crane'))lsRemove('crane')"); lp('ramp')
         else: lp('crane'); ev('LS.across=3; lsRender()')
         for t, want in (('block', n), ('winch', w)):
             if want: lp(t)
@@ -458,7 +458,7 @@ with sync_playwright() as p:
     pg.locator('#shMore [data-sr]').click(); pg.wait_for_timeout(300)
     chk('h2: the rover, 2 m up, four routes', ev("WS.load") == 3920 and ev("WS.lift") == 2 and len(ev('WS.bRoutes')) == 4)
     hb(10, 0, 10); pull(16); pg.wait_for_timeout(300); pg.screenshot(path=OUT + 'h2_done.png')
-    chk('h2: 10 m ramp with winch ×10 and no block passes first time for 4 points', ev("dbGet('chal.c6d',{}).h2.best") == 4, pg.locator('#shFb').inner_text())
+    chk('h2: 10 m ramp with winch ×10 and no block passes first time for 4 points', ev("dbGet('chal.c6d',{}).h2.best") == 4, [pg.locator('#shFb').inner_text(), ev('[lsGate(),WS.mach,WS.bw,WS.bn,WS.br,Object.keys(LS.pl),JSON.stringify(LS.j||LS.ropes||0)]')])
     pg.locator('#shMore [data-sr]').click(); pg.wait_for_timeout(300)
     chk('h3: the builder is locked until the weight is worked out', pg.locator('#shCalc').is_visible() and not pg.locator('.labhost').is_visible())
     pg.fill('#shCalcIn', '1260'); pg.click('#shCalcGo'); pg.wait_for_timeout(250)
