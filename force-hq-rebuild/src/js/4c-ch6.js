@@ -61,7 +61,7 @@ const ntRopes = (n, m) => ({ ctl: 'ropes', sel: '[data-lm="ropes+"]', is: () => 
 const ntPick = (k, v) => ({ ctl: k, sel: `[data-lm="${k}:${v}"]`, is: () => String(WS[k]) === String(v) });
 const ntRope = { ctl: 'rope', sel: '[data-lm="rope"]', is: () => lsRoped() };
 const UNITS_W = ['N', 'J', 'm', 'kg'];
-const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
+const WS_TREND = ['bigger', 'the same', 'smaller'];   // fits "made the effort {0}"
 
 CHDATA.c6 = {
   goal: 'Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn\'t reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue.',

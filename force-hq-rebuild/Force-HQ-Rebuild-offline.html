@@ -6918,7 +6918,7 @@ Object.assign(INFO, {
    Extension c5x (steps p1–p3, the three missions, Check c5r8–c5r12): air, weight and other worlds (added in a later step).
    The physics is in 46-dropzone.js and matches tools/dropzone_model.py. The script is docs/Chapter5_Script.md. */
 const DZ_HIDE_OLD = ['shove', 'astro', 'readAV', 'readAM', 'pushf', 'thrust', 'pairs', 'pal', 'meter', 'readL', 'readR', 'readRes', 'readF', 'readW', 'readN', 'readM', 'floor', 'run', 'mass', 'fbd', 'vt', 'brake', 'launch', 'toggles', 'readD'];
-const DZ_TREND = ['gets bigger', 'stays the same', 'gets smaller'];
+const DZ_TREND = ['got bigger', 'stayed the same', 'got smaller'];   // every use is told in the past ("As the crate fell…")
 const c5Crate = { obj: 'crate', world: 'earth', height: 600 };
 const c5Sky = { obj: 'para', world: 'earth', height: 1500 };
 /* the fixed example skydive used by the "tap the moment" questions: 1,500 m, medium canopy opened at 20 s (the same run as dropzone_model.run('para','earth',height=1500,canopy='medium',open_at=20)) */
@@ -8267,7 +8267,7 @@ const ntRopes = (n, m) => ({ ctl: 'ropes', sel: '[data-lm="ropes+"]', is: () => 
 const ntPick = (k, v) => ({ ctl: k, sel: `[data-lm="${k}:${v}"]`, is: () => String(WS[k]) === String(v) });
 const ntRope = { ctl: 'rope', sel: '[data-lm="rope"]', is: () => lsRoped() };
 const UNITS_W = ['N', 'J', 'm', 'kg'];
-const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
+const WS_TREND = ['bigger', 'the same', 'smaller'];   // fits "made the effort {0}"
 
 CHDATA.c6 = {
   goal: 'Name the six simple machines and say how each one helps; work out mechanical advantage, effort and effort distance; calculate work as force × distance and explain why an ideal machine doesn\'t reduce the work; find the mechanical advantage of a compound machine by multiplying, and use it to plan a rescue.',

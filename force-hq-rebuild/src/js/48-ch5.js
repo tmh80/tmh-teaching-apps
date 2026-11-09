@@ -3,7 +3,7 @@
    Extension c5x (steps p1–p3, the three missions, Check c5r8–c5r12): air, weight and other worlds (added in a later step).
    The physics is in 46-dropzone.js and matches tools/dropzone_model.py. The script is docs/Chapter5_Script.md. */
 const DZ_HIDE_OLD = ['shove', 'astro', 'readAV', 'readAM', 'pushf', 'thrust', 'pairs', 'pal', 'meter', 'readL', 'readR', 'readRes', 'readF', 'readW', 'readN', 'readM', 'floor', 'run', 'mass', 'fbd', 'vt', 'brake', 'launch', 'toggles', 'readD'];
-const DZ_TREND = ['gets bigger', 'stays the same', 'gets smaller'];
+const DZ_TREND = ['got bigger', 'stayed the same', 'got smaller'];   // every use is told in the past ("As the crate fell…")
 const c5Crate = { obj: 'crate', world: 'earth', height: 600 };
 const c5Sky = { obj: 'para', world: 'earth', height: 1500 };
 /* the fixed example skydive used by the "tap the moment" questions: 1,500 m, medium canopy opened at 20 s (the same run as dropzone_model.run('para','earth',height=1500,canopy='medium',open_at=20)) */
