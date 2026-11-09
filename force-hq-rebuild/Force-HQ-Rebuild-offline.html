@@ -8728,10 +8728,12 @@ function drawCrater(c, w, h, st, t) {
   const keep = Object.assign({}, GLV), lbk = Object.assign({}, LBL), g = glBaseGround(), done = !!st.e;   // lbk: this small picture must not wipe the board's labels (they share LBL)
   Object.assign(GLV, { LW: w, LH: h, K: w / 100, z: 1, cx: 48, cy: 12.5 });
   try {
-    const u = glU(), rise = !done ? 0 : RMOTION ? 0.7 : (t * 0.2) % 1, sx = done ? 86 : 14, sy = done ? 8 + 4.6 * rise * rise * (3 - 2 * rise) : glAt(g, 14), X = glSX(sx), Y = glSY(sy);
+    /* done: a smaller Gumdrop rises in the tractor beam from the plain to just under the Big Jelly (drawn after the Jelly, so it must stay below its hull) */
+    const u = glU(), rise = !done ? 0 : RMOTION ? 0.7 : (t * 0.2) % 1, ease = rise * rise * (3 - 2 * rise), s = done ? 0.4 : 0.8, X = glSX(done ? 86 : 14);
+    const yLow = glSY(glAt(g, done ? 86 : 14)), yHigh = glSY(22) + 2.4 * u + 112 * s, Y = done ? yLow - Math.max(0, yLow - yHigh) * ease : yLow;
     glDrawWorld(c, { rig: { parts: [], cables: [] }, ground: g, ev: null, ship: null, rock: !done, t,
-      run: done ? { beam: { x: X - 2.6 * u, y: Y + 1.2 * u, x2: X + 2.6 * u, y2: Y + 1.2 * u } } : {} });
-    drawGumdropInside(c, X, Y, 0.8, 0, done ? 'cheer' : 'wave', t);
+      run: done ? { beam: { x: X - 2.6 * u, y: Y + 0.6 * u, x2: X + 2.6 * u, y2: Y + 0.6 * u } } : {} });
+    drawGumdropInside(c, X, Y, s, 0, done ? 'cheer' : 'wave', t);
   } finally { Object.assign(GLV, keep); Object.assign(LBL, lbk); }
 }
 function renderRescue() {
