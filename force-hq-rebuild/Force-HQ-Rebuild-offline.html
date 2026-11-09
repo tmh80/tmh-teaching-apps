@@ -891,6 +891,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glrec li.tot{font-weight:800;border-bottom:0}
 .glboard{position:relative;border-radius:12px;overflow:hidden;background:#2d1f63;border:4px solid #2a2547;box-shadow:0 0 0 2px #0d0b1a}
 .glboard canvas{display:block;width:100%;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+.glcv{position:relative}
+.glboard .gltray{padding:10px;background:var(--panel);border-top:3px solid #2a2547}
 .glzoom{position:absolute;left:8px;top:38px;display:flex;gap:4px}
 .glzoom .ghost{min-width:34px;background:rgba(255,255,255,.88)}
 /* the docked settings panel (rescue #glDock, lesson mode #lsDock): beside the board, below it on a phone */
@@ -991,8 +993,12 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .unithint{margin:2px 0 0}
 
 /* lesson mode (4m-lesson.js): the parts tray and menu share the rescue builder's look */
-#lsTray{order:1;margin:8px 0 0;grid-template-columns:repeat(auto-fill,minmax(150px,200px))} #lsTray[hidden],#lsStatus[hidden]{display:none}
-.lsstatus{order:1;margin:6px 0 0}
+/* the tray is part of the board's frame, joined to its bottom edge (Tom, 9 Nov 2026) */
+.bbcv{position:relative}
+.boardrow.ls .boardbox{border:2px solid var(--line);border-radius:12px;background:var(--panel)}
+.boardrow.ls .boardbox canvas{border-radius:10px 10px 0 0}
+#lsTray{margin:0;padding:10px;border-top:2px solid var(--line);grid-template-columns:repeat(auto-fill,minmax(150px,200px))} #lsTray[hidden],#lsStatus[hidden]{display:none}
+.lsstatus{margin:0;padding:0 12px 10px}
 .lsit{position:relative} .lsit .gltry{width:100%;min-height:54px} .lsit .gltry:disabled{opacity:.65;cursor:default}
 .lsq{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);font-weight:800;font-size:14px;line-height:1;cursor:pointer;padding:0}
 #cvScene.shopscene{cursor:default}
@@ -1029,6 +1035,17 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glstamp.test{background:var(--chip);color:var(--ink);border-color:var(--accent)}
 .gltest{list-style:none;padding:0;margin:8px 0}.gltest li{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.gltest li.no{color:var(--nofg)}.gltest li.ok{color:var(--okfg)}
 .gltest .box{flex:none;width:20px;text-align:center;font-weight:900}
+
+/* "do this next": the one tray tile or panel control the current task needs (ndApply in 4n-boardkit.js). Static glow ring always; the pulse only when motion is allowed. */
+.ndneed{border-color:#e0a010!important;box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 14px 3px rgba(240,180,30,.4);position:relative;z-index:2}
+.ndneed:not(.ndpulse){box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 14px 3px rgba(240,180,30,.4)!important}
+.ndneed.ndpulse{animation:ndglow 1.4s ease-in-out infinite}   /* a glow ring only: no transform, so the tile stays put and is easy to hit (and to click in tests) */
+@keyframes ndthrob{0%,100%{transform:scale(1);box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 10px 2px rgba(240,180,30,.3)}50%{transform:scale(1.045);box-shadow:0 0 0 4px rgba(240,180,30,.8),0 0 20px 6px rgba(240,180,30,.5)}}
+@keyframes ndglow{0%,100%{box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 8px 2px rgba(240,180,30,.3)}50%{box-shadow:0 0 0 4px rgba(240,180,30,.85),0 0 16px 5px rgba(240,180,30,.5)}}
+@media (prefers-reduced-motion:reduce){.ndneed.ndpulse{animation:none!important}}
+
+.glclearask{margin:6px 0;padding:8px 12px;border:2px solid var(--hazard);border-radius:10px;background:var(--hazard-soft);align-items:center;gap:8px}
+.glrunctl{position:absolute;right:8px;top:36px;z-index:4;display:flex;gap:6px}.glrunctl[hidden]{display:none}.glrunctl .ghost{background:rgba(255,255,255,.92)}
 
 </style>
 <header class="top">
@@ -1201,10 +1218,10 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
       </aside>
       <div class="stagecol">
         <div class="chunk" id="chunk" hidden aria-live="polite"></div>
-        <div class="boardrow" id="boardRow"><div class="boardbox" id="boardBox"><canvas id="cvScene" role="img" aria-label="The Main Arena tug-of-war, with the crate in the middle. Drop pullers here to add them to a team."></canvas></div>
+        <div class="boardrow" id="boardRow"><div class="boardbox" id="boardBox"><div class="bbcv" id="boardCv"><canvas id="cvScene" role="img" aria-label="The Main Arena tug-of-war, with the crate in the middle. Drop pullers here to add them to a team."></canvas></div>
+          <div class="lstray gltray" id="lsTray" hidden role="toolbar" aria-label="Parts tray: drag a piece onto the bench"></div>
+          <p class="scaleNote lsstatus" id="lsStatus" hidden></p></div>
           <aside class="dock" id="lsDock" hidden aria-label="Settings for this piece" aria-live="polite"></aside></div>
-        <div class="lstray gltray" id="lsTray" hidden role="toolbar" aria-label="Parts tray: drag a piece onto the bench"></div>
-        <p class="scaleNote lsstatus" id="lsStatus" hidden></p>
         <div class="scenebar">
           <button class="go" id="runBtn" type="button" data-panel="run">Pull!</button>
           <button class="ghost" id="shoveBtn" type="button" data-panel="shove">Give it a push →</button>
@@ -8235,6 +8252,13 @@ const WL = {
   barrel: { id: 'barrel', N: 784, name: '80 kg fuel barrel', short: 'barrel' }, engine: { id: 'engine', N: 490, name: '50 kg spare engine', short: 'engine' }
 };
 const shopStage = o => { LAB.pullGate = null; clearCh2(); S.scene = 'shop'; S.left = []; S.right = []; S.floor = 'air'; S.warp = 1; S.running = false; wsSetup(o); };
+/* "do this next" data for lesson mode (Tom, 9 Nov 2026; engine in 4m-lesson.js, lsNeedNow): a task's third item can be { need: [...] }. A string is a tray piece; an object is a panel control. */
+const ntCrane = (id, load) => [`Drag the <b>crane gantry</b> from the tray over the ${load}.`, () => !!(S.flags['crane_' + id] || (LS.on && LS.pl.crane && (S.flags['crane_' + id] = true))), { need: 'crane' }];   // latched: taking the crane off later does not un-tick the step
+const ntArm = (kind, v) => ({ ctl: 'arm', sel: () => `[data-lm="arm${wsCalc()[kind] > v ? '-' : '+'}"]`, is: () => Math.abs(wsCalc()[kind] - v) < 1e-6 });
+const ntCls = n => ({ ctl: 'cls', sel: `[data-lm="cls${n}"]`, is: () => WS.cls === n });
+const ntRopes = (n, m) => ({ ctl: 'ropes', sel: '[data-lm="ropes+"]', is: () => WS.ropes >= n, when: () => shopHas({ mach: m || 'pulley', ropes: WS.ropes }) });
+const ntPick = (k, v) => ({ ctl: k, sel: `[data-lm="${k}:${v}"]`, is: () => String(WS[k]) === String(v) });
+const ntRope = { ctl: 'rope', sel: '[data-lm="rope"]', is: () => lsRoped() };
 const UNITS_W = ['N', 'J', 'm', 'kg'];
 const WS_TREND = ['got bigger', 'stayed the same', 'got smaller'];
 
@@ -8251,7 +8275,7 @@ CHDATA.c6 = {
         { html: `<p>Your pull on the other end of the bar is called the ${T('effort', 'effort')}. So every lever has three parts: the fulcrum, the load and the effort.</p>${picLever({ focus: 'E' })}` }],
       setup() { lessonStage({ mach: 'hand', allow: ['hand', 'lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { hand: WL.rock, lever: WL.rock }, maxTravel: 1.5, lesson: { tray: ['lever'], pre: [], lock: [] } }); }, adds: ['wspull'], sides: [], pullers: [], idle: 'Press ▶ Lift! to lift the rock with just a rope',
       tasks: [['Press <b>▶ Lift!</b> with just the rope.', () => shopHas({ mach: 'hand' })], ['', () => hasAns('q1'), { q: 'q1' }],
-        ['Now drag the <b>lever</b> from the tray under the rock. The fulcrum starts in the middle of the bar. Press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+        ['Now drag the <b>lever</b> from the tray under the rock. The fulcrum starts in the middle of the bar. Press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 1 }), { need: 'lever' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'Lifting the rock by hand, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'hand' }), need: () => shopHas({ mach: 'hand' }), needMsg: 'Lift the rock by hand first. Your runs are in the Journal.', ok: 'Right, 294 N. That\'s nearly five times more than Smooshy\'s 60 N!' },
         { id: 'q2', type: 'reading', p: 'With the lever and the fulcrum in the middle, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 1 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 1 }), needMsg: 'Pull with the lever first. Your runs are in the Journal.', ok: '294 N again! With the fulcrum in the middle, the lever doesn\'t make the job any easier yet. You\'ll change that in the next step.' },
@@ -8263,8 +8287,8 @@ CHDATA.c6 = {
         CFACT('The Greek scientist Archimedes, over 2,200 years ago, said that with a long enough lever and a place to stand, he could move the Earth.')],
       predict: { q: 'You move the fulcrum closer to the rock. What will happen to the effort you need?', opts: ['It gets smaller, because more of the bar is on your side', 'It gets bigger, because the rock is now closer to the fulcrum', 'It stays the same, because the rock\'s weight hasn\'t changed', 'It drops to zero, because the fulcrum now holds up the rock'], then: 'Test it! Move the fulcrum close to the rock and pull.' },
       setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: [], sides: [], pullers: [], idle: 'Press ▶ Pull! to work the lever',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Drag the fulcrum so the rock is <b>0.4 m</b> from it, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }],
+        ['Drag the fulcrum so the rock is <b>0.4 m</b> from it, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), { need: ntArm('la', 0.4) }], ['', () => hasAns('q1'), { q: 'q1' }],
         ['Find a fulcrum position where the effort is <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'lever' && r.cls === 1 && !r.capped && r.E <= 60)]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the rock 0.4 m from the fulcrum, what did the newtonmeter read?', unit: 'N', tol: 1, live: () => shopE({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Pull with the rock 0.4 m from the fulcrum first. Your runs are in the Journal.', ok: 'Yes, 73.5 N. That\'s four times smaller than lifting the rock by hand.' },
@@ -8275,9 +8299,9 @@ CHDATA.c6 = {
       cards: [
         { hi: '#cvScene', html: `<p>Is there a catch to this trick? Let's find out. After each pull, two rulers appear under the bench. The <b style="color:#2a7d48">green ruler</b> shows how far the rock rose. The <b style="color:#d6402c">red ruler</b> shows how far your hand moved. Compare them carefully. You'll try three fulcrum positions.</p>` }],
       setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 0.4, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: ['rulers'], sides: [], pullers: [], idle: 'Press ▶ Pull! and look at both rulers',
-      tasks: [['Pull with the rock <b>0.4 m</b> from the fulcrum and look at both rulers.', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 })], ['', () => hasAns('q1'), { q: 'q1' }],
-        ['Now move the fulcrum so the rock is <b>0.2 m</b> from it, and pull again.', () => shopHas({ mach: 'lever', cls: 1, la: 0.2 })], ['', () => hasAns('q2'), { q: 'q2' }],
-        ['Last one: move the fulcrum close to <b>your hand</b>, so the rock is <b>1.6 m</b> from it. Pull, and compare the rulers again.', () => shopHas({ mach: 'lever', cls: 1, la: 1.6 })], ['', () => hasAns('q3'), { q: 'q3' }]],
+      tasks: [['Pull with the rock <b>0.4 m</b> from the fulcrum and look at both rulers.', () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), { need: ntArm('la', 0.4) }], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Now move the fulcrum so the rock is <b>0.2 m</b> from it, and pull again.', () => shopHas({ mach: 'lever', cls: 1, la: 0.2 }), { need: ntArm('la', 0.2) }], ['', () => hasAns('q2'), { q: 'q2' }],
+        ['Last one: move the fulcrum close to <b>your hand</b>, so the rock is <b>1.6 m</b> from it. Pull, and compare the rulers again.', () => shopHas({ mach: 'lever', cls: 1, la: 1.6 }), { need: ntArm('la', 1.6) }], ['', () => hasAns('q3'), { q: 'q3' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the rock 0.4 m from the fulcrum, the rock rose 0.10 m. How far did your hand move? Use the red ruler.', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 1, la: 0.4 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.4 }), needMsg: 'Pull with the rock 0.4 m from the fulcrum first.', ok: '0.40 m: four times further than the rock rose.' },
         { id: 'q2', type: 'reading', p: 'With the rock 0.2 m from the fulcrum, how far did your hand move?', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 1, la: 0.2 }), need: () => shopHas({ mach: 'lever', cls: 1, la: 0.2 }), needMsg: 'Pull with the rock 0.2 m from the fulcrum first.', ok: '0.90 m! The effort was tiny, but your hand moved nine times further than the rock.' },
@@ -8291,9 +8315,9 @@ CHDATA.c6 = {
         { hi: '#cvScene', html: `<p>So far the fulcrum has always been in the middle. You can also build a lever with the load in the middle, or with your effort in the middle. Use the <b>Lever</b> panel to choose a design. Then press <b>▶ Pull!</b> and check the newtonmeter and the two rulers.</p>${picThree()}` }],
       predict: { q: 'With the effort in the middle, your hand pulls up close to the fulcrum and the rock sits at the far end. How will the effort compare with the rock\'s weight?', opts: ['The effort will be bigger than the rock\'s weight', 'The effort will be smaller than the rock\'s weight', 'The effort will be equal to the rock\'s weight', 'The effort will be zero, because the fulcrum holds it'], then: 'Try the load in the middle first, then the effort in the middle.' },
       setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 1, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: [], sides: [], pullers: [], idle: 'Choose a design in the Lever panel, then press ▶ Pull!',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['In the <b>Lever</b> panel, choose <b>Load in the middle</b>. Drag the rock so it is <b>0.5 m</b> from the fulcrum, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 })],
-        ['In the <b>Lever</b> panel, choose <b>Effort in the middle</b>. Drag your hand so it is <b>0.5 m</b> from the fulcrum, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }],
+        ['In the <b>Lever</b> panel, choose <b>Load in the middle</b>. Drag the rock so it is <b>0.5 m</b> from the fulcrum, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 2, la: 0.5 }), { need: [ntCls(2), ntArm('la', 0.5)] }],
+        ['In the <b>Lever</b> panel, choose <b>Effort in the middle</b>. Drag your hand so it is <b>0.5 m</b> from the fulcrum, then press <b>▶ Pull!</b>', () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), { need: [ntCls(3), ntArm('ea', 0.5)] }], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the effort in the middle, what did the newtonmeter read?', unit: 'N', tol: 2, live: () => shopE({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle and your hand 0.5 m from the fulcrum first.', ok: '1,176 N: four times the rock\'s weight!' },
         { id: 'q2', type: 'reading', p: 'With the effort in the middle, the rock rose 0.40 m. How far did your hand move? Use the red ruler.', unit: 'm', tol: 0.02, live: () => shopDist({ mach: 'lever', cls: 3, ea: 0.5 }), need: () => shopHas({ mach: 'lever', cls: 3, ea: 0.5 }), needMsg: 'Pull with the effort in the middle first.', ok: 'Only 0.10 m. A small movement of your hand swung the rock four times as far.' },
@@ -8307,7 +8331,7 @@ CHDATA.c6 = {
         { html: `<p>Chopsticks are a <b>class 3</b> lever. They pivot where they rest in your hand, your fingers squeeze in the middle, and the food is at the tips.</p>${picChopsticks()}` },
         { html: `<p>Watch a class 3 lever in action. The effort is big, but your hand only moves a little, and the far end swings a long way.</p>${picClass3Anim()}` }],
       setup() { lessonStage({ mach: 'lever', allow: ['lever'], cls: 3, arm: 1.0, lift: 0.10, loads: { lever: WL.rock }, maxTravel: 1.5, classPick: true, clsNames: true, lesson: { tray: [], pre: ['lever'], lock: ['lever'] } }); }, adds: [], sides: [], pullers: [], idle: 'Press ▶ Pull! to work the class 3 lever',
-      tasks: [['The Lever panel now shows the class names. Build a <b>class 3</b> lever with your hand <b>1.0 m</b> from the fulcrum and press <b>▶ Pull!</b>. Watch the far end swing.', () => shopHas({ mach: 'lever', cls: 3, ea: 1 })]],
+      tasks: [['The Lever panel now shows the class names. Build a <b>class 3</b> lever with your hand <b>1.0 m</b> from the fulcrum and press <b>▶ Pull!</b>. Watch the far end swing.', () => shopHas({ mach: 'lever', cls: 3, ea: 1 }), { need: [ntCls(3), ntArm('ea', 1)] }]],
       qs: [
         { id: 'q1', type: 'pick', p: 'In a class 2 lever, the {0} is in the middle. In a class 3 lever, the {1} is in the middle.', picks: [[['fulcrum', 'load', 'effort'], 1], [['fulcrum', 'load', 'effort'], 2]] },
         { id: 'q2', type: 'mcq', p: 'Chopsticks are a class 3 lever. Why are they so useful?', opts: ['A small squeeze of your fingers moves the tips a long way', 'Your fingers squeeze with less force than the food\'s weight', 'The food gets lighter when you hold it at the tips', 'Class 3 levers can work without any fulcrum at all'], a: 0, ok: 'Yes! Small finger movements open and close the tips wide.', why: { 1: 'In a class 3 lever the effort is bigger than the load.', 2: 'The food\'s weight is mass × g, which never changes.', 3: 'Chopsticks pivot where they rest in your hand: that\'s the fulcrum.' } }] },
@@ -8319,9 +8343,9 @@ CHDATA.c6 = {
         { hi: '#cvScene', html: `<p>A ${T('pulley', 'pulley')} is a wheel with a rope running round it. A flagpole has one at the top: you pull the rope down, and the flag goes up.</p>${picFlagpole()}` },
         { hi: '#lsDock', html: `<p>Here's a trick to make the crate easier to lift: hang it from a pulley that moves up with it. Now there's more than one piece of rope holding the crate up, and the pieces <b>share</b> its weight. They're called ${T('supporting', 'supporting ropes')}. With 2 supporting ropes, each one holds up half of the crate. Count only the ropes that hold the crate up: the end you pull isn't holding the crate, so don't count it.</p>${picMovingPulley()}` }],
       predict: { q: 'With 4 supporting ropes, how much rope will you have to pull to lift the crate 1 m?', opts: ['4 m of rope, because each of the 4 ropes gets 1 m shorter', '1 m of rope, because the crate only rises 1 m', '0.25 m of rope, because the 4 ropes share the job', '2 m of rope, because the pulley doubles the distance'], then: 'Lift the crate with 1, 2, 3 and 4 supporting ropes. Watch the newtonmeter and the red ruler.' },
-      setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate }, lim: { ropesMax: 6 }, lesson: { tray: ['block'], pre: ['crane'], lock: ['crane'], introTray: true } }); }, adds: ['wspull', 'rulers'], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Lift the crate with <b>1, 2, 3 and 4</b> supporting ropes.', () => [1, 2, 3, 4].every(n => shopHas({ mach: 'pulley', ropes: n }))], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
+      setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate }, lim: { ropesMax: 6 }, lesson: { tray: ['crane', 'block'], pre: [], lock: [] } }); }, adds: ['wspull', 'rulers'], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }], ntCrane('pl1', 'crate'),
+        ['Lift the crate with <b>1, 2, 3 and 4</b> supporting ropes.', () => [1, 2, 3, 4].every(n => shopHas({ mach: 'pulley', ropes: n })), { need: ['block', ntRopes(4)] }], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With 4 supporting ropes, what effort lifted the 235.2 N crate?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first. Your runs are in the Journal.', ok: 'Yes, 58.8 N, a quarter of the crate\'s weight. That\'s under Smooshy\'s limit!' },
         { id: 'q2', type: 'reading', p: 'With 4 supporting ropes, the crate rose 1.0 m. How much rope did you pull? Use the red ruler.', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 4 }), need: () => shopHas({ mach: 'pulley', ropes: 4 }), needMsg: 'Lift the crate with 4 supporting ropes first.', ok: '4 m of rope for a 1 m lift. Each of the 4 supporting ropes got 1 m shorter.' },
@@ -8333,9 +8357,9 @@ CHDATA.c6 = {
         { html: `<p>A ${T('wheelaxle', 'wheel and axle')} is a big wheel fixed to a thin rod, called the axle, so they turn together. A screwdriver is one: the fat handle is the wheel, and the thin metal shaft is the axle.</p>${picScrewdriver()}` },
         { hi: '#cvScene', html: `<p>The Workshop's ${T('winch', 'winch')} is a wheel and axle too. You turn the handle, and the thin axle winds up the rope to lift the bucket. Try a short handle, then a long one.</p>` }],
       predict: { q: 'You swap a short winch handle for a long one. What will happen to the effort?', opts: ['It gets smaller, because your hand moves round a bigger circle', 'It gets bigger, because a long handle is heavier to turn', 'It stays the same, because the bucket weighs the same', 'It drops to zero, because the handle does all the work'], then: 'Lift the bucket with each handle and watch the newtonmeter.' },
-      setup() { lessonStage({ mach: 'winch', allow: ['winch'], R: 0.1, axle: 0.05, lift: 1.0, loads: { winch: WL.bucket }, lesson: { tray: ['winch'], pre: ['crane'], lock: ['crane'], introTray: true } }); }, adds: [], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Turn! to wind the winch',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Clip the <b>winch</b> on the end of the rope, then lift the bucket with a handle radius of <b>0.1 m</b>, then <b>0.25 m</b>.', () => shopHas({ mach: 'winch', R: 0.1 }) && shopHas({ mach: 'winch', R: 0.25 })], ['', () => hasAns('q1'), { q: 'q1' }]],
+      setup() { lessonStage({ mach: 'winch', allow: ['winch'], R: 0.1, axle: 0.05, lift: 1.0, loads: { winch: WL.bucket }, lesson: { tray: ['crane', 'winch'], pre: [], lock: [], introTray: true } }); }, adds: [], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Turn! to wind the winch',
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }], ntCrane('pl2', 'bucket'),
+        ['Clip the <b>winch</b> on the end of the rope, then lift the bucket with a handle radius of <b>0.1 m</b>, then <b>0.25 m</b>.', () => shopHas({ mach: 'winch', R: 0.1 }) && shopHas({ mach: 'winch', R: 0.25 }), { need: ['winch', { ctl: 'R', sel: '[data-lm="R+"]', is: () => WS.R >= 0.25 - 1e-9, when: () => shopHas({ mach: 'winch', R: WS.R }) }] }], ['', () => hasAns('q1'), { q: 'q1' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With a handle radius of 0.25 m, what effort lifted the 196 N bucket?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'winch', R: 0.25 }), need: () => shopHas({ mach: 'winch', R: 0.25 }), needMsg: 'Lift the bucket with a handle radius of 0.25 m first. Your runs are in the Journal.', ok: 'Yes, 39.2 N. The long handle made your force five times bigger at the axle.' },
         { id: 'q2', type: 'pick', p: 'The longer handle made the effort {0}, and your hand moved {1} as it turned the handle.', picks: [[['bigger', 'the same', 'smaller'], 2], [['less far', 'the same distance', 'further'], 2]], after: 'Your hand travels round a bigger circle, so a smaller force does the job.' }] },
@@ -8345,8 +8369,8 @@ CHDATA.c6 = {
         { hi: '#cvScene', html: `<p>A ramp lets you raise a load without lifting it straight up. You'll see ramps at school entrances, for wheelchairs and trolleys. Scientists call a ramp an ${T('incline', 'inclined plane')}.</p>${picRamp()}` }],
       predict: { q: 'You pull a 490 N cart up onto a 1 m high platform. Which ramp will need the smallest pull?', opts: ['The longest ramp, 5 m long and gentle', 'The shortest ramp, 2 m long and steep', 'Every ramp needs exactly the same pull', 'The middle ramp, 4 m long and medium'], then: 'Try the 2 m ramp, then the 5 m ramp.' },
       setup() { lessonStage({ mach: 'ramp', allow: ['ramp'], L: 2, h: 1, lift: 1.0, loads: { ramp: WL.cart }, lim: { rampL: [1, 6, 1] }, lesson: { tray: ['ramp'], pre: [], lock: [], introTray: true } }); }, adds: [], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Pull! to pull the cart up the ramp',
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Drag in the ramp and rope the cart to its top. Then pull the cart up the <b>2 m</b> ramp, then the <b>5 m</b> ramp.', () => shopHas({ mach: 'ramp', L: 2, h: 1 }) && shopHas({ mach: 'ramp', L: 5, h: 1 })], ['', () => hasAns('q1'), { q: 'q1' }]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }],
+        ['Drag in the ramp and rope the cart to its top. Then pull the cart up the <b>2 m</b> ramp, then the <b>5 m</b> ramp.', () => shopHas({ mach: 'ramp', L: 2, h: 1 }) && shopHas({ mach: 'ramp', L: 5, h: 1 }), { need: ['ramp', ntRope, { ctl: 'L', sel: '[data-lm="L+"]', is: () => WS.L >= 5, when: () => shopHas({ mach: 'ramp', L: 2, h: 1 }) }] }], ['', () => hasAns('q1'), { q: 'q1' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'What pull got the 490 N cart up the 5 m ramp?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'ramp', L: 5, h: 1 }), need: () => shopHas({ mach: 'ramp', L: 5, h: 1 }), needMsg: 'Pull the cart up the 5 m ramp first.', ok: '98 N, a fifth of the cart\'s weight. You pulled it 5 m to raise it 1 m.' },
         { id: 'q2', type: 'mcq', p: 'Why does the 5 m ramp need a smaller pull than the 2 m ramp?', opts: ['The cart travels a longer distance, so each metre needs less force', 'The cart weighs less when it sits on a long, gentle ramp', 'The long ramp has less friction, so the cart rolls more easily', 'The steep ramp pushes back on the cart and makes it heavier'], a: 0, ok: 'Yes! Less force, more distance, again.', why: { 1: 'The cart\'s weight is mass × g on any ramp.', 2: 'Workshop machines have no friction at all.', 3: 'The cart\'s weight doesn\'t change with the slope.' } }] },
@@ -8359,9 +8383,9 @@ CHDATA.c6 = {
       setup() { lessonStage({ mach: 'wedge', allow: ['wedge', 'screw'], thick: 10, per: 120, pitch: 1.0, lift: 0.20, loads: { wedge: WL.log, screw: WL.car }, lim: { pitch: [0.5, 1.0] }, lesson: { tray: ['jack'], pre: ['wedge'], lock: ['wedge'], introTray: true } }); }, adds: [], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Push! to split the log',
       mask: [{ q: 'q1', keys: ['turns'], when: r => r.mach === 'screw' && r.pitch === 0.5 }],
       tick() { const st = CHDATA.c6.steps.find(x => x.id === 'pl4'); if (!S.flags.iceOn && [0, 1, 2, 3].every(i => st.tasks[i][1]())) { S.flags.iceOn = true; WS.loads.wedge = WL.ice; if (WS.mach === 'wedge') { wsLoadFor('wedge'); wsResetLoad(); wsRenderControls(); } } },
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Split the log with the <b>5 cm</b> wedge, then the <b>2 cm</b> wedge.', () => shopHas({ mach: 'wedge', thick: 5, load: 1200 }) && shopHas({ mach: 'wedge', thick: 2, load: 1200 })],
-        ['Drag the screw jack under the car and lift it, first with a <b>1.0 cm</b> gap between threads, then a <b>0.5 cm</b> gap. Watch the turn counter.', () => shopHas({ mach: 'screw', pitch: 1 }) && shopHas({ mach: 'screw', pitch: 0.5 })], ['', () => hasAns('q1'), { q: 'q1' }],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }],
+        ['Split the log with the <b>5 cm</b> wedge, then the <b>2 cm</b> wedge.', () => shopHas({ mach: 'wedge', thick: 5, load: 1200 }) && shopHas({ mach: 'wedge', thick: 2, load: 1200 }), { need: [{ ctl: 'thick', sel: '[data-lm="thick:5"]', is: () => shopHas({ mach: 'wedge', thick: 5, load: 1200 }) }, { ctl: 'thick', sel: '[data-lm="thick:2"]', is: () => shopHas({ mach: 'wedge', thick: 2, load: 1200 }) }] }],
+        ['Drag the screw jack under the car and lift it, first with a <b>1.0 cm</b> gap between threads, then a <b>0.5 cm</b> gap. Watch the turn counter.', () => shopHas({ mach: 'screw', pitch: 1 }) && shopHas({ mach: 'screw', pitch: 0.5 }), { need: [{ ctl: 'tab', sel: '[data-lm="tab:screw"]', is: () => WS.mach === 'screw' }, 'jack', { ctl: 'pitch', sel: '[data-lm="pitch:0.5"]', is: () => shopHas({ mach: 'screw', pitch: 0.5 }), when: () => shopHas({ mach: 'screw', pitch: 1 }) }] }], ['', () => hasAns('q1'), { q: 'q1' }],
         ['<b>Toolbox job:</b> Smooshy\'s ice block needs <b>500 N</b> to split. Choose a wedge that splits it with <b>60 N or less</b>.', () => shopRuns().some(r => r.mach === 'wedge' && r.loadN === 500 && !r.capped && r.E <= 60)]],
       qs: [
         { id: 'q1', type: 'reading', p: 'How many turns of the handle lifted the car 20 cm with the 0.5 cm gap between threads?', unit: 'turns', tol: 0, live: () => { const r = shopRun({ mach: 'screw', pitch: 0.5 }); return r ? r.turns : null; }, need: () => shopHas({ mach: 'screw', pitch: 0.5 }), needMsg: 'Lift the car with the 0.5 cm gap first. Your runs are in the Journal.', ok: '40 turns! The closer threads needed half the effort, but twice as many turns.' },
@@ -8370,44 +8394,44 @@ CHDATA.c6 = {
 
     /* ================= Part 3: Mechanical advantage and work (c6c) =================
        Re-pitched 2 Nov 2026 against the pacing rules (script section A2): one new word per card, a labelled picture for each new idea, plain words, nothing in a card gives a prediction away. */
-    { id: 'u1', title: 'Mechanical advantage', rescue: 'The mission computer has learned mechanical advantage.',
+    { id: 'u1', title: 'Mechanical advantage', rescue: 'GASA\'s maths check has learned mechanical advantage.',
       cards: [
-        { hi: '#cvScene', html: `<p>📡 ${SMOOSHY.name}: "My mission computer can't understand 'easier'. It needs a <b>number</b>!"</p><p>Engineers use ${T('mechadv', 'mechanical advantage')}: how many times bigger the load is than the effort. In Part 2, the crate needed an effort of 58.8 N with 4 supporting ropes. The load, 235.2 N, is 4 times bigger than the effort, so the mechanical advantage is 4.</p>${picMA()}<div class="law">mechanical advantage = load ÷ effort</div><p>Newtons divided by newtons leaves a plain number, so mechanical advantage has no unit.</p>` },
+        { hi: '#cvScene', html: `<p>📡 ${SMOOSHY.name}: "GASA's maths check can't understand 'easier'. It needs a <b>number</b>!"</p><p>Engineers use ${T('mechadv', 'mechanical advantage')}: how many times bigger the load is than the effort. In Part 2, the crate needed an effort of 58.8 N with 4 supporting ropes. The load, 235.2 N, is 4 times bigger than the effort, so the mechanical advantage is 4.</p>${picMA()}<div class="law">mechanical advantage = load ÷ effort</div><p>Newtons divided by newtons leaves a plain number, so mechanical advantage has no unit.</p>` },
         { html: `<p>A flagpole has just one pulley, and the effort is the same as the flag's weight. The load is not bigger than the effort at all, so the mechanical advantage is 1. That means no help with the force.</p>${picFlagpole()}` }],
-      setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 }, lesson: { tray: ['block'], pre: ['crane'], lock: ['crane'] } }); }, adds: ['wspull', 'readMA'], hide: ['wsctl', 'wsmach', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
+      setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 1.0, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 }, lesson: { tray: ['crane', 'block'], pre: [], lock: [] } }); }, adds: ['wspull', 'readMA'], hide: ['wsctl', 'wsmach', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
       mask: [{ q: 'q1', keys: ['readMA'], when: r => r.mach === 'pulley' && r.ropes === 3 }, { q: 'q2', keys: ['readMA'], when: r => r.mach === 'pulley' && r.ropes === 6 }],
-      tasks: [['Lift the 294 N crate with <b>3</b> supporting ropes. Read the newtonmeter.', () => shopHas({ mach: 'pulley', ropes: 3 })], ['', () => hasAns('q1'), { q: 'q1' }],
-        ['Now lift it with <b>6</b> supporting ropes.', () => shopHas({ mach: 'pulley', ropes: 6 })], ['', () => hasAns('q2'), { q: 'q2' }]],
+      tasks: [ntCrane('u1', 'crate'), ['Lift the 294 N crate with <b>3</b> supporting ropes. Read the newtonmeter.', () => shopHas({ mach: 'pulley', ropes: 3 }), { need: ['block', ntRopes(3)] }], ['', () => hasAns('q1'), { q: 'q1' }],
+        ['Now lift it with <b>6</b> supporting ropes.', () => shopHas({ mach: 'pulley', ropes: 6 }), { need: [ntRopes(6)] }], ['', () => hasAns('q2'), { q: 'q2' }]],
       qs: [
         { id: 'q1', type: 'num', p: 'Use your newtonmeter reading for 3 supporting ropes. What is the mechanical advantage?', unit: '', ans: 3, tol: 0.05, need: () => shopHas({ mach: 'pulley', ropes: 3 }), needMsg: 'Lift the crate with 3 supporting ropes first. Your runs are in the Journal.', ladder: true, hints: ['Mechanical advantage = load ÷ effort.', 'The load is 294 N. The effort is your newtonmeter reading.', 'Type 294 ÷ (your reading) into the calculator.'], work: '294 ÷ 98 = 3. There is no unit.', ok: 'Yes, 3. It matches the 3 supporting ropes. The mechanical advantage readout now shows.' },
         { id: 'q2', type: 'num', p: 'Use your newtonmeter reading for 6 supporting ropes. What is the mechanical advantage?', unit: '', ans: 6, tol: 0.1, need: () => shopHas({ mach: 'pulley', ropes: 6 }), needMsg: 'Lift the crate with 6 supporting ropes first. Your runs are in the Journal.', ladder: true, hints: ['Find your effort reading for 6 ropes in the Journal.', 'Divide the load, 294 N, by that effort.', 'Type 294 ÷ 49 into the calculator.'], work: '294 ÷ 49 = 6.', ok: 'Yes, 6. For a pulley system, the mechanical advantage is the number of supporting ropes.' },
         { id: 'q3', type: 'pick', p: 'A machine with a mechanical advantage of 1 needs an effort {0} the load. A machine with a mechanical advantage of 5 needs an effort {1} the load.', picks: [[['smaller than', 'the same as', 'bigger than'], 1], [['5 times smaller than', 'the same as', '5 times bigger than'], 0]], after: 'Mechanical advantage = load ÷ effort, so a mechanical advantage of 5 means the effort is 5 times smaller than the load.' }] },
 
-    { id: 'u2', title: 'Mechanical advantage from the shape', rescue: 'The mission computer can predict the effort for any simple machine.',
+    { id: 'u2', title: 'Mechanical advantage from the shape', rescue: 'GASA\'s maths check can predict the effort for any simple machine.',
       cards: [
         { html: `<p>You can find a machine's mechanical advantage from its shape, before you lift anything. For a lever, divide your hand's distance from the fulcrum by the rock's distance from the fulcrum.</p>${picLeverDims()}<div class="law">lever: mechanical advantage = (your hand to fulcrum) ÷ (rock to fulcrum)</div>` },
         { html: `<p>Once you know the mechanical advantage, you can work out the effort before you pull. In Part 1, the 294 N rock needed 73.5 N with this lever. That is the same number!</p>${picLeverDims({ calc: true })}<div class="law">effort = load ÷ mechanical advantage</div>` },
         { hi: '#cvScene', html: `<p>A winch is a wheel and axle. Its mechanical advantage is the handle radius divided by the axle radius. Use the same unit for both.</p>${picWinchDims()}<div class="law">winch: mechanical advantage = handle radius ÷ axle radius</div>` },
         { html: `<p>A ramp is the last one. Its mechanical advantage is the length of the ramp divided by its height.</p>${picRamp()}<div class="law">ramp: mechanical advantage = length ÷ height</div>` }],
-      setup() { lessonStage({ mach: 'winch', allow: ['winch', 'ramp'], R: 0.1, axle: 0.05, L: 2, h: 1, lift: 1.0, rampH: true, loads: { winch: WL.bucket, ramp: WL.cart }, lesson: { tray: ['winch', 'ramp'], pre: ['crane'], lock: ['crane'] } }); }, adds: ['readMA'], hide: ['wsctl', 'wsmach', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Pick the Winch or Ramp tab in the panel, then press ▶ to lift',
+      setup() { lessonStage({ mach: 'winch', allow: ['winch', 'ramp'], R: 0.1, axle: 0.05, L: 2, h: 1, lift: 1.0, rampH: true, loads: { winch: WL.bucket, ramp: WL.cart }, lesson: { tray: ['crane', 'winch', 'ramp'], pre: [], lock: [] } }); }, adds: ['readMA'], hide: ['wsctl', 'wsmach', 'builder', 'rulers'], sides: [], pullers: [], idle: 'Pick the Winch or Ramp tab in the panel, then press ▶ to lift',
       mask: [{ q: 'q1', keys: ['readE'], when: r => r.mach === 'winch' && r.R === 0.4 }, { q: 'q2', keys: ['readE'], when: r => r.mach === 'ramp' && r.L === 4 && r.h === 0.8 }],
-      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['Check it: on the <b>Winch</b> tab, clip the winch on, set the handle radius to <b>0.4 m</b> and press <b>▶ Turn!</b>', () => shopHas({ mach: 'winch', R: 0.4 })],
-        ['', () => hasAns('q2'), { q: 'q2' }], ['Check it: on the <b>Ramp</b> tab, drag in the ramp and rope the cart to its top, set it <b>4 m</b> long and <b>0.8 m</b> high, and press <b>▶ Pull!</b>', () => shopHas({ mach: 'ramp', L: 4, h: 0.8 })]],
+      tasks: [ntCrane('u2', 'bucket'), ['', () => hasAns('q1'), { q: 'q1' }], ['Check it: on the <b>Winch</b> tab, clip the winch on, set the handle radius to <b>0.4 m</b> and press <b>▶ Turn!</b>', () => shopHas({ mach: 'winch', R: 0.4 }), { need: ['winch', { ctl: 'R', sel: '[data-lm="R+"]', is: () => WS.R >= 0.4 - 1e-9 }] }],
+        ['', () => hasAns('q2'), { q: 'q2' }], ['Check it: on the <b>Ramp</b> tab, drag in the ramp and rope the cart to its top, set it <b>4 m</b> long and <b>0.8 m</b> high, and press <b>▶ Pull!</b>', () => shopHas({ mach: 'ramp', L: 4, h: 0.8 }), { need: ['ramp', ntRope, { ctl: 'L', sel: '[data-lm="L+"]', is: () => WS.L >= 4 }, { ctl: 'h', sel: '[data-lm="h-"]', is: () => WS.h <= 0.8 + 1e-9 }] }]],
       qs: [
         { id: 'q1', type: 'num', p: 'A winch has a handle radius of 0.4 m and an axle radius of 0.05 m. It lifts the 196 N bucket. What effort should it need?', unit: 'N', units: UNITS_W, ans: 24.5, tol: 0.5, ladder: true, hints: ['Find the mechanical advantage first: handle radius ÷ axle radius.', '0.4 ÷ 0.05 = 8. Then effort = load ÷ mechanical advantage.', 'Type 196 ÷ 8 into the calculator.'], work: 'Mechanical advantage = 0.4 ÷ 0.05 = 8, so the effort is 196 ÷ 8 = 24.5 N.', ok: 'Yes, 24.5 N. Now check it with the newtonmeter.' },
         { id: 'q2', type: 'num', p: 'A ramp is 4 m long and 0.8 m high. What pull does the 490 N cart need?', unit: 'N', units: UNITS_W, ans: 98, tol: 0.5, ladder: true, hints: ['Find the mechanical advantage first: length of the ramp ÷ height.', '4 ÷ 0.8 = 5. Then effort = load ÷ mechanical advantage.', 'Type 490 ÷ 5 into the calculator.'], work: 'Mechanical advantage = 4 ÷ 0.8 = 5, so the pull is 490 ÷ 5 = 98 N.', ok: 'Yes, 98 N. Now check it with the newtonmeter.' },
         { id: 'q3', type: 'pick', p: 'To find the mechanical advantage of a pulley system, count the {0}. A ramp 6 m long and 1.5 m high has a mechanical advantage of {1}.', picks: [[['supporting ropes', 'pulley wheels', 'metres of rope'], 0], [['4', '9', '0.25'], 0]], after: 'A pulley system\'s mechanical advantage is its number of supporting ropes. The ramp is 6 ÷ 1.5 = 4.' }] },
 
-    { id: 'u3', title: 'Work and the catch', rescue: 'The mission computer now checks the work for every plan.',
+    { id: 'u3', title: 'Work and the catch', rescue: 'GASA\'s maths check now checks the work for every plan.',
       cards: [
         { hi: '#cvScene', html: `<p>You know that a smaller effort means your hand moves further. In this step you will measure exactly how much further, and add it up like a scientist.</p>` },
         { html: `<p>When a force moves something, scientists say the force does ${T('work', 'work')}. You find it by multiplying the force by the distance.</p>${picWork()}<div class="law">work = force × distance</div>` },
         { html: `<p>Work is measured in ${T('joule', 'joules')}, written J. Lifting the 294 N crate 1 m takes 294 J.</p>${picWork({ unit: true })}` },
         { html: `<p>A machine has two ends. You put work in at your hand, and the machine does work on the load.</p>${picWorkInOut()}` }],
       predict: { q: 'A pulley system with 6 supporting ropes lifts the 294 N crate 2 m. How much rope will you pull?', opts: ['12 m of rope', '3 m of rope', '8 m of rope', '2 m of rope'], then: 'Lift the crate 2 m and measure the rope with the red ruler.' },
-      setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 6, lift: 1.0, lifts: { pick: true }, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 }, lesson: { tray: ['block'], pre: ['crane'], lock: ['crane'] } }); }, adds: ['wspull', 'readMA', 'readWork', 'rulers'], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
+      setup() { lessonStage({ mach: 'pulley', allow: ['pulley'], ropes: 6, lift: 1.0, lifts: { pick: true }, loads: { pulley: WL.crate30 }, lim: { ropesMax: 6 }, lesson: { tray: ['crane', 'block'], pre: [], lock: [] } }); }, adds: ['wspull', 'readMA', 'readWork', 'rulers'], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Press ▶ Pull! to lift the crate',
       mask: [{ q: 'q2', keys: ['readWork'], when: r => r.mach === 'pulley' }, { q: 'q3', keys: ['readWork'], when: r => r.mach === 'pulley' }],
-      tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Choose a lift height of <b>2 m</b> in the crane\'s panel, hang the pulley block with <b>6</b> supporting ropes and lift the crate.', () => shopHas({ mach: 'pulley', ropes: 6, rise: 2 })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }], ntCrane('u3', 'crate'), ['Choose a lift height of <b>2 m</b> in the crane\'s panel, hang the pulley block with <b>6</b> supporting ropes and lift the crate.', () => shopHas({ mach: 'pulley', ropes: 6, rise: 2 }), { need: [ntPick('lift', 2), 'block', ntRopes(6)] }], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'How much rope did you pull to lift the crate 2 m with 6 supporting ropes? Use the red ruler.', unit: 'm', tol: 0.05, live: () => shopDist({ mach: 'pulley', ropes: 6, rise: 2 }), need: () => shopHas({ mach: 'pulley', ropes: 6, rise: 2 }), needMsg: 'Lift the crate 2 m with 6 supporting ropes first.', ok: '12 m: six times the 2 m the crate rose. Your hand\'s distance = mechanical advantage × the load\'s distance.' },
         { id: 'q2', type: 'num', p: 'Your effort was 49 N, and you pulled 12 m of rope. How much work did you put in? (Force × distance.)', unit: 'J', units: UNITS_W, ans: 588, tol: 1, ladder: true, hints: ['Work = force × distance.', 'The force is your effort, 49 N, and the distance is the rope you pulled, 12 m.', 'Type 49 × 12 into the calculator.'], work: 'Work in = 49 × 12 = 588 J.', ok: 'Yes, 588 J of work in.' },
@@ -8432,12 +8456,12 @@ CHDATA.c6 = {
         { hi: '#lsTray', html: `<p>The Workshop crane has two simple machines. You turn the ${T('winch', 'winch')} handle, and the winch winds in the rope of a pulley block. The winch makes your force bigger, then the pulley block makes it bigger again.</p>` },
         { html: `<p>To find the total mechanical advantage, multiply. Here is a worked example with different numbers: a winch of ×2 and a pulley block with 2 supporting ropes give 2 × 2 = 4. A 400 N load needs an effort of 400 ÷ 4 = 100 N.</p>${picCompoundChain(2, 2)}` }],
       predict: { q: 'A winch with a mechanical advantage of 4 drives a pulley block with 3 supporting ropes. What is the total mechanical advantage?', opts: ['12, because the advantages multiply', '7, because the advantages add up', '4, because only the biggest one counts', '3, because the last machine decides'], then: 'Set up the crane and check with the newtonmeter.' },
-      setup() { lessonStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb }, bRoutes: [[0, 'Straight up']], lesson: { tray: ['block', 'winch'], pre: ['crane', 'cables'], lock: ['crane'], introTray: true } }); }, adds: ['wspull', 'rulers', 'bTotMA', 'bTravel', 'readMA'], hide: ['wsctl', 'wsmach', 'builder', 'bCable'], sides: [], pullers: [], idle: 'Clip on a pulley block and a winch, then press ▶ Turn!',
+      setup() { lessonStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.engineb }, bRoutes: [[0, 'Straight up']], lesson: { tray: ['crane', 'block', 'winch'], pre: ['cables'], lock: [], introTray: true } }); }, adds: ['wspull', 'rulers', 'bTotMA', 'bTravel', 'readMA'], hide: ['wsctl', 'wsmach', 'builder', 'bCable'], sides: [], pullers: [], idle: 'Clip on a pulley block and a winch, then press ▶ Turn!',
       mask: [{ q: 'q2', keys: ['readE', 'readMA', 'bTotMA'], when: r => r.mach === 'build' && r.bw === 6 && r.bn === 4 }],
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
-        ['Clip on the pulley block and the winch, set the winch to <b>×4</b> and use <b>3</b> supporting ropes. Press <b>▶ Turn!</b> to lift the 1,176 N engine block.', () => shopHas({ mach: 'build', bw: 4, bn: 3 })], ['', () => hasAns('q1'), { q: 'q1' }],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }], ntCrane('k2', 'engine block'),
+        ['Clip on the pulley block and the winch, set the winch to <b>×4</b> and use <b>3</b> supporting ropes. Press <b>▶ Turn!</b> to lift the 1,176 N engine block.', () => shopHas({ mach: 'build', bw: 4, bn: 3 }), { need: ['block', 'winch', ntPick('bw', 4), ntPick('bn', 3)] }], ['', () => hasAns('q1'), { q: 'q1' }],
         ['', () => hasAns('q2'), { q: 'q2' }],
-        ['Check it: set the winch to <b>×6</b> with <b>4</b> supporting ropes and turn the handle.', () => shopHas({ mach: 'build', bw: 6, bn: 4 })], ['', () => hasAns('q3'), { q: 'q3' }]],
+        ['Check it: set the winch to <b>×6</b> with <b>4</b> supporting ropes and turn the handle.', () => shopHas({ mach: 'build', bw: 6, bn: 4 }), { need: [ntPick('bw', 6), ntPick('bn', 4)] }], ['', () => hasAns('q3'), { q: 'q3' }]],
       qs: [
         { id: 'q1', type: 'reading', p: 'With the winch at ×4 and 3 supporting ropes, what effort lifted the 1,176 N engine block?', unit: 'N', tol: 0.5, live: () => shopE({ mach: 'build', bw: 4, bn: 3 }), need: () => shopHas({ mach: 'build', bw: 4, bn: 3 }), needMsg: 'Lift the engine block with the winch at ×4 and 3 supporting ropes first. Your runs are in the Journal.', ok: '98 N: twelve times smaller than the load, just as 4 × 3 predicted.' },
         { id: 'q2', type: 'num', p: 'With the winch at ×6 and 4 supporting ropes, what effort should lift the 1,176 N engine block?', unit: 'N', units: UNITS_W, ans: 49, tol: 0.5, ladder: true, hints: ['Multiply the two mechanical advantages to get the total.', '6 × 4 = 24. Then effort = load ÷ total mechanical advantage.', 'Type 1176 ÷ 24 into the calculator.'], work: 'Total mechanical advantage = 6 × 4 = 24, so the effort is 1,176 ÷ 24 = 49 N.', ok: 'Yes, 49 N. Now check it with the newtonmeter.' },
@@ -8449,9 +8473,9 @@ CHDATA.c6 = {
         { html: `<p>Remember the catch: every extra bit of mechanical advantage means a longer pull. Real rescues have limits, such as only so much cable and only so much time. Your job is to build a machine that is strong enough, without being so slow that it takes forever.</p>${picCompoundChain(3, 4)}` }],
       setup() { lessonStage({ mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.gen }, bRoutes: [[0, 'Straight up'], [6, '6 m ramp']], lesson: { tray: ['crane', 'ramp', 'block', 'winch'], pre: [], lock: [] } }); }, adds: ['wspull', 'rulers', 'bTotMA', 'bCable', 'bTravel', 'readMA'], hide: ['wsctl', 'wsmach', 'builder'], sides: [], pullers: [], idle: 'Build your machine, then press ▶ Turn!',
       mask: [{ q: 'q1', keys: ['bTotMA', 'readMA'], when: r => r.mach === 'build' && r.bw === 4 && r.bn === 2 && r.br === 6 }, { q: 'q2', keys: ['bTravel'], when: r => r.mach === 'build' && r.bw === 4 && r.bn === 2 && r.br === 6 }],
-      tasks: [['Build <b>winch ×4</b>, <b>2 supporting ropes</b> and the <b>6 m ramp</b>. The 240 kg generator (2,352 N) rises 2 m up the ramp.', () => S.flags.k3built || (WS.mach === 'build' && WS.bw === 4 && WS.bn === 2 && WS.br === 6 && (S.flags.k3built = true))], ['', () => hasAns('q1'), { q: 'q1' }],
+      tasks: [['Build <b>winch ×4</b>, <b>2 supporting ropes</b> and the <b>6 m ramp</b>. The 240 kg generator (2,352 N) rises 2 m up the ramp.', () => S.flags.k3built || (WS.mach === 'build' && WS.bw === 4 && WS.bn === 2 && WS.br === 6 && (S.flags.k3built = true)), { need: ['ramp', ntRope, 'block', 'winch', ntPick('bw', 4)] }], ['', () => hasAns('q1'), { q: 'q1' }],
         ['Press <b>▶ Turn!</b> and watch the generator roll up the ramp.', () => shopHas({ mach: 'build', bw: 4, bn: 2, br: 6 })], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }],
-        ['<b>Two-leg practice:</b> press <b>Two-leg practice</b> in the panel. Put a ramp by the crate, then a crane in the glowing box, and rope each one to the crate.', () => lsK3Done()]],
+        ['<b>Two-leg practice:</b> press <b>Two-leg practice</b> in the panel. Put a ramp by the crate, then a crane in the glowing box, and rope each one to the crate.', () => lsK3Done(), { stage: 'two', need: [{ ctl: 'two', sel: '[data-lm="two:start"]', is: () => lsIsTwo(), when: () => lsK3Open() }, 'ramp', 'crane'] }]],
       qs: [
         { id: 'q1', type: 'num', p: 'Your machine has a winch ×4, a pulley block with 2 supporting ropes and a ramp 6 m long that rises 2 m. What is its total mechanical advantage?', unit: '', ans: 24, tol: 0.05, ladder: true, hints: ['Find each machine\'s mechanical advantage. The ramp\'s is length ÷ height.', 'The ramp: 6 ÷ 2 = 3. The pulley block: 2. The winch: 4.', 'Multiply: 4 × 2 × 3.'], work: 'Ramp = 6 ÷ 2 = 3. Total = 4 × 2 × 3 = 24. There is no unit.', ok: 'Yes, 24. The total mechanical advantage readout now shows.' },
         { id: 'q2', type: 'num', p: 'The generator rose 2 m. How far did your hand travel on the winch handle?', unit: 'm', units: UNITS_W, ans: 48, tol: 0.5, ladder: true, hints: ['Your hand\'s distance = total mechanical advantage × the load\'s distance.', 'The total mechanical advantage is 24, and the load rose 2 m.', 'Type 24 × 2 into the calculator.'], work: 'Your hand moved 24 × 2 = 48 m.', ok: 'Yes, 48 m. The hand travel readout now shows.' },
@@ -8482,7 +8506,7 @@ CHDATA.c6 = {
       predict: { q: 'You switch the pulley system from Perfect to Real and lift the tank 2 m again. How much rope will you pull?', opts: ['The same 8 m, because each rope still shortens by 2 m', 'More than 8 m, because friction drags on the rope', 'Less than 8 m, because friction helps hold the tank up', 'It depends on how hard you pull on the rope'], then: 'Lift the tank with the Perfect machine, then with the Real one, and compare the newtonmeter and the ruler.' },
       setup() { shopStage({ mach: 'pulley', allow: ['pulley'], ropes: 4, lift: 2, loads: { pulley: WL.tank600 }, site: 'base', real: false, lim: { ropesMax: 4 } }); }, adds: ['wsctl', 'wspull', 'mfric', 'readWork', 'readEff', 'rulers'], hide: ['wsmach'], sides: [], pullers: [], idle: 'Press Pull! to lift the water tank',
       mask: [{ q: 'q2', keys: ['readWork'], when: r => r.mach === 'pulley' && r.real }, { q: 'q3', keys: ['readEff'], when: r => r.mach === 'pulley' && r.real }],
-      tasks: [['Make your prediction in the box above.', () => predOf() != null],
+      tasks: [['Make your prediction in the box above.', () => predOf() != null, { pred: true }],
         ['Lift the 600 N tank 2 m with the <b>Perfect</b> machine (4 supporting ropes).', () => shopHas({ mach: 'pulley', ropes: 4, load: 600, real: false })],
         ['Switch to <b>Real</b> and lift it again. Watch the wheels.', () => shopHas({ mach: 'pulley', ropes: 4, load: 600, real: true })], ['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }]],
       qs: [
@@ -8610,7 +8634,7 @@ CHDATA.c6.challenge = {
   missions: [
     { id: 'y1', kind: 'shop', title: 'Mission 1: Oxygen tank', cap: 60,
       setup: { mach: 'pulley', allow: ['pulley'], ropes: 1, lift: 3, loads: { pulley: WL.tank }, lim: { ropesMax: 6 } }, show: ['wsctl', 'wspull', 'readMA'],
-      brief: 'Lift the 25 kg oxygen tank (245 N) <b>3 m</b> up into the rocket\'s hatch. Your pull must be <b>60 N or less</b>, and there are only <b>15 m of rope</b>.',
+      brief: 'Lift the 25 kg oxygen tank (245 N) <b>3 m</b> up into the Big Jelly\'s hatch. Your pull must be <b>60 N or less</b>, and there are only <b>15 m of rope</b>.',
       goal: 'Choose the number of supporting ropes, then press Pull!',
       objs: [shObjE(60), { label: 'Pull 15 m of rope or less', ok: r => r.dist <= 15, say: r => `Rope pulled: ${fmt(r.dist, 1)} m. Target: 15 m or less. ${shMark(r.dist <= 15)}` }],
       clues: ['What mechanical advantage gets the effort under 60 N? 245 ÷ 60 = 4.08.', 'Each choice also needs rope: the rope pulled = supporting ropes × 3 m.', '4 ropes need 61.3 N, and 6 ropes need 18 m of rope. Which number is left?'],
@@ -8633,14 +8657,14 @@ CHDATA.c6.challenge = {
     /* ---- Part 4 Challenge: Build the rescue kit (h1 to h3). The student builds a compound machine with the builder; every pull counts (same scoring as y1 to y3). ---- */
     { id: 'h1', kind: 'shop', title: 'Mission 1: Hoist the nose cone', cap: 100,
       setup: { mach: 'build', allow: ['build'], lift: 6, loads: { build: WL.cone }, bRoutes: [[0, 'Straight up']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
-      brief: 'Hoist the rocket\'s 200 kg nose cone (1,960 N) <b>6 m</b> up. The crane operator can pull <b>100 N at most</b>. There is <b>30 m of cable</b>, and the job must take <b>150 m of hand travel or less</b>.',
+      brief: 'Hoist the Big Jelly\'s 200 kg nose cone (1,960 N) <b>6 m</b> up. The crane operator can pull <b>100 N at most</b>. There is <b>30 m of cable</b>, and the job must take <b>150 m of hand travel or less</b>.',
       goal: 'Choose a winch and a pulley block, then press Turn!',
       objs: [shObjE(100), shObjC(30), shObjT(150)],
       clues: ['The mechanical advantage you need is 1,960 ÷ 100 = 19.6. Hand travel = mechanical advantage × 6 m, so the mechanical advantage must be 25 or less.', 'No single machine here reaches 19.6. Which pairs multiply to between 19.6 and 25?', 'Try 2 ropes with winch ×10, or 3 ropes with winch ×8.'],
       give: '2 ropes with winch ×10 (98 N, 12 m of cable, 120 m of travel) works.' },
     { id: 'h2', kind: 'shop', title: 'Mission 2: Load the Gummy Rover', cap: 80,
       setup: { mach: 'build', allow: ['build'], lift: 2, loads: { build: WL.rover }, bRoutes: [[0, 'Straight up'], [4, '4 m ramp'], [6, '6 m ramp'], [10, '10 m ramp']] }, show: ['builder', 'wspull', 'bTotMA', 'bCable', 'bTravel'],
-      brief: 'Get the 400 kg Gummy Rover (3,920 N) onto the rocket\'s deck, <b>2 m</b> up. The pull must be <b>80 N or less</b>, there is <b>40 m of cable</b>, and the job must take <b>120 m of hand travel or less</b>.',
+      brief: 'Get the 400 kg Gummy Rover (3,920 N) onto the Big Jelly\'s deck, <b>2 m</b> up. The pull must be <b>80 N or less</b>, there is <b>40 m of cable</b>, and the job must take <b>120 m of hand travel or less</b>.',
       goal: 'Choose a route, a pulley block and a winch, then press Turn!',
       objs: [shObjE(80), shObjC(40), shObjT(120)],
       clues: ['The mechanical advantage you need is 3,920 ÷ 80 = 49, and at most 120 ÷ 2 = 60.', 'Cable = supporting ropes × route length, so long ramps and lots of ropes use cable fast.', 'The 10 m ramp has a mechanical advantage of 5. What do the pulley block and the winch need to multiply to?'],
@@ -8713,7 +8737,10 @@ const RB_SLOTS = [
   { sec: 'c6e', title: 'Smooshy saved!', part: 'Part 5', next: 'Next: Part 5 is the rescue, planned at Mission Control.' },
   { sec: 'c6f', title: 'Gummy Base One built', part: 'Extension', ext: true, next: 'Optional: the Extension helps the gummy colonists build Gummy Base One.' }
 ];
-const rbDone = id => !!dbGet('stamps', {})[id];
+/* a slot is done when its section's stamp is in; the rescue slot (and the picture) only when the Gumdrop has really reached the tractor beam.
+   (The c6e stamp only needs a tried rescue, so it can't say Smooshy is saved.) */
+const rbSaved = () => !!((dbGet('chal.c6e', {}).gl || {}).firstDone);
+const rbDone = id => id === 'c6e' ? rbSaved() : !!dbGet('stamps', {})[id];
 /* the Gumdrop with Captain Smooshy safe inside, seen through the round window (the live link from the Gumdrop) */
 function drawGumdropInside(c, x, y, s, tilt, mood, tt) {
   drawGumdrop(c, x, y, s, tilt);
@@ -9444,6 +9471,7 @@ function glDrawLabels(c, o, g, crest, ev) {
     if (o.dropGlow) { const t = o.t || performance.now() / 1000, pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 6); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
       c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); lblAdd('Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), { size: sz + 1, col: '#c9ffdc', bg: 'rgba(31,29,38,.7)', prio: 2 }); }
     else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3, tx: glSX(GL.boulderX), ty: glSY(by + 0.9) }); }
+  lblAdd('Tractor beam reaches this line', glSX(58), glSY(crest), { size: sz, col: '#c9ffdc', bg: 'rgba(31,29,38,.72)', prio: 1 });   // on the dotted line (Tom, 9 Nov 2026): the goal is only to get the Gumdrop up to here
   if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4, tx: glSX(o.ship.x), ty: glSY(o.ship.y + 4.5) });
   if (o.ship && ev && ev.ghosts) ev.ghosts.forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4, tx: glSX(gh.x), ty: glSY(gh.y + 4.5) }));
 }
@@ -9588,7 +9616,19 @@ function glAutoAttach(p) {
 }
 function glRemove(id) {
   glPush(); GLB.rig.parts = GLB.rig.parts.filter(p => p.id !== id); GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
-  GLB.sel = null; glCloseMenu(); glChanged();
+  glDropOrphans(); GLB.sel = null; glCloseMenu(); glChanged();
+}
+/* Tom, 9 Nov 2026: take a machine away and the pulley block or winch clipped to it must not hang in mid-air. Any add-on with nothing holding it up (no cable chain to a machine, the Gumdrop or the boulder)
+   falls to the floor under it, ground or platform, with a short drop (instant with reduced motion; GLB.fall holds the animation, the rig already has the final spot). A cable that no longer joins two things is removed. */
+function glDropOrphans() {
+  const rig = GLB.rig, ids = new Set(rig.parts.map(p => p.id).concat(['ship', 'boulder']));
+  rig.cables = (rig.cables || []).filter(c => ids.has(c.a) && ids.has(c.b));
+  const held = new Set(rig.parts.filter(p => GL_LIFT[p.type]).map(p => p.id)); let grew = true;   // only a machine holds an add-on up: a rope to the Gumdrop or the boulder is a load, not a support
+  while (grew) { grew = false; rig.cables.forEach(c => { if (!ids.has(c.a) || !ids.has(c.b) || c.a === 'ship' || c.b === 'ship' || c.a === 'boulder' || c.b === 'boulder') return; if (held.has(c.a) !== held.has(c.b)) { held.add(c.a); held.add(c.b); grew = true; } }); }
+  const orphans = rig.parts.filter(p => glIsAddon(p) && !held.has(p.id)); if (!orphans.length) return [];
+  const g = glGround(rig).g, pl = glPlatforms(rig, g), now = performance.now(); GLB.fall = GLB.fall || {};
+  orphans.forEach(p => { const y1 = +(glFloorAt(p.x, g, pl) + (p.type === 'winch' ? 0.7 : 0.8)).toFixed(2); if (y1 < p.y - 1e-6) { if (!RMOTION) GLB.fall[p.id] = { y0: p.y, t0: now, dur: Math.min(900, 300 + 140 * Math.sqrt(p.y - y1)) }; p.y = y1; } });
+  return orphans.map(p => p.id);
 }
 /* ---------- the canvas: sizing, the draw loop and hit tests ---------- */
 function glSize() {
@@ -9604,7 +9644,9 @@ function glFrameOpts() {
 }
 function glLoop() {
   cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
-    if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH); glDrawWorld(c, glFrameOpts()); }
+    if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH), keep = [], now = performance.now();
+      Object.keys(GLB.fall || {}).forEach(id => { const f = GLB.fall[id], p = glPart(id), k = (now - f.t0) / f.dur; if (!p || k >= 1) { delete GLB.fall[id]; return; } keep.push([p, p.y]); p.y = f.y0 + (keep[keep.length - 1][1] - f.y0) * k * k; });   // gravity: slow, then faster
+      try { glDrawWorld(c, glFrameOpts()); } finally { keep.forEach(([p, y]) => { p.y = y; }); } }
     GLB.raf = requestAnimationFrame(step); }; step();
 }
 const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - r.left) * GLV.LW / r.width, sy = (e.clientY - r.top) * GLV.LH / r.height; return { sx, sy, x: glWX(sx), y: glWY(sy) }; };
@@ -9703,7 +9745,7 @@ function glPaintDock() {
   else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; icon = p.big ? '💥' : '🧨'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when the rescue launches. Careful near the Gumdrop!</p>`; acts += `<button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button>`; }
   if (cabled) acts += '<button type="button" class="ghost sm" data-gm="cut">✂ Cut its cables</button>';
   acts += '<button type="button" class="ghost sm" data-gm="del">🗑 Remove</button>';
-  dkSet(d, dkHTML({ icon, title, help, body, fb, actions: acts }));
+  dkSet(d, dkHTML({ icon, title, help, body, fb, actions: acts })); if (typeof glGuideThrob === 'function') glGuideThrob();
 }
 function glMenuAct(k) {
   const id = GLB.dockId, p = id && glPart(id); if (!p) return;
@@ -9731,15 +9773,41 @@ function glUnrope(spot) {
   if (!mine.length) return false; glPush(); GLB.rig.cables = GLB.rig.cables.filter(c => c !== mine[mine.length - 1]); glChanged(); return true;
 }
 /* ---------- the side bits: crystals, the tray, tools ---------- */
-function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
+/* the drag ghost for a rescue tray tile: the real drawing of a default piece, at the board's current zoom (Tom, 9 Nov 2026) */
+function glGhostStart(t) {
+  const cv = GLB.cv; if (!cv) return; const g = glGround0(), pl = glPlats0(), x = clamp(glSnap(GLV.cx), 1, GL.W - 1), fl = glFloorAt(x, g, pl);
+  const P = { id: '_ghost', x, x1: x, y1: fl, y: fl + 4, L: 12, rise: 3, arm: 2, dir: 1, ropes: 2, ratio: 4, size: (t || '').slice(4) || 'M', h: 2, big: t === 'dynB' };
+  ndGhostBegin(GLV.LW, GLV.LH, cv.getBoundingClientRect().width / GLV.LW, c => {
+    if (t === 'ramp') { const p = Object.assign({ type: 'ramp' }, P); glDrawRamp(c, p, glMachine(p, g, pl), false, g); }
+    else if (t === 'crane') { const p = Object.assign({ type: 'crane', rise: 4 }, P); glDrawCrane(c, p, glMachine(p, g, pl), false, undefined); }
+    else if (t === 'lever') { const p = Object.assign({ type: 'lever', rise: 1 }, P); glDrawLever(c, p, glMachine(p, g, pl), false, undefined); }
+    else if (t === 'jack') { const p = Object.assign({ type: 'jack', rise: 1 }, P); glDrawJack(c, p, glMachine(p, g, pl), false, undefined); }
+    else if (t === 'block') glDrawBlock(c, Object.assign({ type: 'block', y: fl + 6 }, P), false);
+    else if (t === 'winch') glDrawWinch(c, Object.assign({ type: 'winch', y: fl + 6 }, P), false, 0);
+    else if (t.startsWith('plat')) { const p = Object.assign({ type: 'platform' }, P); const q = glPlatforms({ parts: [p] }, g)[0]; if (q) glDrawPlatform(c, q, false); }
+    else if (t.startsWith('dyn')) glDrawDyn(c, Object.assign({ type: 'dyn', x }, P), g, true);
+  });
+}
+function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); if (typeof glGuideThrob === 'function') glGuideThrob(); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
 function glPaintSide() {
   const ev = GLB.ev, el = $('#glCrys'); if (!el || !ev) return; const c = ev.cost.total, over = c > GL.budget;
   el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} ${T('sugarcrystal', 'sugar crystals')} (gummy money)</span>`;
   const rc = $('#glReceipt'); if (rc) rc.innerHTML = ev.cost.items.length ? ev.cost.items.map(([w, n]) => `<li><span>${esc(w)}</span><b>${n}</b></li>`).join('') + `<li class="tot"><span>Total</span><b>${c}</b></li>` : '<li>Nothing bought yet.</li>';
 }
+function glClearAsk(on) {
+  let ask = $('#glClearAsk'); if (ask) ask.remove(); const row = $('.gltools'); if (!on || !row) return;
+  ask = document.createElement('div'); ask.id = 'glClearAsk'; ask.className = 'row glclearask'; ask.setAttribute('role', 'alertdialog'); ask.setAttribute('aria-label', 'Clear the whole route?');
+  ask.innerHTML = '<span><b>Clear every piece you placed?</b> The boulder, the Gumdrop and the ground stay.</span> <button type="button" class="go sm" data-gt="clear-yes">Yes, clear all</button> <button type="button" class="ghost sm" data-gt="clear-no">Keep my route</button>';
+  row.insertAdjacentElement('afterend', ask); const k = ask.querySelector('[data-gt=clear-no]'); if (k) k.focus({ preventScroll: true });
+}
 function glToolAct(k) {
   if (k === 'undo') { const s = GLB.hist.pop(); if (s) { GLB.rig = JSON.parse(s); GLB.sel = null; glCloseMenu(); glChanged(); } else toast('Nothing to undo.'); }
-  else if (k === 'clear') { if (!GLB.rig.parts.length) return; if (!confirm('Clear the whole rig and start again?')) return; glPush(); GLB.rig = { v: 2, parts: [], cables: [] }; GLB.sel = null; glCloseMenu(); glChanged(); }
+  /* Clear all (Tom, 9 Nov 2026: it did nothing). It used window.confirm(), and browser dialogs are blocked where this app runs (Toddle's frame), so confirm() answered "no" at once. It now asks in the page itself. */
+  else if (k === 'clear') { if (!GLB.rig.parts.length) { toast('The board is already empty.'); return; } glClearAsk(true); }
+  else if (k === 'clear-no') glClearAsk(false);
+  else if (k === 'clear-yes') { glClearAsk(false); glPush(); GLB.rig = { v: 2, parts: [], cables: [] }; GLB.sel = null; GLB.dockId = null; glCloseMenu(); glChanged();
+    if (typeof glwPut === 'function') { glwPut(w => { w.rows = {}; }); if (typeof glwPaint === 'function') glwPaint(); }   // the route strip starts again, empty, like the board
+    toast('✓ Cleared. The boulder, the Gumdrop and the ground are as they were.', 'ok'); }
   else if (k === 'ruler') { GLB.rulerOn = !GLB.rulerOn; if (!GLB.ruler) GLB.ruler = { a: { x: glSnap(GLV.cx - 6, 0.1), y: 0 }, b: { x: glSnap(GLV.cx + 4, 0.1), y: 6 } }; if (GLB.rulerOn) { GLB.ruler.a = glRulerSnap({ x: GLB.ruler.a.x, y: GLB.ruler.a.y }); } $('[data-gt=ruler]').classList.toggle('on', GLB.rulerOn); }
   else if (k === 'zin' || k === 'zout') { GLV.z = clamp(GLV.z * (k === 'zin' ? 1.5 : 1 / 1.5), 1, 4); glClampView(); glSaveRig(); }
   else if (k === 'zall') { GLV.z = 1; GLV.cx = 48; GLV.cy = GLV.LH > GLV.wide ? 15 : 12; glClampView(); }
@@ -9747,12 +9815,12 @@ function glToolAct(k) {
 /* the board, built into a host element */
 function glBoardHTML() {
   return `<div class="glstats"><span id="glCrys"></span><details class="glrec"><summary>Receipt</summary><ul id="glReceipt"></ul></details></div>
-    <div class="glarea"><div class="glboard"><div class="glmchd" aria-hidden="true"><i class="glled"></i><i class="glled"></i><span>GUMMY MISSION CONTROL · RESCUE SIMULATOR</span><i class="glled"></i><i class="glled"></i></div><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
+    <div class="glarea"><div class="glboard"><div class="glcv"><div class="glmchd" aria-hidden="true"><i class="glled"></i><i class="glled"></i><span>GUMMY MISSION CONTROL · RESCUE SIMULATOR</span><i class="glled"></i><i class="glled"></i></div><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
       <div class="glzoom"><button type="button" class="ghost sm" data-gt="zin" aria-label="Zoom in">＋</button><button type="button" class="ghost sm" data-gt="zout" aria-label="Zoom out">−</button><button type="button" class="ghost sm" data-gt="zall" aria-label="See the whole crater">⤢</button></div>
-      <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button><div class="glaccept" id="glAccept" role="status" hidden><b>Mission accepted 🚀</b><span>GASA approves your maths!</span></div></div>
+      <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button><div class="glrunctl" id="glRunCtl" hidden><button type="button" class="ghost sm" data-gr="skip">⏭ Skip</button><button type="button" class="go sm" data-gr="edit">🔧 Back to building</button></div><div class="glaccept" id="glAccept" role="status" hidden><b>Mission accepted 🚀</b><span>GASA approves your maths!</span></div></div>
+      <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div></div>
       <aside class="dock" id="glDock" aria-label="Settings for the machine you tapped" aria-live="polite"></aside></div>
     <p class="scaleNote" id="glStatus"></p>
-    <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div>
     <div class="row gltools"><button type="button" class="ghost sm" data-gt="ruler">📏 Ruler</button><button type="button" class="ghost sm" data-gt="undo">↶ Undo</button><button type="button" class="ghost sm" data-gt="clear">Clear all</button></div>`;
 }
 function glMountBoard(host, opts) {
@@ -9764,11 +9832,13 @@ function glMountBoard(host, opts) {
   host.addEventListener('click', e => { const b = e.target.closest('[data-gt]'); if (b) glToolAct(b.dataset.gt); const a = e.target.closest('[data-add]'); if (a && !GLB.trayDrag) { GLB.place = GLB.place === a.dataset.add ? null : a.dataset.add; glTrayMark(); } });
   /* drag straight from the tray onto the crater */
   $('#glTray', host).addEventListener('pointerdown', e => { const a = e.target.closest('[data-add]'); if (!a) return; const t = a.dataset.add, x0 = e.clientX, y0 = e.clientY; GLB.trayDrag = false;
-    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { GLB.trayDrag = true; GLB.trayType = t; } };
-    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); GLB.trayType = null;
+    let ghosted = false;
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { GLB.trayDrag = true; GLB.trayType = t; if (!ghosted) { ghosted = true; glGhostStart(t); } ndGhostMove(ev2.clientX, ev2.clientY); } };
+    const cx = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); document.removeEventListener('pointercancel', cx); ndGhostEnd(); GLB.trayType = null; setTimeout(() => { GLB.trayDrag = false; }, 0); };
+    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); document.removeEventListener('pointercancel', cx); ndGhostEnd(); GLB.trayType = null;
       const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
       setTimeout(() => { GLB.trayDrag = false; }, 0); };
-    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); document.addEventListener('pointercancel', cx); });
   glSize(); if (st.view && st.view.LH === GLV.LH) { GLV.z = st.view.z; GLV.cx = st.view.cx; GLV.cy = st.view.cy; glClampView(); }
   glLoop();
 }
@@ -9779,7 +9849,7 @@ function renderGummyLift(ch, m, host, save) {
   const card = h('section', { class: 'panel mission glwrap', id: 'mi-gl' }); host.appendChild(card);
   card.innerHTML = `${remindersHTML()}<details class="glbrief"${st.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
       <p>The Gumdrop weighs <b>6,300 N</b>. Smooshy can only pull <b>60 N</b>. If he has to pull harder, he fires the broken thrusters, and they damage the ship.</p>
-      <p>The tractor beam can lift the Gumdrop once it reaches the dotted line at the top of the crater. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
+      <p>Lift the Gumdrop up to the dotted line. The Big Jelly's tractor beam does the rest. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
       <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
       <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p>
       <p>Test your route in the simulator, work out the maths for every leg in your route strip, then send it to GASA. When GASA approves your maths, the rescue launches!</p></div></details>
@@ -9802,12 +9872,15 @@ const GL_STOP = { none: 'Nothing was ready to lift the Gumdrop. A machine needs 
   heavy: 'That leg needed more than 180 N, far too much even with the thrusters roaring. Give it a bigger mechanical advantage.',
   collapse: 'A platform buckled under too much weight! Its load is the Gumdrop plus every machine standing on it.',
   norope: 'A machine wasn\'t roped to the Gumdrop, so nothing was pulling it. Drag a rope from the machine\'s ◉ to the Gumdrop\'s ◉.' };
+/* how far short of the dotted line a run stopped (Tom, 9 Nov 2026): from the model's own numbers, the height the Gumdrop reached above where it started, and how much higher the line is */
+function glShort(r) { if (!r || r.arrived || !r.ship0) return null; const at = r.stop && r.stop.at ? r.stop.at : r.final; if (!at) return null; return { up: Math.max(0, at.y - r.ship0.y), to: Math.max(0, r.crest - at.y) }; }
+const glShortText = (up, to) => up == null ? '' : `The Gumdrop got ${fmt(up, 1)} m up, and the dotted line is ${fmt(to, 1)} m higher.`;
 const glStopText = (why, leg) => why === 'norope' && leg != null ? `Leg ${leg + 1}'s machine isn't roped to the Gumdrop.` : GL_STOP[why] || '';
 const GL_END = { spotless: ['Spotless rescue!', 'The Gumdrop is safe without a single scratch.'], dented: ['Dented, but home!', 'Smooshy is safe, though the Gumdrop needs a little repair.'], notyet: ['Not yet!', 'Smooshy is still in the crater. Fix the part that stopped and run it again.'] };
 const glLegName = l => `${GL_NAME[l.type]}${l.type === 'ramp' ? ` ${fmt(l.m.L, 1)} m` : ''}${l.ropes > 1 ? `, ${l.ropes} ropes` : ''}${l.winches.length ? ', winch ' + l.winches.map(w => '×' + w).join(' ') : ''}`;
 function glSummary(r) {
   return { legs: r.legs.map(l => ({ type: l.type, name: glLegName(l), rise: +l.rise.toFixed(2), ma: +l.ma.toFixed(2), pull: +l.pull.toFixed(2), hand: +l.hand.toFixed(1), work: Math.round(l.work), stopped: !!l.stopped, thr: +(l.thruster || 0).toFixed(1) })),
-    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, total: +r.dmg.total.toFixed(1) },
+    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), up: glShort(r) ? +glShort(r).up.toFixed(1) : null, toLine: glShort(r) ? +glShort(r).to.toFixed(1) : null, work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, total: +r.dmg.total.toFixed(1) },
     boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, stopLeg: r.stop ? r.stop.leg : null, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, hints: r.score.hints || 0, max: GL_MAX, ending: r.score.ending, load: r.load };
 }
 /* ---------- the panel under the board: the result of a test or of the rescue ---------- */
@@ -9815,7 +9888,8 @@ function glMountRun(host) {
   host.innerHTML = `<div class="panel glrunbox"><div class="row glrunrow"><button type="button" class="ghost" id="glSkip" hidden>Skip to the end ▶▶</button><button type="button" class="ghost" id="glBack" hidden>🔧 Back to building</button><span class="scaleNote" id="glTries"></span></div>
     <div id="glRes" aria-live="polite"></div></div>`;
   const st = glState();
-  $('#glRun').addEventListener('click', () => glStartRun('test')); $('#glSkip').addEventListener('click', () => { GLR.t0 -= 1e7; });
+  $('#glRun').addEventListener('click', () => glStartRun('test'));
+  $('#glRunCtl').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if (!b) return; if (b.dataset.gr === 'skip') GLR.t0 -= 1e7; else if (GLR.mode === 'test') glBackToBuild(); });   // buttons ON the board, so there is always a way out $('#glSkip').addEventListener('click', () => { GLR.t0 -= 1e7; });
   $('#glBack').addEventListener('click', glBackToBuild);
   glRunPaint();
   if (st.last) glShowResult(st.last, st.lastPred); if (st.lastTest && (!st.last || st.lastTest.at > (st.lastAt || 0))) glShowTest(st.lastTest);
@@ -9867,9 +9941,9 @@ function glBuildBeats(res, rig, o) {
   ran.forEach(l => {
     const stopHere = res.stop && res.stop.leg === l.i, moves = !stopHere || (res.stop.why === 'collapse' && glPlatOnlyAtEnd(l, res, plats)), push = !glHandSpot(l, rig, res.ground, plats);
     const spot = push ? { x: l.start.x - 2.6, y: l.start.y } : glHandSpot(l, rig, res.ground, plats); walkTo(spot);
-    const from = Object.assign({}, l.start), to = Object.assign({}, l.end), tilt = l.type === 'ramp' ? -Math.atan2(l.end.y - l.start.y, l.end.x - l.start.x) : 0;
+    const prev = shipAt, from = Object.assign({}, l.start), to = Object.assign({}, l.end), tilt = l.type === 'ramp' ? -Math.atan2(l.end.y - l.start.y, l.end.x - l.start.x) : 0;
     const strain = l.pull > GL.pullOk + 1e-9, dur = 1.6 + Math.min(2.2, l.rise * 0.18);
-    if (l.type !== 'ramp') add(0.6, (S, k) => { const e = glEase(k); S.ship.x = glLerp(shipAt.x, from.x, e); S.ship.y = glLerp(shipAt.y, from.y, e); S.ship.tilt = glLerp(S.ship.tilt, 0, e); if (l.type === 'crane') S.hook[l.id] = from.y + 4.2; });
+    if (l.type !== 'ramp') add(0.6, (S, k) => { const e = glEase(k); S.ship.x = glLerp(prev.x, from.x, e); S.ship.y = glLerp(prev.y, from.y, e); S.ship.tilt = glLerp(S.ship.tilt, 0, e); if (l.type === 'crane') S.hook[l.id] = from.y + 4.2; });
     else add(0.4, (S, k) => { S.ship.x = from.x; S.ship.y = from.y; S.ship.tilt = glLerp(0, tilt, glEase(k)); });
     if (moves && !(stopHere && (res.stop.why === 'broken' || res.stop.why === 'heavy'))) {
       add(dur, (S, k) => { const e = glEase(k); S.ship.x = glLerp(from.x, to.x, e); S.ship.y = glLerp(from.y, to.y, e); S.ship.tilt = tilt * (l.type === 'ramp' ? 1 : 0);
@@ -9895,6 +9969,8 @@ function glBuildBeats(res, rig, o) {
   return B;
 }
 function glPlatOnlyAtEnd(l, res, plats) { const s = glSupport(l.end.x, l.end.y, res.ground, plats); return s && s.kind === 'platform' && s.id === res.stop.plat; }
+/* Tom, 9 Nov 2026: the Gumdrop used to flash at the top of the crane, then drop back, before a leg's lift. A beat read shipAt when it PLAYED, after all the beats were built, so it saw the end spot. Each beat now keeps
+   the spot it starts from (prev). The Gumdrop stays at its start until its leg's lift beat moves it. */
 /* ---------- playing it ---------- */
 function glSceneAt(t) {
   const res = GLR.res, st = glState(), S = { ship: { x: GL.shipX, y: res.ship0.y, tilt: 0, inside: true, mood: 'worried', dmg: 0, carryRock: false, shake: false }, smoo: null, ground: glBaseGround(), blown: new Set(), hook: {}, tilt: {}, sink: {}, readouts: [], fx: [], spin: 0 };
@@ -9902,7 +9978,12 @@ function glSceneAt(t) {
   if (S.rockAway) S.rockGone = true;
   return S;
 }
+/* Tom, 9 Nov 2026: "stuck testing in the simulator, no way to build now". The board stayed in its running state after a test (the Back to building button was far below the board, and a run that hit an error
+   was never ended at all). Now: a test always hands the board back by itself, Skip and Back to building sit on the board, and any problem in a run puts the board back in build mode. */
 function glRunFrame() {
+  if (!GLR.on) return; try { glRunFrame1(); } catch (e) { try { console.warn('Simulator run stopped:', e); } catch (_) {} GLR.done = true; glBackToBuild(); toast('The simulator stopped. You are back to building.'); }
+}
+function glRunFrame1() {
   if (!GLR.on) return; const cv = GLB.cv; if (!cv || !cv.isConnected) { GLR.on = false; return; }
   const t = (performance.now() - GLR.t0) / 1000 * (GLR.speed || 1), S = glSceneAt(t), res = GLR.res, g = S.ground; glSize(); const c = fit(cv, GLV.LW, GLV.LH);
   const plats = res.plats.map(p => S.sink[p.id] ? Object.assign({}, p, { top: p.top - S.sink[p.id] * (p.top - p.base) * 0.5, over: true }) : p);
@@ -9934,10 +10015,11 @@ function glStartRun(mode) {
   const st = glState(); GLR.mode = mode; GLR.rig = JSON.parse(JSON.stringify(GLB.rig)); GLR.res = glEvaluate(GLR.rig, { hints: st.hints || 0, maths: mode === 'launch' });
   GLR.pred = null; GLR.work = mode === 'launch' && typeof glwSnapshot === 'function' ? glwSnapshot() : null; GLR.speed = mode === 'test' && !RMOTION ? 3 : 1;
   GLR.beats = glBuildBeats(GLR.res, GLR.rig, { test: mode === 'test' }); GLR.total = GLR.beats.reduce((a, b) => a + b.dur, 0); GLR.t0 = performance.now(); GLR.on = true; GLR.done = false;
+  { const rc = $('#glRunCtl'); if (rc) { rc.hidden = false; rc.querySelector('[data-gr=skip]').hidden = false; rc.querySelector('[data-gr=edit]').hidden = mode === 'launch'; } }
   GLB.sel = null; glCloseMenu(); $('#glSkip').hidden = false; $('#glBack').hidden = true; $('#glRun').disabled = true; $('.glboard').classList.add('running');
   $('#glRes').innerHTML = ''; $('.glarea').classList.add('running'); GLB.cv.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
-  if (typeof glwSendState === 'function') glwSendState(); if (typeof glGuidePaint === 'function') glGuidePaint();
-  cancelAnimationFrame(GLB.raf); GLR.raf = requestAnimationFrame(glRunFrame);
+  cancelAnimationFrame(GLB.raf); GLR.raf = requestAnimationFrame(glRunFrame);   // started first, so a problem in the panels below can never leave the board stuck
+  try { if (typeof glwSendState === 'function') glwSendState(); if (typeof glGuidePaint === 'function') glGuidePaint(); } catch (e) { try { console.warn(e); } catch (_) {} }
 }
 /* a simulator test is over: each leg worked or failed, in words, with no numbers. It saves no score, but it counts as having tried (attempting is enough to move on). */
 function glTestLines(res) {
@@ -9954,13 +10036,15 @@ function glTestLines(res) {
   else if (stop && stop.why === 'gap') L.push([`After leg ${stop.leg}, the next machine isn't in the glowing box`, 0]);
   const bo = res.boulder; L.push([bo.how ? (bo.ok ? 'The boulder rolls free' : 'The boulder is still stuck') : 'The boulder is still stuck', bo.ok ? 1 : 0]);
   if (res.bShip) L.push(['Dynamite went off too close to the Gumdrop', 0]);
-  L.push([res.arrived ? 'The Gumdrop reached the tractor beam' : 'The Gumdrop did not reach the tractor beam yet', res.arrived ? 1 : 0]);
+  { const sh = glShort(res); L.push([res.arrived ? 'The Gumdrop reached the tractor beam' : 'The Gumdrop did not reach the tractor beam yet.' + (sh ? ' ' + glShortText(sh.up, sh.to) : ''), res.arrived ? 1 : 0]); }
   return L;
 }
 function glFinishTest() {
   const res = GLR.res, st = glState(), lines = glTestLines(res), lastTest = { lines, arrived: !!res.arrived, at: Date.now() };
   GLB.save({ id: GLB.mid }, { tried: true, tests: (st.tests || 0) + 1, lastTest });
   $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowTest(lastTest); glRunPaint(); if (typeof glGuidePaint === 'function') glGuidePaint();
+  { const rc = $('#glRunCtl'); if (rc) rc.querySelector('[data-gr=skip]').hidden = true; }
+  setTimeout(() => { if (GLR.on && GLR.mode === 'test') glBackToBuild(); }, RMOTION ? 0 : 1200);   // the end picture stays for a moment, then the board is yours again
   const r = $('#glRes'); if (r) r.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
 }
 function glShowTest(t) {
@@ -9980,18 +10064,19 @@ function glFinishRun() {
   if (res.arrived && !st.firstDone) patch.firstDone = Date.now();
   GLB.save({ id: GLB.mid }, patch);
   if (better && typeof rigSnapshot === 'function') rigSnapshot();
+  { const rc = $('#glRunCtl'); if (rc) rc.hidden = true; }
   $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowResult(sum, null, better && n > 1); glRunPaint();
   if (typeof glShowEnding === 'function') glShowEnding(sum, { first: firstRescue, better });
 }
 function glBackToBuild() {
-  GLR.on = false; cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop();
+  GLR.on = false; { const rc = $('#glRunCtl'); if (rc) rc.hidden = true; } cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop();
 }
 function glShowResult(sum, pred, newBest) {
   const host = $('#glRes'); if (!host || !sum) return; const E = GL_END[sum.ending], f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
   const P = sum.pts, rows = sum.legs.map((l, i) => `<tr class="${l.stopped ? 'stop' : ''}"><td>${i + 1}</td><td>${esc(l.name)}</td><td>${f1(l.rise)} m</td><td>${fmt(l.ma, 1)}</td><td><b>${f1(l.pull)} N</b>${l.pull > 60 + 1e-9 ? ' 🔥' : ''}</td><td>${n0(l.hand)} m</td><td>${n0(l.work)} J</td></tr>`).join('');
   const pl = pred && sum.legs[pred.leg] ? `<p class="glpredfb">You predicted <b>${f1(pred.value)} N</b> for leg ${pred.leg + 1}. Smooshy's pull on it was <b>${f1(sum.legs[pred.leg].pull)} N</b>. ${Math.abs(pred.value - sum.legs[pred.leg].pull) <= Math.max(1, sum.legs[pred.leg].pull * 0.05) ? 'Spot on, engineer!' : 'Compare your working with the receipt below to see where the numbers split.'}</p>` : '';
   const pt = (lab, got, max, note) => `<li class="${got === max ? 'ok' : ''}"><span class="box">${got === max ? '✓' : ''}</span>${lab}: <b>${got} of ${max}</b>${note ? ` <small>${note}</small>` : ''}</li>`;
-  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of ${sum.max || 10}` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + glStopText(sum.stop, sum.stopLeg) : ''}</p>${pl}
+  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of ${sum.max || 10}` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + glStopText(sum.stop, sum.stopLeg) : ''}${sum.up != null && !sum.arrived ? ' ' + glShortText(sum.up, sum.toLine) : ''}</p>${pl}
     ${rows ? `<div class="gltab"><table><thead><tr><th>Leg</th><th>Machine</th><th>Rise</th><th>Total MA</th><th>Pull</th><th>Hand travel</th><th>Work</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="glnote">Work receipt: each leg's work = ${n0(sum.load)} N × its rise. Change the machines and only the pull and hand travel change; the work only changes when the rise does.</p>` : ''}
     <ul class="glsums"><li>Hand travel: <b>${n0(sum.hand)} m</b> of 1,500 m oxygen</li><li>Sugar crystals: <b>${sum.cost}</b> of 475</li><li>Final crest height: <b>${f1(sum.crest)} m</b></li><li>Total work: <b>${n0(sum.work)} J</b></li>
@@ -10031,14 +10116,24 @@ function rigSnapshot() {
    The boulder pull is shown here because it is practice; after this the strip is where the student works out every number. */
 function glWarmLever() { return GLB.rig && GLB.rig.parts.find(p => p.type === 'lever' && p.role === 'boulder'); }
 const glgLeg = i => GLB.ev && GLB.ev.legs[i];
+/* "do this next" for the guided start (Tom, 9 Nov 2026): a step's need() says which tray tile, or which button in the settings panel, to pulse (ndApply in 4n-boardkit.js). Board data only, never text. */
+const glgAddon = (type, btn) => { const q = GLB.rig.parts.find(p => p.type === type); if (!q) return { tile: type }; return GLB.dockId === q.id ? { sel: `[data-gm="${btn}"]` } : null; };
+function glGuideThrob() {
+  const roots = [$('#glTray'), $('#glDock')]; if (!roots[0]) return; const st = glState();
+  if (st.guide !== 'on' || (GLR && GLR.on)) { ndApply([], roots); return; }
+  const done = GLG_STEPS.map(s => { try { return !!s.done(); } catch (_) { return false; } }), s = GLG_STEPS[done.indexOf(false)]; let n = null, el = null;
+  try { n = s && s.need ? s.need() : null; } catch (_) { n = null; }
+  if (n && n.tile) el = $(`#glTray [data-add="${n.tile}"]`); else if (n && n.sel) el = $(n.sel, $('#glDock'));
+  ndApply(el ? [el] : [], roots);
+}
 const GLG_STEPS = [
-  { t: 'First, free the Gumdrop. Drag a <b>lever</b> from the tray onto the boulder. It glows when it\'s in the right place.', why: 'A lever turns on a fulcrum. It gives a mechanical advantage, so Smooshy needs less pull.', done: () => !!glWarmLever() },
-  { t: 'Tap the lever and make its <b>load arm</b> shorter until Smooshy\'s pull on the boulder is <b>60 N or less</b>.', why: 'Lever MA = effort arm ÷ load arm. Smooshy\'s pull = 252 N ÷ MA. A shorter load arm gives a bigger MA.', done: () => { const b = GLB.ev && GLB.ev.boulder; return !!(b && b.ok && b.how === 'lever'); }, live: true },
-  { t: 'Leg 1. Drag a <b>ramp</b> next to the Gumdrop. It snaps on, and its rope clips onto the Gumdrop\'s ◉ hook.', why: 'A ramp lets Smooshy pull the Gumdrop up a slope instead of lifting it straight up.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.roped); } },
+  { t: 'First, free the Gumdrop. Drag a <b>lever</b> from the tray onto the boulder. It glows when it\'s in the right place.', why: 'A lever turns on a fulcrum. It gives a mechanical advantage, so Smooshy needs less pull.', done: () => !!glWarmLever(), need: () => glWarmLever() ? null : { tile: 'lever' } },
+  { t: 'Tap the lever and make its <b>load arm</b> shorter until Smooshy\'s pull on the boulder is <b>60 N or less</b>.', why: 'Lever MA = effort arm ÷ load arm. Smooshy\'s pull = 252 N ÷ MA. A shorter load arm gives a bigger MA.', done: () => { const b = GLB.ev && GLB.ev.boulder; return !!(b && b.ok && b.how === 'lever'); }, live: true, need: () => { const l = glWarmLever(); return l && GLB.dockId === l.id ? { sel: '[data-gm="arm-"]' } : null; } },
+  { t: 'Leg 1. Drag a <b>ramp</b> next to the Gumdrop. It snaps on, and its rope clips onto the Gumdrop\'s ◉ hook.', why: 'A ramp lets Smooshy pull the Gumdrop up a slope instead of lifting it straight up.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.roped); }, need: () => GLB.rig.parts.some(p => p.type === 'ramp') ? null : { tile: 'ramp' } },
   { t: 'Drag the white handle at the top of the ramp up to the shelf, 6 m up.', why: 'Ramp MA = length ÷ rise. A longer ramp means a smaller pull, but a longer way to pull.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.end.y >= 5.9 && !l.faults.length); } },
-  { t: 'Clip a <b>pulley block</b> onto the ramp\'s ◉ dot at the top, then tap it and choose <b>4 ropes</b>.', why: 'Each supporting rope shares the load, so the pulley block\'s MA is its number of ropes.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.addons.some(id => { const q = glPart(id); return q && q.type === 'block' && q.ropes >= 3; })); } },
-  { t: 'Clip a <b>winch</b> onto the end of the pulley block\'s rope, then tap it and choose <b>×7</b>.', why: 'A winch multiplies the MA by its gear ratio. The total MA of a leg is every machine\'s MA multiplied together.', done: () => { const l = glgLeg(0); return !!(l && l.winches.some(w => w >= 6)); } },
-  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. Each machine starts in the glowing box where the last one finished.', done: () => { const l = glgLeg(1); return !!(l && l.roped); } },
+  { t: 'Clip a <b>pulley block</b> onto the ramp\'s ◉ dot at the top, then tap it and choose <b>4 ropes</b>.', why: 'Each supporting rope shares the load, so the pulley block\'s MA is its number of ropes.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.addons.some(id => { const q = glPart(id); return q && q.type === 'block' && q.ropes >= 3; })); }, need: () => glgAddon('block', 'ropes4') },
+  { t: 'Clip a <b>winch</b> onto the end of the pulley block\'s rope, then tap it and choose <b>×7</b>.', why: 'A winch multiplies the MA by its gear ratio. The total MA of a leg is every machine\'s MA multiplied together.', done: () => { const l = glgLeg(0); return !!(l && l.winches.some(w => w >= 6)); }, need: () => glgAddon('winch', 'ratio7') },
+  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. Each machine starts in the glowing box where the last one finished.', done: () => { const l = glgLeg(1); return !!(l && l.roped); }, need: () => GLB.rig.parts.filter(p => p.type === 'ramp').length >= 2 ? null : { tile: 'ramp' } },
   { t: 'Fill in your route strip, then press <b>▶ Test in simulator</b>.', why: 'The strip is where GASA checks your maths. The simulator shows where the route works, with no numbers.', done: () => !!(glState().tests || glState().runs) }
 ];
 function glMountGuide(host) {
@@ -10051,7 +10146,7 @@ function glMountGuide(host) {
 }
 function glGuidePaint() {
   const box = $('#glGuide'); if (!box) return; const st = glState();
-  if (st.guide !== 'on' || (GLR && GLR.on)) { box.hidden = true; return; }
+  if (st.guide !== 'on' || (GLR && GLR.on)) { box.hidden = true; if (typeof glGuideThrob === 'function') glGuideThrob(); return; }
   const done = GLG_STEPS.map(s => { try { return !!s.done(); } catch (_) { return false; } }), cur = done.indexOf(false), all = cur < 0, f1 = v => fmt(v, 1);
   let live = '';
   if (cur <= 2 && glWarmLever()) { const lev = glWarmLever(), bo = GLB.ev && GLB.ev.boulder; if (lev && bo && bo.how === 'lever') live = `<p class="glwlive ${bo.ok ? 'good' : ''}">Load arm ${f1(lev.arm)} m, so the lever's mechanical advantage is <b>${f1(bo.ma)}</b>. Smooshy pulls with <b>${f1(bo.pull)} N</b> ${bo.ok ? 'and the boulder rolls free!' : 'and 60 N is his limit.'}</p>`; }
@@ -10059,7 +10154,8 @@ function glGuidePaint() {
   box.innerHTML = `<h3>🧭 Guided start: your first two legs</h3>
     <p>Welcome to Mission Control! Build the first part of a rescue route with me. You can skip this at any time.</p>
     <ol class="objs glsteps">${GLG_STEPS.map((s, i) => `<li class="${done[i] ? 'ok' : i === cur ? 'cur' : ''}"><span class="box">${done[i] ? '✓' : ''}</span><span>${s.t}${i === cur ? `<small class="glwhy">${s.why}</small>` : ''}</span></li>`).join('')}</ol>${live}
-    ${all ? '<p><b>Well done, engineer!</b> You have the start of a route. Now keep building it up to the dotted line at the top of the crater.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
+    ${all ? '<p><b>Well done, engineer!</b> Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly\'s tractor beam pulls it in. You don\'t need to move it across.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
+  glGuideThrob();
 }
 
 /* ---------- the three ending cards, then the stopping-point pop-up ---------- */
@@ -10078,7 +10174,7 @@ function glEndText(sum) {
   const dent = why.length ? `The damage came from ${why.join(', ')}.` : '';
   if (sum.ending === 'spotless') return ['✨', 'Spotless rescue!', 'The tractor beam locks on and the Gumdrop lifts away without a single scratch. Smooshy climbs aboard, waves from the window, and the Big Jelly hums off across the plain. On the way up he spots the crystals on the crater rim glittering in the light of two moons.'];
   if (sum.ending === 'dented') return ['🛠️', 'Dented, but home!', `The tractor beam lifts the Gumdrop and Smooshy waves from the window, but the hull is scorched and cracked (${fmt(d.total || 0, 1)}% damage). ${dent} Another go can bring the damage down to zero.`];
-  return ['🔄', 'Not yet!', `${(sum.stop && sum.stop !== 'none' ? glStopText(sum.stop, sum.stopLeg) : '') || GL_STOP.none} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
+  return ['🔄', 'Not yet!', `${(sum.stop && sum.stop !== 'none' ? glStopText(sum.stop, sum.stopLeg) : '') || GL_STOP.none}${sum.up != null ? ' ' + glShortText(sum.up, sum.toLine) : ''} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
 }
 function glShowEnding(sum, o) {
   if (!sum) return; o = o || {}; const [ic, ti, tx] = glEndText(sum);
@@ -10197,7 +10293,7 @@ function myRescueHTML(mode) {
    lsEnds(), its pairs to lsNeedRopes() and its drawing to lsDrawMachine().
    THE PANEL: #lsDock beside the board (below it on a phone) always shows the step's piece (lsDockHTML), with its settings, "?" replay and Remove. No floating menus.
    Names to avoid reusing elsewhere (one shared scope): LS, LS_*, ls*, lessonStage. */
-const LS = { on: false, o: null, drag: null, place: null, dragPiece: null, bound: false, flash: 0, tdrag: false, cab: [], ropeMach: null, ropeLine: null };
+const LS = { cardQ: [], used: null, needKey: '', thT: 0, on: false, o: null, drag: null, place: null, dragPiece: null, bound: false, flash: 0, tdrag: false, cab: [], ropeMach: null, ropeLine: null };
 const LS_K = 120, LS_X0 = 214, LS_FLOOR = 350;
 const lsCap = s => s.replace(/^./, ch => ch.toUpperCase());
 /* every piece: its tray tile and its three "first time" cards (the exact student text is in the spec, section 4) */
@@ -10213,27 +10309,28 @@ const lsHas = t => t === 'lever' ? WS.mach === 'lever' : lsHasP(t);
 const lsLocked = t => !!(LS.o && (LS.o.lock || []).includes(t));
 const lsCanvas = () => $('#cvScene');
 function lessonStage(o) {
-  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LAB.pullGate = lsGate;
+  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LS.cardQ = []; LS.used = null; LS.needKey = ''; LAB.pullGate = lsGate;
   LS.pl = {}; (LS.o.pre || []).forEach(t => { LS.pl[t] = true; }); LS.stage = 'main'; LS.two = null; LS.cabBy = {}; LS.cabMain = null; LS.flashMsg = null;
   if (WS.mach === 'pulley' && !LS.pl.block && LS.o.tray.includes('block')) WS.ropes = 1;   // no pulley block on the bench yet: the crane alone gives 1 rope
   const cv = lsCanvas(); if (cv) cv.style.touchAction = 'none';
   lsRender();
 }
-function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.pl = {}; LS.stage = 'main'; LS.two = null; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); }
+function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.pl = {}; LS.stage = 'main'; LS.two = null; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); ndApply([], [$('#lsTray'), $('#lsDock')]); }
 
 /* ---------- the tray and the status line ---------- */
 function lsRender() {
   const tr = $('#lsTray'), st = $('#lsStatus'); if (!tr) return;
   const on = LS.on && S.scene === 'shop' && !!LS.o, TL = on ? (lsIsTwo() ? ['ramp', 'crane'] : LS.o.tray) : []; tr.hidden = !(on && TL.length > 0); if (st) st.hidden = !on;
-  const row = $('#boardRow'), dk = $('#lsDock'), pb = $('#wsPull'), bx = $('#boardBox'); if (row) row.classList.toggle('ls', on); if (dk) dk.hidden = !on;
+  const row = $('#boardRow'), dk = $('#lsDock'), pb = $('#wsPull'), bx = $('#boardCv'); if (row) row.classList.toggle('ls', on); if (dk) dk.hidden = !on;
   if (pb && bx) { if (on && pb.parentElement !== bx) { pb.classList.add('inboard'); bx.appendChild(pb); } else if (!on && pb.parentElement === bx) { pb.classList.remove('inboard'); const bar = $('.scenebar'); if (bar) bar.insertBefore(pb, $('#dzPause')); } }   // ▶ sits inside the board, bottom right
   if (!on) return;
   if (pb) pb.style.display = lsIsTwo() ? 'none' : '';
   if (LS.ropeMach !== WS.mach && !lsIsTwo()) { if (LS.ropeMach) LS.cabBy[LS.ropeMach] = LS.cab; LS.ropeMach = WS.mach; LS.cab = LS.cabBy[WS.mach] || lsInitCab(WS.mach); }   // just a rope starts roped; take it off and the ▶ stays off until it goes back on
-  const sig = TL.map(t => t + lsHas(t) + (LS.place === t)).join('|') + (lsIsTwo() ? 'two' : '');
-  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = TL.map(t => { const P = LS_PIECES[t], has = lsHas(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : lsIsTwo() ? (t === 'ramp' ? 'leg 1' : 'leg 2') : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
+  const sig = TL.map(t => t + lsHas(t) + lsWait(t) + (LS.place === t)).join('|') + (lsIsTwo() ? 'two' : '');
+  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = TL.map(t => { const P = LS_PIECES[t], has = lsHas(t), wt = lsWait(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has || wt ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : wt ? lsWaitNote() : lsIsTwo() ? (t === 'ramp' ? 'leg 1' : 'leg 2') : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
   if (st) st.textContent = LS.place ? (LS.place === 'lever' ? 'Now tap the rock to put the lever there.' : `Now tap the glowing spot to put the ${LS_PIECES[LS.place].name.toLowerCase()} there.`) : lsStatus();
   if (dk) dkSet(dk, lsDockHTML());
+  lsThrob();
 }
 function lsStatus() {
   const o = LS.o; if (!o) return ''; if (lsSc() || lsIsTwo()) return lsStatusSc();
@@ -10326,7 +10423,7 @@ function lsOverlay(c) {
   }
   if (LS.ropeLine) { drawRopePx(c, LS.ropeLine.a, LS.ropeLine.b, 3, 0); }
   if (lsSc() || lsIsTwo()) lsOverlaySc(c, pulse);
-  lsFlashHint(c);
+  lsFlashHint(c); if (performance.now() - LS.thT > 150) { LS.thT = performance.now(); lsThrob(); }
   if (typeof CARDS !== 'undefined' && CARDS && CARDS.opt && CARDS.opt.lsPiece) lsGhost(c, CARDS.opt.lsPiece, CARDS.cards[CARDS.k].ghost, t);
 }
 /* the red "drop it here" hint after a missed drop: a little note in the free strip on the left, under the video. It goes as soon as the piece is placed, and never sits over the newtonmeter or other labels. */
@@ -10378,7 +10475,7 @@ function lsBind() {
     if (d.what === 'rope') { d.moved = true; const A = lsEnds()[d.from]; LS.ropeLine = { a: { x: A.x, y: A.y }, b: p }; return; }
     if (d.what === 'rampL' || d.what === 'rampH') { d.moved = true; lsMoveSc(d, p); return; }
     if (d.what !== 'part') return; d.moved = true;
-    wsSet('arm', d.v0 + (p.x - d.x0) / LS_K);   // the same call the old slider made: it snaps to 0.05 m and keeps to the limits
+    lsMark('arm'); wsSet('arm', d.v0 + (p.x - d.x0) / LS_K);   // the same call the old slider made: it snaps to 0.05 m and keeps to the limits
   });
   const up = e => { const d = LS.drag; if (!d || e.pointerId !== d.id) return; LS.drag = null; LS.ropeLine = null;
     if (d.what === 'rope') { const to = lsDotAt(lsXY(e), d.from);
@@ -10390,11 +10487,14 @@ function lsBind() {
   /* drag straight from the tray onto the bench; a tap picks the piece up, then tap the rock */
   const tr = $('#lsTray');
   tr.addEventListener('pointerdown', e => { const a = e.target.closest('[data-lsadd]'); if (!a || a.disabled) return; const t = a.dataset.lsadd, x0 = e.clientX, y0 = e.clientY; LS.tdrag = false; lsPick(t);
-    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { LS.tdrag = true; LS.dragPiece = t; } };
-    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); const r = cv.getBoundingClientRect(); LS.dragPiece = null;
+    let ghosted = false;
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { LS.tdrag = true; LS.dragPiece = t; if (!ghosted) { ghosted = true; lsGhostStart(t); } ndGhostMove(ev2.clientX, ev2.clientY); } };
+    const stop = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); document.removeEventListener('pointercancel', cx); ndGhostEnd(); };
+    const cx = () => { stop(); LS.dragPiece = null; setTimeout(() => { LS.tdrag = false; }, 0); };
+    const upf = ev2 => { stop(); const r = cv.getBoundingClientRect(); LS.dragPiece = null;
       if (LS.tdrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const p = lsXY(ev2); lsDrop(t, p.x, p.y); }
       setTimeout(() => { LS.tdrag = false; }, 0); };
-    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); document.addEventListener('pointercancel', cx); });
   tr.addEventListener('click', e => {
     const q = e.target.closest('[data-lsq]'); if (q) { lsShowCards(q.dataset.lsq); return; }
     const a = e.target.closest('[data-lsadd]'); if (a && !a.disabled && !LS.tdrag) { lsPick(a.dataset.lsadd); LS.place = LS.place === a.dataset.lsadd ? null : a.dataset.lsadd; tr.dataset.sig = ''; lsRender(); }
@@ -10411,7 +10511,7 @@ function lsDrop(t, x, y) {
   if (lsHas('lever')) return; LS.flashMsg = null;
   if (!lsInZone(x, y)) { LS.flash = performance.now(); LS.flashPiece = 'lever'; toast('Drop the lever under the rock. It glows where it goes.'); return; }
   LS.flash = 0; wsSetMach('lever'); toast('✓ Lever under the rock!', 'ok'); lsRender();
-  if (!lsSeen().lever && !FAST) lsShowCards('lever');
+  if (!lsSeen().lever && !FAST) lsShowCards('lever', true);
 }
 
 /* ---------- the docked settings panel: always the step's piece ---------- */
@@ -10428,6 +10528,7 @@ function lsDockHTML() {
     actions: roped ? '<button type="button" class="ghost sm" data-lm="unrope">✂ Take the rope off</button>' : '<button type="button" class="ghost sm" data-lm="rope">🪢 Rope the rock</button>' });
 }
 function lsMenuAct(k) {
+  lsMark(k);
   if ((lsSc() || lsIsTwo()) && lsSceneAct(k)) return;
   if (k === 'del') { if (!lsLocked('lever') && WS.allow.includes('hand')) { wsSetMach('hand'); lsRender(); } return; }
   if (k === 'rope') { lsAutoRope('load', 'end'); return; }
@@ -10437,14 +10538,52 @@ function lsMenuAct(k) {
 }
 
 /* ---------- first-time cards: three short cards with OK, and a ghost hand on the board (a "?" on each tray tile plays them again) ---------- */
-function lsShowCards(piece) {
+function lsShowCards(piece, auto) {
   const P = LS_PIECES[piece]; if (!P) return;
+  /* a first-time card never replaces cards that are already open (they are not modal, so a student can drop another piece meanwhile): it waits its turn in LS.cardQ */
+  if (auto && typeof CARDS !== 'undefined' && CARDS) { if (!(CARDS.opt && CARDS.opt.lsPiece === piece) && !LS.cardQ.includes(piece)) LS.cardQ.push(piece); return; }
   showCards(P.cards.map(c => ({ html: `<p>${c.t}</p>`, ghost: c.ghost, hi: c.hi })), { title: `New piece: ${P.name}`, journal: false, nextLabel: 'OK', lsPiece: piece, onDone: () => { const s = lsSeen(); s[piece] = true; dbSet('lsSeen', s); lsAfterCards(); } });
 }
-/* after a step's own cards: the pieces already on the bench that this student has not met yet */
+/* after cards close: any piece whose cards were waiting, then the pieces already on the bench (or, with introTray, in the tray) that this student has not met yet. The crane gantry always comes first. */
 function lsAfterCards() {
-  if (!LS.on || FAST || S.scene !== 'shop' || !LS.o) return; const seen = lsSeen(), p = (LS.o.pre || []).concat(LS.o.introTray ? LS.o.tray : []).find(t => LS_PIECES[t] && LS_PIECES[t].cards.length && !seen[t]);
-  if (p) lsShowCards(p);
+  if (!LS.on || FAST || S.scene !== 'shop' || !LS.o) return; const seen = lsSeen();
+  while (LS.cardQ.length) { const q = LS.cardQ.shift(); if (!seen[q]) { lsShowCards(q); return; } }
+  const c = (LS.o.pre || []).concat(LS.o.introTray ? LS.o.tray : []).filter(t => LS_PIECES[t] && LS_PIECES[t].cards.length && !seen[t]).sort((a, b) => (b === 'crane') - (a === 'crane'));
+  if (c.length) lsShowCards(c[0]);
+}
+
+/* ---------- "do this next" (Tom, 9 Nov 2026) ----------
+   A task's third item can carry need: { need: 'crane' } or { need: ['crane', 'block', { ctl: 'ropes', sel: '[data-lm="ropes+"]', is: () => WS.ropes >= 4, when: () => ... }] }.
+   A string is a tray piece (it throbs until lsHas(piece)); an object is a control in the docked panel (sel is a CSS selector, or a function giving one; is() says it is done; when() says it is time
+   to use it). The first unticked task is the one the student is on: a prediction ({ pred: true }) is skipped, any other task without need, or a question, means nothing throbs. A control stops
+   throbbing once the student has used it for this task. Only one element throbs. Nothing throbs while cards are open. */
+const lsMark = k => { LS.used = { ctl: (String(k).match(/^[A-Za-z]+/) || [''])[0], key: LS.needKey }; };
+const lsRoped = () => lsNeed().every(([a, b]) => lsJoined(a, b));
+function lsNeedTask() {
+  if (typeof VIEW === 'undefined' || VIEW !== 'vChapter' || CTAB !== 'learn' || !CH) return null;
+  const st = CHDATA[CH.id].steps[GI]; if (!st || !st.tasks || stepDone(CH.id, GI)) return null; const two = lsIsTwo(), ts = taskState();
+  for (let i = 0; i < st.tasks.length; i++) { const o = st.tasks[i][2] || {};
+    if (two) { if (o.stage === 'two' && !ts[i]) return { i, need: o.need }; continue; }
+    if (ts[i] || o.pred) continue;
+    return { i, need: o.need }; }
+  return null;
+}
+function lsNeedNow() {
+  if (!LS.on || !LS.o || S.scene !== 'shop' || (typeof CARDS !== 'undefined' && CARDS)) return null;
+  const T = lsNeedTask(); if (!T || !T.need) return null; const list = [].concat(T.need);
+  for (let j = 0; j < list.length; j++) { const e = list[j], key = T.i + ':' + j;
+    if (typeof e === 'string') { if (lsHas(e)) continue; LS.needKey = key; return { kind: 'tile', id: e }; }
+    if (e.when && !e.when()) return null; if (e.is && e.is()) continue;
+    LS.needKey = key; if (LS.used && LS.used.key === key && LS.used.ctl === e.ctl) return null;
+    return { kind: 'ctl', sel: typeof e.sel === 'function' ? e.sel() : e.sel }; }
+  return null;
+}
+function lsThrob() {
+  const roots = [$('#lsTray'), $('#lsDock')]; if (!LS.on) { ndApply([], roots); return; }
+  const t = lsNeedNow(); let el = null;
+  if (t && t.kind === 'tile') el = $(`#lsTray [data-lsadd="${t.id}"]`); else if (t) el = $(t.sel, $('#lsDock'));
+  if (el && (el.disabled || !el.offsetParent)) el = null;
+  ndApply(el ? [el] : [], roots);
 }
 
 /* ===== Shared by lesson mode (4m) and the rescue builder (4g to 4i) (Tom, 8 Nov 2026; spec section 10) =====
@@ -10516,6 +10655,34 @@ function dkSet(el, html) {
   if (k) { const n = el.querySelector(`[data-lm="${k}"],[data-gm="${k}"]`); if (n) n.focus(); }
 }
 
+/* ---------- "do this next" (Tom, 9 Nov 2026): the one tray tile or panel control the current task needs gets a gentle pulse and a glow ring ----------
+   ndApply(els, roots) puts the classes ndneed (the static glow ring) and ndpulse (the pulse: left off when the student asks for reduced motion) on exactly the elements given, and
+   takes them off anything else inside the root containers (lesson mode: #lsTray and #lsDock; the rescue: #glTray and #glDock). Callers decide WHICH element from data, never from text. */
+function ndApply(els, roots) {
+  els = (els || []).filter(Boolean); const cur = [].concat(...(roots || []).filter(Boolean).map(r => [...r.querySelectorAll('.ndneed')]));
+  if (cur.length === els.length && cur.every(e => els.includes(e)) && els.every(e => e.classList.contains('ndpulse') === !RMOTION)) return;
+  cur.forEach(e => { if (!els.includes(e)) e.classList.remove('ndneed', 'ndpulse'); });
+  els.forEach(e => { e.classList.add('ndneed'); e.classList.toggle('ndpulse', !RMOTION); });
+}
+
+/* ---------- the drag ghost (Tom, 9 Nov 2026): while a tray tile is dragged, a 60% see-through picture of the piece, drawn by the piece's own board drawing at board scale, follows the pointer ----------
+   ndGhostBegin(W, H, sc, draw): draw(c) paints the piece alone (board units, transparent background) on a W x H board; sc is screen pixels per board unit. The picture is cropped to the piece.
+   ndGhostMove(clientX, clientY) moves it; ndGhostEnd() removes it (drop, cancel, or a step change). It works the same for mouse, pen and touch, and with reduced motion. */
+const NDG = { el: null, w: 0, h: 0 };
+function ndGhostEnd() { if (NDG.el) { NDG.el.remove(); NDG.el = null; } }
+function ndGhostBegin(W, H, sc, draw) {
+  ndGhostEnd();
+  try {
+    if (typeof readColors === 'function') readColors();
+    const off = document.createElement('canvas'); off.width = Math.max(1, Math.ceil(W * sc)); off.height = Math.max(1, Math.ceil(H * sc)); const c = off.getContext('2d'); c.scale(sc, sc); draw(c);
+    const px = c.getImageData(0, 0, off.width, off.height).data; let x0 = off.width, y0 = off.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < off.height; y++) for (let x = 0; x < off.width; x++) if (px[(y * off.width + x) * 4 + 3] > 20) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return; const w = x1 - x0 + 1, h = y1 - y0 + 1, el = document.createElement('canvas'); el.width = w; el.height = h; el.getContext('2d').drawImage(off, x0, y0, w, h, 0, 0, w, h);
+    el.id = 'ndGhost'; el.setAttribute('aria-hidden', 'true'); el.style.cssText = `position:fixed;left:0;top:0;width:${w}px;height:${h}px;pointer-events:none;opacity:.6;z-index:80;display:none`; document.body.appendChild(el); NDG.el = el; NDG.w = w; NDG.h = h;
+  } catch (e) { NDG.el = null; }
+}
+function ndGhostMove(x, y) { if (!NDG.el) return; NDG.el.style.display = 'block'; NDG.el.style.transform = `translate(${Math.round(x - NDG.w / 2)}px,${Math.round(y - NDG.h / 2)}px)`; }
+
 /* ===== Chapter 6: lesson mode pieces for Parts 2 to 4 (spec section 2, 3, 4 and 10; stage 3) =====
    Extends 4m-lesson.js. Pieces: crane gantry, pulley block, winch, ramp, screw jack, wedge (a demonstration), compound (cables between ◉ dots), and the k3 two-leg practice.
    EVERY change goes through wsSet / wsSetMach (4a-workshop.js), so all numbers, task checks, questions and marks stay exactly as they were.
@@ -10565,17 +10732,22 @@ const lsIsTwo = () => !!(LS.on && LS.o && LS.stage === 'two');
 const lsTouch = () => { wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange(); };
 const lsRmax = () => WS.lifts && WS.lifts.pick ? 2 : Math.max(WS.lift, 1);
 function lsRoute() { const m = WS.mach; if (m === 'ramp') return 'ramp'; if (m === 'build') return LS.pl.ramp ? 'ramp' : LS.pl.crane ? 'crane' : 'none'; return m === 'pulley' || m === 'winch' ? 'crane' : null; }
+/* a step with the crane gantry in its tray starts without it: the pulley block and winch wait until it is on the bench (Tom, 9 Nov 2026) */
+const lsNoCrane = () => !!(LS.o && LS.o.tray.includes('crane') && !LS.pl.crane && (lsRoute() === 'crane' || (WS.mach === 'build' && lsRoute() === 'none')));
+const lsWait = t => !lsIsTwo() && (t === 'block' || t === 'winch') && lsNoCrane();
+const lsWaitNote = () => LS.o.tray.includes('ramp') ? 'pick a route first' : 'add the crane first';
+const lsWaitMsg = () => LS.o.tray.includes('ramp') ? 'Pick a route first: drag in the crane gantry or the ramp.' : `Add the crane gantry first: drag it from the tray over the ${WS.loadShort}.`;
 const lsUseBlock = () => (WS.mach === 'pulley' || WS.mach === 'build') && !!LS.pl.block;
 const lsWinchSlot = () => WS.mach === 'winch' || WS.mach === 'build';
 const lsPutWinch = () => lsWinchSlot() && !!LS.pl.winch;
 /* the ropes this machine needs before ▶ works */
 function lsNeed() {
-  const r = lsRoute(), A = []; if (!r || r === 'none') return A;
+  const r = lsRoute(), A = []; if (!r || r === 'none' || (r === 'crane' && !LS.pl.crane)) return A;
   A.push(r === 'crane' && lsUseBlock() ? ['blk', 'top'] : ['load', 'top']);
   if (lsPutWinch()) A.push(['top', 'wd']);
   return A;
 }
-function lsReady() { const m = WS.mach; return m === 'winch' ? !!LS.pl.winch : m === 'ramp' ? !!LS.pl.ramp : m === 'build' ? lsRoute() !== 'none' : m === 'screw' ? !!LS.pl.jack : true; }
+function lsReady() { const m = WS.mach; if ((m === 'pulley' || m === 'winch') && !LS.pl.crane) return false; return m === 'winch' ? !!LS.pl.winch : m === 'ramp' ? !!LS.pl.ramp : m === 'build' ? lsRoute() !== 'none' : m === 'screw' ? !!LS.pl.jack : true; }
 function lsInitCab(m) {
   if (m === 'hand') return [['load', 'end']];
   if (m === 'pulley' || m === 'winch') return LS.pl.crane ? [['load', 'top']] : [];
@@ -10609,9 +10781,9 @@ function lsGeoRamp(prog) {
 /* every rope end on the bench right now */
 function lsEndsSc() {
   const r = lsRoute(), m = WS.mach, E = {};
-  if (r === 'crane') { const g = lsGeoCrane(0, 0); E.load = g.load; E.top = g.top; if (g.useB) E.blk = g.blk; if (g.slot) E.wd = g.wd; }
+  if (r === 'crane') { const g = lsGeoCrane(0, 0); E.load = g.load; if (LS.pl.crane) { E.top = g.top; if (g.useB) E.blk = g.blk; if (g.slot) E.wd = g.wd; } }
   else if (r === 'ramp') { const g = lsGeoRamp(0); E.load = g.hook; E.top = g.top; if (g.slot && g.winch) E.wd = g.wd; }
-  else if (m === 'build' && r === 'none') { const g = lsGeoRamp(0); E.load = g.hook; }
+  else if (m === 'build' && r === 'none') { if (LS.o.tray.includes('ramp')) { const g = lsGeoRamp(0); E.load = g.hook; } else { const g = lsGeoCrane(0, 0); E.load = g.load; } }
   return E;
 }
 
@@ -10622,8 +10794,8 @@ function lsSheaves(c, cx, y, n, s) {
   lsGL(K, () => { for (let i = 0; i < n; i++) glDrawBlock(c, { x: (cx - w / 2 + i * 18) / K, y: (LS_FLOOR - y) / K, s: s || 0.3 }, false); });
 }
 function lsDrawCraneScene(c, cur, riseNow, prog) {
-  const g = lsGeoCrane(riseNow, prog), K = g.K, roped = g.useB ? lsJoined('blk', 'top') : lsJoined('load', 'top'), showCrane = WS.mach !== 'build' || LS.pl.crane;
-  if (!showCrane) return { x: g.cx, y: 200 };
+  const g = lsGeoCrane(riseNow, prog), K = g.K, roped = g.useB ? lsJoined('blk', 'top') : lsJoined('load', 'top'), showCrane = !!LS.pl.crane;
+  if (!showCrane) { lsLoadBox(c, g.cx, g.ly, lsLoadLabel(), false); return { x: g.cx, y: 200 }; }
   lsGL(K, () => glDrawCrane(c, { x: g.cx / K, rise: (LS_FLOOR - g.topY) / K - 1.3, s: 0.5 }, { start: { x: 0, y: 0 } }, false, (LS_FLOOR - g.top.y) / K));
   lsLoadBox(c, g.cx, g.ly, lsLoadLabel(), g.useB ? lsJoined('blk', 'top') : roped);
   if (g.useB) {   // the pulley block hangs on the load's hook; N strands run up to the crane's hook
@@ -10693,7 +10865,7 @@ function lsDrawJackScene(c, cur, riseNow, prog) {
 }
 function lsDrawScene(c, cur, riseNow, prog) {
   const m = lsSc(); if (m === 'wedge') return lsDrawWedgeScene(c, cur, riseNow, prog); if (m === 'screw') return lsDrawJackScene(c, cur, riseNow, prog);
-  return lsRoute() === 'ramp' || (m === 'build' && lsRoute() === 'none') ? lsDrawRampScene(c, cur, riseNow, prog) : lsDrawCraneScene(c, cur, riseNow, prog);
+  return lsRoute() === 'ramp' || (m === 'build' && lsRoute() === 'none' && LS.o.tray.includes('ramp')) ? lsDrawRampScene(c, cur, riseNow, prog) : lsDrawCraneScene(c, cur, riseNow, prog);
 }
 /* the rope strands of a joined pair are drawn inside the scene drawings; this draws every end's dot is done there too */
 
@@ -10711,12 +10883,14 @@ function lsZones(t) {
 const lsInZones = (t, x, y) => lsZones(t).some(z => x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1);
 function lsHasP(t) { if (lsIsTwo()) return !!(LS.two && LS.two[t]); return !!LS.pl[t]; }
 function lsPick(t) {   // a tray piece of the other machine switches the bench to that machine first
+  if (t === 'crane' && !lsIsTwo() && WS.mach === 'ramp' && WS.allow.includes('winch')) { wsSetMach('winch'); return; }
   const P = LS_PIECES[t]; if (lsIsTwo() || !P || !P.mach || WS.mach === P.mach || !WS.allow.includes(P.mach)) return; wsSetMach(P.mach);
 }
-const lsZoneMsg = t => ({ block: 'Drop the pulley block on a ◉ hook. It glows where it goes.', winch: 'Drop the winch on the end of the rope. It glows where it goes.', ramp: 'Drop the ramp so its foot is on the floor and its top is on the platform.', jack: 'Drop the screw jack under the car.', crane: 'Drop the crane gantry over the load.' })[t] || 'Drop it on the glowing spot.';
+const lsZoneMsg = t => ({ block: 'Drop the pulley block on a ◉ hook. It glows where it goes.', winch: 'Drop the winch on the end of the rope. It glows where it goes.', ramp: 'Drop the ramp so its foot is on the floor and its top is on the platform.', jack: 'Drop the screw jack under the car.', crane: `Drop the crane gantry over the ${WS.loadShort}.` })[t] || 'Drop it on the glowing spot.';
 function lsDropSc(t, x, y) {
   if (lsIsTwo()) return lsTwoDrop(t, x, y);
   if (lsHasP(t)) return;
+  if (lsWait(t)) { toast(lsWaitMsg()); return; }
   if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = lsZoneMsg(t); toast(lsZoneMsg(t)); return; }
   lsPlace(t);
 }
@@ -10727,8 +10901,8 @@ function lsPlace(t) {
   else if (t === 'ramp') { LS.pl.ramp = true; LS.pl.crane = false; if (m === 'build') { wsSet('br', 6); LS.cab = LS.cab.filter(q => !(q.includes('blk'))); if (lsJoined('load', 'top')) LS.cab = LS.cab.filter(q => !(q.includes('top') && q.includes('load'))); } }
   else if (t === 'crane') { LS.pl.crane = true; LS.pl.ramp = false; if (m === 'build') wsSet('br', 0); LS.cab = []; lsRope('load', 'top'); if (LS.pl.block) { lsUnropePair('load', 'top'); lsRope('blk', 'top'); } if (LS.pl.winch) lsRope('top', 'wd'); }
   else if (t === 'jack') { LS.pl.jack = true; wsSetMach('screw'); }
-  lsTouch(); toast(`✓ ${LS_PIECES[t].name} on the bench!`, 'ok'); lsRender();
-  if (!lsSeen()[t] && !FAST) lsShowCards(t);
+  lsTouch(); toast(t === 'crane' ? '✓ Crane gantry on the bench. Roped!' : `✓ ${LS_PIECES[t].name} on the bench!`, 'ok'); lsRender();
+  if (!lsSeen()[t] && !FAST) lsShowCards(t, true);
 }
 function lsUnropePair(a, b) { const n = LS.cab.length; LS.cab = LS.cab.filter(q => !((q[0] === a && q[1] === b) || (q[0] === b && q[1] === a))); return LS.cab.length !== n; }
 function lsRemove(t) {
@@ -10736,7 +10910,7 @@ function lsRemove(t) {
   if (t === 'block') { LS.pl.block = false; if (m === 'pulley') wsSet('ropes', 1); else if (m === 'build') wsSet('bn', 0); lsUnropePair('blk', 'top'); if (lsRoute() === 'crane') lsRope('load', 'top'); }
   else if (t === 'winch') { LS.pl.winch = false; if (m === 'build') wsSet('bw', 0); lsUnropePair('top', 'wd'); }
   else if (t === 'ramp') { LS.pl.ramp = false; if (m === 'build') wsSet('br', 0); lsUnropePair('load', 'top'); }
-  else if (t === 'crane') { LS.pl.crane = false; LS.cab = []; if (m === 'build') wsSet('br', 0); }
+  else if (t === 'crane') { LS.pl.crane = false; LS.cab = []; if (m === 'build') wsSet('br', 0); if (LS.o.tray.includes('crane') && !LS.o.tray.includes('ramp')) { if (LS.pl.block) { LS.pl.block = false; wsSet(m === 'pulley' ? 'ropes' : 'bn', m === 'pulley' ? 1 : 0); } if (LS.pl.winch) { LS.pl.winch = false; if (m === 'build') wsSet('bw', 0); } } }
   else if (t === 'jack') { LS.pl.jack = false; if (WS.allow.includes('wedge')) wsSetMach('wedge'); }
   lsTouch(); lsRender();
 }
@@ -10786,6 +10960,20 @@ function lsGhostNew(c, piece, kind, t) {
   c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(down ? '✊' : '👆', x, y); c.restore();
 }
 
+/* ---------- the drag ghost: the piece's own board drawing, alone on a clear board, at the board's screen scale (ndGhostBegin in 4n-boardkit.js) ---------- */
+function lsGhostDraw(t, c) {
+  if (lsIsTwo()) { const g = lsTwoGeo(), K = g.K;
+    if (t === 'ramp') lsGL(K, () => glDrawRamp(c, { L: g.L, rise: g.h, x1: g.fx / K, y1: 0, s: 0.32 }, { start: { x: g.fx / K, y: 0 }, end: { x: g.fx / K + g.run, y: g.h } }, false, lsFlat()));
+    else if (t === 'crane') lsGL(K, () => glDrawCrane(c, { x: g.gx / K, rise: 2.2, s: 0.5 }, { start: { x: 0, y: g.h } }, false, (LS_FLOOR - g.craneHook.y) / K)); return; }
+  if (t === 'lever') { const G = lsLever(0, { la: 1, ea: 1 }); lsBarAndFulcrum(c, G); }
+  else if (t === 'crane') { const g = lsGeoCrane(0, 0), K = g.K; lsGL(K, () => glDrawCrane(c, { x: g.cx / K, rise: (LS_FLOOR - g.topY) / K - 1.3, s: 0.5 }, { start: { x: 0, y: 0 } }, false, (LS_FLOOR - g.top.y) / K)); }
+  else if (t === 'block') lsSheaves(c, LS_CX, 200, 2);
+  else if (t === 'winch') { const g = lsGeoCrane(0, 0), K = g.K; lsGL(K, () => glDrawWinch(c, { x: g.wc.x / K, y: (LS_FLOOR - g.wc.y) / K, s: 0.5, crank: 1.7 }, false, 0)); }
+  else if (t === 'ramp') { const g = lsGeoRamp(0), K = g.K; lsGL(K, () => glDrawRamp(c, { L: g.L, rise: g.h, x1: g.fx / K, y1: 0, s: 0.32 }, { start: { x: g.fx / K, y: 0 }, end: { x: g.fx / K + g.run, y: g.h } }, false, lsFlat())); }
+  else if (t === 'jack') lsGL(60, () => glDrawJack(c, { x: LS_CX / 60, rise: WS.lift, s: 0.5, vis: 10, gap: 0.1 + 0.28 * WS.pitch }, { start: { x: 0, y: 0 } }, false, 0));
+}
+const lsGhostStart = t => { const cv = lsCanvas(); if (!cv) return; ndGhostBegin(900, WS_H, cv.getBoundingClientRect().width / 900, c => lsGhostDraw(t, c)); };
+
 /* ---------- the docked panel ---------- */
 const lsPM = (k, lab, val, atMin, atMax) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-lm="${k}-" aria-label="Less" ${atMin ? 'disabled' : ''}>−</button><b>${val}</b><button type="button" class="ghost sm" data-lm="${k}+" aria-label="More" ${atMax ? 'disabled' : ''}>+</button></div>`;
 const lsChoice = (k, lab, opts, cur) => `<div class="glrow wrap"><span>${lab}</span></div><div class="glrow wrap" style="margin-top:0">${opts.map(([v, l]) => `<button type="button" class="ghost sm ${String(v) === String(cur) ? 'on' : ''}" data-lm="${k}:${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join('')}</div>`;
@@ -10807,19 +10995,20 @@ function lsDockSc() {
   if (m === 'wedge') return tabs + sec('🪓', 'Wedge', '', lsChoice('thick', 'Thickness', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">The wedge is 20 cm long. A thinner wedge is a longer, gentler ramp. Press ▶ Push! to split the log.</p>', '');
   if (m === 'screw') return tabs + sec('🔩', 'Screw jack', 'jack', LS.pl.jack ? lsChoice('per', 'Handle circle', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per) + lsChoice('pitch', 'Gap between threads', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + `<p class="glnote">One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the car ${fmt(WS.pitch, 1)} cm, the gap between threads.</p>` : '<p class="glnote">Drag the ⚙ screw jack from the tray under the car. It glows and snaps into place.</p>', LS.pl.jack ? lsRm('jack') : '');
   const r = lsRoute(), out = [];
+  const cw = lsNoCrane(), cwNote = `<p class="glnote">${lsWaitMsg()}</p>`, craneNone = `<p class="glnote">Drag the 🏗️ crane gantry from the tray over the ${WS.loadShort}. It snaps on and ropes to the hook.</p>`;
   if (m === 'pulley') {
-    out.push(sec('🏗️', 'Crane gantry', 'crane', lsRopeRow('the crate is roped to the hook') .replace('the crate', `the ${WS.loadShort}`) + (WS.lifts && WS.lifts.pick ? lsChoice('lift', 'Lift height', [[1, '1 m'], [2, '2 m']], WS.lift) : '') + '<p class="glnote">The rope goes from the load, up over the top, and down to Smooshy.</p>', ''));
-    out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsPM('ropes', 'Supporting ropes', WS.ropes, WS.ropes <= 1, WS.ropes >= (WS.lim.ropesMax || 6)) + (ml ? `<div class="glrow"><span>MA</span><b>×${WS.ropes}</b></div>` : '') + '<p class="glnote">More supporting ropes share the load, so Smooshy pulls less (and pulls more rope).</p>' : `<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook. With no block there is 1 rope.</p>`, LS.pl.block ? lsRm('block') : ''));
+    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the crate is roped to the hook') .replace('the crate', `the ${WS.loadShort}`) + (WS.lifts && WS.lifts.pick ? lsChoice('lift', 'Lift height', [[1, '1 m'], [2, '2 m']], WS.lift) : '') + '<p class="glnote">The rope goes from the load, up over the top, and down to Smooshy.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
+    out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsPM('ropes', 'Supporting ropes', WS.ropes, WS.ropes <= 1, WS.ropes >= (WS.lim.ropesMax || 6)) + (ml ? `<div class="glrow"><span>MA</span><b>×${WS.ropes}</b></div>` : '') + '<p class="glnote">More supporting ropes share the load, so Smooshy pulls less (and pulls more rope).</p>' : cw ? cwNote : `<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook. With no block there is 1 rope.</p>`, LS.pl.block ? lsRm('block') : ''));
   } else if (m === 'winch') {
-    out.push(sec('🏗️', 'Crane gantry', 'crane', lsRopeRow('the rope runs to the winch') + '<p class="glnote">The rope runs from the load, up over the top, and down to the ◉ rope end.</p>', ''));
-    out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsPM('R', 'Handle radius', fmt(WS.R, 2) + ' m', WS.R <= wsLimits('R').min + 1e-9, WS.R >= wsLimits('R').max - 1e-9) + (WS.axleEdit ? lsPM('axle', 'Axle radius', fmt(WS.axle, 2) + ' m', WS.axle <= 0.04 + 1e-9, WS.axle >= 0.1 - 1e-9) : `<div class="glrow"><span>Axle radius</span><b>${fmt(WS.axle, 2)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">A bigger handle means an easier turn, but more turning.</p>' : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
+    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the rope runs to the winch') + '<p class="glnote">The rope runs from the load, up over the top, and down to the ◉ rope end.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
+    out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsPM('R', 'Handle radius', fmt(WS.R, 2) + ' m', WS.R <= wsLimits('R').min + 1e-9, WS.R >= wsLimits('R').max - 1e-9) + (WS.axleEdit ? lsPM('axle', 'Axle radius', fmt(WS.axle, 2) + ' m', WS.axle <= 0.04 + 1e-9, WS.axle >= 0.1 - 1e-9) : `<div class="glrow"><span>Axle radius</span><b>${fmt(WS.axle, 2)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">A bigger handle means an easier turn, but more turning.</p>' : cw ? cwNote : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
   } else if (m === 'ramp') {
     const lm = wsLimits('L'), hm = wsLimits('h');
     out.push(sec('📐', 'Ramp', 'ramp', LS.pl.ramp ? lsPM('L', 'Length', fmt(WS.L, 1) + ' m', WS.L <= lm.min + 1e-9, WS.L >= lm.max - 1e-9) + (WS.rampH ? lsPM('h', 'Height', fmt(WS.h, 1) + ' m', WS.h <= hm.min + 1e-9, WS.h >= hm.max - 1e-9) : `<div class="glrow"><span>Height</span><b>${fmt(WS.h, 1)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + lsRopeRow('the cart is roped to the top') + '<p class="glnote">Drag the white handle at the top of the ramp, or use − and +. A longer ramp means a smaller pull, but further to go.</p>' : '<p class="glnote">Drag the 📐 ramp from the tray in. Its foot sits on the floor and its top rests on the platform.</p>', (LS.pl.ramp ? lsRopeAct() : '') + (LS.pl.ramp ? lsRm('ramp') : '')));
   } else if (m === 'build') {
-    const tot = wsCalc(); out.push(sec('🔗', 'Machine chain', 'cables', `<div class="glrow"><span>Route</span><b>${r === 'ramp' ? '6 m ramp' : r === 'crane' ? 'crane gantry' : 'choose one'}</b></div>` + lsRopeRow() + ((wsHas('bTotMA') || wsHas('readMA')) && !wsMasked(wsRecord(tot)).has('bTotMA') && !wsMasked(wsRecord(tot)).has('readMA') ? `<div class="glrow"><span>Total MA</span><b>${fmt(tot.ma, 2)}</b></div>` : '') + '<p class="glnote">Drag from one ◉ to the next to join them. Smooshy works the last machine in the chain.</p>', lsRopeAct() + (r !== 'none' && !lsLocked(r) ? lsRm(r) : '')));
-    if (LS.o.tray.includes('block') || LS.pl.block) out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsChoice('bn', 'Supporting ropes', WS.bRopes.filter(v => v > 0).map(v => [v, String(v)]), WS.bn) + '<p class="glnote">More supporting ropes share the load.</p>' : '<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook.</p>', LS.pl.block ? lsRm('block') : ''));
-    if (LS.o.tray.includes('winch') || LS.pl.winch) out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsChoice('bw', 'Winch ×', WS.bWinches.map(v => [v, '×' + v]), WS.bw) + '<p class="glnote">Smooshy turns the winch handle. Its rope winds round the axle.</p>' : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
+    const tot = wsCalc(); out.push(sec('🔗', 'Machine chain', 'cables', `<div class="glrow"><span>Route</span><b>${r === 'ramp' ? '6 m ramp' : r === 'crane' ? 'crane gantry' : LS.o.tray.includes('ramp') ? 'choose one' : 'add the crane gantry'}</b></div>` + lsRopeRow() + ((wsHas('bTotMA') || wsHas('readMA')) && !wsMasked(wsRecord(tot)).has('bTotMA') && !wsMasked(wsRecord(tot)).has('readMA') ? `<div class="glrow"><span>Total MA</span><b>${fmt(tot.ma, 2)}</b></div>` : '') + '<p class="glnote">Drag from one ◉ to the next to join them. Smooshy works the last machine in the chain.</p>', lsRopeAct() + (r !== 'none' && !lsLocked(r) ? lsRm(r) : '')));
+    if (LS.o.tray.includes('block') || LS.pl.block) out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsChoice('bn', 'Supporting ropes', WS.bRopes.filter(v => v > 0).map(v => [v, String(v)]), WS.bn) + '<p class="glnote">More supporting ropes share the load.</p>' : cw ? cwNote : '<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook.</p>', LS.pl.block ? lsRm('block') : ''));
+    if (LS.o.tray.includes('winch') || LS.pl.winch) out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsChoice('bw', 'Winch ×', WS.bWinches.map(v => [v, '×' + v]), WS.bw) + '<p class="glnote">Smooshy turns the winch handle. Its rope winds round the axle.</p>' : cw ? cwNote : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
     if (LS.o.tray.includes('ramp') && LS.stage !== 'two') out.push(`<button type="button" class="go sm" data-lm="two:start" style="margin-top:8px" ${lsK3Open() ? '' : 'disabled'}>➡ Two-leg practice</button><p class="glnote">${lsK3Open() ? 'Next: a crate goes up a ramp, then a crane lifts it.' : 'Finish the generator job first.'}</p>`);
   }
   return tabs + out.join('<hr class="dkhr">');
@@ -10843,6 +11032,7 @@ function lsSceneAct(k) {
 function lsStatusSc() {
   const m = WS.mach, o = LS.o;
   if (lsIsTwo()) return lsTwoStatus();
+  if (lsNoCrane() && !LS.o.tray.includes('ramp')) return `Drag the 🏗️ crane gantry from the tray over the ${WS.loadShort}.`;
   if (m === 'wedge') return 'The wedge is a demonstration: pick a thickness in the panel, then press ▶ Push!';
   if (m === 'screw') return LS.pl.jack ? 'Pick the handle circle and the thread gap in the panel, then press ▶ Turn!' : 'Drag the ⚙ screw jack from the tray under the car.';
   if (m === 'winch' && !LS.pl.winch) return 'Drag the ⚙ winch from the tray onto the ◉ end of the rope.';
@@ -11248,7 +11438,7 @@ const SECTIONS = [
   { id: 'c6e', ch: 'c6', n: 6, title: 'Rescue Captain Smooshy!', part: 'Part 5', stamp: 'Smooshy Saver',
     blurb: 'Land on Glimmer-9 and design a rescue route: free the boulder, build ramps, platforms and machines, blast the crest, and watch Smooshy lift the Gumdrop into the Big Jelly\'s tractor beam.',
     steps: ['v1'], challenge: ['gl'], review: ['c6r23', 'c6r24', 'c6r25', 'c6r26', 'c6r32'], needs: 'c6d',
-    chalInfo: { title: 'Operation Gummy Lift', intro: 'Design one rescue route that gets the Gumdrop out of the crater and into the Big Jelly\'s tractor beam. Build it and test it in the simulator, work out the maths for every leg, and send it to GASA. When GASA approves your maths, the rescue launches. Then make it even better. Your best rescue counts, and every try helps you move on.' },
+    chalInfo: { title: 'Operation Gummy Lift', intro: 'Design one rescue route that gets the Gumdrop out of the crater and into the Big Jelly\'s tractor beam. Lift the Gumdrop up to the dotted line. The Big Jelly\'s tractor beam does the rest. Build it and test it in the simulator, work out the maths for every leg, and send it to GASA. When GASA approves your maths, the rescue launches. Then make it even better. Your best rescue counts, and every try helps you move on.' },
     goal: 'Use weight, mechanical advantage, effort, work and compound machines to design a rescue route of machines; work out the effort for each leg and have GASA check the maths; explain why a bigger mechanical advantage never reduces the work; weigh up two real-world plans for the rescue.',
     vocab: ['weight', 'gravitational field strength', 'mechanical advantage', 'compound machine', 'work'] },
   { id: 'c6f', ch: 'c6', n: 6, title: 'Real machines waste energy', part: 'Extension', stamp: 'Colony Engineer', optional: true,
