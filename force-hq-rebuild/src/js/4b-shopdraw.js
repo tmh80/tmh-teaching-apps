@@ -359,7 +359,15 @@ function drawShopScene(c) {
   else if (WS.mach === 'ramp') ep = wsDrawRamp(c, cur, riseNow, prog); else if (WS.mach === 'wedge') ep = wsDrawWedge(c, cur, riseNow, prog); else ep = wsDrawScrew(c, cur, riseNow, prog);
   if (LS.on && lsIsTwo()) { wsMonitor(c); lsOverlay(c); lblFlush(c, 900, WS_H, LS.drag && LS.drag.moved || LS.tdrag || LS.dragPiece ? 0.2 : 1); lsBoardLabel(c); return; }   // the k3 two-leg practice: no dial or readouts
   const M = wsDialMax(WS.c ? WS.c.need : wsCalc().need), hide = mk.has('readE');
-  wsNewtonmeter(c, 660, 150, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
+  /* the dial moves out of the machine's way (Tom, 9 Nov 2026: it hid the winch and pulley block at the top of a ramp). The spot is chosen only while nothing is running, so it never jumps mid-pull. */
+  if (LS.on && !WS.busy) {
+    const pts = LBL.avoid.slice(4).map(a => ({ x: (a.x0 + a.x1) / 2, y: (a.y0 + a.y1) / 2, r: (a.x1 - a.x0) / 2 })).concat(ep ? [{ x: ep.x, y: ep.y, r: 20 }] : []);
+    const hits = ([x, y]) => pts.filter(p => p.x + p.r > x - 70 && p.x - p.r < x + 70 && p.y + p.r > y - 70 && p.y - p.r < y + 94).length;
+    const spots = [[660, 150], [440, 150], [300, 170]]; LS.meterAt = spots.reduce((best, sp) => hits(sp) < hits(best) ? sp : best, spots[0]);
+  }
+  const [mx, my] = LS.on && LS.meterAt ? LS.meterAt : [660, 150];
+  if (LS.on) LBL.avoid.push({ x0: mx - 64, y0: my - 64, x1: mx + 64, y1: my + 88 });   // labels keep clear of wherever the dial is
+  wsNewtonmeter(c, mx, my, M, hide ? 0 : WS.reading, hide, ep ? ep.x : null, ep ? ep.y : null);
   if (!LS.on || LS.o.live !== false) wsMonitor(c);   // Captain Smooshy coaches by video from the crater (Parts 1 to 4)
   /* readouts */
   const rows = [['Load', `${fmt(WS.load, WS.load % 1 ? 1 : 0)} N (${fmt(WS.load / WS_WORLDS[WS.world].g, 0)} kg)`], [WS.mach === 'wedge' ? 'Halves opened' : 'Load rise', fmt(riseNow, 2) + ' m'], [WS.mach === 'pulley' ? 'Rope pulled' : 'Your hand moved', fmt(wsR2(cur.ma * riseNow), 2) + ' m']];
