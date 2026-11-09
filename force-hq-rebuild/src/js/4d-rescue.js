@@ -8,7 +8,10 @@ const RB_SLOTS = [
   { sec: 'c6e', title: 'Smooshy saved!', part: 'Part 5', next: 'Next: Part 5 is the rescue, planned at Mission Control.' },
   { sec: 'c6f', title: 'Gummy Base One built', part: 'Extension', ext: true, next: 'Optional: the Extension helps the gummy colonists build Gummy Base One.' }
 ];
-const rbDone = id => !!dbGet('stamps', {})[id];
+/* a slot is done when its section's stamp is in; the rescue slot (and the picture) only when the Gumdrop has really reached the tractor beam.
+   (The c6e stamp only needs a tried rescue, so it can't say Smooshy is saved.) */
+const rbSaved = () => !!((dbGet('chal.c6e', {}).gl || {}).firstDone);
+const rbDone = id => id === 'c6e' ? rbSaved() : !!dbGet('stamps', {})[id];
 /* the Gumdrop with Captain Smooshy safe inside, seen through the round window (the live link from the Gumdrop) */
 function drawGumdropInside(c, x, y, s, tilt, mood, tt) {
   drawGumdrop(c, x, y, s, tilt);
