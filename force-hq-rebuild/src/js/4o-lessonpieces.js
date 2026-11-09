@@ -47,17 +47,22 @@ const lsIsTwo = () => !!(LS.on && LS.o && LS.stage === 'two');
 const lsTouch = () => { wsResetLoad(); wsRenderControls(); if (LAB.onChange) LAB.onChange(); };
 const lsRmax = () => WS.lifts && WS.lifts.pick ? 2 : Math.max(WS.lift, 1);
 function lsRoute() { const m = WS.mach; if (m === 'ramp') return 'ramp'; if (m === 'build') return LS.pl.ramp ? 'ramp' : LS.pl.crane ? 'crane' : 'none'; return m === 'pulley' || m === 'winch' ? 'crane' : null; }
+/* a step with the crane gantry in its tray starts without it: the pulley block and winch wait until it is on the bench (Tom, 9 Nov 2026) */
+const lsNoCrane = () => !!(LS.o && LS.o.tray.includes('crane') && !LS.pl.crane && (lsRoute() === 'crane' || (WS.mach === 'build' && lsRoute() === 'none')));
+const lsWait = t => !lsIsTwo() && (t === 'block' || t === 'winch') && lsNoCrane();
+const lsWaitNote = () => LS.o.tray.includes('ramp') ? 'pick a route first' : 'add the crane first';
+const lsWaitMsg = () => LS.o.tray.includes('ramp') ? 'Pick a route first: drag in the crane gantry or the ramp.' : `Add the crane gantry first: drag it from the tray over the ${WS.loadShort}.`;
 const lsUseBlock = () => (WS.mach === 'pulley' || WS.mach === 'build') && !!LS.pl.block;
 const lsWinchSlot = () => WS.mach === 'winch' || WS.mach === 'build';
 const lsPutWinch = () => lsWinchSlot() && !!LS.pl.winch;
 /* the ropes this machine needs before ▶ works */
 function lsNeed() {
-  const r = lsRoute(), A = []; if (!r || r === 'none') return A;
+  const r = lsRoute(), A = []; if (!r || r === 'none' || (r === 'crane' && !LS.pl.crane)) return A;
   A.push(r === 'crane' && lsUseBlock() ? ['blk', 'top'] : ['load', 'top']);
   if (lsPutWinch()) A.push(['top', 'wd']);
   return A;
 }
-function lsReady() { const m = WS.mach; return m === 'winch' ? !!LS.pl.winch : m === 'ramp' ? !!LS.pl.ramp : m === 'build' ? lsRoute() !== 'none' : m === 'screw' ? !!LS.pl.jack : true; }
+function lsReady() { const m = WS.mach; if ((m === 'pulley' || m === 'winch') && !LS.pl.crane) return false; return m === 'winch' ? !!LS.pl.winch : m === 'ramp' ? !!LS.pl.ramp : m === 'build' ? lsRoute() !== 'none' : m === 'screw' ? !!LS.pl.jack : true; }
 function lsInitCab(m) {
   if (m === 'hand') return [['load', 'end']];
   if (m === 'pulley' || m === 'winch') return LS.pl.crane ? [['load', 'top']] : [];
@@ -91,9 +96,9 @@ function lsGeoRamp(prog) {
 /* every rope end on the bench right now */
 function lsEndsSc() {
   const r = lsRoute(), m = WS.mach, E = {};
-  if (r === 'crane') { const g = lsGeoCrane(0, 0); E.load = g.load; E.top = g.top; if (g.useB) E.blk = g.blk; if (g.slot) E.wd = g.wd; }
+  if (r === 'crane') { const g = lsGeoCrane(0, 0); E.load = g.load; if (LS.pl.crane) { E.top = g.top; if (g.useB) E.blk = g.blk; if (g.slot) E.wd = g.wd; } }
   else if (r === 'ramp') { const g = lsGeoRamp(0); E.load = g.hook; E.top = g.top; if (g.slot && g.winch) E.wd = g.wd; }
-  else if (m === 'build' && r === 'none') { const g = lsGeoRamp(0); E.load = g.hook; }
+  else if (m === 'build' && r === 'none') { if (LS.o.tray.includes('ramp')) { const g = lsGeoRamp(0); E.load = g.hook; } else { const g = lsGeoCrane(0, 0); E.load = g.load; } }
   return E;
 }
 
@@ -104,8 +109,8 @@ function lsSheaves(c, cx, y, n, s) {
   lsGL(K, () => { for (let i = 0; i < n; i++) glDrawBlock(c, { x: (cx - w / 2 + i * 18) / K, y: (LS_FLOOR - y) / K, s: s || 0.3 }, false); });
 }
 function lsDrawCraneScene(c, cur, riseNow, prog) {
-  const g = lsGeoCrane(riseNow, prog), K = g.K, roped = g.useB ? lsJoined('blk', 'top') : lsJoined('load', 'top'), showCrane = WS.mach !== 'build' || LS.pl.crane;
-  if (!showCrane) return { x: g.cx, y: 200 };
+  const g = lsGeoCrane(riseNow, prog), K = g.K, roped = g.useB ? lsJoined('blk', 'top') : lsJoined('load', 'top'), showCrane = !!LS.pl.crane;
+  if (!showCrane) { lsLoadBox(c, g.cx, g.ly, lsLoadLabel(), false); return { x: g.cx, y: 200 }; }
   lsGL(K, () => glDrawCrane(c, { x: g.cx / K, rise: (LS_FLOOR - g.topY) / K - 1.3, s: 0.5 }, { start: { x: 0, y: 0 } }, false, (LS_FLOOR - g.top.y) / K));
   lsLoadBox(c, g.cx, g.ly, lsLoadLabel(), g.useB ? lsJoined('blk', 'top') : roped);
   if (g.useB) {   // the pulley block hangs on the load's hook; N strands run up to the crane's hook
@@ -175,7 +180,7 @@ function lsDrawJackScene(c, cur, riseNow, prog) {
 }
 function lsDrawScene(c, cur, riseNow, prog) {
   const m = lsSc(); if (m === 'wedge') return lsDrawWedgeScene(c, cur, riseNow, prog); if (m === 'screw') return lsDrawJackScene(c, cur, riseNow, prog);
-  return lsRoute() === 'ramp' || (m === 'build' && lsRoute() === 'none') ? lsDrawRampScene(c, cur, riseNow, prog) : lsDrawCraneScene(c, cur, riseNow, prog);
+  return lsRoute() === 'ramp' || (m === 'build' && lsRoute() === 'none' && LS.o.tray.includes('ramp')) ? lsDrawRampScene(c, cur, riseNow, prog) : lsDrawCraneScene(c, cur, riseNow, prog);
 }
 /* the rope strands of a joined pair are drawn inside the scene drawings; this draws every end's dot is done there too */
 
@@ -193,12 +198,14 @@ function lsZones(t) {
 const lsInZones = (t, x, y) => lsZones(t).some(z => x >= z.x0 && x <= z.x1 && y >= z.y0 && y <= z.y1);
 function lsHasP(t) { if (lsIsTwo()) return !!(LS.two && LS.two[t]); return !!LS.pl[t]; }
 function lsPick(t) {   // a tray piece of the other machine switches the bench to that machine first
+  if (t === 'crane' && !lsIsTwo() && WS.mach === 'ramp' && WS.allow.includes('winch')) { wsSetMach('winch'); return; }
   const P = LS_PIECES[t]; if (lsIsTwo() || !P || !P.mach || WS.mach === P.mach || !WS.allow.includes(P.mach)) return; wsSetMach(P.mach);
 }
-const lsZoneMsg = t => ({ block: 'Drop the pulley block on a ◉ hook. It glows where it goes.', winch: 'Drop the winch on the end of the rope. It glows where it goes.', ramp: 'Drop the ramp so its foot is on the floor and its top is on the platform.', jack: 'Drop the screw jack under the car.', crane: 'Drop the crane gantry over the load.' })[t] || 'Drop it on the glowing spot.';
+const lsZoneMsg = t => ({ block: 'Drop the pulley block on a ◉ hook. It glows where it goes.', winch: 'Drop the winch on the end of the rope. It glows where it goes.', ramp: 'Drop the ramp so its foot is on the floor and its top is on the platform.', jack: 'Drop the screw jack under the car.', crane: `Drop the crane gantry over the ${WS.loadShort}.` })[t] || 'Drop it on the glowing spot.';
 function lsDropSc(t, x, y) {
   if (lsIsTwo()) return lsTwoDrop(t, x, y);
   if (lsHasP(t)) return;
+  if (lsWait(t)) { toast(lsWaitMsg()); return; }
   if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = lsZoneMsg(t); toast(lsZoneMsg(t)); return; }
   lsPlace(t);
 }
@@ -209,8 +216,8 @@ function lsPlace(t) {
   else if (t === 'ramp') { LS.pl.ramp = true; LS.pl.crane = false; if (m === 'build') { wsSet('br', 6); LS.cab = LS.cab.filter(q => !(q.includes('blk'))); if (lsJoined('load', 'top')) LS.cab = LS.cab.filter(q => !(q.includes('top') && q.includes('load'))); } }
   else if (t === 'crane') { LS.pl.crane = true; LS.pl.ramp = false; if (m === 'build') wsSet('br', 0); LS.cab = []; lsRope('load', 'top'); if (LS.pl.block) { lsUnropePair('load', 'top'); lsRope('blk', 'top'); } if (LS.pl.winch) lsRope('top', 'wd'); }
   else if (t === 'jack') { LS.pl.jack = true; wsSetMach('screw'); }
-  lsTouch(); toast(`✓ ${LS_PIECES[t].name} on the bench!`, 'ok'); lsRender();
-  if (!lsSeen()[t] && !FAST) lsShowCards(t);
+  lsTouch(); toast(t === 'crane' ? '✓ Crane gantry on the bench. Roped!' : `✓ ${LS_PIECES[t].name} on the bench!`, 'ok'); lsRender();
+  if (!lsSeen()[t] && !FAST) lsShowCards(t, true);
 }
 function lsUnropePair(a, b) { const n = LS.cab.length; LS.cab = LS.cab.filter(q => !((q[0] === a && q[1] === b) || (q[0] === b && q[1] === a))); return LS.cab.length !== n; }
 function lsRemove(t) {
@@ -218,7 +225,7 @@ function lsRemove(t) {
   if (t === 'block') { LS.pl.block = false; if (m === 'pulley') wsSet('ropes', 1); else if (m === 'build') wsSet('bn', 0); lsUnropePair('blk', 'top'); if (lsRoute() === 'crane') lsRope('load', 'top'); }
   else if (t === 'winch') { LS.pl.winch = false; if (m === 'build') wsSet('bw', 0); lsUnropePair('top', 'wd'); }
   else if (t === 'ramp') { LS.pl.ramp = false; if (m === 'build') wsSet('br', 0); lsUnropePair('load', 'top'); }
-  else if (t === 'crane') { LS.pl.crane = false; LS.cab = []; if (m === 'build') wsSet('br', 0); }
+  else if (t === 'crane') { LS.pl.crane = false; LS.cab = []; if (m === 'build') wsSet('br', 0); if (LS.o.tray.includes('crane') && !LS.o.tray.includes('ramp')) { if (LS.pl.block) { LS.pl.block = false; wsSet(m === 'pulley' ? 'ropes' : 'bn', m === 'pulley' ? 1 : 0); } if (LS.pl.winch) { LS.pl.winch = false; if (m === 'build') wsSet('bw', 0); } } }
   else if (t === 'jack') { LS.pl.jack = false; if (WS.allow.includes('wedge')) wsSetMach('wedge'); }
   lsTouch(); lsRender();
 }
@@ -268,6 +275,20 @@ function lsGhostNew(c, piece, kind, t) {
   c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(down ? '✊' : '👆', x, y); c.restore();
 }
 
+/* ---------- the drag ghost: the piece's own board drawing, alone on a clear board, at the board's screen scale (ndGhostBegin in 4n-boardkit.js) ---------- */
+function lsGhostDraw(t, c) {
+  if (lsIsTwo()) { const g = lsTwoGeo(), K = g.K;
+    if (t === 'ramp') lsGL(K, () => glDrawRamp(c, { L: g.L, rise: g.h, x1: g.fx / K, y1: 0, s: 0.32 }, { start: { x: g.fx / K, y: 0 }, end: { x: g.fx / K + g.run, y: g.h } }, false, lsFlat()));
+    else if (t === 'crane') lsGL(K, () => glDrawCrane(c, { x: g.gx / K, rise: 2.2, s: 0.5 }, { start: { x: 0, y: g.h } }, false, (LS_FLOOR - g.craneHook.y) / K)); return; }
+  if (t === 'lever') { const G = lsLever(0, { la: 1, ea: 1 }); lsBarAndFulcrum(c, G); }
+  else if (t === 'crane') { const g = lsGeoCrane(0, 0), K = g.K; lsGL(K, () => glDrawCrane(c, { x: g.cx / K, rise: (LS_FLOOR - g.topY) / K - 1.3, s: 0.5 }, { start: { x: 0, y: 0 } }, false, (LS_FLOOR - g.top.y) / K)); }
+  else if (t === 'block') lsSheaves(c, LS_CX, 200, 2);
+  else if (t === 'winch') { const g = lsGeoCrane(0, 0), K = g.K; lsGL(K, () => glDrawWinch(c, { x: g.wc.x / K, y: (LS_FLOOR - g.wc.y) / K, s: 0.5, crank: 1.7 }, false, 0)); }
+  else if (t === 'ramp') { const g = lsGeoRamp(0), K = g.K; lsGL(K, () => glDrawRamp(c, { L: g.L, rise: g.h, x1: g.fx / K, y1: 0, s: 0.32 }, { start: { x: g.fx / K, y: 0 }, end: { x: g.fx / K + g.run, y: g.h } }, false, lsFlat())); }
+  else if (t === 'jack') lsGL(60, () => glDrawJack(c, { x: LS_CX / 60, rise: WS.lift, s: 0.5, vis: 10, gap: 0.1 + 0.28 * WS.pitch }, { start: { x: 0, y: 0 } }, false, 0));
+}
+const lsGhostStart = t => { const cv = lsCanvas(); if (!cv) return; ndGhostBegin(900, WS_H, cv.getBoundingClientRect().width / 900, c => lsGhostDraw(t, c)); };
+
 /* ---------- the docked panel ---------- */
 const lsPM = (k, lab, val, atMin, atMax) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-lm="${k}-" aria-label="Less" ${atMin ? 'disabled' : ''}>−</button><b>${val}</b><button type="button" class="ghost sm" data-lm="${k}+" aria-label="More" ${atMax ? 'disabled' : ''}>+</button></div>`;
 const lsChoice = (k, lab, opts, cur) => `<div class="glrow wrap"><span>${lab}</span></div><div class="glrow wrap" style="margin-top:0">${opts.map(([v, l]) => `<button type="button" class="ghost sm ${String(v) === String(cur) ? 'on' : ''}" data-lm="${k}:${v}" aria-pressed="${String(v) === String(cur)}">${l}</button>`).join('')}</div>`;
@@ -289,19 +310,20 @@ function lsDockSc() {
   if (m === 'wedge') return tabs + sec('🪓', 'Wedge', '', lsChoice('thick', 'Thickness', [[10, '10 cm'], [5, '5 cm'], [4, '4 cm'], [2, '2 cm']].filter(x => !WS.lim.thick || WS.lim.thick.includes(x[0])), WS.thick) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">The wedge is 20 cm long. A thinner wedge is a longer, gentler ramp. Press ▶ Push! to split the log.</p>', '');
   if (m === 'screw') return tabs + sec('🔩', 'Screw jack', 'jack', LS.pl.jack ? lsChoice('per', 'Handle circle', [[60, '60 cm'], [120, '120 cm'], [180, '180 cm']], WS.per) + lsChoice('pitch', 'Gap between threads', [[0.2, '0.2 cm'], [0.5, '0.5 cm'], [1.0, '1.0 cm']].filter(x => !WS.lim.pitch || WS.lim.pitch.includes(x[0])), WS.pitch) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + `<p class="glnote">One turn moves the handle ${fmt(WS.per, 0)} cm and lifts the car ${fmt(WS.pitch, 1)} cm, the gap between threads.</p>` : '<p class="glnote">Drag the ⚙ screw jack from the tray under the car. It glows and snaps into place.</p>', LS.pl.jack ? lsRm('jack') : '');
   const r = lsRoute(), out = [];
+  const cw = lsNoCrane(), cwNote = `<p class="glnote">${lsWaitMsg()}</p>`, craneNone = `<p class="glnote">Drag the 🏗️ crane gantry from the tray over the ${WS.loadShort}. It snaps on and ropes to the hook.</p>`;
   if (m === 'pulley') {
-    out.push(sec('🏗️', 'Crane gantry', 'crane', lsRopeRow('the crate is roped to the hook') .replace('the crate', `the ${WS.loadShort}`) + (WS.lifts && WS.lifts.pick ? lsChoice('lift', 'Lift height', [[1, '1 m'], [2, '2 m']], WS.lift) : '') + '<p class="glnote">The rope goes from the load, up over the top, and down to Smooshy.</p>', ''));
-    out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsPM('ropes', 'Supporting ropes', WS.ropes, WS.ropes <= 1, WS.ropes >= (WS.lim.ropesMax || 6)) + (ml ? `<div class="glrow"><span>MA</span><b>×${WS.ropes}</b></div>` : '') + '<p class="glnote">More supporting ropes share the load, so Smooshy pulls less (and pulls more rope).</p>' : `<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook. With no block there is 1 rope.</p>`, LS.pl.block ? lsRm('block') : ''));
+    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the crate is roped to the hook') .replace('the crate', `the ${WS.loadShort}`) + (WS.lifts && WS.lifts.pick ? lsChoice('lift', 'Lift height', [[1, '1 m'], [2, '2 m']], WS.lift) : '') + '<p class="glnote">The rope goes from the load, up over the top, and down to Smooshy.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
+    out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsPM('ropes', 'Supporting ropes', WS.ropes, WS.ropes <= 1, WS.ropes >= (WS.lim.ropesMax || 6)) + (ml ? `<div class="glrow"><span>MA</span><b>×${WS.ropes}</b></div>` : '') + '<p class="glnote">More supporting ropes share the load, so Smooshy pulls less (and pulls more rope).</p>' : cw ? cwNote : `<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook. With no block there is 1 rope.</p>`, LS.pl.block ? lsRm('block') : ''));
   } else if (m === 'winch') {
-    out.push(sec('🏗️', 'Crane gantry', 'crane', lsRopeRow('the rope runs to the winch') + '<p class="glnote">The rope runs from the load, up over the top, and down to the ◉ rope end.</p>', ''));
-    out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsPM('R', 'Handle radius', fmt(WS.R, 2) + ' m', WS.R <= wsLimits('R').min + 1e-9, WS.R >= wsLimits('R').max - 1e-9) + (WS.axleEdit ? lsPM('axle', 'Axle radius', fmt(WS.axle, 2) + ' m', WS.axle <= 0.04 + 1e-9, WS.axle >= 0.1 - 1e-9) : `<div class="glrow"><span>Axle radius</span><b>${fmt(WS.axle, 2)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">A bigger handle means an easier turn, but more turning.</p>' : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
+    out.push(sec('🏗️', 'Crane gantry', 'crane', LS.pl.crane || !LS.o.tray.includes('crane') ? lsRopeRow('the rope runs to the winch') + '<p class="glnote">The rope runs from the load, up over the top, and down to the ◉ rope end.</p>' : craneNone, LS.pl.crane ? lsRm('crane') : ''));
+    out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsPM('R', 'Handle radius', fmt(WS.R, 2) + ' m', WS.R <= wsLimits('R').min + 1e-9, WS.R >= wsLimits('R').max - 1e-9) + (WS.axleEdit ? lsPM('axle', 'Axle radius', fmt(WS.axle, 2) + ' m', WS.axle <= 0.04 + 1e-9, WS.axle >= 0.1 - 1e-9) : `<div class="glrow"><span>Axle radius</span><b>${fmt(WS.axle, 2)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + '<p class="glnote">A bigger handle means an easier turn, but more turning.</p>' : cw ? cwNote : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
   } else if (m === 'ramp') {
     const lm = wsLimits('L'), hm = wsLimits('h');
     out.push(sec('📐', 'Ramp', 'ramp', LS.pl.ramp ? lsPM('L', 'Length', fmt(WS.L, 1) + ' m', WS.L <= lm.min + 1e-9, WS.L >= lm.max - 1e-9) + (WS.rampH ? lsPM('h', 'Height', fmt(WS.h, 1) + ' m', WS.h <= hm.min + 1e-9, WS.h >= hm.max - 1e-9) : `<div class="glrow"><span>Height</span><b>${fmt(WS.h, 1)} m</b></div>`) + (ml ? `<div class="glrow"><span>MA</span><b>×${fmt(wsCalc().ma, 2)}</b></div>` : '') + lsRopeRow('the cart is roped to the top') + '<p class="glnote">Drag the white handle at the top of the ramp, or use − and +. A longer ramp means a smaller pull, but further to go.</p>' : '<p class="glnote">Drag the 📐 ramp from the tray in. Its foot sits on the floor and its top rests on the platform.</p>', (LS.pl.ramp ? lsRopeAct() : '') + (LS.pl.ramp ? lsRm('ramp') : '')));
   } else if (m === 'build') {
-    const tot = wsCalc(); out.push(sec('🔗', 'Machine chain', 'cables', `<div class="glrow"><span>Route</span><b>${r === 'ramp' ? '6 m ramp' : r === 'crane' ? 'crane gantry' : 'choose one'}</b></div>` + lsRopeRow() + ((wsHas('bTotMA') || wsHas('readMA')) && !wsMasked(wsRecord(tot)).has('bTotMA') && !wsMasked(wsRecord(tot)).has('readMA') ? `<div class="glrow"><span>Total MA</span><b>${fmt(tot.ma, 2)}</b></div>` : '') + '<p class="glnote">Drag from one ◉ to the next to join them. Smooshy works the last machine in the chain.</p>', lsRopeAct() + (r !== 'none' && !lsLocked(r) ? lsRm(r) : '')));
-    if (LS.o.tray.includes('block') || LS.pl.block) out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsChoice('bn', 'Supporting ropes', WS.bRopes.filter(v => v > 0).map(v => [v, String(v)]), WS.bn) + '<p class="glnote">More supporting ropes share the load.</p>' : '<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook.</p>', LS.pl.block ? lsRm('block') : ''));
-    if (LS.o.tray.includes('winch') || LS.pl.winch) out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsChoice('bw', 'Winch ×', WS.bWinches.map(v => [v, '×' + v]), WS.bw) + '<p class="glnote">Smooshy turns the winch handle. Its rope winds round the axle.</p>' : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
+    const tot = wsCalc(); out.push(sec('🔗', 'Machine chain', 'cables', `<div class="glrow"><span>Route</span><b>${r === 'ramp' ? '6 m ramp' : r === 'crane' ? 'crane gantry' : LS.o.tray.includes('ramp') ? 'choose one' : 'add the crane gantry'}</b></div>` + lsRopeRow() + ((wsHas('bTotMA') || wsHas('readMA')) && !wsMasked(wsRecord(tot)).has('bTotMA') && !wsMasked(wsRecord(tot)).has('readMA') ? `<div class="glrow"><span>Total MA</span><b>${fmt(tot.ma, 2)}</b></div>` : '') + '<p class="glnote">Drag from one ◉ to the next to join them. Smooshy works the last machine in the chain.</p>', lsRopeAct() + (r !== 'none' && !lsLocked(r) ? lsRm(r) : '')));
+    if (LS.o.tray.includes('block') || LS.pl.block) out.push(sec('🪢', 'Pulley block', 'block', LS.pl.block ? lsChoice('bn', 'Supporting ropes', WS.bRopes.filter(v => v > 0).map(v => [v, String(v)]), WS.bn) + '<p class="glnote">More supporting ropes share the load.</p>' : cw ? cwNote : '<p class="glnote">Drag the 🪢 pulley block from the tray onto a ◉ hook.</p>', LS.pl.block ? lsRm('block') : ''));
+    if (LS.o.tray.includes('winch') || LS.pl.winch) out.push(sec('⚙️', 'Winch', 'winch', LS.pl.winch ? lsChoice('bw', 'Winch ×', WS.bWinches.map(v => [v, '×' + v]), WS.bw) + '<p class="glnote">Smooshy turns the winch handle. Its rope winds round the axle.</p>' : cw ? cwNote : '<p class="glnote">Drag the ⚙ winch from the tray onto the ◉ end of the rope.</p>', LS.pl.winch ? lsRm('winch') : ''));
     if (LS.o.tray.includes('ramp') && LS.stage !== 'two') out.push(`<button type="button" class="go sm" data-lm="two:start" style="margin-top:8px" ${lsK3Open() ? '' : 'disabled'}>➡ Two-leg practice</button><p class="glnote">${lsK3Open() ? 'Next: a crate goes up a ramp, then a crane lifts it.' : 'Finish the generator job first.'}</p>`);
   }
   return tabs + out.join('<hr class="dkhr">');
@@ -325,6 +347,7 @@ function lsSceneAct(k) {
 function lsStatusSc() {
   const m = WS.mach, o = LS.o;
   if (lsIsTwo()) return lsTwoStatus();
+  if (lsNoCrane() && !LS.o.tray.includes('ramp')) return `Drag the 🏗️ crane gantry from the tray over the ${WS.loadShort}.`;
   if (m === 'wedge') return 'The wedge is a demonstration: pick a thickness in the panel, then press ▶ Push!';
   if (m === 'screw') return LS.pl.jack ? 'Pick the handle circle and the thread gap in the panel, then press ▶ Turn!' : 'Drag the ⚙ screw jack from the tray under the car.';
   if (m === 'winch' && !LS.pl.winch) return 'Drag the ⚙ winch from the tray onto the ◉ end of the rope.';

@@ -10,12 +10,15 @@ const GL_STOP = { none: 'Nothing was ready to lift the Gumdrop. A machine needs 
   heavy: 'That leg needed more than 180 N, far too much even with the thrusters roaring. Give it a bigger mechanical advantage.',
   collapse: 'A platform buckled under too much weight! Its load is the Gumdrop plus every machine standing on it.',
   norope: 'A machine wasn\'t roped to the Gumdrop, so nothing was pulling it. Drag a rope from the machine\'s ◉ to the Gumdrop\'s ◉.' };
+/* how far short of the dotted line a run stopped (Tom, 9 Nov 2026): from the model's own numbers, the height the Gumdrop reached above where it started, and how much higher the line is */
+function glShort(r) { if (!r || r.arrived || !r.ship0) return null; const at = r.stop && r.stop.at ? r.stop.at : r.final; if (!at) return null; return { up: Math.max(0, at.y - r.ship0.y), to: Math.max(0, r.crest - at.y) }; }
+const glShortText = (up, to) => up == null ? '' : `The Gumdrop got ${fmt(up, 1)} m up, and the dotted line is ${fmt(to, 1)} m higher.`;
 const glStopText = (why, leg) => why === 'norope' && leg != null ? `Leg ${leg + 1}'s machine isn't roped to the Gumdrop.` : GL_STOP[why] || '';
 const GL_END = { spotless: ['Spotless rescue!', 'The Gumdrop is safe without a single scratch.'], dented: ['Dented, but home!', 'Smooshy is safe, though the Gumdrop needs a little repair.'], notyet: ['Not yet!', 'Smooshy is still in the crater. Fix the part that stopped and run it again.'] };
 const glLegName = l => `${GL_NAME[l.type]}${l.type === 'ramp' ? ` ${fmt(l.m.L, 1)} m` : ''}${l.ropes > 1 ? `, ${l.ropes} ropes` : ''}${l.winches.length ? ', winch ' + l.winches.map(w => '×' + w).join(' ') : ''}`;
 function glSummary(r) {
   return { legs: r.legs.map(l => ({ type: l.type, name: glLegName(l), rise: +l.rise.toFixed(2), ma: +l.ma.toFixed(2), pull: +l.pull.toFixed(2), hand: +l.hand.toFixed(1), work: Math.round(l.work), stopped: !!l.stopped, thr: +(l.thruster || 0).toFixed(1) })),
-    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, total: +r.dmg.total.toFixed(1) },
+    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), up: glShort(r) ? +glShort(r).up.toFixed(1) : null, toLine: glShort(r) ? +glShort(r).to.toFixed(1) : null, work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, total: +r.dmg.total.toFixed(1) },
     boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, stopLeg: r.stop ? r.stop.leg : null, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, hints: r.score.hints || 0, max: GL_MAX, ending: r.score.ending, load: r.load };
 }
 /* ---------- the panel under the board: the result of a test or of the rescue ---------- */
@@ -23,7 +26,8 @@ function glMountRun(host) {
   host.innerHTML = `<div class="panel glrunbox"><div class="row glrunrow"><button type="button" class="ghost" id="glSkip" hidden>Skip to the end ▶▶</button><button type="button" class="ghost" id="glBack" hidden>🔧 Back to building</button><span class="scaleNote" id="glTries"></span></div>
     <div id="glRes" aria-live="polite"></div></div>`;
   const st = glState();
-  $('#glRun').addEventListener('click', () => glStartRun('test')); $('#glSkip').addEventListener('click', () => { GLR.t0 -= 1e7; });
+  $('#glRun').addEventListener('click', () => glStartRun('test'));
+  $('#glRunCtl').addEventListener('click', e => { const b = e.target.closest('[data-gr]'); if (!b) return; if (b.dataset.gr === 'skip') GLR.t0 -= 1e7; else if (GLR.mode === 'test') glBackToBuild(); });   // buttons ON the board, so there is always a way out $('#glSkip').addEventListener('click', () => { GLR.t0 -= 1e7; });
   $('#glBack').addEventListener('click', glBackToBuild);
   glRunPaint();
   if (st.last) glShowResult(st.last, st.lastPred); if (st.lastTest && (!st.last || st.lastTest.at > (st.lastAt || 0))) glShowTest(st.lastTest);
@@ -110,7 +114,12 @@ function glSceneAt(t) {
   if (S.rockAway) S.rockGone = true;
   return S;
 }
+/* Tom, 9 Nov 2026: "stuck testing in the simulator, no way to build now". The board stayed in its running state after a test (the Back to building button was far below the board, and a run that hit an error
+   was never ended at all). Now: a test always hands the board back by itself, Skip and Back to building sit on the board, and any problem in a run puts the board back in build mode. */
 function glRunFrame() {
+  if (!GLR.on) return; try { glRunFrame1(); } catch (e) { try { console.warn('Simulator run stopped:', e); } catch (_) {} GLR.done = true; glBackToBuild(); toast('The simulator stopped. You are back to building.'); }
+}
+function glRunFrame1() {
   if (!GLR.on) return; const cv = GLB.cv; if (!cv || !cv.isConnected) { GLR.on = false; return; }
   const t = (performance.now() - GLR.t0) / 1000 * (GLR.speed || 1), S = glSceneAt(t), res = GLR.res, g = S.ground; glSize(); const c = fit(cv, GLV.LW, GLV.LH);
   const plats = res.plats.map(p => S.sink[p.id] ? Object.assign({}, p, { top: p.top - S.sink[p.id] * (p.top - p.base) * 0.5, over: true }) : p);
@@ -142,10 +151,11 @@ function glStartRun(mode) {
   const st = glState(); GLR.mode = mode; GLR.rig = JSON.parse(JSON.stringify(GLB.rig)); GLR.res = glEvaluate(GLR.rig, { hints: st.hints || 0, maths: mode === 'launch' });
   GLR.pred = null; GLR.work = mode === 'launch' && typeof glwSnapshot === 'function' ? glwSnapshot() : null; GLR.speed = mode === 'test' && !RMOTION ? 3 : 1;
   GLR.beats = glBuildBeats(GLR.res, GLR.rig, { test: mode === 'test' }); GLR.total = GLR.beats.reduce((a, b) => a + b.dur, 0); GLR.t0 = performance.now(); GLR.on = true; GLR.done = false;
+  { const rc = $('#glRunCtl'); if (rc) { rc.hidden = false; rc.querySelector('[data-gr=skip]').hidden = false; rc.querySelector('[data-gr=edit]').hidden = mode === 'launch'; } }
   GLB.sel = null; glCloseMenu(); $('#glSkip').hidden = false; $('#glBack').hidden = true; $('#glRun').disabled = true; $('.glboard').classList.add('running');
   $('#glRes').innerHTML = ''; $('.glarea').classList.add('running'); GLB.cv.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
-  if (typeof glwSendState === 'function') glwSendState(); if (typeof glGuidePaint === 'function') glGuidePaint();
-  cancelAnimationFrame(GLB.raf); GLR.raf = requestAnimationFrame(glRunFrame);
+  cancelAnimationFrame(GLB.raf); GLR.raf = requestAnimationFrame(glRunFrame);   // started first, so a problem in the panels below can never leave the board stuck
+  try { if (typeof glwSendState === 'function') glwSendState(); if (typeof glGuidePaint === 'function') glGuidePaint(); } catch (e) { try { console.warn(e); } catch (_) {} }
 }
 /* a simulator test is over: each leg worked or failed, in words, with no numbers. It saves no score, but it counts as having tried (attempting is enough to move on). */
 function glTestLines(res) {
@@ -162,13 +172,15 @@ function glTestLines(res) {
   else if (stop && stop.why === 'gap') L.push([`After leg ${stop.leg}, the next machine isn't in the glowing box`, 0]);
   const bo = res.boulder; L.push([bo.how ? (bo.ok ? 'The boulder rolls free' : 'The boulder is still stuck') : 'The boulder is still stuck', bo.ok ? 1 : 0]);
   if (res.bShip) L.push(['Dynamite went off too close to the Gumdrop', 0]);
-  L.push([res.arrived ? 'The Gumdrop reached the tractor beam' : 'The Gumdrop did not reach the tractor beam yet', res.arrived ? 1 : 0]);
+  { const sh = glShort(res); L.push([res.arrived ? 'The Gumdrop reached the tractor beam' : 'The Gumdrop did not reach the tractor beam yet.' + (sh ? ' ' + glShortText(sh.up, sh.to) : ''), res.arrived ? 1 : 0]); }
   return L;
 }
 function glFinishTest() {
   const res = GLR.res, st = glState(), lines = glTestLines(res), lastTest = { lines, arrived: !!res.arrived, at: Date.now() };
   GLB.save({ id: GLB.mid }, { tried: true, tests: (st.tests || 0) + 1, lastTest });
   $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowTest(lastTest); glRunPaint(); if (typeof glGuidePaint === 'function') glGuidePaint();
+  { const rc = $('#glRunCtl'); if (rc) rc.querySelector('[data-gr=skip]').hidden = true; }
+  setTimeout(() => { if (GLR.on && GLR.mode === 'test') glBackToBuild(); }, RMOTION ? 0 : 1200);   // the end picture stays for a moment, then the board is yours again
   const r = $('#glRes'); if (r) r.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
 }
 function glShowTest(t) {
@@ -188,18 +200,19 @@ function glFinishRun() {
   if (res.arrived && !st.firstDone) patch.firstDone = Date.now();
   GLB.save({ id: GLB.mid }, patch);
   if (better && typeof rigSnapshot === 'function') rigSnapshot();
+  { const rc = $('#glRunCtl'); if (rc) rc.hidden = true; }
   $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowResult(sum, null, better && n > 1); glRunPaint();
   if (typeof glShowEnding === 'function') glShowEnding(sum, { first: firstRescue, better });
 }
 function glBackToBuild() {
-  GLR.on = false; cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop();
+  GLR.on = false; { const rc = $('#glRunCtl'); if (rc) rc.hidden = true; } cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop();
 }
 function glShowResult(sum, pred, newBest) {
   const host = $('#glRes'); if (!host || !sum) return; const E = GL_END[sum.ending], f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
   const P = sum.pts, rows = sum.legs.map((l, i) => `<tr class="${l.stopped ? 'stop' : ''}"><td>${i + 1}</td><td>${esc(l.name)}</td><td>${f1(l.rise)} m</td><td>${fmt(l.ma, 1)}</td><td><b>${f1(l.pull)} N</b>${l.pull > 60 + 1e-9 ? ' 🔥' : ''}</td><td>${n0(l.hand)} m</td><td>${n0(l.work)} J</td></tr>`).join('');
   const pl = pred && sum.legs[pred.leg] ? `<p class="glpredfb">You predicted <b>${f1(pred.value)} N</b> for leg ${pred.leg + 1}. Smooshy's pull on it was <b>${f1(sum.legs[pred.leg].pull)} N</b>. ${Math.abs(pred.value - sum.legs[pred.leg].pull) <= Math.max(1, sum.legs[pred.leg].pull * 0.05) ? 'Spot on, engineer!' : 'Compare your working with the receipt below to see where the numbers split.'}</p>` : '';
   const pt = (lab, got, max, note) => `<li class="${got === max ? 'ok' : ''}"><span class="box">${got === max ? '✓' : ''}</span>${lab}: <b>${got} of ${max}</b>${note ? ` <small>${note}</small>` : ''}</li>`;
-  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of ${sum.max || 10}` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + glStopText(sum.stop, sum.stopLeg) : ''}</p>${pl}
+  host.innerHTML = `<div class="glstamp ${sum.ending}"><b>${E[0]}</b> <span>${sum.score != null ? `${sum.score} of ${sum.max || 10}` : 'No score yet'}</span>${newBest ? ' <em>New best run!</em>' : ''}</div><p>${E[1]}${sum.stop ? ' ' + glStopText(sum.stop, sum.stopLeg) : ''}${sum.up != null && !sum.arrived ? ' ' + glShortText(sum.up, sum.toLine) : ''}</p>${pl}
     ${rows ? `<div class="gltab"><table><thead><tr><th>Leg</th><th>Machine</th><th>Rise</th><th>Total MA</th><th>Pull</th><th>Hand travel</th><th>Work</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="glnote">Work receipt: each leg's work = ${n0(sum.load)} N × its rise. Change the machines and only the pull and hand travel change; the work only changes when the rise does.</p>` : ''}
     <ul class="glsums"><li>Hand travel: <b>${n0(sum.hand)} m</b> of 1,500 m oxygen</li><li>Sugar crystals: <b>${sum.cost}</b> of 475</li><li>Final crest height: <b>${f1(sum.crest)} m</b></li><li>Total work: <b>${n0(sum.work)} J</b></li>

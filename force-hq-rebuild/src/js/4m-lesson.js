@@ -12,7 +12,7 @@
    lsEnds(), its pairs to lsNeedRopes() and its drawing to lsDrawMachine().
    THE PANEL: #lsDock beside the board (below it on a phone) always shows the step's piece (lsDockHTML), with its settings, "?" replay and Remove. No floating menus.
    Names to avoid reusing elsewhere (one shared scope): LS, LS_*, ls*, lessonStage. */
-const LS = { on: false, o: null, drag: null, place: null, dragPiece: null, bound: false, flash: 0, tdrag: false, cab: [], ropeMach: null, ropeLine: null };
+const LS = { cardQ: [], used: null, needKey: '', thT: 0, on: false, o: null, drag: null, place: null, dragPiece: null, bound: false, flash: 0, tdrag: false, cab: [], ropeMach: null, ropeLine: null };
 const LS_K = 120, LS_X0 = 214, LS_FLOOR = 350;
 const lsCap = s => s.replace(/^./, ch => ch.toUpperCase());
 /* every piece: its tray tile and its three "first time" cards (the exact student text is in the spec, section 4) */
@@ -28,27 +28,28 @@ const lsHas = t => t === 'lever' ? WS.mach === 'lever' : lsHasP(t);
 const lsLocked = t => !!(LS.o && (LS.o.lock || []).includes(t));
 const lsCanvas = () => $('#cvScene');
 function lessonStage(o) {
-  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LAB.pullGate = lsGate;
+  shopStage(o); LS.on = true; LS.o = Object.assign({ tray: [], pre: [], lock: [] }, o.lesson || {}); LS.drag = null; LS.place = null; LS.dragPiece = null; LS.ropeMach = null; LS.ropeLine = null; LS.cardQ = []; LS.used = null; LS.needKey = ''; LAB.pullGate = lsGate;
   LS.pl = {}; (LS.o.pre || []).forEach(t => { LS.pl[t] = true; }); LS.stage = 'main'; LS.two = null; LS.cabBy = {}; LS.cabMain = null; LS.flashMsg = null;
   if (WS.mach === 'pulley' && !LS.pl.block && LS.o.tray.includes('block')) WS.ropes = 1;   // no pulley block on the bench yet: the crane alone gives 1 rope
   const cv = lsCanvas(); if (cv) cv.style.touchAction = 'none';
   lsRender();
 }
-function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.pl = {}; LS.stage = 'main'; LS.two = null; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); }
+function lsOff() { if (!LS.on) return; LS.on = false; LS.o = null; LS.drag = null; LS.place = null; LS.dragPiece = null; LS.cab = []; LS.pl = {}; LS.stage = 'main'; LS.two = null; LS.ropeMach = null; const cv = lsCanvas(); if (cv) cv.style.touchAction = ''; lsRender(); ndApply([], [$('#lsTray'), $('#lsDock')]); }
 
 /* ---------- the tray and the status line ---------- */
 function lsRender() {
   const tr = $('#lsTray'), st = $('#lsStatus'); if (!tr) return;
   const on = LS.on && S.scene === 'shop' && !!LS.o, TL = on ? (lsIsTwo() ? ['ramp', 'crane'] : LS.o.tray) : []; tr.hidden = !(on && TL.length > 0); if (st) st.hidden = !on;
-  const row = $('#boardRow'), dk = $('#lsDock'), pb = $('#wsPull'), bx = $('#boardBox'); if (row) row.classList.toggle('ls', on); if (dk) dk.hidden = !on;
+  const row = $('#boardRow'), dk = $('#lsDock'), pb = $('#wsPull'), bx = $('#boardCv'); if (row) row.classList.toggle('ls', on); if (dk) dk.hidden = !on;
   if (pb && bx) { if (on && pb.parentElement !== bx) { pb.classList.add('inboard'); bx.appendChild(pb); } else if (!on && pb.parentElement === bx) { pb.classList.remove('inboard'); const bar = $('.scenebar'); if (bar) bar.insertBefore(pb, $('#dzPause')); } }   // ▶ sits inside the board, bottom right
   if (!on) return;
   if (pb) pb.style.display = lsIsTwo() ? 'none' : '';
   if (LS.ropeMach !== WS.mach && !lsIsTwo()) { if (LS.ropeMach) LS.cabBy[LS.ropeMach] = LS.cab; LS.ropeMach = WS.mach; LS.cab = LS.cabBy[WS.mach] || lsInitCab(WS.mach); }   // just a rope starts roped; take it off and the ▶ stays off until it goes back on
-  const sig = TL.map(t => t + lsHas(t) + (LS.place === t)).join('|') + (lsIsTwo() ? 'two' : '');
-  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = TL.map(t => { const P = LS_PIECES[t], has = lsHas(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : lsIsTwo() ? (t === 'ramp' ? 'leg 1' : 'leg 2') : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
+  const sig = TL.map(t => t + lsHas(t) + lsWait(t) + (LS.place === t)).join('|') + (lsIsTwo() ? 'two' : '');
+  if (tr.dataset.sig !== sig) { tr.dataset.sig = sig; tr.innerHTML = TL.map(t => { const P = LS_PIECES[t], has = lsHas(t), wt = lsWait(t); return `<div class="lsit"><button type="button" class="gltry ${LS.place === t ? 'on' : ''}" data-lsadd="${t}" ${has || wt ? 'disabled' : ''}><span class="ic" aria-hidden="true">${P.icon}</span><b>${P.name}</b><small>${has ? '✓ on the bench' : wt ? lsWaitNote() : lsIsTwo() ? (t === 'ramp' ? 'leg 1' : 'leg 2') : P.note}</small></button><button type="button" class="lsq" data-lsq="${t}" aria-label="How does the ${P.name.toLowerCase()} work?">?</button></div>`; }).join(''); }
   if (st) st.textContent = LS.place ? (LS.place === 'lever' ? 'Now tap the rock to put the lever there.' : `Now tap the glowing spot to put the ${LS_PIECES[LS.place].name.toLowerCase()} there.`) : lsStatus();
   if (dk) dkSet(dk, lsDockHTML());
+  lsThrob();
 }
 function lsStatus() {
   const o = LS.o; if (!o) return ''; if (lsSc() || lsIsTwo()) return lsStatusSc();
@@ -141,7 +142,7 @@ function lsOverlay(c) {
   }
   if (LS.ropeLine) { drawRopePx(c, LS.ropeLine.a, LS.ropeLine.b, 3, 0); }
   if (lsSc() || lsIsTwo()) lsOverlaySc(c, pulse);
-  lsFlashHint(c);
+  lsFlashHint(c); if (performance.now() - LS.thT > 150) { LS.thT = performance.now(); lsThrob(); }
   if (typeof CARDS !== 'undefined' && CARDS && CARDS.opt && CARDS.opt.lsPiece) lsGhost(c, CARDS.opt.lsPiece, CARDS.cards[CARDS.k].ghost, t);
 }
 /* the red "drop it here" hint after a missed drop: a little note in the free strip on the left, under the video. It goes as soon as the piece is placed, and never sits over the newtonmeter or other labels. */
@@ -193,7 +194,7 @@ function lsBind() {
     if (d.what === 'rope') { d.moved = true; const A = lsEnds()[d.from]; LS.ropeLine = { a: { x: A.x, y: A.y }, b: p }; return; }
     if (d.what === 'rampL' || d.what === 'rampH') { d.moved = true; lsMoveSc(d, p); return; }
     if (d.what !== 'part') return; d.moved = true;
-    wsSet('arm', d.v0 + (p.x - d.x0) / LS_K);   // the same call the old slider made: it snaps to 0.05 m and keeps to the limits
+    lsMark('arm'); wsSet('arm', d.v0 + (p.x - d.x0) / LS_K);   // the same call the old slider made: it snaps to 0.05 m and keeps to the limits
   });
   const up = e => { const d = LS.drag; if (!d || e.pointerId !== d.id) return; LS.drag = null; LS.ropeLine = null;
     if (d.what === 'rope') { const to = lsDotAt(lsXY(e), d.from);
@@ -205,11 +206,14 @@ function lsBind() {
   /* drag straight from the tray onto the bench; a tap picks the piece up, then tap the rock */
   const tr = $('#lsTray');
   tr.addEventListener('pointerdown', e => { const a = e.target.closest('[data-lsadd]'); if (!a || a.disabled) return; const t = a.dataset.lsadd, x0 = e.clientX, y0 = e.clientY; LS.tdrag = false; lsPick(t);
-    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { LS.tdrag = true; LS.dragPiece = t; } };
-    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); const r = cv.getBoundingClientRect(); LS.dragPiece = null;
+    let ghosted = false;
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { LS.tdrag = true; LS.dragPiece = t; if (!ghosted) { ghosted = true; lsGhostStart(t); } ndGhostMove(ev2.clientX, ev2.clientY); } };
+    const stop = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); document.removeEventListener('pointercancel', cx); ndGhostEnd(); };
+    const cx = () => { stop(); LS.dragPiece = null; setTimeout(() => { LS.tdrag = false; }, 0); };
+    const upf = ev2 => { stop(); const r = cv.getBoundingClientRect(); LS.dragPiece = null;
       if (LS.tdrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const p = lsXY(ev2); lsDrop(t, p.x, p.y); }
       setTimeout(() => { LS.tdrag = false; }, 0); };
-    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); document.addEventListener('pointercancel', cx); });
   tr.addEventListener('click', e => {
     const q = e.target.closest('[data-lsq]'); if (q) { lsShowCards(q.dataset.lsq); return; }
     const a = e.target.closest('[data-lsadd]'); if (a && !a.disabled && !LS.tdrag) { lsPick(a.dataset.lsadd); LS.place = LS.place === a.dataset.lsadd ? null : a.dataset.lsadd; tr.dataset.sig = ''; lsRender(); }
@@ -226,7 +230,7 @@ function lsDrop(t, x, y) {
   if (lsHas('lever')) return; LS.flashMsg = null;
   if (!lsInZone(x, y)) { LS.flash = performance.now(); LS.flashPiece = 'lever'; toast('Drop the lever under the rock. It glows where it goes.'); return; }
   LS.flash = 0; wsSetMach('lever'); toast('✓ Lever under the rock!', 'ok'); lsRender();
-  if (!lsSeen().lever && !FAST) lsShowCards('lever');
+  if (!lsSeen().lever && !FAST) lsShowCards('lever', true);
 }
 
 /* ---------- the docked settings panel: always the step's piece ---------- */
@@ -243,6 +247,7 @@ function lsDockHTML() {
     actions: roped ? '<button type="button" class="ghost sm" data-lm="unrope">✂ Take the rope off</button>' : '<button type="button" class="ghost sm" data-lm="rope">🪢 Rope the rock</button>' });
 }
 function lsMenuAct(k) {
+  lsMark(k);
   if ((lsSc() || lsIsTwo()) && lsSceneAct(k)) return;
   if (k === 'del') { if (!lsLocked('lever') && WS.allow.includes('hand')) { wsSetMach('hand'); lsRender(); } return; }
   if (k === 'rope') { lsAutoRope('load', 'end'); return; }
@@ -252,12 +257,50 @@ function lsMenuAct(k) {
 }
 
 /* ---------- first-time cards: three short cards with OK, and a ghost hand on the board (a "?" on each tray tile plays them again) ---------- */
-function lsShowCards(piece) {
+function lsShowCards(piece, auto) {
   const P = LS_PIECES[piece]; if (!P) return;
+  /* a first-time card never replaces cards that are already open (they are not modal, so a student can drop another piece meanwhile): it waits its turn in LS.cardQ */
+  if (auto && typeof CARDS !== 'undefined' && CARDS) { if (!(CARDS.opt && CARDS.opt.lsPiece === piece) && !LS.cardQ.includes(piece)) LS.cardQ.push(piece); return; }
   showCards(P.cards.map(c => ({ html: `<p>${c.t}</p>`, ghost: c.ghost, hi: c.hi })), { title: `New piece: ${P.name}`, journal: false, nextLabel: 'OK', lsPiece: piece, onDone: () => { const s = lsSeen(); s[piece] = true; dbSet('lsSeen', s); lsAfterCards(); } });
 }
-/* after a step's own cards: the pieces already on the bench that this student has not met yet */
+/* after cards close: any piece whose cards were waiting, then the pieces already on the bench (or, with introTray, in the tray) that this student has not met yet. The crane gantry always comes first. */
 function lsAfterCards() {
-  if (!LS.on || FAST || S.scene !== 'shop' || !LS.o) return; const seen = lsSeen(), p = (LS.o.pre || []).concat(LS.o.introTray ? LS.o.tray : []).find(t => LS_PIECES[t] && LS_PIECES[t].cards.length && !seen[t]);
-  if (p) lsShowCards(p);
+  if (!LS.on || FAST || S.scene !== 'shop' || !LS.o) return; const seen = lsSeen();
+  while (LS.cardQ.length) { const q = LS.cardQ.shift(); if (!seen[q]) { lsShowCards(q); return; } }
+  const c = (LS.o.pre || []).concat(LS.o.introTray ? LS.o.tray : []).filter(t => LS_PIECES[t] && LS_PIECES[t].cards.length && !seen[t]).sort((a, b) => (b === 'crane') - (a === 'crane'));
+  if (c.length) lsShowCards(c[0]);
+}
+
+/* ---------- "do this next" (Tom, 9 Nov 2026) ----------
+   A task's third item can carry need: { need: 'crane' } or { need: ['crane', 'block', { ctl: 'ropes', sel: '[data-lm="ropes+"]', is: () => WS.ropes >= 4, when: () => ... }] }.
+   A string is a tray piece (it throbs until lsHas(piece)); an object is a control in the docked panel (sel is a CSS selector, or a function giving one; is() says it is done; when() says it is time
+   to use it). The first unticked task is the one the student is on: a prediction ({ pred: true }) is skipped, any other task without need, or a question, means nothing throbs. A control stops
+   throbbing once the student has used it for this task. Only one element throbs. Nothing throbs while cards are open. */
+const lsMark = k => { LS.used = { ctl: (String(k).match(/^[A-Za-z]+/) || [''])[0], key: LS.needKey }; };
+const lsRoped = () => lsNeed().every(([a, b]) => lsJoined(a, b));
+function lsNeedTask() {
+  if (typeof VIEW === 'undefined' || VIEW !== 'vChapter' || CTAB !== 'learn' || !CH) return null;
+  const st = CHDATA[CH.id].steps[GI]; if (!st || !st.tasks || stepDone(CH.id, GI)) return null; const two = lsIsTwo(), ts = taskState();
+  for (let i = 0; i < st.tasks.length; i++) { const o = st.tasks[i][2] || {};
+    if (two) { if (o.stage === 'two' && !ts[i]) return { i, need: o.need }; continue; }
+    if (ts[i] || o.pred) continue;
+    return { i, need: o.need }; }
+  return null;
+}
+function lsNeedNow() {
+  if (!LS.on || !LS.o || S.scene !== 'shop' || (typeof CARDS !== 'undefined' && CARDS)) return null;
+  const T = lsNeedTask(); if (!T || !T.need) return null; const list = [].concat(T.need);
+  for (let j = 0; j < list.length; j++) { const e = list[j], key = T.i + ':' + j;
+    if (typeof e === 'string') { if (lsHas(e)) continue; LS.needKey = key; return { kind: 'tile', id: e }; }
+    if (e.when && !e.when()) return null; if (e.is && e.is()) continue;
+    LS.needKey = key; if (LS.used && LS.used.key === key && LS.used.ctl === e.ctl) return null;
+    return { kind: 'ctl', sel: typeof e.sel === 'function' ? e.sel() : e.sel }; }
+  return null;
+}
+function lsThrob() {
+  const roots = [$('#lsTray'), $('#lsDock')]; if (!LS.on) { ndApply([], roots); return; }
+  const t = lsNeedNow(); let el = null;
+  if (t && t.kind === 'tile') el = $(`#lsTray [data-lsadd="${t.id}"]`); else if (t) el = $(t.sel, $('#lsDock'));
+  if (el && (el.disabled || !el.offsetParent)) el = null;
+  ndApply(el ? [el] : [], roots);
 }

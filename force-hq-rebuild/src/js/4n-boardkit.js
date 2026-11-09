@@ -66,3 +66,31 @@ function dkSet(el, html) {
   if (!el || el._h === html) return; const f = document.activeElement, k = f && el.contains(f) ? (f.dataset.lm || f.dataset.gm) : null; el._h = html; el.innerHTML = html;
   if (k) { const n = el.querySelector(`[data-lm="${k}"],[data-gm="${k}"]`); if (n) n.focus(); }
 }
+
+/* ---------- "do this next" (Tom, 9 Nov 2026): the one tray tile or panel control the current task needs gets a gentle pulse and a glow ring ----------
+   ndApply(els, roots) puts the classes ndneed (the static glow ring) and ndpulse (the pulse: left off when the student asks for reduced motion) on exactly the elements given, and
+   takes them off anything else inside the root containers (lesson mode: #lsTray and #lsDock; the rescue: #glTray and #glDock). Callers decide WHICH element from data, never from text. */
+function ndApply(els, roots) {
+  els = (els || []).filter(Boolean); const cur = [].concat(...(roots || []).filter(Boolean).map(r => [...r.querySelectorAll('.ndneed')]));
+  if (cur.length === els.length && cur.every(e => els.includes(e)) && els.every(e => e.classList.contains('ndpulse') === !RMOTION)) return;
+  cur.forEach(e => { if (!els.includes(e)) e.classList.remove('ndneed', 'ndpulse'); });
+  els.forEach(e => { e.classList.add('ndneed'); e.classList.toggle('ndpulse', !RMOTION); });
+}
+
+/* ---------- the drag ghost (Tom, 9 Nov 2026): while a tray tile is dragged, a 60% see-through picture of the piece, drawn by the piece's own board drawing at board scale, follows the pointer ----------
+   ndGhostBegin(W, H, sc, draw): draw(c) paints the piece alone (board units, transparent background) on a W x H board; sc is screen pixels per board unit. The picture is cropped to the piece.
+   ndGhostMove(clientX, clientY) moves it; ndGhostEnd() removes it (drop, cancel, or a step change). It works the same for mouse, pen and touch, and with reduced motion. */
+const NDG = { el: null, w: 0, h: 0 };
+function ndGhostEnd() { if (NDG.el) { NDG.el.remove(); NDG.el = null; } }
+function ndGhostBegin(W, H, sc, draw) {
+  ndGhostEnd();
+  try {
+    if (typeof readColors === 'function') readColors();
+    const off = document.createElement('canvas'); off.width = Math.max(1, Math.ceil(W * sc)); off.height = Math.max(1, Math.ceil(H * sc)); const c = off.getContext('2d'); c.scale(sc, sc); draw(c);
+    const px = c.getImageData(0, 0, off.width, off.height).data; let x0 = off.width, y0 = off.height, x1 = -1, y1 = -1;
+    for (let y = 0; y < off.height; y++) for (let x = 0; x < off.width; x++) if (px[(y * off.width + x) * 4 + 3] > 20) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    if (x1 < 0) return; const w = x1 - x0 + 1, h = y1 - y0 + 1, el = document.createElement('canvas'); el.width = w; el.height = h; el.getContext('2d').drawImage(off, x0, y0, w, h, 0, 0, w, h);
+    el.id = 'ndGhost'; el.setAttribute('aria-hidden', 'true'); el.style.cssText = `position:fixed;left:0;top:0;width:${w}px;height:${h}px;pointer-events:none;opacity:.6;z-index:80;display:none`; document.body.appendChild(el); NDG.el = el; NDG.w = w; NDG.h = h;
+  } catch (e) { NDG.el = null; }
+}
+function ndGhostMove(x, y) { if (!NDG.el) return; NDG.el.style.display = 'block'; NDG.el.style.transform = `translate(${Math.round(x - NDG.w / 2)}px,${Math.round(y - NDG.h / 2)}px)`; }

@@ -840,6 +840,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glrec li.tot{font-weight:800;border-bottom:0}
 .glboard{position:relative;border-radius:12px;overflow:hidden;background:#2d1f63;border:4px solid #2a2547;box-shadow:0 0 0 2px #0d0b1a}
 .glboard canvas{display:block;width:100%;touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+.glcv{position:relative}
+.glboard .gltray{padding:10px;background:var(--panel);border-top:3px solid #2a2547}
 .glzoom{position:absolute;left:8px;top:38px;display:flex;gap:4px}
 .glzoom .ghost{min-width:34px;background:rgba(255,255,255,.88)}
 /* the docked settings panel (rescue #glDock, lesson mode #lsDock): beside the board, below it on a phone */
@@ -940,8 +942,12 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .unithint{margin:2px 0 0}
 
 /* lesson mode (4m-lesson.js): the parts tray and menu share the rescue builder's look */
-#lsTray{order:1;margin:8px 0 0;grid-template-columns:repeat(auto-fill,minmax(150px,200px))} #lsTray[hidden],#lsStatus[hidden]{display:none}
-.lsstatus{order:1;margin:6px 0 0}
+/* the tray is part of the board's frame, joined to its bottom edge (Tom, 9 Nov 2026) */
+.bbcv{position:relative}
+.boardrow.ls .boardbox{border:2px solid var(--line);border-radius:12px;background:var(--panel)}
+.boardrow.ls .boardbox canvas{border-radius:10px 10px 0 0}
+#lsTray{margin:0;padding:10px;border-top:2px solid var(--line);grid-template-columns:repeat(auto-fill,minmax(150px,200px))} #lsTray[hidden],#lsStatus[hidden]{display:none}
+.lsstatus{margin:0;padding:0 12px 10px}
 .lsit{position:relative} .lsit .gltry{width:100%;min-height:54px} .lsit .gltry:disabled{opacity:.65;cursor:default}
 .lsq{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;border:1.5px solid var(--accent);background:var(--panel);color:var(--accent);font-weight:800;font-size:14px;line-height:1;cursor:pointer;padding:0}
 #cvScene.shopscene{cursor:default}
@@ -978,3 +984,14 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glstamp.test{background:var(--chip);color:var(--ink);border-color:var(--accent)}
 .gltest{list-style:none;padding:0;margin:8px 0}.gltest li{display:flex;gap:8px;align-items:flex-start;margin:4px 0}.gltest li.no{color:var(--nofg)}.gltest li.ok{color:var(--okfg)}
 .gltest .box{flex:none;width:20px;text-align:center;font-weight:900}
+
+/* "do this next": the one tray tile or panel control the current task needs (ndApply in 4n-boardkit.js). Static glow ring always; the pulse only when motion is allowed. */
+.ndneed{border-color:#e0a010!important;box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 14px 3px rgba(240,180,30,.4)!important;position:relative;z-index:2}
+.gltry.ndpulse{animation:ndthrob 1.4s ease-in-out infinite}
+.ndneed.ndpulse:not(.gltry){animation:ndglow 1.4s ease-in-out infinite}
+@keyframes ndthrob{0%,100%{transform:scale(1);box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 10px 2px rgba(240,180,30,.3)}50%{transform:scale(1.045);box-shadow:0 0 0 4px rgba(240,180,30,.8),0 0 20px 6px rgba(240,180,30,.5)}}
+@keyframes ndglow{0%,100%{box-shadow:0 0 0 3px rgba(240,180,30,.6),0 0 8px 2px rgba(240,180,30,.3)}50%{box-shadow:0 0 0 4px rgba(240,180,30,.85),0 0 16px 5px rgba(240,180,30,.5)}}
+@media (prefers-reduced-motion:reduce){.ndneed.ndpulse{animation:none!important}}
+
+.glclearask{margin:6px 0;padding:8px 12px;border:2px solid var(--hazard);border-radius:10px;background:var(--hazard-soft);align-items:center;gap:8px}
+.glrunctl{position:absolute;right:8px;top:36px;z-index:4;display:flex;gap:6px}.glrunctl[hidden]{display:none}.glrunctl .ghost{background:rgba(255,255,255,.92)}

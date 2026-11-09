@@ -103,7 +103,19 @@ function glAutoAttach(p) {
 }
 function glRemove(id) {
   glPush(); GLB.rig.parts = GLB.rig.parts.filter(p => p.id !== id); GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
-  GLB.sel = null; glCloseMenu(); glChanged();
+  glDropOrphans(); GLB.sel = null; glCloseMenu(); glChanged();
+}
+/* Tom, 9 Nov 2026: take a machine away and the pulley block or winch clipped to it must not hang in mid-air. Any add-on with nothing holding it up (no cable chain to a machine, the Gumdrop or the boulder)
+   falls to the floor under it, ground or platform, with a short drop (instant with reduced motion; GLB.fall holds the animation, the rig already has the final spot). A cable that no longer joins two things is removed. */
+function glDropOrphans() {
+  const rig = GLB.rig, ids = new Set(rig.parts.map(p => p.id).concat(['ship', 'boulder']));
+  rig.cables = (rig.cables || []).filter(c => ids.has(c.a) && ids.has(c.b));
+  const held = new Set(['ship', 'boulder'].concat(rig.parts.filter(p => GL_LIFT[p.type]).map(p => p.id))); let grew = true;
+  while (grew) { grew = false; rig.cables.forEach(c => { if (held.has(c.a) !== held.has(c.b)) { held.add(c.a); held.add(c.b); grew = true; } }); }
+  const orphans = rig.parts.filter(p => glIsAddon(p) && !held.has(p.id)); if (!orphans.length) return [];
+  const g = glGround(rig).g, pl = glPlatforms(rig, g), now = performance.now(); GLB.fall = GLB.fall || {};
+  orphans.forEach(p => { const y1 = +(glFloorAt(p.x, g, pl) + (p.type === 'winch' ? 0.7 : 0.8)).toFixed(2); if (y1 < p.y - 1e-6) { if (!RMOTION) GLB.fall[p.id] = { y0: p.y, t0: now, dur: Math.min(900, 300 + 140 * Math.sqrt(p.y - y1)) }; p.y = y1; } });
+  return orphans.map(p => p.id);
 }
 /* ---------- the canvas: sizing, the draw loop and hit tests ---------- */
 function glSize() {
@@ -119,7 +131,9 @@ function glFrameOpts() {
 }
 function glLoop() {
   cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
-    if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH); glDrawWorld(c, glFrameOpts()); }
+    if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH), keep = [], now = performance.now();
+      Object.keys(GLB.fall || {}).forEach(id => { const f = GLB.fall[id], p = glPart(id), k = (now - f.t0) / f.dur; if (!p || k >= 1) { delete GLB.fall[id]; return; } keep.push([p, p.y]); p.y = f.y0 + (keep[keep.length - 1][1] - f.y0) * k * k; });   // gravity: slow, then faster
+      try { glDrawWorld(c, glFrameOpts()); } finally { keep.forEach(([p, y]) => { p.y = y; }); } }
     GLB.raf = requestAnimationFrame(step); }; step();
 }
 const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - r.left) * GLV.LW / r.width, sy = (e.clientY - r.top) * GLV.LH / r.height; return { sx, sy, x: glWX(sx), y: glWY(sy) }; };
@@ -218,7 +232,7 @@ function glPaintDock() {
   else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; icon = p.big ? '💥' : '🧨'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when the rescue launches. Careful near the Gumdrop!</p>`; acts += `<button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button>`; }
   if (cabled) acts += '<button type="button" class="ghost sm" data-gm="cut">✂ Cut its cables</button>';
   acts += '<button type="button" class="ghost sm" data-gm="del">🗑 Remove</button>';
-  dkSet(d, dkHTML({ icon, title, help, body, fb, actions: acts }));
+  dkSet(d, dkHTML({ icon, title, help, body, fb, actions: acts })); if (typeof glGuideThrob === 'function') glGuideThrob();
 }
 function glMenuAct(k) {
   const id = GLB.dockId, p = id && glPart(id); if (!p) return;
@@ -246,15 +260,41 @@ function glUnrope(spot) {
   if (!mine.length) return false; glPush(); GLB.rig.cables = GLB.rig.cables.filter(c => c !== mine[mine.length - 1]); glChanged(); return true;
 }
 /* ---------- the side bits: crystals, the tray, tools ---------- */
-function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
+/* the drag ghost for a rescue tray tile: the real drawing of a default piece, at the board's current zoom (Tom, 9 Nov 2026) */
+function glGhostStart(t) {
+  const cv = GLB.cv; if (!cv) return; const g = glGround0(), pl = glPlats0(), x = clamp(glSnap(GLV.cx), 1, GL.W - 1), fl = glFloorAt(x, g, pl);
+  const P = { id: '_ghost', x, x1: x, y1: fl, y: fl + 4, L: 12, rise: 3, arm: 2, dir: 1, ropes: 2, ratio: 4, size: (t || '').slice(4) || 'M', h: 2, big: t === 'dynB' };
+  ndGhostBegin(GLV.LW, GLV.LH, cv.getBoundingClientRect().width / GLV.LW, c => {
+    if (t === 'ramp') { const p = Object.assign({ type: 'ramp' }, P); glDrawRamp(c, p, glMachine(p, g, pl), false, g); }
+    else if (t === 'crane') { const p = Object.assign({ type: 'crane', rise: 4 }, P); glDrawCrane(c, p, glMachine(p, g, pl), false, undefined); }
+    else if (t === 'lever') { const p = Object.assign({ type: 'lever', rise: 1 }, P); glDrawLever(c, p, glMachine(p, g, pl), false, undefined); }
+    else if (t === 'jack') { const p = Object.assign({ type: 'jack', rise: 1 }, P); glDrawJack(c, p, glMachine(p, g, pl), false, undefined); }
+    else if (t === 'block') glDrawBlock(c, Object.assign({ type: 'block', y: fl + 6 }, P), false);
+    else if (t === 'winch') glDrawWinch(c, Object.assign({ type: 'winch', y: fl + 6 }, P), false, 0);
+    else if (t.startsWith('plat')) { const p = Object.assign({ type: 'platform' }, P); const q = glPlatforms({ parts: [p] }, g)[0]; if (q) glDrawPlatform(c, q, false); }
+    else if (t.startsWith('dyn')) glDrawDyn(c, Object.assign({ type: 'dyn', x }, P), g, true);
+  });
+}
+function glTrayMark() { $$('#glTray [data-add]').forEach(b => b.classList.toggle('on', b.dataset.add === GLB.place)); if (typeof glGuideThrob === 'function') glGuideThrob(); const s = $('#glStatus'); if (s) s.textContent = GLB.place ? `Now tap the crater where the ${GL_TRAY.find(i => i.t === GLB.place).name.toLowerCase()} should go.` : 'Tap a part to see what you can do with it. Drag a part\'s ◉ to run a cable to another part.'; }
 function glPaintSide() {
   const ev = GLB.ev, el = $('#glCrys'); if (!el || !ev) return; const c = ev.cost.total, over = c > GL.budget;
   el.innerHTML = `<span class="${over ? 'bad' : ''}">💎 <b>${c}</b> of ${GL.budget} ${T('sugarcrystal', 'sugar crystals')} (gummy money)</span>`;
   const rc = $('#glReceipt'); if (rc) rc.innerHTML = ev.cost.items.length ? ev.cost.items.map(([w, n]) => `<li><span>${esc(w)}</span><b>${n}</b></li>`).join('') + `<li class="tot"><span>Total</span><b>${c}</b></li>` : '<li>Nothing bought yet.</li>';
 }
+function glClearAsk(on) {
+  let ask = $('#glClearAsk'); if (ask) ask.remove(); const row = $('.gltools'); if (!on || !row) return;
+  ask = document.createElement('div'); ask.id = 'glClearAsk'; ask.className = 'row glclearask'; ask.setAttribute('role', 'alertdialog'); ask.setAttribute('aria-label', 'Clear the whole route?');
+  ask.innerHTML = '<span><b>Clear every piece you placed?</b> The boulder, the Gumdrop and the ground stay.</span> <button type="button" class="go sm" data-gt="clear-yes">Yes, clear all</button> <button type="button" class="ghost sm" data-gt="clear-no">Keep my route</button>';
+  row.insertAdjacentElement('afterend', ask); const k = ask.querySelector('[data-gt=clear-no]'); if (k) k.focus({ preventScroll: true });
+}
 function glToolAct(k) {
   if (k === 'undo') { const s = GLB.hist.pop(); if (s) { GLB.rig = JSON.parse(s); GLB.sel = null; glCloseMenu(); glChanged(); } else toast('Nothing to undo.'); }
-  else if (k === 'clear') { if (!GLB.rig.parts.length) return; if (!confirm('Clear the whole rig and start again?')) return; glPush(); GLB.rig = { v: 2, parts: [], cables: [] }; GLB.sel = null; glCloseMenu(); glChanged(); }
+  /* Clear all (Tom, 9 Nov 2026: it did nothing). It used window.confirm(), and browser dialogs are blocked where this app runs (Toddle's frame), so confirm() answered "no" at once. It now asks in the page itself. */
+  else if (k === 'clear') { if (!GLB.rig.parts.length) { toast('The board is already empty.'); return; } glClearAsk(true); }
+  else if (k === 'clear-no') glClearAsk(false);
+  else if (k === 'clear-yes') { glClearAsk(false); glPush(); GLB.rig = { v: 2, parts: [], cables: [] }; GLB.sel = null; GLB.dockId = null; glCloseMenu(); glChanged();
+    if (typeof glwPut === 'function') { glwPut(w => { w.rows = {}; }); if (typeof glwPaint === 'function') glwPaint(); }   // the route strip starts again, empty, like the board
+    toast('✓ Cleared. The boulder, the Gumdrop and the ground are as they were.', 'ok'); }
   else if (k === 'ruler') { GLB.rulerOn = !GLB.rulerOn; if (!GLB.ruler) GLB.ruler = { a: { x: glSnap(GLV.cx - 6, 0.1), y: 0 }, b: { x: glSnap(GLV.cx + 4, 0.1), y: 6 } }; if (GLB.rulerOn) { GLB.ruler.a = glRulerSnap({ x: GLB.ruler.a.x, y: GLB.ruler.a.y }); } $('[data-gt=ruler]').classList.toggle('on', GLB.rulerOn); }
   else if (k === 'zin' || k === 'zout') { GLV.z = clamp(GLV.z * (k === 'zin' ? 1.5 : 1 / 1.5), 1, 4); glClampView(); glSaveRig(); }
   else if (k === 'zall') { GLV.z = 1; GLV.cx = 48; GLV.cy = GLV.LH > GLV.wide ? 15 : 12; glClampView(); }
@@ -262,12 +302,12 @@ function glToolAct(k) {
 /* the board, built into a host element */
 function glBoardHTML() {
   return `<div class="glstats"><span id="glCrys"></span><details class="glrec"><summary>Receipt</summary><ul id="glReceipt"></ul></details></div>
-    <div class="glarea"><div class="glboard"><div class="glmchd" aria-hidden="true"><i class="glled"></i><i class="glled"></i><span>GUMMY MISSION CONTROL · RESCUE SIMULATOR</span><i class="glled"></i><i class="glled"></i></div><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
+    <div class="glarea"><div class="glboard"><div class="glcv"><div class="glmchd" aria-hidden="true"><i class="glled"></i><i class="glled"></i><span>GUMMY MISSION CONTROL · RESCUE SIMULATOR</span><i class="glled"></i><i class="glled"></i></div><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
       <div class="glzoom"><button type="button" class="ghost sm" data-gt="zin" aria-label="Zoom in">＋</button><button type="button" class="ghost sm" data-gt="zout" aria-label="Zoom out">−</button><button type="button" class="ghost sm" data-gt="zall" aria-label="See the whole crater">⤢</button></div>
-      <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button><div class="glaccept" id="glAccept" role="status" hidden><b>Mission accepted 🚀</b><span>GASA approves your maths!</span></div></div>
+      <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button><div class="glrunctl" id="glRunCtl" hidden><button type="button" class="ghost sm" data-gr="skip">⏭ Skip</button><button type="button" class="go sm" data-gr="edit">🔧 Back to building</button></div><div class="glaccept" id="glAccept" role="status" hidden><b>Mission accepted 🚀</b><span>GASA approves your maths!</span></div></div>
+      <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div></div>
       <aside class="dock" id="glDock" aria-label="Settings for the machine you tapped" aria-live="polite"></aside></div>
     <p class="scaleNote" id="glStatus"></p>
-    <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div>
     <div class="row gltools"><button type="button" class="ghost sm" data-gt="ruler">📏 Ruler</button><button type="button" class="ghost sm" data-gt="undo">↶ Undo</button><button type="button" class="ghost sm" data-gt="clear">Clear all</button></div>`;
 }
 function glMountBoard(host, opts) {
@@ -279,11 +319,13 @@ function glMountBoard(host, opts) {
   host.addEventListener('click', e => { const b = e.target.closest('[data-gt]'); if (b) glToolAct(b.dataset.gt); const a = e.target.closest('[data-add]'); if (a && !GLB.trayDrag) { GLB.place = GLB.place === a.dataset.add ? null : a.dataset.add; glTrayMark(); } });
   /* drag straight from the tray onto the crater */
   $('#glTray', host).addEventListener('pointerdown', e => { const a = e.target.closest('[data-add]'); if (!a) return; const t = a.dataset.add, x0 = e.clientX, y0 = e.clientY; GLB.trayDrag = false;
-    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { GLB.trayDrag = true; GLB.trayType = t; } };
-    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); GLB.trayType = null;
+    let ghosted = false;
+    const mv = ev2 => { if (Math.hypot(ev2.clientX - x0, ev2.clientY - y0) > 10) { GLB.trayDrag = true; GLB.trayType = t; if (!ghosted) { ghosted = true; glGhostStart(t); } ndGhostMove(ev2.clientX, ev2.clientY); } };
+    const cx = () => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); document.removeEventListener('pointercancel', cx); ndGhostEnd(); GLB.trayType = null; setTimeout(() => { GLB.trayDrag = false; }, 0); };
+    const upf = ev2 => { document.removeEventListener('pointermove', mv); document.removeEventListener('pointerup', upf); document.removeEventListener('pointercancel', cx); ndGhostEnd(); GLB.trayType = null;
       const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
       setTimeout(() => { GLB.trayDrag = false; }, 0); };
-    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); });
+    document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); document.addEventListener('pointercancel', cx); });
   glSize(); if (st.view && st.view.LH === GLV.LH) { GLV.z = st.view.z; GLV.cx = st.view.cx; GLV.cy = st.view.cy; glClampView(); }
   glLoop();
 }
@@ -294,7 +336,7 @@ function renderGummyLift(ch, m, host, save) {
   const card = h('section', { class: 'panel mission glwrap', id: 'mi-gl' }); host.appendChild(card);
   card.innerHTML = `${remindersHTML()}<details class="glbrief"${st.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
       <p>The Gumdrop weighs <b>6,300 N</b>. Smooshy can only pull <b>60 N</b>. If he has to pull harder, he fires the broken thrusters, and they damage the ship.</p>
-      <p>The tractor beam can lift the Gumdrop once it reaches the dotted line at the top of the crater. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
+      <p>Lift the Gumdrop up to the dotted line. The Big Jelly's tractor beam does the rest. Build a route of machines up to that line. Each machine starts in the glowing box where the last one finished.</p>
       <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
       <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p>
       <p>Test your route in the simulator, work out the maths for every leg in your route strip, then send it to GASA. When GASA approves your maths, the rescue launches!</p></div></details>

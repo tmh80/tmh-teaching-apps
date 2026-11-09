@@ -7,14 +7,24 @@
    The boulder pull is shown here because it is practice; after this the strip is where the student works out every number. */
 function glWarmLever() { return GLB.rig && GLB.rig.parts.find(p => p.type === 'lever' && p.role === 'boulder'); }
 const glgLeg = i => GLB.ev && GLB.ev.legs[i];
+/* "do this next" for the guided start (Tom, 9 Nov 2026): a step's need() says which tray tile, or which button in the settings panel, to pulse (ndApply in 4n-boardkit.js). Board data only, never text. */
+const glgAddon = (type, btn) => { const q = GLB.rig.parts.find(p => p.type === type); if (!q) return { tile: type }; return GLB.dockId === q.id ? { sel: `[data-gm="${btn}"]` } : null; };
+function glGuideThrob() {
+  const roots = [$('#glTray'), $('#glDock')]; if (!roots[0]) return; const st = glState();
+  if (st.guide !== 'on' || (GLR && GLR.on)) { ndApply([], roots); return; }
+  const done = GLG_STEPS.map(s => { try { return !!s.done(); } catch (_) { return false; } }), s = GLG_STEPS[done.indexOf(false)]; let n = null, el = null;
+  try { n = s && s.need ? s.need() : null; } catch (_) { n = null; }
+  if (n && n.tile) el = $(`#glTray [data-add="${n.tile}"]`); else if (n && n.sel) el = $(n.sel, $('#glDock'));
+  ndApply(el ? [el] : [], roots);
+}
 const GLG_STEPS = [
-  { t: 'First, free the Gumdrop. Drag a <b>lever</b> from the tray onto the boulder. It glows when it\'s in the right place.', why: 'A lever turns on a fulcrum. It gives a mechanical advantage, so Smooshy needs less pull.', done: () => !!glWarmLever() },
-  { t: 'Tap the lever and make its <b>load arm</b> shorter until Smooshy\'s pull on the boulder is <b>60 N or less</b>.', why: 'Lever MA = effort arm ÷ load arm. Smooshy\'s pull = 252 N ÷ MA. A shorter load arm gives a bigger MA.', done: () => { const b = GLB.ev && GLB.ev.boulder; return !!(b && b.ok && b.how === 'lever'); }, live: true },
-  { t: 'Leg 1. Drag a <b>ramp</b> next to the Gumdrop. It snaps on, and its rope clips onto the Gumdrop\'s ◉ hook.', why: 'A ramp lets Smooshy pull the Gumdrop up a slope instead of lifting it straight up.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.roped); } },
+  { t: 'First, free the Gumdrop. Drag a <b>lever</b> from the tray onto the boulder. It glows when it\'s in the right place.', why: 'A lever turns on a fulcrum. It gives a mechanical advantage, so Smooshy needs less pull.', done: () => !!glWarmLever(), need: () => glWarmLever() ? null : { tile: 'lever' } },
+  { t: 'Tap the lever and make its <b>load arm</b> shorter until Smooshy\'s pull on the boulder is <b>60 N or less</b>.', why: 'Lever MA = effort arm ÷ load arm. Smooshy\'s pull = 252 N ÷ MA. A shorter load arm gives a bigger MA.', done: () => { const b = GLB.ev && GLB.ev.boulder; return !!(b && b.ok && b.how === 'lever'); }, live: true, need: () => { const l = glWarmLever(); return l && GLB.dockId === l.id ? { sel: '[data-gm="arm-"]' } : null; } },
+  { t: 'Leg 1. Drag a <b>ramp</b> next to the Gumdrop. It snaps on, and its rope clips onto the Gumdrop\'s ◉ hook.', why: 'A ramp lets Smooshy pull the Gumdrop up a slope instead of lifting it straight up.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.roped); }, need: () => GLB.rig.parts.some(p => p.type === 'ramp') ? null : { tile: 'ramp' } },
   { t: 'Drag the white handle at the top of the ramp up to the shelf, 6 m up.', why: 'Ramp MA = length ÷ rise. A longer ramp means a smaller pull, but a longer way to pull.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.end.y >= 5.9 && !l.faults.length); } },
-  { t: 'Clip a <b>pulley block</b> onto the ramp\'s ◉ dot at the top, then tap it and choose <b>4 ropes</b>.', why: 'Each supporting rope shares the load, so the pulley block\'s MA is its number of ropes.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.addons.some(id => { const q = glPart(id); return q && q.type === 'block' && q.ropes >= 3; })); } },
-  { t: 'Clip a <b>winch</b> onto the end of the pulley block\'s rope, then tap it and choose <b>×7</b>.', why: 'A winch multiplies the MA by its gear ratio. The total MA of a leg is every machine\'s MA multiplied together.', done: () => { const l = glgLeg(0); return !!(l && l.winches.some(w => w >= 6)); } },
-  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. Each machine starts in the glowing box where the last one finished.', done: () => { const l = glgLeg(1); return !!(l && l.roped); } },
+  { t: 'Clip a <b>pulley block</b> onto the ramp\'s ◉ dot at the top, then tap it and choose <b>4 ropes</b>.', why: 'Each supporting rope shares the load, so the pulley block\'s MA is its number of ropes.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.addons.some(id => { const q = glPart(id); return q && q.type === 'block' && q.ropes >= 3; })); }, need: () => glgAddon('block', 'ropes4') },
+  { t: 'Clip a <b>winch</b> onto the end of the pulley block\'s rope, then tap it and choose <b>×7</b>.', why: 'A winch multiplies the MA by its gear ratio. The total MA of a leg is every machine\'s MA multiplied together.', done: () => { const l = glgLeg(0); return !!(l && l.winches.some(w => w >= 6)); }, need: () => glgAddon('winch', 'ratio7') },
+  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. Each machine starts in the glowing box where the last one finished.', done: () => { const l = glgLeg(1); return !!(l && l.roped); }, need: () => GLB.rig.parts.filter(p => p.type === 'ramp').length >= 2 ? null : { tile: 'ramp' } },
   { t: 'Fill in your route strip, then press <b>▶ Test in simulator</b>.', why: 'The strip is where GASA checks your maths. The simulator shows where the route works, with no numbers.', done: () => !!(glState().tests || glState().runs) }
 ];
 function glMountGuide(host) {
@@ -35,7 +45,8 @@ function glGuidePaint() {
   box.innerHTML = `<h3>🧭 Guided start: your first two legs</h3>
     <p>Welcome to Mission Control! Build the first part of a rescue route with me. You can skip this at any time.</p>
     <ol class="objs glsteps">${GLG_STEPS.map((s, i) => `<li class="${done[i] ? 'ok' : i === cur ? 'cur' : ''}"><span class="box">${done[i] ? '✓' : ''}</span><span>${s.t}${i === cur ? `<small class="glwhy">${s.why}</small>` : ''}</span></li>`).join('')}</ol>${live}
-    ${all ? '<p><b>Well done, engineer!</b> You have the start of a route. Now keep building it up to the dotted line at the top of the crater.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
+    ${all ? '<p><b>Well done, engineer!</b> Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly\'s tractor beam pulls it in. You don\'t need to move it across.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
+  glGuideThrob();
 }
 
 /* ---------- the three ending cards, then the stopping-point pop-up ---------- */
@@ -54,7 +65,7 @@ function glEndText(sum) {
   const dent = why.length ? `The damage came from ${why.join(', ')}.` : '';
   if (sum.ending === 'spotless') return ['✨', 'Spotless rescue!', 'The tractor beam locks on and the Gumdrop lifts away without a single scratch. Smooshy climbs aboard, waves from the window, and the Big Jelly hums off across the plain. On the way up he spots the crystals on the crater rim glittering in the light of two moons.'];
   if (sum.ending === 'dented') return ['🛠️', 'Dented, but home!', `The tractor beam lifts the Gumdrop and Smooshy waves from the window, but the hull is scorched and cracked (${fmt(d.total || 0, 1)}% damage). ${dent} Another go can bring the damage down to zero.`];
-  return ['🔄', 'Not yet!', `${(sum.stop && sum.stop !== 'none' ? glStopText(sum.stop, sum.stopLeg) : '') || GL_STOP.none} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
+  return ['🔄', 'Not yet!', `${(sum.stop && sum.stop !== 'none' ? glStopText(sum.stop, sum.stopLeg) : '') || GL_STOP.none}${sum.up != null ? ' ' + glShortText(sum.up, sum.toLine) : ''} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
 }
 function glShowEnding(sum, o) {
   if (!sum) return; o = o || {}; const [ic, ti, tx] = glEndText(sum);
