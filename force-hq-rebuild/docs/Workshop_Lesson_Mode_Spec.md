@@ -248,3 +248,32 @@ Do these in stage 3, before converting Parts 2–4, so every converted step inhe
   - The Part 3 challenge "Launch-day loading" (`55-sections.js` ~73, `4c-ch6.js` ~426 and ~449): Gummy Rescue One is replaced by the Big Jelly, so the challenge becomes "Loading the Big Jelly", with the intro "The Big Jelly, GASA's repair ship, is on the launch pad at Force HQ, and it needs loading before it flies to Glimmer-9! Practise like Smooshy: no pull may be more than **60 N**." and the ending "The Big Jelly is fully loaded! Next, Part 4: machines inside machines." Numbers unchanged.
   - Toolkit lines (~120, 134, 149, 161, 172, 473): "packed in the toolkit" becomes "packed on the Big Jelly" (for example "Pulley blocks packed on the Big Jelly.", "Wedges and a screw jack packed. The Big Jelly's toolkit is ready!").
   - `4bb-shoppics.js` ~271–279 (Part 5 picture: Smooshy squeezes out through the hatch for the real rescue) stays: it describes the launch, when he does climb out.
+
+## 14. The crane trolley, and the challenges on the shared builder (9 Nov playtest; waiting for Tom's green light)
+
+**Why.** Tom lifted the Gumdrop with a crane, then had no way to move it on. In the current model a crane only lifts straight up. The load then hangs in mid-air, and the next machine must start within 3 m across and 0.5 m up or down of it. That rule is invisible, and real gantry cranes don't work like that. Tom: "If I can't figure it out, a student won't be able to."
+
+**The trolley.** Every crane gantry has a trolley that rolls along its top beam. A real gantry crane works this way.
+- Panel settings: **Lift height** (as now, up to 8 m) and **Move across** (0 m up to the gantry's span, to the left or the right). The span grows to fit, up to 8 m.
+- What happens: the hook lifts the load by the lift height, the trolley carries it across, then the load is set down on whatever is under it there: ground, a shelf, a platform or the Big Jelly's hold. The set-down spot must be within 0.5 m of the lifted height (the same handover rule as now, now made visible). The board shows a "Set down here" glow where the trolley will put the load, before the run.
+- The maths doesn't change: work = load × lift height; hand distance = mechanical advantage × lift height. Moving across adds no lifting work in a perfect machine. This is a physics point worth showing ("Carrying it across doesn't lift it, so it adds no work").
+- Old saves: Move across 0 m behaves exactly as now.
+- Tom's word was "lever". The student word is **trolley**, so it isn't confused with the lever machine. The crane's panel calls the control "Move across".
+
+**Teaching it before it's needed.**
+1. **First-time cards** for the crane gantry get a 4th card: "The trolley rolls along the top beam. It carries the load across, then sets it down on a shelf or platform."
+2. **Part 3 `u3` (Work and the catch)** gets one new unmarked practice task after its existing ones: "Lift the crate 2 m, then move it 3 m across and set it down on the shelf. Did moving it across add any work?" with a one-tap reveal: "No. Work = force × distance moved *upwards* against its weight. Moving across adds no lifting work." No marks or ids change.
+3. **The Part 3 Challenge "Loading the Big Jelly" (y1–y3)** moves onto the shared builder. The Big Jelly sits on the launch pad at Force HQ, and each mission builds a crane from the tray, then lifts and trolleys the cargo into its hold. y1 is a crane plus a pulley block (the oxygen tank, 3 m up into the hatch). y2 stays a ramp (the fuel barrel onto the loading bay), with the crane not needed. y3 is a crane plus a winch (the spare engine, 2 m into the cargo bay). Each mission's targets, objectives, clues, marks and answers stay the same; only the board and the controls change, plus the set-down into the hold.
+4. **The Part 4 Challenge (h1–h3)** moves onto the shared builder too (a compound crane: gantry, pulley block and winch; h2 has a ramp-route option). Same targets and marks.
+5. **The `k3` two-leg practice** becomes: leg 1, the crane lifts the crate and the trolley sets it on a shelf; leg 2, a ramp from the shelf up to the platform. So a handover *from* a crane has been practised before Part 5.
+6. **Part 5**: the crane's panel has Move across; the guided start mentions it in one line; the route strip maths doesn't change.
+
+**Story fixes in the same round.**
+- Part 3's `rescue:` lines say "the mission computer". Change them to GASA's maths check (Part 3's rescue-board slot is "Maths check ready"):
+  - u1: "GASA's maths check has learned mechanical advantage."
+  - u2: "GASA's maths check can predict the effort for any simple machine."
+  - u3: "GASA's maths check now checks the work for every plan."
+- The u1 card's "My mission computer can't understand 'easier'" becomes "GASA's maths check can't understand 'easier'".
+- y1, h1 and h2 say "the rocket". Change it to the Big Jelly (for example "up into the Big Jelly's hatch", "the Big Jelly's 200 kg nose cone", "onto the Big Jelly's deck").
+
+**Also in this round (stage 6 as planned):** Extension p5a/p5b and Build tasks 1–4 move onto the shared builder, then the old bench code is deleted.
