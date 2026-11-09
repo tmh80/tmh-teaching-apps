@@ -7,7 +7,7 @@ Interactive science sims and labs for WAB MS Science (Grade 6–8). Each app is 
 | Folder | App | Unit | Upload this file to Toddle | Status |
 |---|---|---|---|---|
 | `force-hq/` | Force HQ | G7/8 Forces | `Force-HQ-offline.html` | Ready |
-| `force-hq-rebuild/` | Force HQ (October 2026 rebuild) | G7/8 Forces | `Force-HQ-Rebuild-offline.html` | In progress: Chapters 1, 2, 3, 4 and 5 (Drop Zone) ready, each as a Foundation + Extension; Chapter 6 (the Workshop, "Save Captain Smooshy!") is complete: Parts 1 to 4, Part 5 (Operation Gummy Lift, a free-build rescue mission, rebuilt 7 Nov 2026), an optional Extension and four Build tasks; the Drop Zone, helicopter and Workshop are also in Explore; Toddle PDFs in `worksheets/`. On branch `reading-writing` (not yet merged): new Chapter 2 Skills section (Graphs and CER, `c2s`), whole-app I can screens, self-check, read-first OK and Objective C strands. Source in `src/`, rebuild with `python3 build.py`. Will replace `force-hq/` when finished |
+| `force-hq-rebuild/` | Force HQ (October 2026 rebuild) | G7/8 Forces | `Force-HQ-Rebuild-offline.html` | Chapters 1 to 5 ready for class (Foundation + Extension each, plus the Skills sections for graphs, CER and reading). Chapter 6 (the Workshop) is built but **closed to students** (`WORKSHOP_OPEN = false`) until the Part 5 rescue is rebuilt on real pulling physics (Saturday 14 Nov 2026; `docs/Workshop_Lesson_Mode_Spec.md` section 15). Work is on the `reading-writing` branch. |
 | `sparks-through-time/` | Sparks Through Time | G6 Electricity | `Sparks-Through-Time.html` | Ready (Nov update: PDF download button, MYP strands, AI feedback text; teacher page can make the Challenge optional; reading and writing steps and shorter Checks in electromagnets, generators, acdc and power) |
 | `adapt-lab/` | Adapt Lab | G7/8 Adaptations & evolution | `Adapt-Lab-offline.html` | Ready |
 | `paper-plane-lab/` | Paper Plane Lab | G6 Scientific method | `Paper-Plane-Lab-offline.html` | Ready (source in `src/`, rebuild with `node build.js`) |
@@ -34,7 +34,8 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 
 - **Flashcards with spaced repetition, in every sim and lab:** cards built from the key vocabulary each student has met, reviewed on a spaced-repetition schedule. Force HQ already records the words each student meets (Journal → Vocab tab).
 
-- **Force HQ rebuild:** Explore "draw what's happening now" (Chapter 6 is finished). Port from the old `force-hq/Force-HQ.html` with `force-hq-rebuild/tools/old.py` rather than rebuilding. Start with `force-hq-rebuild/docs/Force_HQ_Handoff.md`.
+- **Force HQ rebuild, next (Saturday 14 Nov 2026):** rebuild the Part 5 rescue on real pulling physics (`force-hq-rebuild/docs/Workshop_Lesson_Mode_Spec.md` section 15), then reopen the Workshop.
+- **Force HQ rebuild, later:** Explore "draw what's happening now" (Chapter 6 is finished). Port from the old `force-hq/Force-HQ.html` with `force-hq-rebuild/tools/old.py` rather than rebuilding. Start with `force-hq-rebuild/docs/Force_HQ_Handoff.md`.
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
 - **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.
