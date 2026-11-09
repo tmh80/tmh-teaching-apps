@@ -27,7 +27,10 @@ function renderChallenge(ch) {
   const C1 = CHDATA[ch].challenge, host = $('#challengeHost'); parkLab(); host.innerHTML = '';
   const lp = learnProgress(ch);
   if (lp.done < lp.total) host.appendChild(h('div', { class: 'gate' }, `<b>Tip:</b> you have finished ${lp.done} of ${lp.total} Learn steps. The Challenge uses everything from Learn, so it's easier if you finish those first. You can still have a go now.`));
-  host.appendChild(h('div', { class: 'panel mission gl' }, `<span class="lbl">Challenge</span><h3>${C1.title}</h3><p>${C1.intro}</p>`));
+  host.appendChild(h('div', { class: 'panel mission gl' }, `<span class="lbl">Challenge</span><h3>${C1.title}</h3><p>${C1.intro}</p>${C1.pop ? '<button type="button" class="ghost sm" id="chalBrief">📖 Read the briefing again</button>' : ''}`));
+  if (C1.pop) { const brief = () => openModal(`<div class="modal" role="dialog" aria-label="${esc(C1.title)}"><h2>${C1.title}</h2>${C1.pop.pic ? C1.pop.pic() : ''}${C1.pop.html}<div style="display:flex;justify-content:flex-end;margin-top:12px"><button type="button" class="go" data-close>${C1.pop.ok || 'OK, let\'s go!'}</button></div></div>`, () => { const f = dbGet('chalPop', {}); f[ch] = true; dbSet('chalPop', f); });
+    $('#chalBrief', host).addEventListener('click', brief); const tryBrief = () => { if (dbGet('chalPop', {})[ch] || CTAB !== 'challenge' || !CH || CH.id !== ch) return; if ($('#modal').hidden) brief(); setTimeout(tryBrief, 500); };
+    setTimeout(tryBrief, 60); }   // keeps checking until the briefing is OK'd: another popup (like the opening transmission) can cover or replace it   // a briefing that must be OK'd the first time (with a picture)
   const save = (m, patch) => { const st = dbGet('chal.' + ch, {}); st[m.id] = Object.assign(st[m.id] || {}, patch); dbSet('chal.' + ch, st); renderOnPage(); tabTicks(); if (challengeDone(ch)) { addEvidence('challenge', `Chapter ${CH.n} ${CH.part} Challenge: ${C1.title}, ${challengeState(ch).score} of ${challengeState(ch).max} objectives met.`); maybeStamp(ch); } };
   const bm = C1.missions.filter(m => m.kind === 'brake'); if (bm.length) renderBrakeCourse(ch, bm, host, save);
   const sm = C1.missions.filter(m => m.kind === 'sled'); if (sm.length) renderSledCourse(ch, sm, host, save);

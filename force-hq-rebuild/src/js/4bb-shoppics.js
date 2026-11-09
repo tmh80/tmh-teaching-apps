@@ -305,3 +305,20 @@ function picTwoStep() {
   b += T(337, 34, 14, PIC_C.E, 'STEP 2') + T(337, 56, 15, PIC_C.ink, 'Divide the load by it') + T(337, 82, 15, PIC_C.L, '294 N load ÷ 4') + T(337, 110, 18, PIC_C.E, '= 73.5 N effort', 800);
   return picWrap(W, 140, 'Two steps: first find the mechanical advantage from the shape (1.6 ÷ 0.4 = 4), then divide the 294 N load by it to get a 73.5 N effort', b, '', 440);
 }
+/* The Big Jelly on the launch pad at Force HQ, with its cargo hold open: the picture for the Part 3 Challenge briefing. Same shapes as glDrawBigJelly. */
+function picBigJelly() {
+  const W = 420, H = 250, T = (x, y, s, col, str, w, a) => `<text x="${x}" y="${y}" text-anchor="${a || 'middle'}" font-family="system-ui, sans-serif" font-size="${s}" font-weight="${w || 700}" fill="${col}">${str}</text>`;
+  let b = `<defs><linearGradient id="bjSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe6f5"/><stop offset="1" stop-color="#eef6fb"/></linearGradient><linearGradient id="bjHull" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd27a"/><stop offset="1" stop-color="#ff8a3d"/></linearGradient></defs>`;
+  b += `<rect width="${W}" height="${H}" rx="12" fill="url(#bjSky)"/><rect y="200" width="${W}" height="50" fill="#b8c4cc"/><rect x="100" y="192" width="220" height="12" rx="4" fill="#6f7d86"/>`;
+  b += `<g transform="translate(210 150) scale(1.4)">`;
+  b += `<path d="M-50 12 L-60 40 M50 12 L60 40" stroke="#5d6b74" stroke-width="5" stroke-linecap="round"/><path d="M-66 40 h14 M54 40 h14" stroke="#5d6b74" stroke-width="5" stroke-linecap="round"/>`;
+  b += `<path d="M-72 10 Q-74 -36 0 -40 Q74 -36 72 10 Q0 22 -72 10Z" fill="url(#bjHull)"/><rect x="-78" y="2" width="156" height="12" rx="6" fill="#e06b2b"/>`;
+  [-40, -14, 12, 38].forEach((wx, i) => { const c = ['#ff6fa8', '#7ad66b', '#ffd24d', '#a78bfa'][i]; b += `<circle cx="${wx}" cy="-14" r="8" fill="#bfe6f5" stroke="#fffaf2" stroke-width="3"/><circle cx="${wx}" cy="-11" r="4" fill="${c}"/><circle cx="${wx - 3}" cy="-15" r="2" fill="${c}"/><circle cx="${wx + 3}" cy="-15" r="2" fill="${c}"/>`; });
+  b += `<rect x="18" y="-4" width="30" height="16" rx="3" fill="#3b2a1e" stroke="#fffaf2" stroke-width="2"/><path d="M18 12 l-10 14 h30 l10 -14" fill="#c97a3d" opacity=".9"/>`;
+  b += `</g>`;
+  b += T(210, 30, 17, PIC_C.ink, 'The Big Jelly: GASA\'s repair ship', 800);
+  b += `<path d="M330 104 L296 146" stroke="${PIC_C.E}" stroke-width="2"/>` + T(336, 98, 13, PIC_C.E, 'cargo hold', 700, 'start');
+  b += `<path d="M78 74 L136 124" stroke="${PIC_C.L}" stroke-width="2"/>` + T(20, 66, 13, PIC_C.L, 'GASA crew', 700, 'start');
+  b += T(210, 232, 13, '#3d4a52', 'On the launch pad at Force HQ', 700);
+  return picWrap(W, H, 'The Big Jelly, GASA\'s orange repair ship, standing on the launch pad at Force HQ with its cargo hold open and gummy bear crew at the windows', b, '', 420);
+}

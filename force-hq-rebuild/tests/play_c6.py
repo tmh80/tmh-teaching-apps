@@ -344,6 +344,8 @@ with sync_playwright() as p:
     finish('u3')
     # ================= Part 3 Challenge: Launch-day loading =================
     ev("openChapter('c6c','challenge')"); pg.wait_for_timeout(500)
+    pg.wait_for_timeout(700); chk('y: the Big Jelly briefing pops up with its picture', pg.locator('#modal svg.pic').count() == 1 and 'Big Jelly' in pg.locator('#modal').inner_text())
+    pg.click('#modal [data-close]'); pg.wait_for_timeout(200); chk('y: OK closes the briefing', pg.locator('#modal').is_hidden())
     chk('challenge: three loading jobs', pg.locator('#mi-shop [role=tab]').count() == 3, pg.locator('#mi-shop [role=tab]').count())
     pg.locator('#mi-shop').scroll_into_view_if_needed(); pg.screenshot(path=OUT + 'y1_start.png', full_page=True)
     chk('y1: pulley, 245 N tank, lift 3 m, the cap is 60 N', ev("WS.mach") == 'pulley' and ev("WS.load") == 245 and ev("WS.lift") == 3 and ev("WS.cap") == 60)
