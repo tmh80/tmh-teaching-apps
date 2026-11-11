@@ -21,9 +21,9 @@ with sync_playwright() as p:
     sx, sy, LW, LH = ev('[glSX(18.2),glSY(0),GLV.LW,GLV.LH]'); bb = pg.locator('#glCv').bounding_box()
     pg.mouse.click(bb['x'] + sx * bb['width'] / LW, bb['y'] + sy * bb['height'] / LH); pg.wait_for_timeout(200)
     chk('lever snaps onto the boulder', json.loads(ev('JSON.stringify(glWarmLever()&&glWarmLever().role)')) == 'boulder')
-    chk('arm 2 m shows a failing pull, no clear message', '63' in pg.inner_text('#glGuide') and 'boulder rolls free' not in pg.inner_text('#glGuide'), pg.inner_text('#glGuide')[:300])
+    chk('arm 2 m shows a failing pull, no clear message', '63' in pg.inner_text('#glGuide') and 'rolls free' not in pg.inner_text('#glGuide'), pg.inner_text('#glGuide')[:300])
     ev('(()=>{glWarmLever().arm=1.5;glChanged();})()'); pg.wait_for_timeout(150)
-    chk('arm 1.5 m clears the boulder', 'boulder rolls free' in pg.inner_text('#glGuide'), pg.inner_text('#glGuide')[:300])
+    chk('arm 1.5 m lifts the boulder but it drops back: the guide asks for a winch', 'drops when he lets go' in pg.inner_text('#glGuide') and 'winch' in pg.inner_text('#glGuide'), pg.inner_text('#glGuide')[:300])
     ev("GLB.save({id:GLB.mid},{guide:'skip'}); glGuidePaint()"); pg.wait_for_timeout(100)
     chk('skipping the guide closes it and is remembered', not pg.locator('#glGuide').is_visible() and ev('glState().guide') == 'skip')
     # endings

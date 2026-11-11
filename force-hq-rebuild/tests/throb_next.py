@@ -161,10 +161,12 @@ with sync_playwright() as p:
     chk('guided start: the lever tile throbs first (one thing only)', throbbing(pg) == ['lever'], throbbing(pg))
     B.ev("(()=>{glAddPart('lever',18.2,0);return 1})()"); pg.wait_for_timeout(300)
     chk('guided start: with the lever placed and its panel open, the load-arm button throbs instead', throbbing(pg) == ['arm-'], throbbing(pg))
-    ev("(()=>{const l=glWarmLever();l.arm=1;glChanged()})()"); pg.wait_for_timeout(300); chk('tutorial: at the choice of first leg nothing throbs', throbbing(pg) == [], throbbing(pg)); ev("glTutSave({a:'ramp'}); glGuidePaint()"); pg.wait_for_timeout(200); chk('tutorial: with a ramp chosen, the ramp tile throbs', throbbing(pg) == ['ramp'], throbbing(pg))
+    ev("(()=>{const l=glWarmLever();l.arm=1;glChanged()})()"); pg.wait_for_timeout(300); chk('tutorial: with the arm set, the winch tile throbs (it locks the boulder up)', throbbing(pg) == ['winch'], throbbing(pg))
+    cpl = B.evr("glCablePoint(glWarmLever(),glMachine(glWarmLever(),GLB.ev.ground,[]))"); B.ev(f"(()=>{{glAddPart('winch',{cpl['x'] + 1.5},{cpl['y'] + 0.5});return 1}})()"); pg.wait_for_timeout(300)
+    chk('tutorial: with the lever winch clipped on, the crane tile throbs', throbbing(pg) == ['crane'], throbbing(pg))
     ev("GLB.save({id:GLB.mid},{guide:'done'});glGuidePaint()"); pg.wait_for_timeout(300); chk('guided start closed: nothing throbs', throbbing(pg) == [])
     txt = ev("Object.keys(GLG).length"); ev("GLB.rig={v:2,parts:[],cables:[]}")
-    src = ev("glGuidePaint.toString()"); chk('tutorial final message says to build up to the dotted line', "Keep building until the Gumdrop is level with the dotted line, and the Big Jelly's tractor beam pulls it in. You don't need to move it across." in src, src[-900:])
+    src = ev("glGuidePaint.toString()"); chk('tutorial final message says to rescue the Gumdrop the same way, up to the dotted line', "each rope picks it up from wherever it is resting, up to the dotted line" in src, src[-900:])
     # not-yet message with metres
     open_part5(pg); B = Board(pg); r1 = B.add('ramp', 16, 0); B.ev("glStartRun('test')"); pg.wait_for_timeout(300); B.ev("GLR.t0-=1e7"); pg.wait_for_timeout(700)
     lines = B.evr("glState().lastTest.lines.map(l=>l[0])"); sh = B.evr("glShort(gpEvaluate(GLB.rig))")
@@ -196,7 +198,8 @@ with sync_playwright() as p:
 
     # ---------- 10. the Gumdrop stays at its start until its leg's lift (it used to flash at the top of the crane first) ----------
     open_part5(pg); B = Board(pg); B.ev("glAddPart('crane',14,0)"); cr = B.ev('GLB.sel'); cp = B.evr(f'glCablePoint(glPart("{cr}"),glMachine(glPart("{cr}"),GLB.ev.ground,[]))'); B.ev(f"glAddPart('block',14,{cp['y']})"); bk = B.ev('GLB.sel')
-    B.ev(f'glPart("{bk}").ropes=6;glChanged()'); B.ev("glAddPart('winch',16,3)"); wn = B.ev('GLB.sel'); B.ev(f'GLB.rig.cables.push({{a:"{bk}",b:"{wn}"}});glPart("{wn}").ratio=12;glChanged()')
+    B.ev(f'glPart("{bk}").ropes=6;glChanged()'); B.ev("glAddPart('winch',16,3)"); wn = B.ev('GLB.sel'); B.ev(f'if(!GLB.rig.cables.some(c=>c.a==="{bk}"&&c.b==="{wn}"))GLB.rig.cables.push({{a:"{bk}",b:"{wn}"}});glPart("{wn}").ratio=12;glChanged()')
+    B.ev("GLB.rig.parts.push({id:'bl',type:'lever',role:'boulder',x:19,arm:1,rise:0.5,dir:1},{id:'blw',type:'winch',ratio:2},{id:'bc',type:'crane',role:'boulder',x:18.7,rise:6,across:-8,adir:-1,on:'ground'},{id:'bcw',type:'winch',ratio:6}); GLB.rig.cables.push({a:'bl',b:'blw'},{a:'bc',b:'bcw'}); glChanged()")   # the boulder kit first: without it the run stops at the boulder
     B.ev("glStartRun('test')")
     ys = B.evr("(()=>{const y0=GLR.res.ship0.y,T=GLR.beats.reduce((a,b)=>a+b.dur,0),o=[];for(let t=0;t<T;t+=0.02)o.push([t,glSceneAt(t).ship.y-y0]);return o})()")
     lift_t = B.evr("(()=>{let acc=0;for(const b of GLR.beats){if(b.dur>1.7){return acc}acc+=b.dur}return null})()"); first_move = next((t_ for t_, d in ys if abs(d) > 1e-9), None)

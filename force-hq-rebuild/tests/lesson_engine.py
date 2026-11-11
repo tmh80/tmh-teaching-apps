@@ -125,7 +125,7 @@ with sync_playwright() as p:
     chk('cards: the button says OK', pg.locator('#chunk [data-cb=next]').inner_text() == 'OK'); shot('lv1_card1')
     pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150); chk('cards: card 2 text', 'Drag the fulcrum along the bar. Watch the two numbers: how far the rock is from the fulcrum, and how far your hand is.' in ch.inner_text())
     shot('lv1_card2'); pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150)
-    chk('cards: card 3 text and the Pull button glows', 'Press ▶ Pull! to push down on the end. In the rescue, a lever under the boulder will pry it up off the Gumdrop's leg.' in ch.inner_text() and 'coachhi' in (pg.locator('#wsPull').get_attribute('class') or ''))
+    chk('cards: card 3 text and the Pull button glows', 'Press ▶ Pull! to push down on the end. In the rescue, a lever under the boulder will pry it up off the Gumdrop\'s leg.' in ch.inner_text() and 'coachhi' in (pg.locator('#wsPull').get_attribute('class') or ''))
     shot('lv1_card3'); pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150)
     chk('cards: after the last OK they close and the piece is marked seen', ch.is_hidden() and ev("dbGet('lsSeen',{}).lever") is True)
     g = geo(); tap(g['b']['x'] - 30, g['b']['y']); pg.locator('#lsDock [data-lm=del]').click(); pg.wait_for_timeout(100)
@@ -300,7 +300,7 @@ with sync_playwright() as p:
     ns = {}; exec(open('tests/play_rescue.py').read().split('with sync_playwright()')[0], ns)
     pg2 = b.new_page(viewport={'width': 1300, 'height': 950}); pg2.on('pageerror', lambda e: errs.append('ERR ' + str(e)))
     ns['open_part5'](pg2); B = ns['Board'](pg2)
-    chk('rescue: the mission card has the new text', all(k in pg2.locator('#mi-gl').inner_text() for k in ['The Gumdrop weighs 6,300 N. Smooshy can only pull 60 N.', 'up to the dotted line', 'Sugar crystals are gummy money. You have 475 to spend.', 'a 252 N boulder is stuck against its leg']), pg2.locator('#mi-gl').inner_text()[:300])
+    chk('rescue: the mission card has the new text', all(k in pg2.locator('#mi-gl').inner_text() for k in ['The Gumdrop weighs 6,300 N. Smooshy can only pull 60 N.', 'up to the dotted line', 'Sugar crystals are gummy money. You have 475 to spend.', 'pry the 252 N boulder off its leg']), pg2.locator('#mi-gl').inner_text()[:300])
     chk('rescue: the counter says gummy money', '120' not in pg2.locator('#glCrys').inner_text() and 'sugar crystals (gummy money)' in pg2.locator('#glCrys').inner_text(), pg2.locator('#glCrys').inner_text())
     chk('glossary: sugarcrystal', B.ev("TERMS.sugarcrystal[1]") == 'Gummy money on Glimmer-9. You spend sugar crystals to buy machines, platforms and dynamite.')
     # a lever dragged from the tray and dropped so that its bar lies across the boulder (its load end is 6 m away): it must snap

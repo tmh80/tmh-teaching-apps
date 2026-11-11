@@ -32,7 +32,7 @@ with sync_playwright() as p:
     chk('student page 1 comes before Part A, reflection on its own page', html.index('My Rescue') < html.index('Part A') < html.index('Part C: My rescue reflection') and html.count('class="page"') >= 3)
     chk('reflection is the last Check question', ev("CHDATA.c6e.review.slice(-1)[0].id") == 'c6r32' and ev("CHDATA.c6e.review.slice(-1)[0].type") == 'explain')
     blank = ev("buildWorksheet('c6e','blank')"); chk('blank template has an empty frame and no numbers', 'rsnap empty' in blank and 'data:image' not in blank and '1,344' not in blank)
-    key = ev("buildWorksheet('c6e','key')"); chk('answer key shows an example route picture and its numbers', 'data:image/jpeg' in key and '56.3 N' in key and '1,344 m' in key and '75,600 J' in key and '358' in key, re.sub('<[^>]+>', ' ', key)[:400])
+    key = ev("buildWorksheet('c6e','key')"); chk('answer key shows an example route picture and its numbers', 'data:image/jpeg' in key and '56.3 N' in key and '1,344 m' in key and '75,600 J' in key and '428' in key, re.sub('<[^>]+>', ' ', key)[:400])
     scheme = ev("schemeHTML('c6e')"); chk('marking scheme has the reflection points and the My Rescue instruction', 'My Rescue table' in scheme and 'Gives one improvement with a reason' in scheme)
     ai = ev("typeof aiPromptText==='function' ? aiPromptText('c6e') : ''") or ''
     src = pathlib.Path('dist/test.html').read_text()

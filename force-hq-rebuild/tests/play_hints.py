@@ -16,7 +16,7 @@ with sync_playwright() as p:
     pg.goto(F); pg.wait_for_timeout(300); pg.fill('#whoName', 'Sam'); pg.click('#whoGo'); pg.evaluate("__fhq.dbSet('tourDone',true)")
     ev('DB.user.teacher=true'); pg.evaluate("__fhq.openChapter('c6e','challenge')"); pg.wait_for_timeout(500); ev('closeModal()'); pg.wait_for_timeout(200)
     chk('Reminders sit at the top of the Part 5 card', pg.evaluate("document.querySelector('#mi-gl').firstElementChild.classList.contains('remind')"))
-    ev("(()=>{const id=glNewId('ramp'); GLB.rig.parts.push({type:'ramp',id:id,x1:15.5,y1:0,L:24,rise:6}); GLB.rig.cables.push({a:id,b:'ship'},{a:id,b:'zb'},{a:'zb',b:'zw'}); GLB.rig.parts.push({id:'zb',type:'block',ropes:4},{id:'zw',type:'winch',ratio:7}); GLB.rig.parts.push({id:'bl',type:'lever',role:'boulder',x:19,arm:1,rise:0.5,dir:1}); glChanged();})()"); pg.wait_for_timeout(150)
+    ev("(()=>{const id=glNewId('ramp'); GLB.rig.parts.push({type:'ramp',id:id,x1:15.5,y1:0,L:24,rise:6}); GLB.rig.cables.push({a:id,b:'ship'},{a:id,b:'zb'},{a:'zb',b:'zw'}); GLB.rig.parts.push({id:'zb',type:'block',ropes:4},{id:'zw',type:'winch',ratio:7}); GLB.rig.parts.push({id:'bl',type:'lever',role:'boulder',x:19,arm:1,rise:0.5,dir:1},{id:'blw',type:'winch',ratio:2},{id:'bc',type:'crane',role:'boulder',x:18.7,rise:6,across:-8,adir:-1,on:'ground'},{id:'bcw',type:'winch',ratio:6}); GLB.rig.cables.push({a:'bl',b:'blw'},{a:'bc',b:'bcw'}); glChanged();})()"); pg.wait_for_timeout(150)
     key = ev("glwRows().find(r=>r.key.startsWith('L:')).key")
     pg.locator('#glStrip').scroll_into_view_if_needed()
     chk('no hints used yet', ev('glState().hints||0') == 0 and 'first is free' in pg.inner_text('#glwHints'))

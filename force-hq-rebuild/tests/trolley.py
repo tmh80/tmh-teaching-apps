@@ -1,6 +1,6 @@
 """The crane trolley (spec section 14): Move across in the rescue model, the panel and the board.
 Run after build.py:  python3 tests/trolley.py     Screenshots: /tmp/fhq-shots/trolley/
-tests/golden_rescue_across0.json was taken from the build BEFORE the trolley, over every saved rescue rig (tests/rescue_routes.js), plain and with hints 3 + maths approved."""
+tests/golden_rescue_across0.json was taken from the build BEFORE the trolley, over every saved rescue rig (tests/rescue_routes.js), plain and with hints 3 + maths approved.""" Regenerated for the boulder two-leg job: only the cost (the boulder kit adds 70) and the crane route score (now over budget) changed.
 import json, pathlib
 from playwright.sync_api import sync_playwright
 F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/trolley/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)

@@ -85,7 +85,7 @@ with sync_playwright() as p:
         pg.evaluate('c=>__fhq.ev(c)', ROUTES + ";(()=>{const g=ROUTES.top(); g.parts=g.parts.filter(p=>p.id!=='d1'); GLB.rig=g; glChanged();})()"); pg.wait_for_timeout(200)
         chk('rescue: the ghost Gumdrop shows after leg 2', ev("!!GLB.ev.ghost") is True and ev("glFrameOpts().ev.ghost!=null"))
         pg.locator('#glCv').scroll_into_view_if_needed(); pg.wait_for_timeout(300); bx = evj("LBL.boxes")
-        chk('rescue: only weights and the ghost caption are on the board', sorted(l['text'] for l in bx) == ['Boulder 252 N', 'Gumdrop 6,300 N', 'Gumdrop after leg 1', 'Gumdrop after leg 2', 'Tractor beam reaches this line'], [l['text'] for l in bx])
+        chk('rescue: only weights, the ghost captions and the boulder notes are on the board', sorted(l['text'] for l in bx) == sorted(['Boulder 252 N', 'Held up', 'Boulder after leg 2', 'Gumdrop 6,300 N', 'Gumdrop after leg 1', 'Gumdrop after leg 2', 'Tractor beam reaches this line', 'Sets down here']), [l['text'] for l in bx])
         chk('rescue: no two labels overlap', not overlaps(bx), overlaps(bx))
         if tag == 'd': pg.screenshot(path=OUT + 'rescue_two_legs_d.png', clip={'x': 0, 'y': max(0, pg.locator('#glCv').bounding_box()['y'] - 20), 'width': 1440, 'height': 560})
         else: pg.screenshot(path=OUT + 'rescue_two_legs_phone.png')

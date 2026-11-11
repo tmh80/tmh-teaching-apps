@@ -13,8 +13,8 @@ def chk(name, cond, extra=''):
     if not cond: fails.append(name)
 def clip(pg, w, h=520):
     bb = pg.locator('#glCv').bounding_box(); return {'x': 0, 'y': max(0, bb['y'] - 20), 'width': w, 'height': h}
-RIG = ("{v:2,parts:[{id:'bl',type:'lever',role:'boulder',x:19,arm:1,rise:0.5,dir:1},{id:'pb',type:'block',ropes:4,x:77,y:8.8},{id:'pw1',type:'winch',ratio:10,x:79,y:8.75},{id:'pw2',type:'winch',ratio:10,x:81,y:8.75}],"
-       "cables:[{a:'ship',b:'pb'},{a:'pb',b:'pw1'},{a:'pw1',b:'pw2'}]}")
+RIG = ("{v:2,parts:[{id:'bl',type:'lever',role:'boulder',x:19,arm:1,rise:0.5,dir:1},{id:'blw',type:'winch',ratio:2},{id:'bc',type:'crane',role:'boulder',x:18.7,rise:6,across:-8,adir:-1,on:'ground'},{id:'bcw',type:'winch',ratio:6},{id:'pb',type:'block',ropes:4,x:77,y:8.8},{id:'pw1',type:'winch',ratio:10,x:79,y:8.75},{id:'pw2',type:'winch',ratio:10,x:81,y:8.75}],"
+       "cables:[{a:'bl',b:'blw'},{a:'bc',b:'bcw'},{a:'ship',b:'pb'},{a:'pb',b:'pw1'},{a:'pw1',b:'pw2'}]}")
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1300, 'height': 950}); errs = []
     pg.on('pageerror', lambda e: errs.append('ERR ' + str(e))); pg.on('console', lambda m: m.type == 'error' and errs.append(m.text))
@@ -35,9 +35,11 @@ with sync_playwright() as p:
     # the post can be moved with the pointer
     px = B.evr(f'glPart("{bk}").x'); pg.click('#glDock [data-gm="mv-5"]'); pg.wait_for_timeout(100); pg.click('#glDock [data-gm="mv+5"]'); pg.wait_for_timeout(100)
     chk('the post can be moved along the ground, with its winches, and comes back', B.evr(f'glPart("{bk}").x') == px and B.evr(f'glPart("{w2}").x') > px and B.evr('GLB.ev.legs[0].type') == 'drag', B.evr(f'[glPart("{bk}").x, glPart("{w2}").x]'))
-    # 2. the boulder: a lever beside it, load arm 1.5 m
-    lv = B.add('lever', 18, 0); B.menu('arm-')
-    chk('the lever clears the boulder', B.evr('GLB.ev.boulder.ok') is True)
+    # 2. the boulder: a lever with a winch pries it up, a crane over it lifts it clear (built by hand, then the settings set)
+    lv = B.add('lever', 18, 0); cpl = B.evr(f'glCablePoint(glPart("{lv}"),glMachine(glPart("{lv}"),GLB.ev.ground,[]))'); wl = B.add('winch', cpl['x'] + 1.5, cpl['y'] + 0.5)
+    cr = B.add('crane', 18.7, 0); cpc = B.evr(f'glCablePoint(glPart("{cr}"),glMachine(glPart("{cr}"),GLB.ev.ground,[]))'); wc = B.add('winch', cpc['x'] + 1.5, cpc['y'] + 0.5)
+    B.ev(f'Object.assign(glPart("{lv}"),{{arm:1,rise:0.5}}); Object.assign(glPart("{wl}"),{{ratio:2}}); Object.assign(glPart("{cr}"),{{rise:6,across:-8,adir:-1}}); Object.assign(glPart("{wc}"),{{ratio:6}}); glChanged()')
+    chk('the lever and the crane clear the boulder', B.evr('GLB.ev.boulder.ok') is True)
     chk('dragging the whole way reaches the tractor beam', B.evr('GLB.ev.arrived') is True, B.evr('[GLB.ev.stop, GLB.ev.legs.map(l=>[l.type,l.force,l.pull])]'))
     chk('the route is a wrecked rescue: 3 points at most, hull 60% or worse', B.evr('GLB.ev.score.ending') == 'wrecked' and B.evr('GLB.ev.score.total') <= 3 and B.evr('GLB.ev.dmg.total') >= 60, B.evr('[GLB.ev.score, GLB.ev.dmg]'))
     chk('the drag tips the Gumdrop over, and falling over costs hull', B.evr('GLB.ev.tips.length') >= 1 and B.evr('GLB.ev.dmg.tips') > 0, B.evr('[GLB.ev.tips, GLB.ev.dmg]'))
