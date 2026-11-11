@@ -1002,7 +1002,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 :root[data-theme="dark"] .twostep { color: #f3e2a8; background: #3a3218; }
 
 /* ---- Part 5: the settings card and the tutorial coach sit ON the board (Tom, 11 Nov 2026), so the board keeps the full width ---- */
-.glfloat{position:absolute;z-index:4;top:38px;right:8px;width:min(46%,420px);max-height:300px;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,.4);font-size:13px;padding:4px 10px 8px}
+.glfloat{position:absolute;z-index:4;top:38px;right:8px;width:min(46%,420px);max-height:340px;overflow:auto;box-shadow:0 6px 20px rgba(0,0,0,.4);font-size:13px;padding:4px 10px 8px}
 .glfloat .dkbody{display:flex;flex-wrap:wrap;gap:0 14px;align-items:center}.glfloat .glnote,.glfloat .dkfb{flex-basis:100%}.glfloat .glrow{margin:3px 0}.glfloat .glrow>span{min-width:0}.glfloat .glx{margin-left:auto}
 .glboard.running .glfloat,.glboard.running .glcoach{display:none}
 .glcoach{position:absolute;z-index:4;top:38px;left:138px;width:min(38%,370px);max-height:330px;overflow:auto;background:var(--panel);color:var(--ink);border:2px solid var(--accent);border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.4);padding:0 10px 8px;font-size:14px}

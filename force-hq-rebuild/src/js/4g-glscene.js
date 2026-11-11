@@ -167,11 +167,13 @@ function glDrawSetDown(c, sp, t) {
   c.fillStyle = `rgba(${col},${0.14 + 0.1 * pulse})`; c.beginPath(); c.ellipse(X, Y - 0.2 * u, 2.7 * u, 0.9 * u, 0, 0, 7); c.fill();
   lblAdd(bad ? 'Too tall to carry over' : 'Sets down here', X, Y - 2.2 * u, { size: 12, col: bad ? '#fff' : '#c9ffdc', bg: bad ? '#c0392b' : 'rgba(31,29,38,.75)', prio: 2 });
 }
-function glDrawLever(c, p, m, bad, tiltT) {
-  /* the same drawing as the Workshop bench lever (drawLeverShape in 4n): a bar on a triangle fulcrum. The load end rises by `rise` as tiltT goes 0 → 1 */
+function glDrawLever(c, p, m, bad, tiltT, ground) {
+  /* the same drawing as the Workshop bench lever (drawLeverShape in 4n): a bar on a triangle fulcrum. The load end rises by `rise` as tiltT goes 0 → 1.
+     A real 1 : 9 lever would sink its pulling end several metres into the crater, so the pulling end dips at most 0.7 m and the fulcrum triangle grows to keep the bar resting on it.
+     On the crater (ground given) a short rope and handle hang from the pulling end. */
   const u = glU(), d = p.dir || 1, by = m.start.y, fx = p.x + d * p.arm, ex = p.x + d * GL.beam, k = tiltT || 0;
-  const ly = by + 0.9 + k * p.rise, ey = by + 0.9 - k * p.rise * (GL.beam - p.arm) / p.arm;
-  drawLeverShape(c, { a: { x: glSX(p.x), y: glSY(ly) }, b: { x: glSX(ex), y: glSY(Math.max(ey, by - 30)) }, fx: glSX(fx), fy: glSY(by + 0.9), floor: glSY(by), thick: Math.max(4, 0.32 * u), bad });
+  const ly = by + 0.9 + k * p.rise, ey = by + 0.9 - Math.min(0.7, k * p.rise * (GL.beam - p.arm) / p.arm), fy = ly + (ey - ly) * (p.arm / GL.beam);
+  drawLeverShape(c, { a: { x: glSX(p.x), y: glSY(ly) }, b: { x: glSX(ex), y: glSY(ey) }, fx: glSX(fx), fy: glSY(fy), floor: glSY(by), thick: Math.max(4, 0.32 * u), bad, pull: ground ? Math.max(10, 0.75 * u) : 0 });
 }
 function glDrawJack(c, p, m, bad, k) {
   const sc = p.s || 1, u = glU() * sc, by = m.start.y, hgt = (0.7 + (k || 0) * p.rise * (p.vis || 1)) * sc, gp = (p.gap || 0.22) * sc; c.fillStyle = bad ? GLC.bad : GLC.dark; c.beginPath(); c.roundRect(glSX(p.x) - 0.7 * u, glSY(by + 0.35 * sc), 1.4 * u, 0.35 * u, 3); c.fill();
@@ -256,17 +258,25 @@ function glDrawWorld(c, o) {
   const fp = o.flashPlat && glPlatforms({ parts: [Object.assign({ id: '_f' }, o.flashPlat, { type: 'platform' })] }, g)[0]; if (fp) { glDrawPlatform(c, fp, true); lblAdd(GL_PLATMSG, glSX((fp.x0 + fp.x1) / 2), glSY(fp.top) - 22, { col: '#fff', bg: '#c0392b', prio: 0, nofade: true }); }
   const ms = {}; rig.parts.filter(p => GL_LIFT[p.type]).forEach(p => { ms[p.id] = glMachine(p, g, P0); });
   rig.parts.filter(p => p.type === 'dyn' && !(run.blown && run.blown.has(p.id))).forEach(p => glDrawDyn(c, p, o.ghost || g, !run.on));
-  const faulty = id => { const m = ms[id]; if (!m) return false; const leg = ev && ev.legs.find(l => l.id === id); return (leg ? leg.faults.length : m.faults.length) > 0; };
+  const faulty = id => { const m = ms[id]; if (!m) return false; const leg = ev && ev.legs.find(l => l.id === id), pp = byId[id]; return (leg ? leg.faults.length : m.faults.filter(f => !(pp && pp.role === 'boulder' && f === 'drop')).length) > 0; };
+  /* the boulder in two legs (Tom, 11 Nov 2026): leg 1 pries it up and holds it 0.5 m off the landing leg; leg 2's crane carries it away and sets it down where the ghost boulder shows */
+  const bo = !run.on && ev && ev.boulder && ev.boulder.how !== 'blast' ? ev.boulder : null, held = !!(bo && bo.pry && bo.pry.ok && o.rock !== false), heldY = held ? bo.pry.lift : 0, bcr = rig.parts.find(p => p.type === 'crane' && p.role === 'boulder');
   rig.parts.filter(p => p.type === 'ramp').forEach(p => glDrawRamp(c, p, ms[p.id], faulty(p.id), g));
   /* the boulder and the ship sit behind the lifting machines' front parts */
   const rockShown = o.rock !== false && !(run.rockGone);
-  if (rockShown && !(o.ship && o.ship.carryRock)) glDrawBoulder(c, run.rockX != null ? run.rockX : 18.7, run.rockY != null ? run.rockY : glAt(g, 18.7), run.rockRot || 0.12, false);
+  const rockFront = run.rockX != null && run.rockX < GL.shipX + 1;   // a boulder set down beside the Gumdrop's other leg is drawn in front of it, so it can be seen
+  const drawRock = () => glDrawBoulder(c, run.rockX != null ? run.rockX : 18.7, run.rockY != null ? run.rockY : glAt(g, 18.7) + heldY, run.rockRot || 0.12, false);
+  if (rockShown && !(o.ship && o.ship.carryRock) && !rockFront) drawRock();
   if (run.rope && o.ship) glDrawCable(c, run.rope.a, run.rope.b, 0);
-  if (o.ship) { glDrawShip(c, o.ship); if (o.ship.carryRock && rockShown) glDrawBoulder(c, o.ship.x + 4.6 * Math.cos(o.ship.tilt || 0), o.ship.y - 4.6 * Math.sin(o.ship.tilt || 0), (o.ship.tilt || 0) + 0.12); }
-  rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id], run.trol && run.trol[p.id]));
-  if (!run.on && o.setdown !== false) rig.parts.filter(p => p.type === 'crane' && p.across).forEach(p => glDrawSetDown(c, glSetSpot(p, ms[p.id], g, plats), t));
-  rig.parts.filter(p => p.type === 'lever').forEach(p => glDrawLever(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
-  rig.parts.filter(p => p.type === 'jack').forEach(p => glDrawJack(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
+  if (o.ship) { glDrawShip(c, o.ship); if (rockShown && !(o.ship.carryRock) && rockFront) drawRock();
+    if (bo && bo.stage === 'clear' && bo.move && rockShown) { c.save(); c.globalAlpha = 0.55; glDrawBoulder(c, bo.move.to.x, bo.move.to.y, 0.3, false); c.restore(); }   // the ghost boulder: where leg 2 sets it down
+    if (o.ship.carryRock && rockShown) glDrawBoulder(c, o.ship.x + 4.6 * Math.cos(o.ship.tilt || 0), o.ship.y - 4.6 * Math.sin(o.ship.tilt || 0), (o.ship.tilt || 0) + 0.12); }
+  if (!o.ship && rockShown && rockFront) drawRock();
+  rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id] != null ? run.hook[p.id] : (p.role === 'boulder' && held ? glAt(g, 18.7) + 1.0 + heldY : undefined), run.trol && run.trol[p.id]));
+  if (!run.on && o.setdown !== false) rig.parts.filter(p => p.type === 'crane' && p.across).forEach(p => glDrawSetDown(c, glSetSpot(p, ms[p.id], g, p.role === 'boulder' ? [] : plats), t));
+  const holdK = p => run.tilt && run.tilt[p.id] != null ? run.tilt[p.id] : p.role === 'boulder' && held ? heldY / Math.max(0.1, p.rise || 1) : undefined;
+  rig.parts.filter(p => p.type === 'lever').forEach(p => glDrawLever(c, p, ms[p.id], faulty(p.id), holdK(p), g));
+  rig.parts.filter(p => p.type === 'jack').forEach(p => glDrawJack(c, p, ms[p.id], faulty(p.id), holdK(p)));
   /* cables, then the add-ons on top */
   const cp = id => { if (id === 'boulder') return { x: 18.9, y: glAt(g, 18.7) + 1.0 }; const p = byId[id]; return p ? glCablePoint(p, ms[id]) : null; };
   (rig.cables || []).forEach(cb => {
@@ -289,7 +299,8 @@ function glDrawWorld(c, o) {
       c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(glSX(gh.x), glSY(gh.y + 2.2), 3.2 * u0, 2.6 * u0, 0, 0, 7); c.stroke(); c.setLineDash([]); hk(gh, true); });
     hk(o.ship);
   }
-  if (!run.on && o.rock !== false) { const b = { x: GL.boulderX - 0.1, y: glAt(g, 18.7) + 1.0 }; drawHookDot(c, glSX(b.x), glSY(b.y), { glow: o.hookGlow }); lblAvoid(glSX(b.x), glSY(b.y), 12); }
+  if (!run.on && o.rock !== false && bcr) { const b = { x: GL.boulderX - 0.1, y: glAt(g, 18.7) + 1.0 + heldY }; drawHookDot(c, glSX(b.x), glSY(b.y), { roped: held }); lblAvoid(glSX(b.x), glSY(b.y), 12); }   // the boulder's ◉: the crane hooks on by itself
+  if (o.clipGlow && !run.on) o.clipGlow.forEach(sp => { const X = glSX(sp.x), Y = glSY(sp.y); drawHookDot(c, X, Y, { glow: true, r: 10 }); lblAvoid(X, Y, 14); lblAdd('clips on here', X, Y - 20, { size: 11, col: '#c9ffdc', bg: 'rgba(31,29,38,.82)', prio: 2, nofade: true }); });
   if (o.ruler) glDrawRuler(c, o.ruler);
   if (o.labels) glDrawLabels(c, o, g, crest, ev);
   lblFlush(c, GLV.LW, GLV.LH, o.fade);
@@ -302,7 +313,9 @@ function glDrawLabels(c, o, g, crest, ev) {
   if (o.rock !== false) {
     if (o.dropGlow) { const t = o.t || performance.now() / 1000, pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 6); c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 10 + 14 * pulse; c.strokeStyle = `rgba(126,240,168,${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
       c.beginPath(); c.ellipse(glSX(GL.boulderX - 0.3), glSY(by + 0.55), 2.1 * u, 1.4 * u, 0, 0, 7); c.stroke(); c.restore(); lblAdd('Drop here', glSX(GL.boulderX + 1.8), glSY(by + 3.6), { size: sz + 1, col: '#c9ffdc', bg: 'rgba(31,29,38,.7)', prio: 2 }); }
-    else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3, tx: glSX(GL.boulderX), ty: glSY(by + 0.9) }); }
+    else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3, tx: glSX(GL.boulderX), ty: glSY(by + 0.9) });
+    const bo = ev && ev.boulder; if (bo && bo.pry && bo.pry.ok && bo.how !== 'blast' && !o.dropGlow) lblAdd('Held up', glSX(GL.boulderX + 1.8), glSY(by + 4.4), { size: sz, col: '#c9ffdc', bg: 'rgba(31,29,38,.78)', prio: 3, tx: glSX(GL.boulderX), ty: glSY(by + 1.6) }); }
+  { const bo = ev && ev.boulder; if (bo && bo.stage === 'clear' && bo.how === 'crane' && bo.move && o.rock !== false) lblAdd('Boulder after leg 2', glSX(bo.move.to.x), glSY(bo.move.to.y + 3.1), { size: sz, col: '#c9ffdc', bg: 'rgba(31,29,38,.78)', prio: 3, tx: glSX(bo.move.to.x), ty: glSY(bo.move.to.y + 1.2) }); }
   lblAdd('Tractor beam reaches this line', glSX(58), glSY(crest), { size: sz, col: '#c9ffdc', bg: 'rgba(31,29,38,.72)', prio: 1 });   // on the dotted line (Tom, 9 Nov 2026): the goal is only to get the Gumdrop up to here
   if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4, tx: glSX(o.ship.x), ty: glSY(o.ship.y + 4.5) });
   if (o.ship && ev) glGhostList(ev).forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4, tx: glSX(gh.x), ty: glSY(gh.y + 4.5) }));

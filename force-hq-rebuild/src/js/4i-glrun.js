@@ -20,7 +20,7 @@ const glLegName = l => `${GL_NAME[l.type]}${l.type === 'ramp' ? ` ${fmt(l.m.L, 1
 function glSummary(r) {
   return { legs: r.legs.map(l => ({ type: l.type, name: glLegName(l), rise: +l.rise.toFixed(2), ma: +l.ma.toFixed(2), pull: +l.pull.toFixed(2), hand: +l.hand.toFixed(1), work: Math.round(l.work), stopped: !!l.stopped, thr: +(l.thruster || 0).toFixed(1), given: !!l.given, force: Math.round(l.force || 0), dist: +(l.dist || 0).toFixed(1) })),
     hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), up: glShort(r) ? +glShort(r).up.toFixed(1) : null, toLine: glShort(r) ? +glShort(r).to.toFixed(1) : null, work: Math.round(r.work), dmg: { tp: +(r.dmg.tips || 0).toFixed(1), t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, s: +(r.dmg.scrape || 0).toFixed(1), bu: +(r.dmg.bumps || 0).toFixed(1), f: +(r.dmg.falls || 0).toFixed(1), tr: r.dmg.torn || 0, total: +r.dmg.total.toFixed(1) }, torn: r.torn ? { leg: r.torn.leg, strain: r.torn.strain } : null,
-    boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, stopLeg: r.stop ? r.stop.leg : null, unroped: r.stop && r.stop.unroped ? r.stop.unroped.length : 0, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, hints: r.score.hints || 0, max: GL_MAX, ending: r.score.ending, load: r.load };
+    boulder: r.boulder.ok ? r.boulder.how : r.boulder.stage === 'held' ? 'held' : r.boulder.how ? 'stuck' : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, stopLeg: r.stop ? r.stop.leg : null, unroped: r.stop && r.stop.unroped ? r.stop.unroped.length : 0, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, hints: r.score.hints || 0, max: GL_MAX, ending: r.score.ending, load: r.load };
 }
 /* where the hull damage came from, in words with the percentages (used on the result card, the ending card and My Rescue) */
 function glHullSources(d) {
@@ -74,14 +74,38 @@ function glBuildBeats(res, rig, o) {
   /* 2. Smooshy squeezes out through the hatch */
   add(1.3, (S, k) => { S.ship.inside = k < 0.35; S.ship.shake = false; const e = glEase((k - 0.3) / 0.7); S.smoo = { x: GL.shipX + 1.2 + 2.4 * e, y: S.ship.y + 1.6 * (1 - e) + (RMOTION ? 0 : Math.sin(e * Math.PI) * 1.2), mood: 'wave' }; if (k < 0.35) S.smoo = null; S.bubble = k > 0.5 ? { who: 'smoo', s: 'Here goes!' } : null; });
   walkFrom = { x: GL.shipX + 3.6, y: shipY0 };
-  /* 3. the boulder */
-  const bm = parts.find(p => p.role === 'boulder' && GL_LIFT[p.type]), bt = res.boulder;
-  if (bt.how === 'lever' || bt.how === 'jack') { const spot = bt.how === 'lever' ? { x: bm.x + GL.beam + 0.6, y: glAt(res.ground, bm.x + GL.beam + 0.6) } : { x: bm.x + 1.3, y: glAt(res.ground, bm.x + 1.3) }; walkTo(spot);
-    add(bt.ok ? 1.6 : 1.4, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); if (bt.ok) { S.tilt[bm.id] = Math.min(1, k * 1.6) * (bt.how === 'lever' ? 0.4 : 0.6); const e = glEase((k - 0.35) / 0.65); S.rockX = 18.7 + 3.5 * e; S.rockY = glAt(res.ground, S.rockX) + Math.sin(e * Math.PI) * 0.6; S.rockRot = 0.12 + e * 4; if (k > 0.98) S.rockAway = true; S.bubble = { who: 'smoo', s: 'Boulder off!' }; }
-      else { S.tilt[bm.id] = RMOTION ? 0 : Math.abs(Math.sin(k * 14)) * 0.05; S.bubble = { who: 'smoo', s: o.test ? 'Too stiff!' : `Too stiff! (${fmt(bt.pull, 1)} N)` }; } }); }
-  else if (bt.how === 'winch') { const ch = glAddons({ parts, cables: (rig.cables || []).map(c => ({ a: c.a === 'boulder' ? '__b' : c.a, b: c.b === 'boulder' ? '__b' : c.b })) }, '__b').chain, w = ch.filter(p => p.type === 'winch').pop() || ch[0], spot = { x: w.x - 1.3, y: glFloorAt(w.x - 1.3, res.ground, plats) }; walkTo(spot);
-    add(1.6, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.spin = k * 12; if (bt.ok) { const e = glEase(k); S.rockX = glLerp(18.7, Math.min(w.x - 2, 26), e); S.rockY = glAt(res.ground, S.rockX); S.rockRot = 0.12 + e * 3; S.bubble = { who: 'smoo', s: 'Boulder off!' }; } else S.bubble = { who: 'smoo', s: 'It won\'t budge!' }; }); }
-  const rockOn = res.rockOn; if (rockOn) add(0.9, (S, k) => { S.ship.carryRock = true; S.bubble = { who: 'ship', s: 'The rock is still jammed on!' }; if (k > 0.5 && !S.rockDmg) { S.rockDmg = true; if (!res.torn) S.ship.dmg += 25; } });
+  /* 3. the boulder, in two legs (Tom, 11 Nov 2026). Leg 1: a lever (its winch locks) or a screw jack pries it 0.5 m off the Gumdrop's leg and holds it. Leg 2: a crane gantry over it lifts it,
+        the trolley carries it across (over the Gumdrop if the lift is high enough) and lowers it onto the ground. Everything comes from res.boulder (the model). */
+  const bt = res.boulder, pm = parts.find(p => p.role === 'boulder' && (p.type === 'lever' || p.type === 'jack')), cm = parts.find(p => p.role === 'boulder' && p.type === 'crane'), rockGY = x => glAt(res.ground, x), rock0 = rockGY(18.7);
+  const pseudo = (type, m) => ({ type, addons: glAddons(rig, m.id).chain.map(q => q.id), m: { part: m } });
+  if (bt.pry && pm) {
+    const py = bt.pry, spot = glHandSpot(pseudo(pm.type, pm), rig, res.ground, plats, null), tiltTo = py.lift / Math.max(0.1, pm.rise || 1); walkTo(spot);
+    add(py.ok ? 2.0 : 1.8, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.spin = k * 14; S.rockX = 18.7; S.rockRot = 0.12;
+      if (py.ok) { const e = glEase(Math.min(1, k * 1.4)); S.tilt[pm.id] = tiltTo * e; S.rockY = rock0 + py.lift * e; if (cm) { S.hook[cm.id] = S.rockY + 1.0; S.trol[cm.id] = 18.7; }   // the crane's hook is on the boulder from here
+        S.narr = py.how === 'jack' ? 'Smooshy winds the screw jack, and the boulder rises off the Gumdrop\'s leg.' : 'Smooshy cranks the winch, the lever tilts and the boulder rises off the Gumdrop\'s leg.'; S.bubble = k > 0.7 ? { who: 'smoo', s: 'Locked!' } : null; }
+      else if (py.easy) { const up = glEase(Math.min(1, k * 2)), dn = k > 0.6 ? glEase((k - 0.6) / 0.4) : 0, e = up * (1 - dn); S.tilt[pm.id] = tiltTo * e; S.rockY = rock0 + py.lift * e;
+        S.narr = k > 0.6 ? 'It dropped back when Smooshy let go.' : 'Smooshy lifts the boulder, but nothing holds it up.'; S.bubble = k > 0.6 ? { who: 'smoo', s: 'It dropped back!' } : null; }
+      else { S.tilt[pm.id] = RMOTION ? 0 : Math.abs(Math.sin(k * 14)) * 0.05; S.rockY = rock0; S.narr = 'The pull on the lever is more than Smooshy can manage, so the boulder does not budge.'; S.bubble = { who: 'smoo', s: o.test ? 'Too stiff!' : `Too stiff! (${fmt(py.pull, 1)} N)` }; } }); }
+  if (bt.move && cm) {
+    const mv = bt.move, held = !!(bt.pry && bt.pry.ok), spot = glHandSpot(pseudo('crane', cm), rig, res.ground, plats, null), top = rock0 + mv.rise, held0 = rock0 + (held ? bt.pry.lift : 0), to = mv.to, hit = res.ship0.x + 3.9; walkTo(spot);
+    if (mv.why === 'jammed' || mv.why === 'heavy') add(1.7, (S, k) => { S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.spin = k * 14; S.hook[cm.id] = held0 + 1.0; S.trol[cm.id] = 18.7;
+      S.narr = mv.why === 'jammed' ? 'The boulder is still jammed against the Gumdrop\'s leg, so the crane cannot lift it.' : 'The lift is too heavy for Smooshy, so the boulder does not move.'; S.bubble = { who: 'smoo', s: mv.why === 'jammed' ? 'It won\'t come out!' : (o.test ? 'Too heavy!' : `Too heavy! (${fmt(mv.pull, 1)} N)`) }; });
+    else {
+      add(clamp(1.2 + mv.rise * 0.25, 1.5, 3), (S, k) => { const e = glEase(k); S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.spin = k * 20; S.rockX = 18.7; S.rockRot = 0.12; S.rockY = glLerp(held0, top, e); S.hook[cm.id] = S.rockY + 1.0; S.trol[cm.id] = 18.7;
+        S.narr = 'Smooshy winds the crane\'s winch, and the boulder lifts into the air.'; S.bubble = k < 0.5 ? { who: 'smoo', s: 'Heave!' } : null; });
+      if (mv.why === 'low') {   // the boulder meets the Gumdrop, and goes back
+        add(1.6, (S, k) => { const e = glEase(k < 0.5 ? k * 2 : 2 - k * 2); S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.rockX = glLerp(18.7, hit, e); S.rockY = top; S.rockRot = 0.12 + e * 0.3; S.hook[cm.id] = top + 1.0; S.trol[cm.id] = S.rockX;
+          S.narr = 'The boulder would hit the Gumdrop. It needs to be lifted higher before it is carried across.'; S.bubble = k > 0.3 && k < 0.7 ? { who: 'ship', s: 'Ouch! The boulder!' } : null; });
+        add(1.1, (S, k) => { const e = glEase(k); S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.rockX = 18.7; S.rockY = glLerp(top, held0, e); S.rockRot = 0.12; S.hook[cm.id] = S.rockY + 1.0; S.trol[cm.id] = 18.7; S.narr = 'The crane puts the boulder back where it was.'; S.bubble = null; });
+      } else {
+        add(clamp(Math.abs(to.x - 18.7) * 0.22, 1.2, 3), (S, k) => { const e = glEase(k); S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.spin = k * 20; S.rockX = glLerp(18.7, to.x, e); S.rockY = top; S.rockRot = 0.12 + e * 0.6; S.hook[cm.id] = top + 1.0; S.trol[cm.id] = S.rockX;
+          S.narr = 'The trolley carries the boulder across.'; S.bubble = null; });
+        add(1.3, (S, k) => { const e = glEase(k); S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.rockX = to.x; S.rockY = glLerp(top, to.y, e); S.rockRot = 0.72; S.hook[cm.id] = S.rockY + 1.0; S.trol[cm.id] = to.x;
+          S.narr = mv.ok ? 'The trolley lowers the boulder onto the ground.' : mv.why === 'near' ? 'The boulder is set down too close to where it was, so it is still in the way.' : 'The boulder is set down on the Gumdrop, so it is still in the way.';
+          S.bubble = k > 0.6 ? { who: 'smoo', s: mv.ok ? 'Boulder clear!' : 'Still in the way!' } : null; });
+      } } }
+  if (bt.pry && bt.pry.ok && res.rockOn) add(1.2, (S, k) => { S.narr = 'The boulder is held up, but it is still in the way.'; S.bubble = { who: 'smoo', s: 'Still in the way!' }; });
+  const rockOn = res.rockOn; if (rockOn) add(0.9, (S, k) => { if (pm) S.tilt[pm.id] = 0; S.ship.carryRock = true; S.bubble = { who: 'ship', s: 'The rock is still jammed on!' }; if (k > 0.5 && !S.rockDmg) { S.rockDmg = true; if (!res.torn) S.ship.dmg += 25; } });
   /* 4. the legs: the Gumdrop follows each leg's own path from the model (leg.path), with Smooshy working the machine.
         Hull damage is added as it goes, from the leg's own scrape, bump, fall and thruster numbers (the model's numbers, spread along the path). */
   const ran = res.legs.filter(l => !l.skipped); let shipAt = { x: GL.shipX, y: shipY0 }, prevLie = 0;
@@ -221,7 +245,13 @@ function glTestLines(res) {
   if (!res.legs.length) L.push(['No machine is ready to lift the Gumdrop', 0]);
   else if (stop && stop.why === 'gap') L.push([stop.unroped && stop.unroped.length ? `Leg ${stop.leg + 1}'s machine isn't roped to the Gumdrop` : `After leg ${stop.leg}, every rope was used and the Gumdrop was not at the crest`, 0]);
   if (res.torn) L.push(['The boulder was still on, and the Gumdrop was pulled apart', 0]);
-  const bo = res.boulder; L.push([bo.how ? (bo.ok ? 'The boulder rolls free' : 'The boulder is still stuck') : 'The boulder is still stuck', bo.ok ? 1 : 0]);
+  /* the boulder is two legs: pry it up and hold it, then lift it clear (Tom, 11 Nov 2026) */
+  const bo = res.boulder, py = bo.pry, mv = bo.move;
+  if (bo.how === 'blast') L.push(['The boulder was blasted away', 1]);
+  else {
+    if (py) L.push([py.ok ? 'The boulder is pried up and held' : py.easy ? 'The boulder is pried up, but nothing holds it up' : 'The boulder is too heavy for Smooshy to pry up', py.ok ? 1 : 0]);
+    if (mv) L.push([mv.ok ? 'The boulder is lifted clear' : { jammed: 'The crane cannot lift the boulder until it is pried up and held', heavy: 'The boulder is too heavy for Smooshy to lift with the crane', near: 'The boulder is set down too close to where it was', on: 'The boulder is set down on the Gumdrop', low: 'The boulder would hit the Gumdrop: it needs a higher lift' }[mv.why], mv.ok ? 1 : 0]);
+    if (!py && !mv) L.push(['The boulder is still stuck', 0]); }
   if (res.bShip) L.push(['Dynamite went off too close to the Gumdrop', 0]);
   { const sh = glShort(res); L.push([res.arrived ? 'The Gumdrop reached the tractor beam' : 'The Gumdrop did not reach the tractor beam yet.' + (sh ? ' ' + glShortText(sh.up, sh.to) : ''), res.arrived ? 1 : 0]); }
   return L;
@@ -268,7 +298,7 @@ function glShowResult(sum, pred, newBest) {
     ${rows ? `<div class="gltab"><table><thead><tr><th>Leg</th><th>Machine</th><th>Rise</th><th>Total MA</th><th>Pull</th><th>Hand travel</th><th>Work</th></tr></thead><tbody>${rows}</tbody></table></div>
     <p class="glnote">Work receipt: when a leg lifts the Gumdrop, its work = the load × the rise. When a leg drags it, the work = the force needed × the distance dragged. Change the machines and only the pull and hand travel change.</p>` : ''}
     <ul class="glsums"><li>Hand travel: <b>${n0(sum.hand)} m</b> of 1,500 m oxygen</li><li>Sugar crystals: <b>${sum.cost}</b> of 475</li><li>Final crest height: <b>${f1(sum.crest)} m</b></li><li>Total work: <b>${n0(sum.work)} J</b></li>
-      <li>Hull damage: <b>${f1(sum.dmg.total)}%</b>${sum.dmg.total ? ` <small>(${glHullSources(sum.dmg).join(', ')})</small>` : ''}</li><li>Boulder: <b>${{ lever: 'levered off', jack: 'jacked off', winch: 'winched away', blast: 'blasted', stuck: 'still jammed on', left: 'left on' }[sum.boulder]}</b></li></ul>
+      <li>Hull damage: <b>${f1(sum.dmg.total)}%</b>${sum.dmg.total ? ` <small>(${glHullSources(sum.dmg).join(', ')})</small>` : ''}</li><li>Boulder: <b>${{ crane: 'lifted clear', blast: 'blasted', held: 'held up but still in the way', stuck: 'still jammed on', left: 'left on', lever: 'levered off', jack: 'jacked off', winch: 'winched away' }[sum.boulder]}</b></li></ul>
     ${sum.score != null ? `<ul class="objs glpts">${pt('Smooshy\'s hardest pull', P.pull, 5, `${f1(sum.hardest)} N. 54 to 60 N earns 5.`)}${pt('Ship condition', P.cond, 2)}${pt('Boulder cleared', P.boulder, 1)}${pt('Oxygen: 1,500 m or less', P.oxy, 1, P.oxy ? '' : 'GASA sent extra oxygen.')}${pt('Budget: 475 crystals or less', P.budget, 1, P.budget ? '' : 'GASA sent extra crystals.')}${P.maths != null ? pt('Maths approved by GASA', P.maths, 1) : ''}${sum.hintCost ? `<li>Hints used: <b>${sum.hints || sum.hintCost + 1}</b> (the first is free): <b>−${sum.hintCost}</b></li>` : ''}</ul>` : ''}`;
 }
 /* ===== stage 4 plumbing: the best run's picture for the worksheet's "My Rescue" page =====

@@ -1,10 +1,10 @@
 /* ===== Part 5, stage 4: the route strip ("My working"), 💡 hints, and 📨 Send to GASA (spec section 11) =====
    The student is at GASA Mission Control. The board is a simulator, so Test in simulator shows where the route works or fails and NO numbers.
-   The maths goes in the strip: one row per leg (plus a Boulder row), each with an input for every machine's MA, the total MA, Smooshy's pull, the hand distance and the work.
+   The maths goes in the strip: one row per leg (plus the two boulder rows), each with an input for every machine's MA, the total MA, Smooshy's pull, the hand distance and the work.
    Nothing is pre-calculated. Send to GASA checks every cell: wrong cells are flagged, a cell rejected twice is shown with its right value and working ("helped", which counts as a hint),
    and when every cell is right: "Mission accepted 🚀" and the rescue animation (4i-glrun.js) plays.
    Saved in chal.c6e.gl.work = { rows: { rowKey: { sig, v: {cell: text}, ok: {cell: 1}, bad: {cell: 1}, rej: {cell: {n, last}}, helped: {cell: 1} } } }.
-   A row's key is the machine's id (the boulder is 'B'); its sig is a fingerprint of the machine as built, so changing a machine clears that row's cells.
+   A row's key is the machine's id (the boulder's pry row is 'B' and its lift row 'B2'); its sig is a fingerprint of the machine as built, so changing a machine clears that row's cells.
    A leg with a drag in it (leg.given, see 4q-pull.js and the spec's section 4) has no textbook machine MA: the row GIVES the force and the distance and the work, and asks for the rope MA, Smooshy's pull (force ÷ MA) and the hand distance (MA × distance).
    glwRows() builds the rows from the rig (GLB.ev); glwSnapshot() is the copy that goes with a launched run to the My Rescue page (4l-glreport.js). */
 const GLW = { open: {}, busy: false, msg: null };
@@ -32,20 +32,22 @@ function glwMake(o) {
   const hd = given ? given.dist : o.rise;   // the distance the Gumdrop moves along its path, or the height a lift rises
   if (o.hand != null) { cells.push({ k: 'hand', lab: 'Hand distance (m)', exp: o.hand, d: 1, wk: `${f2(o.tot)} × ${f1(hd)} m = ${f1(o.hand)} m` }); t2.push(`Hand distance = ${B} × ${f1(hd)} m = ${B} m`); }
   if (o.work != null && !given) { cells.push({ k: 'work', lab: 'Work (J)', exp: o.work, d: 0, wk: `${n0(o.load)} × ${f1(o.rise)} m = ${n0(o.work)} J` }); t2.push(`Work = ${n0(o.load)} × ${f1(o.rise)} m = ${B} J`); }
-  return { kind: o.kind, key: o.key, sig: o.sig, name: o.name, desc: o.desc, load: o.load, mach: o.mach, roped: o.roped, cells, t2, given: given ? Object.assign({}, given, { text: given.text }) : null };
+  return { kind: o.kind, key: o.key, short: o.short, sig: o.sig, name: o.name, desc: o.desc, load: o.load, mach: o.mach, roped: o.roped, cells, t2, given: given ? Object.assign({}, given, { text: given.text }) : null };
 }
 function glwRows() {
   const ev = GLB.ev, rig = GLB.rig; if (!ev) return []; const byId = {}; rig.parts.forEach(p => byId[p.id] = p);
   const f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB'), B = GLH_BLANK, rows = [];
-  /* the boulder: a lever or jack set on it, or a rope and winch from it. A blast needs no maths. */
-  const bo = ev.boulder, bm = rig.parts.find(p => p.role === 'boulder' && (p.type === 'lever' || p.type === 'jack'));
-  if (bo && (bo.how === 'lever' || bo.how === 'jack' || bo.how === 'winch')) {
-    const ad = bm ? glAddons(rig, bm.id) : glAddons({ parts: rig.parts, cables: (rig.cables || []).map(c => ({ a: c.a === 'boulder' ? '__b' : c.a, b: c.b === 'boulder' ? '__b' : c.b })) }, '__b');
-    const ropes = ad.blocks.length ? clamp(ad.blocks[0].ropes | 0, 1, GL.ropesMax) : null, wins = ad.winches.slice(0, GL.winchMax).map(w => w.ratio), mMA = bm ? (bm.type === 'jack' ? GL.jackMA : glLeverMA(bm)) : null;
-    const mWk = !bm ? '' : bm.type === 'jack' ? 'a screw jack has MA 120' : `${f1(GL.beam - bm.arm)} ÷ ${f1(bm.arm)} = ${fmt(mMA, 2)}`;
-    const mT2 = !bm ? '' : bm.type === 'jack' ? 'Screw jack MA = 120' : `Lever MA = effort arm ÷ load arm = ${f1(GL.beam - bm.arm)} ÷ ${f1(bm.arm)} = ${B}`;
-    const desc = (bm ? (bm.type === 'jack' ? 'screw jack' : `lever, load arm ${f1(bm.arm)} m`) : 'rope and winch') + (ropes ? ` · pulley block, ${ropes} rope${ropes > 1 ? 's' : ''}` : '') + wins.map(w => ` · winch ×${w}`).join('');
-    rows.push(glwMake({ kind: 'boulder', key: 'B', sig: JSON.stringify(['B', bo.how, mMA, ropes, wins]), name: 'Boulder', desc, load: GL.boulderN, mach: bm ? bm.type : null, mMA, mWk, mT2, ropes, wins, tot: bo.ma, pull: bo.pull, hand: null, work: null, roped: true }));
+  /* the boulder is two jobs of its own (Tom, 11 Nov 2026), so it has two rows: "Boulder: pry" (a lever with a winch on its pulling end, or a screw jack) and "Boulder: lift" (the crane gantry over it).
+     A row appears only for a machine that is placed. A blast needs no maths. */
+  const bo = ev.boulder, pry = bo && bo.pry, mv = bo && bo.move, bm = pry ? rig.parts.find(p => p.id === pry.id) : null, cr = mv ? rig.parts.find(p => p.id === mv.id) : null, pl1 = n => `${n} rope${n > 1 ? 's' : ''}`;
+  if (pry && bm) {
+    const jack = pry.how === 'jack', mMA = pry.mma, wins = pry.wins;
+    const mWk = jack ? 'a screw jack has MA 120' : `${f1(GL.beam - bm.arm)} ÷ ${f1(bm.arm)} = ${fmt(mMA, 2)}`, mT2 = jack ? 'Screw jack MA = 120' : `Lever MA = effort arm ÷ load arm = ${f1(GL.beam - bm.arm)} ÷ ${f1(bm.arm)} = ${B}`;
+    rows.push(glwMake({ kind: 'boulder', key: 'B', short: 'the boulder pry', sig: JSON.stringify(['B', pry.how, mMA, wins]), name: 'Boulder: pry', desc: (jack ? 'screw jack' : `lever, load arm ${f1(bm.arm)} m`) + wins.map(w => ` · winch ×${w}`).join(''), load: GL.boulderN, mach: bm.type, mMA, mWk, mT2, ropes: null, wins, tot: pry.ma, pull: pry.pull, hand: null, work: null, roped: true }));
+  }
+  if (mv && cr) {
+    const ropes = glAddons(rig, cr.id).blocks.length ? mv.ropes : null, wins = mv.wins;
+    rows.push(glwMake({ kind: 'boulder', key: 'B2', short: 'the boulder lift', sig: JSON.stringify(['B2', ropes, wins, mv.rise]), name: 'Boulder: lift', desc: `crane gantry, lifts ${f1(mv.rise)} m` + (ropes ? ` · pulley block, ${pl1(ropes)}` : '') + wins.map(w => ` · winch ×${w}`).join(''), load: GL.boulderN, mach: null, ropes, wins, tot: mv.ma, pull: mv.pull, hand: mv.hand, work: null, rise: mv.rise, roped: true }));
   }
   ev.legs.forEach((l, i) => {
     const chain = (l.type === 'drag' ? [l.id] : []).concat(l.addons).map(id => byId[id]).filter(Boolean), hasBlock = chain.some(p => p.type === 'block'), ropes = hasBlock ? l.ropes : null, wins = l.winches.slice(0, GL.winchMax), p = l.m ? l.m.part : null;
@@ -94,7 +96,7 @@ function glwRowHTML(r, e) {
 }
 function glwPaint() {
   const host = $('#glStrip'); if (!host || !GLB.ev) return; const rows = glwRows(), W = glwSync(rows), n = glwHints();
-  const body = rows.length ? rows.map(r => glwRowHTML(r, glwEntry(W, r))).join('') : '<p class="glnote">Build a route in the simulator above. Each leg of the route gets a row here, and so does the boulder.</p>';
+  const body = rows.length ? rows.map(r => glwRowHTML(r, glwEntry(W, r))).join('') : '<p class="glnote">Build a route in the simulator above. Each leg of the route gets a row here, and so do the machines that pry up and lift the boulder.</p>';
   host.innerHTML = `<div class="glw-top"><h3>🛰️ My working: the route strip</h3><span class="glw-hints" id="glwHints">💡 Hints used: <b>${n}</b>${n ? '' : ' (the first is free)'}</span></div>
     <p class="glnote">GASA checks your maths before the rescue launches. Test your route in the simulator first: it shows where the route works, but no numbers. Then work out every box for each leg and send it.</p>
     <div class="glw-rows">${body}</div>
@@ -120,7 +122,7 @@ function glwSend() {
   helped.forEach(([r, c]) => glhSpend(`help:${r.key}:${c.k}:${(glwWork().rows[r.key] || {}).sig}`));   // a helped cell counts as a hint (once for that cell and machine)
   const tried = glState().sent || 0; GLB.save({ id: GLB.mid }, { tried: true, sent: tried + 1 });
   if (wrong.length) {
-    const by = []; rows.forEach(r => { const cs = wrong.filter(q => q[0] === r).map(q => q[1].lab.toLowerCase().replace(/ \((n|m|j)\)$/, '').replace('smooshy\'s ', '')); if (cs.length) by.push(`${r.kind === 'boulder' ? 'the boulder' : r.name.toLowerCase()}'s ${glwList(cs)}`); });
+    const by = []; rows.forEach(r => { const cs = wrong.filter(q => q[0] === r).map(q => q[1].lab.toLowerCase().replace(/ \((n|m|j)\)$/, '').replace('smooshy\'s ', '')); if (cs.length) by.push(`${r.short || r.name.toLowerCase()}'s ${glwList(cs)}`); });
     GLB.ev = gpEvaluate(GLB.rig, { hints: glState().hints || 0 });
     GLW.msg = { cls: 'no', text: `Mission not accepted yet: check ${glwList(by)}.` + (anyHelped ? ' GASA has filled in the boxes you got wrong twice. They show as helped, with the working. Press Send to GASA again.' : '') }; glwPaint();
     return;

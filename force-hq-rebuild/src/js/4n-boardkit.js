@@ -51,6 +51,9 @@ function drawLeverShape(c, o) {
   c.lineCap = 'round'; c.strokeStyle = o.bad ? GLC.bad : GLC.wood2; c.lineWidth = th; c.beginPath(); c.moveTo(o.a.x, o.a.y); c.lineTo(o.b.x, o.b.y); c.stroke();
   if (!o.bad) { c.strokeStyle = GLC.wood; c.lineWidth = th / 2; c.beginPath(); c.moveTo(o.a.x, o.a.y - th * 0.07); c.lineTo(o.b.x, o.b.y - th * 0.07); c.stroke(); }
   c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(o.fx, o.fy, Math.max(2.5, th * 0.5), 0, 7); c.fill();
+  /* the crater's levers only (o.pull = the rope's length in px): a short rope and a handle hang from the pulling end, so it reads as "something pulls here". The Workshop bench lever passes no o.pull. */
+  if (o.pull) { c.lineCap = 'round'; c.strokeStyle = GLC.ropeD; c.lineWidth = Math.max(2.4, th * 0.5); c.beginPath(); c.moveTo(o.b.x, o.b.y); c.lineTo(o.b.x, o.b.y + o.pull); c.stroke(); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.2, th * 0.26); c.stroke();
+    const hw = Math.max(5, th * 1.1), hh = Math.max(4, th * 0.8); c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(o.b.x - hw - 1.5, o.b.y + o.pull - 1.5, hw * 2 + 3, hh + 3, 3); c.fill(); c.fillStyle = GLC.yellow; c.beginPath(); c.roundRect(o.b.x - hw, o.b.y + o.pull, hw * 2, hh, 2.5); c.fill(); }
 }
 
 /* ---------- the docked settings panel (replaces the floating menus) ----------
