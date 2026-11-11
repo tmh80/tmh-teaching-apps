@@ -183,13 +183,25 @@ function gpAnchors(rig, W) {
     out.push({ id: p.id, type: 'drag', x: p.x, base: glStand(p, p.x, W.g, W.plats), chain, faults, ropes: blocks.length ? clamp(blocks[0].ropes | 0, 1, GL.ropesMax) : 1, winches: winches.slice(0, GL.winchMax).map(w => w.ratio) }); });
   return out;
 }
-function gpBoulder(rig, parts, blasts, ship0) {
-  const bRock = blasts.filter(b => Math.abs(b.x - GL.boulderX) <= b.r + 0.6); let boulder = { how: null, pull: null, ok: false, ma: 0 };
-  const bm = parts.find(p => p.role === 'boulder' && (p.type === 'lever' || p.type === 'jack')), bc = (rig.cables || []).find(c => c.a === 'boulder' || c.b === 'boulder');
-  if (bRock.length) boulder = { how: 'blast', ok: true, pull: 0, ma: 0 };
-  else if (bm) { const ad = glAddons(rig, bm.id), ma = (bm.type === 'jack' ? GL.jackMA : glLeverMA(bm)) * (bm.type === 'jack' ? 1 : ad.ropes * ad.wm); boulder = { how: bm.type, id: bm.id, ma, pull: GL.boulderN / ma, ok: GL.boulderN / ma <= GL.pullOk + 1e-9 }; }
-  else if (bc) { const ad = glAddons({ parts, cables: (rig.cables || []).map(c => ({ a: c.a === 'boulder' ? '__b' : c.a, b: c.b === 'boulder' ? '__b' : c.b })) }, '__b'), ma = ad.ropes * ad.wm; if (ad.cabled) boulder = { how: 'winch', ma, pull: GL.boulderN / ma, ok: GL.boulderN / ma <= GL.pullOk + 1e-9 }; }
-  return boulder;
+/* The boulder is a two-leg job of its own (Tom, 11 Nov 2026: "removing the boulder and moving it out of the way IS the tutorial. Leg one = pry free, leg two = lift and shift to the side.
+   The boulder is lifted up and the lever keeps it lifted up, and then the crane attaches to it. Lever and winch: the winch locks to keep it lifted.").
+   1. PRY: a lever or a screw jack set on the boulder (role 'boulder') lifts it off the landing leg. It only stays up if something holds it: a winch on the lever's pulling end locks, and a screw jack holds by itself.
+   2. LIFT AND SHIFT: a crane gantry over the boulder (role 'boulder') picks the held boulder up, its trolley carries it across, and it lowers it onto the ground. It must end at least 3 m from where it was
+      and clear of the Gumdrop, and to pass over the Gumdrop it must be lifted at least 5.5 m. A crane cannot pick up a boulder that is still jammed under the leg.
+   A blast that reaches the boulder still clears it in one go. Until BOTH legs work the boulder is still in the way (rockOn), with the same costs and the same tearing rule as before.
+   Result: { ok, stage: 'jammed' | 'held' | 'clear', how: 'blast' | 'crane' | 'lever' | 'jack' | null, pry: {how,id,ma,pull,lock,lift,ok}|null, move: {id,ma,pull,rise,across,to,why,ok}|null, pull, ma, id } */
+const GP_ROCK = { lift: 5.5, away: 3, clear: 2.7 };
+function gpBoulder(rig, parts, blasts, ship0, g) {
+  const N = GL.boulderN, bx = GL.boulderX - 0.3, bRock = blasts.filter(b => Math.abs(b.x - GL.boulderX) <= b.r + 0.6);
+  if (bRock.length) return { how: 'blast', ok: true, stage: 'clear', pull: 0, ma: 0, pry: null, move: null };
+  const bm = parts.find(p => p.role === 'boulder' && (p.type === 'lever' || p.type === 'jack')), cr = parts.find(p => p.role === 'boulder' && p.type === 'crane'); let pry = null, move = null;
+  if (bm) { const ad = glAddons(rig, bm.id), jack = bm.type === 'jack', ma = jack ? GL.jackMA : glLeverMA(bm) * ad.wm, pull = N / ma, lock = jack || ad.winches.length > 0;
+    pry = { how: bm.type, id: bm.id, ma, mma: jack ? GL.jackMA : glLeverMA(bm), wins: jack ? [] : ad.winches.slice(0, GL.winchMax).map(w => w.ratio), pull, lock, lift: 0.5, easy: pull <= GL.pullOk + 1e-9, ok: pull <= GL.pullOk + 1e-9 && lock }; }
+  if (cr) { const ad = glAddons(rig, cr.id), ma = ad.ropes * ad.wm, pull = N / ma, ac = cr.across || 0, tx = clamp(cr.x + ac, 0, GL.W), over = Math.min(cr.x, tx) < ship0.x + GP_ROCK.clear && Math.max(cr.x, tx) > ship0.x - GP_ROCK.clear;
+    const why = !(pry && pry.ok) ? 'jammed' : pull > GL.pullOk + 1e-9 ? 'heavy' : Math.abs(tx - bx) < GP_ROCK.away - 1e-9 ? 'near' : Math.abs(tx - ship0.x) < GP_ROCK.clear - 1e-9 ? 'on' : over && cr.rise < GP_ROCK.lift - 1e-9 ? 'low' : null;
+    move = { how: 'crane', id: cr.id, ma, ropes: ad.ropes, wins: ad.winches.slice(0, GL.winchMax).map(w => w.ratio), pull, rise: cr.rise, across: ac, to: { x: tx, y: g ? glAt(g, tx) : 0 }, hand: ma * cr.rise, work: N * cr.rise, why, ok: !why }; }
+  const ok = !!(pry && pry.ok && move && move.ok);
+  return { how: ok ? 'crane' : pry ? pry.how : cr ? 'crane' : null, ok, stage: ok ? 'clear' : pry && pry.ok ? 'held' : 'jammed', pry, move, id: pry ? pry.id : null, ma: pry ? pry.ma : 0, pull: pry || move ? Math.max(pry ? pry.pull : 0, move ? move.pull : 0) : null };
 }
 /* the path as a few plain stretches, for the route strip */
 function gpSegs(path, at) {
@@ -202,7 +214,7 @@ function gpSegs(path, at) {
 function gpEvaluate(rig, opts) {
   opts = opts || {}; rig = rig || { parts: [], cables: [] };
   const W = gpWorld(rig), { g, blasts, plats, parts, ms } = W, ship0 = { x: GL.shipX, y: glAt(g, GL.shipX) };
-  const bShip = blasts.filter(b => Math.hypot(b.x - GL.shipX, b.y - ship0.y) <= GL.nearShip), boulder = gpBoulder(rig, parts, blasts, ship0);
+  const bShip = blasts.filter(b => Math.hypot(b.x - GL.shipX, b.y - ship0.y) <= GL.nearShip), boulder = gpBoulder(rig, parts, blasts, ship0, g);
   const rockOn = !boulder.ok, anchors = gpAnchors(rig, W); let load = GL.ship + (rockOn ? GL.rock : 0), torn = null;
   /* what each platform already carries: the machines standing on it */
   const onPlat = (b, pl) => b && b.kind === 'platform' && b.id === pl.id, wt = {};

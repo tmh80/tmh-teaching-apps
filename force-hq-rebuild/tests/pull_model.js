@@ -2,15 +2,15 @@
    Loads the model files straight from src/, so it tests exactly what the app will run. */
 const fs = require('fs'), path = require('path'), R = f => fs.readFileSync(path.join(__dirname, '..', f), 'utf8');
 const src = 'const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));const fmt=(v,dp=1)=>String(Math.round(v*10**dp)/10**dp);\n' + R('src/js/4f-gummylift.js') + '\n' + R('src/js/4q-pull.js') + '\n' + R('tests/rescue_routes.js') +
-  '\nreturn { GL, GP, GL_MAX, gpEvaluate, glEvaluate, gpWorld, gpSolid, glAt, glGround, ROUTES, EXPECT, BL, CREST, chainOf, rig };';
-const M = new Function(src)(), { GL, GP, gpEvaluate, ROUTES, EXPECT, BL, CREST } = M;
+  '\nreturn { GL, GP, GL_MAX, gpEvaluate, glEvaluate, gpWorld, gpSolid, glAt, glGround, ROUTES, EXPECT, BL, BLC, CREST, chainOf, rig };';
+const M = new Function(src)(), { GL, GP, gpEvaluate, ROUTES, EXPECT, BL, BLC, CREST } = M;
 let n = 0; const fails = [];
 const chk = (name, cond, extra) => { n++; if (!cond) { fails.push(name); console.log('FAIL ' + name, extra === undefined ? '' : JSON.stringify(extra)); } };
 const near = (a, b, t) => Math.abs(a - b) <= (t == null ? 0.06 : t);
 /* a drag anchor: a pulley block and winches standing at x, roped to the Gumdrop */
 const anchor = (id, x, ropes, ws) => { const parts = [{ id, type: 'block', ropes, x, y: 0 }], cables = [{ a: id, b: 'ship' }]; let prev = id; ws.forEach((r, i) => { parts.push({ id: id + 'w' + i, type: 'winch', ratio: r, x, y: 0 }); cables.push({ a: prev, b: id + 'w' + i }); prev = id + 'w' + i; }); return { parts, cables }; };
 const join = (...rs) => ({ v: 2, parts: [].concat(...rs.map(r => r.parts)), cables: [].concat(...rs.map(r => r.cables || [])) });
-const lever = { parts: BL, cables: [] };
+const lever = { parts: BL, cables: BLC };
 
 /* 1. The routes from the old model still give the textbook numbers */
 EXPECT.rock = [56.25, 1344, 2];   // boulder left on: the leg rips off on the first ramp, then the ship alone goes up, wrecked
