@@ -62,7 +62,7 @@ function glPop(html, key, label) {
   return box;
 }
 function glEndText(sum) {
-  const d = sum.dmg || {}, src = typeof glHullSources === 'function' ? glHullSources(d) : [], dent = src.length ? `The hull damage came from ${src.join(', ')}.` : '';
+  const d = sum.dmg || {}, src = typeof glHullSources === 'function' ? glHullSources(d) : [], dent = src.length ? `The hull damage came from ${src.length > 1 ? src.slice(0, -1).join(', ') + ' and ' + src[src.length - 1] : src[0]}.` : '';
   if (sum.ending === 'spotless') return ['✨', 'Spotless rescue!', 'The tractor beam locks on and the Gumdrop lifts away without a single scratch. Smooshy climbs aboard, waves from the window, and the Big Jelly hums off across the plain. On the way up he spots the crystals on the crater rim glittering in the light of two moons.'];
   if (sum.ending === 'dented') return ['🛠️', 'Dented, but home!', `The tractor beam lifts the Gumdrop and Smooshy waves from the window, but the hull is scorched and cracked (${fmt(d.total || 0, 1)}% damage). ${dent} Another go can bring the damage down to zero.`];
   if (sum.ending === 'wrecked') return ['💥', 'Wrecked, but home!', `The tractor beam lifts the Gumdrop away, and Smooshy is safe in the cabin, but the hull is in a terrible state (${fmt(d.total || 0, 1)}% damage). ${dent} A rescue that wrecks the hull scores 3 points at most. Lifting with ramps, a crane or a lever is much kinder to the hull than dragging the Gumdrop over the ground.`];

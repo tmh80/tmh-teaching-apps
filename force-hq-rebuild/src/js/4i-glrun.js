@@ -24,9 +24,11 @@ function glSummary(r) {
 }
 /* where the hull damage came from, in words with the percentages (used on the result card, the ending card and My Rescue) */
 function glHullSources(d) {
-  d = d || {}; const f1 = v => fmt(v, 1), L = [];
-  if (d.t > 0) L.push(`thrusters ${f1(d.t)}%`); if (d.r > 0) L.push(`rock left on ${f1(d.r)}%`); if (d.tr > 0) L.push(`landing leg ripped off ${f1(d.tr)}%`); if (d.b > 0) L.push(`blasts ${f1(d.b)}%`);
-  if (d.s > 0) L.push(`dragging over rough ground ${f1(d.s)}%`); if (d.tp > 0) L.push(`falling over ${f1(d.tp)}%`); if (d.bu > 0) L.push(`bumps ${f1(d.bu)}%`); if (d.f > 0) L.push(`falls ${f1(d.f)}%`); return L;
+  d = d || {}; const f1 = v => fmt(v, 1);
+  const I = [[d.t, 'thrusters'], [d.r, 'rock left on'], [d.tr, 'landing leg ripped off'], [d.b, 'blasts'], [d.s, 'dragging over rough ground'], [d.tp, 'falling over'], [d.bu, 'bumps'], [d.f, 'falls']].filter(x => x[0] > 0);
+  /* the meter stops at 100%, so when the parts add up to more than that, name them (biggest first) without numbers that could not add up */
+  if (I.reduce((a, x) => a + x[0], 0) > 100.05) return I.slice().sort((a, b) => b[0] - a[0]).map(x => x[1]);
+  return I.map(x => `${x[1]} ${f1(x[0])}%`);
 }
 /* ---------- the panel under the board: the result of a test or of the rescue ---------- */
 function glMountRun(host) {
