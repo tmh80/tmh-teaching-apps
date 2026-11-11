@@ -32,6 +32,13 @@ The Gumdrop is a body that rests on a surface. A rope pulls it towards the rope'
 7. **Too heavy.** If the pull would pass 180 N, the Gumdrop stops at that spot. It still moves as far as Smooshy can manage.
 8. **Platforms give way** the moment the Gumdrop gets onto one that can't hold it and the machines on it.
 
+**Tipping (Tom, 11 Nov: "I'd like the Gumdrop to fall over if it's dragged over high friction, or dropped down a ramp etc. It should take damage when it falls, and when it's fallen over, it should take extra damage when dragged.")**
+- The Gumdrop is tall. It falls onto its side when it is dragged more than **1 m over rough crater ground**, when it is bumped over a kerb, or when it **drops more than 0.5 m**.
+- Falling over costs **10%** hull damage, once each time.
+- While it lies on its side, scraping over crater ground costs **twice as much** (2.4% per metre).
+- Smooth platform decks, ramps and lifts never tip it. A **crane lift stands it up again**, because it hangs straight from the hook.
+- Model: `gpTip`, `leg.tips`, `leg.lying`, path points carry `t: 1` while it lies down, `dmg.tips`. The run draws it going over and lying on its side.
+
 ## 2. Who pulls (a leg = one rope's pull, from start to stop)
 
 Each rope is used once. The nearest one goes first. Smooshy never works a machine that would only drag the ship back down.
@@ -57,7 +64,8 @@ Everything feeds `dmg.total` (0 to 100%), and the report lists where it came fro
 | Boulder left on, leg holds | 25% |
 | Boulder left on, leg rips off | 100% |
 | Blast within 6 m of the ship | 15% each |
-| Scraping over crater ground | 1.2% per metre |
+| Scraping over crater ground | 1.2% per metre, 2.4% while it lies on its side |
+| Falling over | 10% each time |
 | Bumps | 6% per metre of step |
 | Falls over 0.5 m | 8% per metre |
 

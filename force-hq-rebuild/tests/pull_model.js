@@ -40,7 +40,7 @@ for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(
   chk('far ramp: the leg runs (no "wrong place")', l && !l.stopped && near(l.end.y, 6, 0.01), r.stop);
   chk('far ramp: dragging on flat crater ground needs 2,100 N', l.segs.some(s => s.k === 'ground' && near(s.peak, 2100, 1) && near(s.len, 5, 0.01)), l.segs); chk('far ramp: first 3 m is a free nudge', l.segs[0].k === 'nudge' && near(l.segs[0].len, 3, 0.01), l.segs);
   chk('far ramp: hand travel includes the drag (28 × 22.65 m)', near(l.hand, 28 * 22.65, 1), l.hand);
-  chk('far ramp: 5 m of dragging scrapes the hull 6%', near(l.scrape, 6, 0.05), l.scrape); chk('far ramp: not a simple leg, so the strip gives the numbers', l.given === true && !l.simple); }
+  chk('far ramp: it tips over after 1 m of dragging, then scrapes at double rate (1.2 + 4 × 2.4 = 10.8%)', near(l.scrape, 10.8, 0.05) && near(l.tip, 10, 1e-6) && l.tips[0].why === 'drag' && l.lying, [l.scrape, l.tip, l.tips]); chk('far ramp: not a simple leg, so the strip gives the numbers', l.given === true && !l.simple); }
 { const g = M.rig([[{ id: 'rA', type: 'ramp', x1: 22, y1: 0, L: 24, rise: 6 }, 4, [7]]], BL), r = gpEvaluate(g); chk('a far ramp that cuts through the ground: the run says it is broken', r.stop.why === 'broken' && r.stop.faults.includes('ground'), r.stop); }
 { // crane lifts onto a platform; the ramp stands on the platform (Tom: "it blocks the Gumdrop")
   const g = M.rig([[{ id: 'cr', type: 'crane', x: 14, rise: 4, across: 2.5 }, 4, [7, 4]], [{ id: 'rA', type: 'ramp', x1: 17.5, y1: 4, L: 24, rise: 6 }, 4, [7]]], BL.concat([{ id: 'p1', type: 'platform', size: 'M', x: 16.5, h: 4 }, { id: 'p2', type: 'platform', size: 'L', x: 41, h: 4 }]));
@@ -48,7 +48,8 @@ for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(
   chk('ramp on the platform: no damage, pull 56.25', r.dmg.total === 0 && near(r.hardest, 56.25), [r.dmg, r.hardest]); chk('ramp on the platform: ends 10 m up', near(r.final.y, 10, 0.01), r.final); }
 { // crane sets the Gumdrop on a platform; the ramp stands on the ground beside the platform: it rolls off the edge, falls 4 m, and the ramp still takes it
   const g = M.rig([[{ id: 'cr', type: 'crane', x: 14, rise: 4, across: 2.5 }, 4, [7, 4]], [{ id: 'rA', type: 'ramp', x1: 20, y1: 0, L: 8.04, rise: 0.8 }, 4, [7]]], BL.concat([{ id: 'p1', type: 'platform', size: 'M', x: 16.5, h: 4 }]));
-  const r = gpEvaluate(g), l = r.legs[1]; chk('ramp beside the platform: the leg runs', l && !l.stopped, r.stop); chk('ramp beside the platform: a 4 m fall costs 32%', l && near(l.fall, 32, 0.1), l && l.fall); }
+  const r = gpEvaluate(g), l = r.legs[1]; chk('ramp beside the platform: the leg runs', l && !l.stopped, r.stop); chk('ramp beside the platform: a 4 m fall costs 32%', l && near(l.fall, 32, 0.1), l && l.fall);
+  chk('the fall knocks it over (10% more), and it is dragged the last 1.25 m on its side at double scrape', l.tips[0].why === 'fall' && near(l.tip, 10, 1e-6) && near(l.scrape, 1.25 * 2.4, 0.05), [l.tips, l.scrape]); }
 { // a platform over the boulder lever is fine (the model has no rule against it)
   const g = ROUTES.top(); g.parts.push({ id: 'pz', type: 'platform', size: 'S', x: 19.5, h: 3 }); const r = gpEvaluate(g); chk('platform over the lever: boulder still cleared', r.boulder.ok, r.boulder); }
 { // "just build a load of pulleys and drag the Gumdrop to the ship"
@@ -80,11 +81,16 @@ for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(
 { const g = M.rig([[{ id: 'cr', type: 'crane', x: 14, rise: 6, across: 4 }, 4, [7, 4]]], BL.concat([{ id: 'p', type: 'platform', size: 'M', x: 18, h: 4 }])), r = gpEvaluate(g);
   chk('the trolley lowers the Gumdrop onto a platform below it, no damage', near(r.final.y, 4, 0.01) && r.dmg.total === 0 && !r.held, [r.final, r.dmg]); }
 { const g = M.rig([[{ id: 'cr', type: 'crane', x: 20, rise: 4, across: 2 }, 4, [7, 4]]], BL), r = gpEvaluate(g), l = r.legs[0];
-  chk('a crane 6 m away drags the Gumdrop under its hook first', l.segs.some(s => s.k === 'ground') && near(l.scrape, 3.6, 0.05) && !l.simple, [l.segs, l.scrape]); }
+  chk('a crane 6 m away drags the Gumdrop under its hook first', l.segs.some(s => s.k === 'ground') && near(l.scrape, 6, 0.05) && !l.simple, [l.segs, l.scrape]);
+  chk('the crane lift stands the Gumdrop up again', l.tips.length === 1 && !l.lying && !r.tipped, [l.tips, l.lying]); }
 { const g = ROUTES.crane(); g.parts.find(p => p.id === 'p2').size = 'S'; const r = gpEvaluate(g); chk('a small platform under the ship, lever and add-ons gives way', r.stop && r.stop.why === 'collapse' && r.stop.plat === 'p2', r.stop); }
 { const g = { parts: [{ id: 'r', type: 'ramp', x1: 16, y1: 0, L: 30, rise: 16 }], cables: [{ a: 'r', b: 'ship' }] }, r = gpEvaluate(g); chk('a too-steep ramp next to the ship stops the run as broken', r.stop.why === 'broken' && r.stop.faults.includes('steep'), r.stop); }
 { const g = { parts: [{ id: 'r', type: 'ramp', x1: 16, y1: 0, L: 24, rise: 6 }], cables: [] }, r = gpEvaluate(g); chk('a ramp with no rope: why norope', r.stop.why === 'norope' && r.stop.unroped[0] === 'r', r.stop); }
 { const g = { parts: [{ id: 'j', type: 'jack', x: 14, rise: 2 }].concat(BL), cables: [] }, r = gpEvaluate(g); chk('screw jack: MA 120, 52.5 N, 240 m', near(r.legs[0].pull, 52.5, 1e-6) && near(r.legs[0].hand, 240, 1e-6), r.legs[0]); }
+
+{ const r = gpEvaluate(ROUTES.top()), q = gpEvaluate(ROUTES.crane()); chk('lifting and rolling never tips the Gumdrop', !r.tips.length && !q.tips.length && r.legs.every(l => l.path.every(p => p.t === 0)), [r.tips, q.tips]); }
+{ const r = gpEvaluate(join(anchor('a', 30, 4, [10, 10]), lever, { parts: [{ id: 'p', type: 'platform', size: 'M', x: 16.2, h: 0.8 }] })), l = r.legs[0]; chk('a bump tips it over', l.tips.length === 1 && l.tips[0].why === 'bump', l.tips); }
+{ const r = gpEvaluate(join(anchor('a', 77, 4, [10, 10]), lever)), l = r.legs[0]; chk('dragged out: tips once, path marks where it lies down', l.tips.length === 1 && l.path[2].t === 0 && l.path[l.path.length - 1].t === 1 && r.tipped && r.dmg.tips === 10, [l.tips, r.dmg]); }
 
 /* 4. Energy and score bookkeeping */
 { const r = gpEvaluate(join(anchor('a', 77, 4, [10, 10]), lever)), l = r.legs[0];

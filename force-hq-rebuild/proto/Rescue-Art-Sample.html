@@ -300,10 +300,11 @@ const glBetter = (a, b) => !b || (a.total != null && b.total == null) || (a.tota
                              and every metre costs: there is no free nudge for a drag.
    Extra fields on each leg: force (the biggest force the rope needed, N), ropeMA (ropes × winches), dist (metres moved), path [{x,y,k}],
      segs [{k, len, rise, peak}], simple (the textbook sum gives the same pull), scrape/bump/fall (hull damage, %).
+   Tipping: see gpTip. leg.tips [{x,y,idx,why}], leg.lying (on its side at the end of the leg), path points carry t: 1 while it lies down, dmg.tips.
    The boulder: see gpStrain. result.torn = { leg, x, y, strain } when the landing leg ripped off; dmg.torn is its damage.
    Extra fields on the result: dmg.scrape, dmg.bumps, dmg.falls (all inside dmg.total), stop.why 'wall', score.ending 'wrecked'. */
 const GP = { muGround: 1 / 3, muPlat: 0.1, step: 0.25, wallRise: 1, wallRun: 0.5, kerbRun: 2, nudge: 3, level: 0.5, dropFree: 0.5, heldSlide: 3, reach: 1.5, heavy: 180,
-  scrape: 1.2, bump: 6, fall: 8, wreck: 60, wreckCap: 3, legHold: 500, tear: 100, tornCap: 2 };
+  scrape: 1.2, bump: 6, fall: 8, wreck: 60, wreckCap: 3, legHold: 500, tear: 100, tornCap: 2, tip: 10, tipDrag: 1, tipScrape: 2 };
 const gpMu = k => k === 'ramp' ? 0 : k === 'platform' ? GP.muPlat : GP.muGround;
 const gpPt = S => ({ x: +S.x.toFixed(3), y: +S.y.toFixed(3) });
 
@@ -336,13 +337,17 @@ function gpPick(W, x, y, sup, skip) {
 }
 
 /* ---------- moving the Gumdrop ---------- */
-function gpPush(C, S, k, F) { const L = C.leg, last = L.path[L.path.length - 1]; if (last && Math.abs(last.x - S.x) < 1e-9 && Math.abs(last.y - S.y) < 1e-9) return; L.path.push({ x: +S.x.toFixed(3), y: +S.y.toFixed(3), k, F: Math.round(F || 0) }); }
+function gpPush(C, S, k, F) { const L = C.leg, last = L.path[L.path.length - 1]; if (last && Math.abs(last.x - S.x) < 1e-9 && Math.abs(last.y - S.y) < 1e-9) return; L.path.push({ x: +S.x.toFixed(3), y: +S.y.toFixed(3), k, F: Math.round(F || 0), t: C.tipS.tipped ? 1 : 0 }); }
 function gpLand(C, S, sup) {   // put the Gumdrop on a surface; a platform that cannot hold it gives way
   S.sup = sup; S.held = null;
   if (sup.kind === 'platform') { C.shipOn.add(sup.id); if (C.over(sup.id)) return { why: 'collapse', plat: sup.id }; }
   return null;
 }
-function gpFall(C, S, toY) { const d = S.y - toY; if (d > GP.dropFree) { C.leg.fall += GP.fall * d; C.leg.fell += d; } S.y = toY; }
+/* Tipping (Tom, 11 Nov): the Gumdrop is tall, so it falls over when it is dragged over rough crater ground (after GP.tipDrag metres), bumped over a kerb,
+   or dropped more than GP.dropFree. Falling over costs GP.tip % hull. While it lies on its side, scraping over the ground costs GP.tipScrape times as much.
+   A crane lift stands it up again (it hangs straight from the hook). C.tipS = { tipped, dragged } is shared by every leg of a run. */
+function gpTip(C, S, why) { const T = C.tipS; if (T.tipped) return; T.tipped = true; T.dragged = 0; C.leg.tip += GP.tip; C.leg.tips.push({ x: +S.x.toFixed(2), y: +S.y.toFixed(2), idx: C.leg.path.length, why }); }
+function gpFall(C, S, toY) { const d = S.y - toY; S.y = toY; if (d > GP.dropFree) { C.leg.fall += GP.fall * d; C.leg.fell += d; gpTip(C, S, 'fall'); } }
 /* let go of whatever is holding the Gumdrop up: drop onto the highest surface under it */
 function gpDrop(C, S) { const fl = gpSurfaces(C.W, S.x, C.skip).filter(s => s.y <= S.y + 0.05).sort((a, b) => b.y - a.y)[0] || gpSolid(C.W, S.x); gpFall(C, S, fl.y); gpPush(C, S, 'fall', 0); return gpLand(C, S, fl); }
 /* the Gumdrop is on a hook, or up on a lever or jack: the new rope pulls it sideways until it is over something to stand on */
@@ -375,8 +380,11 @@ function gpPull(C, S, nx, ny, kind, abrupt) {
   if (!free && ds > 1e-9) { const sin = abrupt ? dy / Math.hypot(dy, GP.kerbRun) : dy / ds, cos = Math.sqrt(Math.max(0, 1 - sin * sin)), k = Math.max(0, sin + gpMu(kind) * cos); F = C.load * k; if (gpStrain(C, S, F)) F = C.load * k; }
   if (F / C.ropeMA > GP.heavy + 1e-9) { L.force = Math.max(L.force, F); L.forceAt = gpPt(S); return { why: 'heavy' }; }
   if (!free) { L.dist += ds; L.work += F * ds; if (F > L.force + 1e-9) { L.force = F; L.forceAt = { x: +nx.toFixed(2), y: +ny.toFixed(2) }; L.forceOn = kind; }
-    if (kind === 'ground') L.scrape += GP.scrape * ds; if (abrupt) L.bump += GP.bump * dy; if (kind !== 'ramp') L.rough += ds; }
-  L.walked += Math.abs(dx); S.x = nx; S.y = ny; gpPush(C, S, free ? 'nudge' : kind, F);
+    if (abrupt) L.bump += GP.bump * dy; if (kind !== 'ramp') L.rough += ds;
+    if (kind === 'ground') { const T = C.tipS; L.scrape += GP.scrape * ds * (T.tipped ? GP.tipScrape : 1); if (!T.tipped) T.dragged += ds; } }
+  L.walked += Math.abs(dx); S.x = nx; S.y = ny;
+  if (!free && (abrupt || (kind === 'ground' && C.tipS.dragged >= GP.tipDrag - 1e-9))) gpTip(C, S, abrupt ? 'bump' : 'drag');
+  gpPush(C, S, free ? 'nudge' : kind, F);
   return null;
 }
 /* drag the Gumdrop along the surface until it is at tx. Returns why it stopped, or null if it got there. */
@@ -426,6 +434,7 @@ function gpCraneLeg(C, S, m) {
   if (C.load / C.ropeMA > GP.heavy + 1e-9) { L.force = Math.max(L.force, C.load); L.forceAt = gpPt(S); return { why: 'heavy' }; }
   L.simple = L.rough < 1e-9;
   const top = S.y + p.rise; L.dist += p.rise; L.work += C.load * p.rise; if (C.load > L.force) { L.force = C.load; L.forceAt = gpPt(S); L.forceOn = 'lift'; }
+  C.tipS.tipped = false; C.tipS.dragged = 0;   // hanging from the hook, it is upright again
   while (S.y < top - 1e-6) { S.y = Math.min(top, S.y + GP.step); gpPush(C, S, 'lift', C.load); }
   S.sup = null; S.held = { slide: GL.craneAcross, by: p.id }; L.lifted = gpPt(S);
   if (!ac) return null;
@@ -490,7 +499,7 @@ function gpEvaluate(rig, opts) {
     const roped = GL_ROPED[m.type] ? glRoped(rig, m.id, ad) : true;
     pullers.push({ id: m.id, type: m.type, m, roped, faults, ropes: m.type === 'jack' ? 1 : ad.ropes, winches: ad.winches.slice(0, GL.winchMax).map(w => w.ratio), addons: ad.chain.map(p => p.id) }); });
   anchors.forEach(a => pullers.push({ id: a.id, type: 'drag', a, roped: true, faults: a.faults, ropes: a.ropes, winches: a.winches, addons: a.chain.slice(1).map(p => p.id) }));
-  const S = { x: ship0.x, y: ship0.y, sup: gpSolid(W, ship0.x), held: null }, used = new Set(), legs = [];
+  const S = { x: ship0.x, y: ship0.y, sup: gpSolid(W, ship0.x), held: null }, used = new Set(), legs = [], tipS = { tipped: false, dragged: 0 };
   const beamSees = p => p.y >= glMaxRight(g, p.x) - GL.hzY - 1e-9;
   const target = u => u.type === 'ramp' ? u.m.end : u.type === 'drag' ? { x: u.a.x, y: u.a.base.y } : u.type === 'crane' ? { x: u.m.part.x + (u.m.part.across || 0), y: S.y + u.m.rise } : { x: u.m.part.x, y: S.y + u.m.rise };
   const gap = u => u.type === 'ramp' ? (S.x < u.m.start.x ? u.m.start.x - S.x : S.x > u.m.end.x ? S.x - u.m.end.x : 0) : Math.abs((u.type === 'drag' ? u.a.x : u.m.part.x) - S.x);
@@ -507,20 +516,20 @@ function gpEvaluate(rig, opts) {
     const u = cand[0]; used.add(u.id);
     const ropeMA = u.ropes * u.winches.reduce((a, w) => a * w, 1);
     const leg = { i: legs.length, id: u.id, type: u.type, roped: true, at: gpPt(S), y0: S.y, m: u.m || null, ropes: u.ropes, winches: u.winches, ropeMA, load, addons: u.addons, faults: u.faults.slice(),
-      path: [], strain: 0, torn: false, force: 0, forceAt: null, forceOn: null, dist: 0, work: 0, walked: 0, rough: 0, scrape: 0, bump: 0, fall: 0, fell: 0, mma: 1, simple: false, full: false };
+      path: [], strain: 0, torn: false, tip: 0, tips: [], lying: false, force: 0, forceAt: null, forceOn: null, dist: 0, work: 0, walked: 0, rough: 0, scrape: 0, bump: 0, fall: 0, fell: 0, mma: 1, simple: false, full: false };
     legs.push(leg); leg.start = gpPt(S);
     let r = null;
     if (leg.faults.length) r = { why: 'broken', faults: leg.faults };
-    else { const C = { W, load, ropeMA, leg, shipOn, over, skip: null, rock: rockOn && !torn, torn: null, nudge: u.type !== 'drag' };   // a winch post gets no free nudge: a bare rope moves nothing
+    else { const C = { W, load, ropeMA, leg, shipOn, over, tipS, skip: null, rock: rockOn && !torn, torn: null, nudge: u.type !== 'drag' };   // a winch post gets no free nudge: a bare rope moves nothing
       r = u.type === 'ramp' ? gpRampLeg(C, S, u.m) : u.type === 'crane' ? gpCraneLeg(C, S, u.m) : u.type === 'drag' ? gpDragLeg(C, S, u.a) : gpLiftLeg(C, S, u.m);
       if (C.torn) { torn = C.torn; load = GL.ship; leg.simple = false; } }
     const lift = u.type === 'lever' || u.type === 'jack';
-    leg.end = gpPt(S); leg.rise = +(leg.end.y - leg.start.y).toFixed(3); leg.held = !!S.held; leg.segs = gpSegs(leg.path, leg.start);
+    leg.lying = tipS.tipped; leg.end = gpPt(S); leg.rise = +(leg.end.y - leg.start.y).toFixed(3); leg.held = !!S.held; leg.segs = gpSegs(leg.path, leg.start);
     leg.ma = lift ? leg.mma * ropeMA : leg.simple ? leg.mma * ropeMA : ropeMA;      // simple legs: machine MA × ropes × winches, as students work it out
     leg.pull = lift ? load / leg.ma : leg.force / ropeMA;
     leg.hand = lift ? leg.ma * leg.dist : ropeMA * leg.dist; leg.cable = u.type === 'jack' ? 0 : u.ropes * leg.dist;
     leg.given = !leg.simple;                                                          // the route strip has to give this leg's force: students cannot work it out
-    ['dist', 'work', 'hand', 'scrape', 'bump', 'fall', 'fell', 'rough'].forEach(k => { leg[k] = +leg[k].toFixed(3); });
+    ['dist', 'work', 'hand', 'scrape', 'bump', 'fall', 'fell', 'rough', 'tip'].forEach(k => { leg[k] = +leg[k].toFixed(3); });
     if (r) { stop = Object.assign({ at: gpPt(S), leg: leg.i }, r); leg.stopped = true; break; }
   }
   if (!stop && !arrived) { if (beamSees(S) && legs.length) arrived = true; else { const idle = pullers.filter(u => !used.has(u.id) && !u.roped && (u.type === 'ramp' || u.type === 'crane'));
@@ -533,11 +542,11 @@ function gpEvaluate(rig, opts) {
   const hand = legs.reduce((a, l) => a + l.hand, 0), workJ = legs.reduce((a, l) => a + l.work, 0);
   let thr = 0; legs.forEach(l => { l.thruster = l.pull > GL.pullOk + 1e-9 ? Math.min(100, (Math.min(l.pull, GP.heavy) - GL.pullOk) / 120 * 100) : 0; thr += l.thruster; });
   const sum = k => legs.reduce((a, l) => a + l[k], 0);
-  const dmg = { thrusters: thr, rock: rockOn && !torn ? 25 : 0, torn: torn ? GP.tear : 0, blasts: bShip.length * 15, scrape: sum('scrape'), bumps: sum('bump'), falls: sum('fall') };
-  dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.torn + dmg.blasts + dmg.scrape + dmg.bumps + dmg.falls);
+  const dmg = { thrusters: thr, rock: rockOn && !torn ? 25 : 0, torn: torn ? GP.tear : 0, blasts: bShip.length * 15, scrape: sum('scrape'), bumps: sum('bump'), falls: sum('fall'), tips: sum('tip') };
+  dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.torn + dmg.blasts + dmg.scrape + dmg.bumps + dmg.falls + dmg.tips);
   const cost = glCost(rig, legs, boulder), ghosts = legs.filter(l => l.i >= 1).map(l => ({ x: l.at.x, y: l.at.y, after: l.i }));
   const res = { ok: done, arrived: done, stop: done ? null : stop, ghost: !done && stop && legs.length ? gpPt(S) : null, ghosts, legs, ran: legs.filter(l => !l.stopped), hardest, hand, work: workJ, load: GL.ship + (rockOn ? GL.rock : 0), rockOn, torn, boulder, blasts,
-    bShip: bShip.length, dmg, cost, crest: glCrest(g), plats: loads, ground: g, ship0, final: gpPt(S), held: !!S.held, used: [...used], spare: pullers.filter(u => !used.has(u.id)).map(u => u.id) };
+    bShip: bShip.length, dmg, tipped: tipS.tipped, tips: [].concat(...legs.map(l => l.tips.map(t => Object.assign({ leg: l.i }, t)))), cost, crest: glCrest(g), plats: loads, ground: g, ship0, final: gpPt(S), held: !!S.held, used: [...used], spare: pullers.filter(u => !used.has(u.id)).map(u => u.id) };
   res.score = gpScore(res, opts.hints || 0, !!opts.maths);
   return res;
 }
@@ -630,17 +639,18 @@ function draw() {
   const kcol = { nudge: col.mute, ground: col.bad, platform: col.warn, ramp: col.good, lift: col.accent, across: col.accent, lower: col.accent, slide: col.mute, fall: col.bad };
   EV.legs.forEach(l => { let px = l.start.x, py = l.start.y; l.path.forEach(q => { c.strokeStyle = kcol[q.k] || col.ink; c.lineWidth = 3; c.setLineDash(q.k === 'nudge' || q.k === 'slide' || q.k === 'fall' ? [2, 4] : []); c.beginPath(); c.moveTo(sx(px), sy(py) - 2); c.lineTo(sx(q.x), sy(q.y) - 2); c.stroke(); px = q.x; py = q.y; }); c.setLineDash([]);
     if (l.forceAt && l.force > 0) { c.fillStyle = col.ink; c.beginPath(); c.arc(sx(l.forceAt.x), sy(l.forceAt.y) - 2, 3.5, 0, 7); c.fill(); }
-    c.fillStyle = col.ghost; ship(l.end.x, l.end.y, true); if (EV.rockOn && (!EV.torn || l.i < EV.torn.leg)) rock(l.end.x, l.end.y, col.ghost); label('after leg ' + (l.i + 1), sx(l.end.x), sy(l.end.y + 5.5), col.mute); });
+    c.fillStyle = col.ghost; ship(l.end.x, l.end.y, true, l.lying); if (EV.rockOn && (!EV.torn || l.i < EV.torn.leg)) rock(l.end.x, l.end.y, col.ghost); label('after leg ' + (l.i + 1), sx(l.end.x), sy(l.end.y + 5.5), col.mute); });
   if (EV.stop && EV.stop.wall) { c.strokeStyle = col.bad; c.lineWidth = 4; c.beginPath(); c.moveTo(sx(EV.stop.wall.x), sy(EV.stop.wall.y)); c.lineTo(sx(EV.stop.wall.x), sy(EV.stop.at.y)); c.stroke(); label('wall', sx(EV.stop.wall.x), sy(EV.stop.wall.y) - 6, col.bad); }
   /* ropes from each puller to the Gumdrop's start */
   if (EV.torn) { rock(EV.torn.x, EV.torn.y, col.rock2); c.strokeStyle = col.bad; c.lineWidth = 3; c.beginPath(); c.moveTo(sx(EV.torn.x) - 8, sy(EV.torn.y + 3)); c.lineTo(sx(EV.torn.x) + 8, sy(EV.torn.y + 5)); c.moveTo(sx(EV.torn.x) + 8, sy(EV.torn.y + 3)); c.lineTo(sx(EV.torn.x) - 8, sy(EV.torn.y + 5)); c.stroke(); label('landing leg ripped off here', sx(EV.torn.x) + 14, sy(EV.torn.y + 6.3), col.bad, 'left'); }
-  const A = anim ? anim.pos : EV.ship0, on = EV.rockOn && (anim ? anim.rk : true); c.fillStyle = col.ship; ship(A.x, A.y, false); if (on) rock(A.x, A.y, col.bad);
+  const A = anim ? anim.pos : EV.ship0, on = EV.rockOn && (anim ? anim.rk : true); c.fillStyle = col.ship; ship(A.x, A.y, false, anim && anim.tp); if (on) rock(A.x, A.y, col.bad);
   label(on ? 'Gumdrop 6,300 N + boulder 2,100 N' : 'Gumdrop 6,300 N', sx(A.x), sy(A.y + 4.5), on ? col.bad : col.ink);
 }
 function rock(x, y, colr) { c.fillStyle = colr; c.beginPath(); c.arc(sx(x + 2.2), sy(y + 0.8), 0.8 * K, 0, 7); c.fill(); }   // the boulder is jammed on the landing leg, so it goes wherever the Gumdrop goes
-function ship(x, y, ghost) { c.beginPath(); c.roundRect(sx(x) - 1.6 * K, sy(y + 4), 3.2 * K, 4 * K, 10); c.fill(); if (!ghost) { c.fillStyle = css('--panel'); c.beginPath(); c.arc(sx(x), sy(y + 2.6), 7, 0, 7); c.fill(); } }
+function ship(x, y, ghost, lying) { c.beginPath(); if (lying) c.roundRect(sx(x) - 2 * K, sy(y + 3.2), 4 * K, 3.2 * K, 10); else c.roundRect(sx(x) - 1.6 * K, sy(y + 4), 3.2 * K, 4 * K, 10); c.fill(); if (!ghost) { c.fillStyle = css('--panel'); c.beginPath(); c.arc(sx(x), sy(y + 2.6), 7, 0, 7); c.fill(); } }
 
 /* ---------- the read-out ---------- */
+const TIPWHY = { drag: 'dragging over rough ground', fall: 'the fall', bump: 'the bump' };
 const SEG = { nudge: s => `nudged ${fmt(s.len)} m (free)`, ground: s => `dragged ${fmt(s.len)} m over rough ground, up to <b>${fmt(s.peak, 0)} N</b>`, platform: s => `slid ${fmt(s.len)} m across a platform, up to <b>${fmt(s.peak, 0)} N</b>`, ramp: s => `rolled ${fmt(s.len)} m up the ramp (${fmt(s.rise)} m higher), <b>${fmt(s.peak, 0)} N</b>`,
   lift: s => `lifted ${fmt(s.len)} m, <b>${fmt(s.peak, 0)} N</b>`, across: s => `trolley carried it ${fmt(s.len)} m across`, lower: s => `lowered ${fmt(s.len)} m`, slide: s => `pulled ${fmt(s.len)} m sideways off its holder`, fall: s => `<b>fell ${fmt(-s.rise)} m</b>` };
 const NAME = { ramp: 'ramp', crane: 'crane', lever: 'lever', jack: 'screw jack', drag: 'winch post' };
@@ -648,14 +658,14 @@ const WHY = { wall: s => `Stopped: a wall more than ${fmt(GP.wallRise)} m tall i
   gap: () => 'Every rope has been used, and the Gumdrop is not at the beam yet.', norope: () => 'Nothing is roped to the Gumdrop.', none: () => 'Nothing is pulling the Gumdrop yet. Add a machine and rope it on.' };
 function report() {
   const r = EV, m = $('#msg'); m.className = 'msg ' + (r.arrived ? 'ok' : 'no'); m.textContent = (r.torn ? `The boulder was still on the landing leg. In leg ${r.torn.leg + 1} the strain on the leg reached ${fmt(r.torn.strain, 0)} N, more than the ${fmt(GP.legHold, 0)} N it can take, and the Gumdrop was pulled apart. ` : r.rockOn && r.legs.length ? `The boulder came along on the landing leg (strain stayed under ${fmt(GP.legHold, 0)} N). ` : '') + (r.arrived ? `${r.torn ? 'What is left of it reached the beam' : 'Rescued. The beam can lift the Gumdrop'} from ${fmt(r.final.x)} m across, ${fmt(r.final.y)} m up.` : WHY[r.stop.why](r.stop)); if (r.torn) m.className = 'msg no';
-  $('#legs').innerHTML = r.legs.map(l => { const cls = l.stopped || l.torn ? 'bad' : (l.pull > GL.pullOk + 1e-9 || l.scrape + l.bump + l.fall > 0) ? 'warn' : '', lift = l.type === 'lever' || l.type === 'jack', hull = l.scrape + l.bump + l.fall + l.thruster + (l.torn ? GP.tear : 0);
-    return `<div class="leg ${cls}"><b>Leg ${l.i + 1}: ${NAME[l.type]}</b> · ${l.segs.map(s => SEG[s.k](s)).join(', then ') || 'did not move'}.<div class="n">` +
+  $('#legs').innerHTML = r.legs.map(l => { const cls = l.stopped || l.torn ? 'bad' : (l.pull > GL.pullOk + 1e-9 || l.scrape + l.bump + l.fall > 0) ? 'warn' : '', lift = l.type === 'lever' || l.type === 'jack', hull = l.scrape + l.bump + l.fall + l.tip + l.thruster + (l.torn ? GP.tear : 0);
+    return `<div class="leg ${cls}"><b>Leg ${l.i + 1}: ${NAME[l.type]}</b> · ${l.segs.map(s => SEG[s.k](s)).join(', then ') || 'did not move'}.` + l.tips.map(t => ` <b>The Gumdrop fell over at ${fmt(t.x)} m because of ${TIPWHY[t.why]}.</b>`).join('') + (l.type === 'crane' && !l.lying && r.legs.slice(0, l.i).some(q => q.lying) || (l.type === 'crane' && l.tips.length && !l.lying) ? ' The crane stood it up again.' : '') + `<div class="n">` +
       (lift ? `MA ${fmt(l.ma)} → pull ${fmt(l.pull, 2)} N` : `hardest force ${fmt(l.force, 0)} N ÷ ropes and winches ×${fmt(l.ropeMA)} = pull <b>${fmt(l.pull, 2)} N</b>`) + ` · hand ${fmt(l.hand, 0)} m · work ${fmt(l.work, 0)} J` +
-      (hull > 0 ? ` · hull −${fmt(hull)}%` + [l.thruster ? ' thrusters ' + fmt(l.thruster) : '', l.scrape ? ' scrape ' + fmt(l.scrape) : '', l.bump ? ' bump ' + fmt(l.bump) : '', l.fall ? ' fall ' + fmt(l.fall) : '', l.torn ? ' leg ripped off ' + GP.tear : ''].filter(Boolean).join(',') : '') + (r.rockOn && l.strain > 0 && !l.torn ? ` · strain on the trapped leg ${fmt(l.strain, 0)} N` : '') +
+      (hull > 0 ? ` · hull −${fmt(hull)}%` + [l.thruster ? ' thrusters ' + fmt(l.thruster) : '', l.scrape ? ' scrape ' + fmt(l.scrape) : '', l.bump ? ' bump ' + fmt(l.bump) : '', l.fall ? ' fall ' + fmt(l.fall) : '', l.tip ? ' fell over ' + fmt(l.tip) : '', l.torn ? ' leg ripped off ' + GP.tear : ''].filter(Boolean).join(',') : '') + (r.rockOn && l.strain > 0 && !l.torn ? ` · strain on the trapped leg ${fmt(l.strain, 0)} N` : '') +
       ` · ${l.simple ? 'students can do this maths' : 'the strip gives this force'}</div></div>`; }).join('') || '<p class="hint">No legs yet.</p>';
   const s = r.score, d = r.dmg;
   $('#tot').innerHTML = [['Hardest pull', r.legs.length ? fmt(r.hardest, 2) + ' N' : '–', r.hardest <= 60], ['Oxygen (hand travel)', fmt(r.hand, 0) + ' of 1,500 m', r.hand <= GL.oxy], ['Sugar crystals', r.cost.total + ' of 475', r.cost.total <= GL.budget],
-    ['Hull damage', fmt(d.total) + '%', d.total === 0], ['Damage from', [d.thrusters && 'thrusters ' + fmt(d.thrusters), d.rock && 'boulder ' + d.rock, d.torn && 'leg ripped off ' + d.torn, d.blasts && 'blast ' + d.blasts, d.scrape && 'scraping ' + fmt(d.scrape), d.bumps && 'bumps ' + fmt(d.bumps), d.falls && 'falls ' + fmt(d.falls)].filter(Boolean).join(', ') || 'nothing', true],
+    ['Hull damage', fmt(d.total) + '%', d.total === 0], ['Damage from', [d.thrusters && 'thrusters ' + fmt(d.thrusters), d.rock && 'boulder ' + d.rock, d.torn && 'leg ripped off ' + d.torn, d.blasts && 'blast ' + d.blasts, d.scrape && 'scraping ' + fmt(d.scrape), d.tips && 'falling over ' + fmt(d.tips), d.bumps && 'bumps ' + fmt(d.bumps), d.falls && 'falls ' + fmt(d.falls)].filter(Boolean).join(', ') || 'nothing', true],
     ['Score (maths point not counted)', s.total == null ? 'not yet' : `${s.total} of ${GL_MAX - 1} · ${s.ending}`, s.total != null && s.total >= 7]].map(([k, v, ok]) => `<div><span>${k}</span><b style="color:${ok ? 'inherit' : 'var(--bad)'}">${v}</b></div>`).join('');
 }
 
@@ -680,7 +690,7 @@ function settings() {
   box.querySelectorAll('[data-k]').forEach(el => el.addEventListener('input', () => { const k = el.dataset.k; p[k] = el.type === 'checkbox' ? el.checked : k === 'size' ? el.value : k === 'big' ? el.value === 'true' : +el.value; const o = el.closest('label').querySelector('output'); if (o) o.textContent = fmt(p[k], 2) + ' m'; refresh(false); }));
   $('#s_del').addEventListener('click', () => { P = P.filter(z => z.id !== p.id); sel = null; refresh(true); });
 }
-const TUNE = [['legHold', 'The trapped leg rips off above this strain (N)', 100, 2500, 50], ['tear', 'Damage when the leg rips off (%)', 20, 100, 5], ['tornCap', 'A pulled-apart rescue scores at most', 1, 10, 1], ['muGround', 'Friction on crater ground', 0.1, 0.8, 0.01], ['muPlat', 'Friction on a platform deck', 0, 0.4, 0.01], ['wallRise', 'A wall is a step taller than (m)', 0.5, 2.5, 0.1], ['nudge', 'Free nudge for ramps and cranes (m)', 0, 5, 0.5], ['scrape', 'Scrape damage per metre dragged (%)', 0, 4, 0.1], ['bump', 'Bump damage per metre of step (%)', 0, 15, 0.5], ['fall', 'Fall damage per metre fallen (%)', 0, 20, 0.5], ['wreck', 'Wrecked at this much damage (%)', 30, 100, 5], ['wreckCap', 'A wrecked rescue scores at most', 1, 10, 1]];
+const TUNE = [['tipDrag', 'It falls over after this much rough dragging (m)', 0, 20, 0.5], ['tip', 'Damage when it falls over (%)', 0, 40, 1], ['tipScrape', 'Scraping on its side costs this many times more', 1, 5, 0.5], ['legHold', 'The trapped leg rips off above this strain (N)', 100, 2500, 50], ['tear', 'Damage when the leg rips off (%)', 20, 100, 5], ['tornCap', 'A pulled-apart rescue scores at most', 1, 10, 1], ['muGround', 'Friction on crater ground', 0.1, 0.8, 0.01], ['muPlat', 'Friction on a platform deck', 0, 0.4, 0.01], ['wallRise', 'A wall is a step taller than (m)', 0.5, 2.5, 0.1], ['nudge', 'Free nudge for ramps and cranes (m)', 0, 5, 0.5], ['scrape', 'Scrape damage per metre dragged (%)', 0, 4, 0.1], ['bump', 'Bump damage per metre of step (%)', 0, 15, 0.5], ['fall', 'Fall damage per metre fallen (%)', 0, 20, 0.5], ['wreck', 'Wrecked at this much damage (%)', 30, 100, 5], ['wreckCap', 'A wrecked rescue scores at most', 1, 10, 1]];
 function tune() { $('#tune').innerHTML = TUNE.map(([k, t, a, b, s]) => `<label for="t_${k}">${t}<output>${fmt(GP[k], 2)}</output><input id="t_${k}" type="range" min="${a}" max="${b}" step="${s}" value="${GP[k]}" data-k="${k}"></label>`).join('');
   $('#tune').querySelectorAll('input').forEach(el => el.addEventListener('input', () => { GP[el.dataset.k] = +el.value; el.closest('label').querySelector('output').textContent = fmt(+el.value, 2); refresh(false); })); }
 function refresh(full) { anim = null; draw(); report(); if (full) settings(); else { const p = P.find(z => z.id === sel), hint = $('#set .hint'); if (p && p.type === 'ramp' && hint) hint.textContent = `Drag its two ends on the board. Each end rests on whatever is under it. MA = ${fmt(p._L / p._rise, 2)}.`; } }
@@ -701,9 +711,9 @@ cv.addEventListener('pointermove', e => { if (!drag) return; const q = pt(e), p 
   else p.x = clamp(sn(drag.px + d), 1, 95);
   refresh(false); });
 const up = () => { if (drag) { drag = null; cv.style.cursor = 'grab'; settings(); } }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
-function run() { const pts = [{ x: EV.ship0.x, y: EV.ship0.y, rk: true }], T = EV.torn; EV.legs.forEach(l => l.path.forEach((q, j) => pts.push({ x: q.x, y: q.y, rk: !T || l.i < T.leg || (l.i === T.leg && j < T.idx) }))); if (pts.length < 2) return; const lens = [0]; for (let i = 1; i < pts.length; i++) lens.push(lens[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+function run() { const pts = [{ x: EV.ship0.x, y: EV.ship0.y, rk: true }], T = EV.torn; EV.legs.forEach(l => l.path.forEach((q, j) => pts.push({ x: q.x, y: q.y, tp: q.t, rk: !T || l.i < T.leg || (l.i === T.leg && j < T.idx) }))); if (pts.length < 2) return; const lens = [0]; for (let i = 1; i < pts.length; i++) lens.push(lens[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
   const total = lens[lens.length - 1], dur = clamp(total / 14, 2.5, 9) * 1000, t0 = performance.now(), me = anim = { pos: pts[0], rk: true };
-  const tick = now => { if (anim !== me) return; const u = Math.min(1, (now - t0) / dur), d = u * total; let i = 1; while (i < pts.length - 1 && lens[i] < d) i++; const f = lens[i] === lens[i - 1] ? 1 : (d - lens[i - 1]) / (lens[i] - lens[i - 1]); me.pos = { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }; me.rk = pts[i].rk; draw();
+  const tick = now => { if (anim !== me) return; const u = Math.min(1, (now - t0) / dur), d = u * total; let i = 1; while (i < pts.length - 1 && lens[i] < d) i++; const f = lens[i] === lens[i - 1] ? 1 : (d - lens[i - 1]) / (lens[i] - lens[i - 1]); me.pos = { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }; me.rk = pts[i].rk; me.tp = pts[i].tp; draw();
     if (u < 1) requestAnimationFrame(tick); else setTimeout(() => { if (anim === me) { anim = null; draw(); } }, 1200); };
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) { me.pos = pts[pts.length - 1]; me.rk = pts[pts.length - 1].rk; draw(); setTimeout(() => { if (anim === me) { anim = null; draw(); } }, 2500); } else requestAnimationFrame(tick); }
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw()); new MutationObserver(() => draw()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -779,9 +789,9 @@ window.__gb = { get P() { return P; }, set P(v) { P = v; refresh(true); }, get E
   function jackArt(x, y) { c.fillStyle = A.dark; rr(x - 11, y - 5, 22, 5, 2); c.fill(); c.strokeStyle = A.steel; c.lineWidth = 2; c.beginPath(); for (let i = 0; i < 6; i++) { c.moveTo(x - 4, y - 6 - i * 2.6); c.lineTo(x + 4, y - 8 - i * 2.6); } c.stroke(); line(x, y - 5, x, y - 22, A.steel2, 2); c.fillStyle = A.yellow; rr(x - 8, y - 25, 16, 4, 2); c.fill(); line(x, y - 12, x + 13, y - 12, A.steel, 2); dot(x + 13, y - 12, 2.6, A.red); }
   function boulderArt(x, y, r, tone) { const pts = [1, 0.86, 1.05, 0.9, 1, 0.82, 0.96, 1.08]; c.beginPath(); pts.forEach((k, i) => { const a = i / pts.length * Math.PI * 2 - 0.3, px = x + Math.cos(a) * r * k, py = y + Math.sin(a) * r * k * 0.86; i ? c.lineTo(px, py) : c.moveTo(px, py); }); c.closePath(); const gr = c.createLinearGradient(x - r, y - r, x + r, y + r); gr.addColorStop(0, tone || '#b9a8e8'); gr.addColorStop(1, '#55408f'); c.fillStyle = gr; c.fill(); c.strokeStyle = 'rgba(18,12,46,.55)'; c.lineWidth = 1.5; c.stroke(); line(x - r * 0.3, y - r * 0.5, x + r * 0.1, y, 'rgba(18,12,46,.35)', 1.2); line(x + r * 0.1, y, x - r * 0.1, y + r * 0.5, 'rgba(18,12,46,.35)', 1.2); line(x - r * 0.55, y - r * 0.35, x - r * 0.2, y - r * 0.62, 'rgba(255,255,255,.55)', 1.5); }
   function rope(a, b, taut) { const mx = (a.x + b.x) / 2, sag = taut ? 3 : Math.min(40, Math.hypot(b.x - a.x, b.y - a.y) * 0.1), my = (a.y + b.y) / 2 + sag; c.lineCap = 'round'; [[A.ropeD, taut ? 3.6 : 2.6], [A.rope, taut ? 1.8 : 1.1]].forEach(([col, w]) => { c.strokeStyle = col; c.lineWidth = w; c.globalAlpha = taut ? 1 : 0.55; c.beginPath(); c.moveTo(a.x, a.y); c.quadraticCurveTo(mx, my, b.x, b.y); c.stroke(); }); c.globalAlpha = 1; c.lineCap = 'butt'; }
-  /* the Gumdrop: o = { ghost, dmg (0-100), legOff, tilt } */
-  function gumdrop(wxm, wym, o) { o = o || {}; const x = X(wxm), y = Y(wym), w = 1.7 * K, h = 4.1 * K, lg = 0.55 * K;
-    c.save(); if (o.ghost) c.globalAlpha = 0.32;
+  /* the Gumdrop: o = { ghost, dmg (0-100), legOff, lie (0 upright to 1 flat on its side) } */
+  function gumdrop(wxm, wym, o) { o = o || {}; const x = X(wxm), y = Y(wym), w = 1.7 * K, h = 4.1 * K, lg = 0.55 * K, lie = o.lie || 0;
+    c.save(); if (o.ghost) c.globalAlpha = 0.32; if (lie) { c.translate(x - 1.6 * K * lie, y - 1.75 * K * lie); c.rotate(-1.42 * lie); c.translate(-x, -(y - 2.4 * K * lie)); }
     [[-0.95, false], [0, false], [0.95, true]].forEach(([k, right]) => { if (right && o.legOff) { line(x + k * w * 0.8, y - lg - 2, x + k * w * 0.8 + 3, y - lg + 4, A.steelD, 3); return; } line(x + k * w * 0.8, y - lg - 3, x + k * w * 0.95, y - 2, A.steelD, 3.4); c.fillStyle = A.steelD; rr(x + k * w * 0.95 - 5, y - 3, 10, 3, 1.5); c.fill(); });
     const by = y - lg; c.beginPath(); c.moveTo(x - w, by); c.bezierCurveTo(x - w * 1.08, by - h * 0.62, x - w * 0.55, by - h, x, by - h); c.bezierCurveTo(x + w * 0.55, by - h, x + w * 1.08, by - h * 0.62, x + w, by); c.closePath();
     const gr = c.createRadialGradient(x - w * 0.4, by - h * 0.7, 2, x, by - h * 0.4, h); gr.addColorStop(0, A.pinkL); gr.addColorStop(0.45, A.pink); gr.addColorStop(1, A.pinkD); c.fillStyle = gr; c.fill(); c.strokeStyle = 'rgba(120,20,70,.55)'; c.lineWidth = 1.5; c.stroke();
@@ -790,6 +800,7 @@ window.__gb = { get P() { return P; }, set P(v) { P = v; refresh(true); }, get E
     c.restore(); [-0.7, 0, 0.7].forEach(k => dot(x + k * w, by - 3.5, 2, A.yellow));
     const wy = by - h * 0.52; dot(x, wy, 11, A.dark); dot(x, wy, 9.4, '#d9f1ff'); dot(x - 4.6, wy - 3.4, 2.6, A.blue); dot(x + 4.6, wy - 3.4, 2.6, A.blue); dot(x, wy + 1.6, 6, A.blue); dot(x, wy + 3.4, 2.6, A.blueL); dot(x - 2.2, wy + 0.4, 1.1, A.dark); dot(x + 2.2, wy + 0.4, 1.1, A.dark); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 1.4; c.beginPath(); c.arc(x, wy, 9.4, 3.6, 4.6); c.stroke();
     c.strokeStyle = A.steel; c.lineWidth = 2.2; c.beginPath(); c.arc(x, by - h - 3.5, 3.5, 0, 7); c.stroke(); c.restore(); return { x, y: by - h - 4 }; }
+  let lieNow = 0, lieT = 0;   // eases the Gumdrop down onto its side, and back up
   const WOBBLE = () => anim ? Math.sin(performance.now() / 60) * 0.6 : 0;
 
   /* ---------- the whole board ---------- */
@@ -816,26 +827,27 @@ window.__gb = { get P() { return P; }, set P(v) { P = v; refresh(true); }, get E
     /* the route the Gumdrop will take */
     const kcol = { nudge: 'rgba(255,255,255,.55)', ground: '#ff7a6b', platform: A.yellow, ramp: A.green, lift: A.teal, across: A.teal, lower: A.teal, slide: 'rgba(255,255,255,.55)', fall: '#ff7a6b' };
     EV.legs.forEach(l => { let px = l.start.x, py = l.start.y, acc = 0; l.path.forEach(q => { const d = Math.hypot(q.x - px, q.y - py) * K; acc += d; if (acc >= 9 || q.k === 'fall') { acc = 0; dot(X(q.x), Y(q.y) - 5, q.k === 'ground' ? 2.4 : 1.9, kcol[q.k] || A.white); } px = q.x; py = q.y; });
-      gumdrop(l.end.x, l.end.y, { ghost: true, legOff: T && l.i >= T.leg }); pill('after leg ' + (l.i + 1), X(l.end.x), Y(l.end.y + 6.2), null); });
+      gumdrop(l.end.x, l.end.y, { ghost: true, legOff: T && l.i >= T.leg, lie: l.lying ? 1 : 0 }); l.tips.forEach(t => { c.font = '700 13px ' + F(); c.textAlign = 'center'; c.fillStyle = A.yellow; c.fillText('✸', X(t.x), Y(t.y) - 12); pill('Fell over', X(t.x), Y(t.y) + 16, 'bad'); }); pill('after leg ' + (l.i + 1), X(l.end.x), Y(l.end.y + 6.2), null); });
     if (EV.stop && EV.stop.wall) { line(X(EV.stop.wall.x), Y(EV.stop.wall.y), X(EV.stop.wall.x), Y(EV.stop.at.y), A.red, 5); pill('Wall: too tall to drag over', X(EV.stop.wall.x), Y(EV.stop.wall.y) - 14, 'bad'); }
     if (T && (!anim || !anim.rk)) { boulderArt(X(T.x + 1.9), Y(T.y + 0.7), 0.8 * K); line(X(T.x + 1.2), Y(T.y + 1.3), X(T.x + 1.7), Y(T.y + 0.3), A.steelD, 3.4); pill('The landing leg ripped off here', X(T.x + 1.9), Y(T.y + 2.6), 'bad'); }
     /* ropes: the working one is tight, the rest hang slack */
-    const li = anim ? anim.li : 0, cur = EV.legs[li], hookY = Y(ship.y + 0.55 + 4.1) - 4, hook = { x: X(ship.x), y: hookY }; Object.keys(anchors).forEach(id => { if (!cur || cur.id !== id) rope(anchors[id], hook, false); }); if (cur && anchors[cur.id]) rope(anchors[cur.id], hook, true);
+    const want = anim && anim.tp ? 1 : 0, nowT = performance.now(); lieNow += clamp(want - lieNow, -1, 1) * Math.min(1, (nowT - lieT) / 260); lieT = nowT; if (!anim) lieNow = 0;
+    const li = anim ? anim.li : 0, cur = EV.legs[li], hook = { x: X(ship.x) - 5.2 * K * lieNow, y: Y(ship.y + 0.55 + 4.1) - 4 + 2.9 * K * lieNow }; Object.keys(anchors).forEach(id => { if (!cur || cur.id !== id) rope(anchors[id], hook, false); }); if (cur && anchors[cur.id]) rope(anchors[cur.id], hook, true);
     const on = EV.rockOn && (anim ? anim.rk : true), dmgNow = anim ? (anim.done ? EV.dmg.total : EV.dmg.total * anim.u) : 0;
     if (anim && !anim.done && (anim.k === 'ground' || anim.k === 'platform')) { const q = rng(Math.floor(performance.now() / 50) + 3); for (let i = 0; i < 9; i++) { c.globalAlpha = 0.25 + q() * 0.4; dot(X(ship.x) - 26 - q() * 34, Y(ship.y) - q() * 14, 3 + q() * 6, anim.k === 'ground' ? '#e9defc' : '#ffe9a8'); } c.globalAlpha = 1; if (anim.k === 'ground') for (let i = 0; i < 4; i++) dot(X(ship.x) - 12 + q() * 24, Y(ship.y) - q() * 6, 1.4, A.yellow); }
     if (on) { boulderArt(X(ship.x + 1.9), Y(ship.y + 0.7), 0.8 * K, '#e7a5a5'); }
-    gumdrop(ship.x + (anim && !anim.done && anim.k === 'ground' ? WOBBLE() / K : 0), ship.y, { dmg: dmgNow, legOff: T && anim && !anim.rk });
+    gumdrop(ship.x + (anim && !anim.done && anim.k === 'ground' ? WOBBLE() / K : 0), ship.y, { dmg: dmgNow, legOff: T && anim && !anim.rk, lie: lieNow });
     pill(on ? 'Gumdrop 6,300 N + boulder 2,100 N' : 'Gumdrop 6,300 N', X(ship.x), Y(ship.y + 6.4), on ? 'bad' : null);
     /* hull meter */
     const hv = anim ? dmgNow : EV.dmg.total; c.fillStyle = 'rgba(18,12,46,.82)'; rr(14, 12, 190, 30, 9); c.fill(); c.font = '700 11px ' + F(); c.fillStyle = A.white; c.textAlign = 'left'; c.fillText('HULL', 24, 31); c.fillStyle = 'rgba(255,255,255,.18)'; rr(62, 21, 96, 12, 6); c.fill();
     c.fillStyle = hv >= GP.wreck ? A.red : hv > 0 ? A.yellow : A.green; rr(62, 21, Math.max(6, 96 * (1 - hv / 100)), 12, 6); c.fill(); c.fillStyle = A.white; c.fillText(Math.round(100 - hv) + '%', 164, 31);
   };
   /* keep the run moving through this art: carry the leg number and what the Gumdrop is on */
-  run = function () { const pts = [{ x: EV.ship0.x, y: EV.ship0.y, rk: true, k: 'nudge', li: 0 }], T = EV.torn; EV.legs.forEach(l => l.path.forEach((q, j) => pts.push({ x: q.x, y: q.y, k: q.k, li: l.i, rk: !T || l.i < T.leg || (l.i === T.leg && j < T.idx) }))); if (pts.length < 2) return;
+  run = function () { const pts = [{ x: EV.ship0.x, y: EV.ship0.y, rk: true, k: 'nudge', li: 0 }], T = EV.torn; EV.legs.forEach(l => l.path.forEach((q, j) => pts.push({ x: q.x, y: q.y, k: q.k, tp: q.t, li: l.i, rk: !T || l.i < T.leg || (l.i === T.leg && j < T.idx) }))); if (pts.length < 2) return;
     const lens = [0]; for (let i = 1; i < pts.length; i++) lens.push(lens[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)); const total = lens[lens.length - 1], dur = clamp(total / 9, 3, 12) * 1000, t0 = performance.now(), me = anim = { pos: pts[0], rk: true, k: 'nudge', li: 0, u: 0 };
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const tick = now => { if (anim !== me) return; const u = still ? 1 : Math.min(1, (now - t0) / dur), d = u * total; let i = 1; while (i < pts.length - 1 && lens[i] < d) i++; const f = lens[i] === lens[i - 1] ? 1 : (d - lens[i - 1]) / (lens[i] - lens[i - 1]);
-      Object.assign(me, { pos: { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }, rk: pts[i].rk, k: pts[i].k, li: pts[i].li, u, done: u >= 1 }); draw();
+      Object.assign(me, { pos: { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }, rk: pts[i].rk, k: pts[i].k, tp: pts[i].tp, li: pts[i].li, u, done: u >= 1 }); draw();
       if (u < 1) requestAnimationFrame(tick); else setTimeout(() => { if (anim === me) { anim = null; draw(); } }, 2600); };
     requestAnimationFrame(tick); };
   document.querySelector('h1').textContent = 'Rescue art sample'; document.querySelector('.sub').textContent = 'The same board and the same pulling rules, drawn in the style I am proposing for the rescue and the Workshop. Build something, then press Run it.';

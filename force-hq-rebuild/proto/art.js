@@ -65,9 +65,9 @@
   function jackArt(x, y) { c.fillStyle = A.dark; rr(x - 11, y - 5, 22, 5, 2); c.fill(); c.strokeStyle = A.steel; c.lineWidth = 2; c.beginPath(); for (let i = 0; i < 6; i++) { c.moveTo(x - 4, y - 6 - i * 2.6); c.lineTo(x + 4, y - 8 - i * 2.6); } c.stroke(); line(x, y - 5, x, y - 22, A.steel2, 2); c.fillStyle = A.yellow; rr(x - 8, y - 25, 16, 4, 2); c.fill(); line(x, y - 12, x + 13, y - 12, A.steel, 2); dot(x + 13, y - 12, 2.6, A.red); }
   function boulderArt(x, y, r, tone) { const pts = [1, 0.86, 1.05, 0.9, 1, 0.82, 0.96, 1.08]; c.beginPath(); pts.forEach((k, i) => { const a = i / pts.length * Math.PI * 2 - 0.3, px = x + Math.cos(a) * r * k, py = y + Math.sin(a) * r * k * 0.86; i ? c.lineTo(px, py) : c.moveTo(px, py); }); c.closePath(); const gr = c.createLinearGradient(x - r, y - r, x + r, y + r); gr.addColorStop(0, tone || '#b9a8e8'); gr.addColorStop(1, '#55408f'); c.fillStyle = gr; c.fill(); c.strokeStyle = 'rgba(18,12,46,.55)'; c.lineWidth = 1.5; c.stroke(); line(x - r * 0.3, y - r * 0.5, x + r * 0.1, y, 'rgba(18,12,46,.35)', 1.2); line(x + r * 0.1, y, x - r * 0.1, y + r * 0.5, 'rgba(18,12,46,.35)', 1.2); line(x - r * 0.55, y - r * 0.35, x - r * 0.2, y - r * 0.62, 'rgba(255,255,255,.55)', 1.5); }
   function rope(a, b, taut) { const mx = (a.x + b.x) / 2, sag = taut ? 3 : Math.min(40, Math.hypot(b.x - a.x, b.y - a.y) * 0.1), my = (a.y + b.y) / 2 + sag; c.lineCap = 'round'; [[A.ropeD, taut ? 3.6 : 2.6], [A.rope, taut ? 1.8 : 1.1]].forEach(([col, w]) => { c.strokeStyle = col; c.lineWidth = w; c.globalAlpha = taut ? 1 : 0.55; c.beginPath(); c.moveTo(a.x, a.y); c.quadraticCurveTo(mx, my, b.x, b.y); c.stroke(); }); c.globalAlpha = 1; c.lineCap = 'butt'; }
-  /* the Gumdrop: o = { ghost, dmg (0-100), legOff, tilt } */
-  function gumdrop(wxm, wym, o) { o = o || {}; const x = X(wxm), y = Y(wym), w = 1.7 * K, h = 4.1 * K, lg = 0.55 * K;
-    c.save(); if (o.ghost) c.globalAlpha = 0.32;
+  /* the Gumdrop: o = { ghost, dmg (0-100), legOff, lie (0 upright to 1 flat on its side) } */
+  function gumdrop(wxm, wym, o) { o = o || {}; const x = X(wxm), y = Y(wym), w = 1.7 * K, h = 4.1 * K, lg = 0.55 * K, lie = o.lie || 0;
+    c.save(); if (o.ghost) c.globalAlpha = 0.32; if (lie) { c.translate(x - 1.6 * K * lie, y - 1.75 * K * lie); c.rotate(-1.42 * lie); c.translate(-x, -(y - 2.4 * K * lie)); }
     [[-0.95, false], [0, false], [0.95, true]].forEach(([k, right]) => { if (right && o.legOff) { line(x + k * w * 0.8, y - lg - 2, x + k * w * 0.8 + 3, y - lg + 4, A.steelD, 3); return; } line(x + k * w * 0.8, y - lg - 3, x + k * w * 0.95, y - 2, A.steelD, 3.4); c.fillStyle = A.steelD; rr(x + k * w * 0.95 - 5, y - 3, 10, 3, 1.5); c.fill(); });
     const by = y - lg; c.beginPath(); c.moveTo(x - w, by); c.bezierCurveTo(x - w * 1.08, by - h * 0.62, x - w * 0.55, by - h, x, by - h); c.bezierCurveTo(x + w * 0.55, by - h, x + w * 1.08, by - h * 0.62, x + w, by); c.closePath();
     const gr = c.createRadialGradient(x - w * 0.4, by - h * 0.7, 2, x, by - h * 0.4, h); gr.addColorStop(0, A.pinkL); gr.addColorStop(0.45, A.pink); gr.addColorStop(1, A.pinkD); c.fillStyle = gr; c.fill(); c.strokeStyle = 'rgba(120,20,70,.55)'; c.lineWidth = 1.5; c.stroke();
@@ -76,6 +76,7 @@
     c.restore(); [-0.7, 0, 0.7].forEach(k => dot(x + k * w, by - 3.5, 2, A.yellow));
     const wy = by - h * 0.52; dot(x, wy, 11, A.dark); dot(x, wy, 9.4, '#d9f1ff'); dot(x - 4.6, wy - 3.4, 2.6, A.blue); dot(x + 4.6, wy - 3.4, 2.6, A.blue); dot(x, wy + 1.6, 6, A.blue); dot(x, wy + 3.4, 2.6, A.blueL); dot(x - 2.2, wy + 0.4, 1.1, A.dark); dot(x + 2.2, wy + 0.4, 1.1, A.dark); c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 1.4; c.beginPath(); c.arc(x, wy, 9.4, 3.6, 4.6); c.stroke();
     c.strokeStyle = A.steel; c.lineWidth = 2.2; c.beginPath(); c.arc(x, by - h - 3.5, 3.5, 0, 7); c.stroke(); c.restore(); return { x, y: by - h - 4 }; }
+  let lieNow = 0, lieT = 0;   // eases the Gumdrop down onto its side, and back up
   const WOBBLE = () => anim ? Math.sin(performance.now() / 60) * 0.6 : 0;
 
   /* ---------- the whole board ---------- */
@@ -102,26 +103,27 @@
     /* the route the Gumdrop will take */
     const kcol = { nudge: 'rgba(255,255,255,.55)', ground: '#ff7a6b', platform: A.yellow, ramp: A.green, lift: A.teal, across: A.teal, lower: A.teal, slide: 'rgba(255,255,255,.55)', fall: '#ff7a6b' };
     EV.legs.forEach(l => { let px = l.start.x, py = l.start.y, acc = 0; l.path.forEach(q => { const d = Math.hypot(q.x - px, q.y - py) * K; acc += d; if (acc >= 9 || q.k === 'fall') { acc = 0; dot(X(q.x), Y(q.y) - 5, q.k === 'ground' ? 2.4 : 1.9, kcol[q.k] || A.white); } px = q.x; py = q.y; });
-      gumdrop(l.end.x, l.end.y, { ghost: true, legOff: T && l.i >= T.leg }); pill('after leg ' + (l.i + 1), X(l.end.x), Y(l.end.y + 6.2), null); });
+      gumdrop(l.end.x, l.end.y, { ghost: true, legOff: T && l.i >= T.leg, lie: l.lying ? 1 : 0 }); l.tips.forEach(t => { c.font = '700 13px ' + F(); c.textAlign = 'center'; c.fillStyle = A.yellow; c.fillText('✸', X(t.x), Y(t.y) - 12); pill('Fell over', X(t.x), Y(t.y) + 16, 'bad'); }); pill('after leg ' + (l.i + 1), X(l.end.x), Y(l.end.y + 6.2), null); });
     if (EV.stop && EV.stop.wall) { line(X(EV.stop.wall.x), Y(EV.stop.wall.y), X(EV.stop.wall.x), Y(EV.stop.at.y), A.red, 5); pill('Wall: too tall to drag over', X(EV.stop.wall.x), Y(EV.stop.wall.y) - 14, 'bad'); }
     if (T && (!anim || !anim.rk)) { boulderArt(X(T.x + 1.9), Y(T.y + 0.7), 0.8 * K); line(X(T.x + 1.2), Y(T.y + 1.3), X(T.x + 1.7), Y(T.y + 0.3), A.steelD, 3.4); pill('The landing leg ripped off here', X(T.x + 1.9), Y(T.y + 2.6), 'bad'); }
     /* ropes: the working one is tight, the rest hang slack */
-    const li = anim ? anim.li : 0, cur = EV.legs[li], hookY = Y(ship.y + 0.55 + 4.1) - 4, hook = { x: X(ship.x), y: hookY }; Object.keys(anchors).forEach(id => { if (!cur || cur.id !== id) rope(anchors[id], hook, false); }); if (cur && anchors[cur.id]) rope(anchors[cur.id], hook, true);
+    const want = anim && anim.tp ? 1 : 0, nowT = performance.now(); lieNow += clamp(want - lieNow, -1, 1) * Math.min(1, (nowT - lieT) / 260); lieT = nowT; if (!anim) lieNow = 0;
+    const li = anim ? anim.li : 0, cur = EV.legs[li], hook = { x: X(ship.x) - 5.2 * K * lieNow, y: Y(ship.y + 0.55 + 4.1) - 4 + 2.9 * K * lieNow }; Object.keys(anchors).forEach(id => { if (!cur || cur.id !== id) rope(anchors[id], hook, false); }); if (cur && anchors[cur.id]) rope(anchors[cur.id], hook, true);
     const on = EV.rockOn && (anim ? anim.rk : true), dmgNow = anim ? (anim.done ? EV.dmg.total : EV.dmg.total * anim.u) : 0;
     if (anim && !anim.done && (anim.k === 'ground' || anim.k === 'platform')) { const q = rng(Math.floor(performance.now() / 50) + 3); for (let i = 0; i < 9; i++) { c.globalAlpha = 0.25 + q() * 0.4; dot(X(ship.x) - 26 - q() * 34, Y(ship.y) - q() * 14, 3 + q() * 6, anim.k === 'ground' ? '#e9defc' : '#ffe9a8'); } c.globalAlpha = 1; if (anim.k === 'ground') for (let i = 0; i < 4; i++) dot(X(ship.x) - 12 + q() * 24, Y(ship.y) - q() * 6, 1.4, A.yellow); }
     if (on) { boulderArt(X(ship.x + 1.9), Y(ship.y + 0.7), 0.8 * K, '#e7a5a5'); }
-    gumdrop(ship.x + (anim && !anim.done && anim.k === 'ground' ? WOBBLE() / K : 0), ship.y, { dmg: dmgNow, legOff: T && anim && !anim.rk });
+    gumdrop(ship.x + (anim && !anim.done && anim.k === 'ground' ? WOBBLE() / K : 0), ship.y, { dmg: dmgNow, legOff: T && anim && !anim.rk, lie: lieNow });
     pill(on ? 'Gumdrop 6,300 N + boulder 2,100 N' : 'Gumdrop 6,300 N', X(ship.x), Y(ship.y + 6.4), on ? 'bad' : null);
     /* hull meter */
     const hv = anim ? dmgNow : EV.dmg.total; c.fillStyle = 'rgba(18,12,46,.82)'; rr(14, 12, 190, 30, 9); c.fill(); c.font = '700 11px ' + F(); c.fillStyle = A.white; c.textAlign = 'left'; c.fillText('HULL', 24, 31); c.fillStyle = 'rgba(255,255,255,.18)'; rr(62, 21, 96, 12, 6); c.fill();
     c.fillStyle = hv >= GP.wreck ? A.red : hv > 0 ? A.yellow : A.green; rr(62, 21, Math.max(6, 96 * (1 - hv / 100)), 12, 6); c.fill(); c.fillStyle = A.white; c.fillText(Math.round(100 - hv) + '%', 164, 31);
   };
   /* keep the run moving through this art: carry the leg number and what the Gumdrop is on */
-  run = function () { const pts = [{ x: EV.ship0.x, y: EV.ship0.y, rk: true, k: 'nudge', li: 0 }], T = EV.torn; EV.legs.forEach(l => l.path.forEach((q, j) => pts.push({ x: q.x, y: q.y, k: q.k, li: l.i, rk: !T || l.i < T.leg || (l.i === T.leg && j < T.idx) }))); if (pts.length < 2) return;
+  run = function () { const pts = [{ x: EV.ship0.x, y: EV.ship0.y, rk: true, k: 'nudge', li: 0 }], T = EV.torn; EV.legs.forEach(l => l.path.forEach((q, j) => pts.push({ x: q.x, y: q.y, k: q.k, tp: q.t, li: l.i, rk: !T || l.i < T.leg || (l.i === T.leg && j < T.idx) }))); if (pts.length < 2) return;
     const lens = [0]; for (let i = 1; i < pts.length; i++) lens.push(lens[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)); const total = lens[lens.length - 1], dur = clamp(total / 9, 3, 12) * 1000, t0 = performance.now(), me = anim = { pos: pts[0], rk: true, k: 'nudge', li: 0, u: 0 };
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     const tick = now => { if (anim !== me) return; const u = still ? 1 : Math.min(1, (now - t0) / dur), d = u * total; let i = 1; while (i < pts.length - 1 && lens[i] < d) i++; const f = lens[i] === lens[i - 1] ? 1 : (d - lens[i - 1]) / (lens[i] - lens[i - 1]);
-      Object.assign(me, { pos: { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }, rk: pts[i].rk, k: pts[i].k, li: pts[i].li, u, done: u >= 1 }); draw();
+      Object.assign(me, { pos: { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }, rk: pts[i].rk, k: pts[i].k, tp: pts[i].tp, li: pts[i].li, u, done: u >= 1 }); draw();
       if (u < 1) requestAnimationFrame(tick); else setTimeout(() => { if (anim === me) { anim = null; draw(); } }, 2600); };
     requestAnimationFrame(tick); };
   document.querySelector('h1').textContent = 'Rescue art sample'; document.querySelector('.sub').textContent = 'The same board and the same pulling rules, drawn in the style I am proposing for the rescue and the Workshop. Build something, then press Run it.';
