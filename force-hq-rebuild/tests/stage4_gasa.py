@@ -50,25 +50,12 @@ def run(vp, tag, full):
             # guided steps tick from the rig: lever on the boulder, then the arm
             B.add('lever', 18, 0); pg.wait_for_timeout(150)
             chk(f'{tag}: guide ticks the lever step', pg.locator('#glGuide li.ok').count() == 1)
-            ev('(()=>{glWarmLever().arm=1.5;glChanged();})()'); pg.wait_for_timeout(100)
-            chk(f'{tag}: guide ticks the arm step and keeps the live MA line', pg.locator('#glGuide li.ok').count() == 2 and 'rolls free' in pg.inner_text('#glGuide'))
-            # two legs by the guide: ramp by the Gumdrop, stretched to the shelf, block, winch; second ramp by the ghost
-            chk(f'{tag}: then the coach offers two first legs', pg.locator('#glGuide [data-gw="a:ramp"]').count() == 1 and pg.locator('#glGuide [data-gw="a:crane"]').count() == 1)
-            pg.click('#glGuide [data-gw="a:ramp"]'); pg.wait_for_timeout(100)
-            B.ev('GLB.sel=null; glCloseMenu()'); r1 = B.add('ramp', 16, 0); B.ev('GLB.sel=null; glCloseMenu()'); head = B.evr(f'glMachine(glPart("{r1}"),GLB.ev.ground,[]).end'); B.drag((head['x'], head['y']), (38.74, 6))
-            cp = B.evr(f'glCablePoint(glPart("{r1}"),glMachine(glPart("{r1}"),GLB.ev.ground,[]))'); B.add('block', cp['x'] + 1.5, cp['y'] + 0.5); B.menu('ropes4'); B.add('winch', cp['x'] + 3, cp['y'] + 0.5)
-            chk(f'{tag}: the coach says whether Smooshy can manage the pull, with no leg numbers', 'thrusters fire' in pg.inner_text('#glGuide') and not __import__('re').search(r'\\d+\\.\\d', pg.inner_text('#glGuide .glwlive')), pg.inner_text('#glGuide'))
-            B.menu('ratio10'); pg.wait_for_timeout(100)
-            chk(f'{tag}: leg 1 done (ramp, shelf, block, winch), and the coach offers two second legs', pg.locator('#glGuide li.ok').count() == 7 and pg.locator('#glGuide [data-gw="b:ramp"]').count() == 1 and pg.locator('#glGuide [data-gw="b:crane"]').count() == 1, pg.locator('#glGuide li.ok').count())
-            pg.click('#glGuide [data-gw="b:ramp"]'); pg.wait_for_timeout(100); B.ev('GLB.sel=null; glCloseMenu()')
-            r2 = B.add('ramp', 41, 6); pg.wait_for_timeout(150); B.ev('GLB.sel=null; glCloseMenu()'); h2 = B.evr(f'glMachine(glPart("{r2}"),GLB.ev.ground,[]).end'); B.drag((h2['x'], h2['y']), (52.5, B.evr('glAt(GLB.ev.ground,52.5)')))
-            chk(f'{tag}: leg 2 joins on from where leg 1 ends, and the coach asks for a test', pg.locator('#glGuide li.ok').count() == 9 and 'Test in simulator' in pg.inner_text('#glGuide'), (pg.locator('#glGuide li.ok').count(), B.evr('GLB.ev.legs[1] && GLB.ev.legs[1].faults')))
-            B.ev("glStartRun('test')"); pg.wait_for_timeout(300); B.ev('GLR.t0-=1e7'); pg.wait_for_timeout(700); B.ev('glBackToBuild()'); pg.wait_for_timeout(200)
-            chk(f'{tag}: after the test the coach offers Continue from here, or Keep leg 1', pg.locator('#glGuide [data-gw=keep]').count() == 1 and pg.locator('#glGuide [data-gw=leg1]').count() == 1, pg.inner_text('#glGuide'))
-            pg.click('#glGuide [data-gw=leg1]'); pg.wait_for_timeout(200)
-            chk(f'{tag}: Keep leg 1 takes leg 2 away and closes the tutorial', B.evr('GLB.ev.legs.length') == 1 and ev('glState().guide') == 'done' and not pg.locator('#glGuide').is_visible())
-            B.ev("glToolAct('undo')"); pg.wait_for_timeout(150); ev("GLB.save({id:GLB.mid},{guide:'on', tests:0, tried:false, lastTest:null}); glGuidePaint()")
-            chk(f'{tag}: legs gave strip rows plus the boulder row', [r['name'] for r in rows()] == ['Boulder', 'Leg 1', 'Leg 2'], rows())
+            ev('(()=>{glWarmLever().arm=1;glChanged();})()'); pg.wait_for_timeout(100)
+            chk(f'{tag}: guide ticks the arm step and keeps the live MA line', pg.locator('#glGuide li.ok').count() == 2 and 'drops when he lets go' in pg.inner_text('#glGuide'))
+            # the rest of the guided walk-through (winch, crane, pull, lift, across, test) is played with real pointer moves in play_boulder.py
+            setrig('ROUTES.top()'); pg.wait_for_timeout(150)
+            chk(f'{tag}: the boulder kit and two ramps give strip rows: pry, lift, Leg 1, Leg 2', [r['name'] for r in rows()] == ['Boulder: pry', 'Boulder: lift', 'Leg 1', 'Leg 2'], rows())
+            ev("GLB.save({id:GLB.mid},{guide:'on', tests:0, tried:false, lastTest:null}); glGuidePaint()")
         else:
             setrig('ROUTES.top()'); pg.wait_for_timeout(150)
         txt = pg.inner_text('#glStrip'); chk(f'{tag}: the strip describes each leg from the rig', 'Leg 1' in txt and 'ramp' in txt and 'pulley block' in txt and 'winch' in txt and 'Load 6,300 N' in txt, txt[:300])
@@ -77,8 +64,8 @@ def run(vp, tag, full):
         # a full two-ramp route for the rest
         setrig('ROUTES.top()'); R = rows()
         pg.evaluate("document.querySelector('#glStrip').scrollIntoView({block:'start'})"); pg.wait_for_timeout(150); pg.screenshot(path=OUT + f'board_strip_{tag}.png')
-        chk(f'{tag}: ROUTES.top gives Boulder, Leg 1, Leg 2', [r['name'] for r in R] == ['Boulder', 'Leg 1', 'Leg 2'])
-        chk(f'{tag}: each leg has a box for every machine, the total MA, pull, hand distance and work', [c['k'] for c in R[1]['cells']] == ['mach', 'block', 'winch1', 'tot', 'pull', 'hand', 'work'], R[1])
+        chk(f'{tag}: ROUTES.top gives Boulder: pry, Boulder: lift, Leg 1, Leg 2', [r['name'] for r in R] == ['Boulder: pry', 'Boulder: lift', 'Leg 1', 'Leg 2'])
+        chk(f'{tag}: each leg has a box for every machine, the total MA, pull, hand distance and work', [c['k'] for c in R[2]['cells']] == ['mach', 'block', 'winch1', 'tot', 'pull', 'hand', 'work'], R[2])
         pg.locator('#glStrip').scroll_into_view_if_needed()
         # ---------- hints: first free, then 1 point each ----------
         chk(f'{tag}: no hints used yet and the strip says the first is free', ev('glState().hints||0') == 0 and 'first is free' in pg.inner_text('#glwHints'))
