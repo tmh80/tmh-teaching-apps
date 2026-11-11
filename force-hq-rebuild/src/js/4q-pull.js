@@ -13,7 +13,8 @@
      crane roped to 'ship'   drags the Gumdrop under its hook if it has to, lifts it, the trolley carries it across and sets it down.
                              With across 0 the Gumdrop stays on the hook until the next rope takes it.
      lever, screw jack       lifts the Gumdrop when it rests within GP.reach of the machine. No rope needed.
-     drag anchor (new)       a pulley block or winch that is roped to 'ship' and belongs to no machine. The Gumdrop is dragged to where it stands.
+     drag anchor (new)       a pulley block or winch that is roped to 'ship' and belongs to no machine. The Gumdrop is dragged to where it stands,
+                             and every metre costs: there is no free nudge for a drag.
    Extra fields on each leg: force (the biggest force the rope needed, N), ropeMA (ropes × winches), dist (metres moved), path [{x,y,k}],
      segs [{k, len, rise, peak}], simple (the textbook sum gives the same pull), scrape/bump/fall (hull damage, %).
    Extra fields on the result: dmg.scrape, dmg.bumps, dmg.falls (all inside dmg.total), stop.why 'wall', score.ending 'wrecked'. */
@@ -77,7 +78,7 @@ function gpUnhold(C, S, tx) {
 /* one bit of pulling: the force for it, whether Smooshy can manage it, and what it does to the hull */
 function gpPull(C, S, nx, ny, kind, abrupt) {
   const L = C.leg, dx = nx - S.x, dy = ny - S.y, ds = Math.hypot(dx, dy);
-  const free = kind !== 'ramp' && L.walked + Math.abs(dx) <= GP.nudge + 1e-9 && Math.abs(ny - L.y0) <= GP.level + 1e-9;   // the free nudge at the start of a leg
+  const free = C.nudge && kind !== 'ramp' && L.walked + Math.abs(dx) <= GP.nudge + 1e-9 && Math.abs(ny - L.y0) <= GP.level + 1e-9;   // the free nudge at the start of a leg
   let F = 0;
   if (!free && ds > 1e-9) { const sin = abrupt ? dy / Math.hypot(dy, GP.kerbRun) : dy / ds, cos = Math.sqrt(Math.max(0, 1 - sin * sin)); F = C.load * Math.max(0, sin + gpMu(kind) * cos); }
   if (F / C.ropeMA > GP.heavy + 1e-9) { L.force = Math.max(L.force, F); L.forceAt = gpPt(S); return { why: 'heavy' }; }
@@ -216,7 +217,7 @@ function gpEvaluate(rig, opts) {
     legs.push(leg); leg.start = gpPt(S);
     let r = null;
     if (leg.faults.length) r = { why: 'broken', faults: leg.faults };
-    else { const C = { W, load, ropeMA, leg, shipOn, over, skip: null };
+    else { const C = { W, load, ropeMA, leg, shipOn, over, skip: null, nudge: u.type !== 'drag' };   // a winch post gets no free nudge: a bare rope moves nothing
       r = u.type === 'ramp' ? gpRampLeg(C, S, u.m) : u.type === 'crane' ? gpCraneLeg(C, S, u.m) : u.type === 'drag' ? gpDragLeg(C, S, u.a) : gpLiftLeg(C, S, u.m); }
     const lift = u.type === 'lever' || u.type === 'jack';
     leg.end = gpPt(S); leg.rise = +(leg.end.y - leg.start.y).toFixed(3); leg.held = !!S.held; leg.segs = gpSegs(leg.path, leg.start);

@@ -50,6 +50,10 @@ for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(
   chk('drag-only: way over the oxygen', r.hand > GL.oxy * 5 && r.score.pts.oxy === 0, r.hand); chk('drag-only: Smooshy can manage the pull with MA 400', r.hardest <= 60, r.hardest);
   chk('drag-only: hardest on the steep face under the crest', r.legs[0].forceAt.x > 66 && r.legs[0].forceAt.x <= 68.01, r.legs[0].forceAt); }
 
+{ const r = gpEvaluate(join(anchor('a', 77, 1, []), lever)); chk('a bare rope moves nothing: 2,100 N from the first step', r.stop.why === 'heavy' && near(r.final.x, 14, 1e-6) && near(r.legs[0].force, 2100, 1), [r.stop, r.final]); }
+{ const r = gpEvaluate(join(anchor('a', 77, 4, [10]), lever)); chk('MA 40 is the least that drags it out, with the thrusters firing', r.arrived && r.hardest > 150 && r.hardest <= 180 && r.dmg.thrusters > 0, [r.hardest, r.stop]); }
+{ const r = gpEvaluate(join(anchor('a', 77, 4, [4]), lever)); chk('MA 16 stalls on the first slope', r.stop.why === 'heavy' && r.final.x < 30, [r.stop, r.final]); }
+
 /* 3. Walls, bumps, falls */
 { const r = gpEvaluate(join(anchor('a', 30, 4, [10, 10]), lever, { parts: [{ id: 'p', type: 'platform', size: 'M', x: 24, h: 3 }] }));
   chk('a 3 m platform in the way is a wall', r.stop && r.stop.why === 'wall' && near(r.final.x, 22, 0.6), [r.stop, r.final]); }

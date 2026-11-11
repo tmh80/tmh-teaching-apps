@@ -28,7 +28,7 @@ The Gumdrop is a body that rests on a surface. A rope pulls it towards the rope'
 3. **Only a wall stops it.** A wall is a rise of more than **1 m within half a metre**: a platform taller than 1 m, or the side of a big blast hole. Everything smaller is dragged over.
 4. **Bumps.** A step of 0.3 m to 1 m is climbed like a short, steep kerb. It needs a big pull and dents the hull.
 5. **Falls.** Going off an edge is allowed. A drop of more than 0.5 m damages the hull.
-6. **The free nudge.** The first 3 m of a leg is free if it is level (within 0.5 m): no force, no hand travel, no damage. This is the old glowing box turned into a grace: a ramp whose foot is near the Gumdrop gives the same textbook numbers as before. Further than 3 m, the rest is a real drag.
+6. **The free nudge.** The first 3 m of a leg is free if it is level (within 0.5 m): no force, no hand travel, no damage. This is the old glowing box turned into a grace: a ramp whose foot is near the Gumdrop gives the same textbook numbers as before. Further than 3 m, the rest is a real drag. **A winch post gets no nudge** (Tom, 11 Nov): every metre of a pure drag costs, so a bare rope moves nothing.
 7. **Too heavy.** If the pull would pass 180 N, the Gumdrop stops at that spot. It still moves as far as Smooshy can manage.
 8. **Platforms give way** the moment the Gumdrop gets onto one that can't hold it and the machines on it.
 
@@ -41,7 +41,7 @@ Each rope is used once. The nearest one goes first. Smooshy never works a machin
 | **Ramp roped to the Gumdrop** | The anchor is the ramp's head. The Gumdrop is nudged or dragged to the foot, then rolls up the deck. If it is already part-way along, it joins the ramp there. |
 | **Crane roped to the Gumdrop** | Drags the Gumdrop under its hook if it has to, lifts it, and the trolley carries it across and lowers it onto whatever is there (any height below the lift, no 0.5 m rule). A taller platform in the trolley's way is a wall. With Move across 0 it stays on the hook. |
 | **Lever, screw jack** | Lifts the Gumdrop when it rests within 1.5 m. No rope. |
-| **Winch post (new)** | A pulley block or winch that is roped to the Gumdrop and belongs to no machine. The Gumdrop is dragged to where it stands. This is "just build a load of pulleys". |
+| **Winch post (new)** | A pulley block or winch that is roped to the Gumdrop and belongs to no machine. The Gumdrop is dragged to where it stands. This is "just build a load of pulleys". It needs them: the steepest ground under the crest takes about 6,400 N, so an MA of about 36 just to move it and about 107 to keep Smooshy under 60 N. The builder must show the post's pulley block, winches and total MA. |
 
 **Held up.** After a crane with no Move across, a lever or a jack, the Gumdrop is held in the air. The next rope pulls it sideways (up to 8 m on a crane's beam, 3 m off a lever or jack) until it is over something within 0.5 m below, and it settles there. With nothing under it, it falls.
 
@@ -73,7 +73,7 @@ Each leg has `force` (the biggest force the rope needed), `ropeMA` (ropes × win
 
 The grey-box has a "Tune the rules" panel for all of these.
 
-1. Is the 3 m free nudge right, or should every metre cost something?
+1. ~~Is the 3 m free nudge right?~~ Decided 11 Nov: keep it for ramps and cranes, none for winch posts.
 2. Is 1 m the right height for a wall?
 3. Does dragging hurt enough? (1.2% per metre; 2,100 N on the flat.)
 4. Is a 4 m fall at 32% fair?
@@ -96,5 +96,7 @@ One Sonnet agent, medium effort, this section as the brief. Opus or Fable review
 9. **Outputs (load `wab-sim-toddle-outputs`).** My Rescue page: hull damage line and sources. Answer key, marking scheme and the Toddle AI feedback text: hull damage and the "wrecked" rule; the reflection question's model answer mentions dragging.
 10. **Tests.** `tests/pull_model.js` joins `run_all.sh`. Rewrite `rescue_numbers.py`, `play_rescue.py`, `stage2_ropes.py`, `stage4_gasa.py`, `play_story.py`, `play_hints.py`, `play_myrescue.py`, `k4_two_leg.py` for the new rules. New play test: build a drag-only route with real pointer moves and reach the beam, wrecked.
 11. **Docs.** Brief, backlog, handoff, Chapter 6 script, Project copies. Then `WORKSHOP_OPEN = true` after Tom plays.
+
+**The boulder.** If it is not cleared it rides along on the landing leg (+2,100 N, 25% damage), as before. The run must draw it moving with the Gumdrop, so the ship never seems to pass through it (Tom, 11 Nov).
 
 **Not affected:** Parts 1 to 3, the Challenges and the Check keep their numbers and marks.
