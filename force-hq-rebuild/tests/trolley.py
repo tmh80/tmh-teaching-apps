@@ -1,6 +1,6 @@
 """The crane trolley (spec section 14): Move across in the rescue model, the panel and the board.
 Run after build.py:  python3 tests/trolley.py     Screenshots: /tmp/fhq-shots/trolley/
-tests/golden_rescue_across0.json was taken from the build BEFORE the trolley, over every saved rescue rig (tests/rescue_routes.js), plain and with hints 3 + maths approved.""" Regenerated for the boulder two-leg job: only the cost (the boulder kit adds 70) and the crane route score (now over budget) changed.
+tests/golden_rescue_across0.json was taken from the build BEFORE the trolley, over every saved rescue rig (tests/rescue_routes.js), plain and with hints 3 + maths approved. Regenerated for the boulder two-leg job: only the cost (the boulder kit adds 70) and the crane route score (now over budget) changed."""
 import json, pathlib
 from playwright.sync_api import sync_playwright
 F = pathlib.Path('dist/test.html').resolve().as_uri(); OUT = '/tmp/fhq-shots/trolley/'; pathlib.Path(OUT).mkdir(parents=True, exist_ok=True)
@@ -16,7 +16,7 @@ with sync_playwright() as p:
     pg.on('pageerror', lambda e: errs.append('ERR ' + str(e))); pg.goto(F); pg.wait_for_timeout(300)
     def ev(code): return json.loads(pg.evaluate('c=>__fhq.ev(c)', ROUTES + '\n' + RED + '\n;JSON.stringify((()=>{' + code + '})())'))
     # 1. across = 0 (absent, or 0 on every crane) is identical to the build before the trolley
-    for mode, fix in (('no across', ''), ('across 0', "g.parts.forEach(p=>{ if(p.type==='crane') p.across=0; });"), ('adir only', "g.parts.forEach(p=>{ if(p.type==='crane') p.adir=-1; });")):
+    for mode, fix in (('no across', ''), ('across 0', "g.parts.forEach(p=>{ if(p.type==='crane' && !p.role) p.across=0; });"), ('adir only', "g.parts.forEach(p=>{ if(p.type==='crane') p.adir=-1; });")):
         out = ev("const o={}; for (const k in ROUTES) { const g=ROUTES[k](); " + fix + " o[k]=red(gpEvaluate(g)); const h=ROUTES[k](); " + fix.replace('g.', 'h.') + " o[k+'_h']=red(gpEvaluate(h,{hints:3,maths:true})); } return o")
         bad = [k for k in GOLD if json.dumps(out[k], sort_keys=True) != json.dumps(GOLD[k], sort_keys=True)]
         chk(f'{mode}: all {len(GOLD)} saved rescue results (score, pulls, hand, work, cost, legs) match the pre-trolley build', not bad, bad)
