@@ -167,10 +167,10 @@ with sync_playwright() as p:
     src = ev("glGuidePaint.toString()"); chk('guided start final message has the new wording', "Well done, engineer!</b> Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly\\'s tractor beam pulls it in. You don\\'t need to move it across." in src or "Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly's tractor beam pulls it in. You don't need to move it across." in src)
     # not-yet message with metres
     open_part5(pg); B = Board(pg); r1 = B.add('ramp', 16, 0); B.ev("glStartRun('test')"); pg.wait_for_timeout(300); B.ev("GLR.t0-=1e7"); pg.wait_for_timeout(700)
-    lines = B.evr("glState().lastTest.lines.map(l=>l[0])"); sh = B.evr("glShort(glEvaluate(GLB.rig))")
+    lines = B.evr("glState().lastTest.lines.map(l=>l[0])"); sh = B.evr("glShort(gpEvaluate(GLB.rig))")
     chk('a test that stops short says how high it got and how much higher the line is, in metres', any('got' in l and 'm up' in l and 'm higher' in l for l in lines) and sh and sh['to'] > 0, [lines, sh])
-    chk('the metres are the model\'s: up + to = crest height above the start', abs(sh['up'] + sh['to'] - B.evr("glEvaluate(GLB.rig).crest - glEvaluate(GLB.rig).ship0.y")) < 1e-6, sh)
-    sm = B.evr("glSummary(glEvaluate(GLB.rig))"); chk('the not-yet ending card text carries the same sentence', 'higher' in B.ev("glEndText(glSummary(glEvaluate(GLB.rig)))[2]") and sm['up'] is not None)
+    chk('the metres are the model\'s: up + to = crest height above the start', abs(sh['up'] + sh['to'] - B.evr("gpEvaluate(GLB.rig).crest - gpEvaluate(GLB.rig).ship0.y")) < 1e-6, sh)
+    sm = B.evr("glSummary(gpEvaluate(GLB.rig))"); chk('the not-yet ending card text carries the same sentence', 'higher' in B.ev("glEndText(glSummary(gpEvaluate(GLB.rig)))[2]") and sm['up'] is not None)
 
     # ---------- 8. a test always hands the board back ----------
     def board_free(B):

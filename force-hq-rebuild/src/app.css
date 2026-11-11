@@ -876,7 +876,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glboard.running canvas{cursor:default}
 .glstamp{display:inline-flex;flex-wrap:wrap;gap:10px;align-items:baseline;border-radius:12px;padding:8px 14px;font-size:20px;border:2.5px solid}
 .glstamp.spotless{background:var(--okbg);color:var(--okfg);border-color:var(--okfg)}
-.glstamp.dented{background:var(--hazard-soft);color:var(--hzfg);border-color:var(--hzfg)}
+.glstamp.dented,.glstamp.wrecked,.glstamp.torn{background:var(--hazard-soft);color:var(--hzfg);border-color:var(--hzfg)}
+.glnarr{margin:6px 0;font-weight:700}
 .glstamp.notyet{background:var(--chip);color:var(--ink);border-color:var(--line)}
 .glstamp em{font-size:14px;font-style:normal;font-weight:800}
 .gltab{overflow-x:auto;max-width:100%}
@@ -975,6 +976,7 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glw-cell.ok input{border-color:var(--okfg);background:var(--okbg)}.glw-cell.ok .glw-mk{color:var(--okfg)}
 .glw-cell.bad input{border-color:var(--nofg);background:var(--nobg)}.glw-cell.bad .glw-mk{color:var(--nofg)}
 .glw-cell.helped input{border-color:var(--hzfg);background:var(--hazard-soft);padding-right:52px}.glw-cell.helped .glw-mk{color:var(--hzfg);font-size:11px}
+.glw-given{margin:6px 0;background:var(--chip);border-radius:8px;padding:6px 10px;font-size:14px}
 .glw-help{margin-top:8px;background:var(--hazard-soft);border-radius:8px;padding:6px 10px;font-size:14px}.glw-help ul{margin:2px 0 0;padding-left:18px}
 .glw-hint{margin-top:8px;border:1.5px dashed var(--accent);border-radius:10px;padding:6px 12px;background:var(--panel)}
 .glw-send{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}.glw-send .go{font-size:17px}

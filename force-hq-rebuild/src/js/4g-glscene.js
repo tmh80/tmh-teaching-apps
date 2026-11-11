@@ -1,7 +1,7 @@
 /* ===== Operation Gummy Lift: drawing the crater, side-on (stage 2). Same flat, rounded look as the Workshop (4b-shopdraw.js).
    World units are metres (x across, y up from the crater floor). GLV maps them to canvas pixels, with zoom and pan.
    glDrawWorld(c, o) draws everything; o = { rig, ev (glEvaluate result), ground, ghost, ship {x,y,tilt,mood,inside,dmg}, smoo {x,y,mood}|null,
-   sel, hz (handover target), ruler, run (stage 3 extras), t } */
+   sel, routes (draw each leg's path), ruler, run (stage 3 extras), t } */
 const GLC = { sky0: '#2d1f63', sky1: '#8e6fd6', rock0: '#b9a2e4', rock1: '#7d63ba', crust: '#d6c4f5', deep: '#5f4a99', crys: 'rgba(255,255,255,.9)', wood: '#c9a36a', wood2: '#9c7845', steel: '#8e9ca5', steel2: '#5d6b74',
   rope: '#f4e7c8', bad: '#ff5d5d', glow: '#7ef0a8', ink: '#1f1d26', label: '#fffaf2', jelly: '#ffb347', jelly2: '#ff8a3d', beam: 'rgba(160,255,214,.35)' };
 const GLV = { LW: 1000, LH: 300, K: 10, z: 1, cx: 48, cy: 12, wide: 300 };
@@ -155,13 +155,29 @@ function glDrawCable(c, a, b, slack) {
   const u = glU(), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - (slack == null ? 0.25 : slack) * Math.min(1, Math.hypot(b.x - a.x, b.y - a.y) / 6);
   c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(glSX(a.x), glSY(a.y)); c.quadraticCurveTo(glSX(mx), glSY(my), glSX(b.x), glSY(b.y)); c.stroke();
 }
-/* the handover zone: where the next machine must start (3 m across, 0.5 m up or down) */
+/* a glowing spot: the Part 4 practice board still uses it to show where to drop a piece (Part 5 has no box) */
 function glDrawZone(c, z, t, label) {
   const u = glU(), pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 4), X0 = glSX(z.x - GL.hzX), X1 = glSX(z.x + GL.hzX), Y0 = glSY(z.y + GL.hzY), Y1 = glSY(z.y - GL.hzY);
   c.save(); c.shadowColor = GLC.glow; c.shadowBlur = 8 + 10 * pulse; c.strokeStyle = `rgba(126,240,168,${0.55 + 0.4 * pulse})`; c.lineWidth = 2.5; c.setLineDash([6, 4]);
   c.beginPath(); c.roundRect(X0, Y0, X1 - X0, Math.max(6, Y1 - Y0), 6); c.stroke(); c.restore();
   c.fillStyle = `rgba(126,240,168,${0.12 + 0.1 * pulse})`; c.beginPath(); c.roundRect(X0, Y0, X1 - X0, Math.max(6, Y1 - Y0), 6); c.fill();
   if (label) glLbl(c, label, (X0 + X1) / 2, glSY(z.y + 5.4), '#c9ffdc', 11, 'center', 'rgba(31,29,38,.6)');
+}
+/* ghost Gumdrops: where the Gumdrop starts each leg after the first, plus where it waits now (the model keeps that spot in ev.ghost, as the old model did in ghosts) */
+function glGhostList(ev) { const out = ((ev && ev.ghosts) || []).slice(), g = ev && ev.ghost; if (g && ev.stop && ev.stop.leg >= 1 && !out.some(q => Math.hypot(q.x - g.x, q.y - g.y) < 0.01)) out.push({ x: g.x, y: g.y, after: ev.stop.leg }); return out; }
+/* the route of each leg, straight from the model's own path: coloured by what the Gumdrop is doing, and the wall marked where a leg is stopped by one */
+const GL_ROUTE = { nudge: '#c9ffdc', ground: '#ff8f6b', platform: '#ffd27a', ramp: '#7ef0a8', lift: '#8fd3ff', across: '#8fd3ff', lower: '#8fd3ff', slide: '#ffd27a', fall: '#ff5d5d' };
+function glDrawRoutes(c, ev) {
+  if (!ev || !ev.legs) return; const u = glU();
+  ev.legs.forEach(l => { if (!l.path || !l.path.length || !l.start) return; let px = l.start.x, py = l.start.y, cur = null; const runs = [];
+    l.path.forEach(q => { if (!cur || cur.k !== q.k) { cur = { k: q.k, pts: [[px, py]] }; runs.push(cur); } cur.pts.push([q.x, q.y]); px = q.x; py = q.y; });
+    c.save(); c.lineWidth = Math.max(3, 0.3 * u); c.lineCap = 'round'; c.lineJoin = 'round';
+    runs.forEach(r => { c.strokeStyle = GL_ROUTE[r.k] || '#fff'; c.setLineDash(r.k === 'fall' ? [4, 4] : []); c.beginPath(); r.pts.forEach(([x, y], i) => i ? c.lineTo(glSX(x), glSY(y) - 3) : c.moveTo(glSX(x), glSY(y) - 3)); c.stroke(); });
+    c.restore(); const e = l.path[l.path.length - 1]; c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y) - 3, 4.5, 0, 7); c.fill(); c.stroke();
+    lblAdd(`Leg ${l.i + 1} ends`, glSX(e.x), glSY(e.y) + 16, { size: 10, col: GLC.ink, bg: '#c9ffdc', prio: 6 }); });
+  const st = ev.stop; if (st && st.why === 'wall' && st.wall) { const X = glSX(st.wall.x), Y1 = glSY(st.wall.y), Y0 = glSY(st.wall.y - 1.6);
+    c.save(); c.strokeStyle = '#ff5d5d'; c.lineWidth = Math.max(5, 0.45 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(X, Y0); c.lineTo(X, Y1 - 4); c.stroke(); c.restore();
+    lblAdd('A wall: too tall to drag over', X, Y1 - 22, { size: 11, col: '#fff', bg: '#c0392b', prio: 1 }); }
 }
 function glDrawRuler(c, r) {
   const u = glU(), A = { x: glSX(r.a.x), y: glSY(r.a.y) }, B = { x: glSX(r.b.x), y: glSY(r.b.y) }, dx = r.b.x - r.a.x, dy = r.b.y - r.a.y;
@@ -203,7 +219,7 @@ function glDrawWorld(c, o) {
   rig.parts.filter(p => p.type === 'block').forEach(p => glDrawBlock(c, p));
   rig.parts.filter(p => p.type === 'winch').forEach(p => glDrawWinch(c, p, false, run.spin));
   if (o.smoo) drawSmooshy(c, glSX(o.smoo.x), glSY(o.smoo.y + 1.5), 0.026 * glU(), o.smoo.mood, t);
-  if (o.hz) glDrawZone(c, o.hz, t, o.hzLabel);
+  if (o.routes && !run.on) glDrawRoutes(c, ev);
   /* selection ring and cable dots */
   if (o.sel && byId[o.sel]) { const b = glBounds(byId[o.sel], ms[o.sel], g, plats); c.strokeStyle = '#ffe28a'; c.lineWidth = 2; c.setLineDash([5, 4]); c.beginPath(); c.roundRect(glSX(b.x0) - 6, glSY(b.y1) - 6, (b.x1 - b.x0) * glU() + 12, (b.y1 - b.y0) * glU() + 12, 8); c.stroke(); c.setLineDash([]); }
   if (!run.on) rig.parts.filter(p => p.type === 'ramp').forEach(p => { const e = ms[p.id].end; lblAvoid(glSX(e.x), glSY(e.y), 14); c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y), 7, 0, 7); c.fill(); c.stroke(); });
@@ -212,7 +228,7 @@ function glDrawWorld(c, o) {
   if (!run.on && o.ship) {
     const hk = (sp, ghost) => { const X = glSX(sp.x), Y = glSY(sp.y + GL_HOOK); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u0); c.beginPath(); c.moveTo(X, glSY(sp.y + 4.5)); c.lineTo(X, Y); c.stroke(); drawHookDot(c, X, Y, { glow: o.hookGlow }); lblAvoid(X, Y, 12); };
     var u0 = glU();
-    ((ev && ev.ghosts) || []).forEach(gh => { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y), sc, 0); c.restore();
+    glGhostList(ev).forEach(gh => { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y), sc, 0); c.restore();
       c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(glSX(gh.x), glSY(gh.y + 2.2), 3.2 * u0, 2.6 * u0, 0, 0, 7); c.stroke(); c.setLineDash([]); hk(gh, true); });
     hk(o.ship);
   }
@@ -232,7 +248,7 @@ function glDrawLabels(c, o, g, crest, ev) {
     else lblAdd('Boulder 252 N', glSX(GL.boulderX + 1.8), glSY(by + 2.9), { size: sz, prio: 3, tx: glSX(GL.boulderX), ty: glSY(by + 0.9) }); }
   lblAdd('Tractor beam reaches this line', glSX(58), glSY(crest), { size: sz, col: '#c9ffdc', bg: 'rgba(31,29,38,.72)', prio: 1 });   // on the dotted line (Tom, 9 Nov 2026): the goal is only to get the Gumdrop up to here
   if (o.ship && !o.ship.hideLabel) lblAdd('Gumdrop 6,300 N', glSX(o.ship.x), glSY(o.ship.y + 8.0), { size: sz, prio: 4, tx: glSX(o.ship.x), ty: glSY(o.ship.y + 4.5) });
-  if (o.ship && ev && ev.ghosts) ev.ghosts.forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4, tx: glSX(gh.x), ty: glSY(gh.y + 4.5) }));
+  if (o.ship && ev) glGhostList(ev).forEach(gh => lblAdd(`Gumdrop after leg ${gh.after}`, glSX(gh.x), glSY(gh.y + 8.0), { size: sz, col: '#c9ffdc', prio: 4, tx: glSX(gh.x), ty: glSY(gh.y + 4.5) }));
 }
 /* where the Gumdrop is for a machine or add-on: at the start of the leg it belongs to, else waiting as the ghost (or still at the start) */
 function glShipSpot(ev, id, g) {

@@ -9,7 +9,7 @@ const GL_KEY_RIG = (() => {
 })();
 let GL_KEY_CACHE = null;
 function glKey() {
-  if (!GL_KEY_CACHE) { const res = glEvaluate(GL_KEY_RIG, { hints: 0, maths: true }); GL_KEY_CACHE = { sum: glSummary(res), work: glwKeyFor(GL_KEY_RIG), snap: glSnapURL(GL_KEY_RIG, 'Example route: two ramps, a lever and a blasted crest') }; }
+  if (!GL_KEY_CACHE) { const res = gpEvaluate(GL_KEY_RIG, { hints: 0, maths: true }); GL_KEY_CACHE = { sum: glSummary(res), work: glwKeyFor(GL_KEY_RIG), snap: glSnapURL(GL_KEY_RIG, 'Example route: two ramps, a lever and a blasted crest') }; }
   return GL_KEY_CACHE;
 }
 function myRescueHTML(mode) {

@@ -1,4 +1,4 @@
-/* ===== Part 5 story: the guided start (two legs), the three ending cards and the "good place to stop" pop-up ===== */
+/* ===== Part 5 story: the guided start (two legs), the ending cards (spotless, dented, wrecked, pulled apart, not yet) and the "good place to stop" pop-up ===== */
 
 /* ---------- the guided start, about 5 minutes, before the free build (stage 4, spec section 11) ----------
    It replaces the old lever warm-up and the "Mission computer" prediction box. Skip is always allowed and nothing waits on it.
@@ -24,7 +24,7 @@ const GLG_STEPS = [
   { t: 'Drag the white handle at the top of the ramp up to the shelf, 6 m up.', why: 'Ramp MA = length ÷ rise. A longer ramp means a smaller pull, but a longer way to pull.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.end.y >= 5.9 && !l.faults.length); } },
   { t: 'Clip a <b>pulley block</b> onto the ramp\'s ◉ dot at the top, then tap it and choose <b>4 ropes</b>.', why: 'Each supporting rope shares the load, so the pulley block\'s MA is its number of ropes.', done: () => { const l = glgLeg(0); return !!(l && l.type === 'ramp' && l.addons.some(id => { const q = glPart(id); return q && q.type === 'block' && q.ropes >= 3; })); }, need: () => glgAddon('block', 'ropes4') },
   { t: 'Clip a <b>winch</b> onto the end of the pulley block\'s rope, then tap it and choose <b>×7</b>.', why: 'A winch multiplies the MA by its gear ratio. The total MA of a leg is every machine\'s MA multiplied together.', done: () => { const l = glgLeg(0); return !!(l && l.winches.some(w => w >= 6)); }, need: () => glgAddon('winch', 'ratio7') },
-  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. Each machine starts in the glowing box where the last one finished.', done: () => { const l = glgLeg(1); return !!(l && l.roped); }, need: () => GLB.rig.parts.filter(p => p.type === 'ramp').length >= 2 ? null : { tile: 'ramp' } },
+  { t: 'Leg 2. The ghost Gumdrop shows where the ship waits after leg 1. Drag a second <b>ramp</b> next to it, so it snaps on and ropes to the ghost\'s ◉.', why: 'Every leg has its own pull. The next rope picks the Gumdrop up from wherever it is resting.', done: () => { const l = glgLeg(1); return !!(l && l.roped); }, need: () => GLB.rig.parts.filter(p => p.type === 'ramp').length >= 2 ? null : { tile: 'ramp' } },
   { t: 'Fill in your route strip, then press <b>▶ Test in simulator</b>.', why: 'The strip is where GASA checks your maths. The simulator shows where the route works, with no numbers.', done: () => !!(glState().tests || glState().runs) }
 ];
 function glMountGuide(host) {
@@ -45,6 +45,8 @@ function glGuidePaint() {
   box.innerHTML = `<h3>🧭 Guided start: your first two legs</h3>
     <p>Welcome to Mission Control! Build the first part of a rescue route with me. You can skip this at any time.</p>
     <p class="glnote">Tip: a crane gantry has <b>Move across</b>. Its trolley carries the Gumdrop sideways, then sets it down on a shelf or platform.</p>
+    <p class="glnote">You can drag the Gumdrop over the ground with a pulley and winch post, but dragging scrapes the hull.</p>
+    <p class="glnote">Clear the boulder first. If it is still jammed on when the Gumdrop is pulled, the strain can tear the Gumdrop's landing leg off.</p>
     <ol class="objs glsteps">${GLG_STEPS.map((s, i) => `<li class="${done[i] ? 'ok' : i === cur ? 'cur' : ''}"><span class="box">${done[i] ? '✓' : ''}</span><span>${s.t}${i === cur ? `<small class="glwhy">${s.why}</small>` : ''}</span></li>`).join('')}</ol>${live}
     ${all ? '<p><b>Well done, engineer!</b> Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly\'s tractor beam pulls it in. You don\'t need to move it across.</p><div class="row"><button type="button" class="go" data-gw="done">Start building my route</button></div>' : '<div class="row"><button type="button" class="ghost sm" data-gw="skip">Skip the guided start</button></div>'}`;
   glGuideThrob();
@@ -59,13 +61,11 @@ function glPop(html, key, label) {
   return box;
 }
 function glEndText(sum) {
-  const d = sum.dmg || {}, why = [];
-  if (d.t > 0) why.push('a leg that needed more than 60 N, so the thrusters roared');
-  if (d.r > 0) why.push('the rock left on the boulder');
-  if (d.b > 0) why.push('dynamite going off close to the ship');
-  const dent = why.length ? `The damage came from ${why.join(', ')}.` : '';
+  const d = sum.dmg || {}, src = typeof glHullSources === 'function' ? glHullSources(d) : [], dent = src.length ? `The hull damage came from ${src.join(', ')}.` : '';
   if (sum.ending === 'spotless') return ['✨', 'Spotless rescue!', 'The tractor beam locks on and the Gumdrop lifts away without a single scratch. Smooshy climbs aboard, waves from the window, and the Big Jelly hums off across the plain. On the way up he spots the crystals on the crater rim glittering in the light of two moons.'];
   if (sum.ending === 'dented') return ['🛠️', 'Dented, but home!', `The tractor beam lifts the Gumdrop and Smooshy waves from the window, but the hull is scorched and cracked (${fmt(d.total || 0, 1)}% damage). ${dent} Another go can bring the damage down to zero.`];
+  if (sum.ending === 'wrecked') return ['💥', 'Wrecked, but home!', `The tractor beam lifts the Gumdrop away, and Smooshy is safe in the cabin, but the hull is in a terrible state (${fmt(d.total || 0, 1)}% damage). ${dent} A rescue that wrecks the hull scores 3 points at most. Lifting with ramps, a crane or a lever is much kinder to the hull than dragging the Gumdrop over the ground.`];
+  if (sum.ending === 'torn') return ['🧩', 'Pulled apart!', `The tractor beam lifts what is left of the Gumdrop, and Smooshy is safe in the cabin. The boulder was still jammed on the landing leg, and the strain on the leg${sum.torn && sum.torn.strain ? ` (${fmt(sum.torn.strain, 0)} N)` : ''} was more than the 500 N it can take, so the leg ripped off and the hull took a huge hit. ${dent} A rescue that pulls the Gumdrop apart scores 2 points at most. Clear the boulder first and the same route scores more.`];
   return ['🔄', 'Not yet!', `${(sum.stop && sum.stop !== 'none' ? glStopText(sum.stop, sum.stopLeg) : '') || GL_STOP.none}${sum.up != null ? ' ' + glShortText(sum.up, sum.toLine) : ''} Your route stays in the builder, so you only need to fix the part that stopped it. Every go counts, and you can move on to the Check whenever you like.`];
 }
 function glShowEnding(sum, o) {
