@@ -2784,7 +2784,7 @@ function drawHomeArt(c, hit) {
 /* The Workshop (Chapter 6) stays closed to students until the rescue rebuild is finished. To open it, change false to true: this one line
    brings back its chapter card, home page entry, stamps, teacher page rows, Explore Workshop and Build tasks. Students' saved Workshop work is
    never deleted while it is closed. dist/test.html is always built with it open, so the Workshop tests keep working (see build.py). */
-const WORKSHOP_OPEN = false;
+const WORKSHOP_OPEN = true;
 const CHAPTERS = [
   { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },
@@ -7571,13 +7571,20 @@ function star5(c, x, y, R, r) { c.beginPath(); for (let i = 0; i < 10; i++) { co
 /* the Gumdrop: a dome-shaped ship like a gumdrop sweet. (x, y) = the middle of the base; tilt in radians. */
 function drawGumdrop(c, x, y, s, tilt) {
   c.save(); c.translate(x, y); c.rotate(tilt || 0); c.scale(s, s);
-  c.fillStyle = '#6c7b84'; [[-34, 0], [0, 4], [34, 0]].forEach(([lx]) => { c.beginPath(); c.roundRect(lx - 4, 0, 8, 22, 4); c.fill(); c.beginPath(); c.roundRect(lx - 10, 20, 20, 5, 3); c.fill(); });
-  const g = c.createLinearGradient(0, -80, 0, 6); g.addColorStop(0, '#ff9ec4'); g.addColorStop(1, '#e8639b'); c.fillStyle = g;
-  c.beginPath(); c.moveTo(-52, 4); c.quadraticCurveTo(-52, -86, 0, -86); c.quadraticCurveTo(52, -86, 52, 4); c.closePath(); c.fill();
-  c.fillStyle = '#c94a82'; c.beginPath(); c.roundRect(-56, -6, 112, 14, 7); c.fill();
-  c.fillStyle = 'rgba(255,255,255,.85)'; [[-30, -50], [24, -62], [34, -28], [-18, -22], [0, -72], [-40, -30], [10, -40]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 2.4, 0, 7); c.fill(); });
-  c.fillStyle = '#bfe6f5'; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 4; c.stroke();
+  /* three splayed landing legs with foot pads */
+  c.strokeStyle = '#4c5670'; c.fillStyle = '#4c5670'; c.lineWidth = 7; c.lineCap = 'round';
+  [[-28, -38], [0, 0], [28, 38]].forEach(([tx, fx]) => { c.beginPath(); c.moveTo(tx, 0); c.lineTo(fx, 20); c.stroke(); c.beginPath(); c.roundRect(fx - 11, 20, 22, 5, 2.5); c.fill(); });
+  /* the sugary pink dome */
+  const body = () => { c.beginPath(); c.moveTo(-52, 4); c.quadraticCurveTo(-52, -86, 0, -86); c.quadraticCurveTo(52, -86, 52, 4); c.closePath(); };
+  const g = c.createRadialGradient(-20, -62, 4, 0, -36, 92); g.addColorStop(0, '#ffd0e2'); g.addColorStop(0.45, '#ff7fb0'); g.addColorStop(1, '#d94c86'); body(); c.fillStyle = g; c.fill(); c.strokeStyle = 'rgba(120,20,70,.5)'; c.lineWidth = 2; c.stroke();
+  c.save(); body(); c.clip(); c.fillStyle = '#c0407a'; c.fillRect(-60, -10, 120, 16);
+  c.fillStyle = 'rgba(255,255,255,.85)'; [[-30, -50], [24, -62], [34, -28], [-18, -22], [0, -72], [-40, -30], [10, -40], [-8, -60], [38, -46], [-30, -70], [22, -78], [-42, -16], [42, -14]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 2.2, 0, 7); c.fill(); });
+  c.restore();
+  c.fillStyle = '#ffc53d'; [-30, 0, 30].forEach(lx => { c.beginPath(); c.arc(lx, -3, 3.4, 0, 7); c.fill(); });
+  /* the round window, and the lifting ring on top */
+  c.fillStyle = '#1b1d29'; c.beginPath(); c.arc(0, -42, 18, 0, 7); c.fill(); c.fillStyle = '#d9f1ff'; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 3; c.stroke();
   c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.arc(-5, -47, 4, 0, 7); c.fill();
+  c.strokeStyle = '#a9b4c9'; c.lineWidth = 3; c.beginPath(); c.arc(0, -91, 5, 0, 7); c.stroke();
   c.restore();
 }
 
@@ -9334,8 +9341,9 @@ const glBetter = (a, b) => !b || (a.total != null && b.total == null) || (a.tota
    World units are metres (x across, y up from the crater floor). GLV maps them to canvas pixels, with zoom and pan.
    glDrawWorld(c, o) draws everything; o = { rig, ev (glEvaluate result), ground, ghost, ship {x,y,tilt,mood,inside,dmg}, smoo {x,y,mood}|null,
    sel, routes (draw each leg's path), ruler, run (stage 3 extras), t } */
-const GLC = { sky0: '#2d1f63', sky1: '#8e6fd6', rock0: '#b9a2e4', rock1: '#7d63ba', crust: '#d6c4f5', deep: '#5f4a99', crys: 'rgba(255,255,255,.9)', wood: '#c9a36a', wood2: '#9c7845', steel: '#8e9ca5', steel2: '#5d6b74',
-  rope: '#f4e7c8', bad: '#ff5d5d', glow: '#7ef0a8', ink: '#1f1d26', label: '#fffaf2', jelly: '#ffb347', jelly2: '#ff8a3d', beam: 'rgba(160,255,214,.35)' };
+const GLC = { sky0: '#120c2e', sky1: '#33246f', sky2: '#7a4fc0', haze: '#e9a6e0', ridge1: '#2a1f63', ridge2: '#3b2c82', rock0: '#cdbcf7', rock1: '#9a80e0', rock2: '#6a51b8', crust: '#f4ecff', deep: '#463389', crys: 'rgba(255,255,255,.9)', gem: '#8af3ff', gem2: '#ff9be0',
+  wood: '#e0a45a', wood2: '#9b6a2c', steel: '#e4eaf5', steel2: '#a9b4c9', steelD: '#4c5670', dark: '#1b1d29', yellow: '#ffc53d', yellowD: '#c98512', rope: '#f8e6b0', ropeD: '#7c5f24',
+  bad: '#ff5d5d', glow: '#7ef0a8', ink: '#1f1d26', label: '#fffaf2', jelly: '#ffb347', jelly2: '#ff8a3d', beam: 'rgba(160,255,214,.35)' };
 const GLV = { LW: 1000, LH: 300, K: 10, z: 1, cx: 48, cy: 12, wide: 300 };
 const glSX = x => GLV.LW / 2 + (x - GLV.cx) * GLV.K * GLV.z, glSY = y => GLV.LH / 2 - (y - GLV.cy) * GLV.K * GLV.z, glU = () => GLV.K * GLV.z;
 const glWX = sx => GLV.cx + (sx - GLV.LW / 2) / glU(), glWY = sy => GLV.cy - (sy - GLV.LH / 2) / glU();
@@ -9352,43 +9360,72 @@ const glLbl = (c, s, x, y, col, size, align, bg) => { c.font = `800 ${size || 12
 const GL_STARS = (() => { const r = rng(9); return Array.from({ length: 70 }, () => [r() * 100 - 2, 14 + r() * 17, 0.6 + r() * 1.4, r() * 6]); })();
 const GL_CRYS = [[2, 1], [10, 0.6], [25, 0.8], [33, 1], [41, 0.7], [49, 0.9], [61, 0.8], [79, 1], [88, 0.7], [93, 0.9]];
 
+/* two rows of far hills behind the crater (seeded, in metres, so they pan and zoom with the board) */
+const GL_RIDGE = [[5, 11.5, 2.6, 'ridge1'], [9, 9, 2, 'ridge2']].map(([seed, base, amp, col]) => { const r = rng(seed), a = []; let h = base; for (let x = -2; x <= 98; x += 4) { h = Math.max(base - amp, Math.min(base + amp, h + (r() - 0.5) * amp * 1.4)); a.push([x, h]); } return { a, col }; });
 function glDrawSky(c, t) {
-  const sk = c.createLinearGradient(0, glSY(31), 0, glSY(0)); sk.addColorStop(0, GLC.sky0); sk.addColorStop(1, GLC.sky1); c.fillStyle = sk; c.fillRect(0, 0, GLV.LW, GLV.LH);
-  GL_STARS.forEach(([x, y, r, ph]) => { c.globalAlpha = RMOTION ? 0.8 : 0.5 + 0.4 * Math.sin(t * 1.3 + ph); c.fillStyle = '#fff'; c.beginPath(); c.arc(glSX(x), glSY(y), r * Math.min(1.6, GLV.z), 0, 7); c.fill(); });
-  c.globalAlpha = 1; const u = glU();
-  c.fillStyle = '#f3e9ff'; c.beginPath(); c.arc(glSX(22), glSY(25), 2.2 * u, 0, 7); c.fill(); c.fillStyle = '#d9c5f5'; c.beginPath(); c.arc(glSX(21.4), glSY(25.5), 0.6 * u, 0, 7); c.fill();
-  c.fillStyle = '#ffd6f0'; c.beginPath(); c.arc(glSX(34), glSY(22.5), 1.1 * u, 0, 7); c.fill();
+  const u = glU(), sk = c.createLinearGradient(0, glSY(31), 0, glSY(3)); sk.addColorStop(0, GLC.sky0); sk.addColorStop(0.5, GLC.sky1); sk.addColorStop(0.88, GLC.sky2); sk.addColorStop(1, GLC.haze); c.fillStyle = sk; c.fillRect(0, 0, GLV.LW, GLV.LH);
+  GL_STARS.forEach(([x, y, r, ph]) => { c.globalAlpha = RMOTION ? 0.8 : 0.5 + 0.4 * Math.sin(t * 1.3 + ph); c.fillStyle = ph > 5 ? GLC.gem : '#fff'; c.beginPath(); c.arc(glSX(x), glSY(y), r * Math.min(1.6, GLV.z), 0, 7); c.fill(); });
+  c.globalAlpha = 1;
+  [[22, 25, 2.2, '#f1e9ff'], [34, 22.5, 1.1, '#ffb9de']].forEach(([x, y, r, col]) => { const X = glSX(x), Y = glSY(y), R = r * u, gl = c.createRadialGradient(X, Y, R * 0.6, X, Y, R * 3); gl.addColorStop(0, 'rgba(255,255,255,.26)'); gl.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = gl; c.fillRect(X - R * 3, Y - R * 3, R * 6, R * 6);
+    c.fillStyle = col; c.beginPath(); c.arc(X, Y, R, 0, 7); c.fill(); c.globalAlpha = 0.18; c.fillStyle = GLC.sky1; c.beginPath(); c.arc(X - R * 0.3, Y - R * 0.2, R * 0.28, 0, 7); c.fill(); c.beginPath(); c.arc(X + R * 0.35, Y + R * 0.3, R * 0.18, 0, 7); c.fill(); c.globalAlpha = 1; });
+  GL_RIDGE.forEach(R => { c.fillStyle = GLC[R.col]; c.beginPath(); c.moveTo(glSX(-2), GLV.LH + 4); R.a.forEach(([x, h]) => c.lineTo(glSX(x), glSY(h))); c.lineTo(glSX(98), GLV.LH + 4); c.closePath(); c.fill(); });
 }
-/* the Big Jelly: a huge orange jelly cruiser hovering over the plain, too heavy to land on the crumbly rim */
+/* the Big Jelly: the gummy fleet's mothership (Tom, 11 Nov 2026: "bigger, with more mothership vibes than flying saucer vibes"). About 35 m long, prow towards the crater,
+   three engines burning at the stern, decks of lit windows, the bridge under a jelly dome, and the tractor-beam bay in its belly at x = 86 m. Far too heavy to land on the crumbly rim. */
 function glDrawBigJelly(c, t, beamOn) {
-  const u = glU(), bob = RMOTION ? 0 : Math.sin(t * 1.4) * 0.25, x = glSX(86), y = glSY(22 + bob);
-  if (beamOn) { const g = c.createLinearGradient(x, y, x, y + 14 * u); g.addColorStop(0, 'rgba(160,255,214,.7)'); g.addColorStop(1, 'rgba(160,255,214,.22)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 1.2 * u, y + 1.6 * u); c.lineTo(beamOn.x, beamOn.y); c.lineTo(beamOn.x2 || beamOn.x, beamOn.y2 || beamOn.y); c.lineTo(x + 1.2 * u, y + 1.6 * u); c.closePath(); c.fill(); }
-  c.save(); c.translate(x, y); c.scale(u / 10, u / 10);
-  const g = c.createLinearGradient(0, -38, 0, 18); g.addColorStop(0, '#ffd27a'); g.addColorStop(1, GLC.jelly2); c.fillStyle = g; c.globalAlpha = .93;
-  c.beginPath(); c.moveTo(-72, 10); c.quadraticCurveTo(-74, -36, 0, -40); c.quadraticCurveTo(74, -36, 72, 10); c.quadraticCurveTo(0, 22, -72, 10); c.fill(); c.globalAlpha = 1;
-  c.fillStyle = '#e06b2b'; c.beginPath(); c.roundRect(-78, 2, 156, 12, 6); c.fill();
-  c.strokeStyle = 'rgba(255,255,255,.75)'; c.lineWidth = 5; c.lineCap = 'round'; c.beginPath(); c.arc(0, 6, 62, 3.6, 4.3); c.stroke();
-  [-40, -14, 12, 38].forEach((wx, i) => { c.fillStyle = '#bfe6f5'; c.beginPath(); c.arc(wx, -14, 8, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 3; c.stroke(); c.fillStyle = ['#ff6fa8', '#7ad66b', '#ffd24d', '#a78bfa'][i]; c.beginPath(); c.arc(wx, -11, 4, 0, 7); c.fill(); c.beginPath(); c.arc(wx - 3, -15, 2, 0, 7); c.arc(wx + 3, -15, 2, 0, 7); c.fill(); });
-  const on = RMOTION || Math.floor(t * 2) % 2 === 0; [-60, 60].forEach(lx => { c.fillStyle = on ? '#7ef0a8' : '#2f8a5b'; c.beginPath(); c.arc(lx, 8, 4, 0, 7); c.fill(); });
-  c.fillStyle = '#5d6b74'; c.beginPath(); c.roundRect(-12, 13, 24, 8, 4); c.fill(); c.fillStyle = beamOn ? '#a0ffd6' : '#3a8f73'; c.beginPath(); c.arc(0, 21, 5, 0, Math.PI); c.fill();
+  const u = glU(), bob = RMOTION ? 0 : Math.sin(t * 1.1) * 0.15, x = glSX(86), y = glSY(20.4 + bob), fl = RMOTION ? 1 : 0.82 + 0.18 * Math.sin(t * 17), rr = (X, Y, W, H, R) => { c.beginPath(); c.roundRect(X, Y, W, H, R); c.fill(); };
+  if (beamOn) { const g = c.createLinearGradient(x, y, x, y + 14 * u); g.addColorStop(0, 'rgba(160,255,214,.75)'); g.addColorStop(1, 'rgba(160,255,214,.2)'); c.fillStyle = g; c.beginPath(); c.moveTo(x - 1.8 * u, y); c.lineTo(beamOn.x, beamOn.y); c.lineTo(beamOn.x2 || beamOn.x, beamOn.y2 || beamOn.y); c.lineTo(x + 1.8 * u, y); c.closePath(); c.fill(); }
+  c.save(); c.translate(x, y); c.scale(u / 10, u / 10); c.lineJoin = 'round'; c.lineCap = 'round';
+  /* engine flames at the stern */
+  [-36, -24, -12].forEach((ey, i) => { const L = (44 + 12 * (i === 1 ? 1 : 0)) * fl, g = c.createLinearGradient(124, 0, 124 + L, 0); g.addColorStop(0, 'rgba(138,243,255,.95)'); g.addColorStop(1, 'rgba(138,243,255,0)'); c.fillStyle = g; c.beginPath(); c.moveTo(124, ey - 5); c.lineTo(124 + L, ey); c.lineTo(124, ey + 5); c.closePath(); c.fill(); });
+  /* the upper decks, the bridge and its jelly dome, the masts */
+  c.strokeStyle = GLC.steel2; c.lineWidth = 2; c.beginPath(); c.moveTo(98, -58); c.lineTo(98, -86); c.moveTo(-58, -44); c.lineTo(-58, -62); c.moveTo(88, -58); c.lineTo(88, -74); c.stroke();
+  c.fillStyle = (RMOTION || Math.floor(t * 2) % 2 === 0) ? '#ff6f6f' : '#7a2a2a'; c.beginPath(); c.arc(98, -87, 2.6, 0, 7); c.fill(); c.fillStyle = GLC.gem; c.beginPath(); c.arc(-58, -63, 2.2, 0, 7); c.fill();
+  { const dg = c.createLinearGradient(0, -94, 0, -70); dg.addColorStop(0, 'rgba(255,236,190,.85)'); dg.addColorStop(1, 'rgba(255,170,90,.55)'); c.fillStyle = dg; c.beginPath(); c.ellipse(36, -70, 38, 23, 0, Math.PI, 0); c.fill();
+    c.strokeStyle = 'rgba(255,255,255,.8)'; c.lineWidth = 2.5; c.beginPath(); c.ellipse(36, -70, 31, 17, 0, Math.PI * 1.12, Math.PI * 1.42); c.stroke(); }
+  c.fillStyle = '#c9561a'; rr(-84, -60, 200, 20, 7); c.fillStyle = '#ef8a34'; rr(-16, -73, 104, 17, 7);
+  c.fillStyle = 'rgba(255,255,255,.3)'; rr(-80, -60, 192, 3, 1.5); rr(-12, -73, 96, 3, 1.5);
+  [0, 24, 48, 72].forEach((wx, i) => { c.fillStyle = GLC.dark; c.beginPath(); c.arc(wx, -64.5, 7.2, 0, 7); c.fill(); c.fillStyle = '#d9f1ff'; c.beginPath(); c.arc(wx, -64.5, 6, 0, 7); c.fill();
+    c.fillStyle = ['#ff6fa8', '#7ad66b', '#ffd24d', '#a78bfa'][i]; c.beginPath(); c.arc(wx, -62.5, 3.4, 0, 7); c.fill(); c.beginPath(); c.arc(wx - 2.6, -66, 1.6, 0, 7); c.arc(wx + 2.6, -66, 1.6, 0, 7); c.fill(); });
+  for (let wx = -72; wx <= -30; wx += 11) { c.fillStyle = '#fff3c4'; rr(wx, -54, 6, 4, 1.5); }
+  /* the main hull */
+  const hull = () => { c.beginPath(); c.moveTo(-228, -30); c.quadraticCurveTo(-150, -3, -92, 0); c.lineTo(102, 0); c.quadraticCurveTo(118, -3, 120, -20); c.lineTo(120, -44); c.lineTo(-118, -46); c.quadraticCurveTo(-190, -45, -228, -30); c.closePath(); };
+  { const g = c.createLinearGradient(0, -46, 0, 0); g.addColorStop(0, '#ffc46b'); g.addColorStop(0.55, '#ff9a3d'); g.addColorStop(1, '#c9561a'); hull(); c.fillStyle = g; c.fill(); c.strokeStyle = 'rgba(90,30,10,.55)'; c.lineWidth = 1.5; c.stroke(); }
+  c.save(); hull(); c.clip(); c.fillStyle = 'rgba(255,255,255,.3)'; c.fillRect(-230, -44, 360, 3.5); c.fillStyle = '#b44a16'; c.fillRect(-230, -14, 360, 3); c.fillStyle = 'rgba(90,30,10,.25)'; c.fillRect(-230, -9, 360, 10);
+  c.strokeStyle = 'rgba(90,30,10,.2)'; c.lineWidth = 1; for (let px = -190; px <= 110; px += 38) { c.beginPath(); c.moveTo(px, -46); c.lineTo(px - 7, 0); c.stroke(); } c.restore();
+  for (let wx = -170, i = 0; wx <= 98; wx += 12.5, i++) { c.fillStyle = (i * 7) % 5 === 0 ? '#8a3f14' : '#fff3c4'; rr(wx, -36, 7, 4.5, 1.5); }
+  for (let wx = -128, i = 0; wx <= 98; wx += 12.5, i++) { c.fillStyle = (i * 3) % 4 === 0 ? '#8a3f14' : '#a9f3ff'; rr(wx, -23.5, 5, 3.2, 1.2); }
+  /* engine bells, the tractor-beam bay and the running lights */
+  [-36, -24, -12].forEach(ey => { c.fillStyle = GLC.dark; rr(113, ey - 6.5, 13, 13, 3); c.fillStyle = GLC.gem; rr(123.5, ey - 4, 2.5, 8, 1); });
+  c.fillStyle = GLC.dark; rr(-26, -8, 52, 10, 3); c.fillStyle = GLC.yellow; rr(-23, -6, 7, 6, 1.5); rr(16, -6, 7, 6, 1.5); c.fillStyle = beamOn ? '#a0ffd6' : '#3a8f73'; c.beginPath(); c.arc(0, 1.5, 8, 0, Math.PI); c.fill();
+  { const on = RMOTION || Math.floor(t * 2) % 2 === 0; [[-204, -22], [-120, -5], [66, -1]].forEach(([lx, ly]) => { c.fillStyle = on ? GLC.glow : '#2f8a5b'; c.beginPath(); c.arc(lx, ly, 3, 0, 7); c.fill(); }); }
   c.restore();
-  glLbl(c, 'Big Jelly', x, y - 4.9 * u, '#ffe7b8', Math.max(10, Math.min(14, u * 1.2)));
+  glLbl(c, 'The Big Jelly', glSX(72), y + 1.35 * u, '#ffe7b8', Math.max(10, Math.min(14, u * 1.2)), 'center', 'rgba(18,12,46,.7)');
 }
 function glDrawGround(c, g, ghost) {
-  const u = glU(), bot = GLV.LH + 4, path = arr => { c.beginPath(); c.moveTo(glSX(-2), bot); c.lineTo(glSX(-2), glSY(arr[0])); arr.forEach((y, x) => c.lineTo(glSX(x), glSY(y))); c.lineTo(glSX(98), glSY(arr[arr.length - 1])); c.lineTo(glSX(98), bot); c.closePath(); };
+  const u = glU(), bot = GLV.LH + 4, path = (arr, off) => { off = off || 0; c.beginPath(); c.moveTo(glSX(-2), bot + off); c.lineTo(glSX(-2), glSY(arr[0]) + off); arr.forEach((y, x) => c.lineTo(glSX(x), glSY(y) + off)); c.lineTo(glSX(98), glSY(arr[arr.length - 1]) + off); c.lineTo(glSX(98), bot + off); c.closePath(); };
+  const top = off => { c.beginPath(); g.forEach((y, x) => x ? c.lineTo(glSX(x), glSY(y) + off) : c.moveTo(glSX(x), glSY(y) + off)); };
   if (ghost) { path(ghost); c.fillStyle = 'rgba(214,196,245,.28)'; c.fill(); c.setLineDash([5, 5]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.stroke(); c.setLineDash([]); }
-  path(g); const gr = c.createLinearGradient(0, glSY(15), 0, glSY(-1)); gr.addColorStop(0, GLC.rock0); gr.addColorStop(1, GLC.rock1); c.fillStyle = gr; c.fill();
-  c.save(); c.clip(); c.strokeStyle = GLC.crust; c.lineWidth = Math.max(3, 0.45 * u); c.lineJoin = 'round'; c.beginPath(); g.forEach((y, x) => x ? c.lineTo(glSX(x), glSY(y)) : c.moveTo(glSX(x), glSY(y))); c.stroke();
-  c.fillStyle = 'rgba(95,74,153,.35)'; [[12, -0.8, 3], [30, 1.6, 2], [52, 5.5, 2.4], [70, 6.4, 2], [86, 4.8, 3]].forEach(([x, y, r]) => { c.beginPath(); c.ellipse(glSX(x), glSY(y), r * u, r * 0.45 * u, 0, 0, 7); c.fill(); });
+  path(g); const gr = c.createLinearGradient(0, glSY(16), 0, glSY(-2)); gr.addColorStop(0, GLC.rock0); gr.addColorStop(0.45, GLC.rock1); gr.addColorStop(1, GLC.rock2); c.fillStyle = gr; c.fill();
+  /* layers of rock under the surface, dimples, and a soft shadow under the bright top edge */
+  c.save(); c.clip(); c.globalAlpha = 0.5; c.fillStyle = GLC.rock2; path(g, 2.2 * u); c.fill(); c.fillStyle = GLC.deep; path(g, 4.8 * u); c.fill(); c.globalAlpha = 0.6; path(g, 8 * u); c.fill(); c.globalAlpha = 1;
+  c.fillStyle = 'rgba(70,51,137,.4)'; [[12, -0.8, 3], [30, 1.6, 2], [52, 5.5, 2.4], [70, 6.4, 2], [86, 4.8, 3], [6, 2.2, 1.2], [41, 3.6, 1.3], [61, 7.2, 1.1], [79, 6.6, 1.4], [93, 6.2, 1.2]].forEach(([x, y, r]) => { c.beginPath(); c.ellipse(glSX(x), glSY(y), r * u, r * 0.4 * u, 0, 0, 7); c.fill(); });
+  c.lineJoin = 'round'; c.strokeStyle = 'rgba(70,51,137,.5)'; c.lineWidth = Math.max(4, 0.5 * u); top(0.35 * u); c.stroke();
   c.restore();
-  GL_CRYS.forEach(([x, s]) => { const y = glAt(g, x); c.fillStyle = GLC.crys; [-0.5, 0, 0.45].forEach((dx, i) => { const hh = (i === 1 ? 1.3 : 0.8) * s * u, ww = 0.32 * s * u, X = glSX(x + dx * s), Y = glSY(y); c.beginPath(); c.moveTo(X, Y - hh); c.lineTo(X + ww, Y - hh * 0.3); c.lineTo(X + ww * 0.6, Y + 1); c.lineTo(X - ww * 0.6, Y + 1); c.lineTo(X - ww, Y - hh * 0.3); c.closePath(); c.fill(); }); });
+  c.lineJoin = 'round'; c.strokeStyle = GLC.crust; c.lineWidth = Math.max(2, 0.22 * u); top(0); c.stroke();
+  /* glowing sugar crystals */
+  GL_CRYS.forEach(([x, s], n) => { const y = glAt(g, x), col = n % 3 === 1 ? GLC.gem2 : n % 3 === 2 ? GLC.gem : '#ffffff'; c.save(); c.shadowColor = col; c.shadowBlur = 8; c.fillStyle = col;
+    [-0.5, 0, 0.45].forEach((dx, i) => { const hh = (i === 1 ? 1.3 : 0.8) * s * u, ww = 0.3 * s * u, X = glSX(x + dx * s), Y = glSY(y) + 1; c.beginPath(); c.moveTo(X - ww, Y); c.lineTo(X, Y - hh); c.lineTo(X + ww, Y); c.closePath(); c.fill(); });
+    c.restore(); c.strokeStyle = 'rgba(255,255,255,.85)'; c.lineWidth = 1; c.beginPath(); c.moveTo(glSX(x) - 0.06 * s * u, glSY(y) - 1.1 * s * u); c.lineTo(glSX(x) - 0.16 * s * u, glSY(y) - 0.2 * s * u); c.stroke(); });
 }
 /* the boulder: a lumpy grey rock wedged against the Gumdrop's right landing leg */
 function glDrawBoulder(c, x, y, rot, cracked) {
-  const u = glU(); c.save(); c.translate(glSX(x), glSY(y)); c.rotate(rot || 0);
-  c.fillStyle = '#8b8f93'; c.beginPath(); c.moveTo(-1.2 * u, 0.2 * u); c.quadraticCurveTo(-1.35 * u, -0.9 * u, -0.5 * u, -1.25 * u); c.quadraticCurveTo(0.4 * u, -1.55 * u, 1.05 * u, -0.85 * u); c.quadraticCurveTo(1.45 * u, -0.2 * u, 1.0 * u, 0.25 * u); c.closePath(); c.fill();
-  c.fillStyle = '#a3a7ab'; c.beginPath(); c.ellipse(-0.35 * u, -0.85 * u, 0.42 * u, 0.22 * u, -0.4, 0, 7); c.fill();
-  if (cracked) { c.strokeStyle = '#4c5257'; c.lineWidth = 2; c.beginPath(); c.moveTo(-0.1 * u, -1.3 * u); c.lineTo(0.15 * u, -0.6 * u); c.lineTo(-0.2 * u, -0.1 * u); c.stroke(); }
+  const u = glU(), r = 1.3 * u, K = [1, 0.86, 1.05, 0.9, 1, 0.82, 0.96, 1.08]; c.save(); c.translate(glSX(x), glSY(y)); c.rotate(rot || 0); c.translate(0.05 * u, -0.62 * u);
+  c.beginPath(); K.forEach((k, i) => { const a = i / K.length * Math.PI * 2 - 0.3, px = Math.cos(a) * r * k, py = Math.sin(a) * r * k * 0.7; i ? c.lineTo(px, py) : c.moveTo(px, py); }); c.closePath();
+  const gr = c.createLinearGradient(-r, -r, r, r); gr.addColorStop(0, '#dcd8e6'); gr.addColorStop(1, '#5f5a73'); c.fillStyle = gr; c.fill(); c.strokeStyle = 'rgba(18,12,46,.6)'; c.lineWidth = 1.5; c.lineJoin = 'round'; c.stroke();
+  c.strokeStyle = 'rgba(18,12,46,.3)'; c.lineWidth = 1.2; c.beginPath(); c.moveTo(-r * 0.3, -r * 0.36); c.lineTo(r * 0.1, 0); c.lineTo(-r * 0.1, r * 0.36); c.stroke();
+  c.strokeStyle = 'rgba(255,255,255,.6)'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(-r * 0.58, -r * 0.24); c.lineTo(-r * 0.22, -r * 0.46); c.stroke();
+  if (cracked) { c.strokeStyle = '#2b2740'; c.lineWidth = 2; c.beginPath(); c.moveTo(-0.1 * u, -0.7 * u); c.lineTo(0.15 * u, 0); c.lineTo(-0.2 * u, 0.5 * u); c.stroke(); }
   c.restore();
 }
 /* the Gumdrop at real size (about 5 m across), with damage: scorch marks, cracks and a wobble */
@@ -9400,8 +9437,24 @@ function glDrawShip(c, s) {
     c.fillStyle = 'rgba(40,24,20,.45)'; const nS = Math.min(4, Math.ceil(dmg / 25)); for (let i = 0; i < nS; i++) { c.beginPath(); c.ellipse([-30, 26, -12, 36][i], [-18, -30, -60, -10][i], 13, 7, [0.3, -0.5, 0.1, 0.8][i], 0, 7); c.fill(); }
     c.strokeStyle = '#3b1d2c'; c.lineWidth = 3; const nC = Math.min(3, Math.ceil(dmg / 34)); for (let i = 0; i < nC; i++) { const ox = [-18, 20, 0][i], oy = [-66, -54, -30][i]; c.beginPath(); c.moveTo(ox, oy); c.lineTo(ox + 7, oy + 9); c.lineTo(ox + 2, oy + 16); c.lineTo(ox + 9, oy + 24); c.stroke(); }
     c.restore(); }
+  /* dust behind the Gumdrop while it is dragged, and sparks where the hull scrapes rough ground */
+  if ((s.scr === 'ground' || s.scr === 'platform') && !RMOTION) { const q = rng(Math.floor(performance.now() / 60) + 3), gx = glSX(s.x), gy = glSY(s.y);
+    for (let i = 0; i < 9; i++) { c.globalAlpha = 0.2 + q() * 0.35; c.fillStyle = s.scr === 'ground' ? '#e9defc' : '#ffe9a8'; c.beginPath(); c.arc(gx - (2 + q() * 3.4) * u, gy - q() * 1.3 * u, (0.25 + q() * 0.5) * u, 0, 7); c.fill(); } c.globalAlpha = 1;
+    if (s.scr === 'ground') { c.fillStyle = GLC.yellow; for (let i = 0; i < 4; i++) { c.beginPath(); c.arc(gx + (q() * 2.4 - 1.2) * u, gy - q() * 0.5 * u, Math.max(1.2, 0.12 * u), 0, 7); c.fill(); } } }
 }
 /* ---------- machines ---------- */
+/* shared looks: a steel lattice post between two points, and a yellow-and-black hazard bar (the rescue and the Workshop lesson boards both use them) */
+function glTruss(c, x0, y0, x1, y1, w, tint) {
+  const lw = Math.max(2.2, w * 0.7), rail = (dx, col, k) => { c.strokeStyle = col; c.lineWidth = lw * k; c.beginPath(); c.moveTo(x0 + dx, y0); c.lineTo(x1 + dx, y1); c.stroke(); };
+  c.save(); c.lineCap = 'round'; rail(-w, GLC.steelD, 1); rail(w, GLC.steelD, 1);
+  const n = Math.max(2, Math.round(Math.hypot(x1 - x0, y1 - y0) / (w * 2.6))); c.strokeStyle = tint || GLC.steel2; c.lineWidth = Math.max(1, w * 0.3); c.beginPath();
+  for (let i = 0; i < n; i++) { const f0 = i / n, f1 = (i + 1) / n, sd = i % 2 ? 1 : -1; c.moveTo(x0 + (x1 - x0) * f0 + sd * w, y0 + (y1 - y0) * f0); c.lineTo(x0 + (x1 - x0) * f1 - sd * w, y0 + (y1 - y0) * f1); } c.stroke();
+  rail(-w, tint || GLC.steel, 0.42); rail(w, tint || GLC.steel, 0.42); c.restore();
+}
+function glHaz(c, x, y, w, h, bad) {
+  c.save(); c.beginPath(); c.roundRect(x, y, w, h, Math.min(3, h / 3)); c.clip(); c.fillStyle = bad ? GLC.bad : GLC.yellow; c.fillRect(x, y, w, h); c.strokeStyle = bad ? '#7a1020' : GLC.dark; c.lineWidth = Math.max(2, h * 0.45); c.lineCap = 'butt';
+  const st = Math.max(8, h * 1.7); for (let i = -h; i < w + h; i += st) { c.beginPath(); c.moveTo(x + i, y + h); c.lineTo(x + i + h, y); c.stroke(); } c.fillStyle = 'rgba(255,255,255,.35)'; c.fillRect(x, y, w, Math.max(1, h * 0.2)); c.restore();
+}
 function glCablePoint(p, m) {
   if (p.type === 'ramp') { const e = m ? m.end : { x: p.x1 + glRun(p), y: p.y1 + p.rise }; return { x: e.x + 0.6, y: e.y + 1.6 }; }
   if (p.type === 'crane') return { x: p.x, y: (m ? m.start.y : 0) + p.rise + 2.6 };
@@ -9412,29 +9465,29 @@ function glCablePoint(p, m) {
 function glDrawRamp(c, p, m, bad, ground) {
   const u = glU(), us = u * (p.s || 1), a = m.start, b = m.end, ang = Math.atan2(b.y - a.y, b.x - a.x);
   /* support legs down to whatever is below the deck */
-  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.18 * us);
-  for (let d = 3; d < p.L - 1; d += 4) { const x = a.x + Math.cos(ang) * d, y = a.y + Math.sin(ang) * d, gy = glAt(ground, x); if (y - gy > 0.4) { c.beginPath(); c.moveTo(glSX(x), glSY(y)); c.lineTo(glSX(x), glSY(gy)); c.stroke(); } }
+  c.lineCap = 'butt';
+  for (let d = 3; d < p.L - 1; d += 4) { const x = a.x + Math.cos(ang) * d, y = a.y + Math.sin(ang) * d, gy = glAt(ground, x); if (y - gy > 0.4) { c.strokeStyle = GLC.steelD; c.lineWidth = Math.max(3, 0.26 * us); c.beginPath(); c.moveTo(glSX(x), glSY(y)); c.lineTo(glSX(x), glSY(gy)); c.stroke(); c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(1.2, 0.1 * us); c.stroke(); } }
+  /* the deck: a steel beam with a row of yellow rollers (rollers, so no friction) */
   c.save(); c.translate(glSX(a.x), glSY(a.y)); c.rotate(-ang); const L = p.L * u, th = Math.max(5, 0.42 * us);
-  c.fillStyle = bad ? '#e8a0a0' : GLC.wood; c.beginPath(); c.roundRect(0, -th, L, th, th / 3); c.fill();
-  c.fillStyle = bad ? '#c25b5b' : GLC.wood2; for (let d = 1.5; d < p.L; d += 1.5) c.fillRect(d * u, -th, Math.max(1.5, 0.08 * us), th);
-  c.fillStyle = GLC.steel; c.fillRect(0, -th - Math.max(2, 0.1 * us), L, Math.max(2, 0.1 * us));
+  c.fillStyle = bad ? '#7a1020' : GLC.dark; c.beginPath(); c.roundRect(-1.5, -th - 1.5, L + 3, th + 3, th / 2); c.fill();
+  c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(0, -th, L, th, th / 3); c.fill();
+  c.fillStyle = bad ? '#ffb0b0' : GLC.steel; c.fillRect(th / 3, -th, Math.max(0, L - th * 2 / 3), Math.max(1.5, th * 0.26));
+  c.fillStyle = bad ? '#7a1020' : GLC.yellow; const stp = Math.max(0.9, 8 / u); for (let d = stp * 0.6; d < p.L - 0.2; d += stp) { c.beginPath(); c.arc(d * u, -th * 0.4, Math.max(1.3, th * 0.22), 0, 7); c.fill(); }
   c.restore();
-  c.fillStyle = GLC.steel2; c.beginPath(); c.arc(glSX(b.x), glSY(b.y + 0.3), Math.max(3, 0.35 * us), 0, 7); c.fill();
+  [[a.x, a.y + 0.2], [b.x, b.y + 0.3]].forEach(([x, y]) => { const r = Math.max(3, 0.35 * us); c.fillStyle = GLC.dark; c.beginPath(); c.arc(glSX(x), glSY(y), r + 1.5, 0, 7); c.fill(); c.fillStyle = bad ? GLC.bad : GLC.yellow; c.beginPath(); c.arc(glSX(x), glSY(y), r, 0, 7); c.fill(); c.fillStyle = '#fff'; c.beginPath(); c.arc(glSX(x), glSY(y), r * 0.35, 0, 7); c.fill(); });
 }
 function glDrawCrane(c, p, m, bad, hookY, trolX) {
-  const sc = p.s || 1, u = glU() * sc, by = m.start.y, top = by + p.rise + 2.6 * sc, x = p.x, col = bad ? GLC.bad : '#e3a51c';
+  const sc = p.s || 1, u = glU() * sc, by = m.start.y, top = by + p.rise + 2.6 * sc, x = p.x;
   /* the gantry stands at x; with Move across its span grows to cover the set-down spot too (m.legL and m.legR, set in glMachine) */
   const legs = m.legL ? [{ bx: m.legL.x, by: m.legL.y, tx: m.legL.x + 0.6, sd: 1 }, { bx: m.legR.x, by: m.legR.y, tx: m.legR.x - 0.6, sd: -1 }]
     : [-1, 1].map(sd => ({ bx: x + sd * 3.2 * sc, by, tx: x + sd * 2.6 * sc, sd: -sd }));
-  c.strokeStyle = col; c.lineWidth = Math.max(3, 0.3 * u); c.lineCap = 'round';
-  legs.forEach(L => { c.beginPath(); c.moveTo(glSX(L.bx), glSY(L.by)); c.lineTo(glSX(L.tx), glSY(top)); c.stroke(); c.lineWidth = Math.max(1.5, 0.14 * u);
-    for (let k = 1; k < 4; k++) { const f0 = k / 4, f1 = (k + 1) / 4, y0 = L.by + (top - L.by) * f0, y1 = L.by + (top - L.by) * f1; c.beginPath(); c.moveTo(glSX(L.bx + (L.tx - L.bx) * f0), glSY(y0)); c.lineTo(glSX(L.bx + (L.tx - L.bx) * f1), glSY(y1)); c.stroke(); } c.lineWidth = Math.max(3, 0.3 * u); });
-  const bl = legs[0].bx, br = legs[1].bx; c.beginPath(); c.moveTo(glSX(Math.min(bl, br)), glSY(top)); c.lineTo(glSX(Math.max(bl, br)), glSY(top)); c.stroke();
-  c.fillStyle = GLC.steel2; legs.forEach(L => { c.beginPath(); c.roundRect(glSX(L.bx) - 0.5 * u, glSY(L.by) - 0.3 * u, u, 0.3 * u, 2); c.fill(); });
+  legs.forEach(L => { glTruss(c, glSX(L.bx), glSY(L.by), glSX(L.tx), glSY(top), Math.max(2.4, 0.26 * u), bad ? '#ffb0b0' : null); c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(glSX(L.bx) - 0.6 * u, glSY(L.by) - 0.3 * u, 1.2 * u, 0.3 * u, 2); c.fill(); });
+  const bl = legs[0].bx, br = legs[1].bx, X0 = glSX(Math.min(bl, br)) - 0.5 * u, X1 = glSX(Math.max(bl, br)) + 0.5 * u, bh = Math.max(5, 0.5 * u), Yt = glSY(top);
+  c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(X0 - 1.5, Yt - bh / 2 - 1.5, X1 - X0 + 3, bh + 3, 3); c.fill(); glHaz(c, X0, Yt - bh / 2, X1 - X0, bh, bad);
   const tx = trolX == null ? x : trolX, hy = hookY == null ? by + 4.2 * sc : hookY;
-  if (m.legL) { c.fillStyle = GLC.steel; c.beginPath(); c.roundRect(glSX(tx) - 0.55 * u, glSY(top) - 0.3 * u, 1.1 * u, 0.6 * u, 3); c.fill(); }   // the trolley on the top beam
-  c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.beginPath(); c.moveTo(glSX(tx), glSY(top)); c.lineTo(glSX(tx), glSY(hy)); c.stroke();
-  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.arc(glSX(tx), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke();
+  { const tw = Math.max(9, 1.1 * u), thh = Math.max(5, 0.55 * u), TX = glSX(tx); c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(TX - tw / 2, Yt + bh / 2 - 1, tw, thh, 2.5); c.fill(); c.fillStyle = GLC.steel; [-1, 1].forEach(sd => { c.beginPath(); c.arc(TX + sd * tw * 0.28, Yt + bh / 2, Math.max(1.4, 0.13 * u), 0, 7); c.fill(); }); }   // the trolley under the top beam
+  c.lineCap = 'round'; c.strokeStyle = GLC.ropeD; c.lineWidth = Math.max(2.4, 0.17 * u); c.beginPath(); c.moveTo(glSX(tx), Yt + bh / 2); c.lineTo(glSX(tx), glSY(hy)); c.stroke(); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.2, 0.085 * u); c.stroke();
+  c.strokeStyle = GLC.dark; c.lineWidth = Math.max(3.5, 0.26 * u); c.beginPath(); c.arc(glSX(tx), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke(); c.strokeStyle = GLC.steel; c.lineWidth = Math.max(2, 0.14 * u); c.stroke();
 }
 /* "Set down here": where a crane's trolley puts the load, before the run (red when nothing is under it to set it on) */
 function glDrawSetDown(c, m, t, bad) {
@@ -9451,30 +9504,32 @@ function glDrawLever(c, p, m, bad, tiltT) {
   drawLeverShape(c, { a: { x: glSX(p.x), y: glSY(ly) }, b: { x: glSX(ex), y: glSY(Math.max(ey, by - 30)) }, fx: glSX(fx), fy: glSY(by + 0.9), floor: glSY(by), thick: Math.max(4, 0.32 * u), bad });
 }
 function glDrawJack(c, p, m, bad, k) {
-  const sc = p.s || 1, u = glU() * sc, by = m.start.y, hgt = (0.7 + (k || 0) * p.rise * (p.vis || 1)) * sc, gp = (p.gap || 0.22) * sc; c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(glSX(p.x) - 0.7 * u, glSY(by + 0.35 * sc), 1.4 * u, 0.35 * u, 3); c.fill();
-  c.strokeStyle = GLC.steel; c.lineWidth = Math.max(3, 0.28 * u); c.beginPath(); c.moveTo(glSX(p.x), glSY(by + 0.35 * sc)); c.lineTo(glSX(p.x), glSY(by + hgt)); c.stroke();
-  c.strokeStyle = '#e3a51c'; c.lineWidth = Math.max(1.2, 0.07 * u); for (let y = by + 0.45 * sc; y < by + hgt; y += gp) { c.beginPath(); c.moveTo(glSX(p.x) - 0.16 * u, glSY(y)); c.lineTo(glSX(p.x) + 0.16 * u, glSY(y + 0.1 * sc)); c.stroke(); }
-  c.fillStyle = GLC.steel2; c.fillRect(glSX(p.x) - 0.5 * u, glSY(by + hgt + 0.12 * sc), u, 0.14 * u);
+  const sc = p.s || 1, u = glU() * sc, by = m.start.y, hgt = (0.7 + (k || 0) * p.rise * (p.vis || 1)) * sc, gp = (p.gap || 0.22) * sc; c.fillStyle = bad ? GLC.bad : GLC.dark; c.beginPath(); c.roundRect(glSX(p.x) - 0.7 * u, glSY(by + 0.35 * sc), 1.4 * u, 0.35 * u, 3); c.fill();
+  c.lineCap = 'butt'; c.strokeStyle = GLC.steelD; c.lineWidth = Math.max(4.5, 0.36 * u); c.beginPath(); c.moveTo(glSX(p.x), glSY(by + 0.35 * sc)); c.lineTo(glSX(p.x), glSY(by + hgt)); c.stroke(); c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(3, 0.26 * u); c.stroke();
+  c.strokeStyle = GLC.dark; c.lineWidth = Math.max(1.2, 0.07 * u); for (let y = by + 0.45 * sc; y < by + hgt; y += gp) { c.beginPath(); c.moveTo(glSX(p.x) - 0.16 * u, glSY(y)); c.lineTo(glSX(p.x) + 0.16 * u, glSY(y + 0.1 * sc)); c.stroke(); }
+  c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(glSX(p.x) - 0.55 * u - 1, glSY(by + hgt + 0.12 * sc) - 1, 1.1 * u + 2, 0.16 * u + 2, 2); c.fill(); c.fillStyle = GLC.yellow; c.fillRect(glSX(p.x) - 0.55 * u, glSY(by + hgt + 0.12 * sc), 1.1 * u, 0.16 * u);
 }
 function glDrawPlatform(c, pl, over) {
-  const u = glU() * (pl.s || 1), x0 = glSX(pl.x0), x1 = glSX(pl.x1), yT = glSY(pl.top), yB = glSY(pl.base - 0.2), col = over ? GLC.bad : '#9fb0ba';
-  c.strokeStyle = col; c.lineWidth = Math.max(2, 0.16 * u); c.beginPath(); c.moveTo(x0 + 3, yB); c.lineTo(x0 + 3, yT); c.moveTo(x1 - 3, yB); c.lineTo(x1 - 3, yT); c.stroke();
-  c.lineWidth = Math.max(1, 0.08 * u); const n = Math.max(1, Math.round((pl.top - pl.base) / 1.5)); for (let i = 0; i < n; i++) { const ya = yB + (yT - yB) * i / n, yb = yB + (yT - yB) * (i + 1) / n; c.beginPath(); c.moveTo(x0 + 3, ya); c.lineTo(x1 - 3, yb); c.moveTo(x1 - 3, ya); c.lineTo(x0 + 3, yb); c.stroke(); }
-  c.fillStyle = over ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(x0, yT, x1 - x0, Math.max(4, 0.32 * u), 3); c.fill();
-  c.fillStyle = '#e3a51c'; for (let x = x0 + 4; x < x1 - 6; x += 12) c.fillRect(x, yT + 1, 5, Math.max(2, 0.12 * u));
+  const u = glU() * (pl.s || 1), x0 = glSX(pl.x0), x1 = glSX(pl.x1), yT = glSY(pl.top), yB = glSY(pl.base - 0.2), w = Math.max(2, 0.2 * u), ins = Math.min((x1 - x0) * 0.2, w + 4), th = Math.max(5, 0.36 * u), tint = over ? '#ffb0b0' : null;
+  if (yB - yT > 3 * w && x1 - x0 > 8 * w) { c.strokeStyle = GLC.steelD; c.lineWidth = Math.max(1.2, 0.1 * u); c.beginPath(); c.moveTo(x0 + ins, yB - 2); c.lineTo(x1 - ins, yT + th); c.moveTo(x1 - ins, yB - 2); c.lineTo(x0 + ins, yT + th); c.stroke(); }
+  glTruss(c, x0 + ins, yB, x0 + ins, yT + th / 2, w, tint); glTruss(c, x1 - ins, yB, x1 - ins, yT + th / 2, w, tint);
+  c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(x0 - 1.5, yT - 1.5, x1 - x0 + 3, th + 3, 3); c.fill(); glHaz(c, x0, yT, x1 - x0, th, over);
 }
 function glDrawBlock(c, p, bad) {
   const u = glU() * (p.s || 1), r = Math.max(7, 0.5 * u), X = glSX(p.x), Y = glSY(p.y);
-  c.fillStyle = bad ? GLC.bad : GLC.steel2; c.beginPath(); c.roundRect(X - r * 0.5, Y - r * 1.5, r, r * 0.7, 3); c.fill();
-  c.fillStyle = GLC.steel; c.beginPath(); c.arc(X, Y, r, 0, 7); c.fill(); c.fillStyle = GLC.steel2; c.beginPath(); c.arc(X, Y, r * 0.35, 0, 7); c.fill();
+  c.fillStyle = GLC.dark; c.beginPath(); c.roundRect(X - r * 0.95, Y - r * 1.45, r * 1.9, r * 2.6, r * 0.45); c.fill();
+  c.fillStyle = bad ? GLC.bad : GLC.yellow; c.beginPath(); c.roundRect(X - r * 0.72, Y - r * 1.22, r * 1.44, r * 2.14, r * 0.32); c.fill();
+  c.fillStyle = GLC.dark; c.beginPath(); c.arc(X, Y - r * 0.1, r * 0.6, 0, 7); c.fill(); c.fillStyle = GLC.steel; c.beginPath(); c.arc(X, Y - r * 0.1, r * 0.42, 0, 7); c.fill(); c.fillStyle = GLC.dark; c.beginPath(); c.arc(X, Y - r * 0.1, r * 0.14, 0, 7); c.fill();
+  c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(1.6, r * 0.2); c.lineCap = 'round'; c.beginPath(); c.arc(X, Y + r * 1.4, r * 0.3, 0.3, Math.PI * 1.3); c.stroke();
 }
 function glDrawWinch(c, p, bad, spin) {
   const u = glU() * (p.s || 1), r = Math.max(8, 0.55 * u), X = glSX(p.x), Y = glSY(p.y), cl = p.crank || 1.5;
-  c.fillStyle = bad ? GLC.bad : '#2a7d48'; c.beginPath(); c.roundRect(X - r * 1.2, Y + r * 0.6, r * 2.4, r * 0.5, 3); c.fill();
-  c.fillStyle = '#e3a51c'; c.beginPath(); c.roundRect(X - r * 0.9, Y - r * 0.7, r * 1.8, r * 1.4, r * 0.4); c.fill();
-  c.strokeStyle = '#8a5a12'; c.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { c.beginPath(); c.moveTo(X + i * r * 0.32, Y - r * 0.7); c.lineTo(X + i * r * 0.32, Y + r * 0.7); c.stroke(); }
-  const a = spin || 0; c.strokeStyle = GLC.steel2; c.lineWidth = Math.max(2, 0.12 * u); c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl); c.stroke();
-  c.fillStyle = '#d6402c'; c.beginPath(); c.arc(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl, r * 0.28, 0, 7); c.fill();
+  c.fillStyle = bad ? GLC.bad : GLC.dark; c.beginPath(); c.roundRect(X - r * 1.25, Y + r * 0.6, r * 2.5, r * 0.5, 3); c.fill(); c.fillStyle = GLC.steelD; c.fillRect(X - r * 0.5, Y, r, r * 0.7);
+  c.fillStyle = GLC.dark; c.beginPath(); c.arc(X, Y, r * 1.02, 0, 7); c.fill(); c.fillStyle = bad ? GLC.bad : GLC.yellow; c.beginPath(); c.arc(X, Y, r * 0.84, 0, 7); c.fill();
+  const a = spin || 0; c.strokeStyle = GLC.yellowD; c.lineWidth = Math.max(1.2, r * 0.13); c.lineCap = 'butt'; for (let i = 0; i < 4; i++) { const b = a + i * Math.PI / 4; c.beginPath(); c.moveTo(X - Math.cos(b) * r * 0.8, Y - Math.sin(b) * r * 0.8); c.lineTo(X + Math.cos(b) * r * 0.8, Y + Math.sin(b) * r * 0.8); c.stroke(); }
+  c.fillStyle = GLC.dark; c.beginPath(); c.arc(X, Y, r * 0.3, 0, 7); c.fill();
+  c.lineCap = 'round'; c.strokeStyle = GLC.dark; c.lineWidth = Math.max(3.4, 0.22 * u); c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl); c.stroke(); c.strokeStyle = GLC.steel; c.lineWidth = Math.max(2, 0.12 * u); c.stroke();
+  c.fillStyle = GLC.dark; c.beginPath(); c.arc(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl, r * 0.36, 0, 7); c.fill(); c.fillStyle = '#ff5a5a'; c.beginPath(); c.arc(X + Math.cos(a) * r * cl, Y + Math.sin(a) * r * cl, r * 0.26, 0, 7); c.fill();
 }
 function glDrawDyn(c, p, g, preview) {
   const u = glU(), y = glAt(g, p.x), X = glSX(p.x), Y = glSY(y), r = p.big ? GL_BLAST.big : GL_BLAST.small, n = p.big ? 3 : 1;
@@ -9485,7 +9540,7 @@ function glDrawDyn(c, p, g, preview) {
 }
 function glDrawCable(c, a, b, slack) {
   const u = glU(), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2 - (slack == null ? 0.25 : slack) * Math.min(1, Math.hypot(b.x - a.x, b.y - a.y) / 6);
-  c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(glSX(a.x), glSY(a.y)); c.quadraticCurveTo(glSX(mx), glSY(my), glSX(b.x), glSY(b.y)); c.stroke();
+  c.lineCap = 'round'; c.beginPath(); c.moveTo(glSX(a.x), glSY(a.y)); c.quadraticCurveTo(glSX(mx), glSY(my), glSX(b.x), glSY(b.y)); c.strokeStyle = GLC.ropeD; c.lineWidth = Math.max(2.4, 0.17 * u); c.stroke(); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.2, 0.085 * u); c.stroke();
 }
 /* a glowing spot: the Part 4 practice board still uses it to show where to drop a piece (Part 5 has no box) */
 function glDrawZone(c, z, t, label) {
@@ -10108,7 +10163,7 @@ function glBuildBeats(res, rig, o) {
     const strain = l.pull > GL.pullOk + 1e-9, durOf = frac => clamp(1.4 + Ltot * 0.09, 1.6, 8) * frac;
     if (Math.hypot(from.x - shipAt.x, from.y - shipAt.y) > 0.05) { const prev = shipAt; add(0.5, (S, k) => { const e = glEase(k); S.ship.x = glLerp(prev.x, from.x, e); S.ship.y = glLerp(prev.y, from.y, e); S.ship.tilt = 0; }); }
     const dmgAt = a => { const p = posAt(a); return p.d + thr * (Ltot > 1e-9 ? clamp(a / Ltot, 0, 1) : 1); };
-    const sceneAt = (S, a, k, a0) => { S.msg = ''; const p = posAt(a); S.ship.x = p.x; S.ship.y = p.y; S.ship.tilt = tiltAt(a); const lie0 = S.ship.lie || 0; S.ship.lie = lieAt(a);
+    const sceneAt = (S, a, k, a0) => { S.msg = ''; const p = posAt(a); S.ship.x = p.x; S.ship.y = p.y; S.ship.tilt = tiltAt(a); const lie0 = S.ship.lie || 0; S.ship.lie = lieAt(a); S.ship.scr = p.k;
       S.ship.dmg += Ltot > 1e-9 ? dmgAt(a) - dmgAt(a0) : thr * k;
       S.flames = strain ? Math.min(1, (l.pull - GL.pullOk) / 120) : 0; S.ship.shake = strain && !RMOTION; S.spin = k * 30;
       if (l.type === 'crane') { S.hook[l.id] = S.ship.y + 4.2; if (p.k === 'lift' || p.k === 'across' || p.k === 'lower') S.trol[l.id] = S.ship.x; }
@@ -10119,7 +10174,7 @@ function glBuildBeats(res, rig, o) {
       const tipNow = (l.tips || []).find(tp => cum[tp.idx] != null && a >= cum[tp.idx] - 0.01 && a < cum[tp.idx] + 2.2);
       S.narr = tipNow ? (tipNow.why === 'fall' ? 'Oh no, the Gumdrop dropped off an edge and tipped over! Dragging it on its side scrapes the hull twice as fast.' : 'Oh no, the Gumdrop has tipped over! Dragging it on its side scrapes the hull twice as fast.')
         : (l.type === 'crane' && prevLie && S.ship.lie < lie0 + 1e-6 && (p.k === 'lift' || p.k === 'across' || p.k === 'lower')) ? 'The crane has stood the Gumdrop back up.' : p.bump ? SAY.bump : (p.k === 'ground' && S.ship.lie > 0.5) ? 'Smooshy drags the Gumdrop along on its side, and the hull scrapes twice as fast.' : SAY[p.k] || SAY.nudge; S.bubble = strain ? { who: 'ship', s: 'Thrusters! Hold on!' } : (k < 0.5 ? { who: 'smoo', s: 'Heave!' } : null); };
-    const done = S => { S.flames = 0; S.ship.shake = false; S.rope = null; };
+    const done = S => { S.flames = 0; S.ship.shake = false; S.ship.scr = null; S.rope = null; };
     const aT = torn && torn.leg === l.i ? cum[Math.min(torn.idx, pts.length - 1)] : null;
     const leg1 = aT != null ? aT : why === "broken" ? 0 : Ltot;
     if (why !== "broken" && (leg1 > 1e-9 || !stopHere)) add(durOf(Ltot > 1e-9 ? leg1 / Ltot : 0.5), (S, k) => { const e = glEase(k); sceneAt(S, leg1 * e, k, 0); if (k >= 1) { done(S); if (!o.test) S.readouts.push(`Leg ${l.i + 1}: ${fmt(l.pull, 1)} N`); } });
@@ -10176,7 +10231,7 @@ function glRunFrame1() {
 function glFx(c, S, t) {
   const u = glU();
   /* the Hull meter: fills as the run goes (thrusters, scraping, bumps, falls, the boulder and blasts) */
-  { const h = clamp(S.ship.dmg, 0, 100), W = Math.min(210, GLV.LW * 0.3), X = GLV.LW - W - 14, Y = 14; c.save(); c.fillStyle = 'rgba(31,29,38,.72)'; c.beginPath(); c.roundRect(X - 6, Y - 6, W + 12, 38, 8); c.fill();
+  { const h = clamp(S.ship.dmg, 0, 100), W = Math.min(210, GLV.LW * 0.3), X = Math.min(160, GLV.LW - W - 14), Y = 14;   // beside the zoom buttons, clear of the Big Jelly c.save(); c.fillStyle = 'rgba(18,12,46,.92)'; c.beginPath(); c.roundRect(X - 6, Y - 6, W + 12, 38, 8); c.fill();
     c.fillStyle = 'rgba(255,255,255,.2)'; c.beginPath(); c.roundRect(X, Y + 16, W, 10, 5); c.fill(); c.fillStyle = h >= 60 ? '#ff5d5d' : h > 0 ? '#ffb347' : '#7ef0a8'; if (h > 0) { c.beginPath(); c.roundRect(X, Y + 16, Math.max(8, W * h / 100), 10, 5); c.fill(); }
     c.restore(); txt(c, `Hull damage ${Math.round(h)}%`, X, Y + 8, '#fffaf2', `800 12px ${C.fb || 'sans-serif'}`, 'left'); }
   if (S.wall) { const X = glSX(S.wall.x), Y1 = glSY(S.wall.y); c.save(); c.strokeStyle = '#ff5d5d'; c.lineWidth = Math.max(5, 0.45 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(X, glSY(S.wall.y - 1.6)); c.lineTo(X, Y1 - 4); c.stroke(); c.restore(); }
@@ -10637,7 +10692,7 @@ function lsGhost(c, piece, kind, t) {
   let x = g.x + 6, y = g.y + 14 + 5 * Math.sin(t * 5), down = false;
   if (kind === 'drag') {   // grab the part and slide it along the bar and back
     const X = g.x + 0.5 * LS_K * Math.sin(t * 1.7); x = X + 6; y = g.y + 14; down = true;
-    if (!real) { c.save(); c.globalAlpha = .45; c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(X, G.fy + 8); c.lineTo(X + 30, LS_FLOOR); c.lineTo(X - 30, LS_FLOOR); c.closePath(); c.fill(); c.restore(); }
+    if (!real) { c.save(); c.globalAlpha = .45; c.fillStyle = GLC.steelD; c.beginPath(); c.moveTo(X, G.fy + 8); c.lineTo(X + 30, LS_FLOOR); c.lineTo(X - 30, LS_FLOOR); c.closePath(); c.fill(); c.restore(); }
   } else if (kind === 'press') { const bt = $('#wsPull'); if (bt && bt.offsetParent) { const r = bt.getBoundingClientRect(), cr = lsCanvas().getBoundingClientRect(); x = clamp((r.left + r.width / 2 - cr.left) * 900 / cr.width, 40, 860); y = clamp((r.top - cr.top) * WS_H / cr.height - 12, 20, 410); } }
   c.save(); c.font = '34px sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; if (down) { c.strokeStyle = 'rgba(255,190,40,.95)'; c.lineWidth = 3; c.beginPath(); c.arc(x - 4, y - 16, 11, 0, 7); c.stroke(); } c.fillText('👆', x, y); c.restore();   /* pressing: a ring at the fingertip (never a fist emoji) */
 }
@@ -10831,7 +10886,7 @@ function drawRopePx(c, a, b, w, sag) {
    o = { a, b (the two ends of the bar), fx, fy (the pivot on the bar), floor (the pixel row the triangle stands on), thick (bar thickness in px), bad } */
 function drawLeverShape(c, o) {
   const th = o.thick, hw = th * 2.15, apex = o.fy + th * 0.6;
-  c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(o.fx, apex); c.lineTo(o.fx + hw, o.floor); c.lineTo(o.fx - hw, o.floor); c.closePath(); c.fill();
+  c.fillStyle = GLC.steelD; c.beginPath(); c.moveTo(o.fx, apex); c.lineTo(o.fx + hw, o.floor); c.lineTo(o.fx - hw, o.floor); c.closePath(); c.fill();
   c.lineCap = 'round'; c.strokeStyle = o.bad ? GLC.bad : GLC.wood2; c.lineWidth = th; c.beginPath(); c.moveTo(o.a.x, o.a.y); c.lineTo(o.b.x, o.b.y); c.stroke();
   if (!o.bad) { c.strokeStyle = GLC.wood; c.lineWidth = th / 2; c.beginPath(); c.moveTo(o.a.x, o.a.y - th * 0.07); c.lineTo(o.b.x, o.b.y - th * 0.07); c.stroke(); }
   c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(o.fx, o.fy, Math.max(2.5, th * 0.5), 0, 7); c.fill();
@@ -11003,7 +11058,7 @@ function lsEndsSc() {
 /* ---------- drawing ---------- */
 function lsHandDown(c, x, y) { wsSpring(c, x, y, x, y + 66, null); return { x, y: y + 66 }; }
 function lsSheaves(c, cx, y, n, s) {
-  const w = (n - 1) * 18, K = LS_KC; c.fillStyle = GLC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 13, y - 14, w + 26, 20, 6); c.fill();
+  const w = (n - 1) * 18, K = LS_KC; c.fillStyle = GLC.steelD; c.beginPath(); c.roundRect(cx - w / 2 - 13, y - 14, w + 26, 20, 6); c.fill();
   lsGL(K, () => { for (let i = 0; i < n; i++) glDrawBlock(c, { x: (cx - w / 2 + i * 18) / K, y: (LS_FLOOR - y) / K, s: s || 0.3 }, false); });
 }
 function lsDrawCraneScene(c, cur, riseNow, prog) {
@@ -11029,7 +11084,7 @@ function lsDrawCraneScene(c, cur, riseNow, prog) {
   }
   if (g.winch) {
     const cl = WS.mach === 'winch' ? 0.9 + 6 * WS.R : 1 + 0.35 * (WS.bw || 2), spin = WS.mach === 'winch' ? riseNow / WS.axle : prog * 4 * Math.PI, r = Math.max(8, 0.55 * K * 0.5);
-    c.fillStyle = GLC.steel2; c.fillRect(g.wc.x - 7, g.wc.y + r * 1.1, 14, LS_FLOOR - g.wc.y - r * 1.1); c.beginPath(); c.roundRect(g.wc.x - 28, LS_FLOOR - 6, 56, 6, 3); c.fill();
+    c.fillStyle = GLC.steelD; c.fillRect(g.wc.x - 7, g.wc.y + r * 1.1, 14, LS_FLOOR - g.wc.y - r * 1.1); c.beginPath(); c.roundRect(g.wc.x - 28, LS_FLOOR - 6, 56, 6, 3); c.fill();
     lsGL(K, () => glDrawWinch(c, { x: g.wc.x / K, y: (LS_FLOOR - g.wc.y) / K, s: 0.5, crank: cl }, false, spin));
     const gx = g.wc.x + Math.cos(spin) * r * cl, gy = g.wc.y + Math.sin(spin) * r * cl, tx = -Math.sin(spin), ty = Math.cos(spin);
     if (lsGate()) arrow(c, gx - tx * 4, gy - ty * 4, gx + tx * 40, gy + ty * 40, WSC.red, 4);

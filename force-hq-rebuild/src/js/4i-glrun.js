@@ -109,7 +109,7 @@ function glBuildBeats(res, rig, o) {
     const strain = l.pull > GL.pullOk + 1e-9, durOf = frac => clamp(1.4 + Ltot * 0.09, 1.6, 8) * frac;
     if (Math.hypot(from.x - shipAt.x, from.y - shipAt.y) > 0.05) { const prev = shipAt; add(0.5, (S, k) => { const e = glEase(k); S.ship.x = glLerp(prev.x, from.x, e); S.ship.y = glLerp(prev.y, from.y, e); S.ship.tilt = 0; }); }
     const dmgAt = a => { const p = posAt(a); return p.d + thr * (Ltot > 1e-9 ? clamp(a / Ltot, 0, 1) : 1); };
-    const sceneAt = (S, a, k, a0) => { S.msg = ''; const p = posAt(a); S.ship.x = p.x; S.ship.y = p.y; S.ship.tilt = tiltAt(a); const lie0 = S.ship.lie || 0; S.ship.lie = lieAt(a);
+    const sceneAt = (S, a, k, a0) => { S.msg = ''; const p = posAt(a); S.ship.x = p.x; S.ship.y = p.y; S.ship.tilt = tiltAt(a); const lie0 = S.ship.lie || 0; S.ship.lie = lieAt(a); S.ship.scr = p.k;
       S.ship.dmg += Ltot > 1e-9 ? dmgAt(a) - dmgAt(a0) : thr * k;
       S.flames = strain ? Math.min(1, (l.pull - GL.pullOk) / 120) : 0; S.ship.shake = strain && !RMOTION; S.spin = k * 30;
       if (l.type === 'crane') { S.hook[l.id] = S.ship.y + 4.2; if (p.k === 'lift' || p.k === 'across' || p.k === 'lower') S.trol[l.id] = S.ship.x; }
@@ -120,7 +120,7 @@ function glBuildBeats(res, rig, o) {
       const tipNow = (l.tips || []).find(tp => cum[tp.idx] != null && a >= cum[tp.idx] - 0.01 && a < cum[tp.idx] + 2.2);
       S.narr = tipNow ? (tipNow.why === 'fall' ? 'Oh no, the Gumdrop dropped off an edge and tipped over! Dragging it on its side scrapes the hull twice as fast.' : 'Oh no, the Gumdrop has tipped over! Dragging it on its side scrapes the hull twice as fast.')
         : (l.type === 'crane' && prevLie && S.ship.lie < lie0 + 1e-6 && (p.k === 'lift' || p.k === 'across' || p.k === 'lower')) ? 'The crane has stood the Gumdrop back up.' : p.bump ? SAY.bump : (p.k === 'ground' && S.ship.lie > 0.5) ? 'Smooshy drags the Gumdrop along on its side, and the hull scrapes twice as fast.' : SAY[p.k] || SAY.nudge; S.bubble = strain ? { who: 'ship', s: 'Thrusters! Hold on!' } : (k < 0.5 ? { who: 'smoo', s: 'Heave!' } : null); };
-    const done = S => { S.flames = 0; S.ship.shake = false; S.rope = null; };
+    const done = S => { S.flames = 0; S.ship.shake = false; S.ship.scr = null; S.rope = null; };
     const aT = torn && torn.leg === l.i ? cum[Math.min(torn.idx, pts.length - 1)] : null;
     const leg1 = aT != null ? aT : why === "broken" ? 0 : Ltot;
     if (why !== "broken" && (leg1 > 1e-9 || !stopHere)) add(durOf(Ltot > 1e-9 ? leg1 / Ltot : 0.5), (S, k) => { const e = glEase(k); sceneAt(S, leg1 * e, k, 0); if (k >= 1) { done(S); if (!o.test) S.readouts.push(`Leg ${l.i + 1}: ${fmt(l.pull, 1)} N`); } });
@@ -177,7 +177,7 @@ function glRunFrame1() {
 function glFx(c, S, t) {
   const u = glU();
   /* the Hull meter: fills as the run goes (thrusters, scraping, bumps, falls, the boulder and blasts) */
-  { const h = clamp(S.ship.dmg, 0, 100), W = Math.min(210, GLV.LW * 0.3), X = GLV.LW - W - 14, Y = 14; c.save(); c.fillStyle = 'rgba(31,29,38,.72)'; c.beginPath(); c.roundRect(X - 6, Y - 6, W + 12, 38, 8); c.fill();
+  { const h = clamp(S.ship.dmg, 0, 100), W = Math.min(210, GLV.LW * 0.3), X = Math.min(160, GLV.LW - W - 14), Y = 14;   // beside the zoom buttons, clear of the Big Jelly c.save(); c.fillStyle = 'rgba(18,12,46,.92)'; c.beginPath(); c.roundRect(X - 6, Y - 6, W + 12, 38, 8); c.fill();
     c.fillStyle = 'rgba(255,255,255,.2)'; c.beginPath(); c.roundRect(X, Y + 16, W, 10, 5); c.fill(); c.fillStyle = h >= 60 ? '#ff5d5d' : h > 0 ? '#ffb347' : '#7ef0a8'; if (h > 0) { c.beginPath(); c.roundRect(X, Y + 16, Math.max(8, W * h / 100), 10, 5); c.fill(); }
     c.restore(); txt(c, `Hull damage ${Math.round(h)}%`, X, Y + 8, '#fffaf2', `800 12px ${C.fb || 'sans-serif'}`, 'left'); }
   if (S.wall) { const X = glSX(S.wall.x), Y1 = glSY(S.wall.y); c.save(); c.strokeStyle = '#ff5d5d'; c.lineWidth = Math.max(5, 0.45 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(X, glSY(S.wall.y - 1.6)); c.lineTo(X, Y1 - 4); c.stroke(); c.restore(); }

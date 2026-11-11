@@ -2,7 +2,7 @@
 /* The Workshop (Chapter 6) stays closed to students until the rescue rebuild is finished. To open it, change false to true: this one line
    brings back its chapter card, home page entry, stamps, teacher page rows, Explore Workshop and Build tasks. Students' saved Workshop work is
    never deleted while it is closed. dist/test.html is always built with it open, so the Workshop tests keep working (see build.py). */
-const WORKSHOP_OPEN = false;
+const WORKSHOP_OPEN = true;
 const CHAPTERS = [
   { id: 'c1', n: 1, title: 'What is a force?', blurb: 'Pushes and pulls, newtons, the main types of force and how to draw a free-body diagram.', stamp: 'Force Spotter', ready: true, arena: 'Main Arena', icon: 'rope' },
   { id: 'c2', n: 2, title: 'Inertia', blurb: 'Why heavy things are hard to start and hard to stop: Newton\'s first law.', stamp: 'Inertia Expert', ready: true, arena: 'Main Arena', icon: 'move' },

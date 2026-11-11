@@ -47,7 +47,7 @@ function drawRopePx(c, a, b, w, sag) {
    o = { a, b (the two ends of the bar), fx, fy (the pivot on the bar), floor (the pixel row the triangle stands on), thick (bar thickness in px), bad } */
 function drawLeverShape(c, o) {
   const th = o.thick, hw = th * 2.15, apex = o.fy + th * 0.6;
-  c.fillStyle = GLC.steel2; c.beginPath(); c.moveTo(o.fx, apex); c.lineTo(o.fx + hw, o.floor); c.lineTo(o.fx - hw, o.floor); c.closePath(); c.fill();
+  c.fillStyle = GLC.steelD; c.beginPath(); c.moveTo(o.fx, apex); c.lineTo(o.fx + hw, o.floor); c.lineTo(o.fx - hw, o.floor); c.closePath(); c.fill();
   c.lineCap = 'round'; c.strokeStyle = o.bad ? GLC.bad : GLC.wood2; c.lineWidth = th; c.beginPath(); c.moveTo(o.a.x, o.a.y); c.lineTo(o.b.x, o.b.y); c.stroke();
   if (!o.bad) { c.strokeStyle = GLC.wood; c.lineWidth = th / 2; c.beginPath(); c.moveTo(o.a.x, o.a.y - th * 0.07); c.lineTo(o.b.x, o.b.y - th * 0.07); c.stroke(); }
   c.fillStyle = '#e3a51c'; c.beginPath(); c.arc(o.fx, o.fy, Math.max(2.5, th * 0.5), 0, 7); c.fill();

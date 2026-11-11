@@ -41,13 +41,20 @@ function star5(c, x, y, R, r) { c.beginPath(); for (let i = 0; i < 10; i++) { co
 /* the Gumdrop: a dome-shaped ship like a gumdrop sweet. (x, y) = the middle of the base; tilt in radians. */
 function drawGumdrop(c, x, y, s, tilt) {
   c.save(); c.translate(x, y); c.rotate(tilt || 0); c.scale(s, s);
-  c.fillStyle = '#6c7b84'; [[-34, 0], [0, 4], [34, 0]].forEach(([lx]) => { c.beginPath(); c.roundRect(lx - 4, 0, 8, 22, 4); c.fill(); c.beginPath(); c.roundRect(lx - 10, 20, 20, 5, 3); c.fill(); });
-  const g = c.createLinearGradient(0, -80, 0, 6); g.addColorStop(0, '#ff9ec4'); g.addColorStop(1, '#e8639b'); c.fillStyle = g;
-  c.beginPath(); c.moveTo(-52, 4); c.quadraticCurveTo(-52, -86, 0, -86); c.quadraticCurveTo(52, -86, 52, 4); c.closePath(); c.fill();
-  c.fillStyle = '#c94a82'; c.beginPath(); c.roundRect(-56, -6, 112, 14, 7); c.fill();
-  c.fillStyle = 'rgba(255,255,255,.85)'; [[-30, -50], [24, -62], [34, -28], [-18, -22], [0, -72], [-40, -30], [10, -40]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 2.4, 0, 7); c.fill(); });
-  c.fillStyle = '#bfe6f5'; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 4; c.stroke();
+  /* three splayed landing legs with foot pads */
+  c.strokeStyle = '#4c5670'; c.fillStyle = '#4c5670'; c.lineWidth = 7; c.lineCap = 'round';
+  [[-28, -38], [0, 0], [28, 38]].forEach(([tx, fx]) => { c.beginPath(); c.moveTo(tx, 0); c.lineTo(fx, 20); c.stroke(); c.beginPath(); c.roundRect(fx - 11, 20, 22, 5, 2.5); c.fill(); });
+  /* the sugary pink dome */
+  const body = () => { c.beginPath(); c.moveTo(-52, 4); c.quadraticCurveTo(-52, -86, 0, -86); c.quadraticCurveTo(52, -86, 52, 4); c.closePath(); };
+  const g = c.createRadialGradient(-20, -62, 4, 0, -36, 92); g.addColorStop(0, '#ffd0e2'); g.addColorStop(0.45, '#ff7fb0'); g.addColorStop(1, '#d94c86'); body(); c.fillStyle = g; c.fill(); c.strokeStyle = 'rgba(120,20,70,.5)'; c.lineWidth = 2; c.stroke();
+  c.save(); body(); c.clip(); c.fillStyle = '#c0407a'; c.fillRect(-60, -10, 120, 16);
+  c.fillStyle = 'rgba(255,255,255,.85)'; [[-30, -50], [24, -62], [34, -28], [-18, -22], [0, -72], [-40, -30], [10, -40], [-8, -60], [38, -46], [-30, -70], [22, -78], [-42, -16], [42, -14]].forEach(([a, b]) => { c.beginPath(); c.arc(a, b, 2.2, 0, 7); c.fill(); });
+  c.restore();
+  c.fillStyle = '#ffc53d'; [-30, 0, 30].forEach(lx => { c.beginPath(); c.arc(lx, -3, 3.4, 0, 7); c.fill(); });
+  /* the round window, and the lifting ring on top */
+  c.fillStyle = '#1b1d29'; c.beginPath(); c.arc(0, -42, 18, 0, 7); c.fill(); c.fillStyle = '#d9f1ff'; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.fill(); c.strokeStyle = '#fffaf2'; c.lineWidth = 3; c.stroke();
   c.fillStyle = 'rgba(255,255,255,.7)'; c.beginPath(); c.arc(-5, -47, 4, 0, 7); c.fill();
+  c.strokeStyle = '#a9b4c9'; c.lineWidth = 3; c.beginPath(); c.arc(0, -91, 5, 0, 7); c.stroke();
   c.restore();
 }
 

@@ -122,7 +122,7 @@ function lsEndsSc() {
 /* ---------- drawing ---------- */
 function lsHandDown(c, x, y) { wsSpring(c, x, y, x, y + 66, null); return { x, y: y + 66 }; }
 function lsSheaves(c, cx, y, n, s) {
-  const w = (n - 1) * 18, K = LS_KC; c.fillStyle = GLC.steel2; c.beginPath(); c.roundRect(cx - w / 2 - 13, y - 14, w + 26, 20, 6); c.fill();
+  const w = (n - 1) * 18, K = LS_KC; c.fillStyle = GLC.steelD; c.beginPath(); c.roundRect(cx - w / 2 - 13, y - 14, w + 26, 20, 6); c.fill();
   lsGL(K, () => { for (let i = 0; i < n; i++) glDrawBlock(c, { x: (cx - w / 2 + i * 18) / K, y: (LS_FLOOR - y) / K, s: s || 0.3 }, false); });
 }
 function lsDrawCraneScene(c, cur, riseNow, prog) {
@@ -148,7 +148,7 @@ function lsDrawCraneScene(c, cur, riseNow, prog) {
   }
   if (g.winch) {
     const cl = WS.mach === 'winch' ? 0.9 + 6 * WS.R : 1 + 0.35 * (WS.bw || 2), spin = WS.mach === 'winch' ? riseNow / WS.axle : prog * 4 * Math.PI, r = Math.max(8, 0.55 * K * 0.5);
-    c.fillStyle = GLC.steel2; c.fillRect(g.wc.x - 7, g.wc.y + r * 1.1, 14, LS_FLOOR - g.wc.y - r * 1.1); c.beginPath(); c.roundRect(g.wc.x - 28, LS_FLOOR - 6, 56, 6, 3); c.fill();
+    c.fillStyle = GLC.steelD; c.fillRect(g.wc.x - 7, g.wc.y + r * 1.1, 14, LS_FLOOR - g.wc.y - r * 1.1); c.beginPath(); c.roundRect(g.wc.x - 28, LS_FLOOR - 6, 56, 6, 3); c.fill();
     lsGL(K, () => glDrawWinch(c, { x: g.wc.x / K, y: (LS_FLOOR - g.wc.y) / K, s: 0.5, crank: cl }, false, spin));
     const gx = g.wc.x + Math.cos(spin) * r * cl, gy = g.wc.y + Math.sin(spin) * r * cl, tx = -Math.sin(spin), ty = Math.cos(spin);
     if (lsGate()) arrow(c, gx - tx * 4, gy - ty * 4, gx + tx * 40, gy + ty * 40, WSC.red, 4);

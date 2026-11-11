@@ -114,3 +114,10 @@ One Sonnet agent, medium effort, this section as the brief. Opus or Fable review
 - Clearing the boulder always scores more than leaving it. Tested in `tests/pull_model.js`.
 
 **Not affected:** Parts 1 to 3, the Challenges and the Check keep their numbers and marks.
+
+## 7. Art and opening (11 Nov 2026)
+
+- Tom approved the art sample ("the art work all looks good") with one change: the Big Jelly is now a **mothership** about 35 m long (prow towards the crater, three engines, decks of windows, bridge under a jelly dome, tractor-beam bay at x = 86 m), drawn in `glDrawBigJelly`.
+- The sample's look is in the app: night sky, far hills, layered ground, glowing crystals, steel lattice crane and platforms with hazard bars, roller ramps, yellow pulley blocks and winches, two-tone ropes, the new Gumdrop (`drawGumdrop`), dust and sparks while it is dragged. All in `src/js/4g-glscene.js`; the Workshop lesson boards use the same machine drawings, so Parts 1 to 4 get them too.
+- **`WORKSHOP_OPEN = true`** (Tom, 11 Nov: "Let's update the art and open it up", so he can play-test). Not for Toddle until he has played Part 5.
+- Still to do: the lesson boards' indoor background (Parts 1 to 4) keeps its pale simulator grid.
