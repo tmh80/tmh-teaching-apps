@@ -62,9 +62,9 @@ function glDrawBoulder(c, x, y, rot, cracked) {
 /* the Gumdrop at real size (about 5 m across), with damage: scorch marks, cracks and a wobble */
 function glDrawShip(c, s) {
   const u = glU(), sc = 0.045 * u, dmg = s.dmg || 0, wob = !RMOTION && s.shake ? Math.sin(performance.now() / 30) * 0.06 * u : 0;
-  const X = glSX(s.x) + wob, Y = glSY(s.y);
-  if (s.inside) drawGumdropInside(c, X, Y, sc, s.tilt || 0, s.mood || 'worried'); else drawGumdrop(c, X, Y, sc, s.tilt || 0);
-  if (dmg > 0) { c.save(); c.translate(X, Y); c.rotate(s.tilt || 0); c.scale(sc, sc);
+  const lie = s.lie || 0, X = glSX(s.x) + wob, Y = glSY(s.y) - lie * 2.0 * u, tl = (s.tilt || 0) + lie * 1.5;   // lie 0 to 1: the Gumdrop tipped onto its side
+  if (s.inside) drawGumdropInside(c, X, Y, sc, tl, s.mood || 'worried'); else drawGumdrop(c, X, Y, sc, tl);
+  if (dmg > 0) { c.save(); c.translate(X, Y); c.rotate(tl); c.scale(sc, sc);
     c.fillStyle = 'rgba(40,24,20,.45)'; const nS = Math.min(4, Math.ceil(dmg / 25)); for (let i = 0; i < nS; i++) { c.beginPath(); c.ellipse([-30, 26, -12, 36][i], [-18, -30, -60, -10][i], 13, 7, [0.3, -0.5, 0.1, 0.8][i], 0, 7); c.fill(); }
     c.strokeStyle = '#3b1d2c'; c.lineWidth = 3; const nC = Math.min(3, Math.ceil(dmg / 34)); for (let i = 0; i < nC; i++) { const ox = [-18, 20, 0][i], oy = [-66, -54, -30][i]; c.beginPath(); c.moveTo(ox, oy); c.lineTo(ox + 7, oy + 9); c.lineTo(ox + 2, oy + 16); c.lineTo(ox + 9, oy + 24); c.stroke(); }
     c.restore(); }
@@ -164,7 +164,7 @@ function glDrawZone(c, z, t, label) {
   if (label) glLbl(c, label, (X0 + X1) / 2, glSY(z.y + 5.4), '#c9ffdc', 11, 'center', 'rgba(31,29,38,.6)');
 }
 /* ghost Gumdrops: where the Gumdrop starts each leg after the first, plus where it waits now (the model keeps that spot in ev.ghost, as the old model did in ghosts) */
-function glGhostList(ev) { const out = ((ev && ev.ghosts) || []).slice(), g = ev && ev.ghost; if (g && ev.stop && ev.stop.leg >= 1 && !out.some(q => Math.hypot(q.x - g.x, q.y - g.y) < 0.01)) out.push({ x: g.x, y: g.y, after: ev.stop.leg }); return out; }
+function glGhostList(ev) { const out = ((ev && ev.ghosts) || []).slice(), g = ev && ev.ghost; if (g && ev.stop && ev.stop.leg >= 1 && !out.some(q => Math.hypot(q.x - g.x, q.y - g.y) < 0.01)) out.push({ x: g.x, y: g.y, after: ev.stop.leg }); out.forEach(q => { const pl = ev.legs && ev.legs[q.after - 1]; q.lying = !!(pl && pl.lying); }); return out; }
 /* the route of each leg, straight from the model's own path: coloured by what the Gumdrop is doing, and the wall marked where a leg is stopped by one */
 const GL_ROUTE = { nudge: '#c9ffdc', ground: '#ff8f6b', platform: '#ffd27a', ramp: '#7ef0a8', lift: '#8fd3ff', across: '#8fd3ff', lower: '#8fd3ff', slide: '#ffd27a', fall: '#ff5d5d' };
 function glDrawRoutes(c, ev) {
@@ -228,7 +228,7 @@ function glDrawWorld(c, o) {
   if (!run.on && o.ship) {
     const hk = (sp, ghost) => { const X = glSX(sp.x), Y = glSY(sp.y + GL_HOOK); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.5, 0.1 * u0); c.beginPath(); c.moveTo(X, glSY(sp.y + 4.5)); c.lineTo(X, Y); c.stroke(); drawHookDot(c, X, Y, { glow: o.hookGlow }); lblAvoid(X, Y, 12); };
     var u0 = glU();
-    glGhostList(ev).forEach(gh => { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y), sc, 0); c.restore();
+    glGhostList(ev).forEach(gh => { const sc = 0.045 * u0; c.save(); c.globalAlpha = 0.5; drawGumdrop(c, glSX(gh.x), glSY(gh.y) - (gh.lying ? 2.0 * u0 : 0), sc, gh.lying ? 1.5 : 0); c.restore();
       c.setLineDash([4, 4]); c.strokeStyle = 'rgba(255,255,255,.7)'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(glSX(gh.x), glSY(gh.y + 2.2), 3.2 * u0, 2.6 * u0, 0, 0, 7); c.stroke(); c.setLineDash([]); hk(gh, true); });
     hk(o.ship);
   }

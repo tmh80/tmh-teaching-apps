@@ -19,14 +19,14 @@ const GL_END = { spotless: ['Spotless rescue!', 'The Gumdrop is safe without a s
 const glLegName = l => `${GL_NAME[l.type]}${l.type === 'ramp' ? ` ${fmt(l.m.L, 1)} m` : ''}${l.ropes > 1 ? `, ${l.ropes} ropes` : ''}${l.winches.length ? ', winch ' + l.winches.map(w => '×' + w).join(' ') : ''}`;
 function glSummary(r) {
   return { legs: r.legs.map(l => ({ type: l.type, name: glLegName(l), rise: +l.rise.toFixed(2), ma: +l.ma.toFixed(2), pull: +l.pull.toFixed(2), hand: +l.hand.toFixed(1), work: Math.round(l.work), stopped: !!l.stopped, thr: +(l.thruster || 0).toFixed(1), given: !!l.given, force: Math.round(l.force || 0), dist: +(l.dist || 0).toFixed(1) })),
-    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), up: glShort(r) ? +glShort(r).up.toFixed(1) : null, toLine: glShort(r) ? +glShort(r).to.toFixed(1) : null, work: Math.round(r.work), dmg: { t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, s: +(r.dmg.scrape || 0).toFixed(1), bu: +(r.dmg.bumps || 0).toFixed(1), f: +(r.dmg.falls || 0).toFixed(1), tr: r.dmg.torn || 0, total: +r.dmg.total.toFixed(1) }, torn: r.torn ? { leg: r.torn.leg, strain: r.torn.strain } : null,
+    hardest: +r.hardest.toFixed(2), hand: +r.hand.toFixed(1), cost: r.cost.total, crest: +r.crest.toFixed(2), up: glShort(r) ? +glShort(r).up.toFixed(1) : null, toLine: glShort(r) ? +glShort(r).to.toFixed(1) : null, work: Math.round(r.work), dmg: { tp: +(r.dmg.tips || 0).toFixed(1), t: +r.dmg.thrusters.toFixed(1), r: r.dmg.rock, b: r.dmg.blasts, s: +(r.dmg.scrape || 0).toFixed(1), bu: +(r.dmg.bumps || 0).toFixed(1), f: +(r.dmg.falls || 0).toFixed(1), tr: r.dmg.torn || 0, total: +r.dmg.total.toFixed(1) }, torn: r.torn ? { leg: r.torn.leg, strain: r.torn.strain } : null,
     boulder: r.boulder.how ? (r.boulder.ok ? r.boulder.how : 'stuck') : 'left', rockOn: r.rockOn, arrived: r.arrived, stop: r.stop ? r.stop.why : null, stopLeg: r.stop ? r.stop.leg : null, unroped: r.stop && r.stop.unroped ? r.stop.unroped.length : 0, score: r.score.total, pts: r.score.pts, hintCost: r.score.hintCost || 0, hints: r.score.hints || 0, max: GL_MAX, ending: r.score.ending, load: r.load };
 }
 /* where the hull damage came from, in words with the percentages (used on the result card, the ending card and My Rescue) */
 function glHullSources(d) {
   d = d || {}; const f1 = v => fmt(v, 1), L = [];
   if (d.t > 0) L.push(`thrusters ${f1(d.t)}%`); if (d.r > 0) L.push(`rock left on ${f1(d.r)}%`); if (d.tr > 0) L.push(`landing leg ripped off ${f1(d.tr)}%`); if (d.b > 0) L.push(`blasts ${f1(d.b)}%`);
-  if (d.s > 0) L.push(`dragging over rough ground ${f1(d.s)}%`); if (d.bu > 0) L.push(`bumps ${f1(d.bu)}%`); if (d.f > 0) L.push(`falls ${f1(d.f)}%`); return L;
+  if (d.s > 0) L.push(`dragging over rough ground ${f1(d.s)}%`); if (d.tp > 0) L.push(`falling over ${f1(d.tp)}%`); if (d.bu > 0) L.push(`bumps ${f1(d.bu)}%`); if (d.f > 0) L.push(`falls ${f1(d.f)}%`); return L;
 }
 /* ---------- the panel under the board: the result of a test or of the rescue ---------- */
 function glMountRun(host) {
@@ -82,29 +82,32 @@ function glBuildBeats(res, rig, o) {
   const rockOn = res.rockOn; if (rockOn) add(0.9, (S, k) => { S.ship.carryRock = true; S.bubble = { who: 'ship', s: 'The rock is still jammed on!' }; if (k > 0.5 && !S.rockDmg) { S.rockDmg = true; if (!res.torn) S.ship.dmg += 25; } });
   /* 4. the legs: the Gumdrop follows each leg's own path from the model (leg.path), with Smooshy working the machine.
         Hull damage is added as it goes, from the leg's own scrape, bump, fall and thruster numbers (the model's numbers, spread along the path). */
-  const ran = res.legs.filter(l => !l.skipped); let shipAt = { x: GL.shipX, y: shipY0 };
+  const ran = res.legs.filter(l => !l.skipped); let shipAt = { x: GL.shipX, y: shipY0 }, prevLie = 0;
   const sinkPlat = res.stop && res.stop.why === 'collapse' ? res.stop.plat : null, torn = res.torn || null, n0 = v => Math.round(v).toLocaleString('en-GB');
   const SAY = { nudge: 'Smooshy gives the Gumdrop a nudge along.', ground: 'Smooshy drags the Gumdrop across the rough crater ground, and the hull scrapes along it.', platform: 'The Gumdrop slides along a smooth platform.', ramp: 'The Gumdrop rolls up the ramp.',
     lift: 'The crane lifts the Gumdrop into the air.', across: 'The trolley carries the Gumdrop across.', lower: 'The trolley lowers the Gumdrop down gently.', slide: 'Smooshy pulls the hanging Gumdrop sideways.', fall: 'The Gumdrop drops off an edge and lands with a thump, and the hull is dented.', bump: 'The Gumdrop bumps up over a step, and the hull takes a knock.' };
   ran.forEach(l => {
     const stopHere = res.stop && res.stop.leg === l.i, why = stopHere ? res.stop.why : null, hs = glHandSpot(l, rig, res.ground, plats, shipAt), push = !hs, spot = push ? { x: l.start.x - 2.6, y: l.start.y } : hs;
     walkTo(spot);
-    const from = Object.assign({}, l.start), pts = [from].concat(l.path.map(q => ({ x: q.x, y: q.y, k: q.k }))), cum = [0], dm = [0]; let Ltot = 0, rawS = 0, rawB = 0, rawF = 0;
+    const from = Object.assign({}, l.start), pts = [from].concat(l.path.map(q => ({ x: q.x, y: q.y, k: q.k, t: q.t || 0 }))), cum = [0], dm = [0]; let Ltot = 0, rawS = 0, rawB = 0, rawF = 0, rawT = 0; pts[0].t = prevLie;
+    (l.tips || []).forEach(tp => { if (pts[tp.idx]) pts[tp.idx].tipHere = tp; });
     for (let i = 1; i < pts.length; i++) { const a = pts[i - 1], q = pts[i], dx = q.x - a.x, dy = q.y - a.y, ds = Math.hypot(dx, dy); Ltot += ds; cum.push(Ltot);
-      let d = 0; if (q.k === 'ground') { d += GP.scrape * ds; rawS += GP.scrape * ds; }
+      let d = 0; if (q.k === 'ground') { const sc2 = GP.scrape * ds * (a.t ? GP.tipScrape : 1); d += sc2; rawS += sc2; }
+      if (q.tipHere) { d += GP.tip; rawT += GP.tip; }
       if ((q.k === 'ground' || q.k === 'platform') && dy > 0.3 && dy / Math.max(1e-9, Math.abs(dx)) > 2) { d += GP.bump * dy; rawB += GP.bump * dy; }
       if (q.k === 'fall' && -dy > GP.dropFree) { d += GP.fall * -dy; rawF += GP.fall * -dy; }
       dm.push(dm[i - 1] + d); }
-    const resid = Math.max(0, (l.scrape - rawS) + (l.bump - rawB) + (l.fall - rawF)); if (pts.length > 1) dm[dm.length - 1] += resid;   // anything the path points cannot place (a fall onto a ramp's foot) lands at the end
+    const resid = Math.max(0, (l.scrape - rawS) + (l.bump - rawB) + (l.fall - rawF) + ((l.tip || 0) - rawT)); if (pts.length > 1) dm[dm.length - 1] += resid;   // anything the path points cannot place (a fall onto a ramp's foot) lands at the end
     const dmTot = dm[dm.length - 1], thr = l.thruster || 0;
     const posAt = a => { if (pts.length < 2) return { x: from.x, y: from.y, k: "nudge", d: 0, i: 1 }; a = clamp(a, 0, Ltot); let i = 1; while (i < pts.length - 1 && cum[i] < a) i++;
       const span = cum[i] - cum[i - 1], f = span > 1e-9 ? (a - cum[i - 1]) / span : 1, A = pts[i - 1], Q = pts[i]; return { x: glLerp(A.x, Q.x, f), y: glLerp(A.y, Q.y, f), k: Q.k, d: dm[i - 1] + (dm[i] - dm[i - 1]) * f, i, bump: (Q.k === 'ground' || Q.k === 'platform') && Q.y - A.y > 0.3 && (Q.y - A.y) / Math.max(1e-9, Math.abs(Q.x - A.x)) > 2 }; };
+    const rawLie = a => pts[posAt(a).i].t || 0, lieAt = a => [0, 0.4, 0.8, 1.2, 1.6, 2].reduce((s2, o) => s2 + rawLie(Math.max(0, a - o)), 0) / 6;   // goes over (or stands up) smoothly, over a couple of metres of travel
     const rawTilt = a => { const p = posAt(a); if (p.k !== 'ramp') return 0; const A = pts[p.i - 1], Q = pts[p.i]; return -Math.atan2(Q.y - A.y, Q.x - A.x); }, tiltAt = a => [-1, -0.5, 0, 0.5, 1].reduce((s2, o) => s2 + rawTilt(a + o), 0) / 5;
     const post = l.type === 'drag' ? rig.parts.find(q => q.id === l.id) : null, rampEnd = l.type === 'ramp' && l.m ? l.m.end : null;
     const strain = l.pull > GL.pullOk + 1e-9, durOf = frac => clamp(1.4 + Ltot * 0.09, 1.6, 8) * frac;
     if (Math.hypot(from.x - shipAt.x, from.y - shipAt.y) > 0.05) { const prev = shipAt; add(0.5, (S, k) => { const e = glEase(k); S.ship.x = glLerp(prev.x, from.x, e); S.ship.y = glLerp(prev.y, from.y, e); S.ship.tilt = 0; }); }
     const dmgAt = a => { const p = posAt(a); return p.d + thr * (Ltot > 1e-9 ? clamp(a / Ltot, 0, 1) : 1); };
-    const sceneAt = (S, a, k, a0) => { const p = posAt(a); S.ship.x = p.x; S.ship.y = p.y; S.ship.tilt = tiltAt(a);
+    const sceneAt = (S, a, k, a0) => { S.msg = ''; const p = posAt(a); S.ship.x = p.x; S.ship.y = p.y; S.ship.tilt = tiltAt(a); const lie0 = S.ship.lie || 0; S.ship.lie = lieAt(a);
       S.ship.dmg += Ltot > 1e-9 ? dmgAt(a) - dmgAt(a0) : thr * k;
       S.flames = strain ? Math.min(1, (l.pull - GL.pullOk) / 120) : 0; S.ship.shake = strain && !RMOTION; S.spin = k * 30;
       if (l.type === 'crane') { S.hook[l.id] = S.ship.y + 4.2; if (p.k === 'lift' || p.k === 'across' || p.k === 'lower') S.trol[l.id] = S.ship.x; }
@@ -112,7 +115,9 @@ function glBuildBeats(res, rig, o) {
       if (post) S.rope = { a: { x: S.ship.x + 2.2, y: S.ship.y + 1.8 }, b: { x: post.x, y: post.y } };
       else if (rampEnd) S.rope = { a: { x: S.ship.x + 2.2 * Math.cos(S.ship.tilt), y: S.ship.y + 1.8 - 2.2 * Math.sin(S.ship.tilt) }, b: { x: rampEnd.x, y: rampEnd.y + 0.4 } };
       S.smoo = push ? { x: S.ship.x - 2.6 * Math.cos(S.ship.tilt), y: S.ship.y + 2.6 * Math.sin(S.ship.tilt), mood: 'strain' } : Object.assign({}, spot, { mood: 'strain' });
-      S.narr = p.bump ? SAY.bump : SAY[p.k] || SAY.nudge; S.bubble = strain ? { who: 'ship', s: 'Thrusters! Hold on!' } : (k < 0.5 ? { who: 'smoo', s: 'Heave!' } : null); };
+      const tipNow = (l.tips || []).find(tp => cum[tp.idx] != null && a >= cum[tp.idx] - 0.01 && a < cum[tp.idx] + 2.2);
+      S.narr = tipNow ? (tipNow.why === 'fall' ? 'Oh no, the Gumdrop dropped off an edge and tipped over! Dragging it on its side scrapes the hull twice as fast.' : 'Oh no, the Gumdrop has tipped over! Dragging it on its side scrapes the hull twice as fast.')
+        : (l.type === 'crane' && prevLie && S.ship.lie < lie0 + 1e-6 && (p.k === 'lift' || p.k === 'across' || p.k === 'lower')) ? 'The crane has stood the Gumdrop back up.' : p.bump ? SAY.bump : (p.k === 'ground' && S.ship.lie > 0.5) ? 'Smooshy drags the Gumdrop along on its side, and the hull scrapes twice as fast.' : SAY[p.k] || SAY.nudge; S.bubble = strain ? { who: 'ship', s: 'Thrusters! Hold on!' } : (k < 0.5 ? { who: 'smoo', s: 'Heave!' } : null); };
     const done = S => { S.flames = 0; S.ship.shake = false; S.rope = null; };
     const aT = torn && torn.leg === l.i ? cum[Math.min(torn.idx, pts.length - 1)] : null;
     const leg1 = aT != null ? aT : why === "broken" ? 0 : Ltot;
@@ -122,7 +127,7 @@ function glBuildBeats(res, rig, o) {
         S.rockX = tp.x + 4.6; S.rockY = tp.y; S.rockRot = 0.12; if (k >= 0.35) S.rockFixed = true;
         S.narr = o.test ? 'The strain on the landing leg was more than it can take, so it ripped off and the boulder stayed behind.' : `The strain on the landing leg was ${n0(torn.strain)} N, more than the 500 N it can take, so it ripped off and the boulder stayed behind.`; S.bubble = { who: 'ship', s: 'Crack! My leg!' }; });
       if (Ltot - aT > 1e-9) add(durOf((Ltot - aT) / Ltot), (S, k) => { const e = glEase(k); sceneAt(S, aT + (Ltot - aT) * e, k, aT); S.tear = { x: tp.x, y: tp.y, k: 1 }; S.ship.carryRock = false; S.rockX = tp.x + 4.6; S.rockY = tp.y; S.rockFixed = true; if (k >= 1) { done(S); if (!o.test) S.readouts.push(`Leg ${l.i + 1}: ${fmt(l.pull, 1)} N`); } }); }
-    shipAt = stopHere && why === 'broken' ? from : Object.assign({}, l.end);
+    shipAt = stopHere && why === 'broken' ? from : Object.assign({}, l.end); prevLie = l.lying ? 1 : 0;
     if (stopHere && why === 'broken') add(1.8, (S, k) => { S.ship.x = from.x; S.ship.y = from.y; S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.ship.shake = !RMOTION; S.bad = l.id; S.narr = 'Something is wrong with this machine, so it cannot pull the Gumdrop.'; S.bubble = { who: 'smoo', s: 'Something\'s wrong here!' }; if (k >= 1) S.ship.shake = false; });
     if (stopHere && why === 'heavy') add(1.8, (S, k) => { S.ship.x = shipAt.x; S.ship.y = shipAt.y; S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.ship.shake = !RMOTION; S.flames = 1; if (Ltot < 1e-9) S.ship.dmg += thr * glEase(k); S.narr = 'The pull needed here is more than 180 N, even with the thrusters roaring, so the Gumdrop stops.'; S.bubble = { who: 'smoo', s: 'It\'s far too heavy!' }; if (k >= 1) { S.ship.shake = false; S.flames = 0; } });
     if (stopHere && why === 'wall') add(1.8, (S, k) => { S.ship.x = shipAt.x; S.ship.y = shipAt.y; S.smoo = Object.assign({}, spot, { mood: 'strain' }); S.ship.shake = !RMOTION && k < 0.5; S.wall = res.stop.wall; S.narr = 'The Gumdrop has hit a wall. A step taller than 1 m is too tall to drag over.'; S.bubble = { who: 'ship', s: 'Ouch! A wall!' }; });
@@ -133,7 +138,7 @@ function glBuildBeats(res, rig, o) {
   if (res.arrived) {
     walkTo({ x: shipAt.x - 1.5, y: shipAt.y });
     add(1.0, (S, k) => { S.smoo = { x: shipAt.x - 1.5 + 1.5 * glEase(k), y: shipAt.y + Math.sin(k * Math.PI) * 1.4, mood: 'cheer' }; if (k > 0.9) { S.smoo = null; S.ship.inside = true; S.ship.mood = 'cheer'; } });
-    add(4.2, (S, k) => { S.smoo = null; S.ship.inside = true; S.ship.mood = 'wave'; const e = glEase(Math.max(0, (k - 0.25) / 0.75)); S.ship.x = glLerp(shipAt.x, 86, e); S.ship.y = glLerp(shipAt.y, 20.6, e); S.ship.tilt = glLerp(S.ship.tilt, 0, Math.min(1, k * 3));
+    add(4.2, (S, k) => { S.smoo = null; S.ship.inside = true; S.ship.mood = 'wave'; const e = glEase(Math.max(0, (k - 0.25) / 0.75)); S.ship.x = glLerp(shipAt.x, 86, e); S.ship.y = glLerp(shipAt.y, 20.6, e); S.ship.tilt = glLerp(S.ship.tilt, 0, Math.min(1, k * 3)); S.ship.lie = (S.ship.lie || 0) * (1 - Math.min(1, k * 3));
       S.beam = { k }; S.bubble = k < 0.5 ? { who: 'ship', s: 'Tractor beam locked on!' } : null; if (k > 0.97) S.shipGone = true; });
   }
   return B;

@@ -45,6 +45,9 @@ function glPostIds() {
   return out;
 }
 const glIsPost = id => glPostIds().has(id);
+/* the whole post a part belongs to, head first: the part roped to the Gumdrop, then the add-ons cabled to it */
+function glPostChain(id) { const rig = GLB.rig, roped = q => (rig.cables || []).some(c => (c.a === 'ship' && c.b === q.id) || (c.b === 'ship' && c.a === q.id));
+  const cand = [glPart(id)].concat(glChainOf(id).map(glPart)).filter(Boolean), hd = (rig.parts || []).filter(q => glIsAddon(q) && !glOwner(q.id) && roped(q) && (q.id === id || glChainOf(q.id).includes(id)))[0] || cand[0]; return hd ? [hd.id].concat(glChainOf(hd.id)) : []; }
 function glConnect(a, b) {
   if (a === b || GLB.rig.cables.some(c => (c.a === a && c.b === b) || (c.a === b && c.b === a))) return false;
   if (a === 'ship' || b === 'ship') {   /* a rope to the Gumdrop's hook: a ramp, a crane, or one of their pulley blocks or winches */
@@ -250,6 +253,7 @@ function glPaintDock() {
     const post = glIsPost(id);
     if (post) { title = 'Winch post'; const pa = [p].concat(glChainOf(id)).map(q => glPart(q)).filter(Boolean); const hd = pa.find(q => (GLB.rig.cables || []).some(c => (c.a === 'ship' && c.b === q.id) || (c.b === 'ship' && c.a === q.id))) || p, ad = glAddons(GLB.rig, hd.id), ch = [hd].concat(ad.chain);
       const bl = ch.filter(q => q.type === 'block'), wn = ch.filter(q => q.type === 'winch'), rp = bl.length ? clamp(bl[0].ropes | 0, 1, GL.ropesMax) : 1, ma = rp * wn.slice(0, GL.winchMax).reduce((a, q) => a * q.ratio, 1);
+      acts += ['−5', '−1', '+1', '+5'].map(d => `<button type="button" class="ghost sm" data-gm="mv${d.replace('−', '-')}" aria-label="Move the post ${d.replace('−', 'left ').replace('+', 'right ')} m">${d.startsWith('−') ? '◀' : ''} ${d.replace('−', '').replace('+', '')} m ${d.startsWith('+') ? '▶' : ''}</button>`).join('');
       body += `<p class="glnote"><b>Winch post.</b> Smooshy winches the Gumdrop over to here, dragging it along whatever is in the way. ${rp} pulley rope${rp > 1 ? 's' : ''}${wn.slice(0, GL.winchMax).map(q => ` × winch ×${q.ratio}`).join('')} = <b>MA ${fmt(ma, 0)}</b>.</p>`; }
     else if (!glOwner(id) && !roped) acts += '<button type="button" class="ghost sm" data-gm="rope">🪢 Rope it to the Gumdrop</button>'; }
   else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; icon = p.big ? '💥' : '🧨'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when the rescue launches. Careful near the Gumdrop!</p>`; acts += `<button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button>`; }
@@ -265,6 +269,7 @@ function glMenuAct(k) {
   glPush();
   if (k === 'cut') GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
   else if (k === 'rope') { if (!GLB.rig.cables.some(c => (c.a === 'ship' && c.b === id) || (c.b === 'ship' && c.a === id))) GLB.rig.cables.push({ a: 'ship', b: id }); }
+  else if (k.startsWith('mv')) { const d = +k.slice(2); glPostChain(id).forEach(i => { const q = glPart(i); if (q) q.x = clamp(+(q.x + d).toFixed(2), 0.5, GL.W - 0.5); }); }   // slide a winch post along the ground
   else if (k === 'flip') p.dir = -(p.dir || 1);
   else if (k === 'dirL' || k === 'dirR') { p.adir = k === 'dirL' ? -1 : 1; if (p.across) p.across = Math.abs(p.across) * p.adir; }
   else if (k === 'big') p.big = !p.big;
