@@ -17,10 +17,11 @@
                              and every metre costs: there is no free nudge for a drag.
    Extra fields on each leg: force (the biggest force the rope needed, N), ropeMA (ropes × winches), dist (metres moved), path [{x,y,k}],
      segs [{k, len, rise, peak}], simple (the textbook sum gives the same pull), scrape/bump/fall (hull damage, %).
+   Tipping: see gpTip. leg.tips [{x,y,idx,why}], leg.lying (on its side at the end of the leg), path points carry t: 1 while it lies down, dmg.tips.
    The boulder: see gpStrain. result.torn = { leg, x, y, strain } when the landing leg ripped off; dmg.torn is its damage.
    Extra fields on the result: dmg.scrape, dmg.bumps, dmg.falls (all inside dmg.total), stop.why 'wall', score.ending 'wrecked'. */
 const GP = { muGround: 1 / 3, muPlat: 0.1, step: 0.25, wallRise: 1, wallRun: 0.5, kerbRun: 2, nudge: 3, level: 0.5, dropFree: 0.5, heldSlide: 3, reach: 1.5, heavy: 180,
-  scrape: 1.2, bump: 6, fall: 8, wreck: 60, wreckCap: 3, legHold: 500, tear: 100, tornCap: 2 };
+  scrape: 1.2, bump: 6, fall: 8, wreck: 60, wreckCap: 3, legHold: 500, tear: 100, tornCap: 2, tip: 10, tipDrag: 1, tipScrape: 2 };
 const gpMu = k => k === 'ramp' ? 0 : k === 'platform' ? GP.muPlat : GP.muGround;
 const gpPt = S => ({ x: +S.x.toFixed(3), y: +S.y.toFixed(3) });
 
@@ -53,13 +54,17 @@ function gpPick(W, x, y, sup, skip) {
 }
 
 /* ---------- moving the Gumdrop ---------- */
-function gpPush(C, S, k, F) { const L = C.leg, last = L.path[L.path.length - 1]; if (last && Math.abs(last.x - S.x) < 1e-9 && Math.abs(last.y - S.y) < 1e-9) return; L.path.push({ x: +S.x.toFixed(3), y: +S.y.toFixed(3), k, F: Math.round(F || 0) }); }
+function gpPush(C, S, k, F) { const L = C.leg, last = L.path[L.path.length - 1]; if (last && Math.abs(last.x - S.x) < 1e-9 && Math.abs(last.y - S.y) < 1e-9) return; L.path.push({ x: +S.x.toFixed(3), y: +S.y.toFixed(3), k, F: Math.round(F || 0), t: C.tipS.tipped ? 1 : 0 }); }
 function gpLand(C, S, sup) {   // put the Gumdrop on a surface; a platform that cannot hold it gives way
   S.sup = sup; S.held = null;
   if (sup.kind === 'platform') { C.shipOn.add(sup.id); if (C.over(sup.id)) return { why: 'collapse', plat: sup.id }; }
   return null;
 }
-function gpFall(C, S, toY) { const d = S.y - toY; if (d > GP.dropFree) { C.leg.fall += GP.fall * d; C.leg.fell += d; } S.y = toY; }
+/* Tipping (Tom, 11 Nov): the Gumdrop is tall, so it falls over when it is dragged over rough crater ground (after GP.tipDrag metres), bumped over a kerb,
+   or dropped more than GP.dropFree. Falling over costs GP.tip % hull. While it lies on its side, scraping over the ground costs GP.tipScrape times as much.
+   A crane lift stands it up again (it hangs straight from the hook). C.tipS = { tipped, dragged } is shared by every leg of a run. */
+function gpTip(C, S, why) { const T = C.tipS; if (T.tipped) return; T.tipped = true; T.dragged = 0; C.leg.tip += GP.tip; C.leg.tips.push({ x: +S.x.toFixed(2), y: +S.y.toFixed(2), idx: C.leg.path.length, why }); }
+function gpFall(C, S, toY) { const d = S.y - toY; S.y = toY; if (d > GP.dropFree) { C.leg.fall += GP.fall * d; C.leg.fell += d; gpTip(C, S, 'fall'); } }
 /* let go of whatever is holding the Gumdrop up: drop onto the highest surface under it */
 function gpDrop(C, S) { const fl = gpSurfaces(C.W, S.x, C.skip).filter(s => s.y <= S.y + 0.05).sort((a, b) => b.y - a.y)[0] || gpSolid(C.W, S.x); gpFall(C, S, fl.y); gpPush(C, S, 'fall', 0); return gpLand(C, S, fl); }
 /* the Gumdrop is on a hook, or up on a lever or jack: the new rope pulls it sideways until it is over something to stand on */
@@ -92,8 +97,11 @@ function gpPull(C, S, nx, ny, kind, abrupt) {
   if (!free && ds > 1e-9) { const sin = abrupt ? dy / Math.hypot(dy, GP.kerbRun) : dy / ds, cos = Math.sqrt(Math.max(0, 1 - sin * sin)), k = Math.max(0, sin + gpMu(kind) * cos); F = C.load * k; if (gpStrain(C, S, F)) F = C.load * k; }
   if (F / C.ropeMA > GP.heavy + 1e-9) { L.force = Math.max(L.force, F); L.forceAt = gpPt(S); return { why: 'heavy' }; }
   if (!free) { L.dist += ds; L.work += F * ds; if (F > L.force + 1e-9) { L.force = F; L.forceAt = { x: +nx.toFixed(2), y: +ny.toFixed(2) }; L.forceOn = kind; }
-    if (kind === 'ground') L.scrape += GP.scrape * ds; if (abrupt) L.bump += GP.bump * dy; if (kind !== 'ramp') L.rough += ds; }
-  L.walked += Math.abs(dx); S.x = nx; S.y = ny; gpPush(C, S, free ? 'nudge' : kind, F);
+    if (abrupt) L.bump += GP.bump * dy; if (kind !== 'ramp') L.rough += ds;
+    if (kind === 'ground') { const T = C.tipS; L.scrape += GP.scrape * ds * (T.tipped ? GP.tipScrape : 1); if (!T.tipped) T.dragged += ds; } }
+  L.walked += Math.abs(dx); S.x = nx; S.y = ny;
+  if (!free && (abrupt || (kind === 'ground' && C.tipS.dragged >= GP.tipDrag - 1e-9))) gpTip(C, S, abrupt ? 'bump' : 'drag');
+  gpPush(C, S, free ? 'nudge' : kind, F);
   return null;
 }
 /* drag the Gumdrop along the surface until it is at tx. Returns why it stopped, or null if it got there. */
@@ -143,6 +151,7 @@ function gpCraneLeg(C, S, m) {
   if (C.load / C.ropeMA > GP.heavy + 1e-9) { L.force = Math.max(L.force, C.load); L.forceAt = gpPt(S); return { why: 'heavy' }; }
   L.simple = L.rough < 1e-9;
   const top = S.y + p.rise; L.dist += p.rise; L.work += C.load * p.rise; if (C.load > L.force) { L.force = C.load; L.forceAt = gpPt(S); L.forceOn = 'lift'; }
+  C.tipS.tipped = false; C.tipS.dragged = 0;   // hanging from the hook, it is upright again
   while (S.y < top - 1e-6) { S.y = Math.min(top, S.y + GP.step); gpPush(C, S, 'lift', C.load); }
   S.sup = null; S.held = { slide: GL.craneAcross, by: p.id }; L.lifted = gpPt(S);
   if (!ac) return null;
@@ -207,7 +216,7 @@ function gpEvaluate(rig, opts) {
     const roped = GL_ROPED[m.type] ? glRoped(rig, m.id, ad) : true;
     pullers.push({ id: m.id, type: m.type, m, roped, faults, ropes: m.type === 'jack' ? 1 : ad.ropes, winches: ad.winches.slice(0, GL.winchMax).map(w => w.ratio), addons: ad.chain.map(p => p.id) }); });
   anchors.forEach(a => pullers.push({ id: a.id, type: 'drag', a, roped: true, faults: a.faults, ropes: a.ropes, winches: a.winches, addons: a.chain.slice(1).map(p => p.id) }));
-  const S = { x: ship0.x, y: ship0.y, sup: gpSolid(W, ship0.x), held: null }, used = new Set(), legs = [];
+  const S = { x: ship0.x, y: ship0.y, sup: gpSolid(W, ship0.x), held: null }, used = new Set(), legs = [], tipS = { tipped: false, dragged: 0 };
   const beamSees = p => p.y >= glMaxRight(g, p.x) - GL.hzY - 1e-9;
   const target = u => u.type === 'ramp' ? u.m.end : u.type === 'drag' ? { x: u.a.x, y: u.a.base.y } : u.type === 'crane' ? { x: u.m.part.x + (u.m.part.across || 0), y: S.y + u.m.rise } : { x: u.m.part.x, y: S.y + u.m.rise };
   const gap = u => u.type === 'ramp' ? (S.x < u.m.start.x ? u.m.start.x - S.x : S.x > u.m.end.x ? S.x - u.m.end.x : 0) : Math.abs((u.type === 'drag' ? u.a.x : u.m.part.x) - S.x);
@@ -224,20 +233,20 @@ function gpEvaluate(rig, opts) {
     const u = cand[0]; used.add(u.id);
     const ropeMA = u.ropes * u.winches.reduce((a, w) => a * w, 1);
     const leg = { i: legs.length, id: u.id, type: u.type, roped: true, at: gpPt(S), y0: S.y, m: u.m || null, ropes: u.ropes, winches: u.winches, ropeMA, load, addons: u.addons, faults: u.faults.slice(),
-      path: [], strain: 0, torn: false, force: 0, forceAt: null, forceOn: null, dist: 0, work: 0, walked: 0, rough: 0, scrape: 0, bump: 0, fall: 0, fell: 0, mma: 1, simple: false, full: false };
+      path: [], strain: 0, torn: false, tip: 0, tips: [], lying: false, force: 0, forceAt: null, forceOn: null, dist: 0, work: 0, walked: 0, rough: 0, scrape: 0, bump: 0, fall: 0, fell: 0, mma: 1, simple: false, full: false };
     legs.push(leg); leg.start = gpPt(S);
     let r = null;
     if (leg.faults.length) r = { why: 'broken', faults: leg.faults };
-    else { const C = { W, load, ropeMA, leg, shipOn, over, skip: null, rock: rockOn && !torn, torn: null, nudge: u.type !== 'drag' };   // a winch post gets no free nudge: a bare rope moves nothing
+    else { const C = { W, load, ropeMA, leg, shipOn, over, tipS, skip: null, rock: rockOn && !torn, torn: null, nudge: u.type !== 'drag' };   // a winch post gets no free nudge: a bare rope moves nothing
       r = u.type === 'ramp' ? gpRampLeg(C, S, u.m) : u.type === 'crane' ? gpCraneLeg(C, S, u.m) : u.type === 'drag' ? gpDragLeg(C, S, u.a) : gpLiftLeg(C, S, u.m);
       if (C.torn) { torn = C.torn; load = GL.ship; leg.simple = false; } }
     const lift = u.type === 'lever' || u.type === 'jack';
-    leg.end = gpPt(S); leg.rise = +(leg.end.y - leg.start.y).toFixed(3); leg.held = !!S.held; leg.segs = gpSegs(leg.path, leg.start);
+    leg.lying = tipS.tipped; leg.end = gpPt(S); leg.rise = +(leg.end.y - leg.start.y).toFixed(3); leg.held = !!S.held; leg.segs = gpSegs(leg.path, leg.start);
     leg.ma = lift ? leg.mma * ropeMA : leg.simple ? leg.mma * ropeMA : ropeMA;      // simple legs: machine MA × ropes × winches, as students work it out
     leg.pull = lift ? load / leg.ma : leg.force / ropeMA;
     leg.hand = lift ? leg.ma * leg.dist : ropeMA * leg.dist; leg.cable = u.type === 'jack' ? 0 : u.ropes * leg.dist;
     leg.given = !leg.simple;                                                          // the route strip has to give this leg's force: students cannot work it out
-    ['dist', 'work', 'hand', 'scrape', 'bump', 'fall', 'fell', 'rough'].forEach(k => { leg[k] = +leg[k].toFixed(3); });
+    ['dist', 'work', 'hand', 'scrape', 'bump', 'fall', 'fell', 'rough', 'tip'].forEach(k => { leg[k] = +leg[k].toFixed(3); });
     if (r) { stop = Object.assign({ at: gpPt(S), leg: leg.i }, r); leg.stopped = true; break; }
   }
   if (!stop && !arrived) { if (beamSees(S) && legs.length) arrived = true; else { const idle = pullers.filter(u => !used.has(u.id) && !u.roped && (u.type === 'ramp' || u.type === 'crane'));
@@ -250,11 +259,11 @@ function gpEvaluate(rig, opts) {
   const hand = legs.reduce((a, l) => a + l.hand, 0), workJ = legs.reduce((a, l) => a + l.work, 0);
   let thr = 0; legs.forEach(l => { l.thruster = l.pull > GL.pullOk + 1e-9 ? Math.min(100, (Math.min(l.pull, GP.heavy) - GL.pullOk) / 120 * 100) : 0; thr += l.thruster; });
   const sum = k => legs.reduce((a, l) => a + l[k], 0);
-  const dmg = { thrusters: thr, rock: rockOn && !torn ? 25 : 0, torn: torn ? GP.tear : 0, blasts: bShip.length * 15, scrape: sum('scrape'), bumps: sum('bump'), falls: sum('fall') };
-  dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.torn + dmg.blasts + dmg.scrape + dmg.bumps + dmg.falls);
+  const dmg = { thrusters: thr, rock: rockOn && !torn ? 25 : 0, torn: torn ? GP.tear : 0, blasts: bShip.length * 15, scrape: sum('scrape'), bumps: sum('bump'), falls: sum('fall'), tips: sum('tip') };
+  dmg.total = Math.min(100, dmg.thrusters + dmg.rock + dmg.torn + dmg.blasts + dmg.scrape + dmg.bumps + dmg.falls + dmg.tips);
   const cost = glCost(rig, legs, boulder), ghosts = legs.filter(l => l.i >= 1).map(l => ({ x: l.at.x, y: l.at.y, after: l.i }));
   const res = { ok: done, arrived: done, stop: done ? null : stop, ghost: !done && stop && legs.length ? gpPt(S) : null, ghosts, legs, ran: legs.filter(l => !l.stopped), hardest, hand, work: workJ, load: GL.ship + (rockOn ? GL.rock : 0), rockOn, torn, boulder, blasts,
-    bShip: bShip.length, dmg, cost, crest: glCrest(g), plats: loads, ground: g, ship0, final: gpPt(S), held: !!S.held, used: [...used], spare: pullers.filter(u => !used.has(u.id)).map(u => u.id) };
+    bShip: bShip.length, dmg, tipped: tipS.tipped, tips: [].concat(...legs.map(l => l.tips.map(t => Object.assign({ leg: l.i }, t)))), cost, crest: glCrest(g), plats: loads, ground: g, ship0, final: gpPt(S), held: !!S.held, used: [...used], spare: pullers.filter(u => !used.has(u.id)).map(u => u.id) };
   res.score = gpScore(res, opts.hints || 0, !!opts.maths);
   return res;
 }
