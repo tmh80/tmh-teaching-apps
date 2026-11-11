@@ -13,6 +13,7 @@ const join = (...rs) => ({ v: 2, parts: [].concat(...rs.map(r => r.parts)), cabl
 const lever = { parts: BL, cables: [] };
 
 /* 1. The routes from the old model still give the textbook numbers */
+EXPECT.rock = [56.25, 1344, 2];   // boulder left on: the leg rips off on the first ramp, then the ship alone goes up, wrecked
 for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(ROUTES[k]());
   chk(`${k}: hardest pull ${pull}`, near(r.hardest, pull), r.hardest); chk(`${k}: hand travel ${hand}`, near(r.hand, hand, 1), r.hand);
   chk(`${k}: score ${score}`, r.score.total === score, [r.score, r.stop]); }
@@ -21,7 +22,14 @@ for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(
 { const r = gpEvaluate(ROUTES.long()); chk('long: work 94,500 J', near(r.work, 94500, 1), r.work); }
 { const r = gpEvaluate(ROUTES.crane()); chk('crane route: crane, ramp, lever in that order', r.legs.map(l => l.type).join() === 'crane,ramp,lever', r.legs.map(l => l.type)); chk('crane route: spotless', r.dmg.total === 0, r.dmg);
   chk('crane route: the Gumdrop comes off the hook onto the platform beside it', r.legs[1].path.some(q => q.k === 'slide'), r.legs[1].segs); }
-{ const r = gpEvaluate(ROUTES.rock()); chk('rock left on: 25% plus thrusters', near(r.dmg.total, 50, 1e-6), r.dmg); }
+/* the boulder (Tom, 11 Nov): leaving it on pulls the Gumdrop apart, unless the pull is very gentle; clearing it always scores more */
+{ const r = gpEvaluate(ROUTES.rock()); chk('boulder left on, 24 m ramp: the leg strain would be 525 N, so it rips off', r.torn && r.torn.leg === 0 && r.torn.strain === 525, r.torn);
+  chk('torn: wrecked, 100% damage', r.dmg.torn === GP.tear && r.dmg.total === 100 && r.score.ending === 'torn', r.dmg); chk('torn: still reaches the beam', r.arrived);
+  chk('clearing the boulder scores more than leaving it', gpEvaluate(ROUTES.top()).score.total > r.score.total, r.score.total); }
+{ const g = M.rig([[{ id: 'rA', type: 'ramp', x1: 9.2, y1: 0, L: 30, rise: 6 }, 4, [10]]], []), r = gpEvaluate(g), l = r.legs[0];   // a gentler ramp: strain 8,400 × 0.2 × 1/4 = 420 N
+  chk('boulder left on, gentle 30 m ramp: the leg holds (420 N)', !r.torn && near(l.strain, 420, 1) && near(l.load, 8400, 1e-6), [r.torn, l.strain]); chk('gentle ramp with the boulder: 25% damage and the heavier load', r.dmg.rock === 25 && near(l.force, 1680, 1), [r.dmg, l.force]); }
+{ const g = M.rig([[{ id: 'cr', type: 'crane', x: 14, rise: 4, across: 2 }, 4, [10, 4]]], []), r = gpEvaluate(g), l = r.legs[0]; chk('boulder left on, crane lift: the whole boulder hangs off the leg, so it rips off', r.torn && near(l.force, 6300, 1e-6) && near(l.pull, 6300 / 160, 0.01), [r.torn, l.force]); }
+{ const r = gpEvaluate(join(anchor('a', 77, 4, [10, 10]))); chk('boulder left on, dragged: rips off on the first step', r.torn && near(r.torn.x, 14, 1e-6), r.torn); chk('dragged and torn: scores less than the same drag with the boulder cleared', r.score.total < gpEvaluate(join(anchor('a', 77, 4, [10, 10]), lever)).score.total, r.score); }
 { const r = gpEvaluate(ROUTES.dynb()); chk('boulder blast near the ship: 15%', near(r.dmg.total, 15, 1e-6), r.dmg); }
 { const g = ROUTES.top(); g.parts = g.parts.filter(p => p.id !== 'd1'); const r = gpEvaluate(g); chk('no crest blast: top route stops short of the beam', !r.arrived && r.stop.why === 'gap', r.stop); }
 { const r = gpEvaluate(ROUTES.none()); chk('nothing roped: why none', r.stop.why === 'none', r.stop); }

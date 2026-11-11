@@ -20,4 +20,4 @@ const ROUTES = {
   rock: () => rig([[R24a(16), 4, [7]], [R24b(40.76), 4, [7]]], [CREST]),
   none: () => ({ v: 2, parts: BL.slice(), cables: [] })
 };
-const EXPECT = { top: [56.25, 1344, 10], crane: [58.33, 1336, 10], long: [56.25, 1680, 9], single: [45.0, 1680, 8], over: [39.375, 1920, 7], dynb: [56.25, 1344, 9], weak: [98.44, 1056, 4], rock: [75.0, 1344, 4], none: [6300, 0, null] };
+const EXPECT = { top: [56.25, 1344, 10], crane: [58.33, 1336, 10], long: [56.25, 1680, 9], single: [45.0, 1680, 8], over: [39.375, 1920, 7], dynb: [56.25, 1344, 9], weak: [98.44, 1056, 4], rock: [75.0, 1344, 4] /* old model; the pulling model tears the leg off instead: see tests/pull_model.js */, none: [6300, 0, null] };

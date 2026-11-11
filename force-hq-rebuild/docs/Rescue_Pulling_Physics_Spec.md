@@ -54,7 +54,8 @@ Everything feeds `dmg.total` (0 to 100%), and the report lists where it came fro
 | Source | Amount |
 |---|---|
 | Thrusters (pull over 60 N) | as now |
-| Boulder left on | 25% |
+| Boulder left on, leg holds | 25% |
+| Boulder left on, leg rips off | 100% |
 | Blast within 6 m of the ship | 15% each |
 | Scraping over crater ground | 1.2% per metre |
 | Bumps | 6% per metre of step |
@@ -97,6 +98,11 @@ One Sonnet agent, medium effort, this section as the brief. Opus or Fable review
 10. **Tests.** `tests/pull_model.js` joins `run_all.sh`. Rewrite `rescue_numbers.py`, `play_rescue.py`, `stage2_ropes.py`, `stage4_gasa.py`, `play_story.py`, `play_hints.py`, `play_myrescue.py`, `k4_two_leg.py` for the new rules. New play test: build a drag-only route with real pointer moves and reach the beam, wrecked.
 11. **Docs.** Brief, backlog, handoff, Chapter 6 script, Project copies. Then `WORKSHOP_OPEN = true` after Tom plays.
 
-**The boulder.** If it is not cleared it rides along on the landing leg (+2,100 N, 25% damage), as before. The run must draw it moving with the Gumdrop, so the ship never seems to pass through it (Tom, 11 Nov).
+**The boulder (Tom, 11 Nov: "Not removing the boulder should pull the Gumdrop apart. It should have some internal force that it can resist before it is pulled into pieces.").**
+- A boulder that was not cleared is jammed on the landing leg and hangs off the Gumdrop wherever it goes (load 8,400 N). The run draws it moving with the ship.
+- The leg carries the boulder's share of every pull: **strain = force × 2,100 ÷ 8,400**. The leg can take **500 N** (`GP.legHold`).
+- Above that, the leg rips off: the boulder stays behind, the load drops back to 6,300 N, and the hull takes 100% damage (`GP.tear`), and the rescue ends as "torn": it scores **2 at most** (`GP.tornCap`), one below the cap for a wrecked rescue, so it is always below the same route with the boulder cleared.
+- What that means in play: a crane lift (strain 2,100 N), any drag over crater ground (700 N on the flat) and a 24 m ramp up 6 m (525 N) all pull it apart. Only a very gentle ramp (30 m up 6 m: 420 N) gets away with it, and then the old costs apply (25% damage, no boulder point, pull points capped at 2).
+- Clearing the boulder always scores more than leaving it. Tested in `tests/pull_model.js`.
 
 **Not affected:** Parts 1 to 3, the Challenges and the Check keep their numbers and marks.
