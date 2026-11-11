@@ -37,9 +37,9 @@ Object.assign(LS_PIECES, {
     cards: [{ t: 'Machines can work together. Every machine has a ◉ dot where its rope comes out.', ghost: 'point' },
       { t: 'Drag from one ◉ dot to the next to join them with a cable. Add-ons like a pulley block or a winch also clip straight on when you drop them on a ◉ dot.', ghost: 'cable' },
       { t: 'Smooshy always works the last machine in the chain.', ghost: 'point' }] },
-  platform: { name: 'Platforms and the handover box', icon: '🟩', note: '', mach: null,
-    cards: [{ t: 'When a load reaches the top of one machine, it stops on a platform.', ghost: 'point' },
-      { t: 'The glowing box shows where the next machine must start. Put the foot of your next ramp, or your crane, inside it.', ghost: 'point' },
+  platform: { name: 'Platforms and the next rope', icon: '🟩', note: '', mach: null,
+    cards: [{ t: 'When a load reaches the top of one machine, it rests on a platform.', ghost: 'point' },
+      { t: 'Whatever the load is resting on, the next rope picks it up from there. Put the foot of your next ramp, or your crane, on the platform beside it.', ghost: 'point' },
       { t: 'You\'ll use this in the rescue to build a route up the crater.', ghost: 'point' }] }
 });
 const LS_SCENES = ['pulley', 'winch', 'ramp', 'build', 'wedge', 'screw'];
@@ -421,8 +421,8 @@ function lsTwoZones(t) {
 function lsTwoDrop(t, x, y) {
   if (!LS.two || LS.two[t] || lsTwoRunning()) return;
   if (t === 'ramp' && !lsTwoLeg1()) { toast('Build leg 1 first: the crane lifts the crate, and Move across sets it on the shelf.'); return; }
-  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = t === 'crane' ? 'Put the crane in the glowing box, over the crate.' : 'Put the foot of the ramp in the glowing box, on the shelf.'; toast(LS.flashMsg); return; }
-  LS.flash = 0; LS.two[t] = true; if (t === 'crane') lsRope('c', 'ch'); toast(`✓ ${t === 'ramp' ? 'Ramp' : 'Crane gantry'} in the box!`, 'ok'); lsTwoCheck(); lsRender();
+  if (!lsInZones(t, x, y)) { LS.flash = performance.now(); LS.flashPiece = t; LS.flashMsg = t === 'crane' ? 'Put the crane on the glowing spot, over the crate.' : 'Put the foot of the ramp on the glowing spot, on the shelf beside the crate.'; toast(LS.flashMsg); return; }
+  LS.flash = 0; LS.two[t] = true; if (t === 'crane') lsRope('c', 'ch'); toast(`✓ ${t === 'ramp' ? 'Ramp' : 'Crane gantry'} in place!`, 'ok'); lsTwoCheck(); lsRender();
 }
 const lsTwoPairs = () => LS.two ? [LS.two.crane ? ['c', 'ch'] : null, LS.two.ramp ? ['g', 'rt'] : null].filter(Boolean) : [];
 function lsTwoEnds() { const g = lsTwoGeo(), E = { c: g.cHook }; if (LS.two && LS.two.crane) E.ch = g.craneHook; if (lsTwoLeg1()) E.g = g.gHook; if (LS.two && LS.two.ramp) E.rt = g.rampTop; return E; }
@@ -440,9 +440,9 @@ function lsTwoPlan() {
   if (P.lift < g.h1 - 1e-9) { P.fail = 'low'; P.landY = 0; P.x1 = g.sx - g.sw * g.K / 2 - 34; P.msg = `The crate was carried too low (${fmt(P.lift, 1)} m) and bumped into the side of the shelf. Set the lift height to ${fmt(g.h1, 1)} m, the height of the shelf.`; return P; }
   if (P.lift > g.h1 + 1e-9) { P.fail = 'high'; P.msg = `The crate was carried too high (${fmt(P.lift, 1)} m) and dropped onto the shelf. Set the lift height to ${fmt(g.h1, 1)} m, the height of the shelf.`; return P; }
   P.stage = 1;
-  if (!T.ramp) { P.fail = 'noramp'; P.msg = 'Leg 1 worked, but there is no ramp for leg 2. Drag a ramp onto the shelf, so it starts in the glowing box.'; return P; }
+  if (!T.ramp) { P.fail = 'noramp'; P.msg = 'Leg 1 worked, but there is no ramp for leg 2. Drag a ramp onto the shelf, beside the crate, on the glowing spot.'; return P; }
   if (!lsJoined('g', 'rt')) { P.fail = 'norope2'; P.msg = 'Leg 1 worked, but the crate on the shelf isn\'t roped to the ramp. Drag a rope from the crate\'s ◉ to the top of the ramp.'; return P; }
-  if (!lsTwoGapOk()) { P.fail = 'gap'; P.msg = 'Leg 1 worked, but the ramp starts too far from where the crate was set down, so there is a gap. Move across until the crate lands in the glowing box at the foot of the ramp.'; return P; }
+  if (!lsTwoGapOk()) { P.fail = 'gap'; P.msg = 'Leg 1 worked, but the ramp starts too far from where the crate was set down, so the rope cannot pick it up. Move across until the crate lands on the shelf, on the glowing spot at the foot of the ramp.'; return P; }
   return P;
 }
 function lsTwoRun() {
@@ -463,7 +463,7 @@ function lsTwoState(t) {
   if (u < T.set) { S.phase = 'set'; S.say = P.fail && P.stage === 0 ? 'Set down!' : 'Set down on the shelf'; const k = clamp(u / T.set, 0, 1); if (P.fail && P.stage === 0) S.y = P.lift + (P.landY - P.lift) * k * k; return S; } u -= T.set;
   if (P.fail && P.stage === 0) { S.phase = 'stop'; S.y = P.landY; S.over = true; S.end = u >= T.hold; S.say = 'The run stopped'; return S; }
   S.y = g.h1; S.leg = 2;
-  if (u < T.hand) { S.phase = 'hand'; S.say = 'Handover: leg 2 starts where leg 1 set the crate down'; if (!P.fail) S.x = mix(x1, g.fx, u / T.hand); return S; } u -= T.hand;
+  if (u < T.hand) { S.phase = 'hand'; S.say = 'The next rope picks the crate up where leg 1 set it down'; if (!P.fail) S.x = mix(x1, g.fx, u / T.hand); return S; } u -= T.hand;
   if (P.fail) { S.phase = 'stop'; S.over = true; S.end = u >= T.hold; S.say = 'The run stopped'; return S; }
   S.x = g.fx; S.e1 = true;
   if (u < T.ramp) { const k = sstep(clamp(u / T.ramp, 0, 1)); S.phase = 'ramp'; S.say = 'Leg 2: the ramp takes the crate up'; S.e2 = true; S.E = P.E2; S.x = g.fx + g.run * K * k; S.y = g.h1 + g.rise * k; S.ang = Math.asin(g.rise / g.L); return S; } u -= T.ramp;
@@ -485,11 +485,11 @@ function lsTwoStatus() {
   const T = LS.two || {}, R = LS.run;
   if (R && R.done) return R.ok ? 'The crate is on the platform! Both legs worked.' : R.msg;
   if (R) return lsTwoState(lsTwoTime()).say + '.';
-  if (!T.crane) return 'Leg 1: drag the 🏗️ crane gantry into the glowing box over the crate.';
+  if (!T.crane) return 'Leg 1: drag the 🏗️ crane gantry onto the glowing spot over the crate.';
   if (!lsJoined('c', 'ch')) return 'Rope the crate to the crane: drag from its ◉ to the crane\'s ◉ hook.';
   if (!lsTwoLiftOk()) return `Set the lift height to ${fmt(lsTwoGeo().h1, 1)} m, the height of the shelf.`;
   if (!lsTwoOnShelf()) return 'Use Move across in the panel until the glow sits on the shelf.';
-  if (!T.ramp) return 'Leg 2: the crate on the shelf is where leg 1 ends. Drag the 📐 ramp into the glowing box beside it.';
+  if (!T.ramp) return 'Leg 2: the crate rests on the shelf, so the next rope picks it up from there. Drag the 📐 ramp onto the glowing spot beside it.';
   if (!lsJoined('g', 'rt')) return 'Rope the crate on the shelf to the top of the ramp: drag from one ◉ to the other.';
   return 'Both legs are built. Press ▶ Run both legs! and watch the crate go all the way up.';
 }

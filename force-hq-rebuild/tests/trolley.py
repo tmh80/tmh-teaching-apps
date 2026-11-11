@@ -39,7 +39,7 @@ with sync_playwright() as p:
     chk('trolley: rise over 8 m and across over 8 m are faults', 'rise' in r and 'across' in r, r)
     # the next machine starts from the set-down spot
     r = ev("const g=rig([[{id:'c',type:'crane',x:14,rise:2,across:3},4,[7,4]],[{id:'r',type:'ramp',x1:18,y1:2,L:10,rise:3},4,[7]]],BL.concat([{id:'p',type:'platform',size:'L',x:17,h:2}])); const e=gpEvaluate(g); return {legs:e.legs.map(l=>[l.type,l.start,l.end]),stop:e.stop}")
-    chk('the next machine (a ramp) starts from the set-down point, same handover zone', len(r['legs']) == 2 and r['legs'][1][0] == 'ramp' and abs(r['legs'][1][1]['x'] - 18) < 1e-6, r)
+    chk('the next machine (a ramp) starts from the set-down point, same place the next rope picks it up', len(r['legs']) == 2 and r['legs'][1][0] == 'ramp' and abs(r['legs'][1][1]['x'] - 18) < 1e-6, r)
     r = ev(base + "const e=gpEvaluate(g); const q=e.plats[0]; return {ship:q.ship,load:q.load}")
     chk('the Gumdrop set on a platform counts towards what the platform holds', r['ship'] and r['load'] >= 6300, r)
     chk('no page errors', not errs, errs)

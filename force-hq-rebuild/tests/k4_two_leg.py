@@ -48,7 +48,7 @@ with sync_playwright() as p:
     dk('across+'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); dk('across+'); pg.wait_for_timeout(300)
     chk('task b ticks: lift 1.5 m, 3 m across on the shelf', tasks()[:3] == [True, True, False] and ev("lsTwoLeg1()") is True, tasks())
     chk('the ramp tile throbs', throb() == ['ramp'], throb())
-    tray_drop('ramp', zc('ramp')); chk('the ramp goes in the glowing box', ev("!!LS.two.ramp") is True); chk('task c not ticked until it is roped', tasks()[2] is False)
+    tray_drop('ramp', zc('ramp')); chk('the ramp goes on the glowing spot beside the crate', ev("!!LS.two.ramp") is True); chk('task c not ticked until it is roped', tasks()[2] is False)
     chk('after the ramp, the rope button throbs', throb() == ['two:rope'], throb()); dk('two:rope'); pg.wait_for_timeout(300); chk('task c ticks: ramp roped to the crate', tasks()[:3] == [True] * 3, tasks())
     chk('the Run button is the next throb', 'two:run' in throb(), throb())
     chk('the step does not complete before a run', tasks()[3] is False and ev("stepDone(CH.id, GI)") is False and ev("dbGet('k4run', false)") is False)
@@ -86,7 +86,7 @@ with sync_playwright() as p:
     dk('lift:2'); dk('two:run'); at(30); pg.wait_for_timeout(300); m = ev("LS.run.msg"); chk('wrong lift height: too high drops onto the shelf', 'too high' in m and 'dropped' in m, m)
     dk('lift:1.5'); dk('two:run'); at(30); pg.wait_for_timeout(300); m = ev("LS.run.msg"); chk('a leg 1 that works but has no ramp says so', ev("LS.run.ok") is False and 'no ramp' in m, m)
     tray_drop('ramp', zc('ramp')); dk('two:run'); at(30); pg.wait_for_timeout(300); m = ev("LS.run.msg"); chk('a ramp that is not roped says so', "isn't roped to the ramp" in m and ev("LS.run.ok") is False, m)
-    dk('two:rope'); ev("LS.across = 2.0; lsRender()"); dk('two:run'); at(30); pg.wait_for_timeout(300); m = ev("LS.run.msg"); chk('a gap between the set-down and the ramp says so', 'gap' in m and ev("LS.run.ok") is False, m)
+    dk('two:rope'); ev("LS.across = 2.0; lsRender()"); dk('two:run'); at(30); pg.wait_for_timeout(300); m = ev("LS.run.msg"); chk('a gap between the set-down and the ramp says so', 'too far from where the crate was set down' in m and ev("LS.run.ok") is False, m)
     chk('after all the failed runs the step is still not complete', ev("[dbGet('k4run', false), stepDone(CH.id, GI)]") == [False, False])
     ev("LS.across = 3; lsRender()"); dk('two:run'); at(30); pg.wait_for_timeout(300); chk('fixed and run again: it works', ev("[LS.run.ok, dbGet('k4run', false)]") == [True, True])
     # run with nothing built
