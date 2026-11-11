@@ -244,7 +244,7 @@ function glDrawWorld(c, o) {
   glDrawGround(c, g, o.ghost);
   const plats = ev ? ev.plats : [], P0 = glPlatforms(rig, g), byId = {}; rig.parts.forEach(p => byId[p.id] = p);
   plats.forEach(pl => { const bad = o.badPlat && pl.id === o.badPlat; glDrawPlatform(c, pl, pl.over || bad); if (bad) lblAdd(GL_PLATMSG, glSX((pl.x0 + pl.x1) / 2), glSY(pl.top) - 22, { col: '#fff', bg: '#c0392b', prio: 0, nofade: true }); });
-  if (o.flashPlat) { const fp = glPlatforms({ parts: [Object.assign({ id: '_f' }, o.flashPlat)] }, g)[0]; glDrawPlatform(c, fp, true); lblAdd(GL_PLATMSG, glSX((fp.x0 + fp.x1) / 2), glSY(fp.top) - 22, { col: '#fff', bg: '#c0392b', prio: 0, nofade: true }); }
+  const fp = o.flashPlat && glPlatforms({ parts: [Object.assign({ id: '_f' }, o.flashPlat, { type: 'platform' })] }, g)[0]; if (fp) { glDrawPlatform(c, fp, true); lblAdd(GL_PLATMSG, glSX((fp.x0 + fp.x1) / 2), glSY(fp.top) - 22, { col: '#fff', bg: '#c0392b', prio: 0, nofade: true }); }
   const ms = {}; rig.parts.filter(p => GL_LIFT[p.type]).forEach(p => { ms[p.id] = glMachine(p, g, P0); });
   rig.parts.filter(p => p.type === 'dyn' && !(run.blown && run.blown.has(p.id))).forEach(p => glDrawDyn(c, p, o.ghost || g, !run.on));
   const faulty = id => { const m = ms[id]; if (!m) return false; const leg = ev && ev.legs.find(l => l.id === id); return (leg ? leg.faults.length : m.faults.length) > 0; };

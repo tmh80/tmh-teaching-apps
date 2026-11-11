@@ -149,7 +149,8 @@ function glLoop() {
   cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
     if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH), keep = [], now = performance.now();
       Object.keys(GLB.fall || {}).forEach(id => { const f = GLB.fall[id], p = glPart(id), k = (now - f.t0) / f.dur; if (!p || k >= 1) { delete GLB.fall[id]; return; } keep.push([p, p.y]); p.y = f.y0 + (keep[keep.length - 1][1] - f.y0) * k * k; });   // gravity: slow, then faster
-      try { glDrawWorld(c, glFrameOpts()); } finally { keep.forEach(([p, y]) => { p.y = y; }); } }
+      try { glDrawWorld(c, glFrameOpts()); } catch (e) { if (!GLB.drawErr) { GLB.drawErr = 1; try { console.warn('Board drawing problem:', e); } catch (_) {} } }   /* one bad frame must never freeze the board */
+      finally { keep.forEach(([p, y]) => { p.y = y; }); } }
     GLB.raf = requestAnimationFrame(step); }; step();
 }
 const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - r.left) * GLV.LW / r.width, sy = (e.clientY - r.top) * GLV.LH / r.height; return { sx, sy, x: glWX(sx), y: glWY(sy) }; };
@@ -202,7 +203,7 @@ function glBindBoard() {
     else if (p.type === 'ramp') { p.x1 = clamp(glSnap(d.orig.x1 + dx), 0.5, GL.W - 2); p.y1 = +glFloorAt(p.x1, g, pl).toFixed(2); }
     else if (glIsAddon(p)) { p.x = clamp(glSnap(d.orig.x + dx, 0.25), 0, GL.W); p.y = clamp(glSnap(d.orig.y + (P.y - d.P0.y), 0.25), -1, 28); }
     else { p.x = clamp(glSnap(d.orig.x + dx), 0.5, GL.W - 0.5); if (p.type === 'lever' || p.type === 'jack') glBoulderSnap(p); }
-    if (p.type === 'platform') { d.bad = glPlatBlocked(p); if (d.bad) d.badC = { size: p.size, x: p.x, h: p.h }; }
+    if (p.type === 'platform') { d.bad = glPlatBlocked(p); if (d.bad) d.badC = { type: 'platform', size: p.size, x: p.x, h: p.h }; }
     if (glIsAddon(p) && glIsPost(p.id)) { const fy = glFloorAt(p.x, g, pl); p.y = +(fy + (p.type === 'winch' ? 0.75 : 0.8)).toFixed(2); }   // a winch post stays on the ground or a platform as it moves
     /* add-ons ride along with their machine */
     if (d.chain.length) { const nx = p.type === 'ramp' ? p.x1 - d.orig.x1 : (p.x - d.orig.x), ny = p.type === 'ramp' ? p.y1 - d.orig.y1 : 0; d.chain.forEach(([i, x0, y0]) => { const q = glPart(i); if (q) { q.x = x0 + nx; q.y = y0 + ny; } }); }
