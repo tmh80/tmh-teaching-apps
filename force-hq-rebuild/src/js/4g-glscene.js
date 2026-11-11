@@ -174,7 +174,7 @@ function glDrawRoutes(c, ev) {
     c.save(); c.lineWidth = Math.max(3, 0.3 * u); c.lineCap = 'round'; c.lineJoin = 'round';
     runs.forEach(r => { c.strokeStyle = GL_ROUTE[r.k] || '#fff'; c.setLineDash(r.k === 'fall' ? [4, 4] : []); c.beginPath(); r.pts.forEach(([x, y], i) => i ? c.lineTo(glSX(x), glSY(y) - 3) : c.moveTo(glSX(x), glSY(y) - 3)); c.stroke(); });
     c.restore(); const e = l.path[l.path.length - 1]; c.fillStyle = '#fffaf2'; c.strokeStyle = GLC.ink; c.lineWidth = 2; c.beginPath(); c.arc(glSX(e.x), glSY(e.y) - 3, 4.5, 0, 7); c.fill(); c.stroke();
-    lblAdd(`Leg ${l.i + 1} ends`, glSX(e.x), glSY(e.y) + 16, { size: 10, col: GLC.ink, bg: '#c9ffdc', prio: 6 }); });
+  });
   const st = ev.stop; if (st && st.why === 'wall' && st.wall) { const X = glSX(st.wall.x), Y1 = glSY(st.wall.y), Y0 = glSY(st.wall.y - 1.6);
     c.save(); c.strokeStyle = '#ff5d5d'; c.lineWidth = Math.max(5, 0.45 * u); c.lineCap = 'round'; c.beginPath(); c.moveTo(X, Y0); c.lineTo(X, Y1 - 4); c.stroke(); c.restore();
     lblAdd('A wall: too tall to drag over', X, Y1 - 22, { size: 11, col: '#fff', bg: '#c0392b', prio: 1 }); }

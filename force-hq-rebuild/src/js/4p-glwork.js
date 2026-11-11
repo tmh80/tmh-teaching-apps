@@ -63,7 +63,7 @@ function glwRows() {
     const mWk = l.type === 'ramp' ? `${f1(p.L)} ÷ ${f1(p.rise)} = ${fmt(l.mma, 2)}` : l.type === 'lever' ? `${f1(GL.beam - p.arm)} ÷ ${f1(p.arm)} = ${fmt(l.mma, 2)}` : l.type === 'crane' ? 'a crane gantry has MA 1' : 'a screw jack has MA 120';
     const mT2 = l.type === 'ramp' ? `Ramp MA = length ÷ rise = ${f1(p.L)} ÷ ${f1(p.rise)} = ${B}` : l.type === 'lever' ? `Lever MA = effort arm ÷ load arm = ${f1(GL.beam - p.arm)} ÷ ${f1(p.arm)} = ${B}` : l.type === 'crane' ? 'Crane gantry MA = 1' : 'Screw jack MA = 120';
     const desc = `${l.type === 'ramp' ? f1(p.L) + ' m ramp' : GLW_NAME[l.type]}${l.type === 'lever' ? `, load arm ${f1(p.arm)} m` : ''}, up ${f1(l.rise)} m${ropeTxt}${land}`, load = l.given && lift ? l.force : l.load;
-    rows.push(glwMake({ kind: 'leg', key: 'L:' + l.id, sig: JSON.stringify([l.type, l.mma, ropes, wins, load, l.rise]), name: `Leg ${i + 1}`, desc, load, mach: l.type, mMA: l.mma, mWk, mT2, ropes, wins, tot: l.ma, pull: l.pull, hand: l.hand, work: l.work, rise: l.rise, roped: l.roped }));
+    rows.push(glwMake({ kind: 'leg', key: 'L:' + l.id, sig: JSON.stringify([l.type, l.mma, ropes, wins, load, l.rise]), name: `Leg ${i + 1}`, desc, load, mach: l.type, mMA: l.mma, mWk, mT2, ropes, wins, tot: l.ma, pull: l.simple && l.ma > 0 ? load / l.ma : l.pull, hand: l.hand, work: l.work, rise: l.rise, roped: l.roped }));   // a textbook leg: the pull is exactly load ÷ MA, as students work it
   });
   return rows;
 }

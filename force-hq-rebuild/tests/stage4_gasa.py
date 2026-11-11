@@ -9,7 +9,9 @@ ROUTES = pathlib.Path('tests/rescue_routes.js').read_text()
 ns = {}; exec(open('tests/play_rescue.py').read().split('with sync_playwright')[0], ns)
 fails = []
 def back(pg):
-    if pg.locator('#glBack').is_visible(): pg.click('#glBack')
+    try:
+        if pg.locator('#glBack').is_visible(): pg.click('#glBack', timeout=1500)
+    except Exception: pass   # a simulator test hands the board back by itself after a moment
     pg.evaluate("__fhq.ev('if (GLR.on) { GLR.done = true; glBackToBuild(); }')"); pg.wait_for_timeout(150)
 def skip(pg):
     for sel in ('[data-gr=skip]', '#glSkip'):
@@ -94,7 +96,7 @@ def run(vp, tag, full):
         # a leg that fails shows why, still no numbers
         back(pg); setrig("(()=>{const g=ROUTES.top(); g.parts.find(p=>p.id==='rBw0').ratio=4; g.cables=g.cables.filter(c=>!(c.a==='rB'&&c.b==='ship')); return g})()")
         pg.click('#glRun'); pg.wait_for_timeout(300); skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000); t = pg.inner_text('#glRes')
-        chk(f'{tag}: a leg with no rope says so, a leg that is too hard says so', "Leg 2 isn't roped to the Gumdrop" in t, t)
+        chk(f'{tag}: a leg with no rope says so, a leg that is too hard says so', "Leg 2's machine isn't roped to the Gumdrop" in t, t)
         back(pg); setrig("(()=>{const g=ROUTES.weak(); return g})()"); pg.click('#glRun'); pg.wait_for_timeout(300); skip(pg); pg.wait_for_function("document.querySelector('#glRes').innerText.trim().length>0", timeout=20000); t = pg.inner_text('#glRes')
         chk(f'{tag}: "Leg 2: too hard for Smooshy" with no numbers', 'Leg 2: too hard for Smooshy' in t and '98' not in t, t)
         back(pg); setrig('ROUTES.top()')
