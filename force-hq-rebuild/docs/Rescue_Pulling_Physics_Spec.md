@@ -11,8 +11,8 @@ Replaces section 15 of `Workshop_Lesson_Mode_Spec.md`. Written 11 Nov 2026 on br
 | 1 | This spec | Fable | Done |
 | 2 | The model on its own, with number tests and no visuals | Fable | Done: `src/js/4q-pull.js`, `tests/pull_model.js` (79 checks) |
 | 3 | Grey-box: bare crater, the real model, no story or scoring screens. **Tom plays it and tries to break it** | Fable builds, Tom plays | Built: `proto/Rescue-Physics-Greybox.html`. Waiting for Tom |
-| 4 | Wire the model into the real rescue (section 6) | Sonnet, medium effort | Not started. Do not start until Tom has signed off step 3 |
-| 5 | Worksheets, keys, marking text, docs | Sonnet low effort or Haiku | Not started |
+| 4 | Wire the model into the real rescue (section 6) | Sonnet | Built on branch `rescue-wiring` (jobs 1 to 11, including the tipping rule). `WORKSHOP_OPEN` stays false until Tom plays it |
+| 5 | Worksheets, keys, marking text, docs | Sonnet | Done on `rescue-wiring`: My Rescue hull line, answer key, marking scheme, AI text, worksheets rebuilt, docs |
 | 6 | Tom plays Part 5; then `WORKSHOP_OPEN = true` | Tom | |
 
 ## 1. The rules

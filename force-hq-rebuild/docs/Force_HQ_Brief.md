@@ -43,7 +43,7 @@
   - `4c-ch6.js`: Chapter 6 content (`CHDATA.c6`): glossary `TERMS`, `FORMULAS`, loads `WL`, Part 1 (levers) steps lv1–lv5 and Check c6r1–c6r5, Part 2 (pulleys, wheels and ramps) steps pl1–pl4 and Check c6r7–c6r11, Part 3 (mechanical advantage and work) steps u1–u3, the Launch-day loading challenge `CHDATA.c6.challenge` (y1–y3) and Check c6r12–c6r17. Loads `crate30`, `tank`, `barrel`, `engine` are in `WL`; `UNITS_W` (N, J, m, kg) is the unit picker for work questions.
   - `4d-rescue.js`: the story: the black box crash transmission (`openTransmission`, `txCrash`), the five-slot Rescue board (`renderRescue`, shown above every Chapter 6 page) and `drawGumdropInside` (Smooshy trapped in the ship's window).
   - `4f-gummylift.js`: the Operation Gummy Lift model (Part 5): pure maths with no drawing. `glEvaluate(rig, {hints})` returns legs, hardest pull, hand travel, work, damage, cost, crest height, platform loads, boulder, stop reason, arrival and score. The ground is `GL_PROFILE` (one height per metre). Tested by `tests/rescue_numbers.py`.
-  - `4g-glscene.js`: draws the crater, the Big Jelly, the Gumdrop, boulder, machines, platforms, cables, dynamite, the handover box and the ruler (`glDrawWorld`).
+  - `4g-glscene.js`: draws the crater, the Big Jelly, the Gumdrop, boulder, machines, platforms, cables, dynamite, the winch posts, each leg's route and the ruler (`glDrawWorld`).
   - `4h-glbuild.js`: the rescue builder (tray, drag handles, cables, snapping, ruler, zoom and pan, undo, crystal counter, receipt); `renderGummyLift` is called by `renderRescueCourse`.
   - `4i-glrun.js`: Run Rescue (prediction and working boxes, the beat-by-beat animation, result card, best run, `glSummary`, `rigSnapshot` and `GL_END`).
   - `4j-glstory.js`: the lever warm-up (`glMountWarm`), the three ending cards (`glShowEnding`) and the stopping-point pop-up.
@@ -201,3 +201,12 @@ Tom playtested Parts 4 and 5 on 3 Nov and asked for a free-form, creative rescue
 - **Tests.** `tests/rescue_numbers.py` (the brief's section 9 routes), `play_rescue.py` (builds the top route with real mouse and touch moves), `play_story.py`, `play_hints.py`, `play_myrescue.py`, plus the Part 5 rewrites in `play_c6.py` and `play_bt.py`. `tests/workshop_closed.py` was retired. All are in `tests/run_all.sh`.
 - **Workshop switch.** `WORKSHOP_OPEN` in `src/js/20-shell.js` is `true`, so Tom's Toddle file opens the Workshop.
 - **Optional, not built.** Three preset crater variants (swap `GL_PROFILE`, re-run `tests/rescue_routes.js` against each) and a faint 1 m grid when the ruler is on.
+
+## Part 5 rescue on pulling physics (branch `rescue-wiring`, Nov 2026)
+The rescue now runs on `gpEvaluate` (`src/js/4q-pull.js`), the model in `docs/Rescue_Pulling_Physics_Spec.md`. There is no handover box: whatever the Gumdrop rests on, the next rope picks it up from there. Dragging is allowed and costs hull damage.
+- **Builder.** Platforms may go over levers. A pulley block or winch roped to the Gumdrop and dropped on open ground is a winch post (placeable, movable with the dock buttons, with its rope count, winches and MA shown). Each leg's route is drawn from `leg.path`, coloured by what the Gumdrop is doing, and a wall is marked where it stops.
+- **Run.** The Gumdrop follows `leg.path`, with plain-sentence narration. A Hull meter shows damage from thrusters, rock, a torn landing leg, blasts, scraping, bumps, falls and tipping over. The Gumdrop lies on its side at each tip and stands up when a crane lifts it.
+- **Boulder.** It rides on the ship. A leg holds 500 N; if the boulder is left on and the strain is too high the leg is torn off (ending 'torn', 2 points at most). Hull damage of 60% or more is 'wrecked' (3 points at most). Smooshy is always safe and the Check is never blocked.
+- **Route strip and hints.** Given legs (a drag with a force and distance) show a given-force row; the hint tree has three tiers for them.
+- **Outputs.** My Rescue shows a hull damage line with its sources and the ending. The answer key, marking scheme and AI text mention hull damage, dragging, the pulled-apart rule, the caps and falling over. The c6r32 model answer compares lifting with dragging.
+- **Tests.** `tests/play_drag.py` is new; `rescue_numbers.py`, `stage2_ropes.py`, `stage4_gasa.py`, `play_hints.py`, `k4_two_leg.py` and others were updated.
