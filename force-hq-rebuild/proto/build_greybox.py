@@ -7,3 +7,7 @@ rd = lambda p: open(os.path.join(R, p), encoding='utf-8').read()
 out = rd('proto/greybox.src.html').replace('/*__MODEL__*/', rd('src/js/4f-gummylift.js') + '\n' + rd('src/js/4q-pull.js'))
 open(os.path.join(R, 'proto', 'Rescue-Physics-Greybox.html'), 'w', encoding='utf-8').write(out)
 print('built', len(out) // 1024, 'KB')
+# the art sample: the same page with proto/art.js drawing the board
+art = out.replace('<title>Rescue Physics Grey-box</title>', '<title>Rescue Art Sample</title>') + '\n<script>\n' + rd('proto/art.js') + '\n</script>\n'
+open(os.path.join(R, 'proto', 'Rescue-Art-Sample.html'), 'w', encoding='utf-8').write(art)
+print('built art sample', len(art) // 1024, 'KB')
