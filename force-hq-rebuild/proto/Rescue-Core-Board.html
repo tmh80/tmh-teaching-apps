@@ -1,0 +1,314 @@
+<title>Rescue Core Board</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{--bg:#f4f1fb;--panel:#ffffff;--ink:#1f1d2b;--muted:#5d5a72;--line:#d9d3ea;--accent:#6b3fd4;--good:#17794a;--bad:#b3261e;--chip:#ece6fb;--warn:#8a5a00}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#15121f;--panel:#211c30;--ink:#f1eefb;--muted:#b3adc9;--line:#3a3350;--accent:#b79bff;--good:#6fdc9f;--bad:#ff8a80;--chip:#2c2540;--warn:#ffd27a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15121f;--panel:#211c30;--ink:#f1eefb;--muted:#b3adc9;--line:#3a3350;--accent:#b79bff;--good:#6fdc9f;--bad:#ff8a80;--chip:#2c2540;--warn:#ffd27a;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding-block:14px 30px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:10px}
+h1{font-size:20px;margin:0}.sub{margin:0;color:var(--muted)}
+.board{position:relative;border-radius:14px;overflow:hidden;border:2px solid var(--line);background:#120c2e}
+canvas{display:block;width:100%;height:auto;touch-action:none;cursor:default}
+.zoom{position:absolute;left:8px;top:8px;display:flex;gap:6px}
+button{font:inherit;color:var(--ink);background:var(--panel);border:1.5px solid var(--line);border-radius:9px;padding:6px 11px;cursor:pointer;font-weight:650}
+button:hover{border-color:var(--accent)}button.on{background:var(--accent);color:var(--panel);border-color:var(--accent)}
+button.go{background:var(--accent);color:var(--panel);border-color:var(--accent);font-size:16px;padding:9px 18px}
+button:disabled{opacity:.5;cursor:default}
+.card{position:absolute;right:8px;top:8px;width:min(46%,330px);background:var(--panel);border:2px solid var(--accent);border-radius:12px;padding:8px 10px;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.card h2{font-size:15px;margin:0 0 4px}.card p{margin:4px 0;color:var(--muted);font-size:13px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.row.sp{justify-content:space-between}
+.ctl{display:flex;align-items:center;gap:6px;margin:5px 0}.ctl b{min-width:64px;text-align:center}.ctl span{min-width:92px;color:var(--muted)}
+.tray{display:flex;flex-wrap:wrap;gap:8px}.tile{display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:118px;text-align:left}
+.tile small{font-weight:500;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;align-items:center}.chips .lab{color:var(--muted);font-size:13px}
+.chip{border-radius:999px;padding:3px 11px;background:var(--chip);font-weight:600;font-size:13px}
+.panel{background:var(--panel);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:650;font-size:12.5px}
+.ok{color:var(--good);font-weight:700}.no{color:var(--bad);font-weight:700}.mut{color:var(--muted)}
+.meters{display:flex;flex-wrap:wrap;gap:8px 18px;font-weight:650}.meters span b{font-variant-numeric:tabular-nums}
+.banner{font-size:16px;font-weight:750;margin:0}
+details summary{cursor:pointer;font-weight:700}
+</style>
+<div class="wrap">
+  <h1>Rescue core board</h1>
+  <p class="sub">A bare test of the new rules. Get the Gumdrop from the crater floor up to the dotted line. The Gumdrop weighs 6,300 N and Smooshy can pull 60 N.</p>
+  <div class="board"><canvas id="cv" width="2000" height="840" aria-label="The crater"></canvas>
+    <div class="zoom"><button id="zi" aria-label="Zoom in">+</button><button id="zo" aria-label="Zoom out">−</button><button id="zf" aria-label="Show the whole map">⤢</button></div>
+    <div class="card" id="card" hidden></div></div>
+  <div class="chips" id="chips"></div>
+  <div class="tray" id="tray"></div>
+  <div class="row sp"><div class="meters" id="meters"></div><div class="row"><button id="undo">↶ Undo</button><button id="clear">Clear all</button><button class="go" id="run">▶ Run it</button></div></div>
+  <div class="panel"><p class="banner" id="banner"></p><div class="tw"><table id="legs"></table></div></div>
+  <details class="panel"><summary>How this board works</summary>
+    <p><b>One rule.</b> The Gumdrop moves when the pull from Smooshy's machines is at least the force the move needs. Each leg shows both numbers.</p>
+    <p><b>Hooks.</b> A machine's rope must be hooked to the Gumdrop. A slack, pulsing rope is not hooked. Drag the hook onto the Gumdrop, or use the button on the machine's card. Pulley blocks and winches clip onto a machine's pull hook, or onto each other, in any order.</p>
+    <p><b>Legs.</b> One pull from start to stop is a leg. A ghost Gumdrop shows where each leg ends. The next machine picks it up from there.</p>
+    <p><b>Picking pieces.</b> Tap a piece on the board, or tap its name in the row under the board.</p>
+    <p><b>Simplified for this test:</b> the cart fits under the Gumdrop by itself and stays with it. Platforms, the lever, dynamite and the training rock are not on this board yet.</p></details>
+</div>
+<script>
+'use strict';
+const W = 6300, PULL = 60, BUDGET = 475, OXY = 2500, START = { x: 12, y: 0 }, GOAL = 15;
+const PTS = [[0, 8], [6, 0], [22, 0], [46, 4], [46, 10], [52, 10], [82, 15], [100, 15]];
+function ground(x) { x = Math.max(0, Math.min(100, x)); for (let i = PTS.length - 2; i >= 0; i--) { const a = PTS[i], b = PTS[i + 1]; if (b[0] === a[0]) continue; if (x >= a[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); } return PTS[0][1]; }
+const NAMES = { ramp: 'Ramp', cart: 'Cart', post: 'Pull post', crane: 'Crane', jack: 'Screw jack lift', pulley: 'Pulley block', winch: 'Winch' };
+const ICON = { ramp: '📐', cart: '🛒', post: '📍', crane: '🏗️', jack: '🔩', pulley: '⚙️', winch: '🎡' };
+const TRAY = [['ramp', '3 per metre', 'A slope to pull up'], ['cart', '30', 'Rolls over the ground'], ['post', '10', 'Pulls the Gumdrop towards it'], ['crane', '40', 'Lifts, carries across, lowers'], ['jack', '60', 'Raises its platform. MA 120'], ['pulley', '5 per rope', '2 to 8 ropes'], ['winch', '15 and up', 'Handle ×4 to ×20']];
+const MAIN = { ramp: 1, post: 1, crane: 1, jack: 1 }, HELP = { pulley: 1, winch: 1 };
+let parts = [], sel = null, hist = [], nid = 1, EV = null, run = null, drag = null;
+const V = { z: 1, cx: 50, cy: 14, K: 10, LW: 1000, LH: 420 };
+const cv = document.getElementById('cv'), c = cv.getContext('2d');
+const sx = x => V.LW / 2 + (x - V.cx) * V.K * V.z, sy = y => V.LH / 2 - (y - V.cy) * V.K * V.z, U = () => V.K * V.z;
+const wx = px => V.cx + (px - V.LW / 2) / U(), wy = py => V.cy - (py - V.LH / 2) / U();
+function clampView() { const hw = V.LW / 2 / U(), hh = V.LH / 2 / U(); V.cx = Math.max(Math.min(hw, 50), Math.min(Math.max(100 - hw, 50), V.cx)); V.cy = Math.max(Math.min(-4 + hh, 17), Math.min(Math.max(38 - hh, 17), V.cy)); }
+const f0 = v => Math.round(v).toLocaleString('en-US'), f1 = v => (Math.round(v * 10) / 10).toLocaleString('en-US');
+const part = id => parts.find(p => p.id === id);
+function push() { hist.push(JSON.stringify(parts)); if (hist.length > 60) hist.shift(); }
+
+/* ---------- the rules ---------- */
+function chain(m) { const out = []; let cur = m.id; for (let i = 0; i < 12; i++) { const n = parts.find(p => HELP[p.type] && p.to === cur); if (!n) break; out.push(n); cur = n.id; } return out; }
+function helperMA(m) { return chain(m).reduce((a, h) => a * (h.type === 'pulley' ? h.ropes : h.ratio), 1); }
+function maText(m) { const ch = chain(m), bits = (m.type === 'jack' ? ['120'] : []).concat(ch.map(h => String(h.type === 'pulley' ? h.ropes : h.ratio))); return bits.length ? bits.join(' × ') : '1'; }
+function totalMA(m) { return (m.type === 'jack' ? 120 : 1) * helperMA(m); }
+function cost(p) { return p.type === 'ramp' ? Math.round(3 * Math.hypot(p.bx - p.ax, p.by - p.ay)) : p.type === 'cart' ? 30 : p.type === 'post' ? 10 : p.type === 'crane' ? 40 : p.type === 'jack' ? 60 : p.type === 'pulley' ? 5 * p.ropes : 15 + (p.ratio - 4) / 4 * 5; }
+function surf(x, raised) { let y = ground(x); parts.forEach(j => { if (j.type === 'jack' && raised[j.id] && Math.abs(x - j.x) <= 2.5) y = Math.max(y, ground(j.x) + j.h); }); return y; }
+function hookPos(p) {   // { load, pull }
+  if (p.type === 'ramp') { const hi = p.by >= p.ay; return { load: hi ? { x: p.ax, y: p.ay + 0.9 } : { x: p.bx, y: p.by + 0.9 }, pull: hi ? { x: p.bx, y: p.by + 0.9 } : { x: p.ax, y: p.ay + 0.9 } }; }
+  if (p.type === 'post') { const y = ground(p.x); return { load: { x: p.x - 0.5, y: y + 2 }, pull: { x: p.x + 0.9, y: y + 1 } }; }
+  if (p.type === 'crane') { const y = ground(p.x); return { load: { x: p.x, y: y + p.lift + 0.2 }, pull: { x: p.x + 3.4, y: y + 1 } }; }
+  if (p.type === 'jack') { const y = ground(p.x); return { load: null, pull: { x: p.x + 3, y: y + 0.7 } }; }
+  return { load: { x: p.x - 0.8, y: p.y }, pull: { x: p.x + 0.8, y: p.y } };
+}
+/* helpers clipped to a machine park in a tidy row above it, in the order they are clipped */
+function layout() { parts.filter(m => MAIN[m.type]).forEach(m => { const h = hookPos(m).pull, y = m.type === 'ramp' ? Math.max(m.ay, m.by) + 7.2 : ground(m.x) + (m.type === 'crane' ? m.lift + 4.9 : m.type === 'jack' ? m.h + 7.2 : 7.4); chain(m).forEach((q, i) => { q.x = Math.max(2, Math.min(98, h.x + 1.2 + 2.4 * i)); q.y = y; }); }); }
+function freePull(p) { return !parts.some(h => HELP[h.type] && h.to === p.id); }
+function planLeg(m, S) {   // can machine m move the Gumdrop from state S? -> { why } or { path, needs, dist, end, note }
+  if (m.type !== 'jack' && !m.hooked) return { why: 'Its rope is not hooked to the Gumdrop.', idle: 1 };
+  if (m.type === 'ramp') {
+    const aNear = Math.hypot(m.ax - S.x, m.ay - S.y) <= Math.hypot(m.bx - S.x, m.by - S.y), foot = aNear ? { x: m.ax, y: m.ay } : { x: m.bx, y: m.by }, head = aNear ? { x: m.bx, y: m.by } : { x: m.ax, y: m.ay };
+    if (Math.abs(foot.x - S.x) > 3 || Math.abs(foot.y - S.y) > 0.7) return { why: 'The Gumdrop is not at the foot of this ramp (within 3 m and level).', far: 1 };
+    const len = Math.hypot(head.x - foot.x, head.y - foot.y), rise = head.y - foot.y; if (len < 1) return { why: 'The ramp is too short.' };
+    for (let k = 0.1; k < 0.95; k += 0.05) { const x = foot.x + (head.x - foot.x) * k, y = foot.y + (head.y - foot.y) * k; if (ground(x) - y > 1.2) return { why: 'The ramp cuts through the rock. Move one end.' }; }
+    return { path: [{ x: S.x, y: S.y }, foot, head], needs: Math.max(0, W * rise / len), dist: len, end: head, note: `Ramp ${f1(len)} m long, ${f1(rise)} m rise` };
+  }
+  if (m.type === 'post') {
+    const dir = Math.sign(m.x - S.x); if (Math.abs(m.x - S.x) < 1.5) return { why: 'The Gumdrop is already at this post.', far: 1 };
+    const path = [{ x: S.x, y: S.y }], mu = S.cart ? 0.02 : 1 / 3; let x = S.x, y = S.y, needs = 0, dist = 0, wall = false, scrape = 0, fall = 0;
+    while (Math.abs(m.x - x) > 1) { const nx = x + dir * 0.25, ny = surf(nx, S.raised), dy = ny - y; if (dy > 1) { wall = true; break; }
+      const h = Math.hypot(0.25, Math.max(dy, 0)); needs = Math.max(needs, W * Math.max(dy, 0) / h + mu * W * 0.25 / h); if (dy < -0.5) fall += -dy; dist += Math.hypot(0.25, dy > -0.5 ? dy : 0); if (!S.cart) scrape += 0.25; x = nx; y = ny; path.push({ x, y }); }
+    if (dist < 0.5) return { why: 'A cliff is in the way. Something has to lift the Gumdrop up it.', far: 1 };
+    return { path, needs, dist, end: { x, y }, scrape, fall, note: (S.cart ? 'Rolling on the cart' : 'Dragged over the ground') + (wall ? ', as far as the cliff' : '') };
+  }
+  if (m.type === 'crane') {
+    const base = ground(m.x), top = base + m.lift; if (Math.abs(m.x - S.x) > 1.5) return { why: 'The Gumdrop is not under this crane\'s hook (within 1.5 m).', far: 1 };
+    if (S.y > top - 0.3) return { why: 'The hook is not above the Gumdrop.', far: 1 };
+    const tx = Math.max(1, Math.min(99, m.x + m.across)), ty = surf(tx, S.raised); if (Math.abs(m.across) < 1) return { why: 'Move across is 0, so it would set the Gumdrop down where it started.' };
+    if (ty > top + 0.05) return { why: `The ground there is ${f1(ty - base)} m up, higher than this crane lifts (${f1(m.lift)} m). Lift more.` };
+    return { path: [{ x: S.x, y: S.y }, { x: S.x, y: top }, { x: tx, y: top }, { x: tx, y: ty }], needs: W, dist: top - S.y, end: { x: tx, y: ty }, note: `Lifts ${f1(top - S.y)} m, carries ${f1(Math.abs(m.across))} m across, lowers ${f1(top - ty)} m` };
+  }
+  if (m.type === 'jack') {
+    const base = ground(m.x); if (S.raised[m.id]) return { why: 'Already used.', far: 1 };
+    if (Math.abs(m.x - S.x) > 2.5 || Math.abs(base - S.y) > 0.7) return { why: 'The Gumdrop is not on this platform (within 2.5 m and level).', far: 1 };
+    return { path: [{ x: S.x, y: S.y }, { x: m.x, y: base }, { x: m.x, y: base + m.h }], needs: W, dist: m.h, end: { x: m.x, y: base + m.h }, raise: m.id, note: `Raises its platform ${f1(m.h)} m` };
+  }
+}
+function evaluate() {
+  const cart = parts.some(p => p.type === 'cart' && Math.abs(p.x - START.x) <= 3), S = { x: START.x, y: START.y, cart, raised: {} }, legs = [], st = {}, used = new Set(); let scrape = 0, fall = 0, hand = 0, stuck = null;
+  for (let n = 0; n < 10 && !stuck; n++) {
+    const cands = parts.filter(m => MAIN[m.type] && !used.has(m.id)).map(m => ({ m, pl: planLeg(m, S) })).filter(q => q.pl.path);
+    if (!cands.length) break;
+    cands.sort((a, b) => Math.abs((a.m.x != null ? a.m.x : (a.m.ax + a.m.bx) / 2) - S.x) - Math.abs((b.m.x != null ? b.m.x : (b.m.ax + b.m.bx) / 2) - S.x));
+    const { m, pl } = cands[0], ma = totalMA(m), gives = PULL * ma, ok = gives + 1e-6 >= pl.needs;
+    const leg = { n: legs.length + 1, m, pl, ma, gives, ok, pull: pl.needs / ma, from: { x: S.x, y: S.y }, cart: S.cart }; legs.push(leg); used.add(m.id);
+    st[m.id] = { ok, leg: leg.n, text: ok ? `Leg ${leg.n} works` : `Leg ${leg.n}: needs ${f0(pl.needs)} N, you give ${f0(gives)} N` };
+    if (!ok) { stuck = leg; break; }
+    S.x = pl.end.x; S.y = pl.end.y; if (pl.raise) S.raised[pl.raise] = true; scrape += pl.scrape || 0; fall += pl.fall || 0; hand += ma * pl.dist;
+  }
+  parts.filter(m => MAIN[m.type] && !st[m.id]).forEach(m => { const pl = planLeg(m, S); st[m.id] = { ok: false, idle: true, text: pl.why || 'Waiting for the Gumdrop.' }; });
+  const hull = Math.min(100, scrape * 1.2 + fall * 8), total = parts.reduce((a, p) => a + cost(p), 0), won = !stuck && S.y >= GOAL - 0.15;
+  return { legs, st, end: { x: S.x, y: S.y }, cart, raised: S.raised, hull, hand, total, won, stuck, done: legs.filter(l => l.ok).length };
+}
+
+/* ---------- drawing ---------- */
+function rr(x, y, w, h, r) { c.beginPath(); c.roundRect(x, y, w, h, r); }
+function tag(t, x, y, col, bg, size) { c.font = `700 ${size || 12}px system-ui,sans-serif`; const w = c.measureText(t).width + 12, X = Math.max(4, Math.min(V.LW - w - 4, x - w / 2)), Y = Math.max(4, Math.min(V.LH - 22, y - 10)); c.fillStyle = bg || 'rgba(18,12,46,.82)'; rr(X, Y, w, 20, 6); c.fill(); c.fillStyle = col || '#fff'; c.textBaseline = 'middle'; c.textAlign = 'left'; c.fillText(t, X + 6, Y + 10.5); }
+function drawSky(t) {
+  const g = c.createLinearGradient(0, sy(40), 0, sy(2)); g.addColorStop(0, '#120c2e'); g.addColorStop(0.55, '#33246f'); g.addColorStop(1, '#7a4fc0'); c.fillStyle = g; c.fillRect(0, 0, V.LW, V.LH);
+  for (let i = 0; i < 60; i++) { const x = (i * 37.7) % 100, y = 16 + (i * 53.3) % 24; c.globalAlpha = 0.5 + 0.4 * Math.sin(t * 1.2 + i); c.fillStyle = i % 7 ? '#fff' : '#8af3ff'; c.beginPath(); c.arc(sx(x), sy(y), i % 5 ? 1 : 1.7, 0, 7); c.fill(); } c.globalAlpha = 1;
+  c.fillStyle = '#f1e9ff'; c.beginPath(); c.arc(sx(20), sy(31), 2.2 * U(), 0, 7); c.fill();
+  /* the Big Jelly */
+  const u = U() / 10, X = sx(88), Y = sy(24 + Math.sin(t) * 0.15); c.save(); c.translate(X, Y); c.scale(u, u);
+  c.fillStyle = '#c9561a'; rr(-70, -58, 180, 20, 7); c.fill(); c.fillStyle = 'rgba(255,214,140,.7)'; c.beginPath(); c.ellipse(36, -58, 36, 20, 0, Math.PI, 0); c.fill();
+  const hg = c.createLinearGradient(0, -46, 0, 0); hg.addColorStop(0, '#ffc46b'); hg.addColorStop(1, '#c9561a'); c.fillStyle = hg; c.beginPath(); c.moveTo(-220, -30); c.quadraticCurveTo(-150, -3, -92, 0); c.lineTo(110, 0); c.lineTo(120, -44); c.lineTo(-118, -46); c.quadraticCurveTo(-190, -45, -220, -30); c.fill();
+  c.fillStyle = '#fff3c4'; for (let x = -165; x < 100; x += 13) { rr(x, -34, 7, 4.5, 1.5); c.fill(); } c.fillStyle = '#1b1d29'; rr(-22, -8, 44, 9, 3); c.fill(); c.restore();
+  c.setLineDash([6, 6]); c.strokeStyle = 'rgba(160,255,214,.9)'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx(76), sy(GOAL + 5)); c.lineTo(sx(100), sy(GOAL + 5)); c.stroke(); c.setLineDash([]);
+}
+function drawGround() {
+  c.beginPath(); c.moveTo(sx(-5), V.LH + 5); c.lineTo(sx(-5), sy(PTS[0][1])); PTS.forEach(p => c.lineTo(sx(p[0]), sy(p[1]))); c.lineTo(sx(105), sy(15)); c.lineTo(sx(105), V.LH + 5); c.closePath();
+  const g = c.createLinearGradient(0, sy(16), 0, sy(-4)); g.addColorStop(0, '#cdbcf7'); g.addColorStop(0.5, '#9a80e0'); g.addColorStop(1, '#5a43a8'); c.fillStyle = g; c.fill();
+  c.strokeStyle = '#f4ecff'; c.lineWidth = 3; c.lineJoin = 'round'; c.beginPath(); PTS.forEach((p, i) => i ? c.lineTo(sx(p[0]), sy(p[1])) : c.moveTo(sx(p[0]), sy(p[1]))); c.stroke();
+  c.fillStyle = 'rgba(70,51,137,.35)'; c.fillRect(sx(46), sy(10), 0.9 * U(), 6 * U());
+  tag('Cliff, 6 m', sx(48.5), sy(6.5), '#fff', 'rgba(18,12,46,.6)', 11); tag('The beam reaches this line', sx(88), sy(GOAL + 6.2), '#c9ffdc');
+}
+function drawGumdrop(x, y, a, cart, n) {
+  const u = U() * 0.052; c.save(); c.globalAlpha = a; c.translate(sx(x), sy(y)); if (cart) { c.translate(0, -0.7 * U()); }
+  c.scale(u, u); c.strokeStyle = '#4c5670'; c.lineWidth = 7; c.lineCap = 'round'; [[-28, -38], [0, 0], [28, 38]].forEach(([a1, b1]) => { c.beginPath(); c.moveTo(a1, 0); c.lineTo(b1, cart ? 10 : 20); c.stroke(); });
+  c.beginPath(); c.moveTo(-52, 4); c.quadraticCurveTo(-52, -86, 0, -86); c.quadraticCurveTo(52, -86, 52, 4); c.closePath(); const g = c.createRadialGradient(-20, -62, 4, 0, -36, 92); g.addColorStop(0, '#ffd0e2'); g.addColorStop(0.5, '#ff7fb0'); g.addColorStop(1, '#d94c86'); c.fillStyle = g; c.fill();
+  c.fillStyle = '#1b1d29'; c.beginPath(); c.arc(0, -42, 18, 0, 7); c.fill(); c.fillStyle = '#d9f1ff'; c.beginPath(); c.arc(0, -42, 15, 0, 7); c.fill(); c.fillStyle = '#4b8bff'; c.beginPath(); c.arc(0, -39, 8, 0, 7); c.fill();
+  c.strokeStyle = '#e4eaf5'; c.lineWidth = 3; c.beginPath(); c.arc(0, -92, 6, 0, 7); c.stroke(); c.restore();
+  if (cart) { c.save(); c.globalAlpha = a; const X = sx(x), Y = sy(y), w = 3 * U(); c.fillStyle = '#ffc53d'; rr(X - w, Y - 0.75 * U(), 2 * w, 0.3 * U(), 3); c.fill(); c.fillStyle = '#1b1d29'; [-0.65, 0.65].forEach(k => { c.beginPath(); c.arc(X + k * w, Y - 0.32 * U(), 0.34 * U(), 0, 7); c.fill(); }); c.fillStyle = '#e4eaf5'; [-0.65, 0.65].forEach(k => { c.beginPath(); c.arc(X + k * w, Y - 0.32 * U(), 0.13 * U(), 0, 7); c.fill(); }); c.restore(); }
+  if (n) tag(n, sx(x), a < 1 ? sy(y) + 16 : sy(y + 6.2), '#ffe7b8');
+}
+function hookDot(h, on, pulse, t) { const r = 5 + (pulse ? 2 * Math.abs(Math.sin(t * 4)) : 0); c.fillStyle = on ? '#7ef0a8' : '#fff'; c.strokeStyle = on ? '#17794a' : '#ffb02e'; c.lineWidth = 2.5; c.beginPath(); c.arc(sx(h.x), sy(h.y), r, 0, 7); c.fill(); c.stroke(); }
+function rope(a, b, slack) { const mx = (a.x + b.x) / 2, my = Math.min(a.y, b.y) - (slack || 0); c.lineCap = 'round'; c.beginPath(); c.moveTo(sx(a.x), sy(a.y)); c.quadraticCurveTo(sx(mx), sy(my), sx(b.x), sy(b.y)); c.strokeStyle = '#7c5f24'; c.lineWidth = 3.4; c.stroke(); c.strokeStyle = '#f8e6b0'; c.lineWidth = 1.6; c.stroke(); }
+function truss(x0, y0, x1, y1) { c.strokeStyle = '#4c5670'; c.lineWidth = 5; c.beginPath(); c.moveTo(x0, y0); c.lineTo(x1, y1); c.stroke(); c.strokeStyle = '#e4eaf5'; c.lineWidth = 1.6; c.stroke(); }
+function drawPart(p, t, hot) {
+  const u = U(), glow = hot ? '#ffe27a' : null; c.save(); if (glow) { c.shadowColor = glow; c.shadowBlur = 14; }
+  if (p.type === 'ramp') { c.lineCap = 'round'; c.strokeStyle = '#1b1d29'; c.lineWidth = Math.max(7, 0.5 * u); c.beginPath(); c.moveTo(sx(p.ax), sy(p.ay + 0.25)); c.lineTo(sx(p.bx), sy(p.by + 0.25)); c.stroke(); c.strokeStyle = '#a9b4c9'; c.lineWidth = Math.max(4, 0.32 * u); c.stroke();
+    c.shadowBlur = 0; [[p.ax, p.ay], [p.bx, p.by]].forEach(([x, y]) => { c.fillStyle = '#1b1d29'; c.beginPath(); c.arc(sx(x), sy(y + 0.25), 7, 0, 7); c.fill(); c.fillStyle = '#ffc53d'; c.beginPath(); c.arc(sx(x), sy(y + 0.25), 5, 0, 7); c.fill(); }); }
+  if (p.type === 'post') { const y = ground(p.x); truss(sx(p.x), sy(y), sx(p.x), sy(y + 2.2)); c.fillStyle = '#ffc53d'; c.beginPath(); c.arc(sx(p.x), sy(y + 2.2), 6, 0, 7); c.fill(); c.fillStyle = '#1b1d29'; rr(sx(p.x) - 9, sy(y) - 4, 18, 5, 2); c.fill(); }
+  if (p.type === 'crane') { const y = ground(p.x), top = y + p.lift + 2.4, x0 = Math.min(p.x, p.x + p.across) - 3, x1 = Math.max(p.x, p.x + p.across) + 3;
+    truss(sx(x0), sy(ground(x0)), sx(x0 + 0.5), sy(top)); truss(sx(x1), sy(ground(x1)), sx(x1 - 0.5), sy(top)); c.fillStyle = '#1b1d29'; rr(sx(x0) - 4, sy(top) - 6, sx(x1) - sx(x0) + 8, 11, 3); c.fill(); c.fillStyle = '#ffc53d'; rr(sx(x0) - 2, sy(top) - 4, sx(x1) - sx(x0) + 4, 7, 2); c.fill();
+    c.shadowBlur = 0; c.strokeStyle = '#f8e6b0'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(sx(p.x), sy(top) + 4); c.lineTo(sx(p.x), sy(y + p.lift + 0.2)); c.stroke();
+    const tx = p.x + p.across, ty = ground(tx); c.setLineDash([4, 5]); c.strokeStyle = 'rgba(126,240,168,.9)'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx(p.x), sy(y + p.lift)); c.lineTo(sx(tx), sy(y + p.lift)); c.lineTo(sx(tx), sy(ty)); c.stroke(); c.setLineDash([]); c.beginPath(); c.ellipse(sx(tx), sy(ty), 2.4 * u, 0.6 * u, 0, 0, 7); c.stroke(); }
+  if (p.type === 'jack') { const y = ground(p.x), up = (EV && EV.raised[p.id] && !run) ? p.h : (run && run.raised[p.id] != null ? run.raised[p.id] : 0);
+    c.fillStyle = '#1b1d29'; rr(sx(p.x) - 0.8 * u, sy(y) - 0.3 * u, 1.6 * u, 0.3 * u, 2); c.fill(); c.strokeStyle = '#a9b4c9'; c.lineWidth = Math.max(4, 0.35 * u); c.beginPath(); c.moveTo(sx(p.x), sy(y)); c.lineTo(sx(p.x), sy(y + up)); c.stroke();
+    c.globalAlpha = (EV && EV.raised[p.id] && !run) ? 0.55 : 1; c.fillStyle = '#1b1d29'; rr(sx(p.x - 2.5) - 2, sy(y + up) - 0.34 * u - 2, 5 * u + 4, 0.34 * u + 4, 3); c.fill(); c.fillStyle = '#ffc53d'; rr(sx(p.x - 2.5), sy(y + up) - 0.34 * u, 5 * u, 0.34 * u, 2); c.fill(); c.globalAlpha = 1;
+    if (EV && EV.raised[p.id] && !run) { c.setLineDash([4, 4]); c.strokeStyle = '#ffc53d'; c.lineWidth = 1.5; c.strokeRect(sx(p.x - 2.5), sy(y) - 0.34 * u, 5 * u, 0.34 * u); c.setLineDash([]); } }
+  if (p.type === 'cart') { const on = Math.abs(p.x - START.x) <= 3; if (!on) { const X = sx(p.x), Y = sy(ground(p.x)), w = 3 * u; c.fillStyle = '#ffc53d'; rr(X - w, Y - 0.75 * u, 2 * w, 0.3 * u, 3); c.fill(); c.fillStyle = '#1b1d29'; [-0.65, 0.65].forEach(k => { c.beginPath(); c.arc(X + k * w, Y - 0.32 * u, 0.34 * u, 0, 7); c.fill(); }); } }
+  if (p.type === 'pulley') { const X = sx(p.x), Y = sy(p.y), r = Math.max(9, 0.7 * u); c.fillStyle = '#1b1d29'; rr(X - r, Y - r * 1.2, 2 * r, 2.4 * r, r * 0.4); c.fill(); c.fillStyle = '#ffc53d'; rr(X - r * 0.75, Y - r * 0.95, 1.5 * r, 1.9 * r, r * 0.3); c.fill(); c.fillStyle = '#1b1d29'; c.beginPath(); c.arc(X, Y, r * 0.5, 0, 7); c.fill(); c.shadowBlur = 0; c.fillStyle = '#fff'; c.font = '700 11px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('×' + p.ropes, X, Y); }
+  if (p.type === 'winch') { const X = sx(p.x), Y = sy(p.y), r = Math.max(9, 0.7 * u), a = t * 0.6, L = r * (0.9 + p.ratio / 14); c.fillStyle = '#1b1d29'; c.beginPath(); c.arc(X, Y, r, 0, 7); c.fill(); c.fillStyle = '#ffc53d'; c.beginPath(); c.arc(X, Y, r * 0.8, 0, 7); c.fill(); c.strokeStyle = '#1b1d29'; c.lineWidth = 4; c.beginPath(); c.moveTo(X, Y); c.lineTo(X + Math.cos(a) * L, Y + Math.sin(a) * L); c.stroke(); c.fillStyle = '#ff5a5a'; c.beginPath(); c.arc(X + Math.cos(a) * L, Y + Math.sin(a) * L, 4, 0, 7); c.fill(); c.shadowBlur = 0; c.fillStyle = '#1b1d29'; c.font = '700 10px system-ui'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText('×' + p.ratio, X, Y); }
+  c.restore();
+}
+function draw(now) {
+  const t = now / 1000; c.setTransform(cv.width / V.LW, 0, 0, cv.height / V.LH, 0, 0); clampView(); drawSky(t); drawGround();
+  const ev = EV, placing = drag && drag.kind === 'rope';
+  parts.forEach(p => drawPart(p, t, p.id === sel));
+  /* ropes and hooks: only a real connection draws a tight rope */
+  let gpos = run ? run.pos : START;
+  parts.forEach(p => { const h = hookPos(p);
+    if (MAIN[p.type] && h.load) { const leg = ev.legs.find(l => l.m.id === p.id), tgt = run ? run.pos : leg ? leg.from : ev.end; if (p.hooked) rope(h.load, { x: tgt.x, y: tgt.y + 5 }, 0.2); else { rope(h.load, { x: h.load.x + 0.6, y: h.load.y - 1.6 }, 0.5); } hookDot(h.load, p.hooked, !p.hooked, t); }
+    if (HELP[p.type]) { if (p.to) { const o = part(p.to); if (o) rope(hookPos(o).pull, h.load, 0.4); } hookDot(h.load, !!p.to, !p.to, t); }
+    if (h.pull && (MAIN[p.type] || HELP[p.type])) { const free = freePull(p); hookDot(h.pull, !free, false, t); if (free && (MAIN[p.type] || p.to) && !run) { c.font = '14px system-ui'; c.textAlign = 'center'; c.fillText('🧸', sx(h.pull.x + 1.1), sy(h.pull.y) + 4); } } });
+  if (placing) rope(drag.from, drag.at, 0.3);
+  /* the Gumdrop, its ghosts, and each machine's status */
+  if (run) drawGumdrop(run.pos.x, run.pos.y, 1, ev.cart);
+  else { drawGumdrop(START.x, START.y, 1, ev.cart, 'Gumdrop 6,300 N'); ev.legs.filter(l => l.ok).forEach(l => drawGumdrop(l.pl.end.x, l.pl.end.y, 0.42, ev.cart, 'After leg ' + l.n)); }
+  if (!run) parts.filter(p => MAIN[p.type]).forEach(p => { const s = ev.st[p.id], h = hookPos(p), at = p.type === 'ramp' ? { x: (p.ax + p.bx) / 2, y: (p.ay + p.by) / 2 + 2.6 } : p.type === 'crane' ? { x: p.x + p.across / 2, y: ground(p.x) + p.lift + 7.2 } : { x: p.x, y: ground(p.x) + (p.type === 'jack' ? 2 : 3.6) }; if (s) tag((s.ok ? '✓ ' : s.idle ? '• ' : '✗ ') + s.text, sx(at.x), sy(at.y), '#fff', s.ok ? 'rgba(23,121,74,.92)' : s.idle ? 'rgba(60,54,90,.92)' : 'rgba(179,38,30,.94)'); });
+  if (run) { tag(run.cap, V.LW / 2, V.LH - 22, '#1f1d26', '#fffaf2', 15); stepRun(now); }
+  requestAnimationFrame(draw);
+}
+
+/* ---------- the run ---------- */
+function startRun() { if (run) return; sel = null; const legs = EV.legs; run = { t0: performance.now(), legs, pos: { x: START.x, y: START.y }, raised: {}, cap: legs.length ? '' : 'Nothing is hooked to the Gumdrop yet.', i: -1 }; paint(); }
+function stepRun(now) {
+  const D = 2600, t = now - run.t0, i = Math.floor(t / D), legs = run.legs.filter(l => l.ok), bad = run.legs.find(l => !l.ok);
+  if (i < legs.length) { const l = legs[i], k = (t - i * D) / D, e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2, P = l.pl.path, lens = []; let tot = 0; for (let j = 1; j < P.length; j++) { const d = Math.hypot(P[j].x - P[j - 1].x, P[j].y - P[j - 1].y); lens.push(d); tot += d; }
+    let s = e * tot, j = 0; while (j < lens.length - 1 && s > lens[j]) { s -= lens[j]; j++; } const q = lens[j] ? s / lens[j] : 1; run.pos = { x: P[j].x + (P[j + 1].x - P[j].x) * q, y: P[j].y + (P[j + 1].y - P[j].y) * q };
+    if (l.pl.raise) run.raised[l.pl.raise] = Math.max(0, run.pos.y - ground(l.m.x)); run.cap = `Leg ${l.n}: ${NAMES[l.m.type]}. Smooshy pulls ${f1(l.pull)} N.`; return; }
+  legs.forEach(l => { if (l.pl.raise) run.raised[l.pl.raise] = l.m.h; }); if (legs.length) run.pos = legs[legs.length - 1].pl.end;
+  run.cap = EV.won ? 'The Big Jelly\'s beam has the Gumdrop! Rescued.' : bad ? `Stuck at leg ${bad.n}: it needs ${f0(bad.pl.needs)} N and Smooshy's machines give ${f0(bad.gives)} N.` : legs.length ? 'It stops here. Nothing picks it up from this spot.' : run.cap;
+  if (t > legs.length * D + 2600) { run = null; paint(); }
+}
+
+/* ---------- pointer ---------- */
+function pt(e) { const r = cv.getBoundingClientRect(); return { px: (e.clientX - r.left) / r.width * V.LW, py: (e.clientY - r.top) / r.height * V.LH }; }
+const dpx = (a, px, py) => Math.hypot(sx(a.x) - px, sy(a.y) - py);
+function dseg(px, py, x0, y0, x1, y1) { const dx = x1 - x0, dy = y1 - y0, L = dx * dx + dy * dy, k = L ? Math.max(0, Math.min(1, ((px - x0) * dx + (py - y0) * dy) / L)) : 0; return Math.hypot(px - x0 - k * dx, py - y0 - k * dy); }
+function hit(px, py) {   // tight: distance to the drawn shape
+  let best = null; const tryit = (d, lim, o) => { if (d <= lim && (!best || d < best.d)) best = Object.assign({ d }, o); };
+  parts.forEach(p => { const h = hookPos(p);
+    if (h.load && (MAIN[p.type] || HELP[p.type])) tryit(dpx(h.load, px, py) - 3, 9, { id: p.id, what: 'hook' });
+    if (p.type === 'ramp') { tryit(dpx({ x: p.ax, y: p.ay + 0.25 }, px, py), 11, { id: p.id, what: 'a' }); tryit(dpx({ x: p.bx, y: p.by + 0.25 }, px, py), 11, { id: p.id, what: 'b' }); tryit(dseg(px, py, sx(p.ax), sy(p.ay + 0.25), sx(p.bx), sy(p.by + 0.25)) + 3, 12, { id: p.id, what: 'body' }); }
+    if (p.type === 'post') { const y = ground(p.x); tryit(dseg(px, py, sx(p.x), sy(y), sx(p.x), sy(y + 2.2)), 10, { id: p.id, what: 'body' }); }
+    if (p.type === 'crane') { const y = ground(p.x), top = y + p.lift + 2.4, x0 = Math.min(p.x, p.x + p.across) - 3, x1 = Math.max(p.x, p.x + p.across) + 3; tryit(Math.min(dseg(px, py, sx(x0), sy(ground(x0)), sx(x0 + 0.5), sy(top)), dseg(px, py, sx(x1), sy(ground(x1)), sx(x1 - 0.5), sy(top)), dseg(px, py, sx(x0), sy(top), sx(x1), sy(top))), 9, { id: p.id, what: 'body' }); }
+    if (p.type === 'jack') { const y = ground(p.x); tryit(Math.min(dseg(px, py, sx(p.x - 2.5), sy(y + 0.17), sx(p.x + 2.5), sy(y + 0.17)), dseg(px, py, sx(p.x), sy(y), sx(p.x), sy(y - 0.4))), 9, { id: p.id, what: 'body' }); }
+    if (p.type === 'cart') { const X = Math.abs(p.x - START.x) <= 3 ? START.x : p.x, y = ground(X); tryit(dseg(px, py, sx(X - 3), sy(y + 0.5), sx(X + 3), sy(y + 0.5)), 8, { id: p.id, what: 'body' }); }
+    if (HELP[p.type]) tryit(Math.max(0, dpx(p, px, py) - Math.max(9, 0.7 * U())), 4, { id: p.id, what: 'body' }); });
+  return best;
+}
+function gumdropNear(x, y) { const spots = [START].concat(EV.legs.filter(l => l.ok).map(l => l.pl.end)); return spots.some(s => Math.abs(s.x - x) <= 3.2 && y >= s.y - 1 && y <= s.y + 7); }
+function nearestPull(x, y, not) { let b = null; parts.forEach(o => { if (o.id === not || !(MAIN[o.type] || HELP[o.type]) || !freePull(o)) return; if (HELP[o.type] && o.to == null && false) return; const h = hookPos(o).pull, d = Math.hypot(h.x - x, h.y - y); if (!b || d < b.d) b = { d, id: o.id }; }); return b; }
+function loops(h, id) { let cur = id; for (let i = 0; i < 12 && cur; i++) { if (cur === h.id) return true; const o = part(cur); cur = o && o.to; } return false; }
+cv.addEventListener('pointerdown', e => { if (run) return; const { px, py } = pt(e), h = hit(px, py); cv.setPointerCapture(e.pointerId);
+  if (!h) { drag = { kind: 'pan', px, py, cx: V.cx, cy: V.cy, moved: false }; return; }
+  const p = part(h.id); if (h.what === 'hook') { drag = { kind: 'rope', id: p.id, from: hookPos(p).load, at: { x: wx(px), y: wy(py) }, moved: false }; return; }
+  drag = { kind: 'move', id: p.id, what: h.what, x0: wx(px), y0: wy(py), o: JSON.parse(JSON.stringify(p)), moved: false, pushed: false }; });
+cv.addEventListener('pointermove', e => { const { px, py } = pt(e); if (!drag) { cv.style.cursor = run ? 'default' : hit(px, py) ? 'pointer' : 'grab'; return; }
+  const X = wx(px), Y = wy(py); if (drag.kind === 'pan') { if (Math.hypot(px - drag.px, py - drag.py) > 4) drag.moved = true; V.cx = drag.cx - (px - drag.px) / U(); V.cy = drag.cy + (py - drag.py) / U(); return; }
+  if (drag.kind === 'rope') { drag.at = { x: X, y: Y }; drag.moved = true; return; }
+  const p = part(drag.id), o = drag.o, dx = X - drag.x0, dy = Y - drag.y0; if (Math.hypot(dx, dy) * U() < 4 && !drag.moved) return; if (!drag.pushed) { push(); drag.pushed = true; } drag.moved = true;
+  const snap = v => Math.round(v * 2) / 2, cl = v => Math.max(1, Math.min(99, v));
+  if (p.type === 'ramp') { if (drag.what === 'a' || drag.what === 'body') { p.ax = cl(snap(o.ax + dx)); p.ay = ground(p.ax); } if (drag.what === 'b' || drag.what === 'body') { p.bx = cl(snap(o.bx + dx)); p.by = ground(p.bx); }
+    const L = Math.hypot(p.bx - p.ax, p.by - p.ay); if (L > 32) { if (drag.what === 'a') { p.ax = o.ax; p.ay = o.ay; } else { p.bx = o.bx; p.by = o.by; } } }
+  else if (HELP[p.type]) { p.x = cl(snap(o.x + dx)); p.y = Math.max(ground(p.x) + 0.8, Math.min(34, snap(o.y + dy))); }
+  else p.x = cl(snap(o.x + dx));
+  refresh(false); });
+cv.addEventListener('pointerup', e => { const d = drag; drag = null; if (!d) return; const { px, py } = pt(e);
+  if (d.kind === 'pan') { if (!d.moved) { sel = null; paint(); } return; }
+  if (d.kind === 'rope') { const p = part(d.id), X = wx(px), Y = wy(py);
+    if (!d.moved || Math.hypot(sx(d.from.x) - px, sy(d.from.y) - py) < 8) { sel = p.id; paint(); return; }
+    if (MAIN[p.type]) { if (gumdropNear(X, Y)) { push(); p.hooked = true; say('Rope hooked onto the Gumdrop.'); } else say('Drop the hook on the Gumdrop, or on a ghost Gumdrop.'); }
+    else { const b = nearestPull(X, Y, p.id); if (b && b.d <= 3 && !loops(p, b.id)) { push(); p.to = b.id; say('Clipped on.'); } else say('Drop it on a free pull hook of a machine, a pulley block or a winch.'); }
+    sel = p.id; refresh(true); return; }
+  const p = part(d.id); if (!p) return; if (!d.moved) { sel = p.id; paint(); return; }
+  if (MAIN[p.type] && p.type !== 'jack' && !p.hooked) autoHook(p); if (HELP[p.type]) { if (p.to && Math.hypot(p.x - d.o.x, p.y - d.o.y) > 5) { p.to = null; say('Unclipped. Drop it near another free hook to clip it on.'); } if (!p.to) autoClip(p); } sel = p.id; refresh(true); });
+function autoHook(p) { const h = hookPos(p).load, spots = [START].concat(EV.legs.filter(l => l.ok).map(l => l.pl.end)); if (spots.some(s => Math.abs(s.x - h.x) <= 3.5 && Math.abs(s.y - (p.type === 'crane' ? ground(p.x) : h.y - 0.9)) <= 2.5)) { p.hooked = true; say('Rope hooked onto the Gumdrop.'); } }
+function autoClip(p) { const b = nearestPull(p.x, p.y, p.id); if (b && b.d <= 4.5 && !loops(p, b.id)) { p.to = b.id; say(`Clipped onto the ${NAMES[part(b.id).type].toLowerCase()}.`); } }
+
+/* ---------- panels ---------- */
+let sayT = 0; function say(t) { document.getElementById('banner').dataset.say = t; sayT = Date.now(); paint(); }
+function add(type) { if (run) return; push(); const e = EV.end, id = 'p' + nid++; let p;
+  if (type === 'ramp') { const ax = Math.min(96, e.x + 1.5), bx = Math.min(99, ax + 12); p = { id, type, ax, ay: ground(ax), bx, by: ground(bx), hooked: false }; if (Math.abs(ground(ax) - e.y) > 0.7) { p.ax = Math.min(96, e.x + 0.5); p.ay = ground(p.ax); } }
+  if (type === 'post') p = { id, type, x: Math.min(98, e.x + 14), hooked: false };
+  if (type === 'crane') p = { id, type, x: Math.round(e.x * 2) / 2, lift: 7, across: 4, hooked: false };
+  if (type === 'jack') p = { id, type, x: Math.round(e.x * 2) / 2, h: 6 };
+  if (type === 'cart') { if (parts.some(q => q.type === 'cart')) { hist.pop(); return say('The Gumdrop already has a cart.'); } p = { id, type, x: START.x }; }
+  if (type === 'pulley') p = { id, type, x: e.x + 6, y: e.y + 9, ropes: 4, to: null };
+  if (type === 'winch') p = { id, type, x: e.x + 8, y: e.y + 9, ratio: 8, to: null };
+  parts.push(p); layout(); EV = evaluate();
+  if (MAIN[type] && type !== 'jack') autoHook(p);
+  if (HELP[type]) { const selp = part(sel), tgt = selp && (MAIN[selp.type] || HELP[selp.type]) ? [selp].concat(chain(selp)).pop() : null; if (tgt && freePull(tgt) && tgt.id !== p.id) p.to = tgt.id; else autoClip(p); }
+  sel = p.id; refresh(true); if (type === 'cart') say('The cart is under the Gumdrop. It rolls now.'); }
+function act(k) { const p = part(sel); if (!p) return; push(); const step = (v, d, lo, hi) => Math.max(lo, Math.min(hi, v + d));
+  if (k === 'del') { parts = parts.filter(q => q.id !== p.id); parts.forEach(q => { if (q.to === p.id) q.to = null; }); sel = null; }
+  else if (k === 'hook') p.hooked = true; else if (k === 'unhook') p.hooked = false; else if (k === 'unclip') p.to = null;
+  else if (k === 'clip') autoClip(p);
+  else if (k === 'lift-') p.lift = step(p.lift, -0.5, 2, 9); else if (k === 'lift+') p.lift = step(p.lift, 0.5, 2, 9);
+  else if (k === 'ac-') p.across = step(p.across, -1, -8, 8); else if (k === 'ac+') p.across = step(p.across, 1, -8, 8);
+  else if (k === 'h-') p.h = step(p.h, -0.5, 1, 7); else if (k === 'h+') p.h = step(p.h, 0.5, 1, 7);
+  else if (k === 'r-') p.ropes = step(p.ropes, -1, 2, 8); else if (k === 'r+') p.ropes = step(p.ropes, 1, 2, 8);
+  else if (k === 'w-') p.ratio = step(p.ratio, -4, 4, 20); else if (k === 'w+') p.ratio = step(p.ratio, 4, 4, 20);
+  refresh(true); }
+function cardHTML(p) {
+  const ctl = (lab, a, b, val) => `<div class="ctl"><span>${lab}</span><button data-a="${a}" aria-label="less">−</button><b>${val}</b><button data-a="${b}" aria-label="more">+</button></div>`, s = EV.st[p.id]; let h = `<div class="row sp"><h2>${ICON[p.type]} ${NAMES[p.type]}</h2><button data-a="close" aria-label="Close">✕</button></div>`;
+  if (p.type === 'ramp') { const L = Math.hypot(p.bx - p.ax, p.by - p.ay), r = Math.abs(p.by - p.ay); h += `<p>${f1(L)} m long, ${f1(r)} m rise. Ramp MA = ${f1(L)} ÷ ${f1(r)} = <b>${r > 0.05 ? f1(L / r) : '–'}</b>. Drag its yellow ends to change it.</p>`; }
+  if (p.type === 'post') h += '<p>Pulls the Gumdrop along the ground towards the post. Bare ground drags (2,100 N of friction). A cart rolls.</p>';
+  if (p.type === 'crane') h += ctl('Lifts', 'lift-', 'lift+', f1(p.lift) + ' m') + ctl('Move across', 'ac-', 'ac+', (p.across < 0 ? f1(-p.across) + ' m left' : f1(p.across) + ' m right')) + '<p>A crane lifts straight up, so it needs the full 6,300 N. Only the lift counts in the maths.</p>';
+  if (p.type === 'jack') h += ctl('Raises', 'h-', 'h+', f1(p.h) + ' m') + '<p>The screw has MA 120 by itself. It is slow: Smooshy turns the handle a long way.</p>';
+  if (p.type === 'cart') h += '<p>Wheels and axles under a platform. On a cart the Gumdrop rolls, so the ground itself works as a ramp.</p>';
+  if (p.type === 'pulley') h += ctl('Ropes', 'r-', 'r+', p.ropes) + `<p>Pulley MA = number of ropes = <b>${p.ropes}</b>.</p>`;
+  if (p.type === 'winch') h += ctl('Handle', 'w-', 'w+', '×' + p.ratio) + `<p>A longer handle gives a bigger MA: <b>${p.ratio}</b>.</p>`;
+  if (MAIN[p.type]) h += `<p>Total MA on this leg: ${maText(p)} = <b>${f0(totalMA(p))}</b>, so Smooshy's machines give 60 × ${f0(totalMA(p))} = <b>${f0(PULL * totalMA(p))} N</b>.</p>` + (s ? `<p class="${s.ok ? 'ok' : s.idle ? 'mut' : 'no'}">${s.text}</p>` : '');
+  h += '<div class="row">' + (MAIN[p.type] && p.type !== 'jack' ? (p.hooked ? '<button data-a="unhook">Unhook from the Gumdrop</button>' : '<button data-a="hook" class="on">Hook rope to the Gumdrop</button>') : '') + (HELP[p.type] ? (p.to ? '<button data-a="unclip">Unclip</button>' : '<button data-a="clip" class="on">Clip onto the nearest free hook</button>') : '') + '<button data-a="del">🗑 Remove</button></div>'; return h; }
+function paint() {
+  const ev = EV, card = document.getElementById('card'), p = part(sel); card.hidden = !p || !!run; if (p && !run) card.innerHTML = cardHTML(p);
+  document.getElementById('chips').innerHTML = '<span class="lab">Your pieces:</span>' + (parts.length ? parts.map(q => `<button class="chip ${q.id === sel ? 'on' : ''}" data-id="${q.id}">${ICON[q.type]} ${NAMES[q.type]}${q.type === 'pulley' ? ' ×' + q.ropes : q.type === 'winch' ? ' ×' + q.ratio : ''}</button>`).join('') : '<span class="lab">none yet. Tap a tool below to add it.</span>');
+  document.getElementById('meters').innerHTML = `<span class="${ev.total > BUDGET ? 'no' : ''}">💎 <b>${f0(ev.total)}</b> of ${BUDGET} crystals</span><span>Legs that work: <b>${ev.done}</b></span><span class="${ev.hand > OXY ? 'no' : ''}">Hand travel: <b>${f0(ev.hand)}</b> of ${f0(OXY)} m</span><span class="${ev.hull >= 20 ? 'no' : ''}">Hull damage: <b>${f0(ev.hull)}%</b></span>`;
+  const b = document.getElementById('banner'), fresh = b.dataset.say && Date.now() - sayT < 4500; b.className = 'banner ' + (ev.won ? 'ok' : ev.stuck ? 'no' : '');
+  b.textContent = fresh ? b.dataset.say : ev.won ? `Route complete in ${ev.done} leg${ev.done === 1 ? '' : 's'}. Press Run it to watch.` : ev.stuck ? `Leg ${ev.stuck.n} does not move: it needs ${f0(ev.stuck.pl.needs)} N and Smooshy's machines give ${f0(ev.stuck.gives)} N. Add mechanical advantage to that leg.` : ev.done ? `The Gumdrop gets ${f1(ev.end.y)} m up. It needs to reach ${GOAL} m. What picks it up from the last ghost?` : 'Add a machine and hook its rope to the Gumdrop.';
+  document.getElementById('legs').innerHTML = '<tr><th>Leg</th><th>Machine</th><th>The move</th><th>Needs</th><th>Smooshy\'s machines give</th><th>Result</th></tr>' + (ev.legs.length ? ev.legs.map(l => `<tr><td>${l.n}</td><td>${ICON[l.m.type]} ${NAMES[l.m.type]}</td><td>${l.pl.note}</td><td>${f0(l.pl.needs)} N</td><td>60 N × ${maText(l.m)} = ${f0(l.gives)} N</td><td class="${l.ok ? 'ok' : 'no'}">${l.ok ? `Moves. Smooshy pulls ${f1(l.pull)} N.` : 'Not enough. It stays put.'}</td></tr>`).join('') : '<tr><td colspan="6" class="mut">No legs yet.</td></tr>');
+  document.getElementById('run').disabled = !!run; }
+function refresh(full) { layout(); EV = evaluate(); if (full !== false) paint(); else { const p = part(sel); if (p) document.getElementById('card').innerHTML = cardHTML(p); } }
+document.getElementById('tray').innerHTML = TRAY.map(t => `<button class="tile" data-add="${t[0]}"><span>${ICON[t[0]]} ${NAMES[t[0]]}</span><small>💎 ${t[1]}</small><small>${t[2]}</small></button>`).join('');
+document.getElementById('tray').addEventListener('click', e => { const b = e.target.closest('[data-add]'); if (b) add(b.dataset.add); });
+document.getElementById('chips').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (b) { sel = sel === b.dataset.id ? null : b.dataset.id; paint(); } });
+document.getElementById('card').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b) return; if (b.dataset.a === 'close') { sel = null; paint(); } else act(b.dataset.a); });
+document.getElementById('run').addEventListener('click', startRun);
+document.getElementById('undo').addEventListener('click', () => { if (!hist.length || run) return; parts = JSON.parse(hist.pop()); if (!part(sel)) sel = null; refresh(true); });
+document.getElementById('clear').addEventListener('click', () => { if (run || !parts.length) return; push(); parts = []; sel = null; refresh(true); });
+const zoom = k => { V.z = Math.max(1, Math.min(3, V.z * k)); if (V.z > 1 && k > 1 && V.cx === 50) { V.cx = EV.end.x + 8; V.cy = EV.end.y + 8; } };
+document.getElementById('zi').addEventListener('click', () => zoom(1.3)); document.getElementById('zo').addEventListener('click', () => zoom(1 / 1.3)); document.getElementById('zf').addEventListener('click', () => { V.z = 1; V.cx = 50; V.cy = 14; });
+window.__board = { get parts() { return parts; }, set parts(v) { parts = v; refresh(true); }, evaluate, add, act, get ev() { return EV; }, sel: id => { sel = id; paint(); }, V, sx, sy };
+EV = evaluate(); paint(); requestAnimationFrame(draw); setInterval(() => { if (document.getElementById('banner').dataset.say && Date.now() - sayT > 4500) { document.getElementById('banner').dataset.say = ''; paint(); } }, 1000);
+</script>
