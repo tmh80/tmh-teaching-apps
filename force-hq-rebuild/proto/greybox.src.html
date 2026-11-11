@@ -1,0 +1,217 @@
+<title>Rescue Physics Grey-box</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* layout: one wide board on top, the route read-out under it, settings and tuning in a side column that stacks on phones */
+:root { --bg: #f3f4f7; --panel: #ffffff; --ink: #1c2230; --mute: #5c667a; --line: #cfd5e0; --accent: #2f5fd0; --good: #1f8a4c; --warn: #b46a00; --bad: #c0392b;
+  --sky: #e6eaf2; --rock: #9aa3b5; --rock2: #7b8599; --steel: #4b5568; --deck: #c98a2b; --rope: #7a5a22; --ship: #2f5fd0; --ghost: rgba(47,95,208,.28);
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #12151c; --panel: #1b2029; --ink: #e8ecf4; --mute: #9aa5ba; --line: #333b4a; --accent: #7fa4ff; --good: #5fd08e; --warn: #f0b354; --bad: #ff7b6b;
+  --sky: #1a1f2b; --rock: #4a5366; --rock2: #5d6880; --steel: #aab4c8; --deck: #e0a546; --rope: #d2b06a; --ship: #7fa4ff; --ghost: rgba(127,164,255,.3); color-scheme: dark } }
+:root[data-theme="dark"] { --bg: #12151c; --panel: #1b2029; --ink: #e8ecf4; --mute: #9aa5ba; --line: #333b4a; --accent: #7fa4ff; --good: #5fd08e; --warn: #f0b354; --bad: #ff7b6b;
+  --sky: #1a1f2b; --rock: #4a5366; --rock2: #5d6880; --steel: #aab4c8; --deck: #e0a546; --rope: #d2b06a; --ship: #7fa4ff; --ghost: rgba(127,164,255,.3); color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 14px/1.45 var(--font); padding-block: 14px 28px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)) }
+.wrap { max-width: 1500px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px }
+h1 { font-size: 20px; margin: 0; text-wrap: balance } h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--mute); margin: 0 0 6px }
+.sub { color: var(--mute); margin: 2px 0 0; max-width: 75ch }
+.row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+button, select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 7px; padding: 6px 10px; cursor: pointer }
+button:hover { border-color: var(--accent) } button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px }
+button.go { background: var(--accent); color: var(--bg); border-color: var(--accent); font-weight: 700 }
+button.del { color: var(--bad) }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 12px; align-items: start }
+@media (max-width: 980px) { .grid { grid-template-columns: minmax(0, 1fr) } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-width: 0 }
+.board { overflow-x: auto; background: var(--sky); border: 1px solid var(--line); border-radius: 10px }
+canvas { display: block; touch-action: none; cursor: grab }
+.legs { display: flex; flex-direction: column; gap: 6px }
+.leg { border-left: 4px solid var(--good); padding: 4px 8px; background: var(--bg); border-radius: 0 6px 6px 0 }
+.leg.warn { border-color: var(--warn) } .leg.bad { border-color: var(--bad) }
+.leg b { font-variant-numeric: tabular-nums } .leg .n { font-family: var(--mono); font-size: 13px }
+.msg { font-weight: 700; padding: 6px 8px; border-radius: 6px; background: var(--bg) } .msg.ok { color: var(--good) } .msg.no { color: var(--bad) }
+.tot { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px }
+.tot div { background: var(--bg); border-radius: 6px; padding: 5px 8px } .tot span { display: block; color: var(--mute); font-size: 12px } .tot b { font-variant-numeric: tabular-nums; font-size: 15px }
+.set label { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center; margin: 7px 0 } .set input[type=range] { grid-column: 1 / -1; width: 100% } .set output { font-family: var(--mono); font-size: 13px }
+.set .chk { display: flex; gap: 8px; align-items: center }
+.hint { color: var(--mute); font-size: 13px; margin: 4px 0 0 }
+details summary { cursor: pointer; font-weight: 700 }
+</style>
+<div class="wrap">
+  <div>
+    <h1>Rescue physics grey-box</h1>
+    <p class="sub">The new pulling rules on a bare crater. No story, no art, no maths check. Build anything, and the read-out underneath says what each rope would do. Try to break it.</p>
+  </div>
+  <div class="row" id="tray"></div>
+  <div class="row"><span class="hint" style="margin:0">Try these:</span><span class="row" id="presets"></span></div>
+  <div class="grid">
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div class="board"><canvas id="cv" width="1200" height="300"></canvas></div>
+      <p class="hint" style="margin:0">Drag a piece to move it. Drag a ramp by its two round ends. Tap a piece to change it on the right.</p>
+      <div class="panel"><h2>What happens</h2><div id="msg" class="msg"></div><div class="legs" id="legs" style="margin-top:8px"></div></div>
+      <div class="panel"><h2>Totals</h2><div class="tot" id="tot"></div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+      <div class="panel set" id="set"></div>
+      <div class="panel set"><details id="tunebox"><summary>Tune the rules</summary><p class="hint">These change how the physics feels. Tell me the values you like and they go into the real build.</p><div id="tune"></div></details></div>
+    </div>
+  </div>
+</div>
+<script>
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = (v, dp = 1) => { if (v == null || isNaN(v)) return '–'; const r = Math.round(v * 10 ** dp) / 10 ** dp; return Math.abs(r) >= 1000 ? r.toLocaleString('en-GB') : String(r); };
+/*__MODEL__*/
+
+/* ---------- the pieces on the board (add-ons are settings here, to keep the grey-box simple) ---------- */
+const $ = s => document.querySelector(s);
+let P = [], sel = null, uid = 1, anim = null;
+const mk = (type, o) => Object.assign({ id: type[0] + (uid++), type }, o);
+const PRESETS = {
+  'Two ramps (textbook)': () => [mk('blever', { x: 19, arm: 1 }), mk('dyn', { x: 68, big: true }), mk('ramp', { fx: 16, hx: 39.24, roped: true, ropes: 4, w1: 7, w2: 0 }), mk('ramp', { fx: 40.76, hx: 64, roped: true, ropes: 4, w1: 7, w2: 0 })],
+  'Crane, then a ramp beside the platform': () => [mk('blever', { x: 19, arm: 1 }), mk('crane', { x: 14, rise: 4, across: 2.5, roped: true, ropes: 4, w1: 7, w2: 4 }), mk('platform', { x: 16.5, size: 'M', h: 4 }), mk('ramp', { fx: 20, hx: 38.6, roped: true, ropes: 4, w1: 10, w2: 0 })],
+  'Crane, then a ramp standing on the platform': () => [mk('blever', { x: 19, arm: 1 }), mk('crane', { x: 14, rise: 4, across: 2.5, roped: true, ropes: 4, w1: 7, w2: 4 }), mk('platform', { x: 16.5, size: 'M', h: 4 }), mk('ramp', { fx: 17.5, hx: 39, roped: true, ropes: 4, w1: 7, w2: 0 })],
+  'Just drag it out': () => [mk('blever', { x: 19, arm: 1 }), mk('post', { x: 77, ropes: 4, w1: 10, w2: 10 })],
+  'Empty crater': () => []
+};
+/* the saved rig the real model reads: add-ons become separate parts joined by cables */
+function toRig(skipId) {
+  const parts = [], cables = [], base = { parts: P.filter(p => p.type === 'dyn').map(p => ({ id: p.id, type: 'dyn', x: p.x, big: p.big })) };
+  const g = glGround(base).g, plats = glPlatforms({ parts: P.filter(p => p.type === 'platform').map(p => ({ id: p.id, type: 'platform', size: p.size, x: p.x, h: p.h })) }, g);
+  const chain = (p, root, x) => { let prev = root; if (p.ropes > 1 || root === null) { const id = p.id + 'b'; parts.push({ id, type: 'block', ropes: p.ropes, x, y: 0 }); if (prev) cables.push({ a: prev, b: id }); else cables.push({ a: id, b: 'ship' }); prev = id; }
+    [p.w1, p.w2].forEach((r, i) => { if (!r) return; const id = p.id + 'w' + i; parts.push({ id, type: 'winch', ratio: r, x, y: 0 }); cables.push({ a: prev, b: id }); prev = id; }); };
+  P.forEach(p => {
+    if (p.type === 'dyn') parts.push({ id: p.id, type: 'dyn', x: p.x, big: p.big });
+    else if (p.type === 'platform') parts.push({ id: p.id, type: 'platform', size: p.size, x: p.x, h: p.h });
+    else if (p.type === 'blever') parts.push({ id: p.id, type: 'lever', role: 'boulder', x: 19, arm: p.arm, rise: 0.5, dir: 1 });
+    else if (p.type === 'ramp') { const fy = glFloorAt(p.fx, g, plats), hy = glFloorAt(p.hx, g, plats), run = p.hx - p.fx, rise = hy - fy; p._fy = fy; p._hy = hy; p._L = Math.hypot(run, rise); p._rise = rise;
+      parts.push({ id: p.id, type: 'ramp', x1: p.fx, y1: fy, L: Math.hypot(run, rise), rise }); if (p.roped) cables.push({ a: p.id, b: 'ship' }); chain(p, p.id, p.hx); }
+    else if (p.type === 'crane') { parts.push({ id: p.id, type: 'crane', x: p.x, rise: p.rise, across: p.across }); if (p.roped) cables.push({ a: p.id, b: 'ship' }); chain(p, p.id, p.x); }
+    else if (p.type === 'lever') { parts.push({ id: p.id, type: 'lever', x: p.x, arm: p.arm, rise: p.rise, dir: 1 }); chain(p, p.id, p.x); }
+    else if (p.type === 'jack') parts.push({ id: p.id, type: 'jack', x: p.x, rise: p.rise });
+    else if (p.type === 'post') chain(p, null, p.x);
+  });
+  return { v: 2, parts, cables };
+}
+const pullerId = p => p.type === 'post' ? p.id + 'b' : p.id;
+
+/* ---------- drawing ---------- */
+const cv = $('#cv'), c = cv.getContext('2d'), K = 12, PAD = 24, sx = x => PAD + x * K, sy = y => cv.height - (y + 2) * K, wx = px => (px - PAD) / K;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+let EV = null, handles = [];
+function label(s, x, y, col, al) { c.font = '600 11px ' + css('--font'); c.textAlign = al || 'center'; c.fillStyle = col || css('--ink'); c.fillText(s, x, y); }
+function draw() {
+  const rig = toRig(); EV = gpEvaluate(rig); const g = EV.ground, col = { rock: css('--rock'), rock2: css('--rock2'), steel: css('--steel'), deck: css('--deck'), rope: css('--rope'), ship: css('--ship'), ghost: css('--ghost'), ink: css('--ink'), mute: css('--mute'), bad: css('--bad'), good: css('--good'), accent: css('--accent'), warn: css('--warn') };
+  c.clearRect(0, 0, cv.width, cv.height); handles = [];
+  /* where the tractor beam can reach */
+  c.strokeStyle = col.good; c.setLineDash([5, 5]); c.lineWidth = 1.5; c.beginPath(); for (let x = 30; x <= 96; x += 0.5) { const y = glMaxRight(g, x) - GL.hzY; x === 30 ? c.moveTo(sx(x), sy(y)) : c.lineTo(sx(x), sy(y)); } c.stroke(); c.setLineDash([]);
+  label('the beam can lift the Gumdrop from this line', sx(95), sy(glMaxRight(g, 84) - GL.hzY) - 6, col.good, 'right');
+  /* ground */
+  c.fillStyle = col.rock; c.beginPath(); c.moveTo(sx(0), cv.height); for (let x = 0; x <= 96; x++) c.lineTo(sx(x), sy(g[x])); c.lineTo(sx(96), cv.height); c.closePath(); c.fill();
+  c.strokeStyle = col.rock2; c.lineWidth = 2; c.beginPath(); for (let x = 0; x <= 96; x++) x ? c.lineTo(sx(x), sy(g[x])) : c.moveTo(sx(x), sy(g[x])); c.stroke();
+  c.fillStyle = col.mute; for (let x = 0; x <= 96; x += 10) { c.fillRect(sx(x), cv.height - 12, 1, 5); label(x + ' m', sx(x), cv.height - 2, col.mute); }
+  const isSel = p => sel === p.id, lw = p => isSel(p) ? 4 : 2.5;
+  /* platforms */
+  EV.plats.forEach(q => { const p = P.find(z => z.id === q.id); c.fillStyle = q.over ? col.bad : col.steel; c.globalAlpha = .85; c.fillRect(sx(q.x0), sy(q.top), (q.x1 - q.x0) * K, 5); c.globalAlpha = .35; c.fillRect(sx(q.x0) + 3, sy(q.top), 4, (q.top - q.base) * K); c.fillRect(sx(q.x1) - 7, sy(q.top), 4, (q.top - q.base) * K); c.globalAlpha = 1;
+    if (isSel(p)) { c.strokeStyle = col.accent; c.lineWidth = 2; c.strokeRect(sx(q.x0), sy(q.top), (q.x1 - q.x0) * K, Math.max(6, (q.top - q.base) * K)); }
+    label(`${GL_PLAT[p.size].name} platform, holds ${fmt(q.holds, 0)} N`, sx(q.x1) + 5, sy(q.top) + 16, q.over ? col.bad : col.mute, 'left'); handles.push({ p, role: 'move', x: sx(p.x), y: sy(q.top) + 3 }); });
+  /* dynamite */
+  P.filter(p => p.type === 'dyn').forEach(p => { const b = EV.blasts.find(z => z.id === p.id); if (!b) return; c.strokeStyle = col.bad; c.setLineDash([3, 3]); c.lineWidth = isSel(p) ? 2.5 : 1.2; c.beginPath(); c.arc(sx(b.x), sy(b.y), b.r * K, 0, 7); c.stroke(); c.setLineDash([]); c.fillStyle = col.bad; c.fillRect(sx(b.x) - 3, sy(b.y) - 12, 6, 12); handles.push({ p, role: 'move', x: sx(b.x), y: sy(b.y) - 6 }); });
+  /* boulder and its lever */
+  const bl = P.find(p => p.type === 'blever'); c.fillStyle = col.rock2; c.beginPath(); c.arc(sx(19), sy(glAt(g, 19) + 0.9), 0.9 * K, 0, 7); c.fill(); label(EV.boulder.ok ? 'boulder (cleared)' : 'boulder 252 N, still on the leg', sx(20.3), sy(glAt(g, 19) + 2.1), EV.boulder.ok ? col.good : col.bad, 'left');
+  if (bl) { c.strokeStyle = col.steel; c.lineWidth = lw(bl); c.beginPath(); c.moveTo(sx(18.5), sy(0.3)); c.lineTo(sx(28.5), sy(1.6)); c.stroke(); handles.push({ p: bl, role: 'pick', x: sx(24), y: sy(1) }); }
+  /* ramps */
+  P.filter(p => p.type === 'ramp').forEach(p => { const leg = EV.legs.find(l => l.id === p.id), bad = (leg && leg.faults.length) || p._rise <= 0 || p._L > GL.rampMax || p._rise / p._L > GL.slopeMax; c.strokeStyle = bad ? col.bad : col.deck; c.lineWidth = lw(p) + 1.5; c.lineCap = 'round'; c.beginPath(); c.moveTo(sx(p.fx), sy(p._fy)); c.lineTo(sx(p.hx), sy(p._hy)); c.stroke();
+    [['foot', p.fx, p._fy], ['head', p.hx, p._hy]].forEach(([role, x, y]) => { c.fillStyle = css('--panel'); c.strokeStyle = bad ? col.bad : col.deck; c.lineWidth = 2; c.beginPath(); c.arc(sx(x), sy(y), 6, 0, 7); c.fill(); c.stroke(); handles.push({ p, role, x: sx(x), y: sy(y) }); });
+    handles.push({ p, role: 'pick', x: sx((p.fx + p.hx) / 2), y: sy((p._fy + p._hy) / 2) });
+    label(`ramp ${fmt(p._L)} m, up ${fmt(p._rise)} m` + (p.roped ? '' : ' · no rope'), sx((p.fx + p.hx) / 2), sy((p._fy + p._hy) / 2) - 9, bad ? col.bad : col.ink); });
+  /* cranes */
+  P.filter(p => p.type === 'crane').forEach(p => { const m = EV.legs.find(l => l.id === p.id), fl = glFloorAt(p.x, g, EV.plats.map(q => ({ x0: q.x0, x1: q.x1, top: q.top }))), top = fl + Math.max(p.rise, 2) + 6.5, x0 = Math.min(p.x, p.x + p.across) - 2.6, x1 = Math.max(p.x, p.x + p.across) + 2.6;
+    c.strokeStyle = col.steel; c.lineWidth = lw(p); c.beginPath(); c.moveTo(sx(x0), sy(glAt(g, x0))); c.lineTo(sx(x0), sy(top)); c.lineTo(sx(x1), sy(top)); c.lineTo(sx(x1), sy(glAt(g, x1))); c.stroke();
+    c.strokeStyle = col.rope; c.lineWidth = 1.5; c.beginPath(); c.moveTo(sx(p.x), sy(top)); c.lineTo(sx(p.x), sy(fl + 5.6)); c.stroke(); c.fillStyle = col.steel; c.fillRect(sx(p.x) - 5, sy(top) - 3, 10, 6);
+    if (p.across) { c.strokeStyle = col.accent; c.setLineDash([4, 4]); c.beginPath(); c.moveTo(sx(p.x), sy(fl + p.rise)); c.lineTo(sx(p.x + p.across), sy(fl + p.rise)); c.stroke(); c.setLineDash([]); }
+    label(`crane: up ${fmt(p.rise)} m` + (p.across ? `, across ${fmt(Math.abs(p.across))} m` : '') + (p.roped ? '' : ' · no rope'), sx((x0 + x1) / 2), sy(top) - 6); handles.push({ p, role: 'move', x: sx(p.x), y: sy(top) }); handles.push({ p, role: 'move', x: sx(p.x), y: sy(fl + 7) }); });
+  /* levers, jacks, winch posts */
+  P.filter(p => p.type === 'lever' || p.type === 'jack' || p.type === 'post').forEach(p => { const fl = glFloorAt(p.x, g, EV.plats.map(q => ({ x0: q.x0, x1: q.x1, top: q.top })));
+    c.fillStyle = p.type === 'post' ? col.rope : col.steel; c.strokeStyle = col.accent; c.lineWidth = 2; c.beginPath();
+    if (p.type === 'post') { c.rect(sx(p.x) - 5, sy(fl + 1.6), 10, 1.6 * K); c.arc(sx(p.x), sy(fl + 1.9), 7, 0, 7); } else { c.moveTo(sx(p.x) - 9, sy(fl)); c.lineTo(sx(p.x), sy(fl + 1.1)); c.lineTo(sx(p.x) + 9, sy(fl)); c.closePath(); }
+    c.fill(); if (isSel(p)) c.stroke(); label(p.type === 'post' ? 'winch post' : p.type === 'lever' ? 'lever' : 'screw jack', sx(p.x), sy(fl + 2.9), col.ink); handles.push({ p, role: 'move', x: sx(p.x), y: sy(fl + 0.9) }); });
+  /* the route: each leg's path, coloured by what the Gumdrop is doing */
+  const kcol = { nudge: col.mute, ground: col.bad, platform: col.warn, ramp: col.good, lift: col.accent, across: col.accent, lower: col.accent, slide: col.mute, fall: col.bad };
+  EV.legs.forEach(l => { let px = l.start.x, py = l.start.y; l.path.forEach(q => { c.strokeStyle = kcol[q.k] || col.ink; c.lineWidth = 3; c.setLineDash(q.k === 'nudge' || q.k === 'slide' || q.k === 'fall' ? [2, 4] : []); c.beginPath(); c.moveTo(sx(px), sy(py) - 2); c.lineTo(sx(q.x), sy(q.y) - 2); c.stroke(); px = q.x; py = q.y; }); c.setLineDash([]);
+    if (l.forceAt && l.force > 0) { c.fillStyle = col.ink; c.beginPath(); c.arc(sx(l.forceAt.x), sy(l.forceAt.y) - 2, 3.5, 0, 7); c.fill(); }
+    c.fillStyle = col.ghost; ship(l.end.x, l.end.y, true); label('after leg ' + (l.i + 1), sx(l.end.x), sy(l.end.y + 5.5), col.mute); });
+  if (EV.stop && EV.stop.wall) { c.strokeStyle = col.bad; c.lineWidth = 4; c.beginPath(); c.moveTo(sx(EV.stop.wall.x), sy(EV.stop.wall.y)); c.lineTo(sx(EV.stop.wall.x), sy(EV.stop.at.y)); c.stroke(); label('wall', sx(EV.stop.wall.x), sy(EV.stop.wall.y) - 6, col.bad); }
+  /* ropes from each puller to the Gumdrop's start */
+  const A = anim ? anim.pos : EV.ship0; c.fillStyle = col.ship; ship(A.x, A.y, false); label('Gumdrop ' + fmt(EV.load, 0) + ' N', sx(A.x), sy(A.y + 4.5), col.ink);
+}
+function ship(x, y, ghost) { c.beginPath(); c.roundRect(sx(x) - 1.6 * K, sy(y + 4), 3.2 * K, 4 * K, 10); c.fill(); if (!ghost) { c.fillStyle = css('--panel'); c.beginPath(); c.arc(sx(x), sy(y + 2.6), 7, 0, 7); c.fill(); } }
+
+/* ---------- the read-out ---------- */
+const SEG = { nudge: s => `nudged ${fmt(s.len)} m (free)`, ground: s => `dragged ${fmt(s.len)} m over rough ground, up to <b>${fmt(s.peak, 0)} N</b>`, platform: s => `slid ${fmt(s.len)} m across a platform, up to <b>${fmt(s.peak, 0)} N</b>`, ramp: s => `rolled ${fmt(s.len)} m up the ramp (${fmt(s.rise)} m higher), <b>${fmt(s.peak, 0)} N</b>`,
+  lift: s => `lifted ${fmt(s.len)} m, <b>${fmt(s.peak, 0)} N</b>`, across: s => `trolley carried it ${fmt(s.len)} m across`, lower: s => `lowered ${fmt(s.len)} m`, slide: s => `pulled ${fmt(s.len)} m sideways off its holder`, fall: s => `<b>fell ${fmt(-s.rise)} m</b>` };
+const NAME = { ramp: 'ramp', crane: 'crane', lever: 'lever', jack: 'screw jack', drag: 'winch post' };
+const WHY = { wall: s => `Stopped: a wall more than ${fmt(GP.wallRise)} m tall is in the way at ${fmt(s.wall.x)} m.`, heavy: () => `Stopped: Smooshy would need more than ${GP.heavy} N here.`, collapse: () => 'Stopped: that platform cannot hold the load.', broken: s => 'Stopped: a roped machine is broken (' + s.faults.map(f => ({ ground: 'the ramp cuts through the ground', steep: 'the ramp is too steep', long: 'the ramp is over 30 m', head: 'the top of the ramp is not resting on anything', rise: 'it lifts too far', across: 'it moves across too far', fulcrum: 'the lever needs an MA of 9 or less', jackcable: 'a jack cannot take a rope', blocks: 'two pulley blocks', winches: 'more than two winches', tangle: 'tangled cables' }[f] || f)).join(', ') + ').',
+  gap: () => 'Every rope has been used, and the Gumdrop is not at the beam yet.', norope: () => 'Nothing is roped to the Gumdrop.', none: () => 'Nothing is pulling the Gumdrop yet. Add a machine and rope it on.' };
+function report() {
+  const r = EV, m = $('#msg'); m.className = 'msg ' + (r.arrived ? 'ok' : 'no'); m.textContent = r.arrived ? `Rescued. The beam can lift the Gumdrop from ${fmt(r.final.x)} m across, ${fmt(r.final.y)} m up.` : WHY[r.stop.why](r.stop);
+  $('#legs').innerHTML = r.legs.map(l => { const cls = l.stopped ? 'bad' : (l.pull > GL.pullOk + 1e-9 || l.scrape + l.bump + l.fall > 0) ? 'warn' : '', lift = l.type === 'lever' || l.type === 'jack', hull = l.scrape + l.bump + l.fall + l.thruster;
+    return `<div class="leg ${cls}"><b>Leg ${l.i + 1}: ${NAME[l.type]}</b> · ${l.segs.map(s => SEG[s.k](s)).join(', then ') || 'did not move'}.<div class="n">` +
+      (lift ? `MA ${fmt(l.ma)} → pull ${fmt(l.pull, 2)} N` : `hardest force ${fmt(l.force, 0)} N ÷ ropes and winches ×${fmt(l.ropeMA)} = pull <b>${fmt(l.pull, 2)} N</b>`) + ` · hand ${fmt(l.hand, 0)} m · work ${fmt(l.work, 0)} J` +
+      (hull > 0 ? ` · hull −${fmt(hull)}%` + [l.thruster ? ' thrusters ' + fmt(l.thruster) : '', l.scrape ? ' scrape ' + fmt(l.scrape) : '', l.bump ? ' bump ' + fmt(l.bump) : '', l.fall ? ' fall ' + fmt(l.fall) : ''].filter(Boolean).join(',') : '') +
+      ` · ${l.simple ? 'students can do this maths' : 'the strip gives this force'}</div></div>`; }).join('') || '<p class="hint">No legs yet.</p>';
+  const s = r.score, d = r.dmg;
+  $('#tot').innerHTML = [['Hardest pull', r.legs.length ? fmt(r.hardest, 2) + ' N' : '–', r.hardest <= 60], ['Oxygen (hand travel)', fmt(r.hand, 0) + ' of 1,500 m', r.hand <= GL.oxy], ['Sugar crystals', r.cost.total + ' of 475', r.cost.total <= GL.budget],
+    ['Hull damage', fmt(d.total) + '%', d.total === 0], ['Damage from', [d.thrusters && 'thrusters ' + fmt(d.thrusters), d.rock && 'boulder ' + d.rock, d.blasts && 'blast ' + d.blasts, d.scrape && 'scraping ' + fmt(d.scrape), d.bumps && 'bumps ' + fmt(d.bumps), d.falls && 'falls ' + fmt(d.falls)].filter(Boolean).join(', ') || 'nothing', true],
+    ['Score (maths point not counted)', s.total == null ? 'not yet' : `${s.total} of ${GL_MAX - 1} · ${s.ending}`, s.total != null && s.total >= 7]].map(([k, v, ok]) => `<div><span>${k}</span><b style="color:${ok ? 'inherit' : 'var(--bad)'}">${v}</b></div>`).join('');
+}
+
+/* ---------- settings for the tapped piece ---------- */
+const TITLE = { ramp: 'Ramp', crane: 'Crane gantry', post: 'Winch post (drags the Gumdrop to it)', platform: 'Platform', lever: 'Lever under the Gumdrop', jack: 'Screw jack under the Gumdrop', blever: 'Lever on the boulder', dyn: 'Dynamite' };
+function slider(p, key, text, min, max, step, unit) { return `<label for="s_${key}">${text}<output>${fmt(p[key], 2)}${unit || ''}</output><input id="s_${key}" type="range" min="${min}" max="${max}" step="${step}" value="${p[key]}" data-k="${key}"></label>`; }
+function pick(p, key, text, opts) { return `<label for="s_${key}">${text}<select id="s_${key}" data-k="${key}">${opts.map(([v, t]) => `<option value="${v}"${String(p[key]) === String(v) ? ' selected' : ''}>${t}</option>`).join('')}</select></label>`; }
+const WOPT = [[0, 'none'], [2, '×2'], [4, '×4'], [6, '×6'], [7, '×7'], [8, '×8'], [10, '×10']], ropeUI = p => pick(p, 'ropes', 'Pulley block ropes', [[1, '1 (no block)'], [2, '2'], [3, '3'], [4, '4']]) + pick(p, 'w1', 'Winch 1', WOPT) + pick(p, 'w2', 'Winch 2', WOPT);
+function settings() {
+  const p = P.find(z => z.id === sel), box = $('#set');
+  if (!p) { box.innerHTML = '<h2>Piece</h2><p class="hint">Tap a piece on the board to change it.</p>'; return; }
+  let h = `<h2>${TITLE[p.type]}</h2>`; const rope = `<label class="chk" for="s_roped"><span class="chk"><input id="s_roped" type="checkbox" data-k="roped"${p.roped ? ' checked' : ''}> Roped to the Gumdrop</span></label>`;
+  if (p.type === 'ramp') h += `<p class="hint">Drag its two ends on the board. Each end rests on whatever is under it. MA = ${fmt(p._L / p._rise, 2)}.</p>` + rope + ropeUI(p);
+  if (p.type === 'crane') h += slider(p, 'rise', 'Lift height', 0.5, 8, 0.5, ' m') + slider(p, 'across', 'Move across (− left, + right)', -8, 8, 0.5, ' m') + rope + ropeUI(p);
+  if (p.type === 'post') h += '<p class="hint">Stands on the ground or a platform. Its rope always goes to the Gumdrop.</p>' + ropeUI(p);
+  if (p.type === 'platform') h += pick(p, 'size', 'Size', [['S', 'Small, holds 4,000 N'], ['M', 'Medium, holds 7,000 N'], ['L', 'Large, holds 10,000 N']]) + slider(p, 'h', 'Height', 0.5, 8, 0.5, ' m');
+  if (p.type === 'lever') h += '<p class="hint">Works when the Gumdrop rests within 1.5 m of it.</p>' + slider(p, 'arm', 'Load to fulcrum (beam is 10 m)', 1, 5, 0.25, ' m') + slider(p, 'rise', 'Lift height', 0.5, 2, 0.5, ' m') + ropeUI(p);
+  if (p.type === 'jack') h += '<p class="hint">Works when the Gumdrop rests within 1.5 m of it. MA 120.</p>' + slider(p, 'rise', 'Lift height', 0.5, 2, 0.5, ' m');
+  if (p.type === 'blever') h += slider(p, 'arm', 'Boulder to fulcrum (beam is 10 m)', 1, 5, 0.25, ' m');
+  if (p.type === 'dyn') h += pick(p, 'big', 'Size', [[false, 'Small (1.5 m)'], [true, 'Big (3 m)']]);
+  box.innerHTML = h + '<div class="row" style="margin-top:8px"><button class="del" id="s_del">Remove this piece</button></div>';
+  box.querySelectorAll('[data-k]').forEach(el => el.addEventListener('input', () => { const k = el.dataset.k; p[k] = el.type === 'checkbox' ? el.checked : k === 'size' ? el.value : k === 'big' ? el.value === 'true' : +el.value; const o = el.closest('label').querySelector('output'); if (o) o.textContent = fmt(p[k], 2) + ' m'; refresh(false); }));
+  $('#s_del').addEventListener('click', () => { P = P.filter(z => z.id !== p.id); sel = null; refresh(true); });
+}
+const TUNE = [['muGround', 'Friction on crater ground', 0.1, 0.8, 0.01], ['muPlat', 'Friction on a platform deck', 0, 0.4, 0.01], ['wallRise', 'A wall is a step taller than (m)', 0.5, 2.5, 0.1], ['nudge', 'Free nudge at the start of a leg (m)', 0, 5, 0.5], ['scrape', 'Scrape damage per metre dragged (%)', 0, 4, 0.1], ['bump', 'Bump damage per metre of step (%)', 0, 15, 0.5], ['fall', 'Fall damage per metre fallen (%)', 0, 20, 0.5], ['wreck', 'Wrecked at this much damage (%)', 30, 100, 5], ['wreckCap', 'A wrecked rescue scores at most', 1, 10, 1]];
+function tune() { $('#tune').innerHTML = TUNE.map(([k, t, a, b, s]) => `<label for="t_${k}">${t}<output>${fmt(GP[k], 2)}</output><input id="t_${k}" type="range" min="${a}" max="${b}" step="${s}" value="${GP[k]}" data-k="${k}"></label>`).join('');
+  $('#tune').querySelectorAll('input').forEach(el => el.addEventListener('input', () => { GP[el.dataset.k] = +el.value; el.closest('label').querySelector('output').textContent = fmt(+el.value, 2); refresh(false); })); }
+function refresh(full) { anim = null; draw(); report(); if (full) settings(); else { const p = P.find(z => z.id === sel), hint = $('#set .hint'); if (p && p.type === 'ramp' && hint) hint.textContent = `Drag its two ends on the board. Each end rests on whatever is under it. MA = ${fmt(p._L / p._rise, 2)}.`; } }
+
+/* ---------- tray, presets, dragging, run ---------- */
+const TRAY = [['Ramp', () => mk('ramp', { fx: 30, hx: 38.6, roped: true, ropes: 4, w1: 7, w2: 0 })], ['Crane', () => mk('crane', { x: 14, rise: 4, across: 0, roped: true, ropes: 4, w1: 7, w2: 4 })], ['Winch post', () => mk('post', { x: 41, ropes: 4, w1: 10, w2: 0 })], ['Platform', () => mk('platform', { x: 24, size: 'M', h: 2 })],
+  ['Lever (ship)', () => mk('lever', { x: 14, arm: 1, rise: 2, ropes: 2, w1: 6, w2: 0 })], ['Screw jack', () => mk('jack', { x: 14, rise: 2 })], ['Lever (boulder)', () => P.some(p => p.type === 'blever') ? null : mk('blever', { x: 19, arm: 1 })], ['Dynamite', () => mk('dyn', { x: 68, big: true })]];
+TRAY.forEach(([t, f]) => { const b = document.createElement('button'); b.textContent = '+ ' + t; b.addEventListener('click', () => { const p = f(); if (!p) return; P.push(p); sel = p.id; refresh(true); }); $('#tray').appendChild(b); });
+{ const b = document.createElement('button'); b.className = 'go'; b.textContent = '▶ Run it'; b.addEventListener('click', run); $('#tray').appendChild(b); }
+Object.keys(PRESETS).forEach(k => { const b = document.createElement('button'); b.textContent = k; b.addEventListener('click', () => { P = PRESETS[k](); sel = null; refresh(true); }); $('#presets').appendChild(b); });
+let drag = null;
+const pt = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * cv.width / r.width, y: (e.clientY - r.top) * cv.height / r.height }; };
+cv.addEventListener('pointerdown', e => { const q = pt(e); let best = null, bd = 26; handles.forEach(h => { const d = Math.hypot(h.x - q.x, h.y - q.y) - (h.role === 'pick' ? -6 : 0); if (d < bd) { bd = d; best = h; } });
+  if (!best) { if (sel) { sel = null; refresh(true); } return; } sel = best.p.id; drag = { h: best, x0: q.x, fx: best.p.fx, hx: best.p.hx, px: best.p.x }; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; refresh(true); });
+cv.addEventListener('pointermove', e => { if (!drag) return; const q = pt(e), p = drag.h.p, d = (q.x - drag.x0) / K, sn = v => Math.round(v * 4) / 4;
+  if (p.type === 'blever') return;
+  if (p.type === 'ramp') { if (drag.h.role === 'foot') p.fx = clamp(sn(wx(q.x)), 1, p.hx - 2); else if (drag.h.role === 'head') p.hx = clamp(sn(wx(q.x)), p.fx + 2, 95); else { const w = drag.hx - drag.fx; p.fx = clamp(sn(drag.fx + d), 1, 95 - w); p.hx = p.fx + w; } }
+  else p.x = clamp(sn(drag.px + d), 1, 95);
+  refresh(false); });
+const up = () => { if (drag) { drag = null; cv.style.cursor = 'grab'; settings(); } }; cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+function run() { const pts = [{ x: EV.ship0.x, y: EV.ship0.y }]; EV.legs.forEach(l => l.path.forEach(q => pts.push(q))); if (pts.length < 2) return; const lens = [0]; for (let i = 1; i < pts.length; i++) lens.push(lens[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  const total = lens[lens.length - 1], dur = clamp(total / 14, 2.5, 9) * 1000, t0 = performance.now(), me = anim = { pos: pts[0] };
+  const tick = now => { if (anim !== me) return; const u = Math.min(1, (now - t0) / dur), d = u * total; let i = 1; while (i < pts.length - 1 && lens[i] < d) i++; const f = lens[i] === lens[i - 1] ? 1 : (d - lens[i - 1]) / (lens[i] - lens[i - 1]); me.pos = { x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * f, y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * f }; draw();
+    if (u < 1) requestAnimationFrame(tick); else setTimeout(() => { if (anim === me) { anim = null; draw(); } }, 1200); };
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { me.pos = pts[pts.length - 1]; draw(); setTimeout(() => { if (anim === me) { anim = null; draw(); } }, 2500); } else requestAnimationFrame(tick); }
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => draw()); new MutationObserver(() => draw()).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+P = PRESETS['Crane, then a ramp beside the platform'](); tune(); refresh(true);
+window.__gb = { get P() { return P; }, set P(v) { P = v; refresh(true); }, get EV() { return EV; }, PRESETS, mk, handles: () => handles, GP };
+</script>

@@ -280,6 +280,8 @@ Do these in stage 3, before converting Parts 2–4, so every converted step inhe
 
 ## 15. NEXT (Saturday 14 Nov 2026): the rescue on real pulling physics. The Workshop stays closed until this is done.
 
+**Superseded on 11 Nov 2026 by `docs/Rescue_Pulling_Physics_Spec.md`.** The model is built and tested (`src/js/4q-pull.js`), and a grey-box is waiting for Tom to play. Read that spec, not the plan below.
+
 **Tom's playtest (9 Nov):** "I've lifted it up and got it near the ramp, but I can't get the ramp next to the platform because then it doesn't count as the machine starting in the right place. I also can't place a platform over a lever, which seems odd. And when I place the ramp on the platform, since next to it won't work, it blocks the Gumdrop from moving. Very punishing of creative ideas and will result in students quitting or building the most boring thing they can. They should be able, theoretically, to just build a load of pulleys and drag the Gumdrop to the ship. That would wreck the Gumdrop and give a really bad score, but it should be possible with the physics. It should only be impossible if there is a big wall stopping it moving in the direction the rope is pulling it. Small walls or bumps, we should be able to drag the Gumdrop over at a small or large cost, depending on how much it's pulled over rough terrain and uneven builds."
 
 **Cause.** The rescue model (`4f-gummylift.js`, about 220 lines) is a strict chain of legs. Each machine must start inside a 3 m × 0.5 m handover box (`GL.hzX`, `GL.hzY`, `inZone`). Pieces block by overlap rules, and the Gumdrop never moves except along a machine's own path.
