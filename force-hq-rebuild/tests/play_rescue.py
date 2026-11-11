@@ -43,7 +43,10 @@ class Board:
     def evr(s, code): return json.loads(s.ev('JSON.stringify(' + code + ')'))
 def skip(pg):
     for sel in ('[data-gr=skip]', '#glSkip'):
-        if pg.locator(sel).is_visible(): pg.click(sel); return
+        if pg.locator(sel).is_visible():
+            try: pg.click(sel, timeout=1500)   # a fast test run can finish between the check and the click
+            except Exception: pass
+            return
     return
 
 with sync_playwright() as p:

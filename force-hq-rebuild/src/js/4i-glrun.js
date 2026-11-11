@@ -262,7 +262,7 @@ function glFinishTest() {
   GLB.save({ id: GLB.mid }, { tried: true, tests: (st.tests || 0) + 1, lastTest });
   $('#glSkip').hidden = true; $('#glBack').hidden = false; glShowTest(lastTest); glRunPaint(); if (typeof glGuidePaint === 'function') glGuidePaint();
   { const rc = $('#glRunCtl'); if (rc) rc.querySelector('[data-gr=skip]').hidden = true; }
-  setTimeout(() => { if (GLR.on && GLR.mode === 'test') glBackToBuild(); }, RMOTION ? 0 : 1200);   // the end picture stays for a moment, then the board is yours again
+  { const mine = GLR.t0; setTimeout(() => { if (GLR.on && GLR.mode === 'test' && GLR.done && GLR.t0 === mine) glBackToBuild(); }, RMOTION ? 0 : 1200); }   /* only this run's own timer may hand the board back: a new test started in the meantime must not be cut short */   // the end picture stays for a moment, then the board is yours again
   const r = $('#glRes'); if (r) r.scrollIntoView({ block: 'nearest', behavior: RMOTION ? 'auto' : 'smooth' });
 }
 function glShowTest(t) {
