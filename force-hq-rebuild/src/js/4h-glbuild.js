@@ -23,9 +23,9 @@ function glSettle() { const g = glGround(GLB.rig).g, pl = glPlatforms(GLB.rig, g
   /* an add-on with no spot yet (from an older save or a test rig) parks beside its machine's cable dot */
   GLB.rig.parts.filter(p => GL_LIFT[p.type]).forEach(m => { const cp = glCablePoint(m, glMachine(m, g, pl)); if (cp) glChainOf(m.id).forEach((id, i) => { const q = glPart(id); if (q.x == null) { q.x = cp.x + 1.6 * (i + 1); q.y = cp.y; } }); });
   GLB.rig.parts.filter(p => glIsAddon(p) && p.x == null).forEach((p, i) => { p.x = 20 + i * 2; p.y = 12; });
-  GLB.rig.parts.filter(p => p.type === 'winch').forEach(p => { p.y = +(glFloorAt(p.x, g, pl) + 0.75).toFixed(2); });
+  GLB.rig.parts.filter(p => p.type === 'winch').forEach(p => { p.y = +(glStand(p, p.x, g, pl).y + 0.75).toFixed(2); });
   /* a winch post stands on the ground or a platform, wherever it is */
-  const post = glPostIds(); GLB.rig.parts.filter(p => p.type === 'block' && post.has(p.id)).forEach(p => { p.y = +(glFloorAt(p.x, g, pl) + 0.8).toFixed(2); }); }
+  const post = glPostIds(); GLB.rig.parts.filter(p => p.type === 'block' && post.has(p.id)).forEach(p => { p.y = +(glStand(p, p.x, g, pl).y + 0.8).toFixed(2); }); }
 function glChanged(noHist) {
   glSettle(); GLB.ev = gpEvaluate(GLB.rig, { hints: glState().hints || 0 }); glSaveRig(); glPaintSide(); glPaintDock(); if (GLB.onChange) GLB.onChange();
 }
@@ -74,6 +74,11 @@ function glPlatBlocked(c) {
     const b = glBounds(p, m, g, pl0); return b.x1 >= x0 && b.x0 <= x1 && b.y1 >= base && b.y0 <= top + 0.3; });
 }
 function glPlatFlash(c) { GLB.flash = { c, until: performance.now() + 1800 }; toast(GL_PLATMSG); }
+/* the level a pointer is choosing at x: the highest platform top that is at or below the pointer (with 1 m of grace), else the ground */
+function glPickOn(x, wy, g, pl) { const q = pl.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).sort((a, b) => b.top - a.top).find(q => wy >= q.top - 1); return q ? q.id : 'ground'; }
+/* the levels a part at x could stand on, lowest first: the ground, then each platform top over it */
+function glLevels(x, g, pl) { return [{ on: 'ground', y: glAt(g, x) }].concat(pl.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).sort((a, b) => a.top - b.top).map(q => ({ on: q.id, y: q.top }))); }
+const GL_STANDS = { crane: 1, lever: 1, jack: 1, winch: 1, ramp: 1 };
 function glAddPart(t, wx, wy) {
   const g = glGround0(), pl = glPlats0(), fl = x => glFloorAt(x, g, pl), x = clamp(glSnap(wx), 1, GL.W - 1); let p, roped = false;
   if (t === 'ramp') p = { type: 'ramp', x1: x, y1: fl(x), L: 12, rise: 3 };
@@ -85,10 +90,12 @@ function glAddPart(t, wx, wy) {
   else if (t.startsWith('plat')) { p = { type: 'platform', size: t[4], x, h: 2 }; if (glPlatBlocked(p)) { glPlatFlash(p); return; } }
   else if (t.startsWith('dyn')) p = { type: 'dyn', big: t === 'dynB', x };
   if (!p) return; glPush(); p.id = glNewId(p.type); GLB.rig.parts.push(p);
+  if (GL_STANDS[p.type]) { p.on = glPickOn(p.type === 'ramp' ? p.x1 : p.x, wy, g, pl); if (p.type === 'ramp') p.y1 = +glStand(p, p.x1, g, pl).y.toFixed(2); }
   if (p.type === 'lever' || p.type === 'jack') glBoulderSnap(p);
   /* dropped by a load: a ramp's foot and a crane's legs snap to the Gumdrop (or the ghost) and the rope clips on */
   if (GL_ROPED[p.type]) { const sp = glLoadSpots().filter(q => Math.abs(q.x - wx) <= 6 && Math.abs(q.y - wy) <= 7).sort((a, b) => Math.hypot(a.x - wx, a.y - wy) - Math.hypot(b.x - wx, b.y - wy))[0];
-    if (sp) { if (p.type === 'ramp') { p.x1 = +(sp.x + 1.5).toFixed(2); p.y1 = +glFloorAt(p.x1, g, pl).toFixed(2); } else p.x = +sp.x.toFixed(2); GLB.rig.cables.push({ a: p.id, b: 'ship' }); roped = true; } }
+    if (sp) { const lvl = x => { const L = glLevels(x, g, pl).filter(q => Math.abs(q.y - sp.y) < 0.6).pop(); return L ? L.on : glPickOn(x, sp.y, g, pl); };   // it stands on whatever the load is resting on
+      if (p.type === 'ramp') { p.x1 = +(sp.x + 1.5).toFixed(2); p.on = lvl(p.x1); p.y1 = +glStand(p, p.x1, g, pl).y.toFixed(2); } else { p.x = +sp.x.toFixed(2); p.on = lvl(p.x); } GLB.rig.cables.push({ a: p.id, b: 'ship' }); roped = true; } }
   let hooked = false;
   if (p.type === 'block') { const dot = glShipDots().filter(d => Math.hypot(d.x - wx, d.y - wy) <= 2.6).sort((a, b) => Math.hypot(a.x - wx, a.y - wy) - Math.hypot(b.x - wx, b.y - wy))[0];
     if (dot) { p.x = +dot.x.toFixed(2); p.y = +(dot.y + 1.1).toFixed(2); GLB.rig.cables.push({ a: p.id, b: 'ship' }); roped = true; hooked = true;
@@ -112,7 +119,8 @@ function glAutoAttach(p) {
   if (glOwner(p.id) || GLB.rig.cables.some(c => c.a === p.id || c.b === p.id)) return; let best = null, bd = 4.5;   // a part that already has a cable (a winch post's block, say) stays as it is
   const g = glGround0(), pl = glPlats0(), byId = {}; GLB.rig.parts.forEach(q => byId[q.id] = q);
   const heads = GLB.rig.parts.filter(q => glIsAddon(q) && q.id !== p.id && !glOwner(q.id) && GLB.rig.cables.some(c => (c.a === 'ship' && c.b === q.id) || (c.b === 'ship' && c.a === q.id)));   // winch posts take more gear too
-  GLB.rig.parts.filter(q => GL_LIFT[q.type] && q.type !== 'jack').concat(heads, [{ id: 'boulder' }]).forEach(q => {
+  const rockBusy = GLB.rig.parts.some(q => q.role === 'boulder');   // a lever or jack is already on the boulder, so a winch dropped near it is meant for a machine
+  GLB.rig.parts.filter(q => GL_LIFT[q.type] && q.type !== 'jack').concat(heads, rockBusy ? [] : [{ id: 'boulder' }]).forEach(q => {
     const end = glChainEnd(q.id), ep = end === 'boulder' ? { x: 18.9, y: glAt(g, 18.7) + 1 } : glCablePoint(byId[end], GL_LIFT[byId[end].type] ? glMachine(byId[end], g, pl) : null);
     const d = Math.hypot(ep.x - p.x, ep.y - p.y); if (d < bd) { bd = d; best = { end, ep }; } });
   if (best) { GLB.rig.cables.push({ a: best.end, b: p.id }); p.x = glSnap(best.ep.x + 1.6, 0.25); p.y = glSnap(best.ep.y + (p.type === 'winch' ? -0.6 : 0.4), 0.25); }
@@ -134,9 +142,26 @@ function glDropOrphans() {
   return orphans.map(p => p.id);
 }
 /* ---------- the canvas: sizing, the draw loop and hit tests ---------- */
+/* the view the board opens in (Tom, 11 Nov 2026: "for the default to be a little more zoomed in to make things a little less finicky"): the crater floor and the wall up to the shelf.
+   The ⤢ button still shows the whole crater. The test build (FAST) keeps the whole crater, so the older tests can reach every spot. */
+const glHomeView = () => FAST ? { z: 1, cx: 48, cy: 12 } : { z: 1.6, cx: 29, cy: 11 };
+/* the opening shot, once: start on the Big Jelly, pan left over the crest to the Gumdrop, and settle in the home view. A tap skips it. */
+const GL_INTRO = [[0, 'The Big Jelly is waiting above the plain.'], [0.3, 'Its tractor beam reaches down to the dotted line.'], [0.72, 'Captain Smooshy and the Gumdrop are stuck down here.']];
+function glIntroStart() {
+  const st = glState(); if (FAST || GLB.ch !== 'c6e' || st.intro || st.runs || (GLB.rig && GLB.rig.parts.length)) return;
+  GLB.save({ id: GLB.mid }, { intro: 1 }); if (RMOTION) return;
+  GLB.intro = { t0: performance.now(), to: { z: GLV.z, cx: GLV.cx, cy: GLV.cy }, from: { cx: 80, cy: 18 }, hold: 1600, pan: 4600, rest: 1500 };
+}
+function glIntroEnd() { const n = GLB.intro; if (!n) return; GLB.intro = null; GLV.z = n.to.z; GLV.cx = n.to.cx; GLV.cy = n.to.cy; glClampView(); if (typeof glGuidePaint === 'function') glGuidePaint(); }
+function glIntroStep(c) {
+  const n = GLB.intro, t = performance.now() - n.t0, k = Math.max(0, Math.min(1, (t - n.hold) / n.pan)), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  GLV.z = n.to.z; GLV.cx = n.from.cx + (n.to.cx - n.from.cx) * e; GLV.cy = n.from.cy + (n.to.cy - n.from.cy) * e; glClampView();
+  if (t > n.hold + n.pan + n.rest) glIntroEnd();
+  return GL_INTRO.filter(q => k >= q[0]).pop()[1];
+}
 function glSize() {
   const cv = GLB.cv; if (!cv) return; const w = cv.getBoundingClientRect().width || 900, narrow = w < 560, LH = narrow ? 760 : GLV.wide;
-  if (GLV.LH !== LH) { GLV.LH = LH; if (narrow) { GLV.z = 3.2; GLV.cx = 24; GLV.cy = 10; } else { GLV.z = 1; GLV.cx = 48; GLV.cy = 12; } }
+  if (GLV.LH !== LH) { GLV.LH = LH; if (narrow) { GLV.z = 3.2; GLV.cx = 24; GLV.cy = 10; } else Object.assign(GLV, glHomeView()); }
   glClampView();
 }
 function glFrameOpts() {
@@ -149,45 +174,53 @@ function glLoop() {
   cancelAnimationFrame(GLB.raf); const step = () => { const cv = GLB.cv; if (!cv || !cv.isConnected) return;
     if (cv.offsetParent && !(GLR && GLR.on)) { glSize(); const c = fit(cv, GLV.LW, GLV.LH), keep = [], now = performance.now();
       Object.keys(GLB.fall || {}).forEach(id => { const f = GLB.fall[id], p = glPart(id), k = (now - f.t0) / f.dur; if (!p || k >= 1) { delete GLB.fall[id]; return; } keep.push([p, p.y]); p.y = f.y0 + (keep[keep.length - 1][1] - f.y0) * k * k; });   // gravity: slow, then faster
-      try { glDrawWorld(c, glFrameOpts()); } catch (e) { if (!GLB.drawErr) { GLB.drawErr = 1; try { console.warn('Board drawing problem:', e); } catch (_) {} } }   /* one bad frame must never freeze the board */
+      const cap = GLB.intro ? glIntroStep(c) : null;
+      try { glDrawWorld(c, glFrameOpts()); if (cap) { glLbl(c, cap, GLV.LW / 2, GLV.LH - 34, GLC.ink, 17, 'center', '#fffaf2'); glLbl(c, 'Tap to skip', GLV.LW / 2, GLV.LH - 10, '#ffe7b8', 11, 'center', 'rgba(18,12,46,.7)'); } } catch (e) { if (!GLB.drawErr) { GLB.drawErr = 1; try { console.warn('Board drawing problem:', e); } catch (_) {} } }   /* one bad frame must never freeze the board */
       finally { keep.forEach(([p, y]) => { p.y = y; }); } }
     GLB.raf = requestAnimationFrame(step); }; step();
 }
 const glPt = e => { const r = GLB.cv.getBoundingClientRect(), sx = (e.clientX - r.left) * GLV.LW / r.width, sy = (e.clientY - r.top) * GLV.LH / r.height; return { sx, sy, x: glWX(sx), y: glWY(sy) }; };
-function glHit(P) {
+function glHit(P, skip) {
+  skip = skip || new Set();
   const g = glGround0(), pl = glPlats0(), byId = {}; GLB.rig.parts.forEach(q => byId[q.id] = q); const ms = {}; GLB.rig.parts.filter(q => GL_LIFT[q.type]).forEach(q => ms[q.id] = glMachine(q, g, pl));
   const near = (q, r) => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy) <= (r || 14);
   /* dynamite first: its tap area is at least 22 px across on screen (44 px for a finger), tested before cable dots and platform edges
      (Tom, 8 Nov 2026: it was only 1.2 m wide, tiny on a phone, and a cable dot or a ramp handle beside it won the tap) */
   { const sc = (GLB.cv.getBoundingClientRect().width || GLV.LW) / GLV.LW, minL = (GLB.touch ? 44 : 22) / sc, u = glU();
-    for (const p of GLB.rig.parts.filter(q => q.type === 'dyn').slice().reverse()) { const cx = glSX(p.x), y0 = glSY(glAt(g, p.x)), y1 = glSY(glAt(g, p.x) + 1.9), w = Math.max(1.2 * u, minL) / 2, mid = (y0 + y1) / 2, h = Math.max(Math.abs(y0 - y1), minL) / 2;
+    for (const p of GLB.rig.parts.filter(q => q.type === 'dyn' && !skip.has(q.id)).slice().reverse()) { const cx = glSX(p.x), y0 = glSY(glAt(g, p.x)), y1 = glSY(glAt(g, p.x) + 1.9), w = Math.max(1.2 * u, minL) / 2, mid = (y0 + y1) / 2, h = Math.max(Math.abs(y0 - y1), minL) / 2;
       if (Math.abs(P.sx - cx) <= w && Math.abs(P.sy - mid) <= h) return { id: p.id, what: 'body' }; } }
   /* the nearest small target wins: cable dots and ramp-top handles sit close together */
   let best = null, bd = 14; const cand = (d, r) => { if (d < bd) { bd = d; best = r; } }, dist = q => Math.hypot(glSX(q.x) - P.sx, glSY(q.y) - P.sy);
-  glShipDots().forEach(d => cand(dist(d), { id: 'ship', what: 'cable', at: { x: d.x, y: d.y }, spot: d.spot }));
-  for (const p of GLB.rig.parts) { const q = glCablePoint(p, ms[p.id]); if (q) cand(dist(q), { id: p.id, what: 'cable', at: q }); if (p.type === 'ramp') cand(dist(ms[p.id].end) - 2, { id: p.id, what: 'head' }); }
+  if (!skip.size) glShipDots().forEach(d => cand(dist(d), { id: 'ship', what: 'cable', at: { x: d.x, y: d.y }, spot: d.spot }));
+  if (!skip.size) for (const p of GLB.rig.parts) { const q = glCablePoint(p, ms[p.id]); if (q) cand(dist(q), { id: p.id, what: 'cable', at: q }); if (p.type === 'ramp') cand(dist(ms[p.id].end) - 2, { id: p.id, what: 'head' }); }
   if (best) return best;
-  const bcp = { x: 18.9, y: glAt(g, 18.7) + 1 }; if (!GLB.drag && near(bcp, 12)) return { id: 'boulder', what: 'cable', at: bcp };
-  for (const pf of pl.slice().reverse()) if (P.x >= pf.x0 && P.x <= pf.x1 && Math.abs(glSY(pf.top) - P.sy) <= 12) return { id: pf.id, what: 'top' };
+  const bcp = { x: 18.9, y: glAt(g, 18.7) + 1 }; if (!skip.size && !GLB.drag && near(bcp, 12)) return { id: 'boulder', what: 'cable', at: bcp };
+  for (const pf of pl.slice().reverse()) if (!skip.has(pf.id) && P.x >= pf.x0 && P.x <= pf.x1 && Math.abs(glSY(pf.top) - P.sy) <= 12) return { id: pf.id, what: 'top' };
   const order = ['block', 'winch', 'dyn', 'jack', 'lever', 'crane', 'ramp', 'platform'];
-  for (const t of order) for (const p of GLB.rig.parts.filter(q => q.type === t).slice().reverse()) {
+  for (const t of order) for (const p of GLB.rig.parts.filter(q => q.type === t && !skip.has(q.id)).slice().reverse()) {
     if (t === 'ramp') { const m = ms[p.id], a = m.start, b = m.end, ax = glSX(a.x), ay = glSY(a.y), bx = glSX(b.x), by = glSY(b.y), L2 = (bx - ax) ** 2 + (by - ay) ** 2, k = clamp(((P.sx - ax) * (bx - ax) + (P.sy - ay) * (by - ay)) / L2, 0, 1);
       if (Math.hypot(ax + k * (bx - ax) - P.sx, ay + k * (by - ay) - P.sy) <= 12) return { id: p.id, what: 'body' }; continue; }
     const b = glBounds(p, ms[p.id], g, pl); if (P.x >= b.x0 - 0.3 && P.x <= b.x1 + 0.3 && P.y >= b.y0 - 0.4 && P.y <= b.y1 + 0.4) return { id: p.id, what: 'body' };
   }
   return null;
 }
+/* every piece under the pointer, top first (Tom, 11 Nov 2026: "I want to be able to click on things that are on top of each other") */
+function glHitStack(P) { const out = [], skip = new Set(['_']); for (let i = 0; i < 8; i++) { const h = glHit(P, skip); if (!h) break; out.push(h); skip.add(h.id); } return out; }
 /* ---------- pointer handling on the board ---------- */
 function glBindBoard() {
   const cv = GLB.cv;
   cv.addEventListener('pointerdown', e => {
+    if (GLB.intro) { e.preventDefault(); glIntroEnd(); return; }
     if (GLB.readOnly || (GLR && GLR.on)) return; GLB.touch = e.pointerType === 'touch' || e.pointerType === 'pen'; const P = glPt(e); e.preventDefault(); try { cv.setPointerCapture(e.pointerId); } catch (_) {}
     if (GLB.place) { const t = GLB.place; GLB.place = null; glTrayMark(); glAddPart(t, P.x, P.y); return; }
     if (GLB.rulerOn && GLB.ruler) for (const k of ['a', 'b']) if (Math.hypot(glSX(GLB.ruler[k].x) - P.sx, glSY(GLB.ruler[k].y) - P.sy) <= 16) { GLB.drag = { kind: 'ruler', k, P0: P, moved: false }; return; }
-    const hit = glHit(P);
+    let hit = glHit(P), stack = [];
+    /* pieces lying on top of each other: the one already picked is the one you drag, and a tap moves on to the next one down */
+    if (hit) { stack = glHitStack(P); if (hit.what === 'cable' && hit.id !== 'ship' && hit.id !== 'boulder' && !stack.some(h => h.id === hit.id)) stack.unshift(hit);
+      if (hit.what === 'body' || hit.what === 'top') { const mine = stack.find(h => h.id === GLB.sel); if (mine && mine.what === 'body') hit = mine; } }
     if (!hit) { GLB.drag = { kind: 'pan', P0: P, cx: GLV.cx, cy: GLV.cy, moved: false }; return; }
-    if (hit.what === 'cable') { GLB.drag = { kind: 'cable', from: hit.id, spot: hit.spot, P0: P, line: { a: hit.at, b: { x: P.x, y: P.y } }, moved: false }; return; }
-    const p = glPart(hit.id); GLB.drag = { kind: hit.what, id: hit.id, P0: P, orig: JSON.parse(JSON.stringify(p)), chain: GL_LIFT[p.type] ? glChainOf(p.id).map(i => [i, glPart(i).x, glPart(i).y]) : [], moved: false, pushed: false };
+    if (hit.what === 'cable') { GLB.drag = { kind: 'cable', from: hit.id, id: hit.id, spot: hit.spot, P0: P, line: { a: hit.at, b: { x: P.x, y: P.y } }, moved: false, stack: stack.map(h => h.id), wasSel: GLB.sel === hit.id }; return; }
+    const p = glPart(hit.id); GLB.drag = { kind: hit.what, id: hit.id, P0: P, orig: JSON.parse(JSON.stringify(p)), chain: GL_LIFT[p.type] ? glChainOf(p.id).map(i => [i, glPart(i).x, glPart(i).y]) : [], moved: false, pushed: false, stack: stack.map(h => h.id), wasSel: GLB.sel === hit.id };
   });
   cv.addEventListener('pointermove', e => {
     const d = GLB.drag; if (!d) return; const P = glPt(e);
@@ -200,9 +233,9 @@ function glBindBoard() {
     if (d.kind === 'head') { const a = { x: p.x1, y: p.y1 }, vx = Math.max(0.5, P.x - a.x), vy = Math.max(0.5, P.y - a.y); let L = clamp(glSnap(Math.hypot(vx, vy)), 1, GL.rampMax), rise = clamp(glSnap(vy), 0.5, L / 2);
       GLB.hintLine = Math.hypot(vx, vy) > GL.rampMax + 0.3 ? 'That\'s as long as a ramp can be: 30 m.' : vy > L / 2 + 0.3 ? 'That\'s as steep as a ramp can go: it can rise half its length.' : ''; p.L = L; p.rise = rise; }
     else if (d.kind === 'top') { const pf = glPlats0().find(q => q.id === p.id); p.h = clamp(glSnap(P.y - pf.base), 0.5, GL.platMaxH); }
-    else if (p.type === 'ramp') { p.x1 = clamp(glSnap(d.orig.x1 + dx), 0.5, GL.W - 2); p.y1 = +glFloorAt(p.x1, g, pl).toFixed(2); }
-    else if (glIsAddon(p)) { p.x = clamp(glSnap(d.orig.x + dx, 0.25), 0, GL.W); p.y = clamp(glSnap(d.orig.y + (P.y - d.P0.y), 0.25), -1, 28); }
-    else { p.x = clamp(glSnap(d.orig.x + dx), 0.5, GL.W - 0.5); if (p.type === 'lever' || p.type === 'jack') glBoulderSnap(p); }
+    else if (p.type === 'ramp') { p.x1 = clamp(glSnap(d.orig.x1 + dx), 0.5, GL.W - 2); glDragLevel(p, d, P, p.x1, g, pl); p.y1 = +glStand(p, p.x1, g, pl).y.toFixed(2); }
+    else if (glIsAddon(p)) { p.x = clamp(glSnap(d.orig.x + dx, 0.25), 0, GL.W); p.y = clamp(glSnap(d.orig.y + (P.y - d.P0.y), 0.25), -1, 28); if (p.type === 'winch') p.on = glPickOn(p.x, P.y, g, pl); }
+    else { p.x = clamp(glSnap(d.orig.x + dx), 0.5, GL.W - 0.5); glDragLevel(p, d, P, p.x, g, pl); if (p.type === 'lever' || p.type === 'jack') glBoulderSnap(p); }
     if (p.type === 'platform') { d.bad = glPlatBlocked(p); if (d.bad) d.badC = { type: 'platform', size: p.size, x: p.x, h: p.h }; }
     if (glIsAddon(p) && glIsPost(p.id)) { const fy = glFloorAt(p.x, g, pl); p.y = +(fy + (p.type === 'winch' ? 0.75 : 0.8)).toFixed(2); }   // a winch post stays on the ground or a platform as it moves
     /* add-ons ride along with their machine */
@@ -211,17 +244,29 @@ function glBindBoard() {
   });
   const up = e => {
     const d = GLB.drag; GLB.drag = null; if (!d) return; const P = glPt(e); GLB.hintLine = '';
-    if (d.kind === 'cable') { if (!d.moved) { if (d.from !== 'boulder' && d.from !== 'ship') { GLB.sel = d.from; glOpenMenu(d.from); } return; }
+    if (d.kind === 'cable') { if (!d.moved) { if (d.from !== 'boulder' && d.from !== 'ship') glTapPick(d); return; }
       const hit = glHit(P), to = hit && hit.id !== d.from ? hit.id : null; if (to) { glPush(); if (glConnect(d.from, to)) glChanged(); else GLB.hist.pop(); }
       else if (d.from === 'ship' && d.spot) glUnrope(d.spot); return; }   /* a rope dragged off the Gumdrop's hook and let go in empty space comes off again */
-    if (d.kind === 'pan') { if (!d.moved) GLB.sel = null; else glSaveRig(); return; }
+    if (d.kind === 'pan') { if (!d.moved) { GLB.sel = null; glCloseMenu(); } else glSaveRig(); return; }
     if (d.kind === 'ruler') return;
-    if (!d.moved) { GLB.sel = d.id; glOpenMenu(d.id); return; }
+    if (!d.moved) { glTapPick(d); return; }
     const p = glPart(d.id); if (p && glIsAddon(p)) glAutoAttach(p);
     if (d.bad && p) { Object.assign(p, { x: d.orig.x, h: d.orig.h }); glPlatFlash(d.badC); }   /* a platform let go under a machine goes back to where it was */
     glChanged();
   };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', () => { GLB.drag = null; });
+}
+/* while a machine is dragged it keeps the level it was on. Pull it clearly up (or down) and it steps onto the next level above (or below) at that spot. */
+function glDragLevel(p, d, P, x, g, pl) {
+  if (!GL_STANDS[p.type]) return; const L = glLevels(x, g, pl), dy = P.y - d.P0.y, o = d.orig.on, y0 = d.y0 != null ? d.y0 : (d.y0 = glStand(d.orig, d.orig.type === 'ramp' ? d.orig.x1 : d.orig.x, g, pl).y);
+  let i = o ? L.findIndex(q => q.on === o) : L.length - 1; if (i < 0) i = L.reduce((b, q, j) => Math.abs(q.y - y0) < Math.abs(L[b].y - y0) ? j : b, 0); if (o && !L.some(q => q.on === o)) i = 0;
+  if (dy > 1.2) i = Math.min(L.length - 1, i + 1); else if (dy < -1.2) i = Math.max(0, i - 1);
+  p.on = L[i].on;
+}
+/* a tap picks the piece under the pointer; a tap on the piece that is already picked moves on to the next one underneath, and round again */
+function glTapPick(d) {
+  let id = d.id; const st = d.stack || []; if (d.wasSel && st.length > 1) id = st[(st.indexOf(d.id) + 1) % st.length];
+  GLB.sel = id; glOpenMenu(id); if (st.length > 1) { const s2 = $('#glStatus'); if (s2) s2.textContent = `${st.length} pieces are on top of each other here. Tap again to pick the next one.`; }
 }
 function glRulerSnap(P) { const g = glGround0(); let x = glSnap(P.x, 0.1), y = glSnap(P.y, 0.1); const gy = glAt(g, x); if (Math.abs(y - gy) < 0.5) y = +gy.toFixed(1);
   glPlats0().forEach(q => { if (x >= q.x0 && x <= q.x1 && Math.abs(y - q.top) < 0.5) y = q.top; }); return { x, y }; }
@@ -231,7 +276,8 @@ function glCloseMenu() { GLB.dockId = null; glPaintDock(); }
 function glOpenMenu(id) { GLB.dockId = id; glPaintDock(); }
 function glPaintDock() {
   const d = GLB.dock; if (!d) return; const id = GLB.dockId, p = id && glPart(id);
-  if (!p) { GLB.dockId = null; dkSet(d, DK_EMPTY); return; }
+  if (!p) { GLB.dockId = null; dkSet(d, DK_EMPTY); d.hidden = true; if (d.parentElement) d.parentElement.classList.remove('dockopen'); return; }
+  d.hidden = false; if (d.parentElement) d.parentElement.classList.add('dockopen');   // on a phone the tutorial folds to its title while the settings card is open
   const ev = GLB.ev, leg = ev && ev.legs.find(l => l.id === id), g = glGround0(), pl = glPlats0();
   const mach = GL_LIFT[p.type] ? glMachine(p, g, pl) : null, faults = (leg ? leg.faults : mach ? mach.faults.concat(glAddons(GLB.rig, id).faults) : []).filter((f, i, a) => a.indexOf(f) === i);
   const pm = (k, lab, val) => `<div class="glrow"><span>${lab}</span><button type="button" class="ghost sm" data-gm="${k}-" aria-label="Less">−</button><b>${val}</b><button type="button" class="ghost sm" data-gm="${k}+" aria-label="More">+</button></div>`;
@@ -244,7 +290,7 @@ function glPaintDock() {
   else if (p.type === 'crane') { title = 'Crane gantry'; icon = '🏗️'; const ac = p.across || 0, ad = p.adir || (ac < 0 ? -1 : 1);
     body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`) + pm('across', 'Move across', ac ? `${fmt(Math.abs(ac), 1)} m` : '0 m')
       + `<div class="glrow"><span>Direction</span><button type="button" class="ghost sm ${ad < 0 ? 'on' : ''}" data-gm="dirL">Left</button><button type="button" class="ghost sm ${ad > 0 ? 'on' : ''}" data-gm="dirR">Right</button></div>`
-      + `<p class="glnote">${ac ? 'The trolley carries the load across, then sets it down on the glowing spot. Carrying it across adds no lifting work.' : 'The trolley rolls along the top beam. Move across, then it sets the load down on a shelf or platform.'}</p>` + body; }
+      + `<p class="glnote">${ac ? 'The trolley carries the load across, then lowers it until it rests on whatever is below. Only the lift goes into your maths: carrying across and lowering add no work.' : 'The trolley rolls along the top beam. Use Move across, and it lowers the load onto whatever is below.'}</p>` + body; }
   else if (p.type === 'jack') { title = p.role === 'boulder' ? 'Screw jack (on the boulder)' : 'Screw jack'; icon = '🔩'; body = pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`); }
   else if (p.type === 'lever') { title = p.role === 'boulder' ? 'Lever (on the boulder)' : 'Lever'; icon = '⚖️'; help = 'lever'; body = pm('arm', 'Load arm', `${fmt(p.arm, 1)} m`) + `<p class="glnote">Effort arm: <b>${fmt(GL.beam - p.arm, 1)} m</b>. The beam is 10 m long.</p>` + (p.role === 'boulder' ? '' : pm('rise', 'Lifts', `${fmt(p.rise, 1)} m`)); acts += '<button type="button" class="ghost sm" data-gm="flip">↔ Turn it around</button>'; }
   else if (p.type === 'platform') { title = `${GL_PLAT[p.size].name} platform`; icon = '◻️'; body = pm('h', 'Height', `${fmt(p.h, 1)} m`) + `<div class="glrow">${['S', 'M', 'L'].map(s => `<button type="button" class="ghost sm ${p.size === s ? 'on' : ''}" data-gm="size${s}">${GL_PLAT[s].name}</button>`).join('')}</div><p class="glnote">Holds <b>${GL_PLAT[p.size].holds.toLocaleString('en-GB')} N</b>. Drag its top edge to change the height. The Gumdrop lands on platforms.</p>`; }
@@ -258,19 +304,23 @@ function glPaintDock() {
       body += `<p class="glnote"><b>Winch post.</b> Smooshy winches the Gumdrop over to here, dragging it along whatever is in the way. ${rp} pulley rope${rp > 1 ? 's' : ''}${wn.slice(0, GL.winchMax).map(q => ` × winch ×${q.ratio}`).join('')} = <b>MA ${fmt(ma, 0)}</b>.</p>`; }
     else if (!glOwner(id) && !roped) acts += '<button type="button" class="ghost sm" data-gm="rope">🪢 Rope it to the Gumdrop</button>'; }
   else if (p.type === 'dyn') { title = p.big ? 'Big dynamite' : 'Small dynamite'; icon = p.big ? '💥' : '🧨'; body = `<p class="glnote">Blasts a hole ${p.big ? '3' : '1.5'} m deep and ${p.big ? '6' : '3'} m wide when the rescue launches. Careful near the Gumdrop!</p>`; acts += `<button type="button" class="ghost sm" data-gm="big">Swap to ${p.big ? 'small' : 'big'}</button>`; }
+  if (GL_STANDS[p.type] && p.role !== 'boulder') { const x = p.type === 'ramp' ? p.x1 : p.x, L = glLevels(x, g, pl), cur = glStand(p, x, g, pl);
+    if (L.length > 1) body += `<div class="glrow"><span>${p.type === 'ramp' ? 'Foot on' : 'Stands on'}</span>${L.map((q, i) => `<button type="button" class="ghost sm ${(q.on === 'ground' ? cur.kind === 'ground' : cur.id === q.on) ? 'on' : ''}" data-gm="on:${q.on}">${q.on === 'ground' ? 'Ground' : L.length > 2 ? `Platform ${i} (${fmt(q.y, 1)} m)` : 'Platform'}</button>`).join('')}</div>`; }
   if (cabled) acts += '<button type="button" class="ghost sm" data-gm="cut">✂ Cut its cables</button>';
-  acts += '<button type="button" class="ghost sm" data-gm="del">🗑 Remove</button>';
+  acts += '<button type="button" class="ghost sm" data-gm="del">🗑 Remove</button><button type="button" class="ghost sm glx" data-gm="close" aria-label="Close the settings">✕ Close</button>';
   dkSet(d, dkHTML({ icon, title, help, body, fb, actions: acts })); if (typeof glGuideThrob === 'function') glGuideThrob();
 }
 function glMenuAct(k) {
   const id = GLB.dockId, p = id && glPart(id); if (!p) return;
   if (k === 'del') return glRemove(id);
+  if (k === 'close') { GLB.sel = null; return glCloseMenu(); }
   if (k.startsWith('size') && glPlatBlocked(Object.assign({}, p, { size: k[4] }))) return glPlatFlash(Object.assign({}, p, { size: k[4] }));
   if (k === 'h+' && glPlatBlocked(Object.assign({}, p, { h: Math.min(GL.platMaxH, p.h + 0.5) }))) return glPlatFlash(Object.assign({}, p, { h: Math.min(GL.platMaxH, p.h + 0.5) }));
   glPush();
   if (k === 'cut') GLB.rig.cables = GLB.rig.cables.filter(c => c.a !== id && c.b !== id);
   else if (k === 'rope') { if (!GLB.rig.cables.some(c => (c.a === 'ship' && c.b === id) || (c.b === 'ship' && c.a === id))) GLB.rig.cables.push({ a: 'ship', b: id }); }
   else if (k.startsWith('mv')) { const d = +k.slice(2); glPostChain(id).forEach(i => { const q = glPart(i); if (q) q.x = clamp(+(q.x + d).toFixed(2), 0.5, GL.W - 0.5); }); }   // slide a winch post along the ground
+  else if (k.startsWith('on:')) { p.on = k.slice(3); if (p.type === 'ramp') p.y1 = +glStand(p, p.x1, glGround0(), glPlats0()).y.toFixed(2); }
   else if (k === 'flip') p.dir = -(p.dir || 1);
   else if (k === 'dirL' || k === 'dirR') { p.adir = k === 'dirL' ? -1 : 1; if (p.across) p.across = Math.abs(p.across) * p.adir; }
   else if (k === 'big') p.big = !p.big;
@@ -328,7 +378,7 @@ function glToolAct(k) {
     toast('✓ Cleared. The boulder, the Gumdrop and the ground are as they were.', 'ok'); }
   else if (k === 'ruler') { GLB.rulerOn = !GLB.rulerOn; if (!GLB.ruler) GLB.ruler = { a: { x: glSnap(GLV.cx - 6, 0.1), y: 0 }, b: { x: glSnap(GLV.cx + 4, 0.1), y: 6 } }; if (GLB.rulerOn) { GLB.ruler.a = glRulerSnap({ x: GLB.ruler.a.x, y: GLB.ruler.a.y }); } $('[data-gt=ruler]').classList.toggle('on', GLB.rulerOn); }
   else if (k === 'zin' || k === 'zout') { GLV.z = clamp(GLV.z * (k === 'zin' ? 1.5 : 1 / 1.5), 1, 4); glClampView(); glSaveRig(); }
-  else if (k === 'zall') { GLV.z = 1; GLV.cx = 48; GLV.cy = GLV.LH > GLV.wide ? 15 : 12; glClampView(); }
+  else if (k === 'zall') { if (GLB.intro) glIntroEnd(); GLV.z = 1; GLV.cx = 48; GLV.cy = GLV.LH > GLV.wide ? 15 : 12; glClampView(); }
 }
 /* the board, built into a host element */
 function glBoardHTML() {
@@ -336,8 +386,8 @@ function glBoardHTML() {
     <div class="glarea"><div class="glboard"><div class="glcv"><div class="glmchd" aria-hidden="true"><i class="glled"></i><i class="glled"></i><span>GUMMY MISSION CONTROL · RESCUE SIMULATOR</span><i class="glled"></i><i class="glled"></i></div><canvas id="glCv" role="img" aria-label="Glimmer-9's crater, side-on. The Gumdrop is stuck on the crater floor with a boulder against its landing leg. The crater wall rises to a shelf at 6 m, then a bulge, then the crest at 15 m. The Big Jelly waits beyond the crest."></canvas>
       <div class="glzoom"><button type="button" class="ghost sm" data-gt="zin" aria-label="Zoom in">＋</button><button type="button" class="ghost sm" data-gt="zout" aria-label="Zoom out">−</button><button type="button" class="ghost sm" data-gt="zall" aria-label="See the whole crater">⤢</button></div>
       <button type="button" class="go glplay" id="glRun">▶ Test in simulator</button><div class="glrunctl" id="glRunCtl" hidden><button type="button" class="ghost sm" data-gr="skip">⏭ Skip</button><button type="button" class="go sm" data-gr="edit">🔧 Back to building</button></div><div class="glaccept" id="glAccept" role="status" hidden><b>Mission accepted 🚀</b><span>GASA approves your maths!</span></div></div>
-      <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div></div>
-      <aside class="dock" id="glDock" aria-label="Settings for the machine you tapped" aria-live="polite"></aside></div>
+      <div id="glGuideHost"></div><aside class="dock glfloat" id="glDock" hidden aria-label="Settings for the machine you tapped" aria-live="polite"></aside>
+      <div class="gltray" id="glTray" role="toolbar" aria-label="Parts tray: tap a part, then tap the crater (or drag it in)">${GL_TRAY.map(i => `<button type="button" class="gltry" data-add="${i.t}"><span class="ic" aria-hidden="true">${i.icon}</span><b>${i.name}</b><small>💎 ${i.cost}${i.wt ? ` · ${i.wt}` : ''}</small></button>`).join('')}</div></div></div>
     <p class="scaleNote" id="glStatus"></p>
     <div class="row gltools"><button type="button" class="ghost sm" data-gt="ruler">📏 Ruler</button><button type="button" class="ghost sm" data-gt="undo">↶ Undo</button><button type="button" class="ghost sm" data-gt="clear">Clear all</button></div>`;
 }
@@ -357,8 +407,8 @@ function glMountBoard(host, opts) {
       const r = GLB.cv.getBoundingClientRect(); if (GLB.trayDrag && ev2.clientX >= r.left && ev2.clientX <= r.right && ev2.clientY >= r.top && ev2.clientY <= r.bottom) { const P = glPt(ev2); GLB.place = null; glAddPart(t, P.x, P.y); glTrayMark(); }
       setTimeout(() => { GLB.trayDrag = false; }, 0); };
     document.addEventListener('pointermove', mv); document.addEventListener('pointerup', upf); document.addEventListener('pointercancel', cx); });
-  glSize(); if (st.view && st.view.LH === GLV.LH) { GLV.z = st.view.z; GLV.cx = st.view.cx; GLV.cy = st.view.cy; glClampView(); }
-  glLoop();
+  GLV.LH = 0; glSize(); if (st.view && st.view.LH === GLV.LH) { GLV.z = st.view.z; GLV.cx = st.view.cx; GLV.cy = st.view.cy; glClampView(); }
+  glIntroStart(); glLoop();
 }
 
 /* ---------- the Part 5 Challenge card ---------- */
@@ -367,11 +417,11 @@ function renderGummyLift(ch, m, host, save) {
   const card = h('section', { class: 'panel mission glwrap', id: 'mi-gl' }); host.appendChild(card);
   card.innerHTML = `${remindersHTML()}<details class="glbrief"${st.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
       <p>The Gumdrop weighs <b>6,300 N</b>. Smooshy can only pull <b>60 N</b>. If he has to pull harder, he fires the broken thrusters, and they damage the ship.</p>
-      <p>Get the Gumdrop up to the dotted line, and the Big Jelly's tractor beam does the rest. Rope machines to the Gumdrop, and each one picks it up from wherever it is resting. You can even drag it across the ground with a pulley and winch post, but dragging scrapes the hull.</p>
+      <p>Get the Gumdrop up to the dotted line, and the Big Jelly's tractor beam does the rest. Rope machines to the Gumdrop, and each one picks it up from wherever it is resting. You can even drag it across the ground with a pulley and winch post, but dragging scrapes the hull and can tip the Gumdrop onto its side. A crane lift stands it back up.</p>
       <p>💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money. You have <b>475</b> to spend. Smooshy has enough oxygen for <b>1,500 m</b> of pulling.</p>
-      <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg.</p>
+      <p>First, free the Gumdrop: a <b>252 N</b> boulder is stuck against its leg. If the boulder is still on when the Gumdrop is pulled, the strain can tear the leg off.</p>
       <p>Test your route in the simulator, work out the maths for every leg in your route strip, then send it to GASA. When GASA approves your maths, the rescue launches!</p></div></details>
-    <div id="glGuideHost"></div><div id="glBoardHost"></div><div id="glStripHost"></div><div id="glRunHost"></div>`;
+    <div id="glBoardHost"></div><div id="glStripHost"></div><div id="glRunHost"></div>`;
   glMountBoard($('#glBoardHost', card), { onChange: () => { if (typeof glRunPaint === 'function') glRunPaint(); } });
   if (typeof glMountGuide === 'function') glMountGuide($('#glGuideHost', card));
   if (typeof glMountStrip === 'function') glMountStrip($('#glStripHost', card));

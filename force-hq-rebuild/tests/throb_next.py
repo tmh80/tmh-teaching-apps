@@ -161,10 +161,10 @@ with sync_playwright() as p:
     chk('guided start: the lever tile throbs first (one thing only)', throbbing(pg) == ['lever'], throbbing(pg))
     B.ev("(()=>{glAddPart('lever',18.2,0);return 1})()"); pg.wait_for_timeout(300)
     chk('guided start: with the lever placed and its panel open, the load-arm button throbs instead', throbbing(pg) == ['arm-'], throbbing(pg))
-    ev("(()=>{const l=glWarmLever();l.arm=1;glChanged()})()"); pg.wait_for_timeout(300); chk('guided start: once the pull is 60 N or less the next piece (the ramp tile) throbs', throbbing(pg) == ['ramp'], throbbing(pg))
+    ev("(()=>{const l=glWarmLever();l.arm=1;glChanged()})()"); pg.wait_for_timeout(300); chk('tutorial: at the choice of first leg nothing throbs', throbbing(pg) == [], throbbing(pg)); ev("glTutSave({a:'ramp'}); glGuidePaint()"); pg.wait_for_timeout(200); chk('tutorial: with a ramp chosen, the ramp tile throbs', throbbing(pg) == ['ramp'], throbbing(pg))
     ev("GLB.save({id:GLB.mid},{guide:'done'});glGuidePaint()"); pg.wait_for_timeout(300); chk('guided start closed: nothing throbs', throbbing(pg) == [])
-    txt = ev("GLG_STEPS.length"); ev("GLB.rig={v:2,parts:[],cables:[]}")
-    src = ev("glGuidePaint.toString()"); chk('guided start final message has the new wording', "Well done, engineer!</b> Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly\\'s tractor beam pulls it in. You don\\'t need to move it across." in src or "Keep building up to the dotted line. Once the Gumdrop is level with it, the Big Jelly's tractor beam pulls it in. You don't need to move it across." in src)
+    txt = ev("Object.keys(GLG).length"); ev("GLB.rig={v:2,parts:[],cables:[]}")
+    src = ev("glGuidePaint.toString()"); chk('tutorial final message says to build up to the dotted line', "Keep building until the Gumdrop is level with the dotted line, and the Big Jelly's tractor beam pulls it in. You don't need to move it across." in src, src[-900:])
     # not-yet message with metres
     open_part5(pg); B = Board(pg); r1 = B.add('ramp', 16, 0); B.ev("glStartRun('test')"); pg.wait_for_timeout(300); B.ev("GLR.t0-=1e7"); pg.wait_for_timeout(700)
     lines = B.evr("glState().lastTest.lines.map(l=>l[0])"); sh = B.evr("glShort(gpEvaluate(GLB.rig))")

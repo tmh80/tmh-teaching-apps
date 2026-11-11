@@ -180,7 +180,7 @@ function gpAnchors(rig, W) {
     const ad = glAddons(rig, p.id), chain = [p].concat(ad.chain); chain.forEach(q => seen.add(q.id));
     const blocks = chain.filter(q => q.type === 'block'), winches = chain.filter(q => q.type === 'winch'), faults = ad.faults.slice();
     if (blocks.length > 1 && !faults.includes('blocks')) faults.push('blocks'); if (winches.length > GL.winchMax && !faults.includes('winches')) faults.push('winches');
-    out.push({ id: p.id, type: 'drag', x: p.x, base: glFloorKind(p.x, W.g, W.plats), chain, faults, ropes: blocks.length ? clamp(blocks[0].ropes | 0, 1, GL.ropesMax) : 1, winches: winches.slice(0, GL.winchMax).map(w => w.ratio) }); });
+    out.push({ id: p.id, type: 'drag', x: p.x, base: glStand(p, p.x, W.g, W.plats), chain, faults, ropes: blocks.length ? clamp(blocks[0].ropes | 0, 1, GL.ropesMax) : 1, winches: winches.slice(0, GL.winchMax).map(w => w.ratio) }); });
   return out;
 }
 function gpBoulder(rig, parts, blasts, ship0) {

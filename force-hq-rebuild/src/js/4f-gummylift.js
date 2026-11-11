@@ -67,6 +67,13 @@ function glSupport(x, y, g, plats) {
 function glFloorAt(x, g, plats) { const tops = plats.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).map(q => q.top); return tops.length ? Math.max(...tops) : glAt(g, x); }
 function glFloorKind(x, g, plats) { const pl = plats.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).sort((a, b) => b.top - a.top)[0]; return pl ? { kind: 'platform', id: pl.id, y: pl.top } : { kind: 'ground', y: glAt(g, x) }; }
 
+/* what a part stands on (Tom, 11 Nov 2026: "The system shouldn't automatically put stuff on top of a platform just because it's been added. I should make the choice whether something goes on the platform or not.").
+   p.on is the student's choice: a platform's id, or 'ground'. A platform added over a part later never lifts it. A part with no choice yet (an older save) takes the highest platform over it, as before. */
+function glStand(p, x, g, plats) {
+  const over = plats.filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).sort((a, b) => b.top - a.top), on = p && p.on;
+  const pl = on === 'ground' ? null : on ? over.find(q => q.id === on) : over[0];
+  return pl ? { kind: 'platform', id: pl.id, y: pl.top } : { kind: 'ground', y: glAt(g, x) };
+}
 /* ---------- one machine: its start, end, MA and any rule it breaks ---------- */
 const glRun = p => Math.sqrt(Math.max(0, p.L * p.L - p.rise * p.rise));
 const glLeverMA = p => (GL.beam - p.arm) / p.arm;
@@ -83,7 +90,7 @@ function glMachine(p, g, plats) {
     if (!m.headOn) m.faults.push('head');
     m.base = m.headOn;   // the pulley block and winches bolt on at the top of the ramp
   } else {
-    const fl = glFloorKind(p.x, g, plats), cap = p.type === 'crane' ? GL.craneRise : p.type === 'lever' ? GL.leverRise : GL.jackRise;
+    const fl = glStand(p, p.x, g, plats), cap = p.type === 'crane' ? GL.craneRise : p.type === 'lever' ? GL.leverRise : GL.jackRise;
     m.start = { x: p.x, y: fl.y }; m.rise = p.rise; m.end = { x: p.x, y: +(fl.y + p.rise).toFixed(3) }; m.base = fl; m.dist = p.rise;
     if (p.rise <= 0 || p.rise > cap + 1e-9) m.faults.push('rise');
     if (p.type === 'crane') { m.ma = 1; const ac = p.across || 0; m.across = ac;

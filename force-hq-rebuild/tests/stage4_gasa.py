@@ -25,7 +25,7 @@ def run(vp, tag, full):
     with sync_playwright() as p:
         b = p.chromium.launch(); ctx = b.new_context(viewport=vp, has_touch=vp['width'] < 500); pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append('ERR ' + str(e))); pg.on('console', lambda m: m.type == 'error' and errs.append(m.text))
-        ns['open_part5'](pg); B = ns['Board'](pg)
+        ns['open_part5'](pg, guide=True); B = ns['Board'](pg)
         ev = lambda c: pg.evaluate('c=>__fhq.ev(c)', c); evj = lambda c: json.loads(ev('JSON.stringify(' + c + ')'))
         shot = lambda sel, name: pg.locator(sel).first.screenshot(path=OUT + f'{name}_{tag}.png')
         def setrig(code):
@@ -41,7 +41,8 @@ def run(vp, tag, full):
         # ---------- the page: Mission Control framing, old boxes gone ----------
         chk(f'{tag}: the board is labelled GUMMY MISSION CONTROL · RESCUE SIMULATOR', 'GUMMY MISSION CONTROL · RESCUE SIMULATOR' in pg.inner_text('.glmchd'))
         chk(f'{tag}: the Mission computer prediction box and the old warm-up are gone', ev("!document.querySelector('#glPred, #glWarm, #glPVal, #glWork, #glHint')") is True)
-        chk(f'{tag}: the guided start shows with its steps and a Skip', pg.locator('#glGuide').is_visible() and pg.locator('#glGuide [data-gw=skip]').count() == 1 and 'Drag a lever from the tray onto the boulder' in pg.inner_text('#glGuide'))
+        chk(f'{tag}: the tutorial coach shows ON the board with one step and a Skip', pg.locator('#glGuide').is_visible() and pg.locator('#glGuide [data-gw=skip]').count() == 1 and 'Drag a lever from the tray onto the boulder' in pg.inner_text('#glGuide') and pg.evaluate("!!document.querySelector('#glGuide').closest('.glboard')"))
+        chk(f'{tag}: the board keeps the full width: the settings card is on the board too, hidden until a piece is tapped', pg.evaluate("!!document.querySelector('#glDock').closest('.glboard')") and not pg.locator('#glDock').is_visible())
         chk(f'{tag}: the strip is below the board and Send to GASA is off until there is a route', ev("document.querySelector('#glStrip').getBoundingClientRect().top >= document.querySelector('.glboard').getBoundingClientRect().bottom") is True and pg.locator('#glSend').is_disabled())
         chk(f'{tag}: ▶ Test in simulator is inside the board', pg.evaluate("!!document.querySelector('#glRun').closest('.glboard')"))
         shot('#glGuide', 'guided_start')
@@ -52,10 +53,21 @@ def run(vp, tag, full):
             ev('(()=>{glWarmLever().arm=1.5;glChanged();})()'); pg.wait_for_timeout(100)
             chk(f'{tag}: guide ticks the arm step and keeps the live MA line', pg.locator('#glGuide li.ok').count() == 2 and 'rolls free' in pg.inner_text('#glGuide'))
             # two legs by the guide: ramp by the Gumdrop, stretched to the shelf, block, winch; second ramp by the ghost
-            r1 = B.add('ramp', 16, 0); head = B.evr(f'glMachine(glPart("{r1}"),GLB.ev.ground,[]).end'); B.drag((head['x'], head['y']), (38.74, 6))
-            cp = B.evr(f'glCablePoint(glPart("{r1}"),glMachine(glPart("{r1}"),GLB.ev.ground,[]))'); B.add('block', cp['x'] + 1.5, cp['y'] + 0.5); B.menu('ropes4'); B.add('winch', cp['x'] + 3, cp['y'] + 0.5); B.menu('ratio7')
-            r2 = B.add('ramp', 41, 6); pg.wait_for_timeout(150)
-            chk(f'{tag}: guide ticks leg 1 (ramp, shelf, block, winch) and leg 2', pg.locator('#glGuide li.ok').count() == 7, pg.locator('#glGuide li.ok').count())
+            chk(f'{tag}: then the coach offers two first legs', pg.locator('#glGuide [data-gw="a:ramp"]').count() == 1 and pg.locator('#glGuide [data-gw="a:crane"]').count() == 1)
+            pg.click('#glGuide [data-gw="a:ramp"]'); pg.wait_for_timeout(100)
+            B.ev('GLB.sel=null; glCloseMenu()'); r1 = B.add('ramp', 16, 0); B.ev('GLB.sel=null; glCloseMenu()'); head = B.evr(f'glMachine(glPart("{r1}"),GLB.ev.ground,[]).end'); B.drag((head['x'], head['y']), (38.74, 6))
+            cp = B.evr(f'glCablePoint(glPart("{r1}"),glMachine(glPart("{r1}"),GLB.ev.ground,[]))'); B.add('block', cp['x'] + 1.5, cp['y'] + 0.5); B.menu('ropes4'); B.add('winch', cp['x'] + 3, cp['y'] + 0.5)
+            chk(f'{tag}: the coach says whether Smooshy can manage the pull, with no leg numbers', 'thrusters fire' in pg.inner_text('#glGuide') and not __import__('re').search(r'\\d+\\.\\d', pg.inner_text('#glGuide .glwlive')), pg.inner_text('#glGuide'))
+            B.menu('ratio10'); pg.wait_for_timeout(100)
+            chk(f'{tag}: leg 1 done (ramp, shelf, block, winch), and the coach offers two second legs', pg.locator('#glGuide li.ok').count() == 7 and pg.locator('#glGuide [data-gw="b:ramp"]').count() == 1 and pg.locator('#glGuide [data-gw="b:crane"]').count() == 1, pg.locator('#glGuide li.ok').count())
+            pg.click('#glGuide [data-gw="b:ramp"]'); pg.wait_for_timeout(100); B.ev('GLB.sel=null; glCloseMenu()')
+            r2 = B.add('ramp', 41, 6); pg.wait_for_timeout(150); B.ev('GLB.sel=null; glCloseMenu()'); h2 = B.evr(f'glMachine(glPart("{r2}"),GLB.ev.ground,[]).end'); B.drag((h2['x'], h2['y']), (52.5, B.evr('glAt(GLB.ev.ground,52.5)')))
+            chk(f'{tag}: leg 2 joins on from where leg 1 ends, and the coach asks for a test', pg.locator('#glGuide li.ok').count() == 9 and 'Test in simulator' in pg.inner_text('#glGuide'), (pg.locator('#glGuide li.ok').count(), B.evr('GLB.ev.legs[1] && GLB.ev.legs[1].faults')))
+            B.ev("glStartRun('test')"); pg.wait_for_timeout(300); B.ev('GLR.t0-=1e7'); pg.wait_for_timeout(700); B.ev('glBackToBuild()'); pg.wait_for_timeout(200)
+            chk(f'{tag}: after the test the coach offers Continue from here, or Keep leg 1', pg.locator('#glGuide [data-gw=keep]').count() == 1 and pg.locator('#glGuide [data-gw=leg1]').count() == 1, pg.inner_text('#glGuide'))
+            pg.click('#glGuide [data-gw=leg1]'); pg.wait_for_timeout(200)
+            chk(f'{tag}: Keep leg 1 takes leg 2 away and closes the tutorial', B.evr('GLB.ev.legs.length') == 1 and ev('glState().guide') == 'done' and not pg.locator('#glGuide').is_visible())
+            B.ev("glToolAct('undo')"); pg.wait_for_timeout(150); ev("GLB.save({id:GLB.mid},{guide:'on', tests:0, tried:false, lastTest:null}); glGuidePaint()")
             chk(f'{tag}: legs gave strip rows plus the boulder row', [r['name'] for r in rows()] == ['Boulder', 'Leg 1', 'Leg 2'], rows())
         else:
             setrig('ROUTES.top()'); pg.wait_for_timeout(150)

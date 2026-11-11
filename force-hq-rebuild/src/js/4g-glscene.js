@@ -5,7 +5,7 @@
 const GLC = { sky0: '#120c2e', sky1: '#33246f', sky2: '#7a4fc0', haze: '#e9a6e0', ridge1: '#2a1f63', ridge2: '#3b2c82', rock0: '#cdbcf7', rock1: '#9a80e0', rock2: '#6a51b8', crust: '#f4ecff', deep: '#463389', crys: 'rgba(255,255,255,.9)', gem: '#8af3ff', gem2: '#ff9be0',
   wood: '#e0a45a', wood2: '#9b6a2c', steel: '#e4eaf5', steel2: '#a9b4c9', steelD: '#4c5670', dark: '#1b1d29', yellow: '#ffc53d', yellowD: '#c98512', rope: '#f8e6b0', ropeD: '#7c5f24',
   bad: '#ff5d5d', glow: '#7ef0a8', ink: '#1f1d26', label: '#fffaf2', jelly: '#ffb347', jelly2: '#ff8a3d', beam: 'rgba(160,255,214,.35)' };
-const GLV = { LW: 1000, LH: 300, K: 10, z: 1, cx: 48, cy: 12, wide: 300 };
+const GLV = { LW: 1000, LH: 400, K: 10, z: 1, cx: 48, cy: 12, wide: 400 };   // 400 tall: room in the sky for the tutorial coach and the settings card
 const glSX = x => GLV.LW / 2 + (x - GLV.cx) * GLV.K * GLV.z, glSY = y => GLV.LH / 2 - (y - GLV.cy) * GLV.K * GLV.z, glU = () => GLV.K * GLV.z;
 const glWX = sx => GLV.cx + (sx - GLV.LW / 2) / glU(), glWY = sy => GLV.cy - (sy - GLV.LH / 2) / glU();
 /* keep the view inside the world: at zoom 1 the whole crater fits */
@@ -150,13 +150,22 @@ function glDrawCrane(c, p, m, bad, hookY, trolX) {
   c.lineCap = 'round'; c.strokeStyle = GLC.ropeD; c.lineWidth = Math.max(2.4, 0.17 * u); c.beginPath(); c.moveTo(glSX(tx), Yt + bh / 2); c.lineTo(glSX(tx), glSY(hy)); c.stroke(); c.strokeStyle = GLC.rope; c.lineWidth = Math.max(1.2, 0.085 * u); c.stroke();
   c.strokeStyle = GLC.dark; c.lineWidth = Math.max(3.5, 0.26 * u); c.beginPath(); c.arc(glSX(tx), glSY(hy) + 0.25 * u, 0.3 * u, Math.PI * 1.1, Math.PI * 2.4); c.stroke(); c.strokeStyle = GLC.steel; c.lineWidth = Math.max(2, 0.14 * u); c.stroke();
 }
-/* "Set down here": where a crane's trolley puts the load, before the run (red when nothing is under it to set it on) */
-function glDrawSetDown(c, m, t, bad) {
-  const u = glU(), pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 5), e = m.end, X = glSX(e.x), Y = glSY(e.y), col = bad ? '255,120,110' : '126,240,168';
+/* where a crane's trolley sets the load down (Tom, 11 Nov 2026: "Cranes should lower until it sets on a surface. It can lift, it should be able to put down too."):
+   straight below the trolley, on the highest thing at or below the lifted height: a platform top, else the ground. Only something taller than the lift blocks it. Same rule as gpCraneLeg. */
+function glSetSpot(p, m, g, plats) {
+  const liftY = m.start.y + p.rise, x = Math.max(0, Math.min(GL.W, p.x + (p.across || 0))), gy = glAt(g, x);
+  const tops = (plats || []).filter(q => x >= q.x0 - 0.05 && x <= q.x1 + 0.05).map(q => q.top).concat([gy]).filter(y => y <= liftY + 0.05).sort((a, b) => b - a);
+  return tops.length ? { x, y: tops[0], liftY } : { x, y: gy, liftY, blocked: true };
+}
+/* "Sets down here": the spot, and a dotted line down from the trolley to show the load being lowered (red only when something taller than the lift is in the way) */
+function glDrawSetDown(c, sp, t) {
+  const u = glU(), pulse = RMOTION ? 0.5 : 0.5 + 0.5 * Math.sin(t * 5), bad = !!sp.blocked, X = glSX(sp.x), Y = glSY(sp.y), col = bad ? '255,120,110' : '126,240,168';
+  if (!bad && sp.liftY - sp.y > 0.3) { c.save(); c.setLineDash([3, 5]); c.strokeStyle = `rgba(${col},.8)`; c.lineWidth = 2; c.beginPath(); c.moveTo(X, glSY(sp.liftY)); c.lineTo(X, Y - 0.3 * u); c.stroke(); c.setLineDash([]);
+    c.fillStyle = `rgba(${col},.9)`; c.beginPath(); c.moveTo(X - 5, Y - 0.3 * u - 8); c.lineTo(X + 5, Y - 0.3 * u - 8); c.lineTo(X, Y - 0.3 * u); c.closePath(); c.fill(); c.restore(); }
   c.save(); c.shadowColor = bad ? '#ff7a70' : GLC.glow; c.shadowBlur = 8 + 12 * pulse; c.strokeStyle = `rgba(${col},${0.6 + 0.4 * pulse})`; c.lineWidth = 3; c.setLineDash([6, 4]);
   c.beginPath(); c.ellipse(X, Y - 0.2 * u, 2.7 * u, 0.9 * u, 0, 0, 7); c.stroke(); c.restore();
   c.fillStyle = `rgba(${col},${0.14 + 0.1 * pulse})`; c.beginPath(); c.ellipse(X, Y - 0.2 * u, 2.7 * u, 0.9 * u, 0, 0, 7); c.fill();
-  lblAdd(bad ? 'Nothing to set it on' : 'Set down here', X, Y - 2.2 * u, { size: 12, col: bad ? '#fff' : '#c9ffdc', bg: bad ? '#c0392b' : 'rgba(31,29,38,.75)', prio: 2 });
+  lblAdd(bad ? 'Too tall to carry over' : 'Sets down here', X, Y - 2.2 * u, { size: 12, col: bad ? '#fff' : '#c9ffdc', bg: bad ? '#c0392b' : 'rgba(31,29,38,.75)', prio: 2 });
 }
 function glDrawLever(c, p, m, bad, tiltT) {
   /* the same drawing as the Workshop bench lever (drawLeverShape in 4n): a bar on a triangle fulcrum. The load end rises by `rise` as tiltT goes 0 → 1 */
@@ -212,7 +221,7 @@ function glDrawZone(c, z, t, label) {
   if (label) glLbl(c, label, (X0 + X1) / 2, glSY(z.y + 5.4), '#c9ffdc', 11, 'center', 'rgba(31,29,38,.6)');
 }
 /* ghost Gumdrops: where the Gumdrop starts each leg after the first, plus where it waits now (the model keeps that spot in ev.ghost, as the old model did in ghosts) */
-function glGhostList(ev) { const out = ((ev && ev.ghosts) || []).slice(), g = ev && ev.ghost; if (g && ev.stop && ev.stop.leg >= 1 && !out.some(q => Math.hypot(q.x - g.x, q.y - g.y) < 0.01)) out.push({ x: g.x, y: g.y, after: ev.stop.leg }); out.forEach(q => { const pl = ev.legs && ev.legs[q.after - 1]; q.lying = !!(pl && pl.lying); }); return out; }
+function glGhostList(ev) { const out = ((ev && ev.ghosts) || []).slice(), g = ev && ev.ghost; if (g && ev.stop && ev.stop.leg >= 1 && !out.some(q => Math.hypot(q.x - g.x, q.y - g.y) < 2.5)) out.push({ x: g.x, y: g.y, after: ev.stop.leg }); out.forEach(q => { const pl = ev.legs && ev.legs[q.after - 1]; q.lying = !!(pl && pl.lying); }); return out; }
 /* the route of each leg, straight from the model's own path: coloured by what the Gumdrop is doing, and the wall marked where a leg is stopped by one */
 const GL_ROUTE = { nudge: '#c9ffdc', ground: '#ff8f6b', platform: '#ffd27a', ramp: '#7ef0a8', lift: '#8fd3ff', across: '#8fd3ff', lower: '#8fd3ff', slide: '#ffd27a', fall: '#ff5d5d' };
 function glDrawRoutes(c, ev) {
@@ -255,7 +264,7 @@ function glDrawWorld(c, o) {
   if (run.rope && o.ship) glDrawCable(c, run.rope.a, run.rope.b, 0);
   if (o.ship) { glDrawShip(c, o.ship); if (o.ship.carryRock && rockShown) glDrawBoulder(c, o.ship.x + 4.6 * Math.cos(o.ship.tilt || 0), o.ship.y - 4.6 * Math.sin(o.ship.tilt || 0), (o.ship.tilt || 0) + 0.12); }
   rig.parts.filter(p => p.type === 'crane').forEach(p => glDrawCrane(c, p, ms[p.id], faulty(p.id), run.hook && run.hook[p.id], run.trol && run.trol[p.id]));
-  if (!run.on && o.setdown !== false) rig.parts.filter(p => p.type === 'crane' && p.across).forEach(p => glDrawSetDown(c, ms[p.id], t, ms[p.id].faults.includes('drop')));
+  if (!run.on && o.setdown !== false) rig.parts.filter(p => p.type === 'crane' && p.across).forEach(p => glDrawSetDown(c, glSetSpot(p, ms[p.id], g, plats), t));
   rig.parts.filter(p => p.type === 'lever').forEach(p => glDrawLever(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
   rig.parts.filter(p => p.type === 'jack').forEach(p => glDrawJack(c, p, ms[p.id], faulty(p.id), run.tilt && run.tilt[p.id]));
   /* cables, then the add-ons on top */

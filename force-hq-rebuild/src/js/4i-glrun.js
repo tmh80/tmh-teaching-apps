@@ -165,6 +165,7 @@ function glRunFrame1() {
   const t = (performance.now() - GLR.t0) / 1000 * (GLR.speed || 1), S = glSceneAt(t), res = GLR.res, g = S.ground; glSize(); const c = fit(cv, GLV.LW, GLV.LH);
   const plats = res.plats.map(p => S.sink[p.id] ? Object.assign({}, p, { top: p.top - S.sink[p.id] * (p.top - p.base) * 0.5, over: true }) : p);
   const ev = Object.assign({}, res, { plats, ground: g, legs: res.legs.map(l => Object.assign({}, l, { faults: S.bad === l.id ? (l.faults.length ? l.faults : ['x']) : [] })) });
+  if (GLV.z > 1.01) { const f = RMOTION ? 1 : 0.07, fx = S.beam ? 84 : S.ship.x + 3, fy = (S.beam ? 16 : S.ship.y) + 5; GLV.cx += (fx - GLV.cx) * f; GLV.cy += (fy - GLV.cy) * f; glClampView(); }   // zoomed in: the camera follows the Gumdrop
   const shipPx = { x: glSX(S.ship.x), y: glSY(S.ship.y + 2) };
   GLR.hull = Math.min(100, S.ship.dmg); if (S.narr !== GLR.narr) { GLR.narr = S.narr; const host = $('#glRes'); if (host && GLR.on && !GLR.done) host.innerHTML = S.narr ? `<p class="glnarr">${esc(S.narr)}</p>` : ''; }
   glDrawWorld(c, { rig: GLR.rig, ev, ground: g, ghost: null, ship: S.shipGone ? null : Object.assign({}, S.ship, { dmg: Math.min(100, S.ship.dmg) }), smoo: S.smoo, rock: !S.rockGone, t,
@@ -195,7 +196,7 @@ function glFx(c, S, t) {
   S.readouts.forEach((s, i) => glLbl(c, s, 70 + 0, GLV.LH - 18 - i * 22, GLC.ink, 12, 'left', '#c9ffdc'));
 }
 function glStartRun(mode) {
-  if (GLR.on) return; mode = mode === 'launch' ? 'launch' : 'test';
+  if (GLR.on) return; mode = mode === 'launch' ? 'launch' : 'test'; if (GLB.intro) glIntroEnd(); GLR.view0 = { z: GLV.z, cx: GLV.cx, cy: GLV.cy };
   const st = glState(); GLR.mode = mode; GLR.rig = JSON.parse(JSON.stringify(GLB.rig)); GLR.res = gpEvaluate(GLR.rig, { hints: st.hints || 0, maths: mode === 'launch' });
   GLR.pred = null; GLR.work = mode === 'launch' && typeof glwSnapshot === 'function' ? glwSnapshot() : null; GLR.speed = mode === 'test' && !RMOTION ? 3 : 1;
   GLR.beats = glBuildBeats(GLR.res, GLR.rig, { test: mode === 'test' }); GLR.total = GLR.beats.reduce((a, b) => a + b.dur, 0); GLR.t0 = performance.now(); GLR.on = true; GLR.done = false;
@@ -255,7 +256,8 @@ function glFinishRun() {
   if (typeof glShowEnding === 'function') glShowEnding(sum, { first: firstRescue, better });
 }
 function glBackToBuild() {
-  GLR.on = false; { const rc = $('#glRunCtl'); if (rc) rc.hidden = true; } cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop();
+  if (GLR.view0) { GLV.z = GLR.view0.z; GLV.cx = GLR.view0.cx; GLV.cy = GLR.view0.cy; GLR.view0 = null; glClampView(); }
+  GLR.on = false; { const rc = $('#glRunCtl'); if (rc) rc.hidden = true; } cancelAnimationFrame(GLR.raf); $('#glBack').hidden = true; $('.glboard').classList.remove('running'); $('.glarea').classList.remove('running'); glRunPaint(); glLoop(); if (typeof glGuidePaint === 'function') glGuidePaint();
 }
 function glShowResult(sum, pred, newBest) {
   const host = $('#glRes'); if (!host || !sum) return; const E = GL_END[sum.ending], f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');

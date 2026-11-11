@@ -8,10 +8,11 @@ fails = []
 def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
     if not cond: fails.append(name)
-def open_part5(pg):
+def open_part5(pg, guide=False):
     pg.goto(F); pg.wait_for_timeout(300); pg.fill('#whoName', 'Sam'); pg.click('#whoGo'); pg.evaluate("__fhq.dbSet('tourDone',true)")
     pg.evaluate("__fhq.ev('DB.user.teacher=true')"); pg.evaluate("__fhq.openChapter('c6e','challenge')"); pg.wait_for_timeout(500)
     pg.evaluate("__fhq.ev('closeModal()')"); pg.wait_for_timeout(200); pg.locator('#glCv').scroll_into_view_if_needed()
+    if not guide: pg.evaluate("__fhq.ev(\"if (glState().guide === 'on') { GLB.save({ id: GLB.mid }, { guide: 'skip' }); glGuidePaint(); }\")")   # the tutorial coach sits on the board; most tests build without it
 def send_right(pg, wrong=None):
     """Fill every box of the route strip with the right numbers, as a student would work them out, and press Send to GASA."""
     R = json.loads(pg.evaluate("c=>__fhq.ev(c)", "JSON.stringify(glwRows().map(r=>({key:r.key,cells:r.cells.map(c=>({k:c.k,exp:c.exp,d:c.d}))})))"))
@@ -26,9 +27,14 @@ class Board:
     def xy(s, x, y):
         s.pg.evaluate("document.querySelector('#glCv').scrollIntoView({block:'center'})"); bb = s.pg.locator('#glCv').bounding_box(); sx, sy, LW, LH = s.ev(f'[glSX({x}),glSY({y}),GLV.LW,GLV.LH]')
         return bb['x'] + sx * bb['width'] / LW, bb['y'] + sy * bb['height'] / LH
-    def tap(s, x, y): px, py = s.xy(x, y); s.pg.mouse.click(px, py); s.pg.wait_for_timeout(120)
+    def clear(s, x, y):
+        """The settings card and the tutorial coach sit on the board. If one covers the spot, close it first, as a student would (✕ Close, or Hide)."""
+        px, py = s.xy(x, y); over = s.pg.evaluate("([x,y])=>{const e=document.elementFromPoint(x,y); return e&&e.closest('#glDock')?'dock':e&&e.closest('#glGuide')?'guide':''}", [px, py])
+        if over == 'dock': s.ev('GLB.sel=null; glCloseMenu()')
+        if over == 'guide': s.ev('glTutSave({min:true}); glGuidePaint()')
+    def tap(s, x, y): s.clear(x, y); px, py = s.xy(x, y); s.pg.mouse.click(px, py); s.pg.wait_for_timeout(120)
     def drag(s, a, b, steps=12):
-        ax, ay = s.xy(*a); bx, by = s.xy(*b); m = s.pg.mouse; m.move(ax, ay); m.down()
+        s.clear(*a); ax, ay = s.xy(*a); bx, by = s.xy(*b); m = s.pg.mouse; m.move(ax, ay); m.down()
         for i in range(1, steps + 1): m.move(ax + (bx - ax) * i / steps, ay + (by - ay) * i / steps)
         m.up(); s.pg.wait_for_timeout(150)
     def add(s, t, x, y): s.pg.click(f'#glTray [data-add={t}]'); s.tap(x, y); return s.ev('GLB.sel')
