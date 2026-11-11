@@ -110,4 +110,26 @@ for (const k in EXPECT) { const [pull, hand, score] = EXPECT[k], r = gpEvaluate(
       if (!isFinite(r.final.x) || !isFinite(r.final.y) || r.final.x < 0 || r.final.x > GL.W || (!r.held && r.final.y < M.glAt(g, r.final.x) - 0.5) || r.legs.some(l => !isFinite(l.pull) || !isFinite(l.hand) || l.work < -1e-6 || l.pull * l.hand < l.work - 1) || (!r.arrived && !r.stop)) { bad++; if (bad < 4) console.log('odd rig', JSON.stringify({ parts, cables }), JSON.stringify([r.final, r.stop])); } }
     catch (e) { bad++; if (bad < 4) console.log('threw', e.stack.split('\n').slice(0, 3).join(' | '), JSON.stringify({ parts, cables })); } }
   chk('300 random rigs: no errors, the Gumdrop never ends underground, energy adds up', bad === 0 && runs === 300, [bad, runs]); }
+/* 6. The boulder as a two-leg job (Tom, 11 Nov 2026): pry it up and hold it, then lift it clear */
+{ const L = (extra, ws) => { const parts = [{ id: 'bl', type: 'lever', role: 'boulder', x: 19, arm: 1, rise: 0.5, dir: 1 }], cables = []; if (ws) { parts.push({ id: 'blw', type: 'winch', ratio: ws }); cables.push({ a: 'bl', b: 'blw' }); } return { parts: parts.concat(extra || []), cables }; };
+  const crane = (o, ws, ropes) => { const parts = [Object.assign({ id: 'bc', type: 'crane', role: 'boulder', x: 18.7, rise: 6, across: -8, adir: -1, on: 'ground' }, o || {})], cables = []; let prev = 'bc';
+    if (ropes > 1) { parts.push({ id: 'bcb', type: 'block', ropes }); cables.push({ a: prev, b: 'bcb' }); prev = 'bcb'; }
+    (ws || []).forEach((r, i) => { parts.push({ id: 'bcw' + i, type: 'winch', ratio: r }); cables.push({ a: prev, b: 'bcw' + i }); prev = 'bcw' + i; }); return { parts, cables }; };
+  const ev = (...rs) => gpEvaluate(join(...rs)).boulder;
+  let b = ev(L(null, 0)); chk('lever with no winch: easy (pull 28 N) but not locked, so the boulder is still jammed', b.pry && b.pry.easy && !b.pry.lock && !b.pry.ok && b.stage === 'jammed' && !b.ok, b);
+  b = ev(L(null, 2)); chk('lever and a x2 winch: pried up and held (14 N)', b.pry.ok && near(b.pry.pull, 14, 0.01) && b.stage === 'held' && !b.ok, b);
+  b = ev(L([], 0)); chk('a pulley block on the lever adds nothing', near(ev({ parts: L().parts.concat([{ id: 'x', type: 'block', ropes: 4 }]), cables: [{ a: 'bl', b: 'x' }] }).pry.pull, 28, 0.01));
+  b = ev(L(null, 2), crane({}, [], 1)); chk('held, then a bare crane: too heavy (252 N)', b.stage === 'held' && b.move.why === 'heavy' && near(b.move.pull, 252, 1e-6), b.move);
+  b = ev(L(null, 2), crane({ across: 3, adir: 1 }, [6])); chk('crane across 3 m to the right: clear', b.ok && b.stage === 'clear' && b.how === 'crane' && near(b.move.to.x, 21.7, 1e-6), b);
+  b = ev(L(null, 2), crane({ across: -8, rise: 4 }, [6])); chk('across -8 with a lift of 4: low (it would hit the Gumdrop)', b.move.why === 'low' && b.stage === 'held', b.move);
+  b = ev(L(null, 2), crane({ across: -8, rise: 6 }, [6])); chk('lift 6, across -8: clear, 42 N, hand distance 36 m, work 1,512 J', b.ok && near(b.move.pull, 42, 0.01) && near(b.move.hand, 36, 0.01) && near(b.move.work, 1512, 0.5), b.move);
+  b = ev(L(null, 2), crane({ across: 2 }, [6])); chk('set down less than 3 m away: near', b.move.why === 'near', b.move);
+  b = ev(L(null, 2), crane({ across: -4.5, rise: 6 }, [6])); chk('set down on the Gumdrop: on', b.move.why === 'on', b.move);
+  b = ev(crane({}, [6])); chk('a crane with no pry: jammed', b.move.why === 'jammed' && b.stage === 'jammed' && !b.ok, b);
+  b = ev({ parts: [{ id: 'j', type: 'jack', role: 'boulder', x: 18.2, rise: 1 }], cables: [] }); chk('a screw jack pries and holds alone (2.1 N)', b.pry.ok && b.pry.lock && near(b.pry.pull, 2.1, 0.01) && b.stage === 'held', b);
+  b = ev({ parts: [{ id: 'j', type: 'jack', role: 'boulder', x: 18.2, rise: 1 }], cables: [] }, crane({ across: -8, rise: 6 }, [6])); chk('jack then crane: clear', b.ok && b.how === 'crane', b);
+  { const g = join(L(null, 2), crane({}, [6]), { parts: [{ id: 'd', type: 'dyn', big: false, x: 19 }], cables: [] }), r = gpEvaluate(g); chk('a blast that reaches the boulder clears it in one go', r.boulder.ok && r.boulder.how === 'blast' && r.boulder.pry === null && !r.rockOn, r.boulder); }
+  { const r = gpEvaluate(ROUTES.top()); chk('the top route (kit: lever + winch, crane + winch) clears the boulder: stage clear, the Gumdrop is not carrying it', r.boulder.stage === 'clear' && !r.rockOn && r.load === 6300, [r.boulder.stage, r.load]); }
+  { const r = gpEvaluate(join(L(null, 2), crane({}, [], 1), { parts: [{ id: 'rA', type: 'ramp', x1: 15.5, y1: 0, L: 24, rise: 6 }], cables: [{ a: 'rA', b: 'ship' }] })); chk('held but not lifted away: the boulder is still on the Gumdrop (8,400 N load)', r.rockOn && r.load === 8400 && r.boulder.stage === 'held', [r.rockOn, r.load]); } }
+
 console.log(`${n - fails.length}/${n} pulling-model checks passed`); process.exit(fails.length ? 1 : 0);

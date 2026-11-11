@@ -21,7 +21,7 @@ const LS_PIECES = {
     cards: [
       { t: 'This is a lever: a long bar that turns on a <b>fulcrum</b> (the triangle).', ghost: 'point' },
       { t: 'Drag the fulcrum along the bar. Watch the two numbers: how far the rock is from the fulcrum, and how far your hand is.', ghost: 'drag' },
-      { t: 'Press <b>▶ Pull!</b> to push down on the end. In the rescue, a lever under the boulder will knock it clear.', ghost: 'press', hi: '#wsPull' }] }
+      { t: 'Press <b>▶ Pull!</b> to push down on the end. In the rescue, a lever under the boulder will pry it up off the Gumdrop\'s leg.', ghost: 'press', hi: '#wsPull' }] }
 };
 const lsSeen = () => dbGet('lsSeen', {});
 const lsHas = t => t === 'lever' ? WS.mach === 'lever' : lsHasP(t);

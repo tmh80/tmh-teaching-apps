@@ -125,7 +125,7 @@ with sync_playwright() as p:
     chk('cards: the button says OK', pg.locator('#chunk [data-cb=next]').inner_text() == 'OK'); shot('lv1_card1')
     pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150); chk('cards: card 2 text', 'Drag the fulcrum along the bar. Watch the two numbers: how far the rock is from the fulcrum, and how far your hand is.' in ch.inner_text())
     shot('lv1_card2'); pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150)
-    chk('cards: card 3 text and the Pull button glows', 'Press ▶ Pull! to push down on the end. In the rescue, a lever under the boulder will knock it clear.' in ch.inner_text() and 'coachhi' in (pg.locator('#wsPull').get_attribute('class') or ''))
+    chk('cards: card 3 text and the Pull button glows', 'Press ▶ Pull! to push down on the end. In the rescue, a lever under the boulder will pry it up off the Gumdrop's leg.' in ch.inner_text() and 'coachhi' in (pg.locator('#wsPull').get_attribute('class') or ''))
     shot('lv1_card3'); pg.locator('#chunk [data-cb=next]').click(); pg.wait_for_timeout(150)
     chk('cards: after the last OK they close and the piece is marked seen', ch.is_hidden() and ev("dbGet('lsSeen',{}).lever") is True)
     g = geo(); tap(g['b']['x'] - 30, g['b']['y']); pg.locator('#lsDock [data-lm=del]').click(); pg.wait_for_timeout(100)
