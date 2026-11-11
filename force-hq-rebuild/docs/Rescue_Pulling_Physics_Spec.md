@@ -13,6 +13,7 @@ Replaces section 15 of `Workshop_Lesson_Mode_Spec.md`. Written 11 Nov 2026 on br
 | 3 | Grey-box: bare crater, the real model, no story or scoring screens. **Tom plays it and tries to break it** | Fable builds, Tom plays | Built: `proto/Rescue-Physics-Greybox.html`. Waiting for Tom |
 | 4 | Wire the model into the real rescue (section 6) | Sonnet | Built on branch `rescue-wiring` (jobs 1 to 11, including the tipping rule). `WORKSHOP_OPEN` stays false until Tom plays it |
 | 5 | Worksheets, keys, marking text, docs | Sonnet | Done on `rescue-wiring`: My Rescue hull line, answer key, marking scheme, AI text, worksheets rebuilt, docs |
+| 4b | Section 9 jobs 1 to 8: the two-leg boulder wired in (builder, run animation, route strip, tutorial, texts, answer key, My Rescue, worksheets, tests, docs) | Sonnet | Done on `rescue-wiring`. The boulder kit costs 70 crystals, so the crane route is over the 475 budget: open decision for Tom (475 to 545) |
 | 6 | Tom plays Part 5; then `WORKSHOP_OPEN = true` | Tom | |
 
 ## 1. The rules
