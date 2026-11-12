@@ -299,4 +299,4 @@ function renderShopCourse(ch, wm, host, save) {
 }
 
 /* Chapter 6 Part 5: Operation Gummy Lift. One big build; renderGummyLift (4h-glbuild.js) draws the board and 4i-glrun.js runs it. */
-function renderRescueCourse(ch, wm, host, save) { renderGummyLift(ch, wm[0], host, save); }
+function renderRescueCourse(ch, wm, host, save) { renderRescue5(ch, wm[0], host, save); }

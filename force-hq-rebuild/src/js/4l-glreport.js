@@ -14,6 +14,7 @@ function glKey() {
 }
 function myRescueHTML(mode) {
   const stu = mode === 'student', key = mode === 'key', gl = (dbGet('chal.c6e', {}).gl) || {}, br = gl.bestRun;
+  if (stu && br && br.v5) return myRescue5HTML(br, gl);
   const K = key ? glKey() : null, S = key ? K.sum : stu && br ? br.sum : null, snap = key ? K.snap : stu && br && br.snap ? br.snap : '';
   const W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x, f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
   const frame = snap ? `<div class="rsnap"><img src="${snap}" alt="${key ? 'An example rescue route' : 'My best rescue route'}"></div>` : `<div class="rsnap empty"><span>${stu ? 'Press Run Rescue in the sim and a picture of your best route appears here.' : 'A picture of the best rescue route goes here'}</span></div>`;
@@ -32,4 +33,16 @@ function myRescueHTML(mode) {
     <table class="rtot"><tr>${tot.map(t => `<th>${t[0]}</th>`).join('')}</tr><tr>${tot.map(t => `<td>${t[1] ? W(esc(t[1])) : ''}</td>`).join('')}</tr></table>
     <div class="rwork"><b>My working: the route strip</b>${strip}${old ? `<div class="box" style="white-space:pre-wrap">${W(esc(old))}</div>` : ''}${blankStrip}</div>
     <p class="note">${key ? 'This is one example route. Many routes can score well, so check a student\'s numbers against their own table. The rescue is a Challenge, so it is reported here and not marked. The reflection and the Check questions are marked.' : stu ? 'These numbers come from your best run in the sim. The rescue is a Challenge, so it is reported here and not marked.' : 'Students\' best run fills this page. The rescue is a Challenge, so it is reported here and not marked.'}</p></div>`;
+}
+
+/* My Rescue for the new board (4s-rescue5.js): the best run's picture, a row per leg, and the piece and crystal totals */
+function myRescue5HTML(br, gl) {
+  const S = br.sum, W = x => `<span class="stu">${x}</span>`, n0 = v => Math.round(v).toLocaleString('en-GB');
+  const frame = br.snap ? `<div class="rsnap"><img src="${br.snap}" alt="My best rescue route"></div>` : '';
+  const rows = S.legs.map((l, i) => `<tr><td>${i + 1}</td><td>${W(esc(l.type))}</td><td>${W(esc(l.note || ''))}</td><td>${W(fmt(l.ma, 1))}</td><td>${W(fmt(l.pull, 1) + ' N')}</td></tr>`).join('');
+  const b5 = gl.best5 || {};
+  return `<div class="rescue"><h2>My Rescue: Operation Gummy Lift</h2>${frame}
+    <p>Result: ${W('<b>' + (S.won ? 'Rescued!' : 'Not rescued yet') + '</b>')}</p>
+    <table class="rtab"><tr><th>Leg</th><th>Machine</th><th>The move</th><th>Total MA</th><th>Smooshy's pull</th></tr>${rows}</table>
+    <table class="rtot"><tr><th>Pieces used</th><th>Crystals spent</th><th>Hand travel</th><th>Hull damage</th><th>Fewest pieces</th><th>Fewest crystals</th></tr><tr><td>${W(S.pieces)}</td><td>${W(S.crystals)}</td><td>${W(n0(S.hand) + ' m')}</td><td>${W(S.hull + '%')}</td><td>${W(b5.pieces || '')}</td><td>${W(b5.crystals || '')}</td></tr></table></div>`;
 }
