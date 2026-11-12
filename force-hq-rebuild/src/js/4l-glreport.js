@@ -1,48 +1,21 @@
-/* ===== Part 5 worksheet page 1: "My Rescue" (best run's screenshot, result, a row per leg, totals, the route strip with the student's working) =====
-   Student copy: from chal.c6e.gl.bestRun (snap, sum from glSummary, work = the route strip as sent to GASA) plus runs and hints. Old saves with no strip show their free-text working.
-   Blank template: an empty frame and empty boxes. Answer key: the brief's top route (two 24 m ramps, 4 ropes, winch x7, the boulder pried up by a lever with a winch and lifted away by a crane, crest blasted). */
-const GL_KEY_RIG = (() => {
-  const parts = [{ id: 'bl', type: 'lever', role: 'boulder', x: 19, arm: 1, rise: 0.5, dir: 1 }, { id: 'blw', type: 'winch', ratio: 2 }, { id: 'bc', type: 'crane', role: 'boulder', x: 18.7, rise: 6, across: -8, adir: -1, on: 'ground' }, { id: 'bcw', type: 'winch', ratio: 6 }, { id: 'rA', type: 'ramp', x1: 16, y1: 0, L: 24, rise: 6 }, { id: 'rB', type: 'ramp', x1: 40.76, y1: 6, L: 24, rise: 6 }, { id: 'd1', type: 'dyn', big: true, x: 68 }], cables = [{ a: 'bl', b: 'blw' }, { a: 'bc', b: 'bcw' }];   // the boulder kit: a lever with a winch pries it up and holds it, a crane with a winch carries it left over the Gumdrop
-  ['rA', 'rB'].forEach(m => { parts.push({ id: m + 'b', type: 'block', ropes: 4 }, { id: m + 'w', type: 'winch', ratio: 7 }); cables.push({ a: m, b: m + 'b' }, { a: m + 'b', b: m + 'w' }); });
-  cables.push({ a: 'rA', b: 'ship' }, { a: 'rB', b: 'ship' });
-  return { v: 2, parts, cables };
-})();
-let GL_KEY_CACHE = null;
-function glKey() {
-  if (!GL_KEY_CACHE) { const res = gpEvaluate(GL_KEY_RIG, { hints: 0, maths: true }); GL_KEY_CACHE = { sum: glSummary(res), work: glwKeyFor(GL_KEY_RIG), snap: glSnapURL(GL_KEY_RIG, 'Example route: the boulder lifted clear, two ramps and a blasted crest') }; }
-  return GL_KEY_CACHE;
-}
+/* My Rescue page (worksheet page 1) for the new rescue board (4s-rescue5.js). Student copy: the best run's picture, result, score, a row per leg and the student's own maths from the route strip.
+   Answer key: one example route (a pull to the cliff, a crane over it, a pull to the line), worked out below. Blank: empty boxes. */
+const RB5_KEY = { sum: { won: true, pieces: 9, crystals: 260, hand: 9443, hull: 84, hints: 0, legs: [
+  { type: 'pull', note: 'Dragged over the ground, as far as the cliff', needs: 3107, ma: 80, pull: 38.8, hand: 2726.2 },
+  { type: 'crane', note: 'Lifts 7 m, carries 4.5 m across, lowers 0.9 m', needs: 6300, ma: 128, pull: 49.2, hand: 890.7 },
+  { type: 'pull', note: 'Dragged over the ground', needs: 3107, ma: 160, pull: 19.4, hand: 5826.2 }] } };
 function myRescueHTML(mode) {
-  const stu = mode === 'student', key = mode === 'key', gl = (dbGet('chal.c6e', {}).gl) || {}, br = gl.bestRun;
-  if (stu && br && br.v5) return myRescue5HTML(br, gl);
-  const K = key ? glKey() : null, S = key ? K.sum : stu && br ? br.sum : null, snap = key ? K.snap : stu && br && br.snap ? br.snap : '';
-  const W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x, f1 = v => fmt(v, 1), n0 = v => Math.round(v).toLocaleString('en-GB');
-  const frame = snap ? `<div class="rsnap"><img src="${snap}" alt="${key ? 'An example rescue route' : 'My best rescue route'}"></div>` : `<div class="rsnap empty"><span>${stu ? 'Press Run Rescue in the sim and a picture of your best route appears here.' : 'A picture of the best rescue route goes here'}</span></div>`;
-  const E = S ? GL_END[S.ending] : null;
-  const stamp = S ? `<div class="rstamp">Result: ${W('<b>' + esc(E[0]) + '</b>')} &nbsp; Score: ${S.score != null ? W('<b>' + S.score + ' of ' + (S.max || 10) + '</b>') : W('<b>not yet</b>')} <small>(best run; the rescue is not marked)</small></div>` + (S ? `<div class="rstamp">Boulder: ${W('<b>' + esc(GL_BOULDER_TXT[S.boulder] || '') + '</b>')} &nbsp; Hull damage: ${W('<b>' + f1(S.dmg.total) + '%</b>')} ${S.dmg.total ? `<small>(${W(esc(glHullSources(S.dmg).join(', ')))})</small>` : ''} &nbsp; Ending: ${W('<b>' + esc(E[0]) + '</b>')}</div>` : '') : '<div class="rstamp">Result: ____________ &nbsp; Score: ____ of 11 <small>(best run; the rescue is not marked)</small></div>';
-  const rows = S ? S.legs.map((l, i) => `<tr><td>${i + 1}</td><td>${W(esc(l.name))}</td><td>${W(f1(l.rise) + ' m')}</td><td>${W(f1(l.ma))}</td><td>${W(f1(l.pull) + ' N')}</td></tr>`).join('') : [1, 2, 3, 4].map(i => `<tr><td>${i}</td><td></td><td></td><td></td><td></td></tr>`).join('');
-  const hints = key ? 0 : gl.hints || 0, tries = key ? 1 : gl.runs || 0;
-  const tot = [['Hand travel', S && n0(S.hand) + ' m'], ['Crystals spent', S && String(S.cost)], ['Final crest height', S && f1(S.crest) + ' m'], ['Total work', S && n0(S.work) + ' J'], ['Hull damage', S && f1(S.dmg.total) + '%'], ['Hints used', S && String(hints)], ['Tries', S && String(tries)]];
-  const K2 = key ? K.work : null, WK = key ? K2 : stu && br && br.work ? br.work : null;
-  const strip = WK ? `<table class="rtab rstrip"><tr><th>Row</th><th>My working (each box, with GASA's check)</th></tr>${WK.rows.map(r => `<tr><td><b>${esc(r.name)}</b><br><small>${esc(r.desc)}<br>Load ${r.load.toLocaleString('en-GB')} N</small></td><td>${r.cells.map(c => `${esc(c.lab)}: ${W(esc(c.v || '–'))}${c.st === 'helped' ? ' <b>(helped)</b>' : c.st === 'ok' ? ' ✓' : ''}`).join(' &nbsp;·&nbsp; ')}</td></tr>`).join('')}</table>
-    <p class="rstripn">Hints used: ${W(String(WK.hints))}${WK.helped ? ` (${WK.helped} box${WK.helped > 1 ? 'es' : ''} helped by GASA)` : ''}. Maths approved by GASA: ${W(WK.approved ? 'yes' : 'no')}.</p>` : '';
-  const old = !WK && stu && S ? ((br.pred && br.pred.working) || gl.draftWork || '') : '';
-  const blankStrip = !WK && !old ? '<table class="rtab rstrip"><tr><th>Row</th><th>My working</th></tr>' + ['Boulder: pry', 'Boulder: lift', 'Leg 1', 'Leg 2', 'Leg 3'].map(n => `<tr><td><b>${n}</b></td><td style="height:34px"></td></tr>`).join('') + '</table><p class="rstripn">Hints used: ____ &nbsp; Maths approved by GASA: yes / no</p>' : '';
-  return `<div class="rescue"><h2>My Rescue: Operation Gummy Lift</h2>${frame}${stamp}
-    <table class="rtab"><tr><th>Leg</th><th>Machines</th><th>Rise</th><th>Total MA</th><th>Pull</th></tr>${rows}</table>
-    <table class="rtot"><tr>${tot.map(t => `<th>${t[0]}</th>`).join('')}</tr><tr>${tot.map(t => `<td>${t[1] ? W(esc(t[1])) : ''}</td>`).join('')}</tr></table>
-    <div class="rwork"><b>My working: the route strip</b>${strip}${old ? `<div class="box" style="white-space:pre-wrap">${W(esc(old))}</div>` : ''}${blankStrip}</div>
-    <p class="note">${key ? 'This is one example route. Many routes can score well, so check a student\'s numbers against their own table. The rescue is a Challenge, so it is reported here and not marked. The reflection and the Check questions are marked.' : stu ? 'These numbers come from your best run in the sim. The rescue is a Challenge, so it is reported here and not marked.' : 'Students\' best run fills this page. The rescue is a Challenge, so it is reported here and not marked.'}</p></div>`;
-}
-
-/* My Rescue for the new board (4s-rescue5.js): the best run's picture, a row per leg, and the piece and crystal totals */
-function myRescue5HTML(br, gl) {
-  const S = br.sum, W = x => `<span class="stu">${x}</span>`, n0 = v => Math.round(v).toLocaleString('en-GB');
-  const frame = br.snap ? `<div class="rsnap"><img src="${br.snap}" alt="My best rescue route"></div>` : '';
-  const rows = S.legs.map((l, i) => `<tr><td>${i + 1}</td><td>${W(esc(l.type))}</td><td>${W(esc(l.note || ''))}</td><td>${W(fmt(l.ma, 1))}</td><td>${W(fmt(l.pull, 1) + ' N')}</td></tr>`).join('');
-  const b5 = gl.best5 || {};
-  return `<div class="rescue"><h2>My Rescue: Operation Gummy Lift</h2>${frame}
-    <p>Result: ${W('<b>' + (S.won ? 'Rescued!' : 'Not rescued yet') + '</b>')}</p>
-    <table class="rtab"><tr><th>Leg</th><th>Machine</th><th>The move</th><th>Total MA</th><th>Smooshy's pull</th></tr>${rows}</table>
-    <table class="rtot"><tr><th>Pieces used</th><th>Crystals spent</th><th>Hand travel</th><th>Hull damage</th><th>Fewest pieces</th><th>Fewest crystals</th></tr><tr><td>${W(S.pieces)}</td><td>${W(S.crystals)}</td><td>${W(n0(S.hand) + ' m')}</td><td>${W(S.hull + '%')}</td><td>${W(b5.pieces || '')}</td><td>${W(b5.crystals || '')}</td></tr></table></div>`;
+  const stu = mode === 'student', key = mode === 'key', gl = (dbGet('chal.c6e', {}).gl) || {}, br = gl.bestRun && gl.bestRun.v5 ? gl.bestRun : null;
+  const W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x, n0 = v => Math.round(v).toLocaleString('en-GB'), f1 = v => fmt(v, 1);
+  const S = key ? RB5_KEY.sum : stu && br ? br.sum : null, w = stu && br ? (br.work || {}) : {};
+  const snap = stu && br && br.snap ? `<div class="rsnap"><img src="${br.snap}" alt="My best rescue route"></div>` : `<div class="rsnap empty"><span>${stu ? 'Run the rescue in the sim and a picture of your best route appears here.' : key ? 'The student\'s picture goes here.' : 'Stick or draw your best rescue route here.'}</span></div>`;
+  const sc = S ? (S.score || rb5Score(S, key ? true : !!w.approved)) : null, E = S ? rb5Ending(S) : null;
+  const stamp = S ? `<div class="rstamp">Result: ${W('<b>' + esc(E[0]) + '</b>')} &nbsp; Score: ${W('<b>' + sc.total + ' of ' + RB5_MAXP + '</b>')} <small>(best run; the rescue is a Challenge, so it is reported here and not marked)</small></div>` : `<div class="rstamp">Result: ______________ &nbsp; Score: ____ of ${RB5_MAXP}</div>`;
+  const rows = S ? S.legs.map((l, i) => `<tr><td>${i + 1}</td><td>${W(esc((RB5_NAME[l.type] || l.type) + ': ' + (l.note || '')))}</td><td>${W(n0(l.needs) + ' N')}</td><td>${W(f1(l.ma))}</td><td>${W(f1(l.pull) + ' N')}</td><td>${W(n0(l.hand || 0) + ' m')}</td></tr>`).join('') : [1, 2, 3].map(i => `<tr><td>${i}</td><td style="height:26px"></td><td></td><td></td><td></td><td></td></tr>`).join('');
+  const tot = [['Pieces used', S && String(S.pieces)], ['Crystals spent', S && String(S.crystals)], ['Hand travel', S && n0(S.hand) + ' m'], ['Hull damage', S && S.hull + '%'], ['Hints used', S && String(key ? 0 : w.hints != null ? w.hints : S.hints || 0)], ['Maths approved by GASA', S && (key || w.approved ? 'yes' : 'no')]];
+  const pts = S ? `<p class="note">Score: rescued ${sc.pts.rescue} of 4, hull ${sc.pts.hull} of 2, budget ${sc.pts.budget} of 2, oxygen ${sc.pts.oxy} of 1, 8 pieces or fewer ${sc.pts.pieces} of 1, maths approved ${sc.pts.maths} of 1.</p>` : '';
+  return `<div class="rescue"><h2>My Rescue: Operation Gummy Lift</h2>${snap}${stamp}
+    <table class="rtab"><tr><th>Leg</th><th>Machine and move</th><th>Force needed</th><th>Total MA</th><th>Smooshy's pull</th><th>Hand travel</th></tr>${rows}</table>
+    <table class="rtot"><tr>${tot.map(t => `<th>${t[0]}</th>`).join('')}</tr><tr>${tot.map(t => `<td>${t[1] ? W(esc(t[1])) : ''}</td>`).join('')}</tr></table>${pts}
+    <p class="note">${key ? 'This is one example route. Many routes can score well, so check a student\'s numbers against their own table: Smooshy\'s pull = force needed ÷ total MA, and hand travel = total MA × the distance moved. The rescue is a Challenge, so it is reported here and not marked. The reflection question is marked: check the numbers a student quotes against their My Rescue table.' : 'Fewest pieces and fewest crystals: ' + (stu && gl.best5 ? `${gl.best5.pieces} pieces, ${gl.best5.crystals} crystals.` : '______ pieces, ______ crystals.')}</p></div>`;
 }

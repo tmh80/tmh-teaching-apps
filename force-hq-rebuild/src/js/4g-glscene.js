@@ -1,4 +1,5 @@
 /* ===== Operation Gummy Lift: drawing the crater, side-on (stage 2). Same flat, rounded look as the Workshop (4b-shopdraw.js).
+const GL_PLATMSG = 'Move the machine first, then add the platform.';
    World units are metres (x across, y up from the crater floor). GLV maps them to canvas pixels, with zoom and pan.
    glDrawWorld(c, o) draws everything; o = { rig, ev (glEvaluate result), ground, ghost, ship {x,y,tilt,mood,inside,dmg}, smoo {x,y,mood}|null,
    sel, routes (draw each leg's path), ruler, run (stage 3 extras), t } */

@@ -298,5 +298,5 @@ function renderShopCourse(ch, wm, host, save) {
   load(cur);
 }
 
-/* Chapter 6 Part 5: Operation Gummy Lift. One big build; renderGummyLift (4h-glbuild.js) draws the board and 4i-glrun.js runs it. */
+/* Chapter 6 Part 5: Operation Gummy Lift. renderRescue5 (4s-rescue5.js) mounts the rescue board (4r), the training round (4u) and the route strip (4t). */
 function renderRescueCourse(ch, wm, host, save) { renderRescue5(ch, wm[0], host, save); }

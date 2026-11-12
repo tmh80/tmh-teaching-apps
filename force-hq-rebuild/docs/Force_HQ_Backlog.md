@@ -1,6 +1,8 @@
 # Force HQ (rebuild): backlog
 
 ## Next milestones (from the rebuild brief)
+**12 Nov 2026: Part 5 now runs on the new rescue board** (training rock, route strip with GASA's check, score of 11, new My Rescue page and key). Draft until Tom plays it. Review list: `docs/Part5_Review_Flags.md`. NEXT: Tom plays Part 5; a better answer-key route; check the Part 5 Check questions against the new board.
+
 **Open decision for Tom: the crystal budget.** The boulder kit (lever, winch, crane gantry, winch) costs 70, so the crane route is over 475; raise the budget to about 545 or leave it. **NEXT: Tom plays Part 5 on branch `rescue-wiring` (the pulling-physics rescue is wired in, jobs 1 to 11 done); then set `WORKSHOP_OPEN = true`.** Background: `docs/Rescue_Pulling_Physics_Spec.md`. Steps 1 to 3 are done (spec, model with 79 number checks, grey-box `proto/Rescue-Physics-Greybox.html`) on branch `rescue-physics`. Tom plays the grey-box and answers the spec's section 5; then step 4 wires the model into the real rescue. The Workshop (Chapter 6) is closed to students (`WORKSHOP_OPEN = false`) until that is finished. Every other chapter is ready for class (Tom, 9 Nov 2026).
 
 **Now (3 Nov 2026): Chapter 6 is built in full: Parts 1 to 5, the optional Extension (`c6f`) and Build tasks bt1 to bt4, with the Explore Workshop scene. Tom to play Parts 4 and 5, the Extension and the Build tasks.** Next job: Explore "Draw what's happening now" (item 7 below).

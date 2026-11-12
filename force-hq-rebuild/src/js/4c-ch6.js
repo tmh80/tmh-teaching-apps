@@ -303,7 +303,7 @@ CHDATA.c6 = {
     /* ================= Part 5: Rescue Captain Smooshy! (c6e) ================= */
     { id: 'v1', title: 'Landing on Glimmer-9', rescue: 'Landed on Glimmer-9. Rescue plan loaded!',
       cards: [
-        { hi: '#cvScene', html: `<p>Welcome to Gummy Mission Control! 🛰️ This is <b>Planet Glimmer-9</b>. The Gumdrop has crashed at the bottom of a <b>15 m</b> deep crater, and a boulder is stuck against its landing leg. Captain Smooshy is safe inside. Let's get him home!</p>` },
+        { hi: '#cvScene', html: `<p>Welcome to Gummy Mission Control! 🛰️ This is <b>Planet Glimmer-9</b>. The Gumdrop has crashed at the bottom of a <b>15 m</b> deep crater, and a rock sits beside it. Captain Smooshy is safe inside. Let's get him home!</p>` },
         { html: `<p>Here's the plan. The <b>Big Jelly</b> is a huge repair ship. It can't land close to the crater, so it waits nearby. Its <b>tractor beam</b> can lift the Gumdrop once the ship reaches the top of the crater. Smooshy will climb out and work each machine you build. When the Gumdrop reaches the top, he climbs back in and the beam carries the ship home.</p>${picCraterPlan()}` },
         { html: `<p>Gravity on Glimmer-9 is weaker than on Earth: ${T('gfs', 'g')} = <b>4.2 N/kg</b>. The ship is still far too heavy for a 60 N gummy bear, so you'll need machines. 💎 ${T('sugarcrystal', 'Sugar crystals')} are gummy money, and you have <b>475</b> to spend on machines, platforms and dynamite. Smooshy has enough oxygen for <b>1,500 m</b> of pulling. This mission takes two homework sessions: build and test a route in the first, then improve it in the second.</p>` }],
       setup() { shopStage({ mach: 'build', allow: ['build'], lift: 15, loads: { build: WL.gumdrop }, site: 'mission', cap: 60, bRoutes: [[0, 'Straight up'], [30, 'Steep track'], [45, 'Medium track'], [75, 'Gentle track']] }); }, adds: [], hide: ['wsctl', 'wspull', 'builder', 'rulers', 'wsmach'], sides: [], pullers: [], idle: 'Smooshy is waiting in the Gumdrop. Answer the questions to get ready',
@@ -498,7 +498,7 @@ CHDATA.c6.challenge = {
 };
 
 /* ---------- Part 5 Challenge: Operation Gummy Lift, one big build in two sessions (docs/Force_HQ_Rescue_Rebuild_Brief.md).
-   Built in 4h-glbuild.js, run in 4i-glrun.js, scored by glScore in 4f-gummylift.js. Best run counts; the score is out of 11 (ten points for the rescue and one for Maths approved by GASA). ---------- */
+   Built in 4s-rescue5.js (board 4r, strip 4t, training 4u). Best run counts; the score is out of 11 (ten points for the rescue and one for Maths approved by GASA). ---------- */
 CHDATA.c6.challenge.missions.push({ id: 'gl', kind: 'rescue', title: 'Operation Gummy Lift', max: 11, mins: 44 });
 
 /* ---------- Extension Challenge: Build Gummy Base One (gb1 to gb3). Real machines (efficiencies multiply) and an energy budget. ---------- */

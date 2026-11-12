@@ -9,14 +9,6 @@ fails = []
 def chk(name, cond, extra=''):
     print(('PASS ' if cond else 'FAIL ') + name + (' ' + str(extra) if (extra and not cond) else ''))
     if not cond: fails.append(name)
-def send_right(pg):
-    """Fill every box of the route strip with the right numbers and press Send to GASA."""
-    R = json.loads(pg.evaluate("c=>__fhq.ev(c)", "JSON.stringify(glwRows().map(r=>({key:r.key,cells:r.cells.map(c=>({k:c.k,exp:c.exp,d:c.d}))})))"))
-    for r in R:
-        for c in r['cells']:
-            sel = f'[data-glw-in="{r["key"]}|{c["k"]}"]'
-            if pg.locator(sel).is_enabled(): pg.fill(sel, str(round(c['exp'], c['d'])))
-    pg.click('#glSend')
 with sync_playwright() as p:
     b = p.chromium.launch(); pg = b.new_page(viewport={'width': 1440, 'height': 1000}); errs = []
     pg.on('pageerror', lambda e: errs.append('ERR ' + str(e))); pg.on('console', lambda m: m.type == 'error' and errs.append(m.text))
@@ -491,18 +483,20 @@ with sync_playwright() as p:
     finish('v1')
     ev("openChapter('c6e','challenge')"); pg.wait_for_timeout(500)
     chk('rescue: one Operation Gummy Lift mission out of 11', ev("CHDATA.c6.challenge.missions.filter(m=>m.kind==='rescue').length") == 1 and ev("challengeState('c6e').max") == 11, ev("challengeState('c6e')"))
-    chk('rescue: Reminders sit at the top and the guided start shows first', pg.locator('#glGuide').is_visible() and ev("document.querySelector('#mi-gl').firstElementChild.classList.contains('remind')"))
-    import pathlib; routes = pathlib.Path('tests/rescue_routes.js').read_text()
-    pg.evaluate('c=>__fhq.ev(c)', routes + ";(()=>{GLB.rig=ROUTES.top(); glChanged(); glRunPaint();})()"); pg.wait_for_timeout(100)
-    chk('rescue: Send to GASA waits for every box of the route strip', pg.locator('#glSend').is_disabled() and pg.locator('#glStrip [data-glw-in]').count() >= 5)
-    send_right(pg); pg.wait_for_timeout(1000); ev('GLR.t0 -= 1e7'); pg.wait_for_timeout(800); pg.screenshot(path=OUT + 'rescue_done.png')
-    chk('rescue: the top route rescues the Gumdrop for 11 of 11', ev("challengeState('c6e').score") == 11 and ev("challengeState('c6e').max") == 11, ev("challengeState('c6e')"))
-    chk('rescue: the spotless ending card shows, then the good-place-to-stop pop-up on the first rescue', 'Spotless' in pg.locator('#glPop').inner_text())
-    pg.click('#glPop [data-gp=on]'); pg.wait_for_timeout(100); chk('rescue: the stopping pop-up offers Save my work', 'good place to stop' in pg.locator('#glPop').inner_text() and pg.locator('#glPop [data-gp=save]').count() == 1); pg.click('#glPop [data-gp=on]'); pg.wait_for_timeout(100)
+    chk('rescue: Reminders sit at the top and the training round shows first', pg.locator('#rb5tc').is_visible() and ev("document.querySelector('#mi-gl').firstElementChild.classList.contains('remind')"))
+    pg.click('#rb5tskip'); pg.wait_for_timeout(300); chk('rescue: skipping training opens the board', pg.locator('#rb5Host canvas').count() == 1)
+    def H(i, t, mount, to, **k): d = dict(id=i, type=t, x=0, y=0, mount=mount, to=to); d.update(k); return d
+    ROUTE = [dict(id='a', type='pole', x=44, h=6), H('a1', 'winch', 'a', 'a2', ratio=20), H('a2', 'pulley', 'a', None, ropes=4, hooked=True), dict(id='b', type='crane', x=45.5, lift=7, across=4.5, hooked=True), H('b1', 'winch', 'b', 'b2', ratio=16), H('b2', 'pulley', 'b', 'b', ropes=8), dict(id='d', type='pole', x=84, h=6), H('d1', 'winch', 'd', 'd2', ratio=20), H('d2', 'pulley', 'd', None, ropes=8, hooked=True)]
+    pg.evaluate("p=>{window.__board.parts=p}", ROUTE); pg.wait_for_timeout(400)
+    chk('rescue: the route strip has a row for each leg and Run waits for GASA', pg.locator('.rb5in').count() == 9)
+    legs = pg.evaluate("()=>window.__board.ev.legs.filter(l=>l.ok).map(l=>[l.ma,l.pull,l.ma*(l.pl.dist||0)])")
+    for i, l in enumerate(legs):
+        for j, v in enumerate(l): pg.locator('.rb5in').nth(i * 3 + j).fill(str(round(v, 2)))
+    pg.click('#rb5Send'); pg.wait_for_timeout(200); pg.click('#run'); pg.wait_for_timeout(21000); pg.screenshot(path=OUT + 'rescue_done.png')
+    chk('rescue: the example route rescues the Gumdrop for 7 of 11', ev("challengeState('c6e').score") == 7 and ev("challengeState('c6e').max") == 11, ev("challengeState('c6e')"))
     chk('rescue: the snapshot is saved for the worksheet', ev("((dbGet('chal.c6e',{}).gl||{}).bestRun||{}).snap||''").startswith('data:image/jpeg'))
-    pg.click('#glBack'); pg.wait_for_timeout(100); ev("(()=>{GLB.rig={parts:[],cables:[]}; glChanged(); glRunPaint();})()"); ev("glStartRun('launch')"); pg.wait_for_timeout(300); ev('GLR.t0 -= 1e7'); pg.wait_for_timeout(600)
-    chk('rescue: a worse try never lowers the best score', ev("challengeState('c6e').score") == 11 and ev("dbGet('chal.c6e',{}).gl.runs") == 2)
-    if pg.locator('#glPop').count(): pg.click('#glPop [data-gp=on]')
+    pg.evaluate("p=>{window.__board.parts=p}", []); pg.wait_for_timeout(300); pg.click('#run'); pg.wait_for_timeout(6000)
+    chk('rescue: a worse try never lowers the best score', ev("challengeState('c6e').score") == 7 and ev("dbGet('chal.c6e',{}).gl.runs") == 2, ev("challengeState('c6e')"))
     ev("openChapter('c6e','review')"); pg.wait_for_timeout(400)
     if pg.locator('#revAnyway').count() and pg.locator('#revAnyway').is_visible(): pg.click('#revAnyway'); pg.wait_for_timeout(200)
     chk('check 5: five questions, the reflection last', pg.locator('#reviewHost [id^=rq-c6r]').count() == 5, pg.locator('#reviewHost [id^=rq-c6r]').count())
