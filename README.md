@@ -34,7 +34,7 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 
 - **Flashcards with spaced repetition, in every sim and lab:** cards built from the key vocabulary each student has met, reviewed on a spaced-repetition schedule. Force HQ already records the words each student meets (Journal → Vocab tab).
 
-- **Force HQ rebuild, next:** Tom plays Part 5 on the pulling physics and the new art (`force-hq-rebuild/docs/Rescue_Pulling_Physics_Spec.md`); fix what he finds, then merge `rescue-wiring` and upload to Toddle. After that, give the Workshop lesson boards (Parts 1 to 4) the same outdoor look.
+- **Force HQ rebuild, next:** the rescue is being rebuilt on the v3 rules. Start from `force-hq-rebuild/docs/Rescue_v3_Sonnet_Handoff.md` and the test board `force-hq-rebuild/proto/Rescue-Core-Board.html` (Tom played it on 12 Nov 2026 and approved the direction). First job: poles, so pulley blocks and winches never float.
 - **Force HQ rebuild, later:** Explore "draw what's happening now" (Chapter 6 is finished). Port from the old `force-hq/Force-HQ.html` with `force-hq-rebuild/tools/old.py` rather than rebuilding. Start with `force-hq-rebuild/docs/Force_HQ_Handoff.md`.
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
