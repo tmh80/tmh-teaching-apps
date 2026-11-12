@@ -433,4 +433,5 @@ const zoom = k => { V.z = Math.max(1, Math.min(3, V.z * k)); if (V.z > 1 && k > 
 document.getElementById('zi').addEventListener('click', () => zoom(1.3)); document.getElementById('zo').addEventListener('click', () => zoom(1 / 1.3)); document.getElementById('zg').addEventListener('click', () => { V.z = 1.9; V.cx = EV.end.x + 12; V.cy = EV.end.y + 7; }); document.getElementById('zf').addEventListener('click', () => { V.z = 1; V.cx = 50; V.cy = 14; });
 window.__board = { get parts() { return parts; }, set parts(v) { parts = v; refresh(true); }, evaluate, add, act, get ev() { return EV; }, sel: id => { sel = id; paint(); }, V, sx, sy };
 EV = evaluate(); paint(); requestAnimationFrame(draw); setInterval(() => { if (document.getElementById('banner').dataset.say && Date.now() - sayT > 4500) { document.getElementById('banner').dataset.say = ''; paint(); } }, 1000);
+window.addEventListener('keydown', e => { if ((e.key !== 'Delete' && e.key !== 'Backspace') || run || !part(sel)) return; const t = e.target; if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return; e.preventDefault(); act('del'); say('Removed.'); });
 </script>
