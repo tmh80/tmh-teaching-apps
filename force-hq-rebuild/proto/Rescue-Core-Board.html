@@ -417,7 +417,8 @@ function paint() {
 function refresh(full) { layout(); EV = evaluate(); if (full !== false) paint(); else { const p = part(sel); if (p) document.getElementById('card').innerHTML = cardHTML(p); } }
 document.getElementById('tray').innerHTML = TRAY.map(t => `<button class="tile" data-add="${t[0]}"><span>${ICON[t[0]]} ${NAMES[t[0]]}</span><small>💎 ${t[1]}</small><small>${t[2]}</small></button>`).join('');
 let tdrag = null, noClick = false;
-function addAt(type, X, Y) { const before = parts.length; sel = null; add(type); if (parts.length === before) return; const p = part(sel); if (!p) return; const xx = Math.max(1, Math.min(99, Math.round(X * 2) / 2));
+function addAt(type, X, Y) { const v0 = { cx: V.cx, cy: V.cy }; addAt0(type, X, Y); V.cx = v0.cx; V.cy = v0.cy; }
+function addAt0(type, X, Y) { const before = parts.length; sel = null; add(type); if (parts.length === before) return; const p = part(sel); if (!p) return; const xx = Math.max(1, Math.min(99, Math.round(X * 2) / 2));
   if (HELP[type]) { const s = nearestSite(X, Y, kindOf(p), p.id); if (!s) { dropParts(new Set([p.id])); sel = null; say('That is too high up to stand on anything. It went back to the tray. Drop it on a pole or a machine, or near the floor.'); refresh(true); return; } if (s.ground != null) { p.mount = 'ground'; p.gx = s.ground; } else p.mount = s.owner.id; }
   else if (type === 'ramp') { p.ax = Math.min(87, xx); p.ay = ground(p.ax); p.bx = Math.min(99, p.ax + 12); p.by = ground(p.bx); }
   else { p.x = xx; if (type === 'jack') { const q = parts[parts.length - 1]; if (q.type === 'platform') q.x = xx; } }
