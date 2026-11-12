@@ -38,3 +38,9 @@ Checked against the code and by running routes through the board's own rules. Ch
 - The 2,500 m oxygen point can only be earned with carts: dragging alone costs at least about 3,650 m.
 
 Still open: flags 7 to 9 and 13 (art scale, run camera, opening pan, phone, PDF, backup), and the boulder wording in `picCraterPlan()` (flag 10). The board still shows total hand travel in its meter, which lets students check the sum of their three answers.
+
+## Later on 12 Nov, after Tom opened it
+
+- **Training rebuilt (flag 5 replaced).** The separate drawn panel with dropdowns is gone. Training is now the real rescue board in training mode (`rescueBoardMount(host, { train: true })`, or `?train` on the test board): same tray, cards, hooks and legs table, with a 252 N rock wedged beside the Gumdrop. Leg 1: lever (starts 1 m short at 240 N, so it needs a longer arm or a winch). Leg 2: crane, which is refused until the lever has pried the rock up, and must carry the rock at least 4 m clear and not onto the Gumdrop. Tray is lever, crane, pulley block, winch. Run it clears the rock, the kit packs away, and the empty rescue board opens. Tom asked for the rock to go left; with the Gumdrop in the way and 8 m of crane reach it goes right, then disappears with the kit.
+- **Building on the crane.** A pulley block or winch dropped anywhere on a crane's frame (or tapped in the tray while that crane's leg is stuck or the crane is selected) is built on the crane and clipped to the end of its rope. Dragging a rope onto a crane's frame clips it to that crane; a pull hook right under the pointer wins over the Gumdrop. "Clip onto the nearest free hook" now tries the machine the piece is mounted on first (it used to pick the lever when the piece hung on the crane).
+- `tests/play_rescue5.py` plays the new training with real clicks and checks both crane cases.

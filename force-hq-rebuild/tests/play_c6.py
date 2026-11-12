@@ -483,7 +483,7 @@ with sync_playwright() as p:
     finish('v1')
     ev("openChapter('c6e','challenge')"); pg.wait_for_timeout(500)
     chk('rescue: one Operation Gummy Lift mission out of 11', ev("CHDATA.c6.challenge.missions.filter(m=>m.kind==='rescue').length") == 1 and ev("challengeState('c6e').max") == 11, ev("challengeState('c6e')"))
-    chk('rescue: Reminders sit at the top and the training round shows first', pg.locator('#rb5tc').is_visible() and ev("document.querySelector('#mi-gl').firstElementChild.classList.contains('remind')"))
+    chk('rescue: Reminders sit at the top and the training round shows first', pg.locator('#rb5TrainHost canvas').is_visible() and ev("document.querySelector('#mi-gl').firstElementChild.classList.contains('remind')"))
     pg.click('#rb5tskip'); pg.wait_for_timeout(300); chk('rescue: skipping training opens the board', pg.locator('#rb5Host canvas').count() == 1)
     def H(i, t, mount, to, **k): d = dict(id=i, type=t, x=0, y=0, mount=mount, to=to); d.update(k); return d
     ROUTE = [dict(id='a', type='pole', x=44, h=6), H('a1', 'winch', 'a', 'a2', ratio=20), H('a2', 'pulley', 'a', None, ropes=4, hooked=True), dict(id='b', type='crane', x=45.5, lift=7, across=4.5, hooked=True), H('b1', 'winch', 'b', 'b2', ratio=16), H('b2', 'pulley', 'b', 'b', ropes=8), dict(id='d', type='pole', x=84, h=6), H('d1', 'winch', 'd', 'd2', ratio=20), H('d2', 'pulley', 'd', None, ropes=8, hooked=True)]

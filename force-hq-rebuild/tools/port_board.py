@@ -58,6 +58,11 @@ newship = r'''function drawGumdrop(x, y, a, cart, n, skipBody) {
 }
 '''
 js = js[:g0] + newship + js[g1:]
+# training mode comes from the mount options, and the rock uses the Glimmer-9 boulder art
+a = "const TRAIN = /[?&]train\\b/.test(location.search);"; assert js.count(a) == 1, js.count(a)
+js = js.replace(a, "const TRAIN = !!opts.train;")
+r0 = js.index('function drawRock(x, y, a) {'); r1 = js.index('function drawLoad')
+js = js[:r0] + "function drawRock(x, y, a) { syncGLV(); c.save(); c.globalAlpha = a; glDrawBoulder(c, x, y + 0.3, 0, false); c.restore(); }\n" + js[r1:]
 # hooks for Force HQ: save the pieces, report the end of a run
 js = js.replace("let parts = [], sel = null, hist = [], nid = 1, EV = null, run = null, drag = null;",
   "let parts = (opts.parts || []).map(p => Object.assign({}, p)), sel = null, hist = [], nid = 1 + parts.reduce((m, p) => Math.max(m, parseInt(String(p.id).replace(/\\D/g, ''), 10) || 0), 0), EV = null, run = null, drag = null, saveT = 0;\n  const changed = () => { clearTimeout(saveT); saveT = setTimeout(() => { if (opts.onChange) opts.onChange(JSON.parse(JSON.stringify(parts)), EV); }, 350); };", 1)
