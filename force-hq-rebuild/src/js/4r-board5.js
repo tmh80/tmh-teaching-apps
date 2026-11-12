@@ -251,6 +251,7 @@ function drawPart(p, t, hot) {
 }
 function draw(now) {
   if (!root.isConnected) return;
+  if (run) { if (!run.view0) run.view0 = { z: V.z, cx: V.cx, cy: V.cy }; V.z += (Math.max(V.z, 1.8) - V.z) * 0.1; V.cx += (run.pos.x - V.cx) * 0.06; V.cy += (run.pos.y + 3 - V.cy) * 0.06; }
   const t = now / 1000; c.setTransform(cv.width / V.LW, 0, 0, cv.height / V.LH, 0, 0); TQ = []; clampView(); const shk = blastShake(performance.now()); if (shk) c.translate((Math.random() - 0.5) * shk, (Math.random() - 0.5) * shk); drawSky(t); drawGround();
   const ev = EV, placing = drag && drag.kind === 'rope';
   parts.forEach(p => drawPart(p, t, p.id === sel));
@@ -292,7 +293,7 @@ function stepRun(now) {
     if (l.pl.raise) run.raised[l.pl.raise] = Math.max(0, run.pos.y - l.from.y); run.cap = `Leg ${l.n}: ${NAMES[l.m.type]}. Smooshy pulls ${f1(l.pull)} N.`; return; }
   applyTows(legs.length, 0, legs); legs.forEach(l => { if (l.pl.raise) run.raised[l.pl.raise] = l.m.h; }); if (legs.length) { run.pos = legs[legs.length - 1].gEnd || legs[legs.length - 1].pl.end; run.cartNow = legs[legs.length - 1].cartEnd; }
   run.cap = EV.won ? 'The Big Jelly\'s beam has the Gumdrop! Rescued.' : bad ? `Stuck at leg ${bad.n}: it needs ${f0(bad.pl.needs)} N and Smooshy's machines give ${f0(bad.gives)} N.` : legs.length ? 'It stops here. Nothing picks it up from this spot.' : run.cap;
-  if (t > legs.length * D + 2600) { run.saved.forEach(([q, x]) => { q.x = x; }); run = null; layout(); paint(); if (opts.onRunEnd) opts.onRunEnd(EV, JSON.parse(JSON.stringify(parts))); }
+  if (t > legs.length * D + 2600) { run.saved.forEach(([q, x]) => { q.x = x; }); if (run.view0) Object.assign(V, run.view0); run = null; layout(); paint(); if (opts.onRunEnd) opts.onRunEnd(EV, JSON.parse(JSON.stringify(parts))); }
 }
 
 /* ---------- pointer ---------- */

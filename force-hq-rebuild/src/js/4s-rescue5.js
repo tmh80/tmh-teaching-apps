@@ -13,7 +13,9 @@ function renderRescue5(ch, m, host, save) {
     <div id="rb5Host"></div><div id="rb5Res" class="glres"></div>`;
   const put = patch => { const all = dbGet('chal.' + ch, {}); all[m.id] = Object.assign(all[m.id] || {}, patch); dbSet('chal.' + ch, all); };
   const res = $('#rb5Res', card), host5 = $('#rb5Host', card);
-  const paintRes = () => { const g = (dbGet('chal.' + ch, {})[m.id]) || {}, s = g.bestRun && g.bestRun.sum; res.innerHTML = s ? `<p><b>Best rescue so far:</b> ${s.pieces} pieces, ${s.crystals} crystals, ${s.legs.length} leg${s.legs.length === 1 ? '' : 's'}, hull damage ${s.hull}%.</p>` : ''; };
+  const paintRes = () => { const g = (dbGet('chal.' + ch, {})[m.id]) || {}, s = g.bestRun && g.bestRun.sum, l = g.lastSum;
+    const end = l ? (l.won ? (l.hull < 1 ? 'Spotless rescue! The Gumdrop is safe without a scratch.' : l.hull < 20 ? 'Dented, but home! Smooshy is safe, though the Gumdrop needs a little repair.' : 'Wrecked, but home! The hull is in a terrible state, but Smooshy is safe in the cabin.') : 'The Gumdrop did not reach the dotted line. Check the legs table under the board: the first leg that says "Not enough" is the one to fix.') : '';
+    res.innerHTML = (l ? `<p><b>Last run:</b> ${end} (${l.pieces} pieces, ${l.crystals} crystals, hull damage ${l.hull}%.)</p>` : '') + (s ? `<p><b>Best rescue so far:</b> ${s.pieces} pieces, ${s.crystals} crystals, ${s.legs.length} leg${s.legs.length === 1 ? '' : 's'}, hull damage ${s.hull}%.</p>` : ''); };
   paintRes();
   rescueBoardMount(host5, { parts: st0.parts5 || [],
     onChange: parts => put({ parts5: parts, tried: !!parts.length || !!(dbGet('chal.' + ch, {})[m.id] || {}).tried }),
