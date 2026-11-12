@@ -113,7 +113,7 @@ function mountedOn(o, kind, except) { return parts.filter(h => HELP[h.type] && h
 function roomFor(o, kind, except) { if (kind === 'hang' && o.type === 'lever') return false; return mountedOn(o, kind, except).length < cap(o, kind); }
 function siteCentre(o, kind, i) { const a = frame(o)[kind](i); return kind === 'hang' ? { x: a.ax, y: a.ay - 2 } : { x: a.ax + a.dx, y: a.ay }; }
 function nearestSite(x, y, kind, except) { let b = null; parts.forEach(o => { if (!isOwner(o) || !roomFor(o, kind, except)) return; const p = siteCentre(o, kind, mountedOn(o, kind, except).length), d = Math.hypot(p.x - x, p.y - y); if (d <= 4.5 && (!b || d < b.d)) b = { d, owner: o, at: p }; });
-  const gx = Math.max(1, Math.min(99, Math.round(x * 2) / 2)), gp = { x: gx, y: ground(gx) + 1.5 }, gd = Math.abs(y - gp.y); if (gd <= 4.5 && (!b || gd < b.d)) b = { d: gd, owner: null, ground: gx, at: gp }; return b; }
+  const gx = Math.max(1, Math.min(99, Math.round(x * 2) / 2)), gp = { x: gx, y: ground(gx) + 1.5 }, gd = Math.abs(y - gp.y) + (y - ground(gx) < 1.0 ? 0 : 1.2); if (gd <= 4.5 && (!b || gd < b.d)) b = { d: gd, owner: null, ground: gx, at: gp }; return b; }
 function layout() {
   const used = {};
   parts.filter(h => HELP[h.type]).forEach(h => { if (drag && drag.kind === 'move' && drag.id === h.id) return; if (h.mount === 'ground') { const g = ground(h.gx); h.ax = h.gx; h.ay = g + 0.5; h.x = h.gx; h.y = g + 1.5; return; } const o = part(h.mount); if (!o) return; const k = kindOf(h), key = o.id + k, i = Math.min(used[key] || 0, cap(o, k) - 1); used[key] = (used[key] || 0) + 1;
