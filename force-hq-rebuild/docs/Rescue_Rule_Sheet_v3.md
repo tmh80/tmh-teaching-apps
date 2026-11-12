@@ -56,3 +56,11 @@ Boulder rules and the torn leg, hidden machine roles, platform strength limits, 
 
 ## Added 12 Nov 2026: the pole (Tom)
 A pole replaces the pull post. Pulley blocks and winches never float: a pulley block hangs from the top arm of a pole (or from a machine's own frame), and a winch is bolted low on it where Smooshy can reach the handle. A pole with a rope hooked to the Gumdrop is a pull post (MA 1).
+
+## Addendum: towing carts and the challenge (Nov 2026)
+
+- A pole, crane or screw jack dropped on a cart rides on it. Fixed weights: pole 1,000 N, crane 3,000 N, jack 2,000 N, cart 500 N.
+- A winch or pulley block rope dragged onto a cart tows it. The puller must stand on the floor or on a pole that stands on the ground. A puller on wheels would roll too, so it is refused.
+- Tow legs run first. The cart (and everything on it) rolls toward the puller and stops 1.2 m short of it. Force needed = 0.02 × (weight on wheels) plus the slope pull. The Gumdrop adds 6,300 N if it is aboard and then moves with the cart.
+- Anything fixed to the ground never moves. Helpers mounted on a rider machine move with it.
+- Challenge for fun, once Smooshy is saved: fewest pieces and fewest crystals. The best of each is kept in the browser.
