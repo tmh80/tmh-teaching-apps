@@ -46,6 +46,7 @@ details summary{cursor:pointer;font-weight:700}
     <p><b>Poles and the floor.</b> A pole is a structure with no rope of its own. Hang pulley blocks from its arm and bolt winches to it at any height. A pulley block or winch can also stand on a little block set into the floor.</p>
     <p><b>Picking pieces.</b> Tap a piece on the board, or tap its name in the row under the board.</p>
     <p><b>Platforms and carts.</b> A platform is a shelf: set its width and how high it stands. Add wheels and axle and it is a cart. The Gumdrop gets on a cart from level ground, or is set down on it by a crane or tipped on by a lever. A screw jack is one piece: a screw pole with a platform on its left or right. It raises the platform and what is on it.</p>
+    <p><b>Over a pole top.</b> Drag a winch or pulley block's rope hook onto the top of a pole. The rope runs over the pole top, so it clears hills, and the Gumdrop is pulled toward the pole. Then hook the rope's end onto the Gumdrop.</p>
     <p><b>Where a pull stops.</b> Every rope that pulls the Gumdrop or a cart shows an orange STOP flag where the pull ends. Drag the flag to stop sooner, for example on a screw jack's platform, before the cliff.</p>
     <p><b>Towing.</b> Drop a crane, pole or screw jack on a cart. Drag a rope from a winch or pulley block that stands on the floor (or on a pole that stands on the ground) onto the cart. The cart rolls up beside the puller, with everything on it. Pieces fixed to the ground never move. After you save Smooshy there is a fun challenge: do it with the fewest pieces and the fewest crystals.</p>
     <p><b>Lever.</b> Tips the Gumdrop up about 1 m onto a cart or a low platform. Winches go on its pulling end.</p>
@@ -80,7 +81,7 @@ function push() { hist.push(JSON.stringify(parts)); if (hist.length > 60) hist.s
 /* ---------- the rules ---------- */
 function chain(m) { const out = []; let cur = m.id; for (let i = 0; i < 12; i++) { const n = parts.find(p => HELP[p.type] && p.to === cur); if (!n) break; out.push(n); cur = n.id; } return out; }
 function chainFor(m) { return m.type === 'pull' || m.type === 'tow' ? [m.head].concat(chain(m.head)) : chain(m); }
-function machines() { return parts.filter(p => MAIN[p.type]).concat(parts.filter(h => HELP[h.type] && (h.hooked || h.tow)).map(h => ({ type: h.tow ? 'tow' : 'pull', id: h.id, head: h, cart: h.tow, x: h.ax != null ? h.ax : h.x, hooked: true }))); }
+function machines() { return parts.filter(p => MAIN[p.type]).concat(parts.filter(h => HELP[h.type] && (h.hooked || h.tow)).map(h => ({ type: h.tow ? 'tow' : 'pull', id: h.id, head: h, cart: h.tow, x: (h.via && !h.tow && part(h.via)) ? part(h.via).x : (h.ax != null ? h.ax : h.x), hooked: true }))); }
 function helperMA(m) { return chainFor(m).reduce((a, h) => a * (h.type === 'pulley' ? h.ropes : h.ratio), 1); }
 const inh = m => m.type === 'jack' ? 120 : m.type === 'lever' ? 2 * m.e : 1;
 function maText(m) { const ch = chainFor(m), bits = (inh(m) > 1 ? [String(inh(m))] : []).concat(ch.map(h => String(h.type === 'pulley' ? h.ropes : h.ratio))); return bits.length ? bits.join(' × ') : '1'; }
@@ -311,10 +312,11 @@ function draw(now) {
   /* ropes and hooks: only a real connection draws a tight rope */
   let gpos = run ? run.pos : START;
   parts.forEach(p => { const h = hookPos(p);
-    if ((MAIN[p.type] && h.load) || (HELP[p.type] && p.hooked)) { const leg = ev.legs.find(l => l.m.id === p.id), tgt = run ? run.pos : leg ? leg.from : ev.end; if (p.hooked) rope(h.load, { x: tgt.x, y: tgt.y + 5 }, 0.2); else { rope(h.load, { x: h.load.x + 0.6, y: h.load.y - 1.6 }, 0.5); } hookDot(h.load, p.hooked, !p.hooked, t); }
+    if ((MAIN[p.type] && h.load) || (HELP[p.type] && p.hooked)) { const leg = ev.legs.find(l => l.m.id === p.id), tgt = run ? run.pos : leg ? leg.from : ev.end; const vp = HELP[p.type] && p.via && !p.tow ? part(p.via) : null; if (p.hooked && vp) { const tp = poleTop(vp); rope(h.load, tp, 0.3); rope(tp, { x: tgt.x, y: tgt.y + 5 }, 0.3); } else if (p.hooked) rope(h.load, { x: tgt.x, y: tgt.y + 5 }, 0.2); else { rope(h.load, { x: h.load.x + 0.6, y: h.load.y - 1.6 }, 0.5); } hookDot(h.load, p.hooked, !p.hooked, t); }
     if (HELP[p.type] && p.tow) { const k = part(p.tow); if (k) rope(h.load, { x: k.x, y: ground(k.x) + 1.4 }, 0.2); hookDot(h.load, true, false, t); }
-    if (HELP[p.type] && !p.hooked && !p.tow) { if (p.to) { const o = part(p.to); if (o) rope(hookPos(o).pull, h.load, 0.4); } hookDot(h.load, !!p.to, !p.to, t); }
+    if (HELP[p.type] && !p.hooked && !p.tow) { if (p.to) { const o = part(p.to); if (o) rope(hookPos(o).pull, h.load, 0.4); } else if (p.via && part(p.via)) { const tp = poleTop(part(p.via)); rope(h.load, tp, 0.3); rope(tp, { x: tp.x + 0.5, y: tp.y - 2.4 }, 0.2); } hookDot(h.load, !!p.to, !p.to, t); }
     if (h.pull && (MAIN[p.type] || HELP[p.type])) { const free = freePull(p); hookDot(h.pull, !free, false, t); if (free && (MAIN[p.type] || p.to || p.hooked) && !run) { c.font = '14px system-ui'; c.textAlign = 'center'; c.fillText('🧸', sx(h.pull.x + 1.1), sy(h.pull.y) + 4); } } });
+  parts.filter(q => q.type === 'pole').forEach(q => { const used = parts.some(h => h.via === q.id), tp = poleTop(q); if (used || (placing && HELP[(part(drag.id) || {}).type])) { c.save(); c.fillStyle = '#e4eaf5'; c.strokeStyle = used ? '#17794a' : '#19b3c9'; c.lineWidth = 3; c.beginPath(); c.arc(sx(tp.x), sy(tp.y), 6 + (used ? 0 : 2 * Math.abs(Math.sin(t * 4))), 0, 7); c.fill(); c.stroke(); c.restore(); } });
   parts.filter(k => k.type === 'platform' && k.wheels).forEach(k => { const tows = parts.some(h => h.tow === k.id); if (tows || placing) hookDot({ x: k.x, y: ground(k.x) + 1.4 }, tows, !tows, t); });
   if (placing) rope(drag.from, drag.at, 0.3);
   if (drag && drag.kind === 'move' && HELP[(part(drag.id) || {}).type]) { const hp = part(drag.id); if (drag.site) { const q = drag.site.at, r = 12 + 5 * Math.abs(Math.sin(t * 5)); c.strokeStyle = '#7ef0a8'; c.lineWidth = 3; c.setLineDash([5, 4]); c.beginPath(); c.arc(sx(q.x), sy(q.y), r, 0, 7); c.stroke(); c.setLineDash([]); tag('Mount it here', sx(q.x), sy(q.y) - 26, '#0d3b24', '#bff5d6'); } else tag('Needs a pole or a machine frame', sx(hp.x), sy(hp.y) - 24, '#fff', 'rgba(179,38,30,.94)'); }
@@ -396,6 +398,7 @@ cv.addEventListener('pointerup', e => { const d = drag; drag = null; if (!d) ret
     if (!d.moved || Math.hypot(sx(d.from.x) - px, sy(d.from.y) - py) < 8) { sel = p.id; paint(); return; }
     if (d.end === 'pull') { const t = nearestLoad(px, py, p.id); if (t && !loops(t, p.id)) { push(); t.to = p.id; t.hooked = false; say('Clipped on.'); } else say('Drop it on the rope hook of a pulley block or winch that is not connected yet.'); }
     else if (MAIN[p.type] || HELP[p.type]) { if (gumdropNear(X, Y)) { push(); p.hooked = true; p.tow = null; p.stopX = null; if (HELP[p.type]) p.to = null; say('Rope hooked onto the Gumdrop. Drag the orange flag to choose where the pull stops.'); }
+      else if (HELP[p.type] && poleNear(X, Y)) { push(); const q = poleNear(X, Y); p.via = q.id; p.to = null; p.tow = null; say(p.hooked ? 'The rope now runs over the top of the pole. The Gumdrop is pulled toward the pole.' : 'The rope runs over the top of the pole. Now hook its end onto the Gumdrop.'); }
       else if (HELP[p.type] && cartNear(X, Y)) { push(); p.tow = cartNear(X, Y).id; p.hooked = false; p.to = null; p.stopX = null; say('Rope hooked onto the cart. It tows the cart up beside the puller. Drag the orange flag to stop it sooner.'); }
       else if (HELP[p.type]) { const b = nearestPull(px, py, p.id); if (b && b.free && !loops(p, b.id)) { push(); p.to = b.id; p.hooked = false; say('Clipped on.'); } else say(b && !b.free ? 'That pull hook already has something clipped on. Unclip it first.' : 'Drop the hook on the Gumdrop, or on a pull hook of a machine, pulley block or winch.'); }
       else say('Drop the hook on the Gumdrop, or on a ghost Gumdrop.'); }
@@ -416,6 +419,8 @@ function autoClip(p) { let b = null; parts.forEach(o => { if (o.id === p.id || !
 let sayT = 0; function say(t) { document.getElementById('banner').dataset.say = t; sayT = Date.now(); paint(); }
 function seat(p) { const k = parts.find(q => q.type === 'platform' && q.wheels && Math.abs(q.x - p.x) <= q.w / 2 - 0.5); p.cart = k ? k.id : null; p.off = k ? p.x - k.x : 0; }
 function followCarts() { parts.forEach(r => { if (!RIDER[r.type] || !r.cart) return; const k = part(r.cart); if (!k || !k.wheels) { r.cart = null; return; } r.off = Math.max(-k.w / 2 + 0.8, Math.min(k.w / 2 - 0.8, r.off || 0)); r.x = k.x + r.off; }); }
+const poleTop = q => ({ x: q.x, y: gb(q) + q.h });
+function poleNear(X, Y) { return parts.find(q => q.type === 'pole' && Math.abs(X - q.x) <= 1.8 && Y >= gb(q) - 0.3 && Y <= gb(q) + q.h + 2.2) || null; }
 function cartNear(X, Y) { return parts.find(q => q.type === 'platform' && q.wheels && Math.abs(X - q.x) <= q.w / 2 + 1.2 && Y >= ground(q.x) - 0.5 && Y <= ground(q.x) + 3) || null; }
 function reseat() { parts.forEach(r => { if (r.type === 'ramp') { r.ay = ground(r.ax); r.by = ground(r.bx); } }); }
 function showPart(p) { const x = p.x != null ? p.x : (p.ax + p.bx) / 2, hw = V.LW / 2 / U(); if (Math.abs(x - V.cx) > hw * 0.8) V.cx = x; }
@@ -428,8 +433,8 @@ function add(type) { if (run) return; push(); const e = EV.end, id = 'p' + nid++
   if (type === 'lever') p = { id, type, x: Math.round((e.x + 2.2) * 2) / 2, e: 4, dir: 1 };
   if (type === 'dynamite') p = { id, type, x: 47, size: 2, fired: false };
   if (type === 'cart') p = { id, type: 'platform', x: Math.round(e.x * 2) / 2, w: 6, wheels: true };
-  if (type === 'pulley') p = { id, type, x: 0, y: 0, ropes: 4, mount: null, to: null, hooked: false, tow: null };
-  if (type === 'winch') p = { id, type, x: 0, y: 0, ratio: 8, mount: null, to: null, hooked: false, tow: null };
+  if (type === 'pulley') p = { id, type, x: 0, y: 0, ropes: 4, mount: null, to: null, hooked: false, tow: null, via: null };
+  if (type === 'winch') p = { id, type, x: 0, y: 0, ratio: 8, mount: null, to: null, hooked: false, tow: null, via: null };
   if (RIDER[type]) seat(p);
   if (HELP[type]) { const o = pickOwner(type); if (o) p.mount = o.id; else { p.mount = 'ground'; p.gx = Math.max(2, Math.min(98, Math.round(e.x + 5))); } }
   parts.push(p); if (extra) parts.push(extra); layout(); EV = evaluate();
@@ -438,7 +443,7 @@ function add(type) { if (run) return; push(); const e = EV.end, id = 'p' + nid++
   sel = p.id; refresh(true); showPart(p); if (extra) say('Added a platform on top of the screw jack.'); if (type === 'cart') say('A cart is a platform with wheels. The Gumdrop rolls onto it from level ground.'); }
 function act(k) { const p = part(sel); if (!p) return; push(); const step = (v, d, lo, hi) => Math.max(lo, Math.min(hi, v + d));
   if (k === 'del') { const gone = new Set([p.id]); parts.forEach(q => { if (HELP[q.type] && q.mount === p.id) gone.add(q.id); }); dropParts(gone); reseat(); sel = null; }
-  else if (k === 'nostop') p.stopX = null; else if (k === 'hook') { p.hooked = true; p.tow = null; p.stopX = null; if (HELP[p.type]) p.to = null; } else if (k === 'unhook') { p.hooked = false; p.tow = null; p.stopX = null; } else if (k === 'unclip') p.to = null;
+  else if (k === 'nostop') p.stopX = null; else if (k === 'unvia') p.via = null; else if (k === 'hook') { p.hooked = true; p.tow = null; p.stopX = null; if (HELP[p.type]) p.to = null; } else if (k === 'unhook') { p.hooked = false; p.tow = null; p.stopX = null; } else if (k === 'unclip') p.to = null;
   else if (k === 'clip') autoClip(p);
   else if (k === 'lift-') p.lift = step(p.lift, -0.5, 2, 9); else if (k === 'lift+') p.lift = step(p.lift, 0.5, 2, 9);
   else if (k === 'ac-') p.across = step(p.across, -1, -8, 8); else if (k === 'ac+') p.across = step(p.across, 1, -8, 8);
@@ -467,6 +472,7 @@ function cardHTML(p) {
   if (HELP[p.type]) { const o = part(p.mount); h += '<p>' + (o ? (p.type === 'pulley' ? 'Hangs from' : 'Bolted to') + ' the ' + NAMES[o.type].toLowerCase() + '. Drag it to another pole or frame to move it. Drag it clear and it goes back to the tray.' : (p.mount === 'ground' ? 'Set on a block in the floor. Drag it along the ground, or onto a pole or a machine frame.' : 'Not mounted.')) + '</p>'; }
   const mm = MAIN[p.type] ? p : (HELP[p.type] && (p.hooked || p.tow) ? machines().find(m => m.id === p.id) : null);
   if (mm) h += `<p>Total MA on this leg: ${maText(mm)} = <b>${f0(totalMA(mm))}</b>, so Smooshy's machines give 60 × ${f0(totalMA(mm))} = <b>${f0(PULL * totalMA(mm))} N</b>.</p>` + (s ? `<p class="${s.ok ? 'ok' : s.idle ? 'mut' : 'no'}">${s.text}</p>` : '');
+  if (HELP[p.type] && p.via && part(p.via)) h += '<p>The rope runs over the top of a pole, so it clears hills and the Gumdrop is pulled toward the pole.</p><div class="row"><button data-a="unvia">Take the rope off the pole top</button></div>';
   if (HELP[p.type] && (p.hooked || p.tow)) h += `<p>Drag the orange flag on the board to choose where the pull stops.${p.stopX != null ? '' : ' Right now it pulls all the way to the puller.'}</p>` + (p.stopX != null ? '<div class="row"><button data-a="nostop">Pull all the way</button></div>' : '');
   h += '<div class="row">' + (((MAIN[p.type] && !nohook(p.type)) || HELP[p.type]) ? (p.hooked || p.tow ? `<button data-a="unhook">Unhook from the ${p.tow ? 'cart' : 'Gumdrop'}</button>` : '<button data-a="hook" class="on">Hook rope to the Gumdrop</button>') : '') + (HELP[p.type] && !p.hooked && !p.tow ? (p.to ? '<button data-a="unclip">Unclip</button>' : '<button data-a="clip">Clip onto the nearest free hook</button>') : '') + '<button data-a="del">🗑 Remove</button></div>'; return h; }
 function bestScore(ev) { let b = {}; try { b = JSON.parse(localStorage.getItem('rescueBest') || '{}'); } catch (e) { b = {}; } const n = parts.length, cr = Math.round(ev.total); let ch = false; if (!(b.pieces <= n)) { b.pieces = n; ch = true; } if (!(b.crystals <= cr)) { b.crystals = cr; ch = true; } if (ch) { try { localStorage.setItem('rescueBest', JSON.stringify(b)); } catch (e) { } } return b; }
