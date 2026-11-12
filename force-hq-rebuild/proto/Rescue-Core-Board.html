@@ -45,7 +45,7 @@ details summary{cursor:pointer;font-weight:700}
     <p><b>Legs.</b> One pull from start to stop is a leg. A ghost Gumdrop shows where each leg ends. The next machine picks it up from there.</p>
     <p><b>Poles and the floor.</b> A pole is a structure with no rope of its own. Hang pulley blocks from its arm and bolt winches to it at any height. A pulley block or winch can also stand on a little block set into the floor.</p>
     <p><b>Picking pieces.</b> Tap a piece on the board, or tap its name in the row under the board.</p>
-    <p><b>Platforms and carts.</b> A platform is a shelf; size is width only. Add wheels and axle and it is a cart. The Gumdrop gets on a cart from level ground, or is set down on it by a crane or tipped on by a lever. A screw jack under a platform raises the platform and what is on it.</p>
+    <p><b>Platforms and carts.</b> A platform is a shelf: set its width and how high it stands. Add wheels and axle and it is a cart. The Gumdrop gets on a cart from level ground, or is set down on it by a crane or tipped on by a lever. A screw jack is one piece: a screw pole with a platform on its left or right. It raises the platform and what is on it.</p>
     <p><b>Lever.</b> Tips the Gumdrop up about 1 m onto a cart or a low platform. Winches go on its pulling end.</p>
     <p><b>Dynamite.</b> Shows the hole and a red ring first. Light the fuse to lower the ground. Undo the blast any time.</p>
     <p><b>Hull.</b> Dragging over bare ground scrapes it, a step over 0.5 m tips it, a fall dents it, and a blast too close hurts it.</p>
@@ -61,7 +61,7 @@ function ground(x) { let y = groundBase(x); for (let i = 0; i < parts.length; i+
 const NAMES = { ramp: 'Ramp', platform: 'Platform', cart: 'Cart', pole: 'Pole', crane: 'Crane', jack: 'Screw jack', lever: 'Lever', dynamite: 'Dynamite', pulley: 'Pulley block', winch: 'Winch', pull: 'Rope pull' };
 const ICON = { ramp: '📐', platform: '🪵', cart: '🛒', pole: '🗼', crane: '🏗️', jack: '🔩', lever: '⚖️', dynamite: '🧨', pulley: '⚙️', winch: '🎡', pull: '🪢' };
 const lab = q => q.type === 'platform' ? (q.wheels ? 'Cart' : 'Platform') : NAMES[q.type], ico = q => q.type === 'platform' && q.wheels ? ICON.cart : ICON[q.type];
-const TRAY = [['ramp', '3 per metre', 'A slope to pull up'], ['platform', '2 per metre', 'A shelf to rest on. Width only'], ['cart', '2 per metre + 20', 'A platform with wheels'], ['pole', '10', 'A tall mount for pulleys and winches'], ['crane', '40', 'Lifts, carries across, lowers'], ['jack', '60', 'Raises a platform. MA 120'], ['lever', '8 + 2 per metre', 'Tips the Gumdrop up 1 m'], ['dynamite', '15 per charge', 'Lowers the ground. Preview first'], ['pulley', '5 per rope', '2 to 8 ropes'], ['winch', '15 and up', 'Handle ×4 to ×20']];
+const TRAY = [['ramp', '3 per metre', 'A slope to pull up'], ['platform', '2 per metre', 'A shelf to rest on. Width only'], ['cart', '2 per metre + 20', 'A platform with wheels'], ['pole', '10', 'A tall mount for pulleys and winches'], ['crane', '40', 'Lifts, carries across, lowers'], ['jack', '60 + 2 per metre', 'A screw pole with a platform. MA 120'], ['lever', '8 + 2 per metre', 'Tips the Gumdrop up 1 m'], ['dynamite', '15 per charge', 'Lowers the ground. Preview first'], ['pulley', '5 per rope', '2 to 8 ropes'], ['winch', '15 and up', 'Handle ×4 to ×20']];
 const STRUCT = { pole: 1 }, isOwner = o => MAIN[o.type] || STRUCT[o.type], MAIN = { ramp: 1, crane: 1, jack: 1, lever: 1 }, nohook = t => t === 'jack' || t === 'lever', HELP = { pulley: 1, winch: 1 };
 let parts = [], sel = null, hist = [], nid = 1, EV = null, run = null, drag = null;
 const V = { z: 1.9, cx: 27, cy: 8, K: 10, LW: 1000, LH: 420 };
@@ -81,12 +81,15 @@ function helperMA(m) { return chainFor(m).reduce((a, h) => a * (h.type === 'pull
 const inh = m => m.type === 'jack' ? 120 : m.type === 'lever' ? 2 * m.e : 1;
 function maText(m) { const ch = chainFor(m), bits = (inh(m) > 1 ? [String(inh(m))] : []).concat(ch.map(h => String(h.type === 'pulley' ? h.ropes : h.ratio))); return bits.length ? bits.join(' × ') : '1'; }
 function totalMA(m) { return inh(m) * helperMA(m); }
-function cost(p) { return p.type === 'ramp' ? Math.round(3 * Math.hypot(p.bx - p.ax, p.by - p.ay)) : p.type === 'platform' ? Math.round(2 * p.w + (p.wheels ? 20 : 0)) : p.type === 'pole' ? 10 : p.type === 'crane' ? 40 : p.type === 'jack' ? 60 : p.type === 'lever' ? Math.round(8 + 2 * p.e) : p.type === 'dynamite' ? 15 * p.size : p.type === 'pulley' ? 5 * p.ropes : 15 + (p.ratio - 4) / 4 * 5; }
-function deckBase(p) { return Math.min(ground(p.x - p.w / 2), ground(p.x), ground(p.x + p.w / 2)) + 0.4; }
-function deck(p, raised) { let y = deckBase(p); parts.forEach(j => { if (j.type === 'jack' && raised && raised[j.id] && Math.abs(j.x - p.x) <= p.w / 2) y += raised[j.id] === true ? j.h : raised[j.id]; }); return y; }
+function cost(p) { return p.type === 'ramp' ? Math.round(3 * Math.hypot(p.bx - p.ax, p.by - p.ay)) : p.type === 'platform' ? Math.round(2 * p.w + 2 * (p.lift || 0) + (p.wheels ? 20 : 0)) : p.type === 'pole' ? 10 : p.type === 'crane' ? 40 : p.type === 'jack' ? Math.round(60 + 2 * (p.w || 8)) : p.type === 'lever' ? Math.round(8 + 2 * p.e) : p.type === 'dynamite' ? 15 * p.size : p.type === 'pulley' ? 5 * p.ropes : 15 + (p.ratio - 4) / 4 * 5; }
+function deckBase(p) { return Math.min(ground(p.x - p.w / 2), ground(p.x), ground(p.x + p.w / 2)) + 0.4 + (p.lift || 0); }
+const JS = j => j.side || 1;
+function jackDeck(j) { const w = j.w || 8; return { id: j.id, type: 'platform', wheels: false, jack: j, x: j.x + JS(j) * (w / 2 - 1.3), w }; }   // the platform that belongs to a screw jack
+const plats = () => parts.filter(p => p.type === 'platform').concat(parts.filter(j => j.type === 'jack').map(jackDeck));
+function deck(p, raised) { let y = deckBase(p); const j = p.jack; if (j && raised && raised[j.id]) y += raised[j.id] === true ? j.h : raised[j.id]; return y; }
 const LIP = 1.2;   // a platform's ends slope down to the ground over this length, so the Gumdrop can climb on
-function deckAt(p, x, dk) { const x0 = p.x - p.w / 2, x1 = p.x + p.w / 2, l = Math.min(LIP, p.w / 2); if (x < x0 + l) return ground(x0) + (dk - ground(x0)) * (x - x0) / l; if (x > x1 - l) return ground(x1) + (dk - ground(x1)) * (x1 - x) / l; return dk; }
-function surf(x, raised) { let y = ground(x); parts.forEach(p => { if (p.type === 'platform' && !p.wheels && Math.abs(x - p.x) <= p.w / 2) y = Math.max(y, deckAt(p, x, deck(p, raised))); }); return y; }
+function deckAt(p, x, dk) { const x0 = p.x - p.w / 2, x1 = p.x + p.w / 2, l = Math.min(LIP, p.w / 2); if ((p.lift || 0) > 0.8) return dk; if (x < x0 + l) return ground(x0) + (dk - ground(x0)) * (x - x0) / l; if (x > x1 - l) return ground(x1) + (dk - ground(x1)) * (x1 - x) / l; return dk; }
+function surf(x, raised) { let y = ground(x); plats().forEach(p => { if (!p.wheels && Math.abs(x - p.x) <= p.w / 2) y = Math.max(y, deckAt(p, x, deck(p, raised))); }); return y; }
 function cartAt(x, y) { return parts.find(p => p.type === 'platform' && p.wheels && Math.abs(p.x - x) <= p.w / 2 && Math.abs(y - ground(x)) <= 0.8) || null; }
 const levEnd = m => Math.max(1, Math.min(99, m.x - m.dir * m.e));
 function hookPos(p) {   // { load, pull }
@@ -99,7 +102,7 @@ function hookPos(p) {   // { load, pull }
 }
 /* ---------- mounts: nothing floats. A pulley block hangs from, and a winch is bolted to, a pole or a machine's own frame ---------- */
 const SLOTS = 3;
-function stubOf(m) { if (m.type === 'lever') { const xs = levEnd(m); return { xs, gs: ground(xs), dir: -m.dir }; } if (m.type === 'jack') { const xs = m.x - 3.2; return { xs, gs: ground(xs), dir: -1 }; } const hi = m.by >= m.ay, hx = hi ? m.bx : m.ax, hy = hi ? m.by : m.ay, d = Math.sign(hi ? m.bx - m.ax : m.ax - m.bx) || 1; return { xs: hx, gs: hy, dir: d }; }
+function stubOf(m) { if (m.type === 'lever') { const xs = levEnd(m); return { xs, gs: ground(xs), dir: -m.dir }; } if (m.type === 'jack') { const xs = m.x - JS(m) * 3.2; return { xs, gs: ground(xs), dir: -JS(m) }; } const hi = m.by >= m.ay, hx = hi ? m.bx : m.ax, hy = hi ? m.by : m.ay, d = Math.sign(hi ? m.bx - m.ax : m.ax - m.bx) || 1; return { xs: hx, gs: hy, dir: d }; }
 function stubFrame(xs, gs, dir, H) { return { hang: i => ({ ax: xs + dir * (3.0 + 1.9 * i), ay: gs + H }), bolt: i => ({ ax: xs, ay: Math.min(gs + 1.9 + 1.8 * i, gs + H - 0.7), dx: dir * 1.5 }) }; }
 function frame(m) {
   if (m.type === 'pole') return stubFrame(m.x, ground(m.x), 1, m.h);
@@ -150,13 +153,13 @@ function planLeg(m, S) {   // can machine m move the Gumdrop from state S? -> { 
   }
   if (m.type === 'jack') {
     if (S.raised[m.id]) return { why: 'Already used.', far: 1 };
-    const pl = parts.find(q => q.type === 'platform' && !q.wheels && Math.abs(q.x - m.x) <= q.w / 2); if (!pl) return { why: 'Put a platform on top of the screw jack.' };
+    const pl = jackDeck(m);
     if (Math.abs(S.x - pl.x) > pl.w / 2 || Math.abs(S.y - deck(pl, S.raised)) > 0.7) return { why: 'The Gumdrop has to sit on the platform, level.', far: 1 };
     return { path: [{ x: S.x, y: S.y }, { x: S.x, y: S.y + m.h }], needs: W, dist: m.h, end: { x: S.x, y: S.y + m.h }, raise: m.id, note: `Raises the platform ${f1(m.h)} m` };
   }
   if (m.type === 'lever') {
     if (Math.abs(m.x - S.x) > 3.5 || Math.abs(ground(m.x) - S.y) > 1.2) return { why: 'The Gumdrop is not at the tip of this lever (within 3.5 m, on level ground).', far: 1 };
-    const lx = S.x + m.dir * 2.6, tgt = parts.find(q => q.type === 'platform' && Math.abs(q.x - lx) <= q.w / 2 + 0.01 && q.id !== S.cart);
+    const lx = S.x + m.dir * 2.6, tgt = plats().find(q => Math.abs(q.x - lx) <= q.w / 2 + 0.01 && q.id !== S.cart);
     if (!tgt) return { why: `Nothing to tip the Gumdrop onto. Put a cart or a low platform on the ${m.dir > 0 ? 'right' : 'left'}, about 2.6 m from the Gumdrop.` };
     const ty = tgt.wheels ? ground(lx) : deck(tgt, S.raised); if (ty - S.y > 1.3) return { why: 'That platform is higher than a lever tips the Gumdrop (about 1 m).' };
     return { path: [{ x: S.x, y: S.y }, { x: S.x + m.dir * 1.0, y: Math.max(S.y, ty) + 1.0 }, { x: lx, y: ty }], needs: W, dist: 1, end: { x: lx, y: ty }, cartId: tgt.wheels ? tgt.id : null, note: `Tips the Gumdrop up about 1 m onto the ${tgt.wheels ? 'cart' : 'platform'}` };
@@ -237,14 +240,13 @@ function drawPart(p, t, hot) {
     truss(sx(x0), sy(ground(x0)), sx(x0 + 0.5), sy(top)); truss(sx(x1), sy(ground(x1)), sx(x1 - 0.5), sy(top)); c.fillStyle = '#1b1d29'; rr(sx(x0) - 4, sy(top) - 6, sx(x1) - sx(x0) + 8, 11, 3); c.fill(); c.fillStyle = '#ffc53d'; rr(sx(x0) - 2, sy(top) - 4, sx(x1) - sx(x0) + 4, 7, 2); c.fill();
     c.shadowBlur = 0; c.strokeStyle = '#f8e6b0'; c.lineWidth = 1.6; c.beginPath(); c.moveTo(sx(p.x), sy(top) + 4); c.lineTo(sx(p.x), sy(y + p.lift + 0.2)); c.stroke();
     const tx = p.x + p.across, ty = ground(tx); c.setLineDash([4, 5]); c.strokeStyle = 'rgba(126,240,168,.9)'; c.lineWidth = 2; c.beginPath(); c.moveTo(sx(p.x), sy(y + p.lift)); c.lineTo(sx(tx), sy(y + p.lift)); c.lineTo(sx(tx), sy(ty)); c.stroke(); c.setLineDash([]); c.beginPath(); c.ellipse(sx(tx), sy(ty), 2.4 * u, 0.6 * u, 0, 0, 7); c.stroke(); }
-  if (p.type === 'jack') { const y = ground(p.x), pl = parts.find(q => q.type === 'platform' && !q.wheels && Math.abs(q.x - p.x) <= q.w / 2), top = pl ? deck(pl, run ? run.raised : {}) - 0.35 : y + 0.6;
-    c.fillStyle = '#1b1d29'; rr(sx(p.x) - 1.1 * u, sy(y) - 0.3 * u, 2.2 * u, 0.3 * u, 2); c.fill(); c.strokeStyle = '#a9b4c9'; c.lineWidth = Math.max(4, 0.35 * u); c.beginPath(); c.moveTo(sx(p.x), sy(y)); c.lineTo(sx(p.x), sy(Math.max(top, y + 0.5))); c.stroke();
-    if (!pl) { c.shadowBlur = 0; c.fillStyle = '#ffd0cc'; c.font = '700 11px system-ui'; c.textAlign = 'center'; c.fillText('needs a platform', sx(p.x), sy(y) - 1.0 * u); } }
+  if (p.type === 'jack') { const y = ground(p.x), pl = jackDeck(p), top = deck(pl, run ? run.raised : {}) - 0.35;
+    c.fillStyle = '#1b1d29'; rr(sx(p.x) - 1.1 * u, sy(y) - 0.3 * u, 2.2 * u, 0.3 * u, 2); c.fill(); c.strokeStyle = '#a9b4c9'; c.lineWidth = Math.max(4, 0.35 * u); c.beginPath(); c.moveTo(sx(p.x), sy(y)); c.lineTo(sx(p.x), sy(Math.max(top, y + 0.5))); c.stroke(); c.shadowBlur = 0; drawPart(pl, t, hot); }
   if (p.type === 'platform') {
     if (p.wheels) { const carried = run && run.cartNow === p.id, hx = run && run.parked && run.parked[p.id] ? run.parked[p.id].x : p.x; if (!carried) cartBody(hx, ground(hx), p.w, 1); }
     else { const base = deckBase(p), dk = run ? deck(p, run.raised) : base, X0 = sx(p.x - p.w / 2), X1 = sx(p.x + p.w / 2), th = 0.35 * u;
-      [p.x - p.w / 2 + 0.3, p.x, p.x + p.w / 2 - 0.3].forEach(lx => { if (ground(lx) < dk - 0.5) truss(sx(lx), sy(ground(lx)), sx(lx), sy(dk - 0.35)); });
-      const l = Math.min(LIP, p.w / 2), g0 = ground(p.x - p.w / 2), g1 = ground(p.x + p.w / 2); c.lineJoin = 'round'; c.beginPath(); c.moveTo(X0, sy(g0)); c.lineTo(sx(p.x - p.w / 2 + l), sy(dk)); c.lineTo(sx(p.x + p.w / 2 - l), sy(dk)); c.lineTo(X1, sy(g1)); c.lineTo(sx(p.x + p.w / 2 - l), sy(dk) + th); c.lineTo(sx(p.x - p.w / 2 + l), sy(dk) + th); c.closePath(); c.fillStyle = '#ffc53d'; c.fill(); c.strokeStyle = '#1b1d29'; c.lineWidth = 2.5; c.stroke();
+      [p.x - p.w / 2 + 0.3, p.x, p.x + p.w / 2 - 0.3].forEach(lx => { if (!p.jack && ground(lx) < dk - 0.5) truss(sx(lx), sy(ground(lx)), sx(lx), sy(dk - 0.35)); });
+      const hi = (p.lift || 0) > 0.8, l = hi ? 0 : Math.min(LIP, p.w / 2), g0 = hi ? dk : ground(p.x - p.w / 2), g1 = hi ? dk : ground(p.x + p.w / 2); c.lineJoin = 'round'; c.beginPath(); c.moveTo(X0, sy(g0)); c.lineTo(sx(p.x - p.w / 2 + l), sy(dk)); c.lineTo(sx(p.x + p.w / 2 - l), sy(dk)); c.lineTo(X1, sy(g1)); c.lineTo(sx(p.x + p.w / 2 - l), sy(dk) + th); c.lineTo(sx(p.x - p.w / 2 + l), sy(dk) + th); c.closePath(); c.fillStyle = '#ffc53d'; c.fill(); c.strokeStyle = '#1b1d29'; c.lineWidth = 2.5; c.stroke();
       if (!run && EV) { const d2 = deck(p, EV.raised); if (d2 > base + 0.01) { c.setLineDash([4, 4]); c.strokeStyle = '#ffc53d'; c.lineWidth = 1.5; c.strokeRect(X0, sy(d2), X1 - X0, th); c.setLineDash([]); } } } }
   if (p.type === 'lever') { const g = ground(p.x), ex = levEnd(p), eg = ground(ex), tipx = p.x + p.dir * 0.5;
     c.lineCap = 'round'; c.strokeStyle = '#1b1d29'; c.lineWidth = Math.max(8, 0.5 * u); c.beginPath(); c.moveTo(sx(tipx), sy(g + 0.45)); c.lineTo(sx(ex), sy(eg + 1.0)); c.stroke(); c.strokeStyle = '#a9b4c9'; c.lineWidth = Math.max(5, 0.32 * u); c.stroke();
@@ -303,7 +305,7 @@ function hit(px, py) {   // tight: distance to the drawn shape
     if (p.type === 'ramp') { tryit(dpx({ x: p.ax, y: p.ay + 0.25 }, px, py), 11, { id: p.id, what: 'a' }); tryit(dpx({ x: p.bx, y: p.by + 0.25 }, px, py), 11, { id: p.id, what: 'b' }); tryit(dseg(px, py, sx(p.ax), sy(p.ay + 0.25), sx(p.bx), sy(p.by + 0.25)) + 3, 12, { id: p.id, what: 'body' }); }
     if (p.type === 'pole') { const y = ground(p.x); tryit(Math.min(dseg(px, py, sx(p.x), sy(y), sx(p.x), sy(y + p.h)), dseg(px, py, sx(p.x), sy(y + p.h), sx(p.x + 7.8), sy(y + p.h))), 10, { id: p.id, what: 'body' }); }
     if (p.type === 'crane') { const y = ground(p.x), top = y + p.lift + 2.4, x0 = Math.min(p.x, p.x + p.across) - 3, x1 = Math.max(p.x, p.x + p.across) + 3; tryit(Math.min(dseg(px, py, sx(x0), sy(ground(x0)), sx(x0 + 0.5), sy(top)), dseg(px, py, sx(x1), sy(ground(x1)), sx(x1 - 0.5), sy(top)), dseg(px, py, sx(x0), sy(top), sx(x1), sy(top))), 9, { id: p.id, what: 'body' }); }
-    if (p.type === 'jack') { const y = ground(p.x); tryit(Math.min(dseg(px, py, sx(p.x - 1.1), sy(y + 0.15), sx(p.x + 1.1), sy(y + 0.15)), dseg(px, py, sx(p.x), sy(y), sx(p.x), sy(y + 1.5))), 9, { id: p.id, what: 'body' }); }
+    if (p.type === 'jack') { const y = ground(p.x), pl = jackDeck(p), dk = deckBase(pl); tryit(Math.min(dseg(px, py, sx(p.x - 1.1), sy(y + 0.15), sx(p.x + 1.1), sy(y + 0.15)), dseg(px, py, sx(p.x), sy(y), sx(p.x), sy(dk)), dseg(px, py, sx(pl.x - pl.w / 2), sy(dk), sx(pl.x + pl.w / 2), sy(dk)) + 1), 9, { id: p.id, what: 'body' }); }
     if (p.type === 'platform') { if (p.wheels) tryit(dseg(px, py, sx(p.x - p.w / 2), sy(ground(p.x) + 0.6), sx(p.x + p.w / 2), sy(ground(p.x) + 0.6)), 9, { id: p.id, what: 'body' }); else { const dk = deckBase(p); tryit(dseg(px, py, sx(p.x - p.w / 2), sy(dk), sx(p.x + p.w / 2), sy(dk)) + 1, 9, { id: p.id, what: 'body' }); } }
     if (p.type === 'lever') { const ex = levEnd(p); tryit(dseg(px, py, sx(p.x + p.dir * 0.5), sy(ground(p.x) + 0.45), sx(ex), sy(ground(ex) + 1.0)), 10, { id: p.id, what: 'body' }); }
     if (p.type === 'dynamite' && !p.fired) tryit(dpx({ x: p.x, y: ground(p.x) + 0.6 }, px, py), 14, { id: p.id, what: 'body' });
@@ -358,8 +360,8 @@ function add(type) { if (run) return; push(); const e = EV.end, id = 'p' + nid++
   if (type === 'ramp') { const ax = Math.min(96, e.x + 1.5), bx = Math.min(99, ax + 12); p = { id, type, ax, ay: ground(ax), bx, by: ground(bx), hooked: false }; if (Math.abs(ground(ax) - e.y) > 0.7) { p.ax = Math.min(96, e.x + 0.5); p.ay = ground(p.ax); } }
   if (type === 'pole') p = { id, type, x: Math.min(98, e.x + 14), h: 6, hooked: false };
   if (type === 'crane') p = { id, type, x: Math.round(e.x * 2) / 2, lift: 7, across: 4, hooked: false };
-  if (type === 'jack') { p = { id, type, x: Math.round(e.x * 2) / 2, h: 6 }; if (!parts.some(q => q.type === 'platform' && !q.wheels && Math.abs(q.x - p.x) <= q.w / 2)) extra = { id: 'p' + nid++, type: 'platform', x: p.x, w: 8, wheels: false }; }
-  if (type === 'platform') p = { id, type, x: Math.round(e.x * 2) / 2, w: 8, wheels: false };
+  if (type === 'jack') p = { id, type, x: Math.round(e.x * 2) / 2, h: 6, w: 8, side: 1 };
+  if (type === 'platform') p = { id, type, x: Math.round(e.x * 2) / 2, w: 8, wheels: false, lift: 0 };
   if (type === 'lever') p = { id, type, x: Math.round((e.x + 2.2) * 2) / 2, e: 4, dir: 1 };
   if (type === 'dynamite') p = { id, type, x: 47, size: 2, fired: false };
   if (type === 'cart') p = { id, type: 'platform', x: Math.round(e.x * 2) / 2, w: 6, wheels: true };
@@ -376,8 +378,8 @@ function act(k) { const p = part(sel); if (!p) return; push(); const step = (v, 
   else if (k === 'clip') autoClip(p);
   else if (k === 'lift-') p.lift = step(p.lift, -0.5, 2, 9); else if (k === 'lift+') p.lift = step(p.lift, 0.5, 2, 9);
   else if (k === 'ac-') p.across = step(p.across, -1, -8, 8); else if (k === 'ac+') p.across = step(p.across, 1, -8, 8);
-  else if (k === 'wd-') p.w = step(p.w, -2, 4, 16); else if (k === 'wd+') p.w = step(p.w, 2, 4, 16); else if (k === 'wheels') p.wheels = !p.wheels;
-  else if (k === 'le-') p.e = step(p.e, -1, 2, 10); else if (k === 'le+') p.e = step(p.e, 1, 2, 10); else if (k === 'flip') p.dir = -p.dir;
+  else if (k === 'wd-') p.w = step(p.w, -2, 4, 16); else if (k === 'wd+') p.w = step(p.w, 2, 4, 16); else if (k === 'wheels') p.wheels = !p.wheels; else if (k === 'lf-') p.lift = step(p.lift || 0, -0.5, 0, 6); else if (k === 'lf+') p.lift = step(p.lift || 0, 0.5, 0, 6);
+  else if (k === 'le-') p.e = step(p.e, -1, 2, 10); else if (k === 'le+') p.e = step(p.e, 1, 2, 10); else if (k === 'flip') { if (p.type === 'jack') p.side = -JS(p); else p.dir = -p.dir; }
   else if (k === 'ds-') p.size = step(p.size, -1, 1, 3); else if (k === 'ds+') p.size = step(p.size, 1, 1, 3);
   else if (k === 'fire') { p.fired = true; reseat(); } else if (k === 'unfire') { p.fired = false; reseat(); }
   else if (k === 'ph-') p.h = step(p.h, -0.5, 2, 10); else if (k === 'ph+') p.h = step(p.h, 0.5, 2, 10);
@@ -390,8 +392,8 @@ function cardHTML(p) {
   if (p.type === 'ramp') { const L = Math.hypot(p.bx - p.ax, p.by - p.ay), r = Math.abs(p.by - p.ay); h += `<p>${f1(L)} m long, ${f1(r)} m rise. Ramp MA = ${f1(L)} ÷ ${f1(r)} = <b>${r > 0.05 ? f1(L / r) : '–'}</b>. Drag its yellow ends to change it.</p>`; }
   if (p.type === 'pole') h += ctl('Height', 'ph-', 'ph+', f1(p.h) + ' m') + '<p>A structure with no rope of its own. Hang pulley blocks from its arm and bolt winches to it at any height. Drag a pulley block or winch onto it to mount it.</p>';
   if (p.type === 'crane') h += ctl('Lifts', 'lift-', 'lift+', f1(p.lift) + ' m') + ctl('Move across', 'ac-', 'ac+', (p.across < 0 ? f1(-p.across) + ' m left' : f1(p.across) + ' m right')) + '<p>A crane lifts straight up, so it needs the full 6,300 N. Only the lift counts in the maths.</p>';
-  if (p.type === 'jack') h += ctl('Raises', 'h-', 'h+', f1(p.h) + ' m') + '<p>The screw has MA 120 by itself and needs a platform on top. It is slow: Smooshy turns the handle a long way.</p>';
-  if (p.type === 'platform') h += ctl('Width', 'wd-', 'wd+', f1(p.w) + ' m') + `<p>${p.wheels ? 'A cart: a platform with wheels and axles. The Gumdrop rolls on it, so the ground itself works as a ramp. The Gumdrop gets on from level ground, or is set down or tipped on.' : 'A shelf for the Gumdrop to rest on. Every size holds it. A screw jack under it raises it.'}</p><div class="row"><button data-a="wheels" class="on">${p.wheels ? 'Take the wheels off' : 'Add wheels and axle (makes it a cart)'}</button></div>`;
+  if (p.type === 'jack') h += ctl('Raises', 'h-', 'h+', f1(p.h) + ' m') + ctl('Platform width', 'wd-', 'wd+', f1(p.w || 8) + ' m') + `<p>One piece: a screw pole with a platform on its ${JS(p) > 0 ? 'right' : 'left'}. The screw has MA 120 by itself. It is slow: Smooshy turns the handle a long way.</p><div class="row"><button data-a="flip">Put the platform on the ${JS(p) > 0 ? 'left' : 'right'}</button></div>`;
+  if (p.type === 'platform') h += ctl('Width', 'wd-', 'wd+', f1(p.w) + ' m') + ctl('Height', 'lf-', 'lf+', f1(p.lift || 0) + ' m') + `<p>${p.wheels ? 'A cart: a platform with wheels and axles. The Gumdrop rolls on it, so the ground itself works as a ramp. The Gumdrop gets on from level ground, or is set down or tipped on.' : 'A shelf for the Gumdrop to rest on. Every size holds it. Raise it on legs with Height. Above about 1 m the Gumdrop cannot walk on, so it needs a ramp, a crane or a lever.'}</p><div class="row"><button data-a="wheels" class="on">${p.wheels ? 'Take the wheels off' : 'Add wheels and axle (makes it a cart)'}</button></div>`;
   if (p.type === 'lever') h += ctl('Effort arm', 'le-', 'le+', f1(p.e) + ' m') + `<p>Lever MA = effort arm ÷ load arm = ${f1(p.e)} ÷ 0.5 = <b>${f1(2 * p.e)}</b>. It tips the Gumdrop up about 1 m ${p.dir > 0 ? 'to the right' : 'to the left'}, onto a cart or a low platform. Bolt a winch on its pulling end for more MA. A pulley block does not go on a lever.</p><div class="row"><button data-a="flip">Tip the other way</button></div>`;
   if (p.type === 'dynamite') h += (p.fired ? '<p>The blast has gone off and the ground is lower here.</p><div class="row"><button data-a="unfire">Undo the blast</button></div>' : ctl('Charge', 'ds-', 'ds+', p.size) + `<p>Digs a bowl up to <b>${f1(1.5 * p.size)} m</b> deep and <b>${f1(2 * (3 + 2 * p.size))} m</b> wide. The dashed bowl on the board is the hole. Keep the Gumdrop outside the red ring.</p><div class="row"><button data-a="fire" class="on">💥 Light the fuse</button></div>`);
   if (p.type === 'pulley') h += ctl('Ropes', 'r-', 'r+', p.ropes) + `<p>Pulley MA = number of ropes = <b>${p.ropes}</b>.</p>`;
