@@ -300,7 +300,7 @@ with sync_playwright() as p:
     pg2 = b.new_page(viewport={'width': 1300, 'height': 950}); pg2.on('pageerror', lambda e: errs.append('ERR ' + str(e)))
     pg2.goto(F); pg2.wait_for_timeout(300); pg2.fill('#whoName', 'Sam'); pg2.click('#whoGo'); pg2.evaluate("__fhq.dbSet('tourDone',true)"); pg2.evaluate("__fhq.ev('DB.user.teacher=true')")
     pg2.evaluate("__fhq.openChapter('c6e','challenge')"); pg2.wait_for_timeout(600); pg2.evaluate("__fhq.ev('closeModal()')")
-    chk('rescue: the mission card has the new text', all(k in pg2.locator('#mi-gl').inner_text() for k in ['6,300 N', 'dotted line', 'Sugar crystals', '475']), pg2.locator('#mi-gl').inner_text()[:200])
+    chk('rescue: the mission card has the new text', all(k in pg2.locator('#mi-gl').inner_text() for k in ['6,300 N', 'dotted line', 'Sugar crystals', '300']), pg2.locator('#mi-gl').inner_text()[:200])
     chk('glossary: sugarcrystal', pg2.evaluate("__fhq.ev('TERMS.sugarcrystal[1]')") == 'Gummy money on Glimmer-9. You spend sugar crystals to buy machines, platforms and dynamite.')
     chk('no page errors', not errs, errs)
     b.close()

@@ -1,11 +1,11 @@
 /* ===== Chapter 6 Part 5: Operation Gummy Lift, on the new rescue board (4r-board5.js, generated from proto/Rescue-Core-Board.html).
    Flow: training rock (4u) -> opening pan -> build and test on the board -> route strip and GASA check (4t) -> Run it launches the rescue.
    Saved at chal.c6e.gl: { parts5, runs, trainDone, introDone, work5, firstDone, best (score of 11), best5 {pieces, crystals}, lastSum, bestRun { v5, sum, snap, parts, at } }.
-   Score of 11: rescued 4, hull damage 2 (spotless) or 1 (under 20%), budget 475 crystals or less 2, hand travel 2,500 m or less 1, 8 pieces or fewer 1, and 1 for Maths approved by GASA. */
+   Score of 11: rescued 4, hull damage 2 (spotless) or 1 (under 20%), budget 300 crystals or less 2, hand travel 2,500 m or less 1, 8 pieces or fewer 1, and 1 for Maths approved by GASA. */
 const RB5_NAME = { pull: 'Rope pull', tow: 'Rope tow', ramp: 'Ramp', crane: 'Crane', jack: 'Screw jack', lever: 'Lever' };
 const RB5_MAXP = 11;
 function rb5Score(sum, approved) {
-  const p = { rescue: sum.won ? 4 : 0, hull: !sum.won ? 0 : sum.hull < 1 ? 2 : sum.hull < 20 ? 1 : 0, budget: sum.won && sum.crystals <= 475 ? 2 : 0, oxy: sum.won && sum.hand <= 2500 ? 1 : 0, pieces: sum.won && sum.pieces <= 8 ? 1 : 0, maths: sum.won && approved ? 1 : 0 };
+  const p = { rescue: sum.won ? 4 : 0, hull: !sum.won ? 0 : sum.hull < 1 ? 2 : sum.hull < 20 ? 1 : 0, budget: sum.won && sum.crystals <= 300 ? 2 : 0, oxy: sum.won && sum.hand <= 2500 ? 1 : 0, pieces: sum.won && sum.pieces <= 8 ? 1 : 0, maths: sum.won && approved ? 1 : 0 };
   return { pts: p, total: Object.values(p).reduce((a, b) => a + b, 0) };
 }
 function rb5Ending(sum) {
@@ -18,7 +18,7 @@ function renderRescue5(ch, m, host, save) {
   card.innerHTML = `${typeof remindersHTML === 'function' ? remindersHTML() : ''}<details class="glbrief"${st0.runs ? '' : ' open'}><summary>📋 Your mission</summary><div class="gl">
       <p>Gummy Mission Control has bad news. The Gumdrop weighs <b>6,300 N</b> and is stuck in the crater. Smooshy is inside and can only pull <b>60 N</b>. Get the Gumdrop up to the dotted line, and the Big Jelly's tractor beam does the rest.</p>
       <p>Build machines to share the load. Each <b>leg</b> is one pull, and the Gumdrop moves when 60 N × the machines' mechanical advantage is at least the force that leg needs.</p>
-      <p>💎 ${typeof T === 'function' ? T('sugarcrystal', 'Sugar crystals') : 'Sugar crystals'} are gummy money. GASA can only fly so much kit to Glimmer-9, so you have <b>475</b> to spend, and the cheapest, lightest design is best. Smooshy has enough oxygen for <b>2,500 m</b> of hand travel.</p>
+      <p>💎 ${typeof T === 'function' ? T('sugarcrystal', 'Sugar crystals') : 'Sugar crystals'} are gummy money. GASA can only fly so much kit to Glimmer-9, so you have <b>300</b> to spend, and the cheapest, lightest design is best. Smooshy has enough oxygen for <b>2,500 m</b> of hand travel.</p>
       <p>Drag pieces from the tray onto the crater. Drag from a hook to connect ropes. Press <b>Delete</b> to remove the piece you picked. When the route works, work out the maths in the route strip, send it to GASA, then press <b>Run it</b>.</p>
       <p>After you save Smooshy, try the fun challenge: can you do it with fewer pieces and fewer crystals?</p></div></details>
     <div id="rb5Train"></div><div id="rb5Main"${st0.trainDone ? '' : ' hidden'}><div id="rb5Host"></div><div id="rb5Strip"></div><div id="rb5Res" class="glres"></div></div>`;
@@ -30,7 +30,7 @@ function renderRescue5(ch, m, host, save) {
     let html = '';
     if (l) { const E = rb5Ending(l), sc = l.score, P = sc && sc.pts, row = (lab, got, max, note) => `<li class="${got === max ? 'ok' : ''}"><span class="box">${got === max ? '✓' : ''}</span>${lab}: <b>${got} of ${max}</b>${note ? ` <small>${note}</small>` : ''}</li>`;
       html += `<div class="glstamp ${l.won ? 'ok' : ''}"><b>${E[0]}</b> ${sc ? `<span>${sc.total} of ${RB5_MAXP}</span>` : ''}</div><p>${E[1]}</p>`
-        + (P ? `<ul class="objs glpts">${row('Gumdrop reaches the line', P.rescue, 4)}${row('Hull damage', P.hull, 2, `${l.hull}%. Spotless earns 2, under 20% earns 1.`)}${row('Budget: 475 crystals or less', P.budget, 2, `${l.crystals} crystals.`)}${row('Oxygen: 2,500 m or less', P.oxy, 1, `${l.hand.toLocaleString('en-GB')} m of hand travel.`)}${row('8 pieces or fewer', P.pieces, 1, `${l.pieces} pieces.`)}${row('Maths approved by GASA', P.maths, 1)}</ul>` : ''); }
+        + (P ? `<ul class="objs glpts">${row('Gumdrop reaches the line', P.rescue, 4)}${row('Hull damage', P.hull, 2, `${l.hull}%. Spotless earns 2, under 20% earns 1.`)}${row('Budget: 300 crystals or less', P.budget, 2, `${l.crystals} crystals.`)}${row('Oxygen: 2,500 m or less', P.oxy, 1, `${l.hand.toLocaleString('en-GB')} m of hand travel.`)}${row('8 pieces or fewer', P.pieces, 1, `${l.pieces} pieces.`)}${row('Maths approved by GASA', P.maths, 1)}</ul>` : ''); }
     if (s) html += `<p><b>Best rescue so far:</b> ${s.pieces} pieces, ${s.crystals} crystals, ${s.legs.length} leg${s.legs.length === 1 ? '' : 's'}, hull damage ${s.hull}%.</p>`;
     res.innerHTML = html; };
   paintRes();

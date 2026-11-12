@@ -82,10 +82,17 @@ assert 'opts.canRun' in js
 hp = "Smooshy pulls ${f1(l.pull)} N."
 assert js.count(hp) >= 2, js.count(hp)
 js = js.replace(hp, "${opts.hidePull && opts.hidePull() ? 'It moves.' : 'Smooshy pulls ' + f1(l.pull) + ' N.'}")
+js = js.replace("`Moves. ${opts.hidePull && opts.hidePull() ? 'It moves.' :", "`Moves. ${opts.hidePull && opts.hidePull() ? '' :")
+assert "? '' : 'Smooshy pulls '" in js
 js = js.replace("run.cap = `Leg ${l.n}: ${NAMES[l.m.type]}. ${opts.hidePull", "run.cap = `Leg ${l.n}: ${NAMES[l.m.type]}. ${opts.hidePull")
 js = js.replace("document.getElementById('run').disabled = !!run; }", "document.getElementById('run').disabled = !!run; }", 1)
 js = js.replace("$r('run').disabled = !!run; }", "$r('run').disabled = !!run; if (opts.onPaint) opts.onPaint(EV, parts); }", 1)
 assert 'opts.onPaint' in js
+# the total MA and the force it gives are the student's sums: show only the machines' own numbers until GASA approves
+a = "<td>60 N × ${maText(l.m)} = ${f0(l.gives)} N</td>"; assert js.count(a) == 1
+js = js.replace(a, "<td>${opts.hidePull && opts.hidePull() ? '60 N × ' + maText(l.m) : '60 N × ' + maText(l.m) + ' = ' + f0(l.gives) + ' N'}</td>")
+a = "h += `<p>Total MA on this leg: ${maText(mm)} = <b>${f0(totalMA(mm))}</b>, so Smooshy's machines give 60 × ${f0(totalMA(mm))} = <b>${f0(PULL * totalMA(mm))} N</b>.</p>`"; assert js.count(a) == 1
+js = js.replace(a, "h += (opts.hidePull && opts.hidePull() ? `<p>Machines on this leg: <b>${maText(mm)}</b>. Multiply them to find the total MA.</p>` : `<p>Total MA on this leg: ${maText(mm)} = <b>${f0(totalMA(mm))}</b>, so Smooshy's machines give 60 × ${f0(totalMA(mm))} = <b>${f0(PULL * totalMA(mm))} N</b>.</p>`)")
 # opening pan: from the Big Jelly, down to the Gumdrop
 js = js.replace("function draw(now) {\n  if (!root.isConnected) return;", "let intro = opts.intro ? { t0: 0 } : null;\n  function draw(now) {\n  if (!root.isConnected) return;\n  if (intro) { if (!intro.t0) intro.t0 = now; const k = Math.min(1, (now - intro.t0) / 3600), e = k * k * (3 - 2 * k); V.z = 1 + 0.9 * e; V.cx = 62 + (27 - 62) * e; V.cy = 17 + (8 - 17) * e; if (k >= 1) { intro = null; if (opts.onIntroEnd) opts.onIntroEnd(); } }", 1)
 assert 'let intro' in js

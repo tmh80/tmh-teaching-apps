@@ -56,7 +56,7 @@ details summary{cursor:pointer;font-weight:700}
 </div>
 <script>
 'use strict';
-const W = 6300, PULL = 60, BUDGET = 475, OXY = 2500, START = { x: 12, y: 0 }, GOAL = 15;
+const W = 6300, PULL = 60, BUDGET = 300, OXY = 2500, START = { x: 12, y: 0 }, GOAL = 15;
 const PTS = [[0, 8], [6, 0], [22, 0], [46, 4], [46, 10], [52, 10], [82, 15], [100, 15]];
 function groundBase(x) { x = Math.max(0, Math.min(100, x)); for (let i = PTS.length - 2; i >= 0; i--) { const a = PTS[i], b = PTS[i + 1]; if (b[0] === a[0]) continue; if (x >= a[0]) return a[1] + (b[1] - a[1]) * (x - a[0]) / (b[0] - a[0]); } return PTS[0][1]; }
 const BL = d => ({ cx: d.x, R: 3 + 2 * d.size, D: 1.5 * d.size, cy: groundBase(d.x) });
@@ -162,7 +162,7 @@ function planLeg(m, S) {   // can machine m move the Gumdrop from state S? -> { 
     while (Math.abs(tx - x) > tol) { const nx = dir > 0 ? Math.min(tx, x + 0.25) : Math.max(tx, x - 0.25), ny = surf(nx, S.raised), dy = ny - y; if (dy > 1) { wall = true; break; }
       const stp = Math.abs(nx - x), h = Math.hypot(stp, Math.max(dy, 0)); needs = Math.max(needs, W * Math.max(dy, 0) / h + mu * W * stp / h); if (dy < -0.5) fall += -dy; if (!S.cart && dy > 0.5) tip++; dist += Math.hypot(stp, dy > -0.5 ? dy : 0); if (!S.cart) scrape += stp; x = nx; y = ny; path.push({ x, y }); }
     if (dist < 0.5) return { why: 'A cliff is in the way. Something has to lift the Gumdrop up it.', far: 1 };
-    return { path, needs, dist, end: { x, y }, scrape, fall, tip: tip ? 1 : 0, note: (S.cart ? 'Rolling on the cart' : 'Dragged over the ground') + (tip ? ', and it tips over a step' : '') + (wall ? ', as far as the cliff' : '') };
+    return { path, needs, dist, end: { x, y }, scrape, fall, tip: tip ? 1 : 0, note: (S.cart ? `Rolling ${f1(dist)} m on the cart` : `Dragged ${f1(dist)} m over the ground`) + (tip ? ', and it tips over a step' : '') + (wall ? ', as far as the cliff' : '') };
   }
   if (m.type === 'crane') {
     const base = gb(m), top = base + m.lift; if (Math.abs(m.x - S.x) > 1.5) return { why: 'The Gumdrop is not under this crane\'s hook (within 1.5 m).', far: 1 };

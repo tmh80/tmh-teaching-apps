@@ -25,3 +25,16 @@ Built by Claude Sonnet 5.5 in one go after Tom said "just do the rest together".
 - Board (generated, do not hand-edit): `src/js/4r-board5.js` from `proto/Rescue-Core-Board.html` via `python3 tools/port_board.py`.
 - Part 5 flow, score, endings: `src/js/4s-rescue5.js`. Route strip and GASA check: `4t-strip5.js`. Training: `4u-train5.js`. My Rescue page and key: `4l-glreport.js`.
 - Save shape at `chal.c6e.gl`: `parts5, runs, trainDone, introDone, work5, firstDone, best, best5, lastSum, bestRun`.
+
+## Fable's check (12 Nov 2026, afternoon)
+
+Checked against the code and by running routes through the board's own rules. Changed, with Tom's go-ahead:
+
+- **Rope pulls now say how far the Gumdrop moves** ("Rolling 32.3 m on the cart"), so hand travel can be worked out. Before this the distance was not shown anywhere.
+- **Flag 1 settled:** until GASA approves, the legs table shows only "60 N × 7 × 16" and the piece card shows only the machines' numbers. The multiplied total and the force it gives appear after approval. GASA's second MA hint now tells students to multiply those numbers.
+- **Flag 4 changed:** budget is now **300 crystals** (475 was an almost free 2 points).
+- **Flag 6 settled:** new answer-key route in `RB5_KEY`, 11 of 11: Gumdrop starts on a cart, winch ×20 on the ground at x = 45; crane at 44.5 (lift 7, across 5.5) with winch ×16 and a 7-rope pulley, setting down on a second cart at x = 50; winch ×20 on the ground at x = 86. 7 pieces, 239 crystals, 2,148 m, 0% hull. `tests/rescue5_rules.py` checks it.
+- **Check questions:** c6r24 now asks for the useful work done on the Gumdrop (still 94,500 J), because friction on the new board makes Smooshy's own work bigger (about 125,000 J on carts). c6r25's correct reason was reworded to match.
+- The 2,500 m oxygen point can only be earned with carts: dragging alone costs at least about 3,650 m.
+
+Still open: flags 7 to 9 and 13 (art scale, run camera, opening pan, phone, PDF, backup), and the boulder wording in `picCraterPlan()` (flag 10). The board still shows total hand travel in its meter, which lets students check the sum of their three answers.

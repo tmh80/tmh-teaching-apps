@@ -1,9 +1,9 @@
 /* My Rescue page (worksheet page 1) for the new rescue board (4s-rescue5.js). Student copy: the best run's picture, result, score, a row per leg and the student's own maths from the route strip.
    Answer key: one example route (a pull to the cliff, a crane over it, a pull to the line), worked out below. Blank: empty boxes. */
-const RB5_KEY = { sum: { won: true, pieces: 9, crystals: 260, hand: 9443, hull: 84, hints: 0, legs: [
-  { type: 'pull', note: 'Dragged over the ground, as far as the cliff', needs: 3107, ma: 80, pull: 38.8, hand: 2726.2 },
-  { type: 'crane', note: 'Lifts 7 m, carries 4.5 m across, lowers 0.9 m', needs: 6300, ma: 128, pull: 49.2, hand: 890.7 },
-  { type: 'pull', note: 'Dragged over the ground', needs: 3107, ma: 160, pull: 19.4, hand: 5826.2 }] } };
+const RB5_KEY = { sum: { won: true, pieces: 7, crystals: 239, hand: 2148, hull: 0, hints: 0, legs: [
+  { type: 'pull', note: 'Rolling 32.3 m on the cart (a winch ×20 on the ground at the foot of the cliff)', needs: 1160, ma: 20, pull: 58, hand: 646.1 },
+  { type: 'crane', note: 'Lifts 7.1 m, carries 5.5 m across, lowers 0.8 m onto a second cart (winch ×16 and a 7-rope pulley)', needs: 6300, ma: 112, pull: 56.3, hand: 793.3 },
+  { type: 'pull', note: 'Rolling 35.4 m on the cart (a winch ×20 on the ground at the top)', needs: 1160, ma: 20, pull: 58, hand: 708.3 }] } };
 function myRescueHTML(mode) {
   const stu = mode === 'student', key = mode === 'key', gl = (dbGet('chal.c6e', {}).gl) || {}, br = gl.bestRun && gl.bestRun.v5 ? gl.bestRun : null;
   const W = x => stu ? `<span class="stu">${x}</span>` : key ? `<span class="key">${x}</span>` : x, n0 = v => Math.round(v).toLocaleString('en-GB'), f1 = v => fmt(v, 1);

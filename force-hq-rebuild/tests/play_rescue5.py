@@ -27,6 +27,7 @@ with sync_playwright() as p:
     pg.evaluate("p=>{window.__board.parts=p}", ROUTE); pg.wait_for_timeout(500)
     chk('route strip has a row per leg (3 legs x 3 boxes)', pg.locator('.rb5in').count() == 9, pg.locator('.rb5in').count())
     chk('the board hides Smooshy\'s pull until GASA approves', 'Smooshy pulls' not in pg.inner_text('#legs'))
+    lt = pg.inner_text('#legs'); chk('the board hides the total MA sum until GASA approves, and shows each distance', '4,800' not in lt and '20 × 4' in lt.replace('4 × 20', '20 × 4') and 'Dragged 34.1 m' in lt, lt)
     pg.click('#run'); pg.wait_for_timeout(300); chk('Run is refused before GASA approves', 'GASA' in pg.inner_text('#banner'), pg.inner_text('#banner'))
     for i in range(9): pg.locator('.rb5in').nth(i).fill('1')
     pg.click('#rb5Send'); chk('wrong boxes get a hint, not the answer', 'Look again' in pg.inner_text('#rb5Msg'), pg.inner_text('#rb5Msg'))
@@ -35,6 +36,7 @@ with sync_playwright() as p:
     for i, l in enumerate(legs):
         for j, v in enumerate(l): pg.locator('.rb5in').nth(i * 3 + j).fill(str(round(v, 2)))
     pg.click('#rb5Send'); pg.wait_for_timeout(200); chk('GASA approves right numbers', 'approves' in pg.inner_text('#rb5Msg'), pg.inner_text('#rb5Msg'))
+    chk('after approval the board shows the full sum', '4,800' in pg.inner_text('#legs'))
     pg.click('#run'); pg.wait_for_timeout(21000)
     g = pg.evaluate("()=>{const g=__fhq.ev('dbGet(\"chal.c6e\",{}).gl');return {runs:g.runs,first:!!g.firstDone,best:g.best,score:g.lastSum&&g.lastSum.score,hints:g.work5&&g.work5.hints,snap:!!(g.bestRun&&g.bestRun.snap),parts:(g.parts5||[]).length}}")
     chk('the rescue is recorded and scored (4 + 2 budget + 1 maths = 7 for this example)', g['first'] and g['best'] == 7 and g['score']['pts']['maths'] == 1, g)
