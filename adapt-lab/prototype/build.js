@@ -1,7 +1,9 @@
-// Builds the single-file prototype: node build.js (run from adapt-lab/prototype/)
+// Builds single-file pages: node build.js   (run from anywhere)
+// Every <script src="local.js"></script> in a *.src.html page is replaced by the file's contents. Missing files become empty.
 const fs=require('fs'),path=require('path');const d=__dirname;
-const html=fs.readFileSync(path.join(d,'index.src.html'),'utf8')
-  .replace('/*RIG*/',()=>fs.readFileSync(path.join(d,'rig.js'),'utf8'))
-  .replace('/*SCENE*/',()=>fs.readFileSync(path.join(d,'scene.js'),'utf8'));
-fs.writeFileSync(path.join(d,'Adapt-Lab-Art-Prototype.html'),html);
-console.log('built',html.length,'bytes');
+const PAGES={'index.src.html':'Adapt-Lab-Art-Prototype.html'};
+for(const[src,out]of Object.entries(PAGES)){
+  if(!fs.existsSync(path.join(d,src)))continue;
+  const html=fs.readFileSync(path.join(d,src),'utf8').replace(/<script src="([^"]+)"><\/script>/g,(m,f)=>{const p=path.join(d,f);return fs.existsSync(p)?'<script>\n'+fs.readFileSync(p,'utf8').replace(/<\/script/g,'<\\/script')+'\n</script>':''});
+  fs.writeFileSync(path.join(d,out),html);console.log('built',out,html.length,'bytes');
+}

@@ -260,7 +260,13 @@ const PAL={white:{b:'#f1f0ea',d:'#c9cdd0',l:'#ffffff'},sandy:{b:'#d9ad6c',d:'#b0
 function colours(t){const P=PAL[t.color]||PAL.brown;const light=t.color==='white'||t.color==='silver';
   return{base:P.b,shade:P.d,belly:P.l,dark:'#2a2422',mark:t.pattern==='stripes'&&light?'#2f2c2c':mix(P.d,'#1a1210',.35),earIn:mix(P.l,'#e9a6a0',.5),cheek:'#eea39b',
     fin:mix(P.d,P.b,.4),wing:mix(P.b,P.d,.55),leg:mix(P.d,'#3a2c20',.5),beak:'#e9a53a',eyeRing:'#f2c230',paw:null}}
+/* Extra body plans register here from their own files (plan-frog.js and so on):
+   Rig.register('frog',{test:t=>bool, spec:(t,seed,col)=>({...}), draw:(c,spec,pose)=>{}, size:spec=>({len,height})})
+   Registered plans are checked before the built-in ones, in the order they were registered. */
+const EXTRA=[];
+function register(name,def){const i=EXTRA.findIndex(e=>e.name===name);const e={name,...def};if(i>=0)EXTRA[i]=e;else EXTRA.push(e)}
 function planOf(t){
+  for(const e of EXTRA)if(e.test(t))return e.name;
   if(t.cov==='exo')return'insect';
   if(t.fins==='fins'&&t.legs==='0')return'fish';
   if(t.cov==='feathers'||(t.wings!=='none'&&t.legs==='2'))return'bird';
@@ -269,6 +275,7 @@ function planOf(t){
 }
 function specOf(t,seed){
   const n=k=>(t[k]??50)/100,col=colours(t),plan=planOf(t),fat=t.fatWhere==='all'?n('fat'):0;
+  const ex=EXTRA.find(e=>e.name===plan);if(ex)return{plan,seed,pattern:t.pattern,col,...ex.spec(t,seed,col)};
   if(plan==='quad'){const sh=t.shape||'round';const base={round:{L:86,D:58,neck:7,neckUp:.6,lg:[13,34]},long:{L:122,D:42,neck:18,neckUp:.3,lg:[18,50]},tall:{L:104,D:54,neck:50,neckUp:1.0,lg:[44,52]},stream:{L:120,D:44,neck:14,neckUp:.2,lg:[16,40]}}[sh];
     const big=n('size')>.6||sh==='tall';
     return{plan,seed,col,pattern:t.pattern,L:base.L,D:base.D*(1+.3*fat+.12*n('insul')),leg:base.lg[0]+base.lg[1]*n('legLen'),legW:lerp(8.5,10.5,n('size')),neck:base.neck*(sh==='tall'?.8+.6*n('legLen'):1),neckUp:base.neckUp,
@@ -283,9 +290,44 @@ function specOf(t,seed){
   if(plan==='lizard')return{plan,seed,col,pattern:t.pattern,L:96,D:t.cov==='skin'?30:24,leg:12+18*n('legLen'),legW:4.6,spiny:t.defence==='spines',tongue:t.senses==='tongue'};
   return{plan,seed,col:{...col,dark:'#241f1c'},pattern:t.pattern,L:92,D:30,leg:16+24*n('legLen'),legW:3.2,jump:n('legLen')>.6,wings:t.wings!=='none'};
 }
-function draw(c,s,po){({quad:drawQuad,bird:drawBird,fish:drawFish,lizard:drawLizard,insect:drawInsect})[s.plan](c,s,po)}
+function draw(c,s,po){const ex=EXTRA.find(e=>e.name===s.plan);if(ex)return ex.draw(c,s,po||{});({quad:drawQuad,bird:drawBird,fish:drawFish,lizard:drawLizard,insect:drawInsect})[s.plan](c,s,po)}
+// a young animal of the same species: smaller body, bigger head, shorter legs. The caller also draws it at about 0.55 scale.
+function youngOf(s){const ex=EXTRA.find(e=>e.name===s.plan);if(ex&&ex.young)return ex.young(s);const y={...s,young:true};
+  if(s.plan==='quad')Object.assign(y,{L:s.L*.82,D:s.D*.9,leg:s.leg*.72,neck:s.neck*.7,head:s.head*1.22,snout:s.snout*.6,ear:s.ear*.85,tail:s.tail*.7,cheek:true,hump:(s.hump||0)*.4,mane:false});
+  if(s.plan==='bird')Object.assign(y,{leg:s.leg*.7,neck:s.neck*.6,head:s.head*1.25,wing:s.wing*.6,tail:s.tail*.5,beak:s.beak*.7,canFly:false});
+  return y}
+// rough size in local units, for fitting an animal into a box: {len, height}
+function sizeOf(s){const ex=EXTRA.find(e=>e.name===s.plan);if(ex&&ex.size)return ex.size(s);
+  if(s.plan==='quad')return{len:s.L*1.25,height:s.leg+s.D+Math.max(0,Math.sin(s.neckUp)*s.neck)+s.head+s.ear*.6};
+  if(s.plan==='bird')return{len:s.B*1.5,height:s.leg+s.B*.8+s.neck+s.head};
+  if(s.plan==='fish')return{len:s.L,height:s.D*2,swims:true};
+  if(s.plan==='lizard')return{len:150,height:s.leg+s.D*1.6};
+  return{len:s.L*1.2,height:s.leg+s.D*2.4}}
+/* ---------- the zoo: real animals as Adapt Lab trait sets (copied from the sim's PRESETS and PRED_BANK) ---------- */
+const DEF={cov:'fur',blood:'warm',breathe:'lungs',shape:'round',legs:'4',wings:'none',fins:'none',color:'brown',pattern:'plain',diet:'plants',defence:'none',fatWhere:'none',
+  activity:'day',season:'active',social:'solo',escape:'flee',store:'none',care:'some',posture:'upright',senses:'sight',size:35,insul:40,fat:30,ears:45,legLen:45,tail:30,wingSize:55,finSize:50,eyes:40,waterSave:25,salt:5};
+const A=o=>({...DEF,...o});
+// trait sets copied from Adapt Lab's PRESETS, so this proves the rig works from the sim's real data
+const zoo={
+ 'Arctic hare':A({color:'white',insul:90,fat:20,fatWhere:'all',ears:70,size:55,legLen:60,tail:8}),
+ 'Arctic fox':A({shape:'long',color:'white',insul:95,fatWhere:'all',fat:55,ears:22,size:35,legLen:35,tail:75,diet:'meat'}),
+ 'Fennec fox':A({shape:'long',color:'sandy',insul:40,ears:98,size:18,legLen:35,tail:60,diet:'both'}),
+ 'Dromedary camel':A({shape:'tall',color:'sandy',insul:30,fatWhere:'hump',fat:70,ears:15,size:92,legLen:95,tail:25}),
+ 'Plains zebra':A({shape:'tall',color:'white',pattern:'stripes',insul:15,size:85,legLen:70,tail:40,ears:40}),
+ 'Wolf':A({shape:'long',color:'grey',insul:55,ears:35,size:70,legLen:70,tail:60,diet:'meat'}),
+ 'European rabbit':A({color:'brown',insul:55,size:25,ears:75,legLen:40,tail:8}),
+ 'Cheetah':A({shape:'long',color:'sandy',pattern:'spots',insul:15,ears:18,size:60,legLen:85,tail:85,diet:'meat'}),
+ 'Snowy owl':A({cov:'feathers',legs:'2',legLen:20,wings:'fly',wingSize:85,color:'white',pattern:'spots',insul:92,size:42,tail:35,diet:'meat',eyes:90}),
+ 'Ostrich':A({cov:'feathers',shape:'tall',legs:'2',legLen:95,wings:'flightless',wingSize:45,color:'black',insul:35,size:85,tail:40,diet:'both',eyes:60}),
+ 'Red-tailed hawk':A({cov:'feathers',legs:'2',legLen:30,wings:'fly',wingSize:80,color:'brown',size:30,tail:50,diet:'meat',eyes:60}),
+ 'Atlantic mackerel':A({cov:'scales',blood:'cold',breathe:'gills',shape:'stream',legs:'0',fins:'fins',finSize:60,color:'blue',pattern:'stripes',size:15,tail:0,diet:'meat'}),
+ 'Brown trout':A({cov:'scales',blood:'cold',breathe:'gills',shape:'stream',legs:'0',fins:'fins',finSize:55,color:'brown',pattern:'spots',size:25,tail:0,diet:'meat'}),
+ 'Thorny devil':A({cov:'scales',blood:'cold',shape:'long',color:'sandy',pattern:'spots',defence:'spines',size:7,legLen:30,posture:'sprawl',senses:'tongue',tail:40,diet:'meat'}),
+ 'Green lizard':A({cov:'scales',blood:'cold',shape:'long',color:'green',pattern:'stripes',size:10,legLen:55,posture:'sprawl',tail:60,diet:'meat'}),
+ 'Desert locust':A({cov:'exo',blood:'cold',breathe:'tubes',shape:'long',legs:'6',legLen:75,wings:'fly',wingSize:70,color:'sandy',size:4,tail:0})
+};
 // soft ground shadow, drawn before the animal
 function shadow(c,w,alpha){c.save();c.scale(1,.2);const g=c.createRadialGradient(0,0,0,0,0,w);g.addColorStop(0,`rgba(30,25,40,${alpha||.28})`);g.addColorStop(1,'rgba(30,25,40,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,w,0,TAU);c.fill();c.restore()}
 
-root.Rig={draw,specOf,planOf,colours,shadow,PAL,smooth,tube,seg,ell,leaf,fill,rng,mix,lerp,clamp,TAU};
+root.Rig={draw,specOf,planOf,sizeOf,youngOf,register,colours,shadow,PAL,DEF,A,zoo,smooth,tube,seg,ik,step,ell,leaf,fill,eye,pattern,area,rng,mix,hex,lerp,clamp,TAU};
 })(typeof window!=='undefined'?window:globalThis);

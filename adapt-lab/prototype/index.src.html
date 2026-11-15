@@ -36,13 +36,27 @@ b.gen{font-variant-numeric:tabular-nums;min-width:9.5em}
     <canvas id="vary"></canvas>
   </section>
   <section>
+    <h2>Plants</h2>
+    <p>Growth forms, leaves, roots and seasons, drawn from the plant traits.</p>
+    <canvas id="plantGal"></canvas>
+  </section>
+  <section>
     <h2>3. A living biome</h2>
     <p>The herd wanders, grazes and runs when a predator passes. Feet match the ground speed, so nothing slides.</p>
-    <div class="row"><button data-biome="tundra" aria-pressed="true">Arctic tundra</button><button data-biome="savanna" aria-pressed="false">Savanna</button><button data-biome="ocean" aria-pressed="false">Coastal ocean</button></div>
+    <div class="row" id="sceneCtl"><button data-biome="tundra" aria-pressed="true">Arctic tundra</button><button data-biome="savanna" aria-pressed="false">Savanna</button><button data-biome="ocean" aria-pressed="false">Coastal ocean</button></div>
     <canvas id="scene"></canvas>
   </section>
 </main>
-<script>/*RIG*/</script>
-<script>/*SCENE*/</script>
+<script src="rig.js"></script>
+<script src="plan-frog.js"></script>
+<script src="plan-crab.js"></script>
+<script src="plan-snake.js"></script>
+<script src="plan-seal.js"></script>
+<script src="zoo-predators.js"></script>
+<script src="plants.js"></script>
+<script src="util.js"></script>
+<script src="gallery.js"></script>
+<script src="biomes.js"></script>
+<script src="scene.js"></script>
 </body>
 </html>

@@ -36,13 +36,19 @@ b.gen{font-variant-numeric:tabular-nums;min-width:9.5em}
     <canvas id="vary"></canvas>
   </section>
   <section>
+    <h2>Plants</h2>
+    <p>Growth forms, leaves, roots and seasons, drawn from the plant traits.</p>
+    <canvas id="plantGal"></canvas>
+  </section>
+  <section>
     <h2>3. A living biome</h2>
     <p>The herd wanders, grazes and runs when a predator passes. Feet match the ground speed, so nothing slides.</p>
-    <div class="row"><button data-biome="tundra" aria-pressed="true">Arctic tundra</button><button data-biome="savanna" aria-pressed="false">Savanna</button><button data-biome="ocean" aria-pressed="false">Coastal ocean</button></div>
+    <div class="row" id="sceneCtl"><button data-biome="tundra" aria-pressed="true">Arctic tundra</button><button data-biome="savanna" aria-pressed="false">Savanna</button><button data-biome="ocean" aria-pressed="false">Coastal ocean</button></div>
     <canvas id="scene"></canvas>
   </section>
 </main>
-<script>/* Adapt Lab art prototype: jointed body-plan rigs.
+<script>
+/* Adapt Lab art prototype: jointed body-plan rigs.
    Style rules (keep these when porting):
    1. Flat fills, no outlines. Parts of one animal share one fill colour, so overlapping shapes merge into one silhouette.
    2. Three tones per animal: base, shade (far-side legs, wing, far ear) and belly (underside). One dark for eyes, nose, hooves.
@@ -304,7 +310,13 @@ const PAL={white:{b:'#f1f0ea',d:'#c9cdd0',l:'#ffffff'},sandy:{b:'#d9ad6c',d:'#b0
 function colours(t){const P=PAL[t.color]||PAL.brown;const light=t.color==='white'||t.color==='silver';
   return{base:P.b,shade:P.d,belly:P.l,dark:'#2a2422',mark:t.pattern==='stripes'&&light?'#2f2c2c':mix(P.d,'#1a1210',.35),earIn:mix(P.l,'#e9a6a0',.5),cheek:'#eea39b',
     fin:mix(P.d,P.b,.4),wing:mix(P.b,P.d,.55),leg:mix(P.d,'#3a2c20',.5),beak:'#e9a53a',eyeRing:'#f2c230',paw:null}}
+/* Extra body plans register here from their own files (plan-frog.js and so on):
+   Rig.register('frog',{test:t=>bool, spec:(t,seed,col)=>({...}), draw:(c,spec,pose)=>{}, size:spec=>({len,height})})
+   Registered plans are checked before the built-in ones, in the order they were registered. */
+const EXTRA=[];
+function register(name,def){const i=EXTRA.findIndex(e=>e.name===name);const e={name,...def};if(i>=0)EXTRA[i]=e;else EXTRA.push(e)}
 function planOf(t){
+  for(const e of EXTRA)if(e.test(t))return e.name;
   if(t.cov==='exo')return'insect';
   if(t.fins==='fins'&&t.legs==='0')return'fish';
   if(t.cov==='feathers'||(t.wings!=='none'&&t.legs==='2'))return'bird';
@@ -313,6 +325,7 @@ function planOf(t){
 }
 function specOf(t,seed){
   const n=k=>(t[k]??50)/100,col=colours(t),plan=planOf(t),fat=t.fatWhere==='all'?n('fat'):0;
+  const ex=EXTRA.find(e=>e.name===plan);if(ex)return{plan,seed,pattern:t.pattern,col,...ex.spec(t,seed,col)};
   if(plan==='quad'){const sh=t.shape||'round';const base={round:{L:86,D:58,neck:7,neckUp:.6,lg:[13,34]},long:{L:122,D:42,neck:18,neckUp:.3,lg:[18,50]},tall:{L:104,D:54,neck:50,neckUp:1.0,lg:[44,52]},stream:{L:120,D:44,neck:14,neckUp:.2,lg:[16,40]}}[sh];
     const big=n('size')>.6||sh==='tall';
     return{plan,seed,col,pattern:t.pattern,L:base.L,D:base.D*(1+.3*fat+.12*n('insul')),leg:base.lg[0]+base.lg[1]*n('legLen'),legW:lerp(8.5,10.5,n('size')),neck:base.neck*(sh==='tall'?.8+.6*n('legLen'):1),neckUp:base.neckUp,
@@ -327,22 +340,25 @@ function specOf(t,seed){
   if(plan==='lizard')return{plan,seed,col,pattern:t.pattern,L:96,D:t.cov==='skin'?30:24,leg:12+18*n('legLen'),legW:4.6,spiny:t.defence==='spines',tongue:t.senses==='tongue'};
   return{plan,seed,col:{...col,dark:'#241f1c'},pattern:t.pattern,L:92,D:30,leg:16+24*n('legLen'),legW:3.2,jump:n('legLen')>.6,wings:t.wings!=='none'};
 }
-function draw(c,s,po){({quad:drawQuad,bird:drawBird,fish:drawFish,lizard:drawLizard,insect:drawInsect})[s.plan](c,s,po)}
-// soft ground shadow, drawn before the animal
-function shadow(c,w,alpha){c.save();c.scale(1,.2);const g=c.createRadialGradient(0,0,0,0,0,w);g.addColorStop(0,`rgba(30,25,40,${alpha||.28})`);g.addColorStop(1,'rgba(30,25,40,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,w,0,TAU);c.fill();c.restore()}
-
-root.Rig={draw,specOf,planOf,colours,shadow,PAL,smooth,tube,seg,ell,leaf,fill,rng,mix,lerp,clamp,TAU};
-})(typeof window!=='undefined'?window:globalThis);
-</script>
-<script>/* Adapt Lab art prototype: gallery, variation strip and living biome scene. Uses Rig from rig.js. */
-(function(){
-"use strict";
-const R=window.Rig,{lerp,clamp,TAU,rng,mix,fill,ell,smooth}=R;
+function draw(c,s,po){const ex=EXTRA.find(e=>e.name===s.plan);if(ex)return ex.draw(c,s,po||{});({quad:drawQuad,bird:drawBird,fish:drawFish,lizard:drawLizard,insect:drawInsect})[s.plan](c,s,po)}
+// a young animal of the same species: smaller body, bigger head, shorter legs. The caller also draws it at about 0.55 scale.
+function youngOf(s){const ex=EXTRA.find(e=>e.name===s.plan);if(ex&&ex.young)return ex.young(s);const y={...s,young:true};
+  if(s.plan==='quad')Object.assign(y,{L:s.L*.82,D:s.D*.9,leg:s.leg*.72,neck:s.neck*.7,head:s.head*1.22,snout:s.snout*.6,ear:s.ear*.85,tail:s.tail*.7,cheek:true,hump:(s.hump||0)*.4,mane:false});
+  if(s.plan==='bird')Object.assign(y,{leg:s.leg*.7,neck:s.neck*.6,head:s.head*1.25,wing:s.wing*.6,tail:s.tail*.5,beak:s.beak*.7,canFly:false});
+  return y}
+// rough size in local units, for fitting an animal into a box: {len, height}
+function sizeOf(s){const ex=EXTRA.find(e=>e.name===s.plan);if(ex&&ex.size)return ex.size(s);
+  if(s.plan==='quad')return{len:s.L*1.25,height:s.leg+s.D+Math.max(0,Math.sin(s.neckUp)*s.neck)+s.head+s.ear*.6};
+  if(s.plan==='bird')return{len:s.B*1.5,height:s.leg+s.B*.8+s.neck+s.head};
+  if(s.plan==='fish')return{len:s.L,height:s.D*2,swims:true};
+  if(s.plan==='lizard')return{len:150,height:s.leg+s.D*1.6};
+  return{len:s.L*1.2,height:s.leg+s.D*2.4}}
+/* ---------- the zoo: real animals as Adapt Lab trait sets (copied from the sim's PRESETS and PRED_BANK) ---------- */
 const DEF={cov:'fur',blood:'warm',breathe:'lungs',shape:'round',legs:'4',wings:'none',fins:'none',color:'brown',pattern:'plain',diet:'plants',defence:'none',fatWhere:'none',
   activity:'day',season:'active',social:'solo',escape:'flee',store:'none',care:'some',posture:'upright',senses:'sight',size:35,insul:40,fat:30,ears:45,legLen:45,tail:30,wingSize:55,finSize:50,eyes:40,waterSave:25,salt:5};
 const A=o=>({...DEF,...o});
 // trait sets copied from Adapt Lab's PRESETS, so this proves the rig works from the sim's real data
-const ZOO={
+const zoo={
  'Arctic hare':A({color:'white',insul:90,fat:20,fatWhere:'all',ears:70,size:55,legLen:60,tail:8}),
  'Arctic fox':A({shape:'long',color:'white',insul:95,fatWhere:'all',fat:55,ears:22,size:35,legLen:35,tail:75,diet:'meat'}),
  'Fennec fox':A({shape:'long',color:'sandy',insul:40,ears:98,size:18,legLen:35,tail:60,diet:'both'}),
@@ -360,23 +376,49 @@ const ZOO={
  'Green lizard':A({cov:'scales',blood:'cold',shape:'long',color:'green',pattern:'stripes',size:10,legLen:55,posture:'sprawl',tail:60,diet:'meat'}),
  'Desert locust':A({cov:'exo',blood:'cold',breathe:'tubes',shape:'long',legs:'6',legLen:75,wings:'fly',wingSize:70,color:'sandy',size:4,tail:0})
 };
+// soft ground shadow, drawn before the animal
+function shadow(c,w,alpha){c.save();c.scale(1,.2);const g=c.createRadialGradient(0,0,0,0,0,w);g.addColorStop(0,`rgba(30,25,40,${alpha||.28})`);g.addColorStop(1,'rgba(30,25,40,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,w,0,TAU);c.fill();c.restore()}
+
+root.Rig={draw,specOf,planOf,sizeOf,youngOf,register,colours,shadow,PAL,DEF,A,zoo,smooth,tube,seg,ik,step,ell,leaf,fill,eye,pattern,area,rng,mix,hex,lerp,clamp,TAU};
+})(typeof window!=='undefined'?window:globalThis);
+
+</script>
+
+
+
+
+
+
+<script>
+/* small page helpers shared by the prototype pages */
+(function(){
+"use strict";
 function fit(cv,ratio){const dpr=Math.min(2,window.devicePixelRatio||1);const w=cv.clientWidth,h=Math.round(w*ratio);cv.style.height=h+'px';if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);return{c,w,h}}
-function heightOf(s){return s.plan==='quad'?s.leg+s.D+Math.max(0,Math.sin(s.neckUp)*s.neck)+s.head+s.ear*.6:s.plan==='bird'?s.leg+s.B*.8+s.neck+s.head:s.plan==='fish'?s.D*2:s.plan==='lizard'?s.leg+s.D*1.6:s.leg+s.D*2.4}
 function blinkAt(t,seed){return((t+seed*1.7)%4.3)<.12}
 function label(c,txt,x,y,sz,colr,weight){c.font=`${weight||600} ${sz}px "Avenir Next","Segoe UI",system-ui,sans-serif`;c.textAlign='center';c.fillStyle=colr||'#24352d';c.fillText(txt,x,y)}
+window.PU={fit,blinkAt,label};
+})();
 
+</script>
+<script>
+/* Adapt Lab art prototype: gallery of every animal in Rig.zoo, and the variation strip. */
+(function(){
+"use strict";
+const R=window.Rig,{lerp,clamp,TAU,rng,mix,fill,ell,smooth}=R,{fit,blinkAt,label}=window.PU;
+const ZOO=R.zoo,A=R.A;
+const heightOf=s=>R.sizeOf(s).height;
 /* ---------- 1. gallery ---------- */
 function gallery(t){
   const cv=document.getElementById('gal');const names=Object.keys(ZOO);const narrow=cv.clientWidth<640;const cols=narrow?2:4,rows=Math.ceil(names.length/cols);
   const{c,w,h}=fit(cv,rows/cols*.82);c.clearRect(0,0,w,h);const cw=w/cols,ch=h/rows;
   names.forEach((nm,i)=>{const x0=(i%cols)*cw,y0=Math.floor(i/cols)*ch;const s=R.specOf(ZOO[nm],i+1);
     const pad=cw*.045;c.fillStyle=['#e8f0ec','#f3ecdc','#e6eef4','#efe9f1'][(i+Math.floor(i/cols))%4];c.beginPath();c.roundRect(x0+pad,y0+pad,cw-2*pad,ch-2*pad,14);c.fill();
-    const fish=s.plan==='fish';const gy=y0+ch*.74,cx=x0+cw*.5;
-    const sc=Math.min(cw*.62/(s.plan==='lizard'?150:s.plan==='fish'?120:s.L||s.B*1.5),ch*.6/heightOf(s));
+    const zs=R.sizeOf(s),fish=!!zs.swims;const gy=y0+ch*.74,cx=x0+cw*.5;
+    const sc=Math.min(cw*.62/zs.len,ch*.6/zs.height);
     c.save();c.beginPath();c.roundRect(x0+pad,y0+pad,cw-2*pad,ch-2*pad,14);c.clip();
     if(!fish){c.fillStyle='rgba(60,80,70,.10)';c.fillRect(x0,gy,cw,ch)}
-    c.translate(cx-(s.plan==='lizard'?-sc*14:s.plan==='quad'?sc*8:0),fish?y0+ch*.46:gy);
-    if(!fish)R.shadow(c,sc*(s.L||s.B)*.62);c.scale(sc,sc);
+    c.translate(cx-(s.plan==='lizard'?-sc*14:s.plan==='quad'?sc*8:0)+(zs.dx||0)*sc,fish?y0+ch*.46:gy);
+    if(!fish)R.shadow(c,sc*zs.len*.5);c.scale(sc,sc);
     const flyDemo=s.canFly&&((t+i)%9)>5.5;
     R.draw(c,s,{t,phase:t*(s.plan==='insect'?1.6:s.plan==='lizard'?1.2:.95),move:1,blink:blinkAt(t,i),fly:flyDemo?1:0,flap:t*9,tongue:s.tongue&&((t+i)%3)<.35});
     c.restore();label(c,nm,cx,y0+ch-pad-9,Math.max(11,Math.min(14,cw*.075)))});
@@ -392,6 +434,20 @@ function variation(t){
     c.save();c.translate(cw*(i+.5)-sc*8,h*.8);R.shadow(c,sc*s.L*.6);c.scale(sc,sc);R.draw(c,s,{t:t+i,phase:0,move:0,blink:blinkAt(t,i*3),headDown:i%3===1?.5+.5*Math.sin(t*.8+i):0});c.restore()}
   label(c,g<.3?'Warm years: thin brown coats, long ears and long legs lose heat':g<.7?'The climate is cooling: thicker, paler coats are surviving more often':'Ice age: thick white coats, small ears and short legs keep heat in',w/2,h*.13,Math.max(11,Math.min(15,w*.022)),'#24352d',600);
 }
+let T=0,last=0;const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;if(document.getElementById('gal'))gallery(T);if(document.getElementById('vary'))variation(T);if(!still)requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
+})();
+
+</script>
+
+<script>
+/* Adapt Lab art prototype: living biome scene. Owns the #scene canvas and the #sceneCtl controls. */
+(function(){
+"use strict";
+const R=window.Rig,{lerp,clamp,TAU,rng,mix,fill,ell,smooth}=R,{fit,blinkAt,label}=window.PU;
+const ZOO=R.zoo,A=R.A;
+const heightOf=s=>R.sizeOf(s).height;
 /* ---------- 3. living scene ---------- */
 const BIO={
  tundra:{sky:['#8fb6d8','#dcebf2','#f6f3ee'],sun:'#fff6dc',ridge:['#b9cbdc','#cfdce8','#e4edf2'],ground:['#f4f7f9','#e2ebf1'],fore:'#b7c6d1',herd:'Arctic hare',pred:'Arctic fox',flyer:'Snowy owl',n:14,size:.4,psize:.42},
@@ -464,11 +520,12 @@ function scene(t,dt){
   c.fillStyle=B.fore;const Rf=rng(4);for(let i=0;i<34;i++){const x=Rf()*w,hh=h*(.05+.1*Rf()),sw=Math.sin(t*1.1+i)*h*.006;c.beginPath();c.moveTo(x-h*.006,h);c.quadraticCurveTo(x+sw,h-hh*.6,x+sw*2+h*.01,h-hh);c.quadraticCurveTo(x+sw+h*.004,h-hh*.5,x+h*.008,h);c.closePath();c.fill()}
 }
 let last=0,T=0;const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;gallery(T);variation(T);scene(T,dt);if(!still)requestAnimationFrame(frame)}
+function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;scene(T,dt);if(!still)requestAnimationFrame(frame)}
 document.querySelectorAll('[data-biome]').forEach(b=>b.addEventListener('click',()=>{makeScene(b.dataset.biome);document.querySelectorAll('[data-biome]').forEach(x=>x.setAttribute('aria-pressed',x===b))}));
 window.__proto={setTime:v=>{T=v},makeScene};
 requestAnimationFrame(frame);
 })();
+
 </script>
 </body>
 </html>
