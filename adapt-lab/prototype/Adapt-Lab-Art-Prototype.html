@@ -1398,13 +1398,13 @@ function make(bk){
     pop.slice().forEach((p,i)=>{if(i%3===0&&pop.length<CAP)pop.push(mkYoung(p,Rn))})}
   const extras=[];C.extra.forEach((n,k)=>{if(!ZOO[n])return;for(let i=0;i<2;i++){const a=mkAnimal(ZOO[n],Rn,50+k*5+i,Rn(),info.water?.9:.2+Rn()*.75);a.extra=true;a.cad*=.8;a.graze=false;if(info.water){a.y=R.sizeOf(a.s).swims?.2+Rn()*.3:.93;a.dir=1;a.turn=1;a.lag=0;a.floor=!R.sizeOf(a.s).swims}extras.push(a)}});
   const pr=predSpecFor(bk,C.pred);const fl=pick(C.fly);
-  let plants=[];try{if(window.Plants&&window.Plants.zoo){const names=Object.keys(window.Plants.zoo).filter(n=>window.Plants.zoo[n].home===bk);names.forEach((n,k)=>{const tr=window.Plants.zoo[n].t,tree=tr.form==='tree';for(let i=0;i<(tree?2:3);i++)plants.push({spec:window.Plants.specOf(tr,k*7+i),x:.05+Rn()*.9,z:info.water?.95:tree?.08+Rn()*.4:.15+Rn()*.8,sc:tree?2.6+Rn()*.6:1.5+Rn()*.5})})}}catch(e){plants=[]}
+  let plants=[];try{if(window.Plants&&window.Plants.zoo){const names=Object.keys(window.Plants.zoo).filter(n=>window.Plants.zoo[n].home===bk);names.forEach((n,k)=>{const tr=window.Plants.zoo[n].t,tree=tr.form==='tree';for(let i=0;i<(tree?2:3);i++)plants.push({spec:window.Plants.specOf(tr,k*7+i),x:.05+Rn()*.9,z:info.water?.95:tree?.06+Rn()*.3:.15+Rn()*.8,sc:tree?1.9+Rn()*.5:1.4+Rn()*.5})})}}catch(e){plants=[]}
   const keep=SC||{};
   SC={bk,info,Rn,herdName:hn,base,pop:pop.concat(extras),fx:[],plants,
     pred:{...pr,sf:sizeF(pr.size),state:'away',timer:6,x:-.2,z:.6,y:.5,face:1,ph:0,mv:0,hd:0,target:null,win:false},
     fly:fl?{s:R.specOf(ZOO[fl],5),x:1.2,y:.16}:null,
     season:keep.bk===bk?keep.season:0,seasonT:keep.bk===bk?keep.seasonT:0,seasonClock:0,auto:keep.auto!==false,
-    night:keep.night||0,nightT:keep.nightT||0,ev:{id:'none',amount:0,next:'none'},birthClock:8};
+    night:keep.night||0,nightT:keep.nightT||0,ev:{id:'none',amount:0,next:'none'},birthClock:8,stats:{born:0,caught:0}};
   syncCtl();return SC}
 function mkYoung(p,Rn){const y={...p,s:R.youngOf(p.s),young:true,parent:p,sf:p.sf*.55,x:clamp(p.x+.02,.02,.98),z:p.z,seed:p.seed+200,wait:0,cad:p.cad*1.5,ph:Rn(),fear:0,hd:0,lie:0,mv:0,graze:false};return y}
 /* ---------- land behaviour ---------- */
@@ -1420,10 +1420,12 @@ function fleeSpot(p,P){const Rn=SC.Rn;let best=[p.x,p.z],bs=-9;const tp=[P.x-p.x
     if(sc>bs){bs=sc;best=[x,z]}}
   return best}
 function moveTo(p,dt,w,h,cad){const dx=p.tx-p.x,dz=p.tz-p.z,d=Math.hypot(dx,dz*.5);if(d<.008)return true;
-  const sc=BM.scOf(p.z,h)*p.sf*2;const spPx=cad*cycleLen(p.s)*sc;const stepN=spPx*dt/w;const ux=dx/d,uz=dz/d;const k=Math.min(1,d/stepN||1);
-  p.x+=ux*stepN*k;p.z+=uz*stepN*k*.5;if(Math.abs(ux)>.15)p.face=ux>=0?1:-1;p.mv=lerp(p.mv,1,.18);
-  p.ph+=cad*dt*Math.max(.55,Math.abs(ux));return false}
-function landStep(dt,w,h){const P=SC.pred,night=SC.night>.6;
+  const sc=BM.scOf(p.z,h)*p.sf*2;const spPx=cad*cycleLen(p.s)*sc;const stepN=spPx*dt/w;const ux=dx/d,uz=dz/d;const ease=.2+.8*p.mv,k=Math.min(1,d/(stepN*ease)||1)*ease;
+  p.x+=ux*stepN*k;p.z+=uz*stepN*k*.5;if(Math.abs(ux)>.15)p.face=ux>=0?1:-1;p.mv=lerp(p.mv,1,.12);
+  p.ph+=cad*dt*ease*Math.max(.55,Math.abs(ux));return false}
+const COLD={tundra:1,forest:1};
+function landStep(dt,w,h){const P=SC.pred,night=SC.night>.6,harsh=(SC.harshNow||0)>.6,huddle=harsh&&COLD[SC.bk],siesta=harsh&&!COLD[SC.bk]&&!night;
+  let cx=0,cz=0,cn=0;SC.pop.forEach(p=>{if(!p.extra&&!p.dead&&!p.young){cx+=p.x;cz+=p.z;cn++}});cx/=cn||1;cz/=cn||1;
   SC.pop.forEach(p=>{
     if(p.dead){p.lie=lerp(p.lie,1,.12);p.mv=lerp(p.mv,0,.2);p.dead+=dt;if(p.dead>2.2)p.fade=Math.max(0,p.fade-dt*.6);return}
     const hunting=P.state==='chase'||P.state==='stalk';const dP=Math.hypot(p.x-P.x,(p.z-P.z)*.6);
@@ -1432,29 +1434,29 @@ function landStep(dt,w,h){const P=SC.pred,night=SC.night>.6;
     if(p.young&&p.parent&&!p.parent.dead){const q=p.parent;const gx=clamp(q.x-q.face*.028,.02,.98),gz=clamp(q.z+.015,.1,.96);if(Math.hypot(gx-p.x,gz-p.z)>.02||q.mv>.3){p.tx=gx;p.tz=gz;p.wait=0}p.fear=Math.max(p.fear,q.fear)}
     if(p.wait>0){p.wait-=dt;p.mv=lerp(p.mv,0,.14);p.hd=lerp(p.hd,p.graze&&!p.rest?1:0,.06);p.lie=lerp(p.lie,p.rest?1:0,.05);
       // too close to a neighbour: step away
-      if(!p.young&&!p.rest)for(const q of SC.pop){if(q!==p&&!q.dead&&!q.young&&Math.hypot(q.x-p.x,(q.z-p.z)*.6)<.035&&q.seed<p.seed){const s=freeSpot(p,.3);p.tx=s[0];p.tz=s[1];p.wait=0;break}}
+      if(!p.young&&!p.rest)for(const q of SC.pop){if(q!==p&&!q.dead&&!q.young&&Math.hypot(q.x-p.x,(q.z-p.z)*.6)<(huddle?.02:.035)&&q.seed<p.seed){const s=freeSpot(p,.3);p.tx=s[0];p.tz=s[1];p.wait=0;break}}
     }else{p.hd=lerp(p.hd,0,.18);p.lie=lerp(p.lie,0,.12);if(p.lie>.25){p.mv=lerp(p.mv,0,.2);return}
       const arrived=moveTo(p,dt,w,h,p.cad*(1+2*p.fear));
-      if(arrived){p.wait=(p.young?.5:2.5)+SC.Rn()*6;p.graze=!p.extra&&SC.Rn()<.7;p.rest=!p.young&&!hunting&&SC.Rn()<(night?.75:.14);if(p.rest)p.wait+=5;
-        if(!p.young){const s=freeSpot(p,p.extra?.25:.45);p.tx=s[0];p.tz=s[1]}}}
+      if(arrived){p.wait=(p.young?.5:2.5)+SC.Rn()*6;p.graze=!p.extra&&SC.Rn()<.7;p.rest=!p.young&&!hunting&&SC.Rn()<(night?.75:siesta?.55:.14);if(p.rest)p.wait+=5;
+        if(!p.young){if(huddle&&!p.extra){p.tx=clamp(cx+(SC.Rn()-.5)*.2,.05,.95);p.tz=clamp(cz+(SC.Rn()-.5)*.22,.12,.93);p.graze=SC.Rn()<.35}else{const s=freeSpot(p,p.extra?.25:.45);p.tx=s[0];p.tz=s[1]}}}}
   });
   SC.pop=SC.pop.filter(p=>p.fade>0);
   // a birth now and then keeps the herd up
   SC.birthClock-=dt;const adults=SC.pop.filter(p=>!p.young&&!p.extra&&!p.dead);
   if(SC.birthClock<0&&adults.length){SC.birthClock=10+SC.Rn()*8;const herd=SC.pop.filter(p=>!p.extra&&!p.dead);
-    if(herd.length<Math.min(CAP-4,CAST[SC.bk].n+6)){const par=adults.filter(a=>!SC.pop.some(y=>y.young&&y.parent===a)&&P.target!==a)[0];if(par){const y=mkYoung(par,SC.Rn);SC.pop.push(y);SC.fx.push({k:'born',a:y,age:0})}}}
+    if(herd.length<Math.min(CAP-4,CAST[SC.bk].n+6)){const par=adults.filter(a=>!SC.pop.some(y=>y.young&&y.parent===a)&&P.target!==a)[0];if(par){const y=mkYoung(par,SC.Rn);SC.pop.push(y);SC.fx.push({k:'born',a:y,age:0});SC.stats.born++}}}
   // young grow up when their parent is gone
   SC.pop.forEach(p=>{if(p.young&&(!p.parent||p.parent.dead)&&!p.grow){p.grow=true;p.young=false;p.parent=null;p.s=R.specOf(p.t,p.seed);p.sf=sizeF(p.t.size)*.8;p.wait=1}});
   predStep(dt,w,h);
 }
-function predStep(dt,w,h){const P=SC.pred;const walk=(tx,tz,cad)=>{const o={x:P.x,z:P.z,tx,tz,face:P.face,ph:P.ph,mv:P.mv,s:P.s,sf:P.sf};const done=moveTo(o,dt,w,h,cad);P.x=o.x;P.z=o.z;P.face=o.face;P.ph=o.ph;P.mv=o.mv;return done};
+function predStep(dt,w,h){const P=SC.pred;const walk=(tx,tz,cad)=>{const o={x:P.x,z:P.z,tx,tz,face:P.face,ph:P.ph,mv:Math.max(P.mv,.3),s:P.s,sf:P.sf};const done=moveTo(o,dt,w,h,cad);P.x=o.x;P.z=o.z;P.face=o.face;P.ph=o.ph;P.mv=o.mv;return done};
   P.timer-=dt;
   if(P.state==='away'){P.mv=0;if(P.timer<0)sendPredator()}
   else if(P.state==='stalk'){const q=P.target;if(!q||q.dead||!SC.pop.includes(q)){P.state='leave';return}P.hd=lerp(P.hd,.35,.08);
     walk(q.x,q.z,.55);if(Math.hypot(q.x-P.x,(q.z-P.z)*.6)<.2||P.timer<0){P.state='chase';P.timer=P.win?9:4}}
   else if(P.state==='chase'){const q=P.target;if(!q||q.dead){P.state='leave';return}P.hd=lerp(P.hd,.12,.1);
     const qv=q.cad*3*cycleLen(q.s)*q.sf,cadP=clamp((P.win?1.3:.82)*qv/(cycleLen(P.s)*P.sf),1.4,5.5);walk(q.x,q.z,cadP);const d=Math.hypot(q.x-P.x,(q.z-P.z)*.6);
-    if(d<.022&&P.win){q.dead=.01;q.fear=0;SC.fx.push({k:'caught',a:q,age:0});SC.pop.forEach(y=>{if(y.parent===q)y.parent=null});P.state='eat';P.timer=3.2}
+    if(d<.022&&P.win){q.dead=.01;q.fear=0;SC.fx.push({k:'caught',a:q,age:0});SC.stats.caught++;SC.pop.forEach(y=>{if(y.parent===q)y.parent=null});P.state='eat';P.timer=3.2}
     else if(P.timer<0){P.state='leave';P.timer=20}}
   else if(P.state==='eat'){P.mv=lerp(P.mv,0,.2);P.hd=lerp(P.hd,1,.1);if(P.timer<0){P.state='leave';P.timer=20}}
   else if(P.state==='leave'){P.hd=lerp(P.hd,.1,.08);const ex=P.x>.5?1.25:-.25;if(walk(ex,P.z,1)||P.timer<0||P.x>1.2||P.x<-.2){P.state='away';P.timer=14+SC.Rn()*10;P.target=null}}
@@ -1463,8 +1465,9 @@ function sendPredator(){const P=SC.pred;if(P.state!=='away'&&P.state!=='leave')r
   const herd=SC.pop.filter(p=>!p.dead&&!p.extra&&!p.young);if(!herd.length)return;
   if(SC.info.water){P.state='cruise';P.dirX=SC.Rn()<.5?1:-1;P.x=P.dirX>0?-.25:1.25;P.y=.3+SC.Rn()*.35;P.timer=30;return}
   const fromLeft=SC.Rn()<.5;P.x=fromLeft?-.18:1.18;P.z=.3+SC.Rn()*.55;P.face=fromLeft?1:-1;
-  P.target=herd.slice().sort((a,b)=>Math.abs(a.x-P.x)-Math.abs(b.x-P.x))[Math.floor(SC.Rn()*Math.min(3,herd.length))];
-  P.win=SC.Rn()<.5;P.state='stalk';P.timer=9;P.hd=.3}
+  const near=herd.slice().sort((a,b)=>Math.abs(a.x-P.x)-Math.abs(b.x-P.x)).slice(0,4);
+  P.target=near.sort((a,b)=>(a.t.legLen||50)-(b.t.legLen||50))[Math.floor(SC.Rn()*Math.min(2,near.length))];
+  P.win=SC.Rn()<clamp(.8-.55*(P.target.t.legLen||50)/100,.2,.85);P.state='stalk';P.timer=9;P.hd=.3}
 /* ---------- water behaviour ---------- */
 function waterStep(dt){const P=SC.pred,Rn=SC.Rn;
   SC.schoolClock=(SC.schoolClock||9)-dt;if(SC.schoolClock<0){SC.schoolClock=10+Rn()*8;SC.schoolDir=-(SC.schoolDir||1)}
@@ -1477,7 +1480,7 @@ function waterStep(dt){const P=SC.pred,Rn=SC.Rn;
     if(p.dead){p.dead+=dt;p.fade=Math.max(0,p.fade-dt*1.2);return}
     if(p.floor){p.x+=Math.sin(T*.3+p.seed)*dt*.01;p.ph+=dt*.6*Math.abs(Math.sin(T*.3+p.seed));p.mv=Math.abs(Math.sin(T*.3+p.seed));return}
     const dx=p.x-P.x,dy=p.y-P.y,d=Math.hypot(dx,dy*1.3);const scared=live&&d<.2;
-    if(scared){p.fear=1;p.dir=dx>=0?1:-1;p.vy+=(dy>=0?1:-1)*dt*.5;if(d<.03&&!p.extra&&P.dash&&!P.fed){p.dead=.01;P.fed=true;SC.fx.push({k:'bubbles',x:p.x,y:p.y,age:0})}}
+    if(scared){p.fear=1;p.dir=dx>=0?1:-1;p.vy+=(dy>=0?1:-1)*dt*.5;if(d<.03&&!p.extra&&P.dash&&!P.fed){p.dead=.01;P.fed=true;SC.stats.caught++;SC.fx.push({k:'bubbles',x:p.x,y:p.y,age:0})}}
     else{p.fear=Math.max(0,p.fear-dt*.5);if(p.fear<.3){p.lag-=dt;if(p.dir!==H&&p.lag<0)p.dir=H;if(p.dir===H&&p.lag<-1)p.lag=Rn()*1.2}}
     p.turn=lerp(p.turn,p.dir,.08);
     p.x+=p.dir*dt*(.045+.012*(p.seed%5))*(1+2.2*p.fear)*Math.abs(p.turn)*(p.extra?.5:1);
@@ -1489,10 +1492,12 @@ function waterStep(dt){const P=SC.pred,Rn=SC.Rn;
   SC.birthClock-=dt;if(SC.birthClock<0){SC.birthClock=9;const n=SC.pop.filter(p=>!p.extra).length;if(n<CAST[SC.bk].n){const a=mkAnimal(SC.base,Rn,300+Math.floor(Rn()*900),H>0?-.1:1.1,.2+Rn()*.7);a.y=.15+Rn()*.6;a.vy=0;a.dir=H;a.turn=H;a.lag=Rn();SC.pop.push(a)}}
 }
 /* ---------- drawing ---------- */
-function drawAnimal(c,p,x,y,sc,pose,alpha){c.save();c.globalAlpha=alpha;c.translate(x,y);if(!SC.info.water)R.shadow(c,sc*R.sizeOf(p.s).len*.45,.2*alpha);c.scale(sc*(p.faceX!=null?p.faceX:p.face),sc);try{R.draw(c,p.s,pose)}catch(e){}c.restore()}
+function drawAnimal(c,p,x,y,sc,pose,alpha){c.save();c.globalAlpha=alpha;c.translate(x,y);if(!SC.info.water)R.shadow(c,sc*R.sizeOf(p.s).len*.45,.2*alpha);if(p.faceX==null)p.faceX=p.face;if(!SC.info.water){p.faceX=lerp(p.faceX,p.face,.22);if(Math.abs(p.faceX-p.face)<.02)p.faceX=p.face}const fx=Math.abs(p.faceX)<.14?(p.faceX<0?-.14:.14):p.faceX;c.scale(sc*fx,sc);try{R.draw(c,p.s,pose)}catch(e){}c.restore()}
 function badge(c,x,y,r){c.save();fill(c,'#c4473a',p=>ell(p,x,y,r,r));c.fillStyle='#fff';[[-.42,-.2],[0,-.48],[.42,-.2]].forEach(q=>{c.beginPath();c.arc(x+q[0]*r,y+q[1]*r,r*.17,0,TAU);c.fill()});c.beginPath();c.ellipse(x,y+r*.22,r*.36,r*.28,0,0,TAU);c.fill();c.restore()}
 function pill(c,txt,harsh,w){c.save();c.font=`600 ${Math.max(11,Math.min(14,w*.022))}px "Avenir Next","Segoe UI",system-ui,sans-serif`;const tw=c.measureText(txt).width+(harsh?c.measureText('  harsh season').width:0);
   c.fillStyle='rgba(22,36,30,.72)';c.beginPath();c.roundRect(10,10,tw+22,28,14);c.fill();c.textAlign='left';c.textBaseline='middle';c.fillStyle='#fff';c.fillText(txt,21,24.5);if(harsh){c.fillStyle='#ffd27a';c.fillText('  harsh season',21+c.measureText(txt).width,24.5)}c.restore()}
+function tally(c,w){const n=SC.pop.filter(p=>!p.extra&&!p.dead).length,txt=`${SC.herdName}: ${n}  ·  born ${SC.stats.born}  ·  caught ${SC.stats.caught}`;c.save();c.font=`600 ${Math.max(10,Math.min(13,w*.02))}px "Avenir Next","Segoe UI",system-ui,sans-serif`;const tw=c.measureText(txt).width;
+  c.fillStyle='rgba(255,255,255,.82)';c.beginPath();c.roundRect(w-tw-30,w<520?44:10,tw+20,26,13);c.fill();c.textAlign='left';c.textBaseline='middle';c.fillStyle='#16241e';c.fillText(txt,w-tw-20,(w<520?44:10)+13.5);c.restore()}
 function frame(dt){
   const cv=document.getElementById('scene');if(!cv)return;const{c,w,h}=fit(cv,cv.clientWidth<640?.72:.5);if(!SC)make('tundra');
   // nothing snaps: ease season, night and event
@@ -1501,7 +1506,7 @@ function frame(dt){
   const E=SC.ev;if(E.next!==E.id){E.amount=still?0:Math.max(0,E.amount-dt*.7);if(E.amount<=0)E.id=E.next}else if(E.id!=='none')E.amount=still?1:Math.min(1,E.amount+dt*.45);
   const o={biome:SC.bk,season:SC.season,night:SC.night,t:T,event:{id:E.id,amount:E.amount}};
   const water=SC.info.water;if(!still){water?waterStep(dt):landStep(dt,w,h)}
-  const S=BM.draw(c,w,h,o);const items=BM.deco(c,w,h,o,S);
+  const S=BM.draw(c,w,h,o);SC.harshNow=S.harsh;const items=BM.deco(c,w,h,o,S);
   const surf=(SC.info.surface||0)*h,y0=surf+h*.06,y1=h*.9;
   SC.plants.forEach(pl=>items.push({z:pl.z,draw(){try{const k=BM.scOf(pl.z,h)*pl.sc;c.save();c.translate(pl.x*w,water?h*.93:BM.yOf(pl.z,h));c.scale(k,k);window.Plants.draw(c,pl.spec,{t:T,season:Math.round(SC.season)%4,harsh:S.harsh>.5,roots:false});c.restore()}catch(e){SC.plants=[]}}}));
   const sleepy=SC.night>.6;
@@ -1522,7 +1527,7 @@ function frame(dt){
   SC.fx=SC.fx.filter(f=>f.age<(f.k==='caught'?3.5:1.6));
   const F=SC.fly;if(F&&!water){if(!still)F.x-=dt*.06;if(F.x<-.2){F.x=1.3;F.y=.1+SC.Rn()*.18}const s=h/520*.5;c.save();c.globalAlpha=1-.5*SC.night;c.translate(F.x*w,h*F.y+Math.sin(T*1.3)*h*.02);c.scale(-s,s);try{R.draw(c,F.s,{t:T,fly:1,flap:T*7,move:1})}catch(e){}c.restore()}
   BM.front(c,w,h,o,S);
-  const si=((Math.round(SC.season)%4)+4)%4;pill(c,`${SC.info.name} · ${SC.info.seasons[si]}${SC.nightT?' · night':''}`,si===SC.info.harsh,w);
+  const si=((Math.round(SC.season)%4)+4)%4;pill(c,`${SC.info.name} · ${SC.info.seasons[si]}${SC.nightT?' · night':''}`,si===SC.info.harsh,w);tally(c,w);
 }
 /* ---------- controls ---------- */
 let ctl={};

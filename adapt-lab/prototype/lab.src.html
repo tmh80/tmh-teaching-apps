@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adapt Lab · Evolution Lab prototype</title>
+<link rel="stylesheet" href="lab.css">
+</head>
+<body>
+<div class="lab" id="lab">
+  <header class="bar">
+    <div class="brand">Evolution <span>Lab</span></div>
+    <div class="who" id="who"></div>
+    <div class="ctl">
+      <button class="play" id="bPlay" aria-label="Pause">❚❚</button>
+      <div class="seg" role="group" aria-label="Speed"><button id="bNormal" aria-pressed="true">Normal</button><button id="bFast" aria-pressed="false">Fast</button></div>
+      <button id="bFinish">Finish this era ⏩</button>
+      <button id="bSame" title="Start again with exactly the same weather and luck">Same world again ↺</button>
+      <button id="bNew">Choose another animal</button>
+    </div>
+  </header>
+  <main class="stage">
+    <section class="scenebox">
+      <canvas id="scene" aria-label="The herd living in its biome"></canvas>
+      <div class="pill" id="season"></div>
+      <div class="hint" id="hint">Tap an animal to look at it closely</div>
+      <aside class="pin" id="pin" hidden></aside>
+      <div class="report" id="report" aria-live="polite"></div>
+      <div class="startcard" id="start"></div>
+    </section>
+    <aside class="data">
+      <div class="nums">
+        <div class="num"><span>Generation</span><b id="nGen">0</b></div>
+        <div class="num"><span>Alive now</span><b id="nPop">20</b></div>
+        <div class="num"><span>Era</span><b id="nEra">1</b></div>
+      </div>
+      <div class="card">
+        <h2>Population <em>how many are alive after each generation</em></h2>
+        <div class="chartwrap"><canvas id="cPop"></canvas><div class="tip" id="tip" hidden></div></div>
+      </div>
+      <div class="card">
+        <h2>What killed them <em>all generations so far</em></h2>
+        <div class="tally" id="tally"></div>
+      </div>
+      <div class="card">
+        <h2>Traits that changed most <em>herd average, 0 to 100</em></h2>
+        <div class="traits" id="traits"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+<script src="../src/js/00-util.js"></script>
+<script src="../src/js/10-data.js"></script>
+<script src="../src/js/11-model-animal.js"></script>
+<script src="../src/js/12-model-plant.js"></script>
+<script src="../src/js/13-hazards.js"></script>
+<script src="../src/js/14-run.js"></script>
+<script src="rig.js"></script>
+<script src="plan-frog.js"></script>
+<script src="plan-crab.js"></script>
+<script src="plan-snake.js"></script>
+<script src="plan-seal.js"></script>
+<script src="zoo-predators.js"></script>
+<script src="biomes.js"></script>
+<script src="lab.js"></script>
+</body>
+</html>

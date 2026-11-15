@@ -136,8 +136,10 @@ function renderOpts(cost,force){
 }
 function renderVitals(a,anc){
   const cls=v=>v>=70?'good':v>=45?'ok':'bad';const d=a.year-anc.year;
-  $('headline').innerHTML=`<div class="pct ${cls(a.year)}">${a.year}<small>%</small></div><div class="cap">Chance of surviving a year</div>`+
+  const from=S.prev?S.prev.year:a.year;
+  $('headline').innerHTML=`<div class="pct ${cls(a.year)}"><span id="pctN">${from}</span><small>%</small></div><div class="cap">Chance of surviving a year</div>`+
     `<div class="cmp">Your ancestor: ${anc.year}% ${d?`· <b class="${d>0?'up':'down'}">${d>0?'up':'down'} ${Math.abs(d)}</b>`:''}</div><div class="threat"><span>Biggest threat</span>${esc(threatText(a,S.biome))}</div>`;
+  if(from!==a.year){const t0=performance.now(),el=$('pctN');(function tick(now){const u=Math.min(1,(now-t0)/380),e=1-Math.pow(1-u,3);if(el.isConnected){el.textContent=Math.round(lerp(from,a.year,e));if(u<1)requestAnimationFrame(tick)}})(t0)}
   const worst=PRESS.reduce((m,p)=>a.bars[p.k]<a.bars[m.k]?p:m,PRESS[0]).k;
   if(!$('bars').children.length){$('bars').innerHTML=PRESS.map(p=>`<button type="button" class="bar" data-bar="${p.k}"><svg viewBox="0 0 24 24">${p.icon}</svg><span class="nm"><span>${p.name}</span><em></em></span><span class="num"></span><span class="track"><span class="fill"></span><span class="ghost"></span></span></button>`).join('')+'<div class="legend"><i></i>The line shows your ancestor</div>'}
   PRESS.forEach(p=>{const el=$('bars').querySelector(`[data-bar="${p.k}"]`),v=a.bars[p.k];el.className='bar '+cls(v)+(p.k===worst&&v<70?' worst':'');
@@ -171,7 +173,7 @@ function render(full){
   renderTabs(cost);renderOpts(cost,full);renderVitals(a,ANC_A);renderCombos(combosOf(S.t,S.biome));renderDock(cost);renderTags();
   S.prev=a;SPEC=null;
 }
-function setTrait(k,v){if(S.t[k]===v)return;S.t={...S.t,[k]:v};S.moveUntil=performance.now()+1500;$('stageHint').classList.add('gone');render(false)}
+function setTrait(k,v){if(S.t[k]===v)return;S.t={...S.t,[k]:v};S.moveUntil=performance.now()+1500;S.pulse=performance.now();$('stageHint').classList.add('gone');render(false)}
 
 /* ---------- events ---------- */
 $('biomes').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b&&b.dataset.b!==S.biome)loadBiome(b.dataset.b)});
@@ -222,7 +224,8 @@ function frame(ts){
     const want=ts<S.moveUntil?1:0;mv=lerp(mv,want,.08);phase+=dt*(.5+.9*mv)*(swims?1:mv>0.02?1:0);
     const grow=lerp(.62,1.12,S.t.size/100);const sc=Math.min(w*.5/z.len,h*.5/z.height)*grow;
     const gx=w*.5+(z.dx||0)*sc,gy=swims&&aq?h*.52+Math.sin(t*.9)*h*.012:h*(aq?.84:.8);
-    cx.save();cx.translate(gx,gy);if(!(swims&&aq))R.shadow(cx,sc*z.len*.5,.26);cx.scale(sc,sc);
+    const age=(ts-(S.pulse||-1e9))/1000,sq=age<.9?Math.sin(age*17)*Math.exp(-age*6)*.07:0; // a small squash and stretch when a trait changes
+    cx.save();cx.translate(gx,gy);if(!(swims&&aq))R.shadow(cx,sc*z.len*.5,.26);cx.scale(sc*(1+sq),sc*(1-sq));
     try{R.draw(cx,SPEC,{t,phase,move:swims?1:mv,blink:(t%4.3)<.12,tongue:SPEC.tongue&&(t%3)<.3,swim:aq})}catch(e){if(!frame.warned){frame.warned=1;console.warn('draw failed:',e.message)}}
     cx.restore()}
   requestAnimationFrame(frame);
