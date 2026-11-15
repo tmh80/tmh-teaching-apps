@@ -123,7 +123,7 @@ function pattern(c,clip,s,box,seed){
 /* ================= QUADRUPED: hare, fox, wolf, camel, zebra, deer, cat ================= */
 function drawQuad(c,s,po){
   po=po||{};const col=s.col,t=po.t||0,mv=po.move||0,ph=po.phase||0,hd=po.headDown||0;
-  const L=s.L,D=s.D,leg=s.leg,lw=s.legW;
+  const lie=po.lie||0,L=s.L,D=s.D,leg=s.leg*(1-.8*lie),lw=s.legW;
   const bob=mv*Math.sin(ph*TAU*2)*D*.035+(1-mv)*Math.sin(t*1.7+(s.seed||0))*D*.012;
   const top=-(leg+D)+bob,bot=-leg+bob,cy=(top+bot)/2;
   const hipX=-L*.30,shX=L*.30,jy=cy+D*.14,hh=-jy;
@@ -133,6 +133,9 @@ function drawQuad(c,s,po){
   function drawLeg(g){const[dx,dy]=step(ph,g.off,stride,lift);const fx=g.x+dx+(g.hind?-L*.02:L*.02),fy=dy;
     const k=ik(g.x,jy,fx,fy,l1,l2,g.hind?1:-1);const tone=g.far?col.shade:col.base;
     fill(c,tone,p=>{seg(p,g.x,jy,k[0],k[1],lw*(g.hind?2.3:1.8),lw*1.15);seg(p,k[0],k[1],fx,fy-lw*.35,lw*1.15,lw*.85)});
+    if(s.pattern==='stripes'||s.pattern==='spots'){c.save();c.strokeStyle=col.mark;c.fillStyle=col.mark;c.globalAlpha=g.far?.55:1;c.lineWidth=lw*.36;c.lineCap='butt';
+      [[g.x,jy,k[0],k[1],lw*1.7,g.hind?.35:.2],[k[0],k[1],fx,fy-lw*.35,lw*1.05,.1]].forEach(([x1,y1,x2,y2,ww,u0])=>{const dx=x2-x1,dy=y2-y1,d=Math.hypot(dx,dy)||1,nx=-dy/d,ny=dx/d;
+        for(let i=0;i<3;i++){const u=u0+(1-u0)*(i+.5)/3,px=lerp(x1,x2,u),py=lerp(y1,y2,u);c.beginPath();if(s.pattern==='stripes'){c.moveTo(px-nx*ww*.5,py-ny*ww*.5);c.lineTo(px+nx*ww*.5,py+ny*ww*.5);c.stroke()}else{c.arc(px+nx*ww*(i%2?.15:-.15),py,ww*.17,0,TAU);c.fill()}}});c.restore()}
     if(s.feet==='hoof')fill(c,col.dark,p=>{p.moveTo(fx-lw*.5,fy-lw*.75);p.lineTo(fx+lw*.55,fy-lw*.75);p.lineTo(fx+lw*.8,fy);p.lineTo(fx-lw*.6,fy);p.closePath()});
     else fill(c,g.far?col.shade:col.paw||tone,p=>ell(p,fx+lw*.3,fy-lw*.36,lw*.85,lw*.42))}
   // far legs
@@ -145,6 +148,8 @@ function drawQuad(c,s,po){
     fill(c,col.base,p=>tube(p,pts,w));
     if(s.tailType==='bushy')fill(c,col.belly,p=>ell(p,pts[4][0],pts[4][1],D*.12,D*.1));
     if(s.tailType==='tuft')fill(c,col.dark,p=>leaf(p,pts[4][0],pts[4][1],D*.3,D*.11,Math.atan2(pts[4][1]-pts[3][1],pts[4][0]-pts[3][0])))}
+  if(s.spiny){c.fillStyle=col.dark;for(let i=0;i<9;i++){const u=i/8,x=lerp(hipX-L*.16,shX+L*.1,u),y=top+D*.1+Math.abs(u-.5)*D*.12;c.beginPath();c.moveTo(x-L*.045,y+D*.1);c.lineTo(x-L*.05-D*.05,y-D*(.3+.1*Math.sin(u*9)));c.lineTo(x+L*.035,y+D*.1);c.closePath();c.fill()}}
+  if(s.wingQ){c.save();c.translate(shX-L*.05,top+D*.2);c.rotate(-.35+Math.sin(t*2)*.03);fill(c,col.shade,p=>smooth(p,[[0,0],[-L*.1,-D*(.5+.5*s.wingQ)],[-L*(.45+.25*s.wingQ),-D*(.35+.3*s.wingQ)],[-L*(.5+.3*s.wingQ),D*.05],[-L*.25,D*.1]],true));c.restore()}
   // body silhouette
   const fat=s.fat||0,fl=s.fluff||0;
   const body=new Path2D();
@@ -152,9 +157,9 @@ function drawQuad(c,s,po){
   if(s.hump)ell(body,-L*.04,top+D*.02,L*.2,D*(.2+.3*s.hump));
   if(fl>.5){const r=D*(.07+.1*fl);[[shX+L*.15,cy+D*.06],[shX+L*.12,cy+D*.3],[shX+L*.02,bot-D*.02],[hipX-L*.19,cy+D*.12],[hipX-L*.14,cy+D*.32],[hipX-L*.2,cy-D*.14]].forEach(q=>ell(body,q[0],q[1],r,r))}
   // neck and head
-  const wx=shX+L*.06,wy=top+D*.3;const A=lerp(s.neckUp,-.75,hd);const N=s.neck;
-  const hx=wx+Math.cos(A)*N+L*.1,hy=wy-Math.sin(A)*N-D*.04+(1-mv)*Math.sin(t*1.7)*.6;
-  const hr=s.head,ha=lerp(.1,1.15,hd)+(s.neckUp>.9?.3:0);
+  const wx=shX+L*.06,wy=top+D*.3;const A=s.neckUp,N=s.neck,hr=s.head;
+  const hx=lerp(wx+Math.cos(A)*N+L*.1,wx+L*.2+hr*.6,hd*.95),hy=lerp(wy-Math.sin(A)*N-D*.04+(1-mv)*Math.sin(t*1.7)*.6,-hr*.95,hd*.95);
+  ha=lerp(.1+(s.neckUp>.9?.3:0),1.2,hd);
   const neck=new Path2D();tube(neck,[[wx-L*.06,wy+D*.12],[(wx+hx)/2-L*.01,(wy+hy)/2+D*.04],[hx-hr*.2,hy+hr*.1]],[D*.62,lerp(D*.5,hr*1.5,.55),hr*1.45]);
   const sl=hr*(.55+s.snout*.9),sx=hx+Math.cos(ha)*(hr*.35+sl*.6),sy=hy+Math.sin(ha)*(hr*.35+sl*.6);
   const head=new Path2D();ell(head,hx,hy,hr,hr*.94);ell(head,sx,sy,sl,hr*(.62-.08*s.snout),ha);
@@ -171,6 +176,7 @@ function drawQuad(c,s,po){
   if(s.pattern==='counter')fill(c,col.shade,p=>ell(p,0,top-D*.05,L*.75,D*.3));
   c.restore();
   pattern(c,all,s,[hipX-L*.25,top-D*.2-(s.neckUp>.6?N:0),hx+hr,bot],s.seed);
+  if(s.shell){c.save();c.clip(body);fill(c,col.shade,p=>ell(p,-L*.02,top+D*.18,L*.5,D*.62));c.strokeStyle=col.dark;c.globalAlpha=.35;c.lineWidth=D*.035;for(let i=-3;i<=3;i++){c.beginPath();c.moveTo(i*L*.12,top-D*.1);c.quadraticCurveTo(i*L*.14,top+D*.4,i*L*.12,top+D*.85);c.stroke()}c.restore()}
   if(s.mane)fill(c,col.dark,p=>tube(p,[[wx-L*.04,wy-D*.06],[(wx+hx)/2-L*.05,(wy+hy)/2-D*.12],[hx-hr*.7,hy-hr*.55]],[D*.06,D*.1,D*.07]));
   // near legs
   LEGS.filter(g=>!g.far).forEach(drawLeg);
@@ -178,7 +184,7 @@ function drawQuad(c,s,po){
   fill(c,col.base,p=>leaf(p,ex,ey,s.ear,s.earW,ea-tw));
   fill(c,col.earIn,p=>leaf(p,ex+Math.cos(ea)*s.ear*.14,ey+Math.sin(ea)*s.ear*.14,s.ear*.72,s.earW*.5,ea-tw));
   fill(c,col.base,p=>ell(p,ex+hr*.1,ey+hr*.25,hr*.3,hr*.26));
-  eye(c,hx+hr*.3+Math.cos(ha)*hr*.1,hy-hr*.16,hr*.2,{blink:po.blink,dark:col.dark});
+  eye(c,hx+hr*.3+Math.cos(ha)*hr*.1,hy-hr*.16,hr*(s.eyeR||.2),{blink:po.blink||po.sleep,dark:col.dark});
   const nx=sx+Math.cos(ha)*sl*.86,ny=sy+Math.sin(ha)*sl*.86-hr*.1;
   fill(c,col.nose||col.dark,p=>ell(p,nx,ny,hr*.16,hr*.12,ha));
   if(s.cheek)fill(c,col.cheek,p=>ell(p,hx+hr*.2,hy+hr*.3,hr*.2,hr*.13));
@@ -193,8 +199,8 @@ function drawBird(c,s,po){
   const flap=Math.sin(po.flap||t*9);
   const wing=(far)=>{const sxw=cx+B*.1,syw=cy-B*.1;c.save();c.translate(sxw,syw);
     const v=fly>.5?clamp(flap,-1,1):0;const ys=fly>.5?(Math.abs(v)<.18?(v<0?-.18:.18):v):0;
-    if(fly>.5){c.scale(1,ys);c.rotate(-.75);const W=s.wing*1.1;fill(c,far?col.shade:col.wing,p=>smooth(p,[[W*.08,0],[W*.42,-W*.45],[W*.3,-W*1.08],[-W*.1,-W*.98],[-W*.38,-W*.7],[-W*.56,-W*.3],[-W*.42,0]],true,1));
-      c.strokeStyle=col.shade;c.lineWidth=B*.012;c.globalAlpha=.5;for(let i=1;i<4;i++){c.beginPath();c.moveTo(-W*.05*i,-W*.1);c.lineTo(-W*.1*i+W*.1,-W*(.95-.12*i));c.stroke()}}
+    if(fly>.5){c.scale(1,ys);c.rotate(-.3);const W=s.wing*1.15;fill(c,far?col.shade:col.wing,p=>smooth(p,[[W*.14,0],[W*.2,-W*.42],[W*.06,-W*.86],[-W*.2,-W*1.2],[-W*.25,-W*.92],[-W*.36,-W*.86],[-W*.34,-W*.62],[-W*.46,-W*.52],[-W*.4,-W*.3],[-W*.5,-W*.16],[-W*.4,0]],true,1));
+      c.strokeStyle=col.shade;c.lineWidth=B*.012;c.globalAlpha=.5;for(let i=1;i<4;i++){c.beginPath();c.moveTo(-W*.07*i,-W*.08);c.lineTo(-W*.09*i+W*.02,-W*(.9-.16*i));c.stroke()}}
     c.restore()};
   if(fly>.5)wing(true);
   // legs
@@ -274,6 +280,8 @@ function drawLizard(c,s,po){
   if(s.pattern==='spots'){const R=rng(s.seed||9);c.fillStyle=col.mark;for(let i=0;i<30;i++){const k=1+Math.floor(R()*9),q=sp[k];c.beginPath();c.arc(q[0]+(R()-.5)*L*.12,q[1]-w[k]*.3*R(),D*.07,0,TAU);c.fill()}}
   if(s.pattern==='stripes'){c.strokeStyle=col.mark;c.lineWidth=D*.14;for(let i=1;i<10;i++){const q=sp[i];c.beginPath();c.moveTo(q[0],q[1]-w[i]);c.lineTo(q[0]-D*.1,q[1]+w[i]*.2);c.stroke()}}
   c.restore();
+  if(s.shell){const a=sp[3],b=sp[8],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2,rx=(b[0]-a[0])*.6,ry=D*1.15;fill(c,col.shade,p=>{p.moveTo(mx-rx,my+D*.2);p.bezierCurveTo(mx-rx,my-ry*1.25,mx+rx,my-ry*1.25,mx+rx,my+D*.2);p.closePath()});
+    c.save();c.strokeStyle=col.mark;c.globalAlpha=.5;c.lineWidth=D*.06;for(let i=-2;i<=2;i++){c.beginPath();c.moveTo(mx+i*rx*.3,my+D*.15);c.quadraticCurveTo(mx+i*rx*.36,my-ry*.4,mx+i*rx*.22,my-ry*.82);c.stroke()}c.beginPath();c.moveTo(mx-rx*.8,my-ry*.35);c.quadraticCurveTo(mx,my-ry*.62,mx+rx*.8,my-ry*.35);c.stroke();c.restore()}
   legs.filter(g=>!g.far).forEach(drawLeg);
   const hq=sp[10],hp=sp[9];
   eye(c,hp[0]+D*.12,hp[1]-D*.16,D*.11,{blink:po.blink,ring:col.eyeRing});
@@ -329,15 +337,15 @@ function specOf(t,seed){
   if(plan==='quad'){const sh=t.shape||'round';const base={round:{L:86,D:58,neck:7,neckUp:.6,lg:[13,34]},long:{L:122,D:42,neck:18,neckUp:.3,lg:[18,50]},tall:{L:104,D:54,neck:50,neckUp:1.0,lg:[44,52]},stream:{L:120,D:44,neck:14,neckUp:.2,lg:[16,40]}}[sh];
     const big=n('size')>.6||sh==='tall';
     return{plan,seed,col,pattern:t.pattern,L:base.L,D:base.D*(1+.3*fat+.12*n('insul')),leg:base.lg[0]+base.lg[1]*n('legLen'),legW:lerp(8.5,10.5,n('size')),neck:base.neck*(sh==='tall'?.8+.6*n('legLen'):1),neckUp:base.neckUp,
-      head:sh==='tall'?16.5:lerp(25,18,n('size')),snout:sh==='tall'?.75:t.diet==='meat'?.6:t.diet==='both'?.45:.25,ear:7+44*n('ears'),earW:n('ears')>.6?9:8,earLop:0,
+      head:sh==='tall'?16.5:lerp(25,18,n('size')),snout:sh==='tall'?.75:t.diet==='meat'?.52:t.diet==='both'?.42:.25,ear:7+44*n('ears'),earW:n('ears')>.6?9:8,earLop:0,
       tail:14+70*n('tail'),tailType:n('tail')<.15?'stub':(sh==='long'&&n('insul')>.5?'bushy':sh==='tall'?'tuft':'thin'),
-      fluff:n('insul'),fat,hump:t.fatWhere==='hump'?n('fat'):0,feet:big?'hoof':'paw',mane:sh==='tall'&&t.pattern==='stripes',cheek:!big}}
+      fluff:n('insul'),fat,hump:t.fatWhere==='hump'?n('fat'):0,eyeR:.15+.12*n('eyes'),spiny:t.defence==='spines',shell:t.defence==='shell',wingQ:t.wings!=='none'?.3+.7*n('wingSize'):0,feet:big?'hoof':'paw',mane:sh==='tall'&&t.pattern==='stripes',cheek:!big}}
   if(plan==='bird'){const tall=t.shape==='tall';const owl=n('eyes')>.8&&!tall;
     const bare='#d9b6a4';return{plan,seed,col:tall?{...col,head:bare,neck:bare,leg:'#cfa893',beak:'#e3b98a'}:{...col,head:col.base,neck:col.base},pattern:t.pattern,B:tall?100:78,tilt:tall?.06:owl?.75:.42,leg:tall?46+60*n('legLen'):12+34*n('legLen'),legW:tall?5.5:3.2,thigh:tall,thinNeck:tall,
       neck:tall?66:owl?4:12,neckUp:tall?1.2:.9,head:owl?24:tall?12.5:17,beak:owl?7:t.diet==='meat'?13:10,beakType:t.diet==='meat'?'hook':'cone',bigEye:owl,face:owl,
       wing:40+70*n('wingSize'),tail:6+22*n('tail'),canFly:t.wings==='fly'}}
   if(plan==='fish')return{plan,seed,col,pattern:t.pattern,L:120,D:34+16*n('size')+10*fat,tailFin:.7+.5*n('finSize'),fin:n('finSize')};
-  if(plan==='lizard')return{plan,seed,col,pattern:t.pattern,L:96,D:t.cov==='skin'?30:24,leg:12+18*n('legLen'),legW:4.6,spiny:t.defence==='spines',tongue:t.senses==='tongue'};
+  if(plan==='lizard')return{plan,seed,col,pattern:t.pattern,L:96,D:t.cov==='skin'?30:24,leg:12+18*n('legLen'),legW:4.6,spiny:t.defence==='spines',shell:t.defence==='shell',tongue:t.senses==='tongue'};
   return{plan,seed,col:{...col,dark:'#241f1c'},pattern:t.pattern,L:92,D:30,leg:16+24*n('legLen'),legW:3.2,jump:n('legLen')>.6,wings:t.wings!=='none'};
 }
 function draw(c,s,po){const ex=EXTRA.find(e=>e.name===s.plan);if(ex)return ex.draw(c,s,po||{});({quad:drawQuad,bird:drawBird,fish:drawFish,lizard:drawLizard,insect:drawInsect})[s.plan](c,s,po)}
@@ -374,7 +382,10 @@ const zoo={
  'Brown trout':A({cov:'scales',blood:'cold',breathe:'gills',shape:'stream',legs:'0',fins:'fins',finSize:55,color:'brown',pattern:'spots',size:25,tail:0,diet:'meat'}),
  'Thorny devil':A({cov:'scales',blood:'cold',shape:'long',color:'sandy',pattern:'spots',defence:'spines',size:7,legLen:30,posture:'sprawl',senses:'tongue',tail:40,diet:'meat'}),
  'Green lizard':A({cov:'scales',blood:'cold',shape:'long',color:'green',pattern:'stripes',size:10,legLen:55,posture:'sprawl',tail:60,diet:'meat'}),
- 'Desert locust':A({cov:'exo',blood:'cold',breathe:'tubes',shape:'long',legs:'6',legLen:75,wings:'fly',wingSize:70,color:'sandy',size:4,tail:0})
+ 'Desert locust':A({cov:'exo',blood:'cold',breathe:'tubes',shape:'long',legs:'6',legLen:75,wings:'fly',wingSize:70,color:'sandy',size:4,tail:0}),
+ 'Porcupine':A({color:'brown',insul:60,size:40,ears:12,legLen:25,tail:20,defence:'spines'}),
+ 'Armadillo':A({shape:'long',color:'grey',insul:5,size:30,ears:30,legLen:20,tail:45,defence:'shell',diet:'both'}),
+ 'Tortoise':A({cov:'scales',blood:'cold',shape:'round',color:'green',size:30,legLen:35,posture:'sprawl',tail:10,defence:'shell'})
 };
 // soft ground shadow, drawn before the animal
 function shadow(c,w,alpha){c.save();c.scale(1,.2);const g=c.createRadialGradient(0,0,0,0,0,w);g.addColorStop(0,`rgba(30,25,40,${alpha||.28})`);g.addColorStop(1,'rgba(30,25,40,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,w,0,TAU);c.fill();c.restore()}
@@ -385,8 +396,152 @@ root.Rig={draw,specOf,planOf,sizeOf,youngOf,register,colours,shadow,PAL,DEF,A,zo
 </script>
 
 
+<script>
+/* Adapt Lab art prototype: SNAKE body plan (legless reptile or amphibian).
+   Chosen when: scales or moist skin, no legs, no fins.
+   Silhouette notes: one long tapering tube, S-curves on the ground, raised head on a curved neck,
+   wedge head a little wider than the neck, forked tongue. Rattlesnakes add a segmented rattle on a raised tail tip.
+   Local units: faces right, belly on y = 0, about 170 long. The sideways slither is drawn as seen from slightly above,
+   so the body weaves a little toward and away from the viewer on the ground. */
+(function(){
+"use strict";
+const R=window.Rig,{lerp,clamp,TAU,fill,ell,tube,mix}=R;
+const sst=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
+const N=24;
+function width(u,s){ // 0 = tail tip, 1 = snout
+  let k;
+  if(u<.34)k=lerp(.16,1,sst(u/.34));
+  else if(u<.74)k=1;
+  else if(u<.9)k=lerp(1,.7,sst((u-.74)/.16));
+  else if(u<.965)k=lerp(.7,1.02,sst((u-.9)/.065));
+  else k=lerp(1.02,.62,sst((u-.965)/.035));
+  return s.D*k;
+}
+function spine(s,po){
+  const t=po.t||0,mv=po.move||0,ph=po.phase||0,L=s.L,D=s.D;
+  const raise=s.raise*lerp(1,.5,mv)*(po.strike?.35:1);
+  const pts=[],w=[];
+  for(let i=0;i<N;i++){const u=i/(N-1);
+    const x=lerp(-L*.5,L*.44,u)+(u>.72?-sst((u-.72)/.2)*D*.9*(1-mv*.5):0)+(u>.9?(u-.9)/.1*D*1.5:0);
+    const env=sst(u/.18)*(1-sst((u-.58)/.2));
+    const wave=Math.sin((u*s.waves+ph)*TAU)*D*lerp(.95,1.25,mv)*env+Math.sin(t*.9+u*6)*D*.1*(1-mv)*env;
+    const lift=raise*sst((u-.66)/.24)+(u>.9?Math.sin(t*1.3+(s.seed||0))*D*.12*(1-mv):0);
+    const tailUp=s.rattle?D*2.2*Math.pow(1-sst(u/.12),1.5):0;
+    const ww=width(u,s);pts.push([x,-ww/2-D*.55+wave*.55-lift-tailUp]);w.push(ww)}
+  return{pts,w};
+}
+function drawSnake(c,s,po){
+  po=po||{};const col=s.col,t=po.t||0,D=s.D,L=s.L;
+  const{pts,w}=spine(s,po);
+  // rattle (behind the tail tip)
+  if(s.rattle){const a=pts[0],b=pts[2];let dx=a[0]-b[0],dy=a[1]-b[1];const d=Math.hypot(dx,dy)||1;dx/=d;dy/=d;const sh=Math.sin(t*38)*D*.1*(po.rattle?1:.25);
+    for(let i=3;i>=0;i--){const r=D*(.3-.035*i);fill(c,i%2?'#cdb98a':'#e3d3a6',p=>ell(p,a[0]+dx*r*1.25*i-dy*sh*i*.4,a[1]+dy*r*1.25*i+dx*sh*i*.4,r*.8,r,Math.atan2(dy,dx)))}}
+  const body=new Path2D();tube(body,pts,w);c.fillStyle=col.base;c.fill(body);
+  c.save();c.clip(body);
+  // belly: the same tube shifted down
+  fill(c,col.belly,p=>tube(p,pts.map((q,i)=>[q[0],q[1]+w[i]*.62]),w));
+  if(s.pattern==='counter')fill(c,col.shade,p=>tube(p,pts.map((q,i)=>[q[0],q[1]-w[i]*.62]),w));
+  const dir=i=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(N-1,i+1)];const dx=b[0]-a[0],dy=b[1]-a[1],d=Math.hypot(dx,dy)||1;return[dx/d,dy/d]};
+  if(s.pattern==='stripes'){c.strokeStyle=col.mark;c.lineCap='butt';for(let i=2;i<N-3;i+=2){const q=pts[i],[dx,dy]=dir(i),hw=w[i]*.7;c.lineWidth=L*.026;c.beginPath();c.moveTo(q[0]+dy*hw,q[1]-dx*hw);c.lineTo(q[0]-dy*hw,q[1]+dx*hw);c.stroke()}
+    c.strokeStyle=col.belly;for(let i=3;i<N-3;i+=2){const q=pts[i],[dx,dy]=dir(i),hw=w[i]*.7;c.lineWidth=L*.008;c.beginPath();c.moveTo(q[0]+dy*hw,q[1]-dx*hw);c.lineTo(q[0]-dy*hw,q[1]+dx*hw);c.stroke()}}
+  if(s.pattern==='spots'){for(let i=3;i<N-4;i+=2){const q=pts[i],[dx,dy]=dir(i),hl=L*.03,hh=w[i]*.42,cx=q[0]+dy*w[i]*.14,cy=q[1]-dx*w[i]*.14;
+      const dia=(k,colr)=>fill(c,colr,p=>{p.moveTo(cx-dx*hl*k,cy-dy*hl*k);p.lineTo(cx+dy*hh*k,cy-dx*hh*k);p.lineTo(cx+dx*hl*k,cy+dy*hl*k);p.lineTo(cx-dy*hh*k,cy+dx*hh*k);p.closePath()});
+      dia(1,col.mark);dia(.42,col.base)}}
+  c.restore();
+  // head details
+  const h=pts[N-2],tip=pts[N-1],[hdx,hdy]=dir(N-2),hw=w[N-2];
+  R.eye(c,h[0]-hdx*hw*.1+hdy*hw*.16,h[1]-hdy*hw*.1-hdx*hw*.16-hw*.06,hw*.17,{blink:po.blink,ring:col.eyeRing,dark:col.dark});
+  c.strokeStyle=col.shade;c.lineWidth=hw*.07;c.lineCap='round';c.beginPath();c.moveTo(tip[0]+hdx*hw*.22,tip[1]+hw*.12);c.quadraticCurveTo(h[0]+hdx*hw*.2,h[1]+hw*.3,h[0]-hdx*hw*.35,h[1]+hw*.2);c.stroke();
+  fill(c,col.dark,p=>ell(p,tip[0]+hdx*hw*.12,tip[1]-hw*.1,hw*.045,hw*.035));
+  if(po.tongue){const tx=tip[0]+hdx*hw*.3,ty=tip[1]+hw*.1,f=hw*(.9+.25*Math.sin(t*30));c.strokeStyle='#d6455b';c.lineWidth=hw*.09;c.lineJoin='round';c.beginPath();c.moveTo(tx,ty);c.lineTo(tx+f,ty+hw*.05);c.lineTo(tx+f*1.4,ty-hw*.22);c.moveTo(tx+f,ty+hw*.05);c.lineTo(tx+f*1.4,ty+hw*.3);c.stroke()}
+}
+R.register('snake',{
+  test:t=>(t.cov==='scales'||t.cov==='skin')&&t.legs==='0'&&t.fins!=='fins',
+  spec:(t,seed,col)=>{const n=k=>(t[k]??50)/100;const fat=t.fatWhere==='all'?n('fat'):0;
+    return{L:150+40*n('tail'),D:(10+9*n('size'))*(1+.3*fat)*(t.cov==='skin'?1.12:1),raise:26+10*n('size'),waves:1.6+.6*n('tail'),
+      rattle:t.defence==='poison'&&t.pattern==='spots',tongue:true,col:{...col,belly:mix(col.belly,'#fff6dc',.35)}}},
+  draw:drawSnake,
+  size:s=>({len:s.L*1.02,height:s.raise+s.D*3.2+(s.rattle?s.D*1.2:0),dx:4}),
+  young:s=>({...s,young:true,L:s.L*.82,D:s.D*1.1,raise:s.raise*.8})
+});
+R.zoo['Rattlesnake']=R.A({cov:'scales',blood:'cold',shape:'long',legs:'0',color:'sandy',pattern:'spots',defence:'poison',senses:'tongue',size:25,tail:40,diet:'meat',activity:'night',escape:'freeze'});
+R.zoo['Coral snake']=R.A({cov:'scales',blood:'cold',shape:'long',legs:'0',color:'orange',pattern:'stripes',defence:'poison',senses:'tongue',size:10,tail:55,diet:'meat',escape:'hide'});
+})();
 
+</script>
+<script>
+/* Adapt Lab art prototype: SEA MAMMAL body plan (seal, sea lion, otter).
+   Chosen when: fur and fins or flippers.
+   Silhouette notes: one smooth torpedo with no neck, round head with a short whiskered muzzle and big dark eyes,
+   paddle fore flipper low on the chest, two hind flippers fanned at the tail. Thick with blubber when fat is high.
+   Otters (long tail trait) are thinner, with a thick tapering tail and small paws.
+   Two poses. Swimming (default): origin at the body centre, body undulates, flippers paddle.
+   Hauled out (pose.land = true): belly on y = 0, chest and head raised. */
+(function(){
+"use strict";
+const R=window.Rig,{lerp,clamp,TAU,fill,ell,tube,leaf,mix}=R;
+const sst=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
+const PROF=[.2,.34,.52,.72,.9,1,1,.94,.82,.68,.58];
+function drawSeal(c,s,po){
+  po=po||{};const col=s.col,t=po.t||0,ph=po.phase!=null?po.phase:t*.8,land=!!po.land,mv=po.move==null?1:po.move;
+  const L=s.L,D=s.D,n=PROF.length,sp=[],w=[];
+  for(let i=0;i<n;i++){const u=i/(n-1),ww=D*PROF[i]*(i<3?s.rear:1);w.push(ww);const x=lerp(-L*.46,L*.36,u);
+    if(land){const hump=mv*Math.max(0,Math.sin(ph*TAU))*D*.22*Math.sin(u*Math.PI);
+      sp.push([x-sst((u-.5)/.5)*D*.35,-ww/2-D*.95*sst((u-.42)/.55)-hump-(u<.12?(.12-u)/.12*D*.28:0)])}
+    else sp.push([x,Math.sin(ph*TAU-u*2.6)*D*.13*(1-u)*(1-u)*(.4+.6*mv)+Math.sin(ph*TAU-1)*D*.03])}
+  const head=sp[n-1],hr=D*.36*s.headK,ha=land?-.1:.08;
+  const hx=head[0]+hr*.55,hy=head[1]-(land?hr*.25:hr*.05)+(land?Math.sin(t*1.2+(s.seed||0))*D*.03:0);
+  const mz=hr*(.62+.25*s.snout),mx=hx+Math.cos(ha)*hr*.78,my=hy+Math.sin(ha)*hr*.78+hr*.16;
+  const tail=sp[0],td=[sp[0][0]-sp[1][0],sp[0][1]-sp[1][1]],ta=Math.atan2(td[1],td[0]);
+  const flap=Math.sin(ph*TAU*(land?0:1))*(land?0:1);
+  // far flippers (shade)
+  const fl=L*.2*(.65+.6*s.fin),sx=sp[6][0],sy=sp[6][1]+w[6]*.3;
+  const foreA=land?1.15:2.1+Math.sin(ph*TAU+1.2)*.5*mv;
+  fill(c,col.shade,p=>leaf(p,sx+L*.05,sy-D*.02,fl*.9,fl*.26,land?.95:foreA+.5));
+  if(s.otter){ // thick tapering tail, then small hind paws
+    const tp=[];for(let i=0;i<=5;i++){const u=i/5;tp.push([tail[0]+Math.cos(ta)*s.tail*u,tail[1]+Math.sin(ta)*s.tail*u+Math.sin(ph*TAU-2.2-u*1.6)*D*.22*u*(land?0:1)+(land?D*.1*u:0)])}
+    fill(c,col.base,p=>tube(p,tp,[w[0]*.95,w[0]*.82,w[0]*.66,w[0]*.5,w[0]*.34,w[0]*.16]));
+    fill(c,col.shade,p=>leaf(p,sp[1][0],sp[1][1]+w[1]*.35,fl*.6,fl*.2,land?1.3:2.5+flap*.3));
+  }else{
+    fill(c,col.shade,p=>leaf(p,tail[0]+Math.cos(ta)*D*.02,tail[1],fl*1.05,fl*.3,ta-.42-flap*.22));
+  }
+  // body and head
+  const body=new Path2D();tube(body,sp,w);ell(body,hx,hy,hr,hr*.95);ell(body,mx,my,mz,mz*.74,ha);
+  if(s.fat>.5&&!s.otter)ell(body,sp[7][0],sp[7][1]+w[7]*.08,D*.3,D*.46);
+  c.fillStyle=col.base;c.fill(body);
+  c.save();c.clip(body);
+  fill(c,col.belly,p=>{tube(p,sp.map((q,i)=>[q[0],q[1]+w[i]*.62]),w);ell(p,mx-mz*.1,my+mz*.55,mz*1.5,mz*.7,ha)});
+  if(s.pattern==='counter')fill(c,col.shade,p=>tube(p,sp.map((q,i)=>[q[0],q[1]-w[i]*.66]),w));
+  c.restore();
+  R.pattern(c,body,s,[sp[0][0],Math.min(sp[5][1],head[1])-D*.6,hx-hr*.2,Math.max(sp[5][1],sp[2][1])+D*.25],s.seed);
+  // near flippers
+  if(!s.otter)fill(c,col.fin,p=>leaf(p,tail[0]+Math.cos(ta)*D*.02,tail[1]+D*.02,fl*1.1,fl*.32,ta+.36+flap*.22));
+  else fill(c,col.fin,p=>leaf(p,sp[1][0]+L*.02,sp[1][1]+w[1]*.38,fl*.62,fl*.2,land?1.2:2.7-flap*.3));
+  fill(c,col.fin,p=>leaf(p,sx,sy,fl,fl*.3,foreA));
+  // face
+  if(s.ear>.12)fill(c,col.shade,p=>ell(p,hx-hr*.5,hy-hr*.62,hr*.2,hr*.17));
+  R.eye(c,hx+hr*.3,hy-hr*.2,hr*.22,{blink:po.blink,dark:col.dark});
+  const nx=mx+Math.cos(ha)*mz*.8,ny=my+Math.sin(ha)*mz*.8-mz*.28;
+  fill(c,col.dark,p=>ell(p,nx,ny,hr*.15,hr*.11,ha));
+  c.strokeStyle=mix(col.belly,'#ffffff',.6);c.lineWidth=hr*.045;c.lineCap='round';c.globalAlpha=.9;
+  for(let i=-1;i<=1;i++){c.beginPath();c.moveTo(mx+mz*.25,my+mz*.12);c.quadraticCurveTo(mx+mz*.9,my+mz*(.3+.28*i),mx+mz*1.55,my+mz*(.38+.5*i)+Math.sin(t*2+i)*hr*.03);c.stroke()}
+  c.globalAlpha=1;
+  c.strokeStyle=col.shade;c.lineWidth=hr*.06;c.beginPath();c.moveTo(nx-hr*.02,ny+hr*.12);c.quadraticCurveTo(mx+mz*.2,my+mz*.5,mx-mz*.3,my+mz*.38);c.stroke();
+}
+R.register('seal',{
+  test:t=>t.cov==='fur'&&t.fins==='fins',
+  spec:(t,seed,col)=>{const n=k=>(t[k]??50)/100;const fat=t.fatWhere==='all'?n('fat'):0;const otter=n('tail')>.3;
+    return{L:otter?138:128,D:(otter?27:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
+      headK:otter?1.12:.92,snout:t.diet==='plants'?.2:.5,ear:n('ears'),cheek:false}},
+  draw:drawSeal,
+  size:s=>({len:(s.L+s.tail*.8)*1.02,height:s.D*2.5,swims:true,dx:s.otter?s.tail*.3:0}),
+  young:s=>({...s,young:true,L:s.L*.84,headK:s.headK*1.22,snout:s.snout*.6,tail:s.tail*.8})
+});
+R.zoo['Harbour seal']=R.A({care:'lots',shape:'stream',legs:'0',fins:'fins',finSize:70,color:'grey',pattern:'spots',insul:40,fatWhere:'all',fat:90,ears:5,size:70,tail:10,diet:'meat',social:'herd',eyes:85,salt:90});
+R.zoo['Otter']=R.A({care:'lots',shape:'long',legs:'4',fins:'fins',finSize:35,color:'brown',insul:80,fatWhere:'none',ears:20,size:40,tail:80,diet:'meat',eyes:55,salt:10});
+})();
 
+</script>
 
 
 <script>

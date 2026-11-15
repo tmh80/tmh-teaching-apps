@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adapt Lab · Species designer (prototype)</title>
+<link rel="stylesheet" href="designer.css">
+</head>
+<body>
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand"><b>Adapt<span>Lab</span></b><small>Species designer</small></div>
+    <div class="biomes" id="biomes" role="group" aria-label="Choose a biome"></div>
+    <div class="era" id="era">Era 1</div>
+  </header>
+
+  <main class="grid">
+    <section class="stage" aria-label="Your species in its biome">
+      <canvas id="stage"></canvas>
+      <label class="tag nameTag"><span>Name</span><input id="spName" maxlength="24" autocomplete="off" aria-label="Name your species"></label>
+      <button class="tag sizeTag" id="sizeTag" type="button"></button>
+      <button class="tag likeTag" id="likeTag" type="button"></button>
+      <button class="tag checkTag" id="checkTag" type="button" hidden></button>
+      <div class="hint" id="stageHint">Tap a trait to change your species. Watch the bars.</div>
+    </section>
+
+    <div class="mini" id="mini" aria-hidden="true"></div>
+
+    <section class="traits panel" aria-label="Traits">
+      <nav class="tabs" id="tabs" role="tablist" aria-label="Trait groups"></nav>
+      <div class="opts" id="opts" role="tabpanel"></div>
+    </section>
+
+    <section class="vitals panel" aria-label="Survival">
+      <div class="headline" id="headline"></div>
+      <div class="bars" id="bars"></div>
+      <div class="combos" id="combos"></div>
+    </section>
+  </main>
+
+  <footer class="dock">
+    <div class="meter" id="meter"></div>
+    <div class="changes" id="changes" aria-label="Changes this era"></div>
+    <div class="actions">
+      <button class="btn ghost" id="reset" type="button">Reset</button>
+      <button class="btn go" id="release" type="button">Release into the biome ▶</button>
+    </div>
+  </footer>
+</div>
+<div class="pop" id="pop" hidden role="tooltip"></div>
+<div class="modal" id="modal" hidden><div class="mwin" role="dialog" aria-modal="true" id="mwin"></div></div>
+
+<script src="_model.gen.js"></script>
+<script src="rig.js"></script>
+<script src="plan-frog.js"></script>
+<script src="plan-crab.js"></script>
+<script src="plan-snake.js"></script>
+<script src="plan-seal.js"></script>
+<script src="zoo-predators.js"></script>
+<script src="biomes.js"></script>
+<script src="../src/js/16-cost.js"></script>
+<script src="../src/js/17-combos.js"></script>
+<script src="designer.js"></script>
+</body>
+</html>
