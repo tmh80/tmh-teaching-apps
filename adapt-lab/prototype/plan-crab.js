@@ -70,7 +70,7 @@ R.register('crab',{
       claw:.78+(t.diet==='meat'?.5:t.diet==='both'?.28:.06)+(t.defence==='none'?.1:0),stalk:5+11*n01(t,'eyes',40),eye:2.9+2.4*n01(t,'eyes',40),
       spiny:t.defence==='spines',domed,limb:mix(col.base,col.shade,.45)}},
   draw:drawCrab,
-  size:s=>({len:2*(s.W*1.22+7*s.claw)+26,height:s.ride+s.Hs*2+18*s.claw+12,dx:0}),
+  size:s=>({len:2*(s.W*1.22+7*s.claw)+26+s.reach*1.5,height:s.ride+s.Hs*2+18*s.claw+12,dx:0}),
   young:s=>({...s,young:true,claw:s.claw*.75,eye:s.eye*1.25,stalk:s.stalk*1.1})
 });
 const A=R.A;

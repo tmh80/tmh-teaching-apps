@@ -4,7 +4,7 @@
 (function(){
 "use strict";
 const M=globalThis.AdaptModel=globalThis.AdaptModel||{};
-const {clamp,rng,hashStr,n01,gauss,vary,BIOMES,getB,scoresFor,seasonHaz,lethalOf,vulCore,predK,PRED_BANK,INVADERS,canHunt,isSwimmer}=M;
+const {clamp,rng,hashStr,n01,gauss,vary,BIOMES,getB,scoresFor,seasonHaz,lethalOf,vulCore,predK,PRED_BANK,INVADERS,isSwimmer}=M;
 /* Drawing and page updates are not part of the model. The shell can listen with AdaptModel.runHooks.<name> = run => {...}
    Names: newRun, paused, continued, finished, foodChain, evLog, evGrid. */
 const HOOKS=M.runHooks=M.runHooks||{};
@@ -88,8 +88,6 @@ function envFor(year,si){
     if(B.id==='tundra'&&dT>0&&!B.tintD){const f=clamp(dT/5,0,1);const M2={brown:.9,grey:.8,green:.6,sandy:.55,black:.45,white:.2,silver:.45,blue:.2,orange:.1};for(const c in B.match)B.match[c]=B.match[c]*(1-f)+M2[c]*f;if(f>.5)B.gname='bare, snowless ground'}}
   B.dT=dT;B.K=K;B.hz=hz;return B;
 }
-function vary(t,keys,R,sd){const n={...t};keys.forEach(k=>{n[k]=clamp(Math.round(t[k]+gauss(R)*sd),0,100)});return n}
-function gauss(R){let u=0,w=0;while(!u)u=R();while(!w)w=R();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*w)}
 function scoreInd(p){p.sc=scoresFor({kind:RUN.org.kind,t:p.t},RUN.env)}
 const needOf=t=>.55+.9*n01(t.size);
 function harshYearOf(y){return RUN.open?(y%14===4):HARSH_YEARS.has(y)}

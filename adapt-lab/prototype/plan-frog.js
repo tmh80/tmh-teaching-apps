@@ -84,7 +84,8 @@ R.register('frog',{
       eye:4.6+5.2*n01(t,'eyes',40),iris:t.color==='orange'||t.color==='blue'?'#2a2422':t.defence==='poison'?'#2a2422':n01(t,'eyes',40)>.85?'#e2482d':col.eyeRing,
       spiny:t.defence==='spines',pads:L>.8}},
   draw:drawFrog,
-  size:s=>({len:s.L+s.foot*.5,height:s.sit+s.B*2+s.eye*1.6+34*Math.sin(s.tilt),dx:-6}),
+  // the box has to hold the whole hop: legs trailing behind and the body in the air
+  size:s=>({len:s.L+s.foot*.5+(s.thigh+s.shin)*.62,height:s.sit+s.B*2+s.eye*1.6+34*Math.sin(s.tilt)+s.hopH*.95,dx:16+(s.thigh+s.shin)*.2}),
   young:s=>({...s,young:true,thigh:s.thigh*.8,shin:s.shin*.8,foot:s.foot*.85,hopH:s.hopH*.7,eye:s.eye*1.2})
 });
 const A=R.A;

@@ -118,7 +118,7 @@ function predSpec(j,seed){
   if(j.kind==='shark'){const col=tint(R.colours({color:'grey'}),j.col);s={plan:'shark',seed,L:150,D:36,col:{...col,belly:'#f1f4f5',dark:'#1d2226'}}}
   else{s=R.specOf(traitsFor(j),seed||7);s={...s,col:tint(s.col,j.col)};
     if(s.plan==='quad'){s.cheek=false;
-      if(j.kind==='cat'||j.kind==='lion'){s.snout=.3;s.earW=10;s.head*=1.04;s.neckUp=.22;if(j.id==='lynx')s.tailType='stub'}
+      if(j.kind==='cat'||j.kind==='lion'){s.snout=.1;s.earW=11;s.head*=1.14;s.neckUp=.22;s.cheek=false;if(j.id!=='lynx')s.ear=Math.min(s.ear,13);if(j.id==='lynx')s.tailType='stub'}
       if(j.kind==='canid'||j.kind==='wolf'){s.snout=.7;s.earW=9;s.neckUp=.26}
       if(j.id==='hyena'){s.neckUp=.42;s.tailType='tuft'}
       if(j.kind==='lion'){s.tailType='tuft';s.col.belly=mix(j.col,'#ffffff',.4);s={plan:'lion',seed,col:s.col,quad:s,mane:true,maneCol:mix(j.col,'#4a2a12',.62)}}}

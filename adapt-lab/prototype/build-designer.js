@@ -20,7 +20,8 @@ if(fs.existsSync(srcPath)){
   const safe=s=>s.replace(/<\/script/g,'<\\/script');
   let html=fs.readFileSync(srcPath,'utf8');const used=[],skipped=[];
   html=html.replace(/<link rel="stylesheet" href="([^"]+)">/g,(m,f)=>{const p=path.join(d,f);return fs.existsSync(p)?'<style>\n'+fs.readFileSync(p,'utf8')+'\n</style>':''});
-  html=html.replace(/<script src="([^"]+)"><\/script>/g,(m,f)=>{const p=path.join(d,f);if(!fs.existsSync(p)){skipped.push(f);return''}used.push(f);return'<script>\n'+safe(fs.readFileSync(p,'utf8'))+'\n</script>'});
+  html=html.replace(/<script src="([^"]+)"><\/script>/g,(m,f)=>{const p=path.join(d,f);if(!fs.existsSync(p)){skipped.push(f);return''}
+    try{new (require('vm').Script)(fs.readFileSync(p,'utf8'),{filename:f})}catch(e){skipped.push(f+' (syntax error, left out)');return''}used.push(f);return'<script>\n'+safe(fs.readFileSync(p,'utf8'))+'\n</script>'});
   fs.writeFileSync(path.join(d,'Adapt-Lab-Designer-Prototype.html'),html);
   console.log('built Adapt-Lab-Designer-Prototype.html',html.length,'bytes · included:',used.join(', '),'· not there yet:',skipped.join(', ')||'none');
 }else console.log('wrote _model.gen.js',model.length,'bytes');

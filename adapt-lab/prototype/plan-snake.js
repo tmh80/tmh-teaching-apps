@@ -59,7 +59,7 @@ function drawSnake(c,s,po){
 R.register('snake',{
   test:t=>(t.cov==='scales'||t.cov==='skin')&&t.legs==='0'&&t.fins!=='fins',
   spec:(t,seed,col)=>{const n=k=>(t[k]??50)/100;const fat=t.fatWhere==='all'?n('fat'):0;
-    return{L:150+40*n('tail'),D:(10+9*n('size'))*(1+.3*fat)*(t.cov==='skin'?1.12:1),raise:26+10*n('size'),waves:1.6+.6*n('tail'),
+    return{L:150+40*n('tail'),D:(13+9*n('size'))*(1+.3*fat)*(t.cov==='skin'?1.12:1),raise:26+10*n('size'),waves:1.6+.6*n('tail'),
       rattle:t.defence==='poison'&&t.pattern==='spots',tongue:true,col:{...col,belly:mix(col.belly,'#fff6dc',.35)}}},
   draw:drawSnake,
   size:s=>({len:s.L*1.02,height:s.raise+s.D*3.2+(s.rattle?s.D*1.2:0),dx:4}),

@@ -59,8 +59,8 @@ function drawSeal(c,s,po){
 R.register('seal',{
   test:t=>t.cov==='fur'&&t.fins==='fins',
   spec:(t,seed,col)=>{const n=k=>(t[k]??50)/100;const fat=t.fatWhere==='all'?n('fat'):0;const otter=n('tail')>.3;
-    return{L:otter?138:128,D:(otter?27:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
-      headK:otter?1.12:.92,snout:t.diet==='plants'?.2:.5,ear:n('ears'),cheek:false}},
+    return{L:otter?132:128,D:(otter?33:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
+      headK:otter?1.18:.92,snout:t.diet==='plants'?.2:.5,ear:n('ears'),cheek:false}},
   draw:drawSeal,
   size:s=>({len:(s.L+s.tail*.8)*1.02,height:s.D*2.5,swims:true,dx:s.otter?s.tail*.3:0}),
   young:s=>({...s,young:true,L:s.L*.84,headK:s.headK*1.22,snout:s.snout*.6,tail:s.tail*.8})

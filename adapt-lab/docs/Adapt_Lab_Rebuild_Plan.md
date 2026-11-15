@@ -28,7 +28,7 @@ Rules that apply to every session:
 - **Taught in March 2027.** Target: classroom-ready by the end of February 2027.
 - **The skills that go with the content** are data analysis, presenting data, and writing a CER paragraph (claim, evidence, reasoning), with scaffolds that teach each one (section 7).
 - **Keep the science model. Rebuild the art, the layout and the game loop.**
-- **Graphics are the top priority.** Tom has never been happy with how his sims look. Section 4 exists to fix that for good.
+- **Three things matter equally** (Tom, 15 Nov): how it looks (section 4), how smooth it feels to use (section 4.7), and how deep the simulation is (section 5.5). Tom has never been happy with how his sims look or feel; these sections exist to fix that for good.
 - It can be a long project: about one session a week.
 
 ## 2. What Adapt Lab is now (audit, 15 Nov 2026)
@@ -143,6 +143,20 @@ Known flaws in the prototype to fix in Session 2: the flying wing reads as a lea
 
 Load the `dataviz` skill before changing any chart. Charts use the same flat style, one clear title in words a student would say, labelled axes with units, and a tap-to-read value on every point. Fewer charts at once: one main chart, others behind tabs.
 
+### 4.7 Smoothness rules (the interface must feel like a game, not a form)
+
+1. **Every tap answers at once.** Something visible changes within a tenth of a second: the chip highlights, the animal reacts, the bar starts to move.
+2. **Nothing jumps.** Changing a trait never moves other parts of the screen. Panels have fixed sizes; text that changes length sits in a box that is already big enough.
+3. **Numbers glide.** Bars and counters animate to their new value over about a quarter of a second, and show the change for a moment ("+12") so cause and effect are obvious.
+4. **The core screens never scroll on a laptop.** The designer and the Evolution Lab fit in 1366 × 768. On a phone they stack, with the animal first and the survival bars pinned.
+5. **One clear next action per screen**, always in the same place, always the biggest button.
+6. **Moving between screens is a short cross-fade**, and the animal the student is working on is carried across, so they never lose their place.
+7. **Touch targets are at least 44 px.** Everything works with touch, mouse and keyboard.
+8. **Nothing is ever lost.** Every change saves at once; undo is always one tap away.
+9. **Waiting is shown.** If a run is being worked out, the scene keeps moving and a small progress line shows; the page never freezes.
+
+Checks to script for every screen (Playwright): the page height equals the window height at 1366 × 768 after clicking every control; the position and size of the survival bars are the same before and after every trait change; no control is smaller than 44 px; frame time stays under 16 ms while the scene runs.
+
 ## 5. Game design
 
 ### 5.1 The loop
@@ -209,6 +223,35 @@ The danger of "spend points to adapt" is the most common wrong idea in evolution
 - Checks ask "Did any single animal change during its life?" more than once, in different settings.
 
 Misconceptions to plan questions around (each targeted at least twice): individuals adapt during their own lives; animals adapt because they need to; evolution means getting bigger and stronger; every feature is an adaptation; an adaptation that helps in one place helps everywhere; extinct species "failed to try"; a behaviour is always a choice.
+
+### 5.5 Depth: what a curious student can discover
+
+Depth means the sim rewards real investigation: a student who changes one thing and watches the data finds a pattern that is true in nature. Most of this is already in the model and only needs to be shown well. Each row is also a ready-made research question.
+
+| What students can discover | Where it comes from | How it shows |
+|---|---|---|
+| Camouflage depends on the background, so a good colour in one place is a bad one in another | `match` per biome; snow melting in a warming event | Predators catch the animals that stand out; the colour average shifts |
+| Big bodies, small ears and thick coats hold heat; the opposite loses it | `animalScores` temperature | Cold deaths fall; trait averages drift |
+| Every adaptation costs energy, so unused ones slowly shrink | upkeep cost in the food score | Thick coats thin out in warm biomes over generations |
+| Predator and prey numbers rise and fall together, a few generations apart | predator numbers in the run engine | Two lines on the population graph, out of step |
+| Food sets a limit on how many can live in one place | food and carrying capacity | The population levels off; starvation becomes the main cause of death |
+| Many young with no care, or few young with lots of care, each win in different places | parental care | Fast recovery after a harsh winter against steady numbers |
+| Specialists do best while nothing changes; generalists survive change | Story mode, `flexOf` | "Can live in 2 of 6 biomes" against "5 of 6" when an event hits |
+| Fast change causes extinction where slow change causes adaptation | event ramps | Same event, two speeds, two outcomes |
+| Traits that work together, and traits that clash | `COMBOS` (5.3) | Chips in the designer; survival bars move |
+| People change species too: hunting the biggest makes a population smaller-bodied | hunting in the conservation model | Body size average falls |
+| Chance matters: the same design can live or die | seeded random runs | "Run it again" gives a different history |
+
+New depth to build, in this order (Sessions 5 and 6):
+1. `COMBOS` and cost by distance (5.2, 5.3).
+2. Behaviours acted out in the scene, so a behaviour is something students see, not a label.
+3. **Tap an animal** in the scene to see its own traits beside the herd average, and later what happened to it. This is the strongest tool against "individuals adapt": students see that one animal never changes, and that the ones that differ in the right way are the ones that live.
+4. **Follow a family:** mark one animal and highlight its descendants in later generations, to show inheritance.
+5. **Same world again:** a switch that replays the same weather and events, so changing one trait is a fair test.
+6. **Two runs side by side** on one graph, for comparing.
+7. Variation as a setting in the Extension chapters: a population with little variation adapts more slowly.
+
+Do not add depth that Grade 6 students cannot see or explain. Every new rule needs a visible cause, a visible effect and one sentence of reason.
 
 ## 6. Chapters
 
