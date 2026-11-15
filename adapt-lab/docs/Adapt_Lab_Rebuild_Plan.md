@@ -4,7 +4,9 @@ Written 15 Nov 2026 by Claude (Fable) with Tom. This plan is carried out by late
 
 ## 0. How to run a session (read this first, every time)
 
-Tom starts each session with: **"Read `adapt-lab/docs/Adapt_Lab_Rebuild_Plan.md` and do the next session."**
+Tom starts each session with: **"In tmh-teaching-apps, switch to the branch `adapt-lab-rebuild`, read `adapt-lab/docs/Adapt_Lab_Rebuild_Plan.md` and do the next session."**
+
+This plan and the prototype live on the branch `adapt-lab-rebuild`, not on `main`, until Session 14 merges the finished rebuild. A copy of the plan is also in the claude.ai project "Apps and Sims"; the copy on the branch is the one to update.
 
 1. Read this whole file. Find the first session in section 9 that is not ticked in the progress log (section 10).
 2. Load `wab-science-sim-builder` and the companion skills that session names. If a skill cannot be loaded, tell Tom and stop.

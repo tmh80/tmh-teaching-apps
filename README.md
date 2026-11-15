@@ -37,7 +37,7 @@ Build briefs and teacher notes (Gravity Lab, Moon Lab, Adapt Lab graphics, Plane
 - **Force HQ rebuild:** Explore "draw what's happening now" (Chapter 6 is finished). Port from the old `force-hq/Force-HQ.html` with `force-hq-rebuild/tools/old.py` rather than rebuilding. Start with `force-hq-rebuild/docs/Force_HQ_Handoff.md`.
 
 - **Shared shell:** pull the common components out of Force HQ into `shared/` and reuse them in the next sim.
-- **Adapt Lab rebuild (Grade 6, taught March 2027):** new jointed animal art, a one-screen designer, cost of change by distance, traits that work together, and data and CER skills in every chapter. Start each session with "Read `adapt-lab/docs/Adapt_Lab_Rebuild_Plan.md` and do the next session."
+- **Adapt Lab rebuild (Grade 6, taught March 2027):** new jointed animal art, a one-screen designer, cost of change by distance, traits that work together, and data and CER skills in every chapter. The plan and prototype are on the branch `adapt-lab-rebuild`. Start each session with "In tmh-teaching-apps, switch to the branch `adapt-lab-rebuild`, read `adapt-lab/docs/Adapt_Lab_Rebuild_Plan.md` and do the next session."
 - **Adapt Lab:** after any change to `Adapt-Lab.html`, rebuild `Adapt-Lab-offline.html` from it (swap the Google Fonts links for the embedded fonts and inline jsPDF 2.5.1) so the Toddle copy stays in step.
 - **Tilt Lab (still to do):** the Toddle AI-marking pack, the "set classwork or homework" prompt generator, the calculator, the guided tour, draggable pop-ups, and one-go answers on the typed explore steps (the multiple-choice check questions are one go already).
 
