@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Adapt Lab art prototype</title>
+<style>
+:root{--bg:#eef2ef;--panel:#fbfdfb;--ink:#16241e;--muted:#55665e;--line:#cddad2;--accent:#2b6d57}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.45}
+main{max-width:1100px;margin:0 auto;padding:18px 14px 48px}
+h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:0 0 4px}
+p{margin:0 0 10px;color:var(--muted)}
+section{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:14px}
+canvas{display:block;width:100%;border-radius:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px}
+button{font:inherit;border:1px solid var(--line);background:#edf3ef;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--accent);color:#fff;border-color:var(--accent)}
+input[type=range]{flex:1;min-width:160px;accent-color:var(--accent)}
+b.gen{font-variant-numeric:tabular-nums;min-width:9.5em}
+</style>
+</head>
+<body>
+<main>
+  <h1>Adapt Lab art prototype</h1>
+  <p>Five jointed body plans, all drawn from Adapt Lab's own trait numbers. This is the visual target for the rebuild.</p>
+  <section>
+    <h2>1. One rig per body plan</h2>
+    <p>Sixteen animals from five rigs: four-legged, bird, fish, lizard and insect. Predators use the same rigs as prey.</p>
+    <canvas id="gal"></canvas>
+  </section>
+  <section>
+    <h2>2. Variation, and change over generations</h2>
+    <p>Every individual is slightly different. Drag the slider to see a population change as the climate cools.</p>
+    <div class="row"><b class="gen" id="genLab">Generation 1</b><input type="range" id="gen" min="0" max="100" value="0" aria-label="Generation"></div>
+    <canvas id="vary"></canvas>
+  </section>
+  <section>
+    <h2>3. A living biome</h2>
+    <p>The herd wanders, grazes and runs when a predator passes. Feet match the ground speed, so nothing slides.</p>
+    <div class="row"><button data-biome="tundra" aria-pressed="true">Arctic tundra</button><button data-biome="savanna" aria-pressed="false">Savanna</button><button data-biome="ocean" aria-pressed="false">Coastal ocean</button></div>
+    <canvas id="scene"></canvas>
+  </section>
+</main>
+<script>/*RIG*/</script>
+<script>/*SCENE*/</script>
+</body>
+</html>

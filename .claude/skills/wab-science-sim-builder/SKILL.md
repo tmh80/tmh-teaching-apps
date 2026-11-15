@@ -5,7 +5,7 @@ description: "Build or extend a self-contained interactive science simulation (H
 
 # WAB Science Sim Builder
 
-For open-ended science simulations in the family of Force HQ (G7/8 forces), Sparks Through Time (G6 electricity) and Adapt Lab (G7/8 adaptations/evolution). Formative virtual labs where students display knowledge in a lab report (like Paper Plane Lab) use `wab-virtual-lab-builder` instead. Simulations are for free play, discovery, foundation building and extension; virtual labs are clear steps in order so students get feedback.
+For open-ended science simulations in the family of Force HQ (G7/8 forces), Sparks Through Time (G6 electricity) and Adapt Lab (G6 adaptations/evolution). Formative virtual labs where students display knowledge in a lab report (like Paper Plane Lab) use `wab-virtual-lab-builder` instead. Simulations are for free play, discovery, foundation building and extension; virtual labs are clear steps in order so students get feedback.
 
 Tom is Head of MS Sciences at WAB (Beijing). Grade 6 is one class; Grade 7/8 is a mixed class on Cycle A / Cycle B.
 
