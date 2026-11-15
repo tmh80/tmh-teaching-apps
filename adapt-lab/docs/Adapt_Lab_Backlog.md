@@ -26,3 +26,7 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 - A sitting frog sits right of centre in gallery cells; the otter is thin; hyena and coyote snouts are long; the heron is small in its cell.
 - A lying four-legged animal folds its legs untidily.
 - A very fat, very thick-coated animal reads as a blob.
+
+## Tom's feedback (16 Nov 2026)
+
+Six fixes from Tom's first look are listed in the progress log of `Adapt_Lab_Rebuild_Plan.md`: snout variety and the cheetah's short face, a middle tail type for cats, sea-mammal flippers placed nearer the head, a fish that swam backwards, the "too hot in the cold winter" sentence, and refusing a change the student cannot afford.
