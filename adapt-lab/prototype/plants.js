@@ -30,8 +30,9 @@ function specOf(t,seed){
     col:{leaf:g,leafD:mix(g,'#1c3626',.34),leafL:mix(g,'#eef5c8',.4),wood:'#8d6846',woodD:'#6b4d34',root:'#d2ad80',dark:'#3a2c22',
       autumn:'#dd8f2e',autumnD:'#b7671e',autumnL:'#f3bb58',dead:'#bca676',deadD:'#9c8558',deadL:'#d6c495',bulb:'#f0e1b4',bulbD:'#d3bd85',berry:'#cf4638',fluff:'#fbfbf4',flower:'#6f7fd8',flowerL:'#f4f0fa'}};
 }
-function sizeOf(s){const wide={herb:.9,shrub:1.5,tree:.95,succulent:.6}[s.form];
-  return{h:s.H*1.12,w:Math.max(s.H*wide,(14+70*s.rs)*2,40),rootDepth:(s.store==='bulb'?24:12)+75*s.rd,rootW:(14+70*s.rs)*2,water:s.aq}}
+const rootK=s=>({herb:.8,shrub:1,tree:1.35,succulent:1.1}[s.form]);
+function sizeOf(s){const wide={herb:.9,shrub:1.5,tree:.95,succulent:.6}[s.form],k=rootK(s);
+  return{h:s.H*1.12,w:Math.max(s.H*wide,(14+70*s.rs)*2*k,40),rootDepth:Math.max(s.store==='bulb'?26:0,(12+75*s.rd)*k),rootW:(14+70*s.rs)*2*k,water:s.aq}}
 // which leaves to show: 1 full, 0 bare stems, -1 died back to the ground
 function leafState(s,po){
   if(po.harsh){if(s.season==='deciduous')return{amt:0,b:s.col.leaf,d:s.col.leafD,l:s.col.leafL};if(s.season==='dormant')return{amt:-1,b:s.col.dead,d:s.col.deadD,l:s.col.deadL}}
@@ -41,14 +42,14 @@ function leafState(s,po){
 }
 /* ---------- roots, bulbs ---------- */
 function roots(c,s){
-  const col=s.col,D=10+75*s.rd,W=14+70*s.rs,Rn=rng(s.seed*13+1);
+  const col=s.col,k=rootK(s),D=(10+75*s.rd)*k,W=(14+70*s.rs)*k,Rn=rng(s.seed*13+1);
   c.strokeStyle=col.root;c.lineCap='round';
   const nl=4+Math.round(4*s.rs);
   for(let i=0;i<nl;i++){const side=i%2?1:-1,u=.4+.6*((i>>1)+1)/Math.ceil(nl/2),ex=side*W*u,ey=5+D*.2*u+Rn()*3+W*.08*u;
-    c.lineWidth=lerp(3.4,1.7,u);c.beginPath();c.moveTo(side*2,1.5);c.quadraticCurveTo(ex*.45,ey*.25+2,ex,ey);c.stroke();
+    c.lineWidth=lerp(3.4,1.7,u)*k;c.beginPath();c.moveTo(side*2,1.5);c.quadraticCurveTo(ex*.45,ey*.25+2,ex,ey);c.stroke();
     c.lineWidth=1.1;for(let j=1;j<=2;j++){const f=.4+.25*j,px=ex*f,py=ey*f*f+2;c.beginPath();c.moveTo(px,py);c.lineTo(px+side*3,py+5+Rn()*4);c.stroke()}}
   const pts=[];for(let i=0;i<=5;i++){const u=i/5;pts.push([Math.sin(u*5+s.seed)*2.6*u,1+D*u])}
-  fill(c,col.root,p=>tube(p,pts,[5.5,4.4,3.5,2.6,1.8,1]));
+  fill(c,col.root,p=>tube(p,pts,[5.5,4.4,3.5,2.6,1.8,1].map(v=>v*k)));
   c.lineWidth=1.1;for(let i=1;i<5;i++){const q=pts[i],side=i%2?1:-1;c.beginPath();c.moveTo(q[0],q[1]);c.lineTo(q[0]+side*(5+5*s.rd),q[1]+5);c.stroke()}
   if(s.store==='bulb'){fill(c,col.bulb,p=>smooth(p,[[0,1],[7,7],[8.5,14],[0,20],[-8.5,14],[-7,7]],true));fill(c,col.bulbD,p=>smooth(p,[[2,6],[6.5,10],[6,16],[1.5,19],[3.5,12]],true))}
 }
@@ -74,14 +75,14 @@ function tree(c,s,po,st){
   const col=s.col,H=s.H,t=po.t||0,sw=Math.sin(t*1.1+s.seed)*H*.014,tw=H*.06+4,Rn=rng(s.seed*5+2);
   const umb=s.leafType==='broad'&&s.wax>.5&&s.ls<.3, lt=s.leafType;
   if(lt==='needles'){ // conifer
-    fill(c,col.wood,p=>tube(p,[[0,2],[0,-H*.3],[sw*.5,-H*.9]],[tw*1.4,tw*.9,tw*.3]));
-    if(st.amt>0)for(let i=0;i<4;i++){const u=i/4,y0=-H*(.2+u*.2),y1=-H*(.5+u*.17),hw=H*lerp(.3,.12,u)*(.8+.4*s.ls),x=sw*u;
+    fill(c,col.wood,p=>tube(p,[[0,-tw*.6],[0,-H*.3],[sw*.5,-H*.9]],[tw*1.3,tw*.9,tw*.3]));
+    if(st.amt>0)for(let i=0;i<4;i++){const u=i/3,y0=-H*(.2+.2*i),y1=y0-H*.34,hw=H*lerp(.3,.13,u)*(.8+.4*s.ls),x=sw*u;
       fill(c,i%2?st.b:st.d,p=>smooth(p,[[x,y1-H*.06],[x+hw*.55,(y0+y1)/2],[x+hw,y0],[x+hw*.4,y0-H*.02],[x,y0+H*.015],[x-hw*.4,y0-H*.02],[x-hw,y0],[x-hw*.55,(y0+y1)/2]],true,.5));
       fill(c,st.l,p=>ell(p,x-hw*.3,(y0+y1)/2,hw*.22,H*.03,-.9))}
     else spikes(c,sw,-H*.6,H*.2,col.woodD,Rn,7);
     return}
   if(lt==='ribbon'){ // palm
-    fill(c,col.wood,p=>tube(p,[[0,2],[H*.03,-H*.4],[sw+H*.01,-H*.82]],[tw*1.2,tw*.8,tw*.6]));
+    fill(c,col.wood,p=>tube(p,[[0,-tw*.55],[H*.03,-H*.4],[sw+H*.01,-H*.82]],[tw*1.2,tw*.8,tw*.6]));
     c.strokeStyle=col.woodD;c.lineWidth=1.2;for(let i=1;i<7;i++){const y=-H*.11*i;c.beginPath();c.moveTo(-tw*.4+H*.01*i*.3,y);c.lineTo(tw*.4+H*.01*i*.3,y-2);c.stroke()}
     if(st.amt>0)for(let i=0;i<8;i++){const a=-Math.PI*(.04+.92*i/7),len=H*(.34+.1*Rn())*(.8+.4*s.ls),x=sw+H*.01,y=-H*.82,dr=Math.sin(t*1.3+i)*.05;
       fill(c,i%3===0?st.l:i%3===1?st.b:st.d,p=>{const ex=x+Math.cos(a)*len,ey=y+Math.sin(a)*len*.7+len*.32;p.moveTo(x,y);p.quadraticCurveTo(x+Math.cos(a+dr)*len*.7,y+Math.sin(a)*len*.9-len*.1,ex,ey);p.quadraticCurveTo(x+Math.cos(a+dr)*len*.5,y+Math.sin(a)*len*.6+len*.08,x,y);p.closePath()})}
@@ -90,8 +91,8 @@ function tree(c,s,po,st){
   // broad-leaved or spiny tree: trunk, branches, canopy
   const top=umb?-H*.62:-H*.48;
   const ends=umb?[[-H*.4,-H*.86],[-H*.14,-H*.9],[H*.14,-H*.9],[H*.4,-H*.86]]:[[-H*.26,-H*.66],[-H*.06,-H*.86],[H*.14,-H*.8],[H*.28,-H*.62]];
-  fill(c,col.wood,p=>{tube(p,[[0,2],[0,-H*.22],[sw*.3,top]],[tw*1.6,tw,tw*.8]);ends.forEach((e,i)=>tube(p,[[sw*.3,top+H*.02],[(e[0]*.5)+sw*.5,(top+e[1])/2-H*.02],[e[0]+sw,e[1]]],[tw*.6,tw*.42,tw*.22]))});
-  fill(c,col.woodD,p=>tube(p,[[tw*.3,0],[tw*.24,-H*.22],[tw*.18+sw*.3,top]],[tw*.5,tw*.34,tw*.24]));
+  fill(c,col.wood,p=>{p.moveTo(-tw*1.25,0);p.quadraticCurveTo(-tw*.6,-tw*.4,-tw*.5,-H*.14);p.lineTo(tw*.5,-H*.14);p.quadraticCurveTo(tw*.6,-tw*.4,tw*1.25,0);p.closePath();tube(p,[[0,-tw*.7],[0,-H*.22],[sw*.3,top]],[tw*1.25,tw,tw*.8]);ends.forEach((e,i)=>tube(p,[[sw*.3,top+H*.02],[(e[0]*.5)+sw*.5,(top+e[1])/2-H*.02],[e[0]+sw,e[1]]],[tw*.6,tw*.42,tw*.22]))});
+  fill(c,col.woodD,p=>tube(p,[[tw*.3,-tw*.4],[tw*.24,-H*.22],[tw*.18+sw*.3,top]],[tw*.5,tw*.34,tw*.24]));
   if(s.thorns)thornsAlong(c,s,[[0,-H*.12],[0,-H*.24],[0,-H*.36]].concat(ends.map(e=>[e[0]*.5+sw*.5,(top+e[1])/2])),tw*.9);
   if(st.amt<=0||lt==='spines'){ // bare twigs
     c.strokeStyle=col.wood;c.lineCap='round';c.lineWidth=Math.max(1.2,tw*.16);ends.forEach((e,i)=>{for(let j=-1;j<=1;j++){c.beginPath();c.moveTo(e[0]+sw,e[1]);c.lineTo(e[0]+sw+j*H*.07+(i-1.5)*H*.02,e[1]-H*.1+Math.abs(j)*H*.03);c.stroke()}});
@@ -108,7 +109,7 @@ function shrub(c,s,po,st){
   for(let i=0;i<n;i++){const a=-Math.PI/2+(i/(n-1)-.5)*2*span,len=H*(.8+.25*Rn())*(Math.abs(i-2)===2?.9:1),sw=Math.sin(t*1.4+i+s.seed)*H*.02;
     const ex=Math.cos(a)*len+sw,ey=Math.sin(a)*len-2;ends.push([ex,ey,a]);
     fill(c,col.wood,p=>tube(p,[[i-2,1],[ex*.45,ey*.55-H*.04],[ex,ey]],[4.2,3,1.6]));
-    if(s.thorns)thornsAlong(c,s,[[ex*.3,ey*.36],[ex*.6,ey*.7]],3.6)}
+    if(s.thorns)thornsAlong(c,s,[[ex*.25,ey*.3],[ex*.45,ey*.52],[ex*.65,ey*.74]],5.5)}
   if(st.amt<=0){if(st.amt===0){c.strokeStyle=col.wood;c.lineWidth=1.3;c.lineCap='round';ends.forEach(e=>{for(let j=-1;j<=1;j+=2){c.beginPath();c.moveTo(e[0],e[1]);c.lineTo(e[0]+Math.cos(e[2]+j*.5)*H*.16,e[1]+Math.sin(e[2]+j*.5)*H*.16);c.stroke()}})}return}
   const r=Math.max(7,H*.2)*(.8+.5*s.ls);
   ends.forEach((e,i)=>{if(s.leafType==='broad')clump(c,e[0],e[1],r,st,Rn,s);
@@ -183,9 +184,10 @@ function draw(c,s,po){
 
 /* ---------- gallery: every preset with the soil cut away to show the roots ---------- */
 const ITEMS=Object.keys(zoo).map(n=>({name:n,t:zoo[n].t,home:zoo[n].home})).concat([
-  {name:'Short roots',t:P({height:40,rootDepth:20,rootSpread:20})},{name:'Wide roots',t:P({height:40,rootDepth:25,rootSpread:90})},{name:'Deep roots',t:P({height:40,rootDepth:90,rootSpread:30})},{name:'Thorns and thick wax',t:P({height:40,defence:'thorns',wax:90,leafSize:25,rootDepth:60,rootSpread:60})},
+  {name:'Short roots',grp:'r',t:P({height:40,rootDepth:20,rootSpread:20})},{name:'Wide roots',grp:'r',t:P({height:40,rootDepth:25,rootSpread:90})},{name:'Deep roots',grp:'r',t:P({height:40,rootDepth:90,rootSpread:30})},{name:'Thorns, thick wax, small leaves',grp:'r',t:P({height:40,defence:'thorns',wax:90,leafSize:15,rootDepth:60,rootSpread:60})},
   {name:'Pine tree (needles)',t:P({form:'tree',leaf:'needles',height:70,rootDepth:50,rootSpread:70})},{name:'Palm (ribbon leaves)',t:P({form:'tree',leaf:'ribbon',height:65,rootDepth:40,rootSpread:60,seeds:'animals'})},{name:'Aloe (fleshy leaves)',t:P({form:'succulent',leaf:'broad',height:30,store:'water',stemStore:80,defence:'thorns',rootSpread:70})},{name:'Small cactus, little water',t:P({form:'succulent',leaf:'spines',height:35,store:'water',stemStore:20,rootSpread:80})},
-  {name:'Oak: spring',t:zoo['English oak'].t,pose:{}},{name:'Oak: autumn',t:zoo['English oak'].t,pose:{turning:true}},{name:'Oak: winter (harsh)',t:zoo['English oak'].t,pose:{harsh:true}},{name:'Bluebell: winter (harsh)',t:zoo['Bluebell'].t,pose:{harsh:true}}
+  {name:'Oak: summer',grp:'o',t:zoo['English oak'].t,pose:{}},{name:'Oak: autumn',grp:'o',t:zoo['English oak'].t,pose:{turning:true}},{name:'Oak: winter (harsh)',grp:'o',t:zoo['English oak'].t,pose:{harsh:true}},{name:'Bluebell: winter (harsh)',t:zoo['Bluebell'].t,pose:{harsh:true}},
+  {name:'Red oat grass: dry season',t:zoo['Red oat grass'].t,pose:{turning:true}},{name:'Water lily: winter (harsh)',t:zoo['Water lily'].t,pose:{harsh:true}},{name:'Thistle (spiny herb)',t:P({form:'herb',leaf:'spines',height:60,rootDepth:70,rootSpread:30,defence:'thorns'})},{name:'Daisy (flat-leaf herb)',t:P({form:'herb',leaf:'broad',height:30,leafSize:60,rootDepth:20,rootSpread:50})}
 ]);
 const SKY={tundra:'#e6eef4',desert:'#f6ead2',forest:'#e4efe2',grassland:'#f5eccd',ocean:'#d3e6ef',freshwater:'#d9ebe6'};
 function gallery(t){
@@ -194,10 +196,11 @@ function gallery(t){
   cv.style.height=Hh+'px';if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(Hh*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(Hh*dpr)}
   const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,W,Hh);const cw=W/cols,ch=Hh/rows;
   ITEMS.forEach((it,i)=>{const x0=(i%cols)*cw,y0=Math.floor(i/cols)*ch,pad=cw*.04,s=specOf(it.t,i+2),z=sizeOf(s);
-    const bx=x0+pad,by=y0+pad,bw=cw-2*pad,bh=ch-2*pad-18,gy=by+bh*.66;
+    const bx=x0+pad,by=y0+pad,bw=cw-2*pad,bh=ch-2*pad-18,gy=by+bh*.62;
     c.save();c.beginPath();c.roundRect(bx,by,bw,bh,14);c.clip();
     c.fillStyle=SKY[it.home]||'#e9f0ec';c.fillRect(bx,by,bw,bh);
-    const sc=Math.min(bh*.6/z.h,bh*.3/z.rootDepth,bw*.86/Math.max(z.w,z.rootW));
+    const scOf=zz=>Math.min(bh*.57/zz.h,bh*.35/zz.rootDepth,bw*.86/Math.max(zz.w,zz.rootW));
+    const sc=it.grp?Math.min(...ITEMS.filter(o=>o.grp===it.grp).map((o,j)=>scOf(sizeOf(specOf(o.t,1))))):scOf(z);
     if(z.water){c.fillStyle='rgba(70,150,190,.3)';c.fillRect(bx,gy-s.H*sc,bw,s.H*sc);c.fillStyle='rgba(255,255,255,.7)';c.fillRect(bx,gy-s.H*sc,bw,1.5)}
     c.fillStyle=z.water?'#cdb98c':'#a9835c';c.fillRect(bx,gy,bw,bh);c.fillStyle=z.water?'#bda774':'#93704c';c.fillRect(bx,gy+bh*.2,bw,bh);
     c.fillStyle=z.water?'#d9c79c':({tundra:'#eef3f6',desert:'#e2c58e',grassland:'#c9b45a'}[it.home]||'#86a85a');c.fillRect(bx,gy-2.5,bw,5);
@@ -208,6 +211,8 @@ function gallery(t){
 }
 let T=0,last=0;const still=typeof matchMedia!=='undefined'&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;gallery(T);if(!still)requestAnimationFrame(frame)}
-window.Plants={draw,specOf,sizeOf,zoo,DEF,gallery};
+// names of the preset plants that live in a biome, for scattering into a scene
+function forBiome(id){return Object.keys(zoo).filter(n=>zoo[n].home===id)}
+window.Plants={draw,specOf,sizeOf,zoo,DEF,forBiome,gallery};
 if(typeof document!=='undefined'&&typeof requestAnimationFrame!=='undefined')requestAnimationFrame(frame);
 })();

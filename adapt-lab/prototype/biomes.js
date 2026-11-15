@@ -200,7 +200,7 @@ function front(c,w,h,o,S){S=S||state(o);const t=S.t,land=!S.water,k=h/520;
       if(la>.06){c.globalAlpha=clamp(la*1.3,0,1);c.fillStyle=lc;const Rl=rng(13);for(let i=0;i<26;i++){const x=Rl()*w,r=(34+Rl()*40)*k;c.beginPath();c.ellipse(x,(-6+Rl()*26)*k+Math.sin(t*.7+i)*2*k,r,r*.55,0,0,TAU);c.fill()}c.globalAlpha=1}}}
   else{const col=mix(mix(S.floor[1],'#22323a',.6),'#0a1230',S.night*.5);fill(c,col,p=>{smooth(p,[[-20,h+10],[-10,h*.9],[w*.06,h*.86],[w*.13,h*.93],[w*.16,h+10]],true);smooth(p,[[w*.84,h+10],[w*.88,h*.92],[w*.95,h*.87],[w+10,h*.9],[w+20,h+10]],true)})}
   if(S.ash>0){c.globalAlpha=S.ash*.22;c.fillStyle='#55504c';c.fillRect(0,0,w,h);c.globalAlpha=1}
-  if(S.night>0){c.save();c.globalCompositeOperation='multiply';c.fillStyle=mix('#ffffff','#39468a',S.night);c.fillRect(0,0,w,h);c.restore()}
+  if(S.night>0){c.save();c.globalCompositeOperation='multiply';c.fillStyle=mix('#ffffff','#7886cc',S.night);c.fillRect(0,0,w,h);c.restore()}
 }
 const info=id=>({id,name:B[id].name,seasons:B[id].seasons,harsh:B[id].harsh,water:!!B[id].water,surface:B[id].surface||0});
 window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};

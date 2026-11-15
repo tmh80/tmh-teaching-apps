@@ -14,7 +14,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f);font-size:15px;l
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-offset:2px}
-.app{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.app{height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;grid-template-columns:minmax(0,1fr)}
+.top,.grid,.dock,.panel,.stage{min-width:0}
 
 /* ---------- top bar ---------- */
 .top{display:flex;align-items:center;gap:14px;padding:8px 14px;background:var(--deep);color:var(--on-deep)}
@@ -46,8 +47,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-of
 .tabs .kind{margin-top:auto;font-size:10.5px;line-height:1.25;color:var(--muted);text-align:center;padding:4px 2px}
 .tabs .kind b{display:inline-block;width:15px;height:15px;border-radius:5px;color:#fff;font-size:10px;line-height:15px;margin-right:2px}
 .opts{padding:10px 12px 12px;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:9px}
-.opts h2{margin:0;font-size:17px;font-weight:800;display:flex;align-items:center;gap:8px}
-.opts h2 em{font-style:normal;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:6px;padding:2px 7px}
+.opts h2{margin:0;font-size:17px;font-weight:800;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.opts h2 em{white-space:nowrap;font-style:normal;font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);border-radius:6px;padding:2px 7px}
 .opts h2 em.beh{background:var(--beh)}
 .row{display:flex;flex-direction:column;gap:5px}
 .row>.lbl{font-size:13px;font-weight:700;color:var(--ink);display:flex;flex-wrap:wrap;gap:2px 5px;align-items:baseline}
@@ -97,14 +98,14 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-of
 .headline .threat{grid-column:1/3;font-size:14px;font-weight:600;border-top:1px solid #2f4c40;padding-top:7px;margin-top:3px}
 .headline .threat span{color:#f0c66a;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-right:6px}
 .bars{display:flex;flex-direction:column;gap:7px}
-.bar{display:grid;grid-template-columns:22px minmax(0,1fr) 34px;gap:2px 8px;align-items:center;border:0;background:none;padding:0;text-align:left;width:100%}
-.bar svg{width:20px;height:20px;grid-row:1/3;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.bar .nm{font-size:13px;font-weight:700;display:flex;justify-content:space-between;gap:6px}
+.bar{cursor:help;display:grid;grid-template-columns:22px minmax(0,1fr) 34px;gap:2px 8px;align-items:center;border:0;background:none;padding:0;text-align:left;width:100%}
+.bar svg{width:20px;height:20px;grid-row:1/3;grid-column:1;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bar .nm{grid-column:2;grid-row:1;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px;min-width:0}
 .bar .nm em{font-style:normal;font:700 12px/1.2 var(--f-num);border-radius:7px;padding:1px 6px;opacity:0;transform:translateY(3px);transition:opacity .25s,transform .25s}
 .bar .nm em.show{opacity:1;transform:none}
 .bar .nm em.up{background:var(--accent-soft);color:var(--good)}.bar .nm em.down{background:#f6d9d2;color:var(--bad)}
-.bar .num{grid-row:1/3;font:700 15px var(--f-num);text-align:right;font-variant-numeric:tabular-nums}
-.bar .track{position:relative;height:13px;border-radius:7px;background:#e3ebe6;overflow:hidden}
+.bar .num{grid-column:3;grid-row:1/3;font:700 15px var(--f-num);text-align:right;font-variant-numeric:tabular-nums}
+.bar .track{grid-column:2;grid-row:2;position:relative;height:13px;border-radius:7px;background:#e3ebe6;overflow:hidden}
 .bar .fill{position:absolute;inset:0 auto 0 0;border-radius:7px;background:var(--good);transition:width .55s cubic-bezier(.2,.8,.2,1),background .3s}
 .bar .ghost{position:absolute;top:-2px;bottom:-2px;width:2.5px;background:rgba(22,36,30,.55);border-radius:2px;transition:left .3s}
 .bar.ok .fill{background:#d09a2a}.bar.bad .fill{background:var(--bad)}

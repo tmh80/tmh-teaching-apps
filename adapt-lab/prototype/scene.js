@@ -35,7 +35,7 @@ function predSpecFor(bk,names){
 let SC=null,T=0;
 function vary(tr,Rn){const o={...tr};['ears','legLen','insul','tail','finSize','size'].forEach(k=>{if(k in o)o[k]=clamp(o[k]+(Rn()-.5)*(k==='size'?10:24),0,100)});return o}
 function mkAnimal(tr,Rn,i,x,z){const t=vary(tr,Rn);const s=R.specOf(t,i+1);
-  return{t,s,sf:sizeF(t.size),x,z,tx:x,tz:z,face:Rn()<.5?1:-1,ph:Rn(),mv:0,wait:Rn()*4,hd:0,lie:0,graze:Rn()<.6,rest:false,seed:i,fear:0,dead:0,fade:1,young:false,cad:.95+Rn()*.25}}
+  return{t,s,sf:sizeF(t.size)*(s.plan==='bird'?.68:1),x,z,tx:x,tz:z,face:Rn()<.5?1:-1,ph:Rn(),mv:0,wait:Rn()*4,hd:0,lie:0,graze:Rn()<.6,rest:false,seed:i,fear:0,dead:0,fade:1,young:false,cad:.95+Rn()*.25}}
 function make(bk){
   bk=CAST[bk]?bk:'tundra';const C=CAST[bk],info=BM.info(bk),Rn=rng(bk.length*97+bk.charCodeAt(2)*13+5);
   const hn=pick(C.herd)||Object.keys(ZOO)[0],base=ZOO[hn];const pop=[];
@@ -45,7 +45,7 @@ function make(bk){
     pop.slice().forEach((p,i)=>{if(i%3===0&&pop.length<CAP)pop.push(mkYoung(p,Rn))})}
   const extras=[];C.extra.forEach((n,k)=>{if(!ZOO[n])return;for(let i=0;i<2;i++){const a=mkAnimal(ZOO[n],Rn,50+k*5+i,Rn(),info.water?.9:.2+Rn()*.75);a.extra=true;a.cad*=.8;a.graze=false;if(info.water){a.y=R.sizeOf(a.s).swims?.2+Rn()*.3:.93;a.dir=1;a.turn=1;a.lag=0;a.floor=!R.sizeOf(a.s).swims}extras.push(a)}});
   const pr=predSpecFor(bk,C.pred);const fl=pick(C.fly);
-  let plants=[];try{if(window.Plants&&window.Plants.zoo){const names=Object.keys(window.Plants.zoo).filter(n=>window.Plants.zoo[n].home===bk);names.forEach((n,k)=>{for(let i=0;i<3;i++)plants.push({spec:window.Plants.specOf(window.Plants.zoo[n].t,k*7+i),x:Rn(),z:info.water?.95:.15+Rn()*.8,sc:.5+Rn()*.3})})}}catch(e){plants=[]}
+  let plants=[];try{if(window.Plants&&window.Plants.zoo){const names=Object.keys(window.Plants.zoo).filter(n=>window.Plants.zoo[n].home===bk);names.forEach((n,k)=>{const tr=window.Plants.zoo[n].t,tree=tr.form==='tree';for(let i=0;i<(tree?2:3);i++)plants.push({spec:window.Plants.specOf(tr,k*7+i),x:.05+Rn()*.9,z:info.water?.95:tree?.08+Rn()*.4:.15+Rn()*.8,sc:tree?2.6+Rn()*.6:1.5+Rn()*.5})})}}catch(e){plants=[]}
   const keep=SC||{};
   SC={bk,info,Rn,herdName:hn,base,pop:pop.concat(extras),fx:[],plants,
     pred:{...pr,sf:sizeF(pr.size),state:'away',timer:6,x:-.2,z:.6,y:.5,face:1,ph:0,mv:0,hd:0,target:null,win:false},
@@ -59,6 +59,13 @@ function freeSpot(p,spread){const Rn=SC.Rn;let best=null,bd=-1;
   for(let k=0;k<6;k++){const x=clamp(p.x+(Rn()-.5)*spread,.04,.96),z=clamp(p.z+(Rn()-.5)*spread*.9,.1,.95);let d=9;
     SC.pop.forEach(q=>{if(q!==p&&!q.dead&&!q.young)d=Math.min(d,Math.hypot(q.tx-x,(q.tz-z)*.6))});if(d>bd){bd=d;best=[x,z]}}
   return best}
+// where to run: far from the predator, not past it, not into a corner, not on top of a neighbour
+function fleeSpot(p,P){const Rn=SC.Rn;let best=[p.x,p.z],bs=-9;const tp=[P.x-p.x,(P.z-p.z)*.6],tl=Math.hypot(tp[0],tp[1])||1;
+  for(let k=0;k<10;k++){const an=Rn()*TAU,r=.16+Rn()*.22;const x=clamp(p.x+Math.cos(an)*r,.04,.96),z=clamp(p.z+Math.sin(an)*r*1.3,.1,.95);
+    const dv=[x-p.x,(z-p.z)*.6],dl=Math.hypot(dv[0],dv[1])||1;let sc=Math.min(.34,Math.hypot(x-P.x,(z-P.z)*.6))*2+dl*.5-Math.max(0,(tp[0]*dv[0]+tp[1]*dv[1])/(tl*dl))*.8;
+    for(const q of SC.pop)if(q!==p&&!q.dead&&!q.young&&Math.hypot(q.tx-x,(q.tz-z)*.6)<.1)sc-=.35;
+    if(sc>bs){bs=sc;best=[x,z]}}
+  return best}
 function moveTo(p,dt,w,h,cad){const dx=p.tx-p.x,dz=p.tz-p.z,d=Math.hypot(dx,dz*.5);if(d<.008)return true;
   const sc=BM.scOf(p.z,h)*p.sf*2;const spPx=cad*cycleLen(p.s)*sc;const stepN=spPx*dt/w;const ux=dx/d,uz=dz/d;const k=Math.min(1,d/stepN||1);
   p.x+=ux*stepN*k;p.z+=uz*stepN*k*.5;if(Math.abs(ux)>.15)p.face=ux>=0?1:-1;p.mv=lerp(p.mv,1,.18);
@@ -67,7 +74,7 @@ function landStep(dt,w,h){const P=SC.pred,night=SC.night>.6;
   SC.pop.forEach(p=>{
     if(p.dead){p.lie=lerp(p.lie,1,.12);p.mv=lerp(p.mv,0,.2);p.dead+=dt;if(p.dead>2.2)p.fade=Math.max(0,p.fade-dt*.6);return}
     const hunting=P.state==='chase'||P.state==='stalk';const dP=Math.hypot(p.x-P.x,(p.z-P.z)*.6);
-    if(P.state==='chase'&&dP<.24&&!p.extra){if(p.fear<.4||p===P.target){const ax=p.x-P.x,az=p.z-P.z,m=Math.hypot(ax,az)||1;p.tx=clamp(p.x+ax/m*.3+(SC.Rn()-.5)*.1,.03,.97);p.tz=clamp(p.z+az/m*.25+(SC.Rn()-.5)*.1,.1,.95)}p.fear=1;p.wait=0;p.rest=false}
+    p.fleeClock=(p.fleeClock||0)-dt;if(P.state==='chase'&&dP<(p===P.target?.5:.17)&&!p.extra&&!p.young){if(p.fear<.4||p.fleeClock<0||Math.hypot(p.tx-p.x,(p.tz-p.z)*.5)<.02){const f=fleeSpot(p,P);p.tx=f[0];p.tz=f[1];p.fleeClock=1.1}p.fear=1;p.wait=0;p.rest=false}
     p.fear=Math.max(0,p.fear-dt*.3);
     if(p.young&&p.parent&&!p.parent.dead){const q=p.parent;const gx=clamp(q.x-q.face*.028,.02,.98),gz=clamp(q.z+.015,.1,.96);if(Math.hypot(gx-p.x,gz-p.z)>.02||q.mv>.3){p.tx=gx;p.tz=gz;p.wait=0}p.fear=Math.max(p.fear,q.fear)}
     if(p.wait>0){p.wait-=dt;p.mv=lerp(p.mv,0,.14);p.hd=lerp(p.hd,p.graze&&!p.rest?1:0,.06);p.lie=lerp(p.lie,p.rest?1:0,.05);
@@ -91,9 +98,9 @@ function predStep(dt,w,h){const P=SC.pred;const walk=(tx,tz,cad)=>{const o={x:P.
   P.timer-=dt;
   if(P.state==='away'){P.mv=0;if(P.timer<0)sendPredator()}
   else if(P.state==='stalk'){const q=P.target;if(!q||q.dead||!SC.pop.includes(q)){P.state='leave';return}P.hd=lerp(P.hd,.35,.08);
-    walk(q.x,q.z,.55);if(Math.hypot(q.x-P.x,(q.z-P.z)*.6)<.2||P.timer<0){P.state='chase';P.timer=P.win?7:3.6}}
+    walk(q.x,q.z,.55);if(Math.hypot(q.x-P.x,(q.z-P.z)*.6)<.2||P.timer<0){P.state='chase';P.timer=P.win?9:4}}
   else if(P.state==='chase'){const q=P.target;if(!q||q.dead){P.state='leave';return}P.hd=lerp(P.hd,.12,.1);
-    walk(q.x,q.z,P.win?3.6:2.4);const d=Math.hypot(q.x-P.x,(q.z-P.z)*.6);
+    const qv=q.cad*3*cycleLen(q.s)*q.sf,cadP=clamp((P.win?1.3:.82)*qv/(cycleLen(P.s)*P.sf),1.4,5.5);walk(q.x,q.z,cadP);const d=Math.hypot(q.x-P.x,(q.z-P.z)*.6);
     if(d<.022&&P.win){q.dead=.01;q.fear=0;SC.fx.push({k:'caught',a:q,age:0});SC.pop.forEach(y=>{if(y.parent===q)y.parent=null});P.state='eat';P.timer=3.2}
     else if(P.timer<0){P.state='leave';P.timer=20}}
   else if(P.state==='eat'){P.mv=lerp(P.mv,0,.2);P.hd=lerp(P.hd,1,.1);if(P.timer<0){P.state='leave';P.timer=20}}

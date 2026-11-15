@@ -40,8 +40,11 @@ const Cost=(window.AdaptCost&&typeof window.AdaptCost.cost==='function')?window.
 const Combos=(window.AdaptCombos&&typeof window.AdaptCombos.find==='function')?window.AdaptCombos:CombosFB;
 const BUDGET=Cost.BUDGET_PER_ERA||10;
 const safe=(fn,fb)=>{try{return fn()}catch(e){if(!safe.warned){safe.warned=1;console.warn('designer fallback:',e.message)}return fb()}};
-const costOf=(a,b)=>safe(()=>{const r=Cost.cost(a,b);if(!r||!isFinite(r.total))throw new Error('no price');return r},()=>CostFB.cost(a,b));
-const combosOf=(t,bk)=>safe(()=>Combos.find(t,bk)||[],()=>CombosFB.find(t,bk));
+// a design that cannot be reached from the ancestor has total = Infinity (for example fur to an insect's exoskeleton)
+const costOf=(a,b)=>safe(()=>{const r=Cost.cost(a,b);if(!r||typeof r.total!=='number'||isNaN(r.total)||!Array.isArray(r.items))throw new Error('no price');return r},()=>CostFB.cost(a,b));
+// the combos module may take the biome as an id or as the biome object: try the id first
+const either=(fn,bk)=>{try{return fn(bk)}catch(e){return fn(M.BIOMES[bk])}};
+const combosOf=(t,bk)=>safe(()=>{const r=either(b=>Combos.find(t,b),bk);if(!Array.isArray(r))throw new Error('no combos');return r},()=>CombosFB.find(t,bk));
 
 /* ---------- ancestors: small plain designs that only just survive (50–65% a year), found by a search over the model ---------- */
 const ANC={
@@ -81,7 +84,7 @@ function loadBiome(bk){S.biome=bk;S.anc={...M.DEF_A,...ANC[bk].t};S.t={...S.anc}
 /* ---------- the model: five yearly survival chances and the overall chance ---------- */
 function assess(t,bk){
   const o={kind:'animal',t};let sc=M.scoresFor(o,bk);
-  sc=safe(()=>Combos.apply(sc,t,M.BIOMES[bk])||sc,()=>sc);
+  sc=safe(()=>{const r=either(b=>Combos.apply(sc,t,b),bk);return r&&typeof r.pred==='number'&&typeof r.food==='number'?r:sc},()=>sc);
   const D={temp:1,breath:1,pred:1,food:1,water:1};
   for(let s=0;s<4;s++){const hz=M.seasonHaz(sc,bk,o,s,false);for(const hk in hz){const k=(hk==='cold'||hk==='heat')?'temp':hk;if(k in D)D[k]*=hz[hk]>=1?0:1-Math.min(.95,hz[hk])}}
   const lethal=M.lethalOf(sc,bk,o);const year=lethal?0:M.yearSurvival(sc,bk,o);
@@ -104,9 +107,11 @@ function renderTabs(cost){
   $('tabs').innerHTML=GROUPS.map((g,i)=>`<button type="button" role="tab" class="${g.beh?'beh':''}" data-tab="${i}" aria-selected="${i===S.tab}"><svg viewBox="0 0 24 24">${ICON[g.title]||ICON.Body}</svg>${esc(SHORT[g.title]||g.title)}${per[i]?`<span class="dot">${per[i]}</span>`:''}</button>`).join('')
     +'<div class="kind"><b style="background:var(--accent)">P</b>body<br><b style="background:var(--beh)">B</b>behaviour</div>';
 }
-function priceFor(k,v,total){const d=costOf(S.anc,{...S.t,[k]:v}).total-total;return d}
+function priceFor(k,v,total){const r=costOf(S.anc,{...S.t,[k]:v});return isFinite(r.total)?r.total-total:Infinity}
+function whyFar(k,v){const r=costOf(S.anc,{...S.t,[k]:v});const it=r.items.find(x=>!isFinite(x.points));return(it&&it.why)||'This body design is too different to evolve from your ancestor.'}
 function priceHtml(d,total,isCur,isStart){
   if(isCur)return`<span class="price">${isStart?'start':'chosen'}</span>`;
+  if(!isFinite(d))return'<span class="price over">too far</span>';
   if(d===0)return'<span class="price free">free</span>';
   if(d<0)return`<span class="price back">${d} back</span>`;
   return`<span class="price${total+d>BUDGET?' over':''}">+${d}</span>`}
@@ -125,9 +130,9 @@ function renderOpts(cost,force){
     host.scrollTop=st}
   // refresh pressed states and prices in place (no rebuild, so nothing jumps while a slider is dragged)
   host.querySelectorAll('.chip').forEach(b=>{const k=b.dataset.k,v=b.dataset.v,cur=String(S.t[k])===v;b.setAttribute('aria-pressed',cur);
-    b.querySelector('.pw').innerHTML=priceHtml(cur?0:priceFor(k,v,cost.total),cost.total,cur,String(S.anc[k])===v)});
+    const d=cur?0:priceFor(k,v,cost.total);b.dataset.far=isFinite(d)?'':'1';b.querySelector('.pw').innerHTML=priceHtml(d,cost.total,cur,String(S.anc[k])===v)});
   host.querySelectorAll('input[data-k]').forEach(inp=>{if(document.activeElement!==inp||inp.type==='range')inp.value=S.t[inp.dataset.k]});
-  host.querySelectorAll('[data-p]').forEach(p=>{const it=cost.items.find(x=>x.key===p.dataset.p);p.textContent=it?'+'+it.points:'free';p.className='price'+(it?'':' free')});
+  host.querySelectorAll('[data-p]').forEach(p=>{const it=cost.items.find(x=>x.key===p.dataset.p);p.textContent=it?'+'+it.points:'free';p.title=it&&it.why?it.why:'';p.className='price'+(it?'':' free')});
 }
 function renderVitals(a,anc){
   const cls=v=>v>=70?'good':v>=45?'ok':'bad';const d=a.year-anc.year;
@@ -146,12 +151,13 @@ function renderCombos(list){
   $('combos').innerHTML=(good.length?`<h3>Works well together</h3>${good.map(card).join('')}`:'')+(bad.length?`<h3>Clashes</h3>${bad.map(card).join('')}`:'')+
     (!list.length?'<h3>Traits that work together</h3><div class="combo none">None yet. Try pairing a behaviour with a body feature that helps it, like night activity and big eyes.</div>':'');
 }
+const cap=x=>String(x).charAt(0).toUpperCase()+String(x).slice(1);
 function valWord(k,v){for(const g of GROUPS)for(const r of g.rows)if(r.k===k&&r.opts&&!r.num){const o=r.opts.find(x=>String(x[0])===String(v));if(o)return o[1]}return String(v)}
 function renderDock(cost){
-  const over=cost.total>BUDGET;$('meter').className='meter'+(over?' over':'');
-  $('meter').innerHTML=`<div class="txt">This era: <b>${cost.total}</b> of ${BUDGET} points${over?' · too many':''}</div><div class="pips">${Array.from({length:BUDGET},(_,i)=>`<i class="${i<cost.total?(over?'over':'on'):''}"></i>`).join('')}</div>`;
-  $('changes').innerHTML=cost.items.length?cost.items.map(it=>`<button type="button" class="chg" data-undo="${it.key}">${esc(it.label||WORD[it.key]||it.key)} <small>${esc(valWord(it.key,it.from))} → ${esc(valWord(it.key,it.to))}</small><b>${it.points}</b><u>Undo</u></button>`).join(''):'<span class="none">No changes yet. Each change costs evolution points: small steps are cheap, new body designs cost a lot.</span>';
-  $('release').setAttribute('aria-disabled',over);$('era').textContent=`Era 1 · ${Math.max(0,BUDGET-cost.total)} points left`;
+  const far=!isFinite(cost.total),over=far||cost.total>BUDGET,spent=far?BUDGET:cost.total;$('meter').className='meter'+(over?' over':'');
+  $('meter').innerHTML=`<div class="txt">This era: <b>${far?'too far':cost.total}</b>${far?'':` of ${BUDGET} points`}${over&&!far?' · too many':''}</div><div class="pips">${Array.from({length:BUDGET},(_,i)=>`<i class="${i<spent?(over?'over':'on'):''}"></i>`).join('')}</div>`;
+  $('changes').innerHTML=cost.items.length?cost.items.map(it=>`<button type="button" class="chg" data-undo="${it.key}">${esc(cap(it.label||WORD[it.key]||it.key))} <small>${esc(valWord(it.key,it.from))} → ${esc(valWord(it.key,it.to))}</small><b>${isFinite(it.points)?it.points:'✕'}</b><u>Undo</u></button>`).join(''):'<span class="none">No changes yet. Each change costs evolution points: small steps are cheap, new body designs cost a lot.</span>';
+  $('release').setAttribute('aria-disabled',over);$('era').textContent=`Era 1 · ${Math.max(0,BUDGET-spent)} points left`;
 }
 function renderTags(){
   $('sizeTag').textContent='Size: '+sizeWord(S.t.size);
@@ -171,7 +177,8 @@ function setTrait(k,v){if(S.t[k]===v)return;S.t={...S.t,[k]:v};S.moveUntil=perfo
 $('biomes').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if(b&&b.dataset.b!==S.biome)loadBiome(b.dataset.b)});
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;S.tab=+b.dataset.tab;$('opts').scrollTop=0;render(false)});
 $('opts').addEventListener('click',e=>{const vt=e.target.closest('.vterm');if(vt){const d=M.VOCAB[vt.dataset.term];if(d)pop(vt,`<b>${esc(d[0])}</b>${esc(d[1])}`);e.stopPropagation();return}
-  const c=e.target.closest('.chip');if(!c)return;const k=c.dataset.k;const cur=S.anc[k];setTrait(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)});
+  const c=e.target.closest('.chip');if(!c)return;const k=c.dataset.k;const cur=S.anc[k];
+  if(c.dataset.far){pop(c,'<b>Too far to evolve</b>'+esc(whyFar(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}setTrait(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)});
 $('opts').addEventListener('input',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='range')return;setTrait(inp.dataset.k,+inp.value)});
 $('opts').addEventListener('change',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='number')return;const v=clamp(Math.round(+inp.value||0),0,100);inp.value=v;setTrait(inp.dataset.k,v)});
 $('opts').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input[type=number]'))e.target.blur()});
@@ -184,7 +191,7 @@ $('likeTag').addEventListener('click',e=>{const cl=M.classify(S.t);if(cl)pop(e.c
 $('sizeTag').addEventListener('click',e=>pop(e.currentTarget,'<b>Body size</b>Big bodies keep heat in and scare off small hunters, but they need more food.'));
 $('spName').addEventListener('input',e=>{S.name=e.target.value});
 $('release').addEventListener('click',()=>{const cost=costOf(S.anc,S.t);
-  if(cost.total>BUDGET){$('meter').classList.remove('shake');void $('meter').offsetWidth;$('meter').classList.add('shake');pop($('meter'),`<b>Too many changes</b>You have ${BUDGET} points this era. Undo ${cost.total-BUDGET} point${cost.total-BUDGET>1?'s':''} of changes.`);return}
+  if(!isFinite(cost.total)||cost.total>BUDGET){$('meter').classList.remove('shake');void $('meter').offsetWidth;$('meter').classList.add('shake');pop($('meter'),isFinite(cost.total)?`<b>Too many changes</b>You have ${BUDGET} points this era. Undo ${cost.total-BUDGET} point${cost.total-BUDGET>1?'s':''} of changes.`:'<b>Too far to evolve</b>One of your changes cannot evolve from this ancestor. Undo it.');return}
   $('mwin').innerHTML=`<h2>${esc(S.name||'Your species')} is ready</h2><p>Over thousands of years, these changes spread through the population. Next, the living scene shows what happens.</p>`+
     `<div class="sum"><div><b>${CUR.year}%</b>chance of surviving a year</div><div><b>${ANC_A.year}%</b>your ancestor</div><div><b>${cost.total} of ${BUDGET}</b>points spent</div><div><b>${combosOf(S.t,S.biome).filter(c=>c.good).length}</b>traits working together</div></div>`+
     `<button type="button" class="btn" id="mBack">Back to the designer</button>`;$('modal').hidden=false;$('mBack').focus();$('mBack').onclick=()=>{$('modal').hidden=true}});
@@ -208,7 +215,7 @@ function frame(ts){
   const dpr=Math.min(2,window.devicePixelRatio||1),w=cv.clientWidth,h=cv.clientHeight;
   if(w&&h){if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}cx.setTransform(dpr,0,0,dpr,0,0);W=w;H=h;
     const B=M.BIOMES[S.biome],aq=!!B.aquatic;
-    let drawn=false;if(biomeOK){try{cx.save();window.Biomes.draw(cx,w,h,{biome:S.biome,season:1,night:0,t});cx.restore();drawn=true}catch(e){cx.restore();biomeOK=false;console.warn('Biomes.draw failed, using the simple backdrop:',e.message)}}
+    let drawn=false;if(biomeOK){try{cx.save();window.Biomes.draw(cx,w,h,{biome:S.biome,season:B.hs,night:0,t});cx.restore();drawn=true}catch(e){cx.restore();biomeOK=false;console.warn('Biomes.draw failed, using the simple backdrop:',e.message)}}
     if(!drawn)ownBackdrop(cx,w,h,S.biome,t);
     if(!SPEC)SPEC=safe(()=>R.specOf(S.t,7),()=>R.specOf({...M.DEF_A},7));
     const z=safe(()=>R.sizeOf(SPEC),()=>({len:120,height:100}));const swims=!!z.swims;

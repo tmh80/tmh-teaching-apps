@@ -28,7 +28,8 @@ function variation(t){
   for(let i=0;i<n;i++){const jit=()=>(Rr()-.5)*16;
     const tr=A({color:g>.72?'white':g>.38?'silver':'brown',insul:clamp(30+60*g+jit(),5,98),fat:20+50*g,fatWhere:'all',ears:clamp(80-55*g+jit(),5,98),size:45,legLen:clamp(60-22*g+jit(),10,95),tail:8});
     const s=R.specOf(tr,i+3);const sc=Math.min(cw*.6/s.L,h*.5/heightOf(s));
-    c.save();c.translate(cw*(i+.5)-sc*8,h*.8);R.shadow(c,sc*s.L*.6);c.scale(sc,sc);R.draw(c,s,{t:t+i,phase:0,move:0,blink:blinkAt(t,i*3),headDown:i%3===1?.5+.5*Math.sin(t*.8+i):0});c.restore()}
+    c.save();c.translate(cw*(i+.5)-sc*8,h*.8);R.shadow(c,sc*s.L*.6);c.scale(sc,sc);R.draw(c,s,{t:t+i,phase:0,move:0,blink:blinkAt(t,i*3),headDown:i%3===1?.5+.5*Math.sin(t*.8+i):0});c.restore()
+    if(i===1||i===3){const y=R.youngOf(s),ys=sc*.55;c.save();c.translate(cw*(i+.5)+sc*s.L*.62,h*.84);R.shadow(c,ys*y.L*.6);c.scale(i===3?-ys:ys,ys);R.draw(c,y,{t:t+i*2,phase:t*1.2,move:i===3?0:.6,blink:blinkAt(t,i*5),lie:i===3?1:0,sleep:i===3});c.restore()}}
   label(c,g<.3?'Warm years: thin brown coats, long ears and long legs lose heat':g<.7?'The climate is cooling: thicker, paler coats are surviving more often':'Ice age: thick white coats, small ears and short legs keep heat in',w/2,h*.13,Math.max(11,Math.min(15,w*.022)),'#24352d',600);
 }
 let T=0,last=0;const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
