@@ -69,7 +69,7 @@
 
 ## Jobs to do after the chapters are finished (Tom, 2 Nov 2026)
 1. **Open-ended Workshop.** Once Chapter 6 is done, the Workshop home card should become an open-ended workshop: a place to take on challenges that save different things, not only Captain Smooshy. Not needed now. The Chapter 6 card wording stays as it is until then.
-2. **Vocabulary and flashcards.** The Journal's Vocab tab exists (`DB.vocab`). The flashcards with spaced repetition are still banked, not built (see Banked ideas). Review how the two fit together.
+2. **Vocabulary and flashcards.** Done 16 Nov 2026: Vocab flashcards (see the brief). Ideas banked: a teacher option to set a class deck by code, like Sparks' class sets; a printable sheet of a student's cards; a "words I keep missing" list for the teacher; cards for formulas (F = m × a, weight = mass × 9.8) as well as words.
 3. **CER paragraph writing review (needs Opus).** Review how Force HQ introduces claim, evidence and reasoning (CER) paragraph writing and builds it up slowly across the chapters: where students first meet it, how the scaffolds fade, and how the Explain questions and checklists support it. Tom needs Opus's help for this specifically, so plan it as an Opus job (a review and a proposed sequence of scaffolds), then Sonnet builds from it.
 
 ## Done: Check fixes (2 Nov 2026)

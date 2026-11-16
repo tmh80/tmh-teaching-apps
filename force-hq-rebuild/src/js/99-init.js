@@ -24,6 +24,8 @@ function init() {
   $('#cvHome').addEventListener('click', homeClick);
   document.addEventListener('click', e => {
     const t = e.target;
+    const fcb = t.closest('[data-fc]'); if (fcb) { fcClick(fcb); return; }
+    if (fcCardTap(e)) return;
     const exs = t.closest('[data-exscene]'); if (exs && VIEW === 'vExplore') { if (exs.dataset.exscene === 'drop') openExploreDrop(); else if (exs.dataset.exscene === 'heli') openExploreHeli(); else if (exs.dataset.exscene === 'shop') openExploreShop('free'); else openExplore(); return; }
     if (t.closest('[data-journal]')) { if (journalOpen()) closeJournal(); else openJournal(); return; }
     const op = t.closest('[data-open]'); if (op) { if (op.closest('[data-close]') || op.closest('.modal')) closeModal(); openChapter(op.dataset.open); return; }
@@ -42,6 +44,7 @@ function init() {
   });
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
   document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#modal').hidden) closeModal(); else if (QSTATE === 'pop') qPlace('dock'); else if (journalOpen()) closeJournal(); });
+  document.addEventListener('keydown', fcKey);
   qDragInit();   // the pop-up layer is click-through now, so clicks on the arena reach the arena
   show('vHome');
   if (!user().name && !user().teacher) askWho(true);

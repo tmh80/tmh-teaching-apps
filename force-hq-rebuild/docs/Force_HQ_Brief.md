@@ -201,3 +201,18 @@ Tom playtested Parts 4 and 5 on 3 Nov and asked for a free-form, creative rescue
 - **Tests.** `tests/rescue_numbers.py` (the brief's section 9 routes), `play_rescue.py` (builds the top route with real mouse and touch moves), `play_story.py`, `play_hints.py`, `play_myrescue.py`, plus the Part 5 rewrites in `play_c6.py` and `play_bt.py`. `tests/workshop_closed.py` was retired. All are in `tests/run_all.sh`.
 - **Workshop switch.** `WORKSHOP_OPEN` in `src/js/20-shell.js` is `true`, so Tom's Toddle file opens the Workshop.
 - **Optional, not built.** Three preset crater variants (swap `GL_PROFILE`, re-run `tests/rescue_routes.js` against each) and a faint 1 m grid when the ruler is on.
+
+## Vocab flashcards (16 Nov 2026)
+Key-vocabulary flashcards with spaced repetition, matching the Sparks Through Time rules. Spec: `docs/Flashcards_Spec.md`.
+- **Student flow:** home card "Vocab flashcards" (also a button in the Journal's Vocab tab) → My flashcards (`vCards` view). Students tick the sections they have covered, which puts those words in their deck. Practise a go (up to 20 cards, at most 10 new), then the end screen. "Look through my deck" lets them browse every card.
+- **Spaced repetition:** five boxes that come back after 1, 3, 7, 14 and 28 days. "Not yet" sends a card to box 1 and it comes back about 6 cards later in the same go. A card missed and then got stays in box 1 and is due tomorrow. From box 3 the card is asked the other way round, with the meaning on the front and the word masked as "____".
+- **Look:** cream index cards with a red header line and blue ruled lines. The word is in Kalam Bold and the meaning in Patrick Hand (OFL, subset and embedded in `src/fonts-hand.css`; licences in `vendor/fonts/`), with the text sitting on the lines. A typed answer appears on the lines in biro blue. Cards flip in 3D (none with reduced motion), and "Need a clue?" shows the picture on the front.
+- **Files:**
+  - `src/js/63-flashcards.js`: engine and views; `FC_TOPICS` maps each section to glossary keys.
+  - `src/flashcards.css`
+  - `src/js/64-fcart-kit.js`: pen-sketch helpers and the wobble filter.
+  - `src/js/64a-fcart-c1-3.js` and `64b-fcart-c4-6.js`: one picture per word, 70 in all.
+  - Card text comes from `TERMS`, so definitions are written once.
+- **Saved data:** `DB.fc = {topics, cards:{key:{box,due,seen,got,miss}}, last, goes}`. The backup file and code carry it automatically. Unticking a topic keeps the card history.
+- **Tests:** `tests/flashcards.py`, `tests/fcart_check.py` (Chapters 1–3 pictures) and `tests/fcart_check_c.py` (Chapters 4–6; contact sheets saved to `/tmp/fhq-shots/fc/`). `FC_NOW = 'YYYY-MM-DD'` (set through `__fhq.ev`) pretends it is another day.
+- **Adding a word:** add it to `TERMS`, to a section in `FC_TOPICS`, and give it a picture in `FC_ART` (240 × 150, kit helpers).
