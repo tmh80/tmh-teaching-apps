@@ -7,6 +7,7 @@
   <div class="crumb" id="crumb"></div>
   <div class="topright">
     <button type="button" class="ghost sm" data-journal>📓 Journal</button>
+    <button type="button" class="ghost sm" id="fcTopBtn" data-fc="open">🃏 Flashcards<span class="fcbadge" hidden></span></button>
     <button type="button" class="ghost sm" id="bkBtn">💾 Save progress</button>
     <button type="button" class="ghost sm" id="saveWorkBtn">📄 Save my work</button>
     <button type="button" class="ghost sm teachbtn" id="teacherBtn">For teachers</button>
@@ -40,6 +41,7 @@
     <div class="homegrid">
       <div class="panel homecard explorec" id="exploreCard"></div>
       <div class="panel homecard workc" id="workshopCard"></div>
+      <div class="panel homecard flashc" id="flashCard"></div>
     </div>
     <div class="panel stampbook" id="stampRow"></div>
   </section>
@@ -67,6 +69,9 @@
     <div class="chhead"><div><span class="lbl">Explore · Main Arena</span><h1>Tug-of-war sandbox</h1></div></div>
     <div id="exploreHost"></div>
   </section>
+
+  <!-- FLASHCARDS -->
+  <section id="vCards" class="view" hidden><div id="fcHost"></div></section>
 
   <!-- TEACHER -->
   <section id="vTeacher" class="view" hidden></section>

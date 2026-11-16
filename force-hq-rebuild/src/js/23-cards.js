@@ -67,8 +67,8 @@ function addEvidence(kind, text) {
 const EVICON = { maths: '🧮', check: '✅', challenge: '🏆', own: '✏️', review: '📝' };
 function vocabHTML() {
   const V = dbGet('vocab', {}), ks = Object.keys(V).filter(k => TERMS[k]).sort((a, b) => TERMS[a][0].localeCompare(TERMS[b][0]));
-  if (!ks.length) return '<p class="scaleNote">Words with a dotted line under them are key vocabulary. Each one you meet in Force HQ is added here, with what it means.</p>';
-  return `<p class="scaleNote">${ks.length} key word${ks.length > 1 ? 's' : ''} you have met so far, in A to Z order. Words with a dotted line under them are added here when you meet them.</p>
+  if (!ks.length) return '<button type="button" class="go sm fc-jbtn" data-fc="open">🃏 Practise words as flashcards</button><p class="scaleNote">Words with a dotted line under them are key vocabulary. Each one you meet in Force HQ is added here, with what it means.</p>';
+  return `<button type="button" class="go sm fc-jbtn" data-fc="open">🃏 Practise words as flashcards</button><p class="scaleNote">${ks.length} key word${ks.length > 1 ? 's' : ''} you have met so far, in A to Z order. Words with a dotted line under them are added here when you meet them.</p>
     <input type="search" class="vsearch" id="vSearch" placeholder="Find a word…" aria-label="Find a word">
     <dl class="vocab">${ks.map(k => `<div class="vitem" data-v="${esc(TERMS[k][0].toLowerCase())}"><dt>${esc(TERMS[k][0])}</dt><dd>${esc(TERMS[k][1])}${V[k].where ? `<small>First met: ${esc(V[k].where)}</small>` : ''}</dd></div>`).join('')}</dl>`;
 }

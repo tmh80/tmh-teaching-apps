@@ -13,7 +13,7 @@ const CHAPTERS = [
 ];
 /* "Start Part 1" / "Start the Extension": Chapter 6 uses Part 1 to Part 4 and an Extension instead of Foundation and Extension */
 const startWord = p => /^Part \d/.test(p) ? p : 'the ' + p;
-const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher'];
+const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher', 'vCards'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
 const user = () => DB.user || {};
 const isTeacher = () => !!(DB.user && DB.user.teacher);
@@ -22,9 +22,10 @@ const unlocked = () => !!DB.unlocked;
 function show(v) {
   if (typeof qUnpop === 'function') qUnpop();
   VIEW = v; VIEWS.forEach(x => $('#' + x).hidden = x !== v); document.body.dataset.view = v;
-  $('#crumb').textContent = v === 'vChapter' && CH ? `Force Arenas · Chapter ${CH.n}` : v === 'vExplore' ? 'Force Arenas · Explore' : v === 'vTeacher' ? 'For teachers' : '';
+  $('#crumb').textContent = v === 'vChapter' && CH ? `Force Arenas · Chapter ${CH.n}` : v === 'vExplore' ? 'Force Arenas · Explore' : v === 'vTeacher' ? 'For teachers' : v === 'vCards' ? 'Flashcards' : '';
   window.scrollTo(0, 0);
   if (v === 'vHome') renderHome();
+  if (v === 'vCards') fcRender();
 }
 function parkLab() { $('#labPark').appendChild($('#lab')); }
 function placeLab(host) { $('#lab').classList.remove('nolc'); host.appendChild($('#lab')); requestAnimationFrame(() => { readColors(); renderPal(); }); }
@@ -84,7 +85,7 @@ function renderHome() {
   $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
     ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
-  $('#workshopCard').hidden = !WORKSHOP_OPEN; $('#workshopCard').parentElement.style.gridTemplateColumns = WORKSHOP_OPEN ? '' : 'minmax(0,1fr)';
+  $('#workshopCard').hidden = !WORKSHOP_OPEN; fcHomeCard();
   if (WORKSHOP_OPEN) { const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
     $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop</span><h3>Save Captain Smooshy!</h3><p>A gummy bear astronaut is stuck in a crater and only has 60 N of pull. Learn how levers, pulleys, ramps, wedges and screws work, then use them to rescue his spaceship.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
   $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
