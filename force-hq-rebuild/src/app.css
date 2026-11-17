@@ -522,6 +522,10 @@ body[data-view]:not([data-view="vHome"]) .teachbtn{display:none}
 .stamp.ghoststamp{color:var(--line);font-size:14px}
 /* Chapter 2: brake control and velocity–time graph */
 .nudge{display:flex;gap:6px;margin-top:4px}
+.trirow{border-top:1px solid var(--line);padding:10px 12px 12px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 22px}
+.trirow>.lbl{flex-basis:100%;display:flex;align-items:center;gap:6px}
+.trirow .tri{margin:0}.trirow .tri svg{width:170px}
+.trirow .trihint{margin:0;max-width:220px;font-size:14px}
 .vtrow{border-top:1px solid var(--line);padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px}
 .vtrow .lbl{display:flex;align-items:center;gap:6px}
 #cvVT{width:100%;aspect-ratio:900/240;display:block;border-radius:8px}

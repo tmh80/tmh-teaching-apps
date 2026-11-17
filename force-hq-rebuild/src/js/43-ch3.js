@@ -96,7 +96,7 @@ CHDATA.c3 = {
         { html: `<p>The ${T('triangle', 'formula triangle')} helps you remember it. <b>Cover the letter you want to find.</b> What is left is the sum.</p>${triHTML()}<p>Try each letter now.</p>` },
         { html: `<div class="example"><b>Worked example.</b> Two huskies (180 N) pull a 60 kg sled. To find <b>a</b>, cover <b>a</b>. F is above m, so divide: a = 180 ÷ 60 = <b>3 m/s²</b>. That is what you measured in the last step.</div><p>Now it is your turn. <b>Work out the answer first, then run the sled to check it.</b></p>` }],
       predict: { q: 'Three huskies (270 N) pull a 72 kg sled. Which sum gives its acceleration?', opts: ['270 ÷ 72', '270 × 72', '72 ÷ 270', '270 − 72'], then: 'Work it out with the calculator, then run the sled and see if the readout agrees.' },
-      setup() { snow(72, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Set 72 kg, drag 3 huskies on, then press Pull!',
+      setup() { snow(72, 'snow0', 0); }, adds: ['tri'], sides: ['right'], pullers: ['husky'], idle: 'Set 72 kg, drag 3 huskies on, then press Pull!',
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['On the formula triangle card, tap the letters <b>F</b>, <b>m</b> and <b>a</b> in the triangle to cover each one in turn. The same triangle is saved in your Journal (Notes tab), so you can use it there too.', () => { const t = S.flags.tri; return !!(t && t.F && t.m && t.a); }], ['Set the mass to <b>72 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 72, 'snow0')]],
       mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [
@@ -109,7 +109,7 @@ CHDATA.c3 = {
         { html: `<p>The triangle works for any letter. Cover the one you want to find.</p><div class="example"><b>Finding F.</b> A 90 kg sled must accelerate at 2 m/s². Cover F, then multiply: F = 90 × 2 = <b>180 N</b>. That is 2 huskies.</div><div class="example"><b>Finding m.</b> Three huskies (270 N) make a sled accelerate at 2.7 m/s². Cover m, then divide: m = 270 ÷ 2.7 = <b>100 kg</b>.</div>` },
         { html: `<p>Two jobs. In each one, <b>work out your answer first</b>, then set up the sled and pull to check it.</p>` }],
       setup() { snow(108, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work it out first, then set up the sled and pull',
-      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['<b>Check job 1</b>: set <b>108 kg</b>, add that many huskies (90 N each) and pull.', () => rHas(3, 108, 'snow0')], ['', () => hasAns('q2'), { q: 'q2' }], ['', () => hasAns('q3'), { q: 'q3' }], ['<b>Check job 2</b>: set the slider to your mass and pull.', () => rHas(2, 80, 'snow0')]],
+      tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['', () => hasAns('q2'), { q: 'q2' }], ['<b>Check job 1</b>: set <b>108 kg</b>, add the number of huskies you just worked out and pull.', () => rHas(3, 108, 'snow0')], ['', () => hasAns('q3'), { q: 'q3' }], ['<b>Check job 2</b>: set the slider to your mass and pull.', () => rHas(2, 80, 'snow0')]],
       mask: [{ q: 'q1', keys: ['readA'], when: (n, m) => m === 108 }, { q: 'q3', keys: ['readA'], when: n => n === 2 }],
       qs: [
         { id: 'q1', type: 'num', p: '<b>Job 1.</b> What resultant force does a 108 kg sled need to accelerate at 2.5 m/s²?', unit: 'N', units: UNITS, ans: 270, tol: 0.6, ladder: true, work: 'F = m × a = 108 × 2.5 = 270 N', ok: 'Yes: 270 N.', hints: ['Cover F in the triangle. The letters left are side by side, so multiply.', 'F = m × a = 108 × 2.5.', 'Type 108 × 2.5 into the calculator.'] },
@@ -136,7 +136,7 @@ CHDATA.c3 = {
       cards: [
         { html: `<p>Time to put F = ma to work on <b>five different sleds</b>. Each one has a <b>?</b> that you have to find.</p><ol><li>Cover the unknown letter on the ${T('triangle', 'formula triangle')} and work out the answer with the calculator.</li><li>Type your answer and choose its unit.</li><li>Set up the sled in the arena and press <b>Pull!</b> The readouts show whether you were right.</li></ol><p>Every question has a <b>Need a clue?</b> box. It gives you one hint at a time, and never the answer.</p>` },
         { html: `<div class="notebox"><b>Which floor?</b><p>Sleds 1 to 3 use the <b>Friction off</b> floor, so the huskies' pull is the whole resultant force. Sleds 4 and 5 use <b>packed snow</b>, where friction is on. Choose the floor with the floor buttons.</p></div>` }],
-      setup() { snow(85, 'snow0', 0); }, adds: [], sides: ['right'], pullers: ['husky'], idle: 'Work out the answer first, then set up the sled and press Pull!',
+      setup() { snow(85, 'snow0', 0); }, adds: ['floor'], sides: ['right'], pullers: ['husky'], idle: 'Work out the answer first, then set up the sled and press Pull!',
       tasks: [['', () => hasAns('q1'), { q: 'q1' }], ['<b>Check sled 1</b>: <b>85 kg</b>, <b>3 huskies</b>, friction off.', () => rHas(3, 85, 'snow0')], ['', () => hasAns('q2'), { q: 'q2' }], ['<b>Check sled 2</b>: <b>72 kg</b>, the huskies your force needs, friction off.', () => rHas(2, 72, 'snow0')], ['', () => hasAns('q3'), { q: 'q3' }], ['<b>Check sled 3</b>: your mass, <b>3 huskies</b>, friction off.', () => rHas(3, 120, 'snow0')], ['Choose <b>packed snow</b>, set <b>64 kg</b>, add <b>2 huskies</b> and pull. Read the friction.', () => rHas(2, 64, 'snow')], ['', () => hasAns('q4'), { q: 'q4' }], ['', () => hasAns('q5'), { q: 'q5' }], ['<b>Check sled 5</b>: packed snow, your mass, <b>3 huskies</b>.', () => rHas(3, 70, 'snow')]],
       more: [1, 2, 3],
       mask: [{ q: 'q1', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 85 }, { q: 'q2', keys: ['readA'], when: (n, m, f) => f === 'snow0' && m === 72 }, { q: 'q3', keys: ['readA'], when: (n, m, f) => f === 'snow0' && n === 3 },
@@ -153,7 +153,7 @@ CHDATA.c3 = {
       cards: [
         { html: `<p>Welcome to the Chapter 3 Extension! A ${T('vtgraph', 'velocity–time graph')} shows acceleration as a <b>straight sloping line</b>. The steeper the ${T('slope', 'slope')}, the bigger the acceleration.</p><p>To work out the acceleration, take two points on the line: <b>acceleration = change in velocity ÷ time taken</b>.</p>` },
         { html: `<p>Here is a sled that speeds up steadily.</p>${vtSVG([{ pts: [[0, 0], [5, 8]], col: '#1f5f8b' }], { tMax: 6, vMax: 9, vStep: 1, tri: [[1, 1.6], [4, 6.4]], alt: 'A straight line from 0 at 0 s up to 8 m/s at 5 s. A dashed triangle marks the velocity rising from 1.6 to 6.4 m/s between 1 s and 4 s.' })}<div class="example">From 1 s to 4 s, the velocity goes from 1.6 to 6.4 m/s. Change in velocity = 4.8 m/s. Time taken = 3 s. Acceleration = 4.8 ÷ 3 = <b>1.6 m/s²</b>.</div>` }],
-      setup() { snow(90, 'snow', 2); }, adds: ['vt'], hide: ['mass'], sides: [], pullers: [], idle: 'Press Pull!',
+      setup() { snow(90, 'snow', 2); }, adds: ['vt'], hide: ['mass', 'tri', 'floor'], sides: [], pullers: [], idle: 'Press Pull!',
       tasks: [['Press <b>Pull!</b> and watch the graph. Let the sled cross the finish line.', () => rHas(2, 90, 'snow')]],
       mask: [{ q: 'q3', keys: ['readA'], when: ALL }],
       qs: [
@@ -178,7 +178,7 @@ CHDATA.c3 = {
     { id: 'e3', title: 'Weight, mass and F = ma', floors: ['snow'], info: ['readW'],
       cards: [
         { html: `<p>Be careful: <b>weight</b> and <b>mass</b> are different. Mass is in kg. Weight is a force in newtons.</p><div class="law">weight = mass × 9.8, so mass = weight ÷ 9.8</div><p>F = m × a needs the <b>mass</b>. If a question gives you the weight, turn it into a mass first.</p><div class="example">A sled weighs 882 N. Its mass is 882 ÷ 9.8 = <b>90 kg</b>.</div>` }],
-      setup() { snow(85, 'snow', 0); }, adds: ['readW', 'readN'], sides: ['right'], pullers: ['husky'], idle: 'Set 85 kg, add 3 huskies, then Pull!',
+      setup() { snow(85, 'snow', 0); }, adds: ['readW', 'readN'], hide: ['floor'], sides: ['right'], pullers: ['husky'], idle: 'Set 85 kg, add 3 huskies, then Pull!',
       tasks: [['Set the mass to <b>85 kg</b>, add <b>3 huskies</b> and pull.', () => rHas(3, 85, 'snow')], ['', () => hasAns('q2'), { q: 'q2' }]],
       mask: [{ q: 'q2', keys: ['readA'], when: ALL }],
       qs: [

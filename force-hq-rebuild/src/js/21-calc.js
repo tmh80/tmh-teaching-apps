@@ -84,6 +84,7 @@ function triInner(cov, kind) {
   return `<svg viewBox="0 0 220 154" role="img" aria-label="${T.lab}"><polygon points="110,8 18,146 202,146" fill="var(--panel)" stroke="var(--ink)" stroke-width="3" stroke-linejoin="round"/><line x1="64" y1="77" x2="156" y2="77" stroke="var(--ink)" stroke-width="3"/><line x1="110" y1="77" x2="110" y2="146" stroke="var(--ink)" stroke-width="3"/>${L(T.L[0], 110, 50)}${L(T.L[1], 66, 112)}${L(T.L[2], 154, 112)}</svg>
     <div class="trisum" aria-live="polite">${sum}</div><div class="trib">${T.L.map(k => `<button type="button" class="mini ${cov === k ? 'on' : ''}" data-tri="${k}" aria-pressed="${cov === k}">Cover ${k}</button>`).join('')}<button type="button" class="mini" data-tri="">Show all</button></div>`;
 }
+{ const tb = document.getElementById('triBelow'); if (tb) tb.innerHTML = triInner('', 'fma'); }
 const triHTML = kind => `<div class="tri noglos" data-kind="${kind || 'fma'}">${triInner('', kind)}</div>`;
 document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList && e.target.classList.contains('trik')) { e.preventDefault(); e.target.dispatchEvent(new MouseEvent('click', { bubbles: true })); } });
 document.addEventListener('click', e => {
