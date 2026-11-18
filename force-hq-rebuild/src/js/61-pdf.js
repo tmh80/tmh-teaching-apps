@@ -4,16 +4,17 @@
    html2canvas and jsPDF are inlined from vendor/ by build.py (no internet needed). Ported from Sparks Through Time and adapted to Force HQ's HTML-string worksheets. */
 const cleanFileName = s => String(s || '').replace(/[\/\\:*?"<>|\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 120).trim();
 function wsWho(mode) {
-  if (mode === 'student' || mode === 'progress') return (user().name || '').trim() || (isTeacher() ? 'Teacher copy' : 'Student');
+  if (mode === 'student' || mode === 'progress' || mode === 'gym') return (user().name || '').trim() || (isTeacher() ? 'Teacher copy' : 'Student');
   return mode === 'blank' ? 'Blank template' : mode === 'scheme' ? 'Marking scheme' : 'Answer key';
 }
 /* Force HQ Ch3 Foundation (F = ma) - Alex Chen   |   ... - Blank template / Answer key / Marking scheme   |   Force HQ - My work so far - Alex Chen */
 function wsFileName(chId, mode) {
   if (mode === 'progress') return cleanFileName(`Force HQ - My work so far - ${wsWho(mode)}`);
+  if (mode === 'gym') return cleanFileName(`Force HQ Maths Gym - ${wsWho(mode)}`);
   const ch = secOf(chId);
   return cleanFileName(`Force HQ Ch${ch.n} ${ch.part} (${ch.title}) - ${wsWho(mode)}`);
 }
-const wsNeedsName = mode => (mode === 'student' || mode === 'progress') && !user().name && !isTeacher();
+const wsNeedsName = mode => !isTeacher() && (((mode === 'student' || mode === 'progress') && !user().name) || (mode === 'gym' && !((user().name || '').trim() && (user().cls || '').trim())));   // the Maths Gym summary needs the class too
 
 /* Browsers suggest the page title as the PDF name, so set it while the print window is open and put it back afterwards. */
 function printAs(fileName) {
@@ -91,7 +92,7 @@ async function downloadSheetPdf(html, fileName, ui) {
   finally { if (host) host.remove(); if (prevTheme) root.setAttribute('data-theme', prevTheme); else root.removeAttribute('data-theme'); }
 }
 /* the sheet for a mode, the same HTML that the print path uses */
-function wsSheetHTML(chId, mode) { return mode === 'progress' ? progressHTML() : mode === 'scheme' ? `<div class="ws"><div class="page">${schemeHTML(chId)}</div></div>` : buildWorksheet(chId, mode); }
+function wsSheetHTML(chId, mode) { return mode === 'progress' ? progressHTML() : mode === 'gym' ? pgSheetHTML() : mode === 'scheme' ? `<div class="ws"><div class="page">${schemeHTML(chId)}</div></div>` : buildWorksheet(chId, mode); }
 function downloadWorksheetPdf(chId, mode, ui, html) {
   if (wsNeedsName(mode)) { ui.noName && ui.noName(); return Promise.resolve(false); }   // the same gate as printing: no name, no worksheet
   return downloadSheetPdf(html || wsSheetHTML(chId, mode), wsFileName(chId, mode), ui);

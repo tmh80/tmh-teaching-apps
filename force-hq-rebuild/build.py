@@ -17,7 +17,7 @@ def vendor_js(name):
     if '</script' in t.lower(): print('vendor file would end the script block early:', name); sys.exit(1)
     return t
 vendor_blocks = ''.join(f'<script>\n{vendor_js(n)}\n</script>\n' for n in VENDOR)
-css = S('fonts.css') + '\n' + S('fonts-hand.css') + '\n' + S('tokens.css') + '\n' + S('app.css') + '\n' + S('flashcards.css')
+css = S('fonts.css') + '\n' + S('fonts-hand.css') + '\n' + S('tokens.css') + '\n' + S('app.css') + '\n' + S('flashcards.css') + '\n' + S('practice.css')
 head = '<title>Force HQ</title>\n<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
 def page(hook=False, full=True, workshop=False):
     hookjs = ('window.__fhq={get S(){return S},LAB,CHDATA,FBDB,setStep:(i)=>setStep(i),openChapter,setCTab,forces,staticForces,dbGet,dbSet,resetDB:()=>{DB={};saveDB()},get DB(){return DB},addPuller,renderReview,openSheet,buildWorksheet,schemeHTML,schemeText,teacherPrompt,progressHTML,openExplore,checkStep,qMarks,CHAPTERS,get GI(){return GI},calcEval,WS_CSS,user,fcRender,fcState:()=>FCV,FC_TOPICS,fcArt,FC_ART,fcStartGo,fcAnswer,ev:c=>eval(c)};' if hook else '')

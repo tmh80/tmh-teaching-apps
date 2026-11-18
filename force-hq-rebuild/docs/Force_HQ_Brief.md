@@ -210,6 +210,8 @@ Key-vocabulary flashcards with spaced repetition, matching the Sparks Through Ti
 - **Look:** cream index cards with a red header line and blue ruled lines. The word is in Kalam Bold and the meaning in Patrick Hand (OFL, subset and embedded in `src/fonts-hand.css`; licences in `vendor/fonts/`), with the text sitting on the lines. A typed answer appears on the lines in biro blue. Cards flip in 3D (none with reduced motion), and "Need a clue?" shows the picture on the front.
 - **Files:**
   - `src/js/63-flashcards.js`: engine and views; `FC_TOPICS` maps each section to glossary keys.
+  - `src/js/66-practice-gen.js`: Maths Gym question generator (`prGen(level, seed, opts)`, `prMatchTrap`, `PR_THINGS` of 31 objects, all student wording in `PR_TEXT`). API in `docs/Force_HQ_Practice_Plan.md` section 8. Chapter 3's `mq()` maths bank is separate and unchanged.
+  - `src/js/67-practice.js` and `src/practice.css`: the Maths Gym (view `vPractice`, home card, Chapter 3 reminder, level meter, adaptive engine, two tries, clue ladder, pictures and force sketches, "Changing units" cards, end screen, summary PDF, the Gym section of "My work so far", the teacher-page row). Saved in `DB.prac` (rides along with the backup). Tests: `tests/practice_gen.py`, `tests/practice.py`.
   - `src/flashcards.css`
   - `src/js/64-fcart-kit.js`: pen-sketch helpers and the wobble filter.
   - `src/js/64a-fcart-c1-3.js` and `64b-fcart-c4-6.js`: one picture per word, 70 in all.

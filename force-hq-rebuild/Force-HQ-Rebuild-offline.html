@@ -1159,6 +1159,163 @@ body[data-view="vCards"] .jtab{display:none!important}
 @media (max-width:359px){.fc-minis{grid-template-columns:minmax(0,1fr)}}
 @media print{#vCards,#flashCard{display:none!important}}
 
+/* ===== Maths Gym (67-practice.js) ===== */
+.gymc .hcicon{background:var(--right-soft);color:var(--right)}
+.gymc .kicker2{color:var(--right)}
+.pg-hcsub{font-size:14px;color:var(--muted)}
+.pg-hcsub b{color:var(--ink)}
+
+.pg{max-width:1240px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px;min-width:0}
+.pg *{min-width:0}
+.pg .chhead h1{font-size:34px}
+
+/* the level bar */
+.pg-bar{padding:14px 18px;display:flex;flex-direction:column;gap:10px;border-radius:16px}
+.pg-lvhd{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.pg-lvname{font-size:18px}
+.pg-rungs{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.pg-rungs li{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--chip);color:var(--muted);font-size:13px;line-height:1.2;font-weight:600}
+.pg-rungs li b{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--panel);border:1.5px solid var(--line);color:var(--ink);font-family:var(--f-num);font-size:14px}
+.pg-rungs li.past{border-color:var(--good);background:var(--okbg2);color:var(--okfg)}
+.pg-rungs li.past b{border-color:var(--good);background:var(--good);color:#fff}
+.pg-rungs li.on{border:2.5px solid var(--hazard);background:var(--hazard-soft);color:var(--ink);font-weight:800;box-shadow:0 2px 8px rgba(227,165,28,.3)}
+.pg-rungs li.on b{background:var(--hazard);border-color:var(--ink);color:#13212a}
+.pg-barrow{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.pg-run{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.pg-dots{display:flex;gap:5px}
+.pg-dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--good);background:var(--panel)}
+.pg-dots i.on{background:var(--good)}
+.pg-target{display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.pg-target select{font:inherit;font-weight:600;padding:5px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);max-width:230px}
+.pg-tprog{font-size:14px;color:var(--muted);font-weight:700}
+.pg-tprog.done{color:var(--okfg);background:var(--okbg);border:1.5px solid var(--good);border-radius:999px;padding:2px 10px}
+.pg-tbar{width:110px;height:8px;border-radius:99px;background:var(--chip);border:1px solid var(--line);overflow:hidden}
+.pg-tbar i{display:block;height:100%;background:var(--good)}
+.pg-rule{margin:0;font-size:13.5px;color:var(--muted)}
+
+/* question card + side column */
+.pg-main{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.pg-card{padding:16px 20px;display:flex;flex-direction:column;gap:12px;border-radius:16px;border-width:1.5px}
+.pg-card.ok{border-color:var(--good)}
+.pg-card.bad{border-color:var(--bad)}
+.pg-qhd{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center}
+.pg-qn{font-family:var(--f-display);font-weight:700;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent)}
+.pg-lv{font-size:14px;color:var(--muted);font-weight:700}
+.pg-chip{font-size:12.5px;font-weight:800;border-radius:999px;padding:2px 10px;border:1.5px solid var(--accent);background:var(--accent-soft);color:var(--ink)}
+.pg-chip.tw{border-color:var(--hazard);background:var(--hazard-soft)}
+.pg-story{display:grid;grid-template-columns:230px minmax(0,1fr);gap:16px;align-items:start}
+.pg-pic{margin:0}
+.pg-pic svg{display:block;width:100%;height:auto;border-radius:10px;box-shadow:0 1px 0 var(--line)}
+.pg-p{margin:0;font-size:18px;line-height:1.55;font-weight:600}
+.pg-fbd{margin:0;align-self:flex-start;border:1.5px solid var(--line);border-radius:12px;padding:6px 10px;background:var(--panel);max-width:380px;width:100%}
+.pg-fbd figcaption{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.pg-fbd svg{display:block;width:100%;height:auto}
+.pg-ans{display:flex;flex-direction:column;gap:4px}
+.pg-ans .numin{gap:8px}
+.pg-ans .ansin{width:150px;font-size:19px}
+.pg-ans .unitsel{font-size:18px}
+.pg-ans .go{padding:9px 22px}
+.pg-work{display:flex;flex-direction:column;gap:6px}
+.pg-work textarea{font:inherit;font-family:var(--f-num);font-size:15px;width:100%;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);resize:vertical}
+.pg-step{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;align-items:start}
+.pg-step>span{font-weight:800;font-size:14px;padding-top:8px;color:var(--accent)}
+.pg-clues{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.pg-clues .clist{margin:0;padding:10px 12px 10px 34px;border:1.5px dashed var(--hazard);border-radius:10px;background:var(--panel);align-self:stretch}
+.pg-clues .clist li{margin:3px 0;font-size:15.5px}
+.pg-cluebtn{border-style:dashed;border-color:var(--hazard);font-size:14px;padding:6px 12px}
+.pg-cnote{font-size:13px;color:var(--muted)}
+.pg-card .fb{font-size:16px}
+.pg-worked{border:2px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--chip)}
+.pg-worked.ok{border-color:var(--good);background:var(--okbg2)}
+.pg-worked summary{cursor:pointer;font-weight:700}
+.pg-workans{white-space:pre-line;font-family:var(--f-num);font-size:15px;line-height:1.6;margin-top:4px}
+.pg-cele{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:2px;border:2.5px solid var(--hazard);border-radius:12px;padding:12px 16px;background:var(--hazard-soft);color:var(--ink);animation:pgPop .5s ease-out}
+.pg-cele b{font-size:20px}
+.pg-conf{position:absolute;inset:0;pointer-events:none}
+.pg-conf i{position:absolute;top:-10px;width:8px;height:12px;border-radius:2px;opacity:0;animation:pgFall 1.6s ease-in .1s 2}
+.pg-conf i:nth-child(4n+1){background:#e8505b}.pg-conf i:nth-child(4n+2){background:#3d7fc1}.pg-conf i:nth-child(4n+3){background:#2a7d48}.pg-conf i:nth-child(4n){background:#e3a51c}
+.pg-conf i:nth-child(1){left:4%}.pg-conf i:nth-child(2){left:11%;animation-delay:.3s}.pg-conf i:nth-child(3){left:18%;animation-delay:.15s}.pg-conf i:nth-child(4){left:25%;animation-delay:.45s}.pg-conf i:nth-child(5){left:32%}.pg-conf i:nth-child(6){left:39%;animation-delay:.25s}.pg-conf i:nth-child(7){left:46%;animation-delay:.5s}
+.pg-conf i:nth-child(8){left:53%;animation-delay:.05s}.pg-conf i:nth-child(9){left:60%;animation-delay:.35s}.pg-conf i:nth-child(10){left:67%;animation-delay:.2s}.pg-conf i:nth-child(11){left:74%;animation-delay:.4s}.pg-conf i:nth-child(12){left:81%}.pg-conf i:nth-child(13){left:88%;animation-delay:.3s}.pg-conf i:nth-child(14){left:95%;animation-delay:.1s}
+@keyframes pgFall{0%{opacity:1;transform:translateY(0) rotate(0)}100%{opacity:0;transform:translateY(110px) rotate(260deg)}}
+@keyframes pgPop{0%{transform:scale(.94);opacity:0}100%{transform:scale(1);opacity:1}}
+.pg-down{display:flex;flex-direction:column;gap:2px;border:2px solid var(--accent);border-radius:12px;padding:10px 14px;background:var(--accent-soft);color:var(--ink)}
+.pg-down b{font-size:17px}
+.pg-tgt{border:2px solid var(--good);border-radius:12px;padding:10px 14px;background:var(--okbg);color:var(--okfg);font-weight:700}
+.pg-acts{display:flex;gap:10px;flex-wrap:wrap}
+.pg-side{position:sticky;top:12px}
+.pg-tri{padding:10px 14px;border-radius:14px}
+.pg-tri>summary{cursor:pointer;font-weight:800;font-size:16px}
+.pg-tri .tri svg{width:180px}
+.pg-tri .trisum{min-width:0;width:100%;font-size:19px}
+.pg-tri .scaleNote{margin:6px 0 0}
+.pg-unitsfold{align-self:flex-start;max-width:640px}
+.pg-unitsfold p{margin:4px 0}
+
+/* reminder, end screen, units cards */
+.pg-remind{padding:20px 24px;display:flex;gap:18px;align-items:flex-start;border-radius:16px;border:2px solid var(--hazard);max-width:760px}
+.pg-remind h2{font-size:26px;margin:0 0 6px}
+.pg-remind p{font-size:18px;margin:0 0 12px}
+.pg-rmicon{flex:none;width:64px;height:64px;border-radius:16px;display:grid;place-items:center;background:var(--hazard-soft);color:var(--fric)}
+.pg-rmicon .chicon{width:40px;height:40px}
+.pg-end{padding:18px 22px;display:flex;flex-direction:column;gap:14px;border-radius:16px}
+.pg-end h2{font-size:30px;margin:0}
+.pg-end h3{font-size:18px;margin:0 0 6px}
+.pg-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.pg-stats>div{border:1.5px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--chip);display:flex;flex-direction:column;gap:2px}
+.pg-stats b{font-family:var(--f-num);font-size:30px}
+.pg-stats b small{font-size:16px;color:var(--muted)}
+.pg-stats span{font-size:14px;color:var(--muted);font-weight:600}
+.pg-stats em{font-style:normal;font-size:14px;font-weight:700;color:var(--ink)}
+.pg-tline{margin:0;font-weight:700;font-size:16px;padding:8px 12px;border-radius:10px;border:1.5px solid var(--hazard);background:var(--hazard-soft);color:var(--hzfg)}
+.pg-tline.done{border-color:var(--good);background:var(--okbg);color:var(--okfg)}
+.pg-endgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+.pg-tbl td,.pg-tbl th{font-size:15px}
+.pg-star{color:var(--hazard)}
+.pg-traps{margin:0;padding-left:20px}.pg-traps li{margin:3px 0}
+.pg-nexttime{margin:0;font-size:17px;font-weight:700;padding:10px 14px;border-radius:10px;background:var(--accent-soft);color:var(--ink)}
+.pg-endbtns{gap:10px}
+.pg-units{padding:18px 22px;display:flex;flex-direction:column;gap:12px;border-radius:16px;max-width:820px;border:2px solid var(--accent)}
+.pg-units h2{font-size:28px;margin:0}
+.pg-uhd{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.pg-udots{display:flex;gap:5px}.pg-udots i{width:10px;height:10px;border-radius:50%;background:var(--line)}.pg-udots i.on{background:var(--accent)}.pg-udots i.past{background:var(--good)}
+.pg-ubody{display:grid;grid-template-columns:240px minmax(0,1fr);gap:18px;align-items:start}
+.pg-ubody p{font-size:18px;margin:0 0 8px}
+.pg-upic{margin:0}.pg-upic svg{width:100%;height:auto;display:block;border-radius:10px}
+.pg-ukey{display:inline-block;font-weight:800;font-size:20px!important;padding:8px 14px;border:2.5px solid var(--hazard);border-radius:10px;background:var(--hazard-soft)}
+.pg-uq{margin:0;font-size:16px;color:var(--muted)}
+.pg-gap{font-size:20px;margin:0;line-height:2}
+.pg-gap .gapin{font-size:19px;width:140px}
+.pg-uacts{gap:10px}
+.pg-ulink{border-color:var(--accent)}
+
+@media (max-width:959px){
+  .pg-main{grid-template-columns:minmax(0,1fr)}
+  .pg-side{position:static}
+}
+@media (max-width:760px){
+  .pg-rungs li span{display:none}
+  .pg-rungs li{justify-content:center;padding:5px}
+  .pg-story{grid-template-columns:minmax(0,1fr)}
+  .pg-pic{max-width:340px}
+  .pg-ubody{grid-template-columns:minmax(0,1fr)}
+  .pg-upic{max-width:300px}
+  .pg-endgrid{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:520px){
+  .pg .chhead h1{font-size:28px}
+  .pg-card,.pg-bar,.pg-end,.pg-units{padding:12px 12px}
+  .pg-p{font-size:17px}
+  .pg-stats{grid-template-columns:minmax(0,1fr)}
+  .pg-stats>div{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+  .pg-stats em{flex-basis:100%}
+  .pg-remind{flex-direction:column;padding:16px}
+  .pg-step{grid-template-columns:minmax(0,1fr);gap:2px}
+  .pg-step>span{padding-top:0}
+  .pg-target select{max-width:200px}
+}
+@media (prefers-reduced-motion:reduce){.pg-cele{animation:none}.pg-conf{display:none}}
+@media print{.pg{display:none}}
+
 </style>
 <header class="top">
   <button type="button" class="brand" id="homeBtn" aria-label="Force HQ home">
@@ -1204,6 +1361,7 @@ body[data-view="vCards"] .jtab{display:none!important}
       <div class="panel homecard explorec" id="exploreCard"></div>
       <div class="panel homecard workc" id="workshopCard"></div>
       <div class="panel homecard flashc" id="flashCard"></div>
+      <div class="panel homecard gymc" id="gymCard"></div>
     </div>
     <div class="panel stampbook" id="stampRow"></div>
   </section>
@@ -1234,6 +1392,9 @@ body[data-view="vCards"] .jtab{display:none!important}
 
   <!-- FLASHCARDS -->
   <section id="vCards" class="view" hidden><div id="fcHost"></div></section>
+
+  <!-- MATHS GYM -->
+  <section id="vPractice" class="view" hidden><div id="pgHost"></div></section>
 
   <!-- TEACHER -->
   <section id="vTeacher" class="view" hidden></section>
@@ -2888,7 +3049,7 @@ const CHAPTERS = [
 ];
 /* "Start Part 1" / "Start the Extension": Chapter 6 uses Part 1 to Part 4 and an Extension instead of Foundation and Extension */
 const startWord = p => /^Part \d/.test(p) ? p : 'the ' + p;
-const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher', 'vCards'];
+const VIEWS = ['vHome', 'vChapter', 'vExplore', 'vTeacher', 'vCards', 'vPractice'];
 let VIEW = 'vHome', CH = null, CTAB = 'learn';
 const user = () => DB.user || {};
 const isTeacher = () => !!(DB.user && DB.user.teacher);
@@ -2897,10 +3058,11 @@ const unlocked = () => !!DB.unlocked;
 function show(v) {
   if (typeof qUnpop === 'function') qUnpop();
   VIEW = v; VIEWS.forEach(x => $('#' + x).hidden = x !== v); document.body.dataset.view = v;
-  $('#crumb').textContent = v === 'vChapter' && CH ? `Force Arenas · Chapter ${CH.n}` : v === 'vExplore' ? 'Force Arenas · Explore' : v === 'vTeacher' ? 'For teachers' : v === 'vCards' ? 'Flashcards' : '';
+  $('#crumb').textContent = v === 'vChapter' && CH ? `Force Arenas · Chapter ${CH.n}` : v === 'vExplore' ? 'Force Arenas · Explore' : v === 'vTeacher' ? 'For teachers' : v === 'vCards' ? 'Flashcards' : v === 'vPractice' ? 'Maths Gym' : '';
   window.scrollTo(0, 0);
   if (v === 'vHome') renderHome();
   if (v === 'vCards') fcRender();
+  if (v === 'vPractice') pgRender();
 }
 function parkLab() { $('#labPark').appendChild($('#lab')); }
 function placeLab(host) { $('#lab').classList.remove('nolc'); host.appendChild($('#lab')); requestAnimationFrame(() => { readColors(); renderPal(); }); }
@@ -2960,7 +3122,7 @@ function renderHome() {
   $('#exploreCard').innerHTML = `<div class="hcicon">${chIcon('rope')}</div><div class="hcbody">` + (exploreOpen()
     ? `<span class="kicker2">Free play · open</span><h3>Explore the Main Arena</h3><p>Every control, readout and diagram is switched on. Build any tug-of-war you like and test your own ideas. Tap any ⓘ button to find out how to read a panel.</p><div class="row"><button type="button" class="go" data-act="explore">Go to Explore →</button></div>`
     : `<span class="kicker2">Free play · opens after Chapter 1</span><h3>Explore the Main Arena</h3><p>Explore switches on every control, readout and diagram at once. It opens when you finish the Chapter 1 Foundation, because by then you'll know how to read every panel.</p><div class="row"><button type="button" class="go" data-open="c1f">Start Chapter 1 →</button><button type="button" class="ghost" data-act="explore-anyway">Open it anyway</button></div>`) + '</div>';
-  $('#workshopCard').hidden = !WORKSHOP_OPEN; fcHomeCard();
+  $('#workshopCard').hidden = !WORKSHOP_OPEN; fcHomeCard(); pgHomeCard();
   if (WORKSHOP_OPEN) { const first = SECTIONS.find(x => x.ch === 'c6'), P = first ? secParts(first.id) : null;
     $('#workshopCard').innerHTML = `<div class="hcicon">${chIcon('gear')}</div><div class="hcbody"><span class="kicker2">Chapter 6 · The Workshop</span><h3>Save Captain Smooshy!</h3><p>A gummy bear astronaut is stuck in a crater and only has 60 N of pull. Learn how levers, pulleys, ramps, wedges and screws work, then use them to rescue his spaceship.</p><div class="row"><button type="button" class="go" data-open="${first ? first.id : 'c6a'}">${P && P.done ? 'Carry on' : 'Start'} the Workshop →</button><button type="button" class="ghost" data-act="transmission">📡 Replay the transmission</button></div></div>`; }
   $('#stampRow').innerHTML = `<div class="sbhd"><div><span class="kicker2">My stamp book</span><h3>${nst ? `${nst} of ${SECTIONS.length} stamps collected` : 'Earn a stamp for every section you finish'}</h3></div></div><div class="sbgrid">`
@@ -10139,9 +10301,9 @@ function schemeText(chId) { const d = h('div', {}, schemeHTML(chId)); return [..
 /* ---------- preview + print ---------- */
 function openSheet(chId, mode) {
   if ((mode === 'key' || mode === 'scheme') && !unlocked()) { askCode(ok => { if (ok) { closeModal(); openSheet(chId, mode); } }, 'Answer keys and marking schemes are for teachers. Type the teacher code to open them.'); return; }
-  const html = wsSheetHTML(chId, mode), student = mode === 'student', fname = wsFileName(chId, mode);
+  const html = wsSheetHTML(chId, mode), student = mode === 'student' || mode === 'gym', fname = wsFileName(chId, mode);
   const back = h('div', { class: 'modalback', style: 'z-index:75' });
-  back.innerHTML = `<div class="modal wide" style="max-width:860px"><div class="row" style="justify-content:space-between"><h2>${mode === 'blank' ? 'Blank worksheet' : mode === 'key' ? 'Answer key' : mode === 'scheme' ? 'Marking scheme' : mode === 'progress' ? 'My work so far' : 'My worksheet'}</h2><div class="row"><button type="button" class="go" id="wsDown">${student ? '⬇ Download my worksheet (PDF)' : '⬇ Download (PDF)'}</button><button type="button" class="ghost" id="wsClose">Close</button></div></div>
+  back.innerHTML = `<div class="modal wide" style="max-width:860px"><div class="row" style="justify-content:space-between"><h2>${mode === 'blank' ? 'Blank worksheet' : mode === 'key' ? 'Answer key' : mode === 'scheme' ? 'Marking scheme' : mode === 'progress' ? 'My work so far' : mode === 'gym' ? 'My Maths Gym practice' : 'My worksheet'}</h2><div class="row"><button type="button" class="go" id="wsDown">${mode === 'gym' ? '⬇ Download my practice (PDF)' : student ? '⬇ Download my worksheet (PDF)' : '⬇ Download (PDF)'}</button><button type="button" class="ghost" id="wsClose">Close</button></div></div>
     <div class="row" style="gap:10px;align-items:baseline;flex-wrap:wrap"><button type="button" class="mini" id="wsPrint">Use the print menu instead</button><span class="scaleNote" id="wsTip" hidden>In the print window, choose <b>Save as PDF</b> as the printer, then press Save.</span></div>
     <p class="fb" id="wsMsg" role="status" aria-live="polite" hidden></p><style>${WS_CSS}</style><div style="border:1px solid var(--line);border-radius:8px;padding:10px;background:#fff;color:#13212a;max-height:70vh;overflow:auto">${html}</div></div>`;
   document.body.appendChild(back);
@@ -10149,7 +10311,7 @@ function openSheet(chId, mode) {
   $('#wsClose', back).addEventListener('click', () => back.remove()); back.addEventListener('click', e => { if (e.target === back) back.remove(); });
   $('#wsPrint', back).addEventListener('click', () => {
     $('#wsTip', back).hidden = false;
-    $('#printArea').innerHTML = `<style>${WS_CSS}</style>` + (wsNeedsName(mode) ? '<div class="ws"><div class="noname">No name, no worksheet!<br><span style="font-size:14pt">Go back and type your name first.</span></div></div>' : html);
+    $('#printArea').innerHTML = `<style>${WS_CSS}</style>` + (wsNeedsName(mode) ? `<div class="ws"><div class="noname">No name, no worksheet!<br><span style="font-size:14pt">Go back and type your ${mode === 'gym' ? 'name and class' : 'name'} first.</span></div></div>` : html);
     try { printAs(fname); } catch (e) { toast('Printing is blocked here. Use the Download button instead.'); }
   });
   const down = $('#wsDown', back);
@@ -10160,7 +10322,7 @@ function openSheet(chId, mode) {
       saved: n => msg(`Saved! Look in your <b>Downloads</b> folder for <i>${esc(n)}</i>, then upload it to Toddle. Can't find it? Use the print menu instead.`, 'ok'),
       failed: () => msg('Sorry, the PDF could not be made on this device. Please use the print menu instead: press "Use the print menu instead" and choose Save as PDF.', 'no'),
       declined: () => msg('', ''),
-      noName: () => msg('No name, no worksheet! Close this window and type your name first.', 'no')
+      noName: () => msg(`No name, no worksheet! Close this window and type your ${mode === 'gym' ? 'name and class' : 'name'} first.`, 'no')
     }, html);
     down.disabled = false;
   });
@@ -10184,6 +10346,7 @@ function progressHTML() {
     const C2 = challengeState(ch.id); if (CHDATA[ch.id].challenge) out += `<h2>Challenge: ${C2.tried} of ${C2.total} missions tried, ${C2.score} of ${C2.max} objectives</h2>`;
     const P = reviewProgress(ch.id); out += `<h2>Check: ${P.done} of ${P.total} questions answered</h2><p class="note">Use "Make my worksheet" on the Check tab for the full worksheet.</p></div>`;
   });
+  out += pgProgressHTML();
   const E = dbGet('evidence', []); if (E.length) out += `<div class="page"><h2>Evidence of my learning</h2>${E.map(e => `<p class="stu" style="margin:2px 0">${EVICON[e.kind] || ''} ${esc(e.text)}</p>`).join('')}</div>`;
   return `<div class="ws">${out}</div>`;
 }
@@ -10194,16 +10357,17 @@ function progressHTML() {
    html2canvas and jsPDF are inlined from vendor/ by build.py (no internet needed). Ported from Sparks Through Time and adapted to Force HQ's HTML-string worksheets. */
 const cleanFileName = s => String(s || '').replace(/[\/\\:*?"<>|\u0000-\u001f]/g, '').replace(/\s+/g, ' ').trim().slice(0, 120).trim();
 function wsWho(mode) {
-  if (mode === 'student' || mode === 'progress') return (user().name || '').trim() || (isTeacher() ? 'Teacher copy' : 'Student');
+  if (mode === 'student' || mode === 'progress' || mode === 'gym') return (user().name || '').trim() || (isTeacher() ? 'Teacher copy' : 'Student');
   return mode === 'blank' ? 'Blank template' : mode === 'scheme' ? 'Marking scheme' : 'Answer key';
 }
 /* Force HQ Ch3 Foundation (F = ma) - Alex Chen   |   ... - Blank template / Answer key / Marking scheme   |   Force HQ - My work so far - Alex Chen */
 function wsFileName(chId, mode) {
   if (mode === 'progress') return cleanFileName(`Force HQ - My work so far - ${wsWho(mode)}`);
+  if (mode === 'gym') return cleanFileName(`Force HQ Maths Gym - ${wsWho(mode)}`);
   const ch = secOf(chId);
   return cleanFileName(`Force HQ Ch${ch.n} ${ch.part} (${ch.title}) - ${wsWho(mode)}`);
 }
-const wsNeedsName = mode => (mode === 'student' || mode === 'progress') && !user().name && !isTeacher();
+const wsNeedsName = mode => !isTeacher() && (((mode === 'student' || mode === 'progress') && !user().name) || (mode === 'gym' && !((user().name || '').trim() && (user().cls || '').trim())));   // the Maths Gym summary needs the class too
 
 /* Browsers suggest the page title as the PDF name, so set it while the print window is open and put it back afterwards. */
 function printAs(fileName) {
@@ -10281,7 +10445,7 @@ async function downloadSheetPdf(html, fileName, ui) {
   finally { if (host) host.remove(); if (prevTheme) root.setAttribute('data-theme', prevTheme); else root.removeAttribute('data-theme'); }
 }
 /* the sheet for a mode, the same HTML that the print path uses */
-function wsSheetHTML(chId, mode) { return mode === 'progress' ? progressHTML() : mode === 'scheme' ? `<div class="ws"><div class="page">${schemeHTML(chId)}</div></div>` : buildWorksheet(chId, mode); }
+function wsSheetHTML(chId, mode) { return mode === 'progress' ? progressHTML() : mode === 'gym' ? pgSheetHTML() : mode === 'scheme' ? `<div class="ws"><div class="page">${schemeHTML(chId)}</div></div>` : buildWorksheet(chId, mode); }
 function downloadWorksheetPdf(chId, mode, ui, html) {
   if (wsNeedsName(mode)) { ui.noName && ui.noName(); return Promise.resolve(false); }   // the same gate as printing: no name, no worksheet
   return downloadSheetPdf(html || wsSheetHTML(chId, mode), wsFileName(chId, mode), ui);
@@ -10291,14 +10455,14 @@ function downloadWorksheetPdf(chId, mode, ui, html) {
 const TPARTS = [['learn', 'Learn steps', 'Work through every guided step: read the cards, do the jobs in the Do this list and answer the Your turn questions.'], ['challenge', 'Challenge (sections that have one)', 'Complete the Challenge missions. Trying every mission is enough to finish.'], ['review', 'Check questions + worksheet', 'Answer every Check question, then press "Make my worksheet" and save it as a PDF.'], ['explore', 'Explore free play', 'Spend some time in Explore, testing your own ideas in the Main Arena.']];
 const TMIN = { learn: id => secMins(id).learn, challenge: id => secMins(id).challenge, review: id => secMins(id).review, explore: () => 10 };
 function renderTeacher() {
-  const T0 = Object.assign({ secs: ['c1f'], opt: ['c1x'], parts: ['learn', 'challenge', 'review'], cls: '', where: 'home', msg: '', bts: [] }, dbGet('teach', {}));
+  const T0 = Object.assign({ secs: ['c1f'], opt: ['c1x'], parts: ['learn', 'challenge', 'review'], cls: '', where: 'home', msg: '', bts: [], gym: { on: false, target: 'l4' } }, dbGet('teach', {}));
   T0.secs = T0.secs.filter(secOf); T0.opt = (T0.opt || []).filter(secOf); if (!WORKSHOP_OPEN) T0.bts = [];
   $('#vTeacher').innerHTML = `<div class="tpage"><div class="chhead"><div><span class="lbl">For teachers</span><h1>Set classwork or homework</h1></div><button type="button" class="ghost" data-act="home">← Back to the home page</button></div>
     <section class="panel tsec"><h2>1. Choose the sections</h2><p class="scaleNote">Every section takes approx. 20–30 minutes and makes its own worksheet. Tick one for a short task, or several for a longer session. Mark a section as optional to let keen students carry on into it.</p>
       ${SECTIONS.map(c => `<div class="row" style="justify-content:space-between;border-bottom:1px dashed var(--line);padding:4px 0"><label><input type="checkbox" data-sec="${c.id}" ${T0.secs.includes(c.id) || T0.opt.includes(c.id) ? 'checked' : ''}> <span><b>Chapter ${c.n} ${c.part}</b>: ${c.title} · about ${secMins(c.id).total} min</span></label><label><input type="checkbox" data-opt="${c.id}" ${T0.opt.includes(c.id) ? 'checked' : ''}> Optional</label></div>`).join('')}
       <p class="scaleNote">Any new chapters will appear here as they are added.</p>
       ${WORKSHOP_OPEN ? `<h3 style="margin:10px 0 2px">Build tasks (optional, open builds)</h3><p class="scaleNote">Open-ended tasks in <b>Explore › Workshop › Build tasks</b>. Students need Part 4 first. Each makes its own build sheet.</p>
-      ${BT.map(b => `<div class="row" style="border-bottom:1px dashed var(--line);padding:4px 0"><label><input type="checkbox" data-bt="${b.id}" ${(T0.bts || []).includes(b.id) ? 'checked' : ''}> <span><b>Build task ${b.id.slice(2)}</b>: ${b.title} · about ${b.mins} min</span></label></div>`).join('')}` : ''}</section>
+      ${BT.map(b => `<div class="row" style="border-bottom:1px dashed var(--line);padding:4px 0"><label><input type="checkbox" data-bt="${b.id}" ${(T0.bts || []).includes(b.id) ? 'checked' : ''}> <span><b>Build task ${b.id.slice(2)}</b>: ${b.title} · about ${b.mins} min</span></label></div>`).join('')}` : ''}${pgTeacherRow(T0)}</section>
     <section class="panel tsec"><h2>2. What should students do?</h2>${TPARTS.map(([k, n]) => `<label><input type="checkbox" data-part="${k}" ${T0.parts.includes(k) ? 'checked' : ''}> ${n}</label>`).join('')}</section>
     <section class="panel tsec"><h2>3. Details</h2><label style="flex-direction:column;gap:4px">Class<input type="text" id="tCls" value="${esc(T0.cls)}" placeholder="for example 7/8B" style="font:inherit;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;max-width:240px;background:var(--panel);color:var(--ink)"></label>
       <div class="row"><b>Where:</b>${[['class', 'In class'], ['home', 'At home'], ['both', 'Both']].map(([k, n]) => `<label><input type="radio" name="tWhere" value="${k}" ${T0.where === k ? 'checked' : ''}> ${n}</label>`).join('')}</div>
@@ -10315,16 +10479,18 @@ function renderTeacher() {
     $$('[data-opt]').forEach(o => { if (o.checked) { const b = $(`[data-sec="${o.dataset.opt}"]`); if (b && !b.checked) b.checked = true; } });
     const ticked = $$('[data-sec]').filter(x => x.checked).map(x => x.dataset.sec), optional = $$('[data-opt]').filter(x => x.checked).map(x => x.dataset.opt), parts = $$('[data-part]').filter(x => x.checked).map(x => x.dataset.part);
     const secs = ticked.filter(x => !optional.includes(x)), opt = ticked.filter(x => optional.includes(x)), bts = $$('[data-bt]').filter(x => x.checked).map(x => x.dataset.bt);
-    const T1 = { secs, opt, parts, cls: $('#tCls').value.trim(), where: ($$('[name=tWhere]').find(x => x.checked) || {}).value || 'home', msg: $('#tMsg').value.trim(), bts }; dbSet('teach', T1);
-    const mt = list => Math.round(list.reduce((a, s) => a + parts.reduce((b, p) => b + (p === 'challenge' && !CHDATA[s].challenge ? 0 : TMIN[p](s)), 0), 0)), mins = mt(secs) + bts.reduce((a, id) => a + btById(id).mins, 0), omins = mt(opt);
+    const T1 = { secs, opt, parts, cls: $('#tCls').value.trim(), where: ($$('[name=tWhere]').find(x => x.checked) || {}).value || 'home', msg: $('#tMsg').value.trim(), bts, gym: { on: !!($('[data-gym]') && $('[data-gym]').checked), target: $('#tGymT') ? $('#tGymT').value : 'l4' } }; dbSet('teach', T1);
+    const gym = pgGymOf(T1); if ($('#tGymMin')) $('#tGymMin').textContent = PG_TMIN[T1.gym.target] || 20;
+    const mt = list => Math.round(list.reduce((a, s) => a + parts.reduce((b, p) => b + (p === 'challenge' && !CHDATA[s].challenge ? 0 : TMIN[p](s)), 0), 0)), mins = mt(secs) + bts.reduce((a, id) => a + btById(id).mins, 0) + pgTeachMins(gym), omins = mt(opt);
     $('#tTime').innerHTML = `Estimated time: <b>approx. ${mins} minutes</b>${opt.length ? `, plus approx. ${omins} minutes for the optional section${opt.length > 1 ? 's' : ''}` : ''}${mins > 40 && T1.where !== 'class' ? ' (consider splitting it across two evenings)' : ''}.`;
     $('#tPrompt').value = teacherPrompt(T1, mins, omins);
     $('#tFiles').innerHTML = parts.includes('review') ? [...secs, ...opt].map(s => { const ch = secOf(s), tot = CHDATA[s].review.reduce((a, q) => a + qMarks(q), 0); return `<div class="filerow"><b>Chapter ${ch.n} ${ch.part} worksheet · ${tot} marks${opt.includes(s) ? ' (optional)' : ''}</b><button type="button" class="mini" data-file="${s}:blank">Blank template</button><button type="button" class="mini" data-file="${s}:key">${unlocked() ? '' : '🔒 '}Answer key</button><button type="button" class="mini" data-file="${s}:scheme">${unlocked() ? '' : '🔒 '}Marking scheme</button></div>`; }).join('') + bts.map(s => { const ch = secOf(s), tot = CHDATA[s].review.reduce((a, q) => a + qMarks(q), 0); return `<div class="filerow"><b>Build task ${s.slice(2)} build sheet · ${tot} marks</b><button type="button" class="mini" data-file="${s}:blank">Blank template</button><button type="button" class="mini" data-file="${s}:key">${unlocked() ? '' : '🔒 '}Answer key</button><button type="button" class="mini" data-file="${s}:scheme">${unlocked() ? '' : '🔒 '}Marking scheme</button></div>`; }).join('') : '<p class="scaleNote">Tick "Check questions + worksheet" in step 2 to get worksheet files. The other parts have no worksheet.</p>';
-    const aiIds = [...secs, ...opt, ...bts];
-    if (!parts.includes('review') || !aiIds.length) $('#tAiBox').innerHTML = '<p class="scaleNote">Tick "Check questions + worksheet" in step 2 to get the AI feedback instructions.</p>';
+    if (gym) $('#tFiles').innerHTML += '<p class="scaleNote">🏋️ Maths Gym: no printable files. The sim makes and marks every question, and students upload their own practice summary PDF.</p>';
+    const aiIds = [...secs, ...opt, ...bts], revOk = parts.includes('review') && aiIds.length > 0;
+    if (!revOk && !gym) $('#tAiBox').innerHTML = '<p class="scaleNote">Tick "Check questions + worksheet" in step 2 to get the AI feedback instructions.</p>';
     else if (!unlocked()) $('#tAiBox').innerHTML = '<p class="scaleNote">🔒 The AI feedback instructions contain the answer key and need the teacher code.</p><button type="button" class="mini" id="tAiUnlock">🔒 Unlock</button>';
     else {
-      const txt = aiFeedbackText([...secs, ...bts], opt), n = txt.length;
+      const txt = revOk ? aiFeedbackText([...secs, ...bts], opt) + (gym ? '\n\n' + pgAiText(gym, false) : '') : pgAiText(gym, true), n = txt.length;
       if (!$('#tAi') || $('#tAi').value !== txt) $('#tAiBox').innerHTML = `<textarea id="tAi" readonly></textarea><div class="row"><button type="button" class="go" id="tAiCopy">Copy AI feedback instructions</button><span class="scaleNote" id="tAiCount"></span><span class="scaleNote" id="tAiCopied"></span></div><p class="scaleNote" id="tAiLong" hidden>This is long. If Toddle cuts it off, set fewer sections in one task.</p>`, $('#tAi').value = txt;
       $('#tAiCount').textContent = n.toLocaleString('en-GB') + ' characters'; $('#tAiLong').hidden = n <= 10000;
     }
@@ -10340,13 +10506,13 @@ function renderTeacher() {
   update();
 }
 function teacherPrompt(T1, mins, omins) {
-  const req = T1.secs.map(secOf), opt = (T1.opt || []).map(secOf), parts = T1.parts, bts = (T1.bts || []).filter(isBT), all = [...req, ...opt];
-  if ((!all.length && !bts.length) || !parts.length) return 'Tick at least one section and one part to build the instructions.';
+  const req = T1.secs.map(secOf), opt = (T1.opt || []).map(secOf), parts = T1.parts, bts = (T1.bts || []).filter(isBT), all = [...req, ...opt], gym = pgGymOf(T1), GP = gym ? pgPromptParts(gym, 0) : null;
+  if ((!all.length && !bts.length && !gym) || (!parts.length && !gym)) return 'Tick at least one section and one part to build the instructions.';
   const where = T1.where === 'class' ? 'in class' : T1.where === 'home' ? 'at home' : 'in class and at home';
   const nm = c => `Chapter ${c.n} ${c.part} (${c.title})`;
   const L = [];
   L.push(`Please create a Toddle task for my ${T1.cls || 'Grade 7/8'} science class using Force HQ, an interactive forces simulation (an HTML file I will attach).`);
-  const btn = b => `Build task ${b.id.slice(2)} (${b.title})`; L.push(''); L.push(`Task title: Force HQ: ${[...(req.length ? req.map(nm) : opt.map(nm)), ...bts.map(id => btn(BT_SEC[id]))].join(', ')}`);
+  const btn = b => `Build task ${b.id.slice(2)} (${b.title})`; L.push(''); L.push(`Task title: Force HQ: ${[...(req.length ? req.map(nm) : opt.map(nm)), ...bts.map(id => btn(BT_SEC[id])), ...(gym ? [GP.title] : [])].join(', ')}`);
   L.push(`Estimated time: approx. ${mins || omins} minutes, ${where}.${opt.length && req.length ? ` There is also an optional extra section of approx. ${omins} minutes for students who want to go further.` : ''}`);
   if ((typeof all !== 'undefined' ? all : []).some(c => c.id === 'c6e')) L.push('Part 5 (Operation Gummy Lift) works best as two sessions of about 30 minutes, or one homework split over two days. Session 1: the landing questions, a short lever warm-up, then a first build and Run Rescue. Session 2: improve the route, then the reflection and the Check. The sim saves the route after every change, so students reopen the same file and carry on where they stopped.');
   L.push(''); L.push('About the resource: Force HQ is a self-contained simulation. Students open the HTML file in a browser, type their name and class, then work through guided steps in the Force Arenas. Every section makes its own worksheet PDF. Progress saves in the browser, so students should use the same device and browser each time.');
@@ -10359,22 +10525,26 @@ function teacherPrompt(T1, mins, omins) {
   L.push(''); L.push('Student instructions:'); let n = 1; L.push(`${n++}. Open the Force HQ file and type your name and class.`);
   (req.length ? req : opt).forEach(c => { const [o, n2] = steps(c, n); L.push(...o); n = n2; });
   bts.forEach(id => { const b = btById(id); L.push(`${n++}. Build task ${id.slice(2)}: on the home page press "Go to Explore", choose "Workshop", then "Build tasks" and Task ${id.slice(2)} ("${b.title}"). Build until every check is green, fill in the results table, answer the questions, then press "Make my build sheet" and choose "Save as PDF". (The Build tasks open when the student finishes Part 4, Compound machines.)`); });
+  if (gym) L.push(pgPromptParts(gym, n++).step);
   if (parts.includes('explore')) L.push(`${n++}. Explore: press "Go to Explore" on the home page and test at least two ideas of your own. (Explore opens when you finish the Chapter 1 Foundation. If it isn't open yet, press "Open it anyway".)`);
   L.push(`${n++}. If you need to stop early, press "📄 Save my work" at the top of the page to save what you have done so far as a PDF.`);
   if (req.length && opt.length) { L.push(''); L.push('Optional extra (for students who want to go further):'); let m = 1; opt.forEach(c => { const [o, m2] = steps(c, m); L.push(...o); m = m2; }); L.push('This makes a second worksheet PDF. Upload it too if you do it.'); }
   L.push(''); L.push('What students submit:');
   if (parts.includes('review')) { (req.length ? req : opt).forEach(c => L.push(`- The ${nm(c)} worksheet PDF.`)); if (req.length) opt.forEach(c => L.push(`- Optional: the ${nm(c)} worksheet PDF, if they did the optional section.`)); }
   bts.forEach(id => L.push(`- The ${btn(BT_SEC[id])} build sheet PDF.`));
-  if (!parts.includes('review') && !bts.length) L.push('- A PDF from "📄 Save my work" showing their progress.');
-  L.push(''); L.push('Learning goals:'); all.forEach(c => L.push(`- ${nm(c)}: ${CHDATA[c.id].goal}`)); bts.forEach(id => L.push(`- ${btn(BT_SEC[id])}: ${CHDATA[id].goal}`));
-  L.push(''); L.push('Key vocabulary: ' + [...new Set(all.flatMap(c => CHDATA[c.id].vocab))].join(', ') + '.');
-  L.push(''); L.push('Teacher-only notes: g = 9.8 N/kg is used throughout. Answer keys are locked inside the simulation with a teacher code.');
-  if (parts.includes('review')) {
-    const st = taskStrands([...all.map(c => c.id), ...bts]), crit = k => { const l = st.filter(x => x[0] === k); return l.length ? `Criterion ${k} (strands ${l.map(strandLabel).join(', ')})` : ''; };
+  if (gym) L.push(GP.submit);
+  if (!parts.includes('review') && !bts.length && (all.length || !gym)) L.push('- A PDF from "📄 Save my work" showing their progress.');
+  L.push(''); L.push('Learning goals:'); all.forEach(c => L.push(`- ${nm(c)}: ${CHDATA[c.id].goal}`)); bts.forEach(id => L.push(`- ${btn(BT_SEC[id])}: ${CHDATA[id].goal}`)); if (gym) L.push(GP.goal);
+  L.push(''); L.push('Key vocabulary: ' + [...new Set(all.flatMap(c => CHDATA[c.id].vocab).concat(gym ? ['force', 'mass', 'acceleration', 'resultant force', 'formula triangle', 'newton (N)'] : []))].join(', ') + '.');
+  L.push(''); L.push('Teacher-only notes: g = 9.8 N/kg is used throughout. Answer keys are locked inside the simulation with a teacher code.' + (gym ? ' ' + GP.note : ''));
+  const rev = parts.includes('review') && (all.length || bts.length);
+  if (rev || gym) {
+    const st0 = rev ? taskStrands([...all.map(c => c.id), ...bts]) : [], st = STRAND_ORDER.filter(x => st0.includes(x) || (gym && x === 'Aii')), crit = k => { const l = st.filter(x => x[0] === k); return l.length ? `Criterion ${k} (strands ${l.map(strandLabel).join(', ')})` : ''; };
     L.push(''); L.push(`MYP objectives: please attach these MYP Year 3 Sciences objectives to the task: ${['A', 'D'].map(crit).filter(Boolean).join(' and ')}.`);
-    L.push('AI marking: I will paste the AI feedback instructions, which include a written answer key, into the AI feedback settings separately. Students must never see them.');
-    L.push(''); L.push('Marks for each worksheet:');
-    all.forEach(c => L.push(`- ${nm(c)} worksheet${opt.includes(c) && req.length ? ' (optional)' : ''}: ${CHDATA[c.id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); bts.forEach(id => L.push(`- ${btn(BT_SEC[id])} build sheet: ${CHDATA[id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); }
+    L.push(rev ? 'AI marking: I will paste the AI feedback instructions, which include a written answer key, into the AI feedback settings separately. Students must never see them.' : 'AI marking: I will paste the AI feedback instructions into the AI feedback settings separately. Students must never see them.');
+    if (rev) { L.push(''); L.push('Marks for each worksheet:'); }
+    if (rev) all.forEach(c => L.push(`- ${nm(c)} worksheet${opt.includes(c) && req.length ? ' (optional)' : ''}: ${CHDATA[c.id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`)); if (rev) bts.forEach(id => L.push(`- ${btn(BT_SEC[id])} build sheet: ${CHDATA[id].review.reduce((a, q) => a + qMarks(q), 0)} marks.`));
+    if (gym) L.push('- Maths Gym: no marks. Feedback checks the practice PDF against the target.'); }
   return L.join('\n');
 }
 
@@ -11375,6 +11545,1016 @@ function fcC_wall(o = {}) {
     }; }
 }
 
+/* ===== Maths Gym: the F = m × a question generator =====
+   prGen(level, seed, opts) builds one seeded `num` question (levels 1–6) with a hint ladder, a worked answer,
+   a picture spec and the answers that common mistakes give (traps). prMatchTrap(q, value) names the mistake.
+   The API is written up in docs/Force_HQ_Practice_Plan.md, section 8. Chapter 3's mq() is separate and unchanged.
+   All student wording lives in PR_TEXT, so a change of voice touches one place. Uses rngSeed and UNITS (43-ch3.js) and DZ_WORLDS (46-dropzone.js). */
+
+/* ---- the object bank: realistic masses (kg), accelerations (m/s²) and top velocities (m/s). Force HQ places first. ----
+   push: who or what gives the force · fw: the name of that force · back: the force that holds it back
+   fric:false = never in a two-force story · fall: drops straight down · grams / tonnes: can be given in g or tonnes · worlds: can be on another world */
+const PR_THINGS = [
+  { key: 'sled', name: 'a husky sled', the: 'the sled', pic: 'sled', m: [140, 260], a: [0.6, 2.4], v: 9, push: 'the huskies', fw: 'pull', back: 'friction', act: 'The huskies pull the sled across the Snow Arena.' },
+  { key: 'crate', name: 'a Workshop crate', the: 'the crate', pic: 'crate', m: [25, 120], a: [0.4, 1.8], v: 2.5, push: 'the winch', fw: 'pull', back: 'friction', act: 'A winch drags the crate across the Workshop floor.', worlds: true, tug: true },
+  { key: 'smooshy', name: 'Captain Smooshy', the: 'Captain Smooshy', pic: 'gummy', m: [45, 75], a: [0.5, 3], v: 6, push: 'the rope', fw: 'pull', back: 'friction', act: 'A rope pulls Captain Smooshy, the giant gummy bear, along the floor.', worlds: true, tug: true },
+  { key: 'pod', name: 'a Space Dome supply pod', the: 'the supply pod', pic: 'pod', m: [180, 450], a: [0.8, 4.5], v: 30, push: 'the thrusters', fw: 'thrust', back: 'air resistance', act: 'The thrusters push the supply pod across the Space Dome.', worlds: true, jupiter: true },
+  { key: 'astro', name: 'an astronaut in a spacesuit', the: 'the astronaut', pic: 'person', m: [105, 160], a: [0.4, 2.2], v: 3, push: 'the jet pack', fw: 'thrust', back: 'friction', act: 'The astronaut moves with a small jet pack.', worlds: true, fric: false },
+  { key: 'rover', name: 'a space rover', the: 'the rover', pic: 'car', m: [180, 1050], a: [0.15, 0.9], v: 1.5, push: 'the motors', fw: 'driving force', back: 'friction', act: 'The motors drive the rover over the rocks.', worlds: true },
+  { key: 'dropcrate', name: 'a Drop Zone supply crate', the: 'the supply crate', pic: 'crate', m: [30, 60], a: [2, 9], v: 40, push: 'gravity', fw: 'weight', back: 'air resistance', act: 'The supply crate drops out of the plane.', fric: false, fall: true, dir: 'down' },
+  { key: 'trolley', name: 'a shopping trolley', the: 'the trolley', pic: 'trolley', m: [12, 45], a: [0.5, 2.2], v: 2.5, push: 'the shopper', fw: 'push', back: 'friction', act: 'A shopper pushes the trolley down the aisle.', tug: true },
+  { key: 'car', name: 'a car', the: 'the car', pic: 'car', m: [1050, 1900], a: [1.5, 4.5], v: 30, push: 'the engine', fw: 'driving force', back: 'friction', act: 'The engine drives the car along the road.', tonnes: true },
+  { key: 'kart', name: 'a go-kart and driver', the: 'the go-kart', pic: 'car', m: [120, 190], a: [2, 6], v: 18, push: 'the engine', fw: 'driving force', back: 'friction', act: 'The engine drives the go-kart round the track.' },
+  { key: 'sprinter', name: 'a sprinter', the: 'the sprinter', pic: 'person', m: [52, 90], a: [2.5, 6], v: 11, push: "the sprinter's legs", fw: 'push', back: 'air resistance', act: 'The sprinter drives off the starting blocks.' },
+  { key: 'wheelchair', name: 'a wheelchair racer', the: 'the racer', pic: 'person', m: [55, 85], a: [1, 3], v: 9, push: "the racer's arms", fw: 'push', back: 'air resistance', act: 'The racer pushes hard on the wheels.' },
+  { key: 'bike', name: 'a cyclist on a bike', the: 'the cyclist', pic: 'bike', m: [62, 105], a: [0.5, 2.2], v: 12, push: 'the pedals', fw: 'driving force', back: 'air resistance', act: 'The cyclist pedals away from the lights.' },
+  { key: 'skate', name: 'a skateboarder', the: 'the skateboarder', pic: 'skateboard', m: [35, 80], a: [0.6, 2.5], v: 7, push: "the skateboarder's foot", fw: 'push', back: 'friction', act: 'The skateboarder pushes off with one foot.' },
+  { key: 'football', name: 'a football', the: 'the football', pic: 'ball', m: [0.41, 0.45], a: [80, 250], v: 32, push: "a player's boot", fw: 'kick', back: 'air resistance', act: 'A player kicks the football.', grams: true, fric: false },
+  { key: 'tennis', name: 'a tennis ball', the: 'the tennis ball', pic: 'ball', m: [0.056, 0.059], a: [150, 400], v: 30, push: 'the ball machine', fw: 'push', back: 'air resistance', act: 'A ball machine fires the tennis ball.', grams: true, fric: false },
+  { key: 'puck', name: 'a hockey puck', the: 'the puck', pic: 'ball', m: [0.156, 0.17], a: [40, 300], v: 35, push: 'the hockey stick', fw: 'push', back: 'friction', act: 'A player hits the puck across the ice.', grams: true, fric: false },
+  { key: 'modeltrain', name: 'a model train', the: 'the model train', pic: 'train', m: [0.8, 2.6], a: [0.2, 0.9], v: 1.2, push: 'the motor', fw: 'pull', back: 'friction', act: 'The motor pulls the model train round the track.', grams: true },
+  { key: 'bowling', name: 'a bowling ball', the: 'the bowling ball', pic: 'ball', m: [4.5, 7.2], a: [5, 25], v: 9, push: "the bowler's hand", fw: 'push', back: 'friction', act: 'A bowler rolls the ball down the lane.', fric: false },
+  { key: 'rhino', name: 'a charging rhino', the: 'the rhino', pic: 'animal', m: [1800, 2500], a: [1.5, 4], v: 12, push: "the rhino's legs", fw: 'push', back: 'air resistance', act: 'The rhino charges across the grass.', tonnes: true },
+  { key: 'elephant', name: 'an elephant', the: 'the elephant', pic: 'animal', m: [2700, 6000], a: [0.5, 1.8], v: 6.5, push: "the elephant's legs", fw: 'push', back: 'air resistance', act: 'The elephant starts to run.', tonnes: true },
+  { key: 'horse', name: 'a racehorse', the: 'the racehorse', pic: 'animal', m: [450, 550], a: [2, 6], v: 18, push: "the horse's legs", fw: 'push', back: 'air resistance', act: 'The racehorse bursts out of the starting gate.' },
+  { key: 'cheetah', name: 'a cheetah', the: 'the cheetah', pic: 'animal', m: [35, 65], a: [5, 12], v: 28, push: "the cheetah's legs", fw: 'push', back: 'air resistance', act: 'The cheetah starts a chase.' },
+  { key: 'elevator', name: 'an elevator', the: 'the elevator', pic: 'lift', m: [450, 1100], a: [0.5, 1.5], v: 3, push: 'the cable', fw: 'pull', back: 'friction', act: 'The cable pulls the elevator up the shaft.', fric: false, dir: 'up' },
+  { key: 'rocketsled', name: 'a rocket sled', the: 'the rocket sled', pic: 'rocket', m: [800, 2400], a: [12, 60], v: 250, push: 'the rocket', fw: 'thrust', back: 'friction', act: 'The rocket fires and the sled shoots along the rails.', tonnes: true },
+  { key: 'bus', name: 'a school bus', the: 'the bus', pic: 'truck', m: [9000, 13500], a: [0.8, 1.6], v: 15, push: 'the engine', fw: 'driving force', back: 'friction', act: 'The school bus pulls away from the stop.', tonnes: true },
+  { key: 'truck', name: 'a delivery truck', the: 'the truck', pic: 'truck', m: [3500, 7500], a: [0.8, 2.2], v: 20, push: 'the engine', fw: 'driving force', back: 'friction', act: 'The delivery truck pulls out onto the road.', tonnes: true },
+  { key: 'train', name: 'an electric train', the: 'the train', pic: 'train', m: [40000, 120000], a: [0.5, 1.2], v: 25, push: 'the motors', fw: 'driving force', back: 'friction', act: 'The electric train leaves the station.', tonnes: true },
+  { key: 'motorboat', name: 'a motorboat', the: 'the motorboat', pic: 'boat', m: [900, 2200], a: [1, 3.5], v: 25, push: 'the engine', fw: 'thrust', back: 'water resistance', act: 'The motorboat races across the lake.', tonnes: true },
+  { key: 'canoe', name: 'a canoe with one paddler', the: 'the canoe', pic: 'boat', m: [85, 120], a: [0.4, 1.5], v: 4, push: 'the paddle', fw: 'push', back: 'water resistance', act: 'The paddler digs the paddle into the water.' },
+  { key: 'skydiver', name: 'a skydiver', the: 'the skydiver', pic: 'diver', m: [60, 100], a: [1.5, 9], v: 50, push: 'gravity', fw: 'weight', back: 'air resistance', act: 'The skydiver jumps out of the plane.', fric: false, fall: true, dir: 'down' }
+];
+const PR_THING = {}; PR_THINGS.forEach(t => { PR_THING[t.key] = t; });
+/* skills, for the end screen (q.skill) */
+const PR_SKILLS = { F: 'Find the force', a: 'Find the acceleration', m: 'Find the mass', res: 'Resultant force first', weight: 'Mass from weight', vel: 'Acceleration from velocity', three: 'Three-step problems', compare: 'Comparing two objects', units: 'Changing units' };
+
+/* ---- every word a student reads. c = the story's names and numbers (already formatted), k = the same numbers for calculator keys ---- */
+const PR_TEXT = {
+  round: dp => `Give your answer to ${dp} decimal place${dp > 1 ? 's' : ''}.`,
+  answer: (c, dp) => `Answer: ${c.ansU}${c.rounded ? ` (to ${dp} decimal place${dp > 1 ? 's' : ''})` : ''}`,
+  traps: {
+    mult: c => `You multiplied. Cover ${c.want} on the triangle: F is over ${c.other}, so divide.`,
+    flip: c => `Check which number goes on top: force ÷ ${c.other === 'm' ? 'mass' : 'acceleration'}.`,
+    div: () => 'You divided. Cover F on the triangle: m and a sit side by side, so multiply.',
+    add: () => 'You added. Cover F on the triangle: m and a sit side by side, so multiply.',
+    weightAsMass: c => `You used the weight in newtons as the mass. Find the mass first: weight ÷ ${c.g}.`,
+    oneForce: c => c.oneSay || `${c.Back} is pushing ${c.bdir || 'back'} too. Work out the resultant force first.`,
+    addOpp: () => 'These forces point opposite ways, so take the smaller from the bigger.',
+    g10: () => 'Close! Force HQ uses g = 9.8 N/kg.',
+    earthG: c => `Close! ${c.worldOn}, g is ${c.g} N/kg. You used the g for Earth.`,
+    noConvert: c => c.from === 'g' ? 'Change the grams into kilograms first. Divide by 1,000.' : 'Change the tonnes into kilograms first. Multiply by 1,000.',
+    convWay: c => c.from === 'g' ? 'Check your unit change. A gram is tiny, so divide by 1,000 to get kilograms.' : 'Check your unit change. A tonne is big, so multiply by 1,000 to get kilograms.',
+    earlyRound: () => 'So close! Keep all the digits until the last step.',
+    noFriction: c => `That's the resultant force. The ${c.fw} also has to beat ${c.back}, so add the ${c.back} on.`,
+    subFric: c => `${c.Back} works against the ${c.fw}, so the ${c.fw} has to be bigger. Add the ${c.back} on.`,
+    gaveResultant: c => `That's the resultant force. ${c.Back} = ${c.fw} − resultant force.`,
+    noStart: () => 'Use the change in velocity. Take the smaller velocity from the bigger one.',
+    noTime: () => 'Divide the change in velocity by the time first. That gives the acceleration.',
+    dvTimes: () => 'You multiplied by the time. Acceleration = change in velocity ÷ time.',
+    noWeight: c => `The weight pulls ${c.the} down too. Find the weight first: m × ${c.g}.`,
+    notDiff: () => 'That is one of the two accelerations. Now take the smaller one from the bigger one.'
+  },
+  /* each kind: p = story templates (one is picked), hints = the 3-rung ladder, work = the worked answer, one line each */
+  kinds: {
+    findF: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.act} ${c.The} accelerates at ${c.a} m/s². What is the resultant force on ${c.the}?`,
+        c => `${c.The} starts from still and accelerates at ${c.a} m/s². The mass of ${c.the} is ${c.m} kg. What resultant force acts on ${c.the}?`,
+        c => `${c.The} is already moving. Then ${c.fwd} makes ${c.the} go faster, with an acceleration of ${c.a} m/s². The mass of ${c.the} is ${c.m} kg. What is the resultant force?`],
+      hints: (c, k) => ['You want the force, so cover F on the formula triangle. Are m and a side by side, or one above the other?', `F = m × a = ${c.m} × ${c.a}`, `Type ${k.m} × ${k.a} into the calculator. Force is measured in N.`],
+      work: c => ['F = m × a', `F = ${c.m} × ${c.a}`, `F = ${c.ansU}`]
+    },
+    findFbrake: {
+      p: [c => `${c.The} is moving, then slows down. The velocity of ${c.the} drops by ${c.a} m/s every second. The mass of ${c.the} is ${c.m} kg. What size is the resultant force that slows ${c.the} down?`,
+        c => `${c.The} has a mass of ${c.m} kg. ${c.The} slows down with an acceleration of ${c.a} m/s² backwards. What size is the resultant force on ${c.the}?`],
+      hints: (c, k) => ['You want the size of the force, so cover F on the formula triangle. Slowing down is still an acceleration. What do you do with m and a?', `F = m × a = ${c.m} × ${c.a}`, `Type ${k.m} × ${k.a} into the calculator. Force is measured in N.`],
+      work: c => ['F = m × a', `F = ${c.m} × ${c.a}`, `F = ${c.ansU}`]
+    },
+    findA: {
+      p: [c => `A resultant force of ${c.F} N acts on ${c.the}. ${c.The} has a mass of ${c.m} kg. What is the acceleration of ${c.the}?${c.round}`,
+        c => `${c.act} The resultant force on ${c.the} is ${c.F} N. The mass of ${c.the} is ${c.m} kg. How big is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => ['You want the acceleration, so cover a on the formula triangle. Which letter is left on top?', `a = F ÷ m = ${c.F} ÷ ${c.m}`, `Type ${k.F} ÷ ${k.m} into the calculator. Acceleration is measured in m/s².`],
+      work: c => ['a = F ÷ m', `a = ${c.F} ÷ ${c.m}`, `a = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    findAbrake: {
+      p: [c => `${c.The} is moving. A resultant force of ${c.F} N acts backwards and slows ${c.the} down. The mass of ${c.the} is ${c.m} kg. What size is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => ['You want the size of the acceleration, so cover a on the formula triangle. Which letter is left on top?', `a = F ÷ m = ${c.F} ÷ ${c.m}`, `Type ${k.F} ÷ ${k.m} into the calculator. Acceleration is measured in m/s².`],
+      work: c => ['a = F ÷ m', `a = ${c.F} ÷ ${c.m}`, `a = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    findM: {
+      p: [c => `A resultant force of ${c.F} N makes ${c.the} accelerate at ${c.a} m/s². What is the mass of ${c.the}?${c.round}`,
+        c => `${c.act} The resultant force on ${c.the} is ${c.F} N. The acceleration is ${c.a} m/s². What is the mass of ${c.the}?${c.round}`],
+      hints: (c, k) => ['You want the mass, so cover m on the formula triangle. Which letter is left on top?', `m = F ÷ a = ${c.F} ÷ ${c.a}`, `Type ${k.F} ÷ ${k.a} into the calculator. Mass is measured in kg.`],
+      work: c => ['m = F ÷ a', `m = ${c.F} ÷ ${c.a}`, `m = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    decF: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.The} accelerates at ${c.a} m/s². What is the resultant force on ${c.the}?${c.round}`,
+        c => `${c.act} The acceleration of ${c.the} is ${c.a} m/s². The mass of ${c.the} is ${c.m} kg. Work out the resultant force.${c.round}`],
+      hints: (c, k) => ['You want the force, so cover F on the formula triangle. Are m and a side by side, or one above the other?', `F = m × a = ${c.m} × ${c.a}`, `Type ${k.m} × ${k.a} into the calculator. Then round to the number of decimal places asked for.`],
+      work: c => ['F = m × a', `F = ${c.m} × ${c.a}`, `F = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    decA: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. The resultant force on ${c.the} is ${c.F} N. What is the acceleration of ${c.the}?${c.round}`,
+        c => `${c.act} A resultant force of ${c.F} N acts on ${c.the}. The mass of ${c.the} is ${c.m} kg. Work out the acceleration.${c.round}`],
+      hints: (c, k) => ['You want the acceleration, so cover a on the formula triangle. Which letter is left on top?', `a = F ÷ m = ${c.F} ÷ ${c.m}`, `Type ${k.F} ÷ ${k.m} into the calculator. Then round to the number of decimal places asked for.`],
+      work: c => ['a = F ÷ m', `a = ${c.F} ÷ ${c.m}`, `a = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    decM: {
+      p: [c => `A resultant force of ${c.F} N gives ${c.the} an acceleration of ${c.a} m/s². What is the mass of ${c.the}?${c.round}`,
+        c => `${c.act} ${c.The} accelerates at ${c.a} m/s². The resultant force is ${c.F} N. Work out the mass of ${c.the}.${c.round}`],
+      hints: (c, k) => ['You want the mass, so cover m on the formula triangle. Which letter is left on top?', `m = F ÷ a = ${c.F} ÷ ${c.a}`, `Type ${k.F} ÷ ${k.a} into the calculator. Then round to the number of decimal places asked for.`],
+      work: c => ['m = F ÷ a', `m = ${c.F} ÷ ${c.a}`, `m = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    fricA: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. The ${c.fw} from ${c.push} is ${c.P} N forwards. ${c.Back} is ${c.f} N backwards. What is the acceleration of ${c.the}?${c.round}`,
+        c => `${c.act} The ${c.fw} is ${c.P} N, and ${c.back} is ${c.f} N. The mass of ${c.the} is ${c.m} kg. What is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => [`Step 1 is the resultant force. The ${c.fw} and ${c.back} point opposite ways. Do you add them, or take one away?`, `Resultant force = ${c.P} − ${c.f}. Then a = F ÷ m, with m = ${c.m} kg.`, `Type (${k.P} − ${k.f}) ÷ ${k.m} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: Resultant force = ${c.P} − ${c.f} = ${c.net} N`, `Step 2: a = F ÷ m = ${c.net} ÷ ${c.m} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    fricM: {
+      p: [c => `${c.The} accelerates at ${c.a} m/s². The ${c.fw} from ${c.push} is ${c.P} N. ${c.Back} is ${c.f} N. What is the mass of ${c.the}?${c.round}`],
+      hints: (c, k) => [`Step 1 is the resultant force. The ${c.fw} and ${c.back} point opposite ways. Do you add them, or take one away?`, `Resultant force = ${c.P} − ${c.f}. Then m = F ÷ a, with a = ${c.a} m/s².`, `Type (${k.P} − ${k.f}) ÷ ${k.a} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: Resultant force = ${c.P} − ${c.f} = ${c.net} N`, `Step 2: m = F ÷ a = ${c.net} ÷ ${c.a} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    oppA: {
+      p: [c => `Two friends push ${c.the} from opposite sides. One pushes with ${c.P} N. The other pushes back with ${c.f} N. The mass of ${c.the} is ${c.m} kg. Ignore friction. What is the acceleration of ${c.the}?${c.round}`,
+        c => `A tug of war! Two ropes pull ${c.the} in opposite directions. One rope pulls with ${c.P} N, and the other pulls with ${c.f} N. The mass of ${c.the} is ${c.m} kg. Ignore friction. What is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => ['Step 1 is the resultant force. The two forces point opposite ways. Do you add them, or take one away?', `Resultant force = ${c.P} − ${c.f}. Then a = F ÷ m, with m = ${c.m} kg.`, `Type (${k.P} − ${k.f}) ÷ ${k.m} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: Resultant force = ${c.P} − ${c.f} = ${c.net} N`, `Step 2: a = F ÷ m = ${c.net} ÷ ${c.m} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    needPull: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.Back} on ${c.the} is ${c.f} N. What ${c.fw} is needed to give ${c.the} an acceleration of ${c.a} m/s²?${c.round}`,
+        c => `You want ${c.the} to accelerate at ${c.a} m/s². The mass of ${c.the} is ${c.m} kg. ${c.Back} is ${c.f} N. How big must the ${c.fw} be?${c.round}`],
+      hints: (c, k) => [`Step 1 is the resultant force you need: F = m × a. Then, does the ${c.fw} also have to beat ${c.back}?`, `Resultant force = ${c.m} × ${c.a}. ${c.Fw} = resultant force + ${c.f}.`, `Type ${k.m} × ${k.a} + ${k.f} into the calculator.`],
+      work: c => [`Step 1: Resultant force = m × a = ${c.m} × ${c.a} = ${c.net} N`, `Step 2: ${c.Fw} = resultant force + ${c.back} = ${c.net} + ${c.f} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    findFric: {
+      p: [c => `The ${c.fw} on ${c.the} is ${c.P} N. ${c.The} has a mass of ${c.m} kg and accelerates at ${c.a} m/s². How big is the ${c.back}?${c.round}`],
+      hints: (c, k) => [`Step 1 is the resultant force: F = m × a. How is the ${c.back} linked to the ${c.fw} and the resultant force?`, `Resultant force = ${c.m} × ${c.a}. ${c.Back} = ${c.P} − resultant force.`, `Type ${k.P} − ${k.m} × ${k.a} into the calculator.`],
+      work: c => [`Step 1: Resultant force = m × a = ${c.m} × ${c.a} = ${c.net} N`, `Step 2: ${c.Back} = ${c.fw} − resultant force = ${c.P} − ${c.net} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    weightF: {
+      p: [c => `${c.The} has a weight of ${c.W} N. ${c.act} ${c.The} accelerates at ${c.a} m/s². What resultant force acts on ${c.the}? On Earth, g = 9.8 N/kg.${c.round}`],
+      hints: (c, k) => ['Step 1 is the mass. Weight is a force in newtons. How do you turn a weight into a mass?', `m = ${c.W} ÷ ${c.g}. Then F = m × ${c.a}.`, `Type ${k.W} ÷ ${k.g} × ${k.a} into the calculator.`],
+      work: c => [`Step 1: m = weight ÷ g = ${c.W} ÷ ${c.g} = ${c.mid1} kg`, `Step 2: F = m × a = ${c.mid1} × ${c.a} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    weightA: {
+      p: [c => `${c.The} has a weight of ${c.W} N. A resultant force of ${c.F} N acts on ${c.the}. What is the acceleration of ${c.the}? On Earth, g = 9.8 N/kg.${c.round}`],
+      hints: (c, k) => ['Step 1 is the mass. Weight is a force in newtons. How do you turn a weight into a mass?', `m = ${c.W} ÷ ${c.g}. Then a = ${c.F} ÷ m.`, `Type ${k.F} ÷ (${k.W} ÷ ${k.g}) into the calculator. Use the brackets.`],
+      work: c => [`Step 1: m = weight ÷ g = ${c.W} ÷ ${c.g} = ${c.mid1} kg`, `Step 2: a = F ÷ m = ${c.F} ÷ ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    worldF: {
+      p: [c => `${c.worldOn}, g = ${c.g} N/kg. ${c.The} has a weight of ${c.W} N there. ${c.The} accelerates at ${c.a} m/s². What resultant force acts on ${c.the}?${c.round}`],
+      hints: (c, k) => [`Step 1 is the mass. Which g do you use ${c.worldOn.replace('On', 'on')}?`, `m = ${c.W} ÷ ${c.g}. Then F = m × ${c.a}.`, `Type ${k.W} ÷ ${k.g} × ${k.a} into the calculator. Type the number ${k.g}, not the g key.`],
+      work: c => [`Step 1: m = weight ÷ g = ${c.W} ÷ ${c.g} = ${c.mid1} kg`, `Step 2: F = m × a = ${c.mid1} × ${c.a} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    worldA: {
+      p: [c => `${c.worldOn}, g = ${c.g} N/kg. ${c.The} has a weight of ${c.W} N there. A resultant force of ${c.F} N acts on ${c.the}. What is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => [`Step 1 is the mass. Which g do you use ${c.worldOn.replace('On', 'on')}?`, `m = ${c.W} ÷ ${c.g}. Then a = ${c.F} ÷ m.`, `Type ${k.F} ÷ (${k.W} ÷ ${k.g}) into the calculator. Use the brackets, and type the number ${k.g}, not the g key.`],
+      work: c => [`Step 1: m = weight ÷ g = ${c.W} ÷ ${c.g} = ${c.mid1} kg`, `Step 2: a = F ÷ m = ${c.F} ÷ ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    dvF: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.act} ${c.The} goes ${c.dvTxt} in ${c.t} s. What resultant force acts on ${c.the}?${c.round}`,
+        c => `In ${c.t} s, ${c.the} goes ${c.dvTxt}. The mass of ${c.the} is ${c.m} kg. Work out the resultant force on ${c.the}.${c.round}`],
+      hints: (c, k) => ['Step 1 is the acceleration. How much does the velocity change, and how long does that take?', `a = (v − u) ÷ t = (${c.v} − ${c.u}) ÷ ${c.t}. Then F = ${c.m} × a.`, `Type (${k.v} − ${k.u}) ÷ ${k.t} × ${k.m} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: a = (v − u) ÷ t = (${c.v} − ${c.u}) ÷ ${c.t} = ${c.mid1} m/s²`, `Step 2: F = m × a = ${c.m} × ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    dvM: {
+      p: [c => `${c.act} The resultant force on ${c.the} is ${c.F} N. ${c.The} goes ${c.dvTxt} in ${c.t} s. What is the mass of ${c.the}?${c.round}`],
+      hints: (c, k) => ['Step 1 is the acceleration. How much does the velocity change, and how long does that take?', `a = (${c.v} − ${c.u}) ÷ ${c.t}. Then m = ${c.F} ÷ a.`, `Type ${k.F} ÷ ((${k.v} − ${k.u}) ÷ ${k.t}) into the calculator. Use the brackets.`],
+      work: c => [`Step 1: a = (v − u) ÷ t = (${c.v} − ${c.u}) ÷ ${c.t} = ${c.mid1} m/s²`, `Step 2: m = F ÷ a = ${c.F} ÷ ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    brakeDv: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.The} ${c.slowTxt} in ${c.t} s. What size is the resultant force that slows ${c.the} down?${c.round}`],
+      hints: (c, k) => ['Step 1 is the acceleration. By how much does the velocity drop, and how long does that take?', `a = (${c.u} − ${c.v}) ÷ ${c.t}. Then F = ${c.m} × a.`, `Type (${k.u} − ${k.v}) ÷ ${k.t} × ${k.m} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: a = (${c.u} − ${c.v}) ÷ ${c.t} = ${c.mid1} m/s² (slowing down)`, `Step 2: F = m × a = ${c.m} × ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    engine: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.Back} on ${c.the} is ${c.f} N. The ${c.fw} must take ${c.the} ${c.dvTxt} in ${c.t} s. How big must the ${c.fw} be?${c.round}`,
+        c => `You want ${c.the} to go ${c.dvTxt} in ${c.t} s. The mass of ${c.the} is ${c.m} kg. ${c.Back} is ${c.f} N. What ${c.fw} do you need?${c.round}`],
+      hints: (c, k) => [`Step 1 is the acceleration, from the change in velocity. Then what do you need before you can add on the ${c.back}?`, `a = (${c.v} − ${c.u}) ÷ ${c.t}. Resultant force = ${c.m} × a. ${c.Fw} = resultant force + ${c.f}.`, `Type (${k.v} − ${k.u}) ÷ ${k.t} × ${k.m} + ${k.f} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: a = (v − u) ÷ t = (${c.v} − ${c.u}) ÷ ${c.t} = ${c.mid1} m/s²`, `Step 2: Resultant force = m × a = ${c.m} × ${c.mid1} = ${c.mid2} N`, `Step 3: ${c.Fw} = resultant force + ${c.back} = ${c.mid2} + ${c.f} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    weightFric: {
+      p: [c => `${c.The} has a weight of ${c.W} N. The ${c.fw} from ${c.push} is ${c.P} N. ${c.Back} is ${c.f} N. What is the acceleration of ${c.the}? On Earth, g = 9.8 N/kg.${c.round}`],
+      hints: (c, k) => ['There are three steps. Step 1 is the mass. How do you turn a weight into a mass?', `m = ${c.W} ÷ ${c.g}. Resultant force = ${c.P} − ${c.f}. Then a = F ÷ m.`, `Type (${k.P} − ${k.f}) ÷ (${k.W} ÷ ${k.g}) into the calculator. Use the brackets.`],
+      work: c => [`Step 1: m = weight ÷ g = ${c.W} ÷ ${c.g} = ${c.mid1} kg`, `Step 2: Resultant force = ${c.P} − ${c.f} = ${c.net} N`, `Step 3: a = F ÷ m = ${c.net} ÷ ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    fall: {
+      p: [c => `${c.The} has a mass of ${c.m} kg. ${c.act} Air resistance pushes up on ${c.the} with ${c.f} N. What is the acceleration of ${c.the}? On Earth, g = 9.8 N/kg.${c.round}`],
+      hints: (c, k) => [`Step 1 is the weight, which pulls ${c.the} down. How do you get the weight from the mass?`, `Weight = ${c.m} × ${c.g}. Resultant force = weight − ${c.f}. Then a = F ÷ m.`, `Type (${k.m} × ${k.g} − ${k.f}) ÷ ${k.m} into the calculator. Use the brackets.`],
+      work: c => [`Step 1: Weight = m × g = ${c.m} × ${c.g} = ${c.mid1} N`, `Step 2: Resultant force = ${c.mid1} − ${c.f} = ${c.mid2} N (downwards)`, `Step 3: a = F ÷ m = ${c.mid2} ÷ ${c.m} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    compare: {
+      p: [c => `${c.A.The} has a mass of ${c.mA} kg. The resultant force on ${c.A.the} is ${c.FA} N. ${c.B.The} has a mass of ${c.mB} kg. The resultant force on ${c.B.the} is ${c.FB} N. Work out both accelerations. How much bigger is the bigger one?${c.round}`],
+      hints: (c, k) => [`Step 1 is the acceleration of ${c.A.the}. Cover a on the triangle. Then do the same for ${c.B.the}.`, `a = ${c.FA} ÷ ${c.mA} and a = ${c.FB} ÷ ${c.mB}. Then take the smaller from the bigger.`, `Type ${k.big} into the calculator.`],
+      work: c => [`Step 1: ${c.A.The}: a = ${c.FA} ÷ ${c.mA} = ${c.aA} m/s²`, `Step 2: ${c.B.The}: a = ${c.FB} ÷ ${c.mB} = ${c.aB} m/s²`, `Step 3: Difference = ${c.diffTxt} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    massDv: {
+      p: [c => `The ${c.fw} from ${c.push} is ${c.P} N. ${c.Back} is ${c.f} N. ${c.The} goes ${c.dvTxt} in ${c.t} s. What is the mass of ${c.the}?${c.round}`],
+      hints: (c, k) => [`Step 1 is the resultant force: the ${c.fw} take away the ${c.back}. What else do you need before you can find m?`, `Resultant force = ${c.P} − ${c.f}. a = (${c.v} − ${c.u}) ÷ ${c.t}. Then m = F ÷ a.`, `Type (${k.P} − ${k.f}) ÷ ((${k.v} − ${k.u}) ÷ ${k.t}) into the calculator. Use the brackets.`],
+      work: c => [`Step 1: Resultant force = ${c.P} − ${c.f} = ${c.net} N`, `Step 2: a = (v − u) ÷ t = (${c.v} − ${c.u}) ÷ ${c.t} = ${c.mid1} m/s²`, `Step 3: m = F ÷ a = ${c.net} ÷ ${c.mid1} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    unitsG: {
+      p: [c => c.find === 'F' ? `${c.The} has a mass of ${c.mg} g. ${c.act} ${c.The} accelerates at ${c.a} m/s². What resultant force acts on ${c.the}?${c.round}`
+        : `${c.The} has a mass of ${c.mg} g. ${c.act} The resultant force on ${c.the} is ${c.F} N. What is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => ['Step 1: change the mass into kilograms. How many grams are there in 1 kg?', c.find === 'F' ? `m = ${c.mg} ÷ 1,000 kg. Then F = m × ${c.a}.` : `m = ${c.mg} ÷ 1,000 kg. Then a = ${c.F} ÷ m.`,
+        c.find === 'F' ? `Type ${k.mg} ÷ 1000 × ${k.a} into the calculator.` : `Type ${k.F} ÷ (${k.mg} ÷ 1000) into the calculator. Use the brackets.`],
+      work: c => [`Step 1: m = ${c.mg} ÷ 1,000 = ${c.mkg} kg`, c.find === 'F' ? `Step 2: F = m × a = ${c.mkg} × ${c.a} = ${c.exactU}` : `Step 2: a = F ÷ m = ${c.F} ÷ ${c.mkg} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    },
+    unitsT: {
+      p: [c => c.find === 'F' ? `${c.The} has a mass of ${c.mt} tonnes. ${c.act} ${c.The} accelerates at ${c.a} m/s². What resultant force acts on ${c.the}?${c.round}`
+        : `${c.The} has a mass of ${c.mt} tonnes. ${c.act} The resultant force on ${c.the} is ${c.F} N. What is the acceleration of ${c.the}?${c.round}`],
+      hints: (c, k) => ['Step 1: change the mass into kilograms. How many kilograms are there in 1 tonne?', c.find === 'F' ? `m = ${c.mt} × 1,000 kg. Then F = m × ${c.a}.` : `m = ${c.mt} × 1,000 kg. Then a = ${c.F} ÷ m.`,
+        c.find === 'F' ? `Type ${k.mt} × 1000 × ${k.a} into the calculator.` : `Type ${k.F} ÷ (${k.mt} × 1000) into the calculator. Use the brackets.`],
+      work: c => [`Step 1: m = ${c.mt} × 1,000 = ${c.mkg} kg`, c.find === 'F' ? `Step 2: F = m × a = ${c.mkg} × ${c.a} = ${c.exactU}` : `Step 2: a = F ÷ m = ${c.F} ÷ ${c.mkg} = ${c.exactU}`, PR_TEXT.answer(c, c.dp)]
+    }
+  }
+};
+
+/* ---- numbers ---- */
+const prRd = (v, dp) => Math.round(v * Math.pow(10, dp)) / Math.pow(10, dp);
+/* shown to students: dp given = fixed decimals, else as stored (up to 4 dp, no trailing zeros); commas from 1,000 (parseNum strips them) */
+function prFmt(v, dp) {
+  const s = dp == null ? String(+(+v).toFixed(4)) : (+v).toFixed(dp), neg = s[0] === '-', [i, d] = (neg ? s.slice(1) : s).split('.');
+  return (neg ? '-' : '') + (i.length > 3 ? i.replace(/\B(?=(\d{3})+(?!\d))/g, ',') : i) + (d ? '.' + d : '');
+}
+const prKey = v => String(+(+v).toFixed(4));   // calculator keys: no commas
+const prMid = v => Math.abs(v * 1000 - Math.round(v * 1000)) < 1e-6 ? prFmt(v) : prFmt(v, 3) + '…';   // a middle step: all the digits kept
+const prTol = (v, dp) => Math.max(0.5 / Math.pow(10, dp), Math.abs(v) >= 1000 ? Math.abs(v) * 0.01 : 0);
+const prDecs = v => { const s = String(+(+v).toFixed(6)); return s.includes('.') ? s.split('.')[1].length : 0; };
+
+/* ---- the kinds of question: level, skill, steps, gate (opts key that must be true) and the maths.
+   make(H) returns { t, given, find, unit, exact, dp?, traps: [[key, value]], c, arrows?, massOf? } or null to try again. ---- */
+const PR_WHOLE = t => t.m[0] >= 3 && t.m[1] - t.m[0] >= 4, PR_FRIC = t => t.fric !== false;
+const PR_KINDS = {
+  findF: { level: 1, skill: 'F', steps: 1, desc: 'Find F from whole-number m and a', make(H) {
+    const t = H.thing(PR_WHOLE), m = H.val(t.m[0], t.m[1], 0), a = H.val(t.a[0], t.a[1], 1), F = m * a;
+    return { t, given: { m, a }, find: 'F', unit: 'N', exact: F, dp: prDecs(prRd(F, 1)), traps: [['div', m / a], ['add', m + a]], c: { m: prFmt(m), a: prFmt(a) }, k: { m, a } }; } },
+  findFbrake: { level: 1, skill: 'F', steps: 1, desc: 'Find the force that slows something down', make(H) {
+    const t = H.thing(x => PR_WHOLE(x) && PR_FRIC(x)), m = H.val(t.m[0], t.m[1], 0), a = H.val(t.a[0], t.a[1], 1), F = m * a;
+    return { t, given: { m, a }, find: 'F', unit: 'N', exact: F, dp: prDecs(prRd(F, 1)), traps: [['div', m / a], ['add', m + a]], c: { m: prFmt(m), a: prFmt(a) }, k: { m, a } }; } },
+  findA: { level: 2, skill: 'a', steps: 1, desc: 'Find a = F ÷ m', make(H) { return H.oneA(PR_WHOLE, 0); } },
+  findAbrake: { level: 2, skill: 'a', steps: 1, desc: 'Find the size of a slowing-down acceleration', make(H) { return H.oneA(x => PR_WHOLE(x) && PR_FRIC(x), 0); } },
+  findM: { level: 2, skill: 'm', steps: 1, desc: 'Find m = F ÷ a', make(H) { return H.oneM(PR_WHOLE, 0); } },
+  decF: { level: 3, skill: 'F', steps: 1, desc: 'Find F with decimals in m and a', make(H) {
+    const t = H.thing(), m = H.val(t.m[0], t.m[1], H.mDec(t)), a = H.val(t.a[0], t.a[1], H.aDec(t)), F = m * a;
+    return { t, given: { m, a }, find: 'F', unit: 'N', exact: F, traps: [['div', m / a], ['add', m + a]], c: { m: prFmt(m), a: prFmt(a) }, k: { m, a } }; } },
+  decA: { level: 3, skill: 'a', steps: 1, desc: 'Find a with decimals in F and m', make(H) { return H.oneA(null, 1); } },
+  decM: { level: 3, skill: 'm', steps: 1, desc: 'Find m with decimals in F and a', make(H) { return H.oneM(null, 1); } },
+  fricA: { level: 4, skill: 'res', steps: 2, desc: 'Resultant = pull − friction, then a', make(H) { return H.twoForce('a', PR_FRIC); } },
+  fricM: { level: 4, skill: 'res', steps: 2, desc: 'Resultant = pull − friction, then m', make(H) { return H.twoForce('m', PR_FRIC); } },
+  oppA: { level: 4, skill: 'res', steps: 2, desc: 'Two opposite pushes or pulls (no friction), then a', make(H) { return H.twoForce('a', t => t.tug, true); } },
+  needPull: { level: 4, skill: 'res', steps: 2, desc: 'Pull needed for a target a against friction (m × a + friction)', make(H) {
+    const t = H.thing(PR_FRIC), m = H.mass(t), a = H.val(t.a[0], t.a[1], H.aDec(t)), net = m * a, fd = net >= 100 ? 0 : 1, f = H.val(net * 0.2, net * 1.5, fd), P = net + f;
+    return { t, given: { m, a, f }, find: 'P', unit: 'N', exact: P, traps: [['noFriction', net], ['subFric', net - f]], c: { m: prFmt(m), a: prFmt(a), f: prFmt(f), net: prMid(net) }, k: { m, a, f },
+      arrows: [H.arrow('fw', null, t), H.arrow('back', f, t)] }; } },
+  findFric: { level: 4, skill: 'res', steps: 2, desc: 'Friction = pull − m × a', make(H) {
+    const t = H.thing(PR_FRIC), m = H.mass(t), a = H.val(t.a[0], t.a[1], H.aDec(t)), net = m * a, fd = net >= 100 ? 0 : 1, P = H.val(net * 1.2, net * 2.4, fd), f = P - net;
+    return { t, given: { m, a, P }, find: 'f', unit: 'N', exact: f, traps: [['gaveResultant', net], ['addOpp', P + net]], c: { m: prFmt(m), a: prFmt(a), P: prFmt(P), net: prMid(net) }, k: { m, a, P },
+      arrows: [H.arrow('fw', P, t), H.arrow('back', null, t)] }; } },
+  weightF: { level: 5, skill: 'weight', steps: 2, desc: 'Mass from weight (÷ 9.8), then F = m × a', make(H) { return H.weight('F', null); } },
+  weightA: { level: 5, skill: 'weight', steps: 2, desc: 'Mass from weight (÷ 9.8), then a = F ÷ m', make(H) { return H.weight('a', null); } },
+  dvF: { level: 5, skill: 'vel', steps: 2, desc: 'a = (v − u) ÷ t, then F = m × a', make(H) { return H.dv('F'); } },
+  dvM: { level: 5, skill: 'vel', steps: 2, desc: 'a = (v − u) ÷ t, then m = F ÷ a', make(H) { return H.dv('m'); } },
+  brakeDv: { level: 5, skill: 'vel', steps: 2, desc: 'Slowing down: a = (u − v) ÷ t, then F', make(H) { return H.dv('brake'); } },
+  worldF: { level: 5, skill: 'weight', steps: 2, gate: 'worlds', desc: 'Another world: mass = weight ÷ that world\'s g, then F', make(H) { return H.weight('F', true); } },
+  worldA: { level: 5, skill: 'weight', steps: 2, gate: 'worlds', desc: 'Another world: mass = weight ÷ that world\'s g, then a', make(H) { return H.weight('a', true); } },
+  engine: { level: 6, skill: 'three', steps: 3, desc: 'a from velocities, resultant = m × a, then add friction for the engine force', make(H) { return H.dv('engine'); } },
+  weightFric: { level: 6, skill: 'three', steps: 3, desc: 'Mass from weight, resultant = pull − friction, then a', make(H) {
+    const t = H.thing(x => PR_FRIC(x) && x.m[1] <= 20000), m0 = H.uni(t.m[0], t.m[1]), W = H.val(m0 * 9.8 * 0.98, m0 * 9.8 * 1.02, m0 * 9.8 >= 100 ? 1 : 2), m = W / 9.8;
+    if (m < t.m[0] || m > t.m[1]) return null;
+    const a0 = H.uni(t.a[0], t.a[1]), net0 = m * a0, fd = net0 >= 100 ? 0 : 1, f = H.val(net0 * 0.2, net0 * 1.2, fd), P = H.val((net0 + f) * 0.98, (net0 + f) * 1.02, fd), net = P - f; if (net <= 0) return null;
+    const a = net / m;
+    return { t, given: { W, P, f, g: 9.8 }, find: 'a', unit: 'm/s²', exact: a, traps: [['weightAsMass', net / W], ['oneForce', P / m], ['addOpp', (P + f) / m], ['g10', net / (W / 10)], ['earlyRound', net / prRd(m, 1)]],
+      c: { W: prFmt(W), P: prFmt(P), f: prFmt(f), g: '9.8', mid1: prMid(m), net: prMid(net) }, k: { W, P, f, g: 9.8 }, arrows: [H.arrow('fw', P, t), H.arrow('back', f, t)] }; } },
+  fall: { level: 6, skill: 'three', steps: 3, desc: 'Falling: weight = m × 9.8, minus air resistance, then a', make(H) {
+    const t = H.thing(x => x.fall), m = H.val(t.m[0], t.m[1], 0), a0 = H.uni(t.a[0], t.a[1]), D = H.val(m * (9.8 - a0) * 0.97, m * (9.8 - a0) * 1.03, 0), W = m * 9.8, a = (W - D) / m;
+    if (a <= 0) return null;
+    return { t, given: { m, f: D, g: 9.8 }, find: 'a', unit: 'm/s²', exact: a, traps: [['oneForce', 9.8], ['noWeight', D / m], ['g10', (m * 10 - D) / m], ['addOpp', (W + D) / m]],
+      c: { m: prFmt(m), f: prFmt(D), g: '9.8', mid1: prMid(W), mid2: prMid(W - D), Back: 'Air resistance', bdir: 'up' }, k: { m, f: D, g: 9.8 },
+      arrows: [{ dir: 'down', label: '? N', name: 'weight' }, { dir: 'up', label: prFmt(D) + ' N', name: 'air resistance' }] }; } },
+  compare: { level: 6, skill: 'compare', steps: 3, desc: 'Two objects: how much bigger is one acceleration than the other', make(H) {
+    const A = H.thing(PR_WHOLE), B = H.thing(x => PR_WHOLE(x) && x.key !== A.key), side = t => { const m = H.val(t.m[0], t.m[1], 0), a0 = H.uni(t.a[0], t.a[1]), F = H.val(m * a0 * 0.97, m * a0 * 1.03, m * a0 >= 100 ? 0 : 1); return { m, F, a: F / m }; };
+    const sa = side(A), sb = side(B), d = Math.abs(sa.a - sb.a); if (d < 0.3) return null;
+    const big = sa.a > sb.a ? sa : sb, small = sa.a > sb.a ? sb : sa;
+    return { t: A, t2: B, given: { mA: sa.m, FA: sa.F, mB: sb.m, FB: sb.F, thing2: B.key }, find: 'da', unit: 'm/s²', exact: d, traps: [['notDiff', big.a], ['notDiff', small.a]],
+      c: { A: H.names(A), B: H.names(B), mA: prFmt(sa.m), FA: prFmt(sa.F), mB: prFmt(sb.m), FB: prFmt(sb.F), aA: prMid(sa.a), aB: prMid(sb.a), diffTxt: `${prMid(big.a)} − ${prMid(small.a)}` },
+      k: { big: `${prKey(big.F)} ÷ ${prKey(big.m)} − ${prKey(small.F)} ÷ ${prKey(small.m)}` } }; } },
+  massDv: { level: 6, skill: 'three', steps: 3, desc: 'Resultant = pull − friction, a from velocities, then m = F ÷ a', make(H) { return H.dv('massDv'); } },
+  unitsG: { level: 6, skill: 'units', steps: 2, gate: 'units', units2: true, desc: 'Mass in grams: ÷ 1,000 to get kg, then F or a', make(H) { return H.units('g'); } },
+  unitsT: { level: 6, skill: 'units', steps: 2, gate: 'units', units2: true, desc: 'Mass in tonnes: × 1,000 to get kg, then F or a', make(H) { return H.units('t'); } }
+};
+const PR_LEVEL_KINDS = [1, 2, 3, 4, 5, 6].map(l => Object.keys(PR_KINDS).filter(k => PR_KINDS[k].level === l));
+
+/* the helpers each kind's make() uses; R is the seeded random number source */
+function prHelpers(R) {
+  const H = {
+    uni: (a, b) => a + R() * (b - a),
+    pick: arr => arr[Math.floor(R() * arr.length)],
+    thing: f => H.pick(f ? PR_THINGS.filter(f) : PR_THINGS),
+    /* a non-round value in [lo, hi] with dp decimals: the last digit is not 0 (whole numbers: not a multiple of 10) */
+    val(lo, hi, dp) { let x = prRd(lo, dp); for (let i = 0; i < 40; i++) { x = prRd(H.uni(lo, hi), dp); if (x < lo || x > hi || x <= 0) continue; if (dp > 0 ? Math.round(x * Math.pow(10, dp)) % 10 === 0 : x >= 20 && x % 10 === 0) continue; return x; } return x; },
+    mDec: t => t.m[1] < 0.1 ? 3 : t.m[1] < 10 ? 2 : 1,
+    aDec: t => t.a[1] < 10 ? 2 : 1,
+    mass: t => t.m[1] >= 10 ? H.val(t.m[0], t.m[1], 0) : H.val(t.m[0], t.m[1], H.mDec(t)),
+    names: t => { const the = t.the || t.name; return { the, The: the[0].toUpperCase() + the.slice(1) }; },
+    arrow: (which, v, t) => ({ dir: which === 'fw' ? (t.dir || 'right') : ({ right: 'left', up: 'down', down: 'up' })[t.dir || 'right'], label: v == null ? '? N' : prFmt(v) + ' N', name: which === 'fw' ? t.fw : t.back }),
+    /* one step, find a (dec: decimals in the givens) */
+    oneA(f, dec) {
+      const t = H.thing(f), m = dec ? H.val(t.m[0], t.m[1], H.mDec(t)) : H.val(t.m[0], t.m[1], 0), a0 = H.uni(t.a[0], t.a[1]), F0 = m * a0;
+      const F = H.val(F0 * 0.95, F0 * 1.05, dec ? (F0 < 100 ? 2 : 1) : (F0 >= 100 ? 0 : 1)), a = F / m;
+      return { t, given: { F, m }, find: 'a', unit: 'm/s²', exact: a, traps: [['mult', F * m], ['flip', m / F]], c: { F: prFmt(F), m: prFmt(m), want: 'a', other: 'm' }, k: { F, m } };
+    },
+    oneM(f, dec) {
+      const t = H.thing(f), a = dec ? H.val(t.a[0], t.a[1], H.aDec(t)) : H.val(t.a[0], t.a[1], 1), m0 = H.uni(t.m[0], t.m[1]), F0 = m0 * a;
+      const F = H.val(F0 * 0.97, F0 * 1.03, dec ? (F0 < 100 ? 2 : 1) : (F0 >= 100 ? 0 : 1)), m = F / a;
+      return { t, given: { F, a }, find: 'm', unit: 'kg', exact: m, massOf: t, traps: [['mult', F * a], ['flip', a / F]], c: { F: prFmt(F), a: prFmt(a), want: 'm', other: 'a' }, k: { F, a } };
+    },
+    /* pull vs friction (or two opposite pushes), then a or m */
+    twoForce(find, f, opp) {
+      const t = H.thing(f), m = H.mass(t), a0 = H.uni(t.a[0], t.a[1]), net0 = m * a0, f0 = net0 * H.uni(0.2, 1.4), fd = net0 + f0 >= 100 ? 0 : 1;
+      const P = H.val((net0 + f0) * 0.98, (net0 + f0) * 1.02, fd), fr = H.val(f0 * 0.97, f0 * 1.03, fd), net = P - fr; if (net <= 0) return null;
+      const s = { t, find, traps: [], c: { P: prFmt(P), f: prFmt(fr), net: prMid(net) }, k: { P, f: fr } };
+      if (find === 'a') Object.assign(s, { given: { P, f: fr, m }, unit: 'm/s²', exact: net / m, traps: [['oneForce', P / m], ['addOpp', (P + fr) / m], ['mult', net * m]] }, { c: Object.assign(s.c, { m: prFmt(m), want: 'a', other: 'm' }), k: Object.assign(s.k, { m }) });
+      else { const a = H.val(t.a[0], t.a[1], H.aDec(t)); Object.assign(s, { given: { P, f: fr, a }, unit: 'kg', exact: net / a, massOf: t, traps: [['oneForce', P / a], ['addOpp', (P + fr) / a], ['mult', net * a]] }); Object.assign(s.c, { a: prFmt(a), want: 'm', other: 'a' }); s.k.a = a; }
+      if (opp) { s.v = H.pick([0, 1]); s.c.oneSay = 'The other force acts too. Work out the resultant force first.'; const nm = s.v ? 'pull' : 'push'; s.arrows = [{ dir: 'right', label: prFmt(P) + ' N', name: nm }, { dir: 'left', label: prFmt(fr) + ' N', name: nm }]; }
+      else s.arrows = [H.arrow('fw', P, t), H.arrow('back', fr, t)];
+      return s;
+    },
+    /* mass from weight (Earth, or another world when w), then F or a */
+    weight(find, w) {
+      const t = H.thing(w ? (x => x.worlds) : (x => x.m[1] <= 20000)); let g = 9.8, world = null;   // weights stay under 200,000 N
+      if (w) { world = H.pick(['moon', 'mars', 'venus', 'titan'].concat(t.jupiter ? ['jupiter'] : [])); g = DZ_WORLDS[world].g; }
+      const m0 = H.uni(t.m[0], t.m[1]), W0 = m0 * g, W = H.val(W0 * 0.98, W0 * 1.02, W0 >= 100 ? 1 : W0 >= 1 ? 2 : 3), m = W / g;
+      if (m < t.m[0] || m > t.m[1]) return null;
+      const s = { t, find, world, c: { W: prFmt(W), g: prFmt(g), mid1: prMid(m) }, k: { W, g } }, mr = prRd(m, m < 1 ? 2 : 1), aw = w ? 'earthG' : 'g10', gw = w ? 9.8 : 10;
+      if (w) s.c.worldOn = DZ_WORLDS[world].on.replace(/^on/, 'On');
+      if (find === 'F') { const a = H.val(t.a[0], t.a[1], H.aDec(t)); Object.assign(s, { given: { W, a, g }, unit: 'N', exact: m * a, traps: [['weightAsMass', W * a], [aw, W / gw * a], ['earlyRound', mr * a]] }); s.c.a = prFmt(a); s.k.a = a; }
+      else { const a0 = H.uni(t.a[0], t.a[1]), F0 = m * a0, F = H.val(F0 * 0.97, F0 * 1.03, F0 >= 100 ? 1 : 2);
+        Object.assign(s, { given: { W, F, g }, unit: 'm/s²', exact: F / m, traps: [['weightAsMass', F / W], [aw, F / (W / gw)], ['flip', m / F], ['earlyRound', F / mr]] }); Object.assign(s.c, { F: prFmt(F), want: 'a', other: 'm' }); s.k.F = F; }
+      return s;
+    },
+    /* velocities: a = (v − u) ÷ t, then F, m, a braking force, an engine force (3 steps) or a mass with friction (3 steps) */
+    dv(mode) {
+      const t = H.thing(mode === 'brake' || mode === 'engine' || mode === 'massDv' ? PR_FRIC : null), a0 = H.uni(t.a[0], t.a[1]), vd = t.v < 5 ? 2 : 1;
+      let u, v;
+      if (mode === 'brake') { u = H.val(t.v * 0.5, t.v, vd); v = H.R() < 0.4 ? 0 : H.val(u * 0.1, u * 0.6, vd); }
+      else { u = mode === 'massDv' || H.R() < 0.55 ? 0 : H.val(t.v * 0.1, t.v * 0.45, vd); v = H.val(u + (t.v - u) * 0.35, t.v, vd); }
+      const dv = Math.abs(v - u); if (dv <= 0) return null;
+      const T0 = dv / a0, td = T0 < 1 ? 2 : 1, T = H.val(T0 * 0.94, T0 * 1.06, td); if (T < 0.05 || T > 120) return null;
+      const a = dv / T; if (a < t.a[0] * 0.8 || a > t.a[1] * 1.2) return null;
+      const ar = prRd(a, 1), c = { u: prFmt(u), v: prFmt(v), t: prFmt(T), mid1: prMid(a), dvTxt: u ? `from ${prFmt(u)} m/s to ${prFmt(v)} m/s` : `from still to ${prFmt(v)} m/s` }, k = { u, v, t: T };
+      const s = { t, c, k, find: 'F', unit: 'N' };
+      if (mode === 'F' || mode === 'brake') {
+        const m = H.mass(t), F = m * a; Object.assign(s, { given: { m, u, v, t: T }, exact: F, traps: [['noTime', m * dv], ['dvTimes', m * dv * T], ['earlyRound', m * ar]] }); c.m = prFmt(m); k.m = m;
+        if (mode === 'F' && u) s.traps.push(['noStart', m * v / T]);
+        if (mode === 'brake') { c.slowTxt = v ? `slows down from ${prFmt(u)} m/s to ${prFmt(v)} m/s` : `is moving at ${prFmt(u)} m/s and comes to a stop`; if (v) s.traps.push(['noStart', m * u / T]); }
+      } else if (mode === 'm') {
+        const m0 = H.uni(t.m[0], t.m[1]), F0 = m0 * a, F = H.val(F0 * 0.97, F0 * 1.03, F0 >= 100 ? 1 : 2), m = F / a;
+        Object.assign(s, { given: { F, u, v, t: T }, find: 'm', unit: 'kg', exact: m, massOf: t, traps: [['noTime', F / dv], ['mult', F * a], ['earlyRound', F / ar]] }); Object.assign(c, { F: prFmt(F), want: 'm', other: 'a' }); k.F = F;
+        if (u) s.traps.push(['noStart', F / (v / T)]);
+      } else if (mode === 'engine') {
+        const m = H.mass(t), net = m * a, fd = net >= 100 ? 0 : 1, f = H.val(net * 0.15, net * 0.9, fd), P = net + f;
+        Object.assign(s, { given: { m, u, v, t: T, f }, find: 'P', exact: P, traps: [['noFriction', net], ['subFric', net - f], ['earlyRound', m * ar + f], ['noTime', m * dv + f]], arrows: [H.arrow('fw', null, t), H.arrow('back', f, t)] });
+        if (u) s.traps.push(['noStart', m * v / T + f]);
+        Object.assign(c, { m: prFmt(m), f: prFmt(f), mid2: prMid(net) }); Object.assign(k, { m, f });
+      } else {   // massDv
+        const m0 = H.uni(t.m[0], t.m[1]), net0 = m0 * a, fd = net0 >= 100 ? 0 : 1, f = H.val(net0 * 0.2, net0 * 1.2, fd), P = H.val((net0 + f) * 0.98, (net0 + f) * 1.02, fd), net = P - f; if (net <= 0) return null;
+        Object.assign(s, { given: { P, f, u, v, t: T }, find: 'm', unit: 'kg', exact: net / a, massOf: t, traps: [['oneForce', P / a], ['noTime', net / dv], ['addOpp', (P + f) / a], ['mult', net * a], ['earlyRound', net / ar]], arrows: [H.arrow('fw', P, t), H.arrow('back', f, t)] });
+        Object.assign(c, { P: prFmt(P), f: prFmt(f), net: prMid(net), want: 'm', other: 'a' }); Object.assign(k, { P, f });
+      }
+      return s;
+    },
+    /* mass in grams or tonnes, changed to kg, then F or a */
+    units(u) {
+      const t = H.thing(u === 'g' ? (x => x.grams) : (x => x.tonnes)), find = H.pick(['F', 'a']);
+      const md = u === 'g' ? 0 : t.m[1] >= 20000 ? 1 : 2, mx = u === 'g' ? H.val(t.m[0] * 1000, t.m[1] * 1000, 0) : H.val(t.m[0] / 1000, t.m[1] / 1000, md), m = u === 'g' ? mx / 1000 : prRd(mx * 1000, 6);
+      const k = { [u === 'g' ? 'mg' : 'mt']: mx }, c = { [u === 'g' ? 'mg' : 'mt']: prFmt(mx), mkg: prFmt(m), from: u, find };
+      const wrongM = u === 'g' ? mx * 1000 : mx / 1000;   // changed units the wrong way
+      const s = { t, find, c, k, given: { [u === 'g' ? 'mg' : 'mt']: mx } };
+      if (find === 'F') { const a = H.val(t.a[0], t.a[1], H.aDec(t)); s.given.a = a; c.a = prFmt(a); k.a = a; Object.assign(s, { unit: 'N', exact: m * a, traps: [['noConvert', mx * a], ['convWay', wrongM * a], ['div', m / a]] }); }
+      else { const a0 = H.uni(t.a[0], t.a[1]), F0 = m * a0, F = H.val(F0 * 0.97, F0 * 1.03, F0 >= 1000 ? 0 : F0 >= 10 ? 1 : 2); s.given.F = F; c.F = prFmt(F); k.F = F; Object.assign(c, { want: 'a', other: 'm' }); Object.assign(s, { unit: 'm/s²', exact: F / m, traps: [['noConvert', F / mx], ['convWay', F / wrongM], ['mult', F * m]] }); }
+      return s;
+    }
+  };
+  H.R = R;
+  return H;
+}
+
+/* prGen(level 1–6, seed, opts {worlds, units, recent}) → a `num` question; the same arguments always give the same question */
+function prGen(level, seed, opts) {
+  opts = opts || {}; level = clamp(Math.round(+level) || 1, 1, 6); seed = Math.abs(Math.round(+seed) || 0);
+  const R = rngSeed(((seed * 8191) + level * 131 + (opts.worlds ? 7 : 0) + (opts.units ? 53 : 0)) % 4294967291), H = prHelpers(R);
+  const pool = PR_LEVEL_KINDS[level - 1].filter(k => !PR_KINDS[k].gate || opts[PR_KINDS[k].gate]);
+  const rec = (opts.recent || []).slice(-3), fresh = pool.filter(k => !rec.includes(k)), first = H.pick(fresh.length ? fresh : pool);
+  const order = [first].concat(pool.filter(k => k !== first));
+  for (const kind of order) for (let tries = 0; tries < 80; tries++) { const q = prBuild(kind, level, seed, H); if (q) return q; }
+  return null;   // never reached in testing (3,000 seeds per level)
+}
+/* one attempt: the maths from PR_KINDS, the checks from the number rules, then the words from PR_TEXT */
+function prBuild(kind, level, seed, H) {
+  const K = PR_KINDS[kind], s = K.make(H); if (!s || !isFinite(s.exact) || s.exact <= 0) return null;
+  const dp = s.dp != null ? s.dp : level === 2 ? 1 : s.exact < 1 ? 2 : (s.exact < 20 && H.R() < 0.5 ? 2 : 1), p10 = Math.pow(10, dp);
+  const frac = s.exact * p10 - Math.floor(s.exact * p10); if (Math.abs(frac - 0.5) < 0.02) return null;   // too close to a rounding edge
+  const ans = prRd(s.exact, dp); if (level >= 2 && Math.abs(ans - Math.round(ans)) < 1e-9) return null;
+  if (s.unit === 'm/s²' && (ans < 0.05 || ans > 400)) return null;
+  if (s.unit === 'N' && (ans < 0.01 || ans > 200000)) return null;
+  if (s.massOf && (ans < s.massOf.m[0] || ans > s.massOf.m[1])) return null;
+  if (['F', 'P', 'f', 'W', 'FA', 'FB'].some(x => s.given[x] > 200000)) return null;   // every stated force stays a readable size
+  const tol = prTol(ans, dp), t = s.t, nm = H.names(t);
+  const c = Object.assign({ The: nm.The, the: nm.the, act: t.act, push: t.push, fw: t.fw, Fw: t.fw[0].toUpperCase() + t.fw.slice(1), back: t.back, Back: t.back[0].toUpperCase() + t.back.slice(1),
+    fwd: `the ${t.fw} from ${t.push}`, g: '9.8', dp, round: level >= 2 ? ' ' + PR_TEXT.round(dp) : '' }, s.c);
+  c.ansU = `${prFmt(ans, dp)} ${s.unit}`; c.exactU = `${prMid(s.exact)} ${s.unit}`; c.rounded = Math.abs(s.exact - ans) > 1e-9;
+  const k = {}; Object.keys(s.k || {}).forEach(x => { k[x] = typeof s.k[x] === 'number' ? prKey(s.k[x]) : s.k[x]; });
+  const T = PR_TEXT.kinds[kind], v = s.v != null ? s.v : Math.floor(H.R() * T.p.length);
+  /* the mistakes: rounded like the answer; dropped when they would match the answer or another mistake */
+  const traps = [];
+  s.traps.forEach(([key, raw]) => {
+    if (!isFinite(raw) || raw <= 0) return; let tv = prRd(raw, dp);
+    if (tv <= 0) tv = +raw.toPrecision(3);   // a tiny wrong answer (forgot to change grams): kept, so typing 0 or 0.0002 still names the mistake
+    const tt = prTol(tv, dp); if (Math.abs(tv - ans) <= Math.max(tol, tt) * 1.001) return;
+    if (traps.some(x => Math.abs(x.ans - tv) <= Math.max(x.tol, tt) * 1.001)) return;
+    traps.push({ ans: tv, key, say: PR_TEXT.traps[key](c), tol: tt });
+  });
+  const workLines = T.work(c).filter(x => x !== PR_TEXT.answer(c, dp) || c.rounded || K.steps > 1);
+  const arrows = (s.arrows || []).map(a => Object.assign({}, a));
+  return { id: `pr${level}_${seed}`, type: 'num', p: T.p[v](c), ans, unit: s.unit, units: UNITS, tol, work: workLines.join('\n'), workLines, hints: T.hints(c, k), ladder: true,
+    kind, level, seed, skill: K.skill, steps: K.steps, dp, units2: !!K.units2, world: s.world || null, find: s.find, given: s.given, exact: s.exact, ansText: prFmt(ans, dp),
+    thing: t.key, traps, pic: { thing: t.key, draw: t.pic, dir: t.dir || 'right', arrows, world: s.world || null, thing2: s.t2 ? s.t2.key : null } };
+}
+/* the mistake a typed answer matches, or null (a right answer never matches) */
+function prMatchTrap(q, value) {
+  const v = typeof value === 'number' ? value : parseNum(value);
+  if (!q || !q.traps || isNaN(v) || near(v, q.ans, q.tol)) return null;
+  return q.traps.find(t => Math.abs(v - t.ans) <= t.tol) || null;
+}
+
+/* ===== Maths Gym: adaptive F = m × a practice (the screens) =====
+   Questions come from prGen (66-practice-gen.js). This file is the view (vPractice), the home card, the Chapter 3 reminder, the level meter,
+   the question card with its picture and force sketch, the adaptive engine (plan section 2), two tries per question, the "Changing units" teach card,
+   the end screen, the summary PDF, the Gym section of "My work so far" and the teacher-page row. Plan: docs/Force_HQ_Practice_Plan.md.
+   Everything is saved in DB.prac (see pgData), so the 💾 Save progress backup carries it automatically. */
+const PG_GO = 10;          // questions in one go (approx. 15 min)
+let PG_MIX = 0.2;          // about 1 question in 5 comes from the level below (the tests set this to 0)
+const PG_LEVELS = ['Find the force', 'Divide to find a or m', 'Decimals', 'Two steps: resultant first', 'Two steps: weight or velocity', 'Stretch'];
+const PG_UP = ['', 'Level 2 unlocked: dividing to find a or m!', 'Level 3 unlocked: decimals!', 'Level 4 unlocked: two-step problems!', 'Level 5 unlocked: weight and velocity problems!', 'Level 6 unlocked: stretch problems!'];
+const PG_TARGETS = { none: 'Free practice (no target)', l3: 'Reach level 3', l4: 'Reach level 4', l5: 'Reach level 5', l6: 'Reach level 6', r10: 'Get 10 questions right', r20: 'Get 20 questions right', r30: 'Get 30 questions right' };
+const PG_TMIN = { l3: 15, r10: 15, l4: 20, r20: 20, l5: 30, l6: 30, r30: 30 };   // teacher page: approx. minutes for each target
+const PG_TRAPNAME = {
+  mult: 'Multiplied instead of dividing', flip: 'Divided the wrong way round', div: 'Divided instead of multiplying', add: 'Added instead of multiplying',
+  weightAsMass: 'Used the weight as the mass', oneForce: 'Used one force, not the resultant force', noWeight: 'Forgot the weight', addOpp: 'Added forces that point opposite ways',
+  g10: 'Used g = 10 instead of 9.8', earthG: 'Used Earth\'s g on another world', noConvert: 'Forgot to change the units to kg', convWay: 'Changed the units the wrong way',
+  earlyRound: 'Rounded too early', noFriction: 'Forgot to add the friction on', subFric: 'Took the friction away instead of adding it', gaveResultant: 'Gave the resultant force, not the friction',
+  noStart: 'Forgot the starting velocity', noTime: 'Forgot to divide by the time', dvTimes: 'Multiplied by the time instead of dividing', notDiff: 'Gave one acceleration, not the difference',
+  unit: 'Right number, wrong unit'
+};
+const PG_QTY = { N: 'force', kg: 'mass', 'm/s²': 'acceleration', 'm/s': 'velocity' };
+const PGV = { mode: 'play', q: null, uStep: 0, uAuto: false, uBack: 'play', triOpen: null, gapOk: false };
+
+/* ---------- saved data (every read tolerates missing or odd data) ---------- */
+function pgData() {
+  const d = dbGet('prac', null), o = d && typeof d === 'object' ? d : {};
+  const n = (x, lo, hi, df) => { const v = Math.round(+x); return isFinite(v) ? clamp(v, lo, hi) : df; }, obj = x => x && typeof x === 'object' && !Array.isArray(x) ? x : {};
+  const P = {
+    level: n(o.level, 1, 6, 1), run: n(o.run, 0, 3, 0), wrongRun: n(o.wrongRun, 0, 2, 0), best: n(o.best, 1, 6, 1), seedN: n(o.seedN, 0, 1e9, 0), goes: n(o.goes, 0, 1e6, 0),
+    target: PG_TARGETS[o.target] ? o.target : 'none', tAt: n(o.tAt, 0, 1e9, 0), unitsDone: !!o.unitsDone, unitsSeen: !!o.unitsSeen, right: n(o.right, 0, 1e9, 0), asked: n(o.asked, 0, 1e9, 0),
+    hist: Array.isArray(o.hist) ? o.hist.filter(x => x && typeof x === 'object') : [], skills: obj(o.skills), traps: obj(o.traps),
+    cur: o.cur && typeof o.cur === 'object' && o.cur.seed != null ? o.cur : null, go: o.go && typeof o.go === 'object' ? o.go : null, lastGo: o.lastGo && typeof o.lastGo === 'object' ? o.lastGo : null,
+    twin: o.twin && typeof o.twin === 'object' ? o.twin : null
+  };
+  P.best = Math.max(P.best, P.level);
+  return P;
+}
+const pgSave = P => dbSet('prac', P);
+const pgPlural = (n, w) => n + ' ' + w + (n === 1 ? '' : 's');
+const pgLearnDone = id => { if (!CHDATA[id]) return false; const L = learnProgress(id); return L.total > 0 && L.done === L.total; };
+/* Chapter 3 Foundation counts as finished once its stamp is earned or its Learn steps are all done (that is where F = m × a and the triangle are taught) */
+const pgC3Done = () => !!dbGet('stamps', {}).c3f || pgLearnDone('c3f');
+const pgWorldsOk = () => isTeacher() || (pgLearnDone('c5f') && pgLearnDone('c5x'));
+const pgOpts = P => ({ worlds: pgWorldsOk(), units: isTeacher() || P.unitsDone, recent: P.hist.slice(-3).map(x => x.kind) });
+const pgNewGo = P => ({ n: 0, right: 0, top: P.level, start: P.level, skills: {}, traps: {}, t: Date.now() });
+
+/* ---------- targets ---------- */
+function pgTargetState(P) {
+  const t = P.target; if (t === 'none') return { on: false };
+  const k = +t.slice(1);
+  if (t[0] === 'l') return { on: true, lvl: true, n: k, have: P.best, done: P.best >= k, label: PG_TARGETS[t], prog: `best so far: level ${P.best}` };
+  const have = Math.max(0, P.right - P.tAt);
+  return { on: true, lvl: false, n: k, have, done: have >= k, label: PG_TARGETS[t], prog: `${Math.min(have, k)} of ${k} right` };
+}
+
+/* ---------- the engine ---------- */
+/* the next question: a twin after a level down, sometimes one from the level below, otherwise one at the student's level */
+function pgNewQ(P) {
+  const opts = pgOpts(P); let q = null, lvl = P.level, low = false, twin = false;
+  if (P.twin) {
+    const tw = P.twin; P.twin = null;
+    if (PR_LEVEL_KINDS[tw.lvl - 1] && PR_LEVEL_KINDS[tw.lvl - 1].includes(tw.kind)) {
+      const o2 = Object.assign({}, opts, { recent: PR_LEVEL_KINDS[tw.lvl - 1].filter(k => k !== tw.kind).slice(0, 3) });
+      for (let i = 0; i < 400; i++) { const s = ++P.seedN, g = prGen(tw.lvl, s, o2); if (g && g.kind === tw.kind) { q = g; lvl = tw.lvl; twin = true; P.cur = { seed: s, opts: o2 }; break; } }
+    }
+  }
+  if (!q) {
+    const prevLow = P.cur && P.cur.low;
+    if (lvl > 1 && !prevLow && rng(P.seedN * 7919 + 13)() < PG_MIX) { lvl--; low = true; }
+    const s = ++P.seedN; q = prGen(lvl, s, opts); P.cur = { seed: s, opts };
+  }
+  Object.assign(P.cur, { lvl, low, twin, tries: 0, clue: 0, hints: 0, done: false, ok: null, v: '', u: '', w: [], traps: [], fb: null, up: 0, down: false, end: false, tgt: false });
+  if (!P.go) P.go = pgNewGo(P);
+  PGV.q = q; return q;
+}
+/* the question on screen, rebuilt from its seed and opts */
+function pgQ(P) {
+  const c = P.cur; if (!c) return null;
+  if (!PGV.q || PGV.q.seed !== c.seed || PGV.q.level !== c.lvl) PGV.q = prGen(c.lvl, c.seed, c.opts || {});
+  return PGV.q;
+}
+/* copy what is typed on screen into the saved question (before any re-draw) */
+function pgGrab(c) {
+  const i = $('#pgIn'), u = $('#pgU'); if (!c || c.done) return;
+  if (i) c.v = i.value; if (u) c.u = u.value;
+  const ws = $$('#pgHost .pg-workin'); if (ws.length) c.w = ws.map(x => x.value);
+}
+const pgWorkText = (c, q) => { const w = (c.w || []).map(x => String(x || '').trim()); if (!w.some(Boolean)) return ''; return q && q.steps > 1 ? w.map((x, i) => x ? `Step ${i + 1}: ${x}` : '').filter(Boolean).join('\n') : w.join('\n'); };
+
+/* mark the typed answer. Returns what happened (the tests read it). */
+function pgCheck() {
+  const P = pgData(), c = P.cur, q = pgQ(P); if (!c || c.done || !q) return null;
+  pgGrab(c);
+  const v = parseNum(c.v);
+  if (!String(c.v || '').trim() || isNaN(v)) { pgSay('Type your answer as a number, for example 42.5.', 'no'); pgSave(P); return { err: 'num' }; }
+  if (!c.u) { pgSay('Choose a unit for your answer from the list.', 'no'); pgSave(P); return { err: 'unit' }; }
+  c.tries++;
+  const numOk = near(v, q.ans, q.tol), unitOk = c.u === q.unit, ok = numOk && unitOk, trap = numOk ? null : prMatchTrap(q, v);
+  if (trap && !c.traps.includes(trap.key)) c.traps.push(trap.key);
+  if (numOk && !unitOk && !c.traps.includes('unit')) c.traps.push('unit');
+  let res;
+  if (ok) res = pgFinish(P, q, true);
+  else if (c.tries < 2) {
+    let msg;
+    if (numOk) msg = `Your number is right! Now check the unit. What is ${PG_QTY[q.unit] || 'this'} measured in?`;
+    else if (trap) msg = trap.say + ' Have another go.';
+    else if (c.hints < q.hints.length) { msg = 'Not quite. Here is a clue: ' + plain(q.hints[c.hints]) + ' Have another go.'; c.hints++; }
+    else msg = 'Not quite. Check each step again, then have another go.';
+    c.fb = { cls: 'hint', msg }; res = { ok: false, tries: 1, trap: trap ? trap.key : null, unit: numOk && !unitOk };
+  } else res = pgFinish(P, q, false, trap, numOk && !unitOk);
+  pgSave(P); pgRender();
+  return Object.assign({ ok }, res);
+}
+/* a question is over: right (on try 1 or 2) or wrong twice. Moves the level up or down, saves the history. */
+function pgFinish(P, q, ok, trap, unitOnly) {
+  const c = P.cur, go = P.go || (P.go = pgNewGo(P)), wtxt = pgWorkText(c, q);
+  c.done = true; c.ok = ok; P.asked++;
+  P.hist.push({ t: Date.now(), seed: c.seed, opts: c.opts, lvl: c.lvl, kind: q.kind, skill: q.skill, ok, tries: c.tries, clue: c.clue > 0, trap: c.traps[0] || null, traps: c.traps.slice(), ans: `${String(c.v).trim()} ${c.u}`, w: wtxt, low: !!c.low, twin: !!c.twin });
+  if (P.hist.length > 300) P.hist.splice(0, P.hist.length - 300);
+  const sk = P.skills[q.skill] || { right: 0, tries: 0 }; sk.tries++; if (ok) sk.right++; P.skills[q.skill] = sk;
+  const gs = go.skills[q.skill] || { right: 0, tries: 0 }; gs.tries++; if (ok) gs.right++; go.skills[q.skill] = gs;
+  c.traps.forEach(k => { const t = P.traps[k] || { met: 0, fixed: 0 }; t.met++; if (ok) t.fixed++; P.traps[k] = t; const g = go.traps[k] || { met: 0, fixed: 0 }; g.met++; if (ok) g.fixed++; go.traps[k] = g; });
+  const tgtBefore = pgTargetState(P).done;
+  go.n++;
+  if (ok) {
+    P.right++; go.right++; P.wrongRun = 0;
+    if (c.tries === 1 && !c.clue) {
+      P.run++;
+      if (P.run >= 3 && P.level < 6) { P.level++; P.run = 0; P.best = Math.max(P.best, P.level); c.up = P.level; go.top = Math.max(go.top || 1, P.level); }
+      P.run = Math.min(P.run, 3);
+    }
+    c.fb = { cls: 'ok', msg: (c.tries === 1 ? pgPraise(P.asked) : 'Yes! You fixed it on your second try.') + ` The answer is ${q.ansText} ${q.unit}.` };
+    addEvidence('maths', `Maths Gym level ${q.level}: ${plain(q.p)} I got ${String(c.v).trim()} ${c.u}.`);
+  } else {
+    P.run = 0; P.wrongRun++;
+    const say = trap ? trap.say + ' ' : unitOnly ? `Your number was right, but the unit is ${q.unit}. ` : '';
+    c.fb = { cls: 'no', msg: `${say}The answer is ${q.ansText} ${q.unit}. Read the worked answer below to see how.` };
+    if (P.wrongRun >= 2) {
+      P.wrongRun = 0; P.twin = { lvl: c.lvl, kind: q.kind };
+      if (P.level > 1) { P.level--; c.down = true; } else c.down = 'same';
+    }
+  }
+  c.tgt = !tgtBefore && pgTargetState(P).done;
+  if (go.n >= PG_GO) c.end = true;
+  return { ok, tries: c.tries, up: c.up || 0, down: c.down, level: P.level };
+}
+const pgPraise = n => ['That\'s right! Great work.', 'Spot on!', 'Yes, that\'s right!', 'Brilliant, that\'s it!', 'Correct! Nicely done.'][n % 5];
+/* Next: the end screen after 10, the units cards on first reaching level 6, otherwise a new question */
+function pgNext() {
+  const P = pgData(), c = P.cur;
+  if (c && !c.done) return null;
+  if (c && c.end) { P.lastGo = P.go; P.go = null; P.goes++; P.cur = null; pgSave(P); PGV.mode = 'end'; pgRender(); window.scrollTo(0, 0); return 'end'; }
+  if (P.level === 6 && !P.unitsDone && !P.unitsSeen && !isTeacher()) { P.unitsSeen = true; pgSave(P); pgUnitsOpen(true); return 'units'; }
+  pgNewQ(P); pgSave(P); PGV.mode = 'play'; pgRender(); window.scrollTo(0, 0); return PGV.q;
+}
+function pgClue() {
+  const P = pgData(), c = P.cur, q = pgQ(P); if (!c || c.done || !q || c.hints >= q.hints.length) return;
+  pgGrab(c); c.hints++; c.clue++; pgSave(P); pgRender();
+  const b = $('#pgHost [data-pg=clue]'); if (b && !b.disabled) b.focus({ preventScroll: true });
+}
+
+/* ---------- opening ---------- */
+function pgOpen() {
+  if (typeof hideCards === 'function') hideCards(); if (typeof closeDesk === 'function') closeDesk(); if (typeof closeJournal === 'function') closeJournal();
+  parkLab(); LAB.onChange = null;   // no chapter step is open, so the formula triangle and calculator have nothing to tell
+  PGV.mode = !pgC3Done() && !isTeacher() ? 'remind' : 'play'; show('vPractice');
+}
+/* make sure there is a question to show (starts a go if needed) */
+function pgEnsure() {
+  const P = pgData(); if (P.cur && P.cur.seed != null && pgQ(P)) return;
+  if (P.level === 6 && !P.unitsDone && !P.unitsSeen && !isTeacher()) { P.unitsSeen = true; pgSave(P); PGV.mode = 'units'; PGV.uStep = 0; PGV.uAuto = true; PGV.uBack = 'next'; PGV.gapOk = false; return; }
+  P.go = P.go || pgNewGo(P); pgNewQ(P); pgSave(P);
+}
+
+/* ---------- drawing the page ---------- */
+function pgRender() {
+  const host = $('#pgHost'); if (!host) return;
+  if (PGV.mode === 'play') pgEnsure();
+  const P = pgData();
+  host.innerHTML = `<div class="pg">${pgHeadHTML()}${PGV.mode === 'remind' ? pgRemindHTML() : `${pgBarHTML(P)}${PGV.mode === 'end' ? pgEndHTML(P) : PGV.mode === 'units' ? pgUnitsHTML() : pgPlayHTML(P)}`}</div>`;
+  $('#crumb').textContent = 'Maths Gym';
+  if (PGV.mode === 'play') pgWire(P);
+}
+const pgHeadHTML = () => `<div class="chhead"><div><span class="lbl">Maths practice · F = m × a</span><h1>🏋️ Maths Gym</h1></div><button type="button" class="ghost" data-pg="home">← Home</button></div>`;
+function pgRemindHTML() {
+  return `<section class="panel pg-remind"><div class="pg-rmicon" aria-hidden="true">${chIcon('tri')}</div><div><h2>Before you start</h2><p>We recommend doing Chapter 3 first. That's where you meet F = m × a and the formula triangle.</p>
+    <div class="row"><button type="button" class="go" data-open="c3f">Go to Chapter 3</button><button type="button" class="ghost" data-pg="anyway">Practise anyway</button></div></div></section>`;
+}
+function pgBarHTML(P) {
+  const T = pgTargetState(P), lv = P.level;
+  const rungs = PG_LEVELS.map((n, i) => `<li class="${i + 1 === lv ? 'on' : i + 1 < lv ? 'past' : ''}"${i + 1 === lv ? ' aria-current="step"' : ''}><b>${i + 1}</b><span>${n}</span></li>`).join('');
+  const dots = [0, 1, 2].map(i => `<i class="${i < P.run ? 'on' : ''}"></i>`).join('');
+  const opts = Object.keys(PG_TARGETS).map(k => `<option value="${k}"${k === P.target ? ' selected' : ''}>${PG_TARGETS[k]}</option>`).join('');
+  const tline = !T.on ? '<span class="pg-tprog">Pick a target if your teacher set one.</span>'
+    : `<span class="pg-tprog ${T.done ? 'done' : ''}">${T.done ? '✓ Target reached!' : T.prog}</span><span class="pg-tbar" aria-hidden="true"><i style="width:${Math.round(Math.min(1, (T.lvl ? (T.have - 1) / Math.max(1, T.n - 1) : T.have / T.n)) * 100)}%"></i></span>`;
+  const units = P.level === 6 && !P.unitsDone && !isTeacher() && PGV.mode !== 'units' ? '<button type="button" class="mini pg-ulink" data-pg="units">📏 Learn to change units</button>' : '';
+  return `<section class="panel pg-bar" aria-label="Your level">
+    <div class="pg-lvhd"><span class="lbl">Your level</span><b class="pg-lvname">Level ${lv}: ${PG_LEVELS[lv - 1]}</b></div>
+    <ol class="pg-rungs">${rungs}</ol>
+    <div class="pg-barrow">
+      <div class="pg-run" role="img" aria-label="${P.run} right in a row out of 3"><span>Right in a row</span><span class="pg-dots">${dots}</span></div>
+      <label class="pg-target"><span>My target</span><select data-pg="target" aria-label="My target">${opts}</select></label>${tline}${units}
+    </div>
+    <p class="pg-rule">Get 3 right in a row without a clue to move up a level. A go is ${PG_GO} questions (approx. 15 min). Your progress saves after every question.</p>
+  </section>`;
+}
+function pgPlayHTML(P) {
+  const c = P.cur, q = pgQ(P); if (!c || !q) return '<p>Loading…</p>';
+  const go = P.go || { n: 0 }, num = Math.min(PG_GO, go.n + (c.done ? 0 : 1));
+  const chips = (c.low ? `<span class="pg-chip">A quick look back: level ${c.lvl}</span>` : '') + (c.twin ? '<span class="pg-chip tw">Twin question: same kind, new numbers</span>' : '');
+  const U = q.units || UNITS, lock = c.done ? ' disabled' : '', vcls = c.done ? (c.ok ? ' right' : ' wrong') : '';
+  const ucls = c.done ? (c.u === q.unit ? ' right' : ' wrong') : '';
+  const steps = Math.max(1, q.steps || 1), w = c.w || [];
+  const work = steps > 1 ? Array.from({ length: steps }, (_, i) => `<label class="pg-step"><span>Step ${i + 1}</span><textarea class="pg-workin" rows="2" aria-label="Working for step ${i + 1}"${lock} placeholder="${i === 0 ? 'Write your first step here' : 'Then the next step'}">${esc(w[i] || '')}</textarea></label>`).join('')
+    : `<textarea class="pg-workin" rows="2" aria-label="Your working"${lock} placeholder="For example: F = m × a = 45 × 2.5">${esc(w[0] || '')}</textarea>`;
+  const shown = q.hints.slice(0, c.hints).map(x => `<li>${esc(x)}</li>`).join('');
+  const clueBtn = c.done ? '' : c.hints >= q.hints.length ? '<button type="button" class="mini" data-pg="clue" disabled>No more clues</button>' : `<button type="button" class="mini pg-cluebtn" data-pg="clue">${c.hints ? 'Need another clue?' : 'Need a clue?'}</button>`;
+  const worked = c.done ? (c.ok ? `<details class="pg-worked ok"><summary>See the worked answer</summary><div class="pg-workans">${esc(q.work)}</div></details>`
+    : `<div class="pg-worked"><div class="lbl">Worked answer</div><div class="pg-workans">${esc(q.work)}</div></div>`) : '';
+  const cele = c.done && c.up ? `<div class="pg-cele" role="status"><span class="pg-conf" aria-hidden="true">${'<i></i>'.repeat(14)}</span><b>🎉 ${PG_UP[c.up - 1]}</b><span>Three right in a row with no clue. Next up: level ${c.up}, ${PG_LEVELS[c.up - 1].toLowerCase()}.</span></div>` : '';
+  const down = c.done && c.down ? `<div class="pg-down" role="status"><b>${c.down === true ? 'Let\'s go back a step and build it up again.' : 'Let\'s practise this one again.'}</b><span>${c.down === true ? `You're on level ${P.level} now. ` : ''}Read the worked answer, then try a twin question: the same kind of problem with new numbers.</span></div>` : '';
+  const tgt = c.done && c.tgt ? '<div class="pg-tgt" role="status">🎯 You reached your target! Press <b>📄 Save my practice</b> on the end screen, or keep practising.</div>' : '';
+  const next = c.done ? `<button type="button" class="go big" data-pg="next" id="pgNext">${c.end ? 'See how you did →' : c.down ? 'Try the twin question →' : c.up ? `Start level ${c.up} →` : 'Next question →'}</button>` : '';
+  const retry = !c.done && c.tries === 1 ? '<button type="button" class="ghost" data-pg="retry">Try again</button>' : '';
+  const units = q.units2 ? `<details class="clue pg-unitsfold"><summary>How do I change units?</summary><p>1 kg = 1,000 g, so to change grams to kilograms, divide by 1,000.</p><p>1 tonne = 1,000 kg, so to change tonnes to kilograms, multiply by 1,000.</p><button type="button" class="mini" data-pg="units">Open the Changing units cards</button></details>` : '';
+  const wTri = q.skill === 'weight' || q.kind === 'fall' || q.kind === 'weightFric';
+  const triOpen = PGV.triOpen != null ? PGV.triOpen : matchMedia('(min-width:960px)').matches;
+  return `<div class="pg-main">
+    <section class="panel pg-card${c.done ? (c.ok ? ' ok' : ' bad') : ''}" aria-labelledby="pgQp">
+      <div class="pg-qhd"><span class="pg-qn">Question ${num} of ${PG_GO}</span><span class="pg-lv">Level ${c.lvl} · ${PG_LEVELS[c.lvl - 1]}</span>${chips}</div>
+      <div class="pg-story"><figure class="pg-pic">${pgPic(q.pic)}</figure><p class="pg-p" id="pgQp">${esc(q.p)}</p></div>
+      ${q.pic.arrows && q.pic.arrows.length ? `<figure class="pg-fbd"><figcaption>The forces on ${esc(PR_THING[q.pic.thing] ? PR_THING[q.pic.thing].the : 'it')}</figcaption>${pgFbd(q.pic)}</figure>` : ''}
+      ${units}
+      <div class="pg-work"><span class="lbl">Working (optional, not marked)</span>${work}</div>
+      <div class="pg-ans"><span class="lbl">Your answer</span><div class="numin noglos"><input class="ansin${vcls}" id="pgIn" inputmode="decimal" autocomplete="off" aria-label="Your answer" value="${esc(c.v || '')}"${lock}><select class="unitsel${ucls}" id="pgU" aria-label="Unit"${lock}><option value="">unit?</option>${U.map(u => `<option value="${esc(u)}"${c.u === u ? ' selected' : ''}>${u}</option>`).join('')}</select>${c.done ? '' : '<button type="button" class="go" data-pg="check" id="pgCheck">Check</button>'}${retry}</div></div>
+      <p class="fb ${c.fb ? c.fb.cls : ''}" id="pgFb" role="status" aria-live="polite">${c.fb ? esc(c.fb.msg) : ''}</p>
+      <div class="pg-clues">${shown ? `<ol class="clist">${shown}</ol>` : ''}${clueBtn}${c.clue && !c.done ? '<span class="pg-cnote">Clues help you learn. A right answer still counts, but it does not add to your run of 3.</span>' : ''}</div>
+      ${worked}${cele}${down}${tgt}
+      ${next ? `<div class="pg-acts">${next}</div>` : ''}
+    </section>
+    <aside class="pg-side"><details class="panel pg-tri"${triOpen ? ' open' : ''}><summary>Formula triangle</summary>${triHTML('fma')}${wTri ? `<p class="scaleNote">Weight = mass × g, so mass = weight ÷ g.</p>${triHTML('w')}` : ''}<p class="scaleNote">Tap a letter to cover it. What is left is the sum. The 🧮 calculator is at the bottom right.</p></details></aside>
+  </div>`;
+}
+function pgWire(P) {
+  const i = $('#pgIn'), c = P.cur; if (!i || !c) return;
+  const save = () => { const D = pgData(); if (D.cur && !D.cur.done && D.cur.seed === c.seed) { pgGrab(D.cur); pgSave(D); } };
+  i.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); pgCheck(); } });
+  i.addEventListener('change', save); $('#pgU').addEventListener('change', save); $$('#pgHost .pg-workin').forEach(t => t.addEventListener('change', save));
+  const tri = $('#pgHost .pg-tri'); if (tri) tri.addEventListener('toggle', () => { PGV.triOpen = tri.open; });
+  if (c.done) { const n = $('#pgNext'); if (n) n.focus({ preventScroll: true }); }
+  else if (matchMedia('(pointer:fine)').matches) { i.focus({ preventScroll: true }); if (c.tries) i.select(); }
+}
+function pgSay(msg, cls) { const f = $('#pgFb'); if (f) { f.className = 'fb ' + cls; f.textContent = msg; } }
+
+/* ---------- the end of a go ---------- */
+function pgNextTime(P, go) {
+  const sk = Object.entries(go.skills || {}).filter(([, s]) => s.tries && s.right < s.tries).sort((a, b) => (a[1].right / a[1].tries) - (b[1].right / b[1].tries) || b[1].tries - a[1].tries);
+  if (sk.length) { const [k, s] = sk[0]; return `Next time, practise the “${PR_SKILLS[k] || k}” questions. You got ${s.right} of ${s.tries} right this go.`; }
+  const tr = Object.entries(go.traps || {}).filter(([, t]) => t.fixed < t.met);
+  if (tr.length) return `Next time, watch out for this mistake: ${(PG_TRAPNAME[tr[0][0]] || tr[0][0]).toLowerCase()}.`;
+  return P.level < 6 ? `Next time, keep going until you reach level ${P.level + 1}: ${PG_LEVELS[P.level].toLowerCase()}.` : 'Next time, keep your run going on the stretch problems. You are at the top level!';
+}
+const pgSkillRows = sk => Object.keys(PR_SKILLS).filter(k => sk[k] && sk[k].tries).map(k => [PR_SKILLS[k], sk[k].right, sk[k].tries]);
+const pgTrapRows = tr => Object.keys(tr || {}).filter(k => tr[k] && tr[k].met).sort((a, b) => tr[b].met - tr[a].met).map(k => [PG_TRAPNAME[k] || k, tr[k].met, tr[k].fixed]);
+function pgEndHTML(P) {
+  const go = P.lastGo || pgNewGo(P), T = pgTargetState(P), sk = pgSkillRows(go.skills), tr = pgTrapRows(go.traps);
+  const skills = sk.length ? `<table class="tbl pg-tbl"><tr><th>Skill</th><th>Right</th></tr>${sk.map(([n, r, t]) => `<tr><td>${esc(n)}</td><td><b>${r}</b> of ${t}${r === t ? ' <span class="pg-star">★</span>' : ''}</td></tr>`).join('')}</table>` : '<p>No questions in this go yet.</p>';
+  const traps = tr.length ? `<ul class="pg-traps">${tr.map(([n, m, f]) => `<li><b>${esc(n)}</b>: ${pgPlural(m, 'time')}${f ? `, fixed ${f === m ? 'every time' : f + ' time' + (f > 1 ? 's' : '')} on your second try` : ''}</li>`).join('')}</ul>` : '<p>None this go. Brilliant!</p>';
+  return `<section class="panel pg-end"><h2>${go.right >= 8 ? 'Brilliant workout!' : go.right >= 5 ? 'Great workout!' : 'Well done for practising!'}</h2>
+    <div class="pg-stats"><div><b>${go.right}<small> of ${go.n}</small></b><span>questions right</span></div><div><b>${go.top || P.level}</b><span>highest level reached</span><em>${esc(PG_LEVELS[(go.top || P.level) - 1])}</em></div><div><b>${P.level}</b><span>your level now</span></div></div>
+    ${T.on ? `<p class="pg-tline ${T.done ? 'done' : ''}">Target: ${esc(T.label.toLowerCase())}. ${T.done ? '✓ Reached!' : 'Not reached yet (' + T.prog + '). Keep going!'}</p>` : ''}
+    <div class="pg-endgrid"><div><h3>Skills this go</h3>${skills}</div><div><h3>Mistakes you met</h3>${traps}</div></div>
+    <p class="pg-nexttime">💡 ${esc(pgNextTime(P, go))}</p>
+    <div class="row pg-endbtns"><button type="button" class="go big" data-pg="again">Keep going</button><button type="button" class="ghost big" data-pg="home">Home</button><button type="button" class="ghost big" data-pg="pdf">📄 Save my practice</button></div></section>`;
+}
+
+/* ---------- the "Changing units" teach card ---------- */
+const PG_UCARDS = [
+  { h: 'Grams and kilograms', pic: 'sugar', p: ['Small masses are often given in grams (g).', 'A bag of sugar has a mass of about 1 kg. That is the same as 1,000 g.'], key: '1 kg = 1,000 g' },
+  { h: 'Tonnes and kilograms', pic: 'car', p: ['Big masses are often given in tonnes.', 'A small car has a mass of about 1 tonne. That is the same as 1,000 kg.'], key: '1 tonne = 1,000 kg' },
+  { h: 'Change to kg first', pic: 'ex', p: ['F = m × a only works when the mass is in kg. So change the units first.', 'A tennis ball has a mass of 57 g. 57 ÷ 1,000 = 0.057 kg.', 'A rhino has a mass of 2.3 tonnes. 2.3 × 1,000 = 2,300 kg.'], key: 'Grams: divide by 1,000. Tonnes: multiply by 1,000.' },
+  { h: 'Check it', gap: true }
+];
+function pgUnitsOpen(auto) { const P = pgData(); PGV.uBack = P.cur && !P.cur.done ? 'play' : 'next'; PGV.uAuto = !!auto; PGV.uStep = 0; PGV.gapOk = false; PGV.mode = 'units'; pgRender(); window.scrollTo(0, 0); }
+function pgUnitPic(k) {
+  if (k === 'sugar') return `<svg viewBox="0 0 200 120" role="img" aria-label="A bag of sugar labelled 1 kg"><rect width="200" height="120" rx="10" fill="#eef5f8"/><rect x="0" y="100" width="200" height="20" fill="#e2cfa9"/><path d="M70 30h60l6 72H64z" fill="#fbfaf4" stroke="#22313a" stroke-width="2.5" stroke-linejoin="round"/><path d="M70 30l6-10h48l6 10" fill="#e9e4d4" stroke="#22313a" stroke-width="2.5" stroke-linejoin="round"/><rect x="74" y="50" width="52" height="34" rx="4" fill="#3d7fc1"/><text x="100" y="65" text-anchor="middle" font-size="11" font-weight="800" fill="#fff">SUGAR</text><text x="100" y="79" text-anchor="middle" font-size="13" font-weight="800" fill="#fff">1 kg</text></svg>`;
+  if (k === 'car') return `<svg viewBox="0 0 200 120" role="img" aria-label="A small car labelled about 1 tonne"><rect width="200" height="120" rx="10" fill="#e3eff5"/><rect x="0" y="100" width="200" height="20" fill="#9aa3a6"/>${pgCar(100, 100, '#d9534f', 1)}<rect x="62" y="12" width="76" height="22" rx="11" fill="#fff" stroke="#22313a" stroke-width="2"/><text x="100" y="27" text-anchor="middle" font-size="11" font-weight="800" fill="#22313a">about 1 tonne</text></svg>`;
+  return `<svg viewBox="0 0 200 120" role="img" aria-label="A tennis ball of 57 g and a rhino of 2.3 tonnes"><rect width="200" height="120" rx="10" fill="#eef5f8"/><rect x="0" y="100" width="200" height="20" fill="#cfe2c3"/>${pgBall('tennis', 44, 100)}<text x="44" y="56" text-anchor="middle" font-size="12" font-weight="800" fill="#22313a">57 g</text>${pgAnimal('rhino', 136, 100, 0.8)}<text x="136" y="40" text-anchor="middle" font-size="12" font-weight="800" fill="#22313a">2.3 tonnes</text></svg>`;
+}
+function pgUnitsHTML() {
+  const i = PGV.uStep, C = PG_UCARDS[i], last = i === PG_UCARDS.length - 1, dots = PG_UCARDS.map((_, k) => `<i class="${k === i ? 'on' : k < i ? 'past' : ''}"></i>`).join('');
+  const back = PGV.uBack === 'play' ? 'Back to my question' : 'Back to practice';
+  let body;
+  if (C.gap) body = `<p class="pg-uq">Fill the gap with one word.</p><p class="pg-gap noglos">To change grams to kilograms, you <input class="gapin${PGV.gapOk ? ' right' : ''}" id="pgGap" autocomplete="off" aria-label="The missing word"${PGV.gapOk ? ' disabled value="divide"' : ''}> by 1,000.</p>
+    ${PGV.gapOk ? '' : '<button type="button" class="ghost sm" data-pg="ugap">Check</button>'}<p class="fb ${PGV.gapOk ? 'ok' : ''}" id="pgUfb" role="status" aria-live="polite">${PGV.gapOk ? 'Yes! A gram is tiny, so you divide by 1,000. And to change tonnes to kilograms, you multiply by 1,000.' : ''}</p>`;
+  else body = `<div class="pg-ubody"><figure class="pg-upic">${pgUnitPic(C.pic)}</figure><div>${C.p.map(x => `<p>${x}</p>`).join('')}<p class="pg-ukey">${C.key}</p></div></div>`;
+  const nextBtn = last ? (PGV.gapOk ? `<button type="button" class="go" data-pg="udone">${PGV.uBack === 'play' ? back + ' →' : 'Start practising →'}</button>` : '') : '<button type="button" class="go" data-pg="unext">Next →</button>';
+  return `<section class="panel pg-units" aria-labelledby="pgUh"><div class="pg-uhd"><span class="lbl">Changing units · card ${i + 1} of ${PG_UCARDS.length}</span><span class="pg-udots" aria-hidden="true">${dots}</span></div>
+    <h2 id="pgUh">${C.h}</h2>${body}
+    <div class="row pg-uacts">${i ? '<button type="button" class="ghost" data-pg="uprev">← Back</button>' : ''}${nextBtn}<button type="button" class="mini" data-pg="uskip">${PGV.uAuto ? 'Skip for now' : back}</button></div></section>`;
+}
+function pgUnitsGap() {
+  const g = $('#pgGap'); if (!g) return false; const raw = g.value.trim(), v = /^[÷\/]$/.test(raw) ? 'divide' : gapNorm(raw), f = $('#pgUfb');
+  if (!v) { f.className = 'fb no'; f.textContent = 'Type one word in the gap first.'; return false; }
+  if (/^(divide|divided|divides|dividing|div|divide it|divided it)$/.test(v)) {
+    PGV.gapOk = true; const P = pgData(); P.unitsDone = true; P.unitsSeen = true; pgSave(P); pgRender(); return true;
+  }
+  f.className = 'fb hint'; f.textContent = /multipl|times|×/.test(v) ? 'Not quite. A gram is tiny, so 1 kg has lots of them. Is the number of kilograms bigger or smaller than the number of grams?' : 'Not quite. Do you multiply or divide? A gram is tiny, so the number of kilograms is smaller.';
+  return false;
+}
+function pgUnitsLeave() {
+  PGV.mode = 'play'; const P = pgData();
+  if (PGV.uBack === 'next' || !P.cur || P.cur.done) { if (P.cur && P.cur.end) { pgNext(); return; } pgNewQ(P); pgSave(P); }
+  pgRender(); window.scrollTo(0, 0);
+}
+
+/* ---------- clicks (called from 99-init.js) ---------- */
+function pgClick(el) {
+  const a = el.dataset.pg;
+  if (a === 'open') { pgOpen(); return; }
+  if (a === 'home') { show('vHome'); return; }
+  if (a === 'anyway') { PGV.mode = 'play'; pgRender(); return; }
+  if (a === 'check') { pgCheck(); return; }
+  if (a === 'clue') { pgClue(); return; }
+  if (a === 'retry') { const i = $('#pgIn'); if (i) { i.value = ''; i.classList.remove('wrong'); i.focus({ preventScroll: true }); } return; }
+  if (a === 'next') { pgNext(); return; }
+  if (a === 'again') { const P = pgData(); P.go = pgNewGo(P); P.cur = null; pgSave(P); PGV.mode = 'play'; pgRender(); window.scrollTo(0, 0); return; }
+  if (a === 'pdf') { pgPdf(); return; }
+  if (a === 'units') { const P = pgData(); if (P.cur) { pgGrab(P.cur); pgSave(P); } pgUnitsOpen(false); return; }
+  if (a === 'unext') { PGV.uStep = Math.min(PG_UCARDS.length - 1, PGV.uStep + 1); pgRender(); return; }
+  if (a === 'uprev') { PGV.uStep = Math.max(0, PGV.uStep - 1); pgRender(); return; }
+  if (a === 'ugap') { pgUnitsGap(); return; }
+  if (a === 'udone' || a === 'uskip') { pgUnitsLeave(); return; }
+}
+function pgChange(el) {
+  if (el.dataset.pg !== 'target') return;
+  const P = pgData(); if (P.cur && !P.cur.done) pgGrab(P.cur);
+  P.target = PG_TARGETS[el.value] ? el.value : 'none'; P.tAt = P.right; pgSave(P); pgRender();
+  const s = $('#pgHost [data-pg=target]'); if (s) s.focus({ preventScroll: true });
+}
+function pgKey(e) {
+  if (VIEW !== 'vPractice' || e.key !== 'Enter' || !$('#modal').hidden) return;
+  if (e.target && e.target.id === 'pgGap') { e.preventDefault(); pgUnitsGap(); }
+}
+/* the PDF: name and class first (no name, no worksheet) */
+function pgPdf() {
+  const u = user();
+  if (!isTeacher() && (!(u.name || '').trim() || !(u.cls || '').trim())) {
+    openModal(`<div class="modal"><h2>No name, no worksheet!</h2><p>Your practice PDF needs your name and your class, so your teacher knows it is yours.</p><div class="row" style="justify-content:space-between"><button type="button" class="ghost" data-close>Not now</button><button type="button" class="go" data-act="who">Add my name and class</button></div></div>`);
+    return false;
+  }
+  openSheet(null, 'gym'); return true;
+}
+
+/* ---------- the home page card ---------- */
+function pgHomeCard() {
+  const el = $('#gymCard'); if (!el) return;
+  const P = pgData(), started = P.asked > 0, T = pgTargetState(P);
+  const msg = started ? `<b>You're on level ${P.level}: ${esc(PG_LEVELS[P.level - 1].toLowerCase())}.</b> Best so far: level ${P.best} · ${pgPlural(P.right, 'question')} right${T.on ? ` · Target: ${esc(T.label.toLowerCase())}${T.done ? ' ✓' : ''}` : ''}` : '<b>Start at level 1 and work your way up to level 6.</b>';
+  el.innerHTML = `<div class="hcicon">${pgIconSvg()}</div><div class="hcbody"><span class="kicker2">Maths practice · F = m × a</span><h3>🏋️ Maths Gym</h3><p>Practise force, mass and acceleration. The questions get harder as you get better.</p><p class="pg-hcsub">${msg}</p><div class="row"><button type="button" class="go" data-pg="open">${started ? 'Carry on practising' : 'Open the Maths Gym'} →</button></div></div>`;
+}
+const pgIconSvg = () => `<svg class="chicon" viewBox="0 0 40 40" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h16" stroke-width="3"/><rect x="7" y="12" width="5" height="16" rx="1.5"/><rect x="28" y="12" width="5" height="16" rx="1.5"/><path d="M4 16v8M36 16v8" stroke-width="3"/></svg>`;
+
+/* ---------- pictures: small flat drawings for each pic.draw key (fixed colours, like an illustration, so they read the same in dark mode) ---------- */
+const PG_OL = 'stroke="#22313a" stroke-width="2" stroke-linejoin="round"';
+const pgWheel = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#2b3338" ${PG_OL}/><circle cx="${x}" cy="${y}" r="${r * 0.4}" fill="#c9d1d5"/>`;
+function pgCar(x, gy, col, s = 1, kind) {
+  const k = kind || 'car';
+  if (k === 'rover') return `<g transform="translate(${x} ${gy}) scale(${s})"><rect x="-38" y="-34" width="76" height="20" rx="4" fill="#d5dde2" ${PG_OL}/><rect x="-30" y="-46" width="44" height="8" fill="#2b5d8f" ${PG_OL}/><path d="M24 -34v-18" stroke="#22313a" stroke-width="2"/><circle cx="24" cy="-54" r="3" fill="#e3a51c"/>${pgWheel(-28, -9, 9)}${pgWheel(0, -9, 9)}${pgWheel(28, -9, 9)}</g>`;
+  if (k === 'kart') return `<g transform="translate(${x} ${gy}) scale(${s})"><path d="M-40 -14h80l-6 -10h-52z" fill="${col}" ${PG_OL}/><circle cx="2" cy="-34" r="10" fill="#e9eef1" ${PG_OL}/><rect x="0" y="-38" width="12" height="6" rx="2" fill="#3d7fc1"/><path d="M-6 -24l-8 10" stroke="#22313a" stroke-width="3"/>${pgWheel(-28, -9, 9)}${pgWheel(28, -9, 9)}</g>`;
+  return `<g transform="translate(${x} ${gy}) scale(${s})"><path d="M-48 -12v-14q0-6 6-7l14-2 12-14h34l16 14 10 2q6 1 6 7v14z" fill="${col}" ${PG_OL}/><path d="M-12 -35h14v12h-24zM6 -35h12l12 12h-24z" fill="#cde6f2" ${PG_OL}/>${pgWheel(-28, -10, 10)}${pgWheel(28, -10, 10)}</g>`;
+}
+function pgBall(t, x, gy, s = 1) {
+  const r = 17 * s;
+  if (t === 'puck') return `<ellipse cx="${x}" cy="${gy - 6}" rx="${20 * s}" ry="${6 * s}" fill="#1e2428" ${PG_OL}/><rect x="${x - 20 * s}" y="${gy - 12}" width="${40 * s}" height="6" fill="#1e2428"/><ellipse cx="${x}" cy="${gy - 12}" rx="${20 * s}" ry="${6 * s}" fill="#3a444a" ${PG_OL}/>`;
+  const cy = gy - r - 1, fill = { tennis: '#c9dd3a', bowling: '#2c4f9e', football: '#f7f7f4' }[t] || '#f7f7f4';
+  let deco = '';
+  if (t === 'tennis') deco = `<path d="M${x - r * 0.75} ${cy - r * 0.6}q${r * 0.7} ${r * 0.6} 0 ${r * 1.2}M${x + r * 0.75} ${cy - r * 0.6}q${-r * 0.7} ${r * 0.6} 0 ${r * 1.2}" fill="none" stroke="#fff" stroke-width="2.2"/>`;
+  else if (t === 'bowling') deco = `<circle cx="${x - 4 * s}" cy="${cy - 6 * s}" r="${2.6 * s}" fill="#0f1c3a"/><circle cx="${x + 4 * s}" cy="${cy - 7 * s}" r="${2.6 * s}" fill="#0f1c3a"/><circle cx="${x}" cy="${cy + 1 * s}" r="${3 * s}" fill="#0f1c3a"/>`;
+  else deco = `<path d="M${x} ${cy - 6 * s}l${5.7 * s} ${4.1 * s}-${2.2 * s} ${6.7 * s}h-${7 * s}l-${2.2 * s}-${6.7 * s}z" fill="#22313a"/><path d="M${x} ${cy - 6 * s}v-${r - 6 * s}M${x + 5.7 * s} ${cy - 1.9 * s}l${r * 0.6} -${r * 0.3}M${x - 5.7 * s} ${cy - 1.9 * s}l-${r * 0.6} -${r * 0.3}M${x + 3.5 * s} ${cy + 4.8 * s}l${r * 0.35} ${r * 0.55}M${x - 3.5 * s} ${cy + 4.8 * s}l-${r * 0.35} ${r * 0.55}" stroke="#22313a" stroke-width="1.6"/>`;
+  return `<circle cx="${x}" cy="${cy}" r="${r}" fill="${fill}" ${PG_OL}/>${deco}`;
+}
+function pgAnimal(t, x, gy, s = 1) {
+  const A = { rhino: ['#8d989e', 1.15, 0.8], elephant: ['#8d989e', 1.25, 1.05], horse: ['#8a5a33', 1, 1.05], cheetah: ['#d9a640', 0.95, 0.85] }[t] || ['#8d989e', 1, 1], col = A[0], w = 30 * A[1], lg = 18 * A[2];
+  const by = -lg - 14, bx = 0;
+  let head = `<ellipse cx="${bx + w + 6}" cy="${by - 4}" rx="11" ry="9" fill="${col}" ${PG_OL}/>`, extra = '';
+  if (t === 'rhino') extra = `<path d="M${bx + w + 14} ${by - 8}l7 -10 -1 12z" fill="#e9e4d4" ${PG_OL}/>`;
+  if (t === 'elephant') { head = `<ellipse cx="${bx + w + 4}" cy="${by - 6}" rx="12" ry="12" fill="${col}" ${PG_OL}/>`; extra = `<ellipse cx="${bx + w - 6}" cy="${by - 4}" rx="9" ry="13" fill="#7a858b" ${PG_OL}/><path d="M${bx + w + 14} ${by - 4}q6 14 -2 26" fill="none" stroke="${col}" stroke-width="7" stroke-linecap="round"/><path d="M${bx + w + 14} ${by - 4}q6 14 -2 26" fill="none" stroke="#22313a" stroke-width="1"/>`; }
+  if (t === 'horse') { head = `<path d="M${bx + w - 4} ${by - 6}l10 -16 12 4 -2 8 -10 2 -2 10z" fill="${col}" ${PG_OL}/>`; extra = `<path d="M${bx + w - 2} ${by - 10}l6 -12" stroke="#3b2414" stroke-width="4" stroke-linecap="round"/><path d="M${bx - w} ${by - 4}q-10 4 -8 16" fill="none" stroke="#3b2414" stroke-width="4" stroke-linecap="round"/>`; }
+  if (t === 'cheetah') extra = [[-14, -2], [-2, 4], [10, -3], [-20, 6], [18, 3], [4, -6]].map(([dx, dy]) => `<circle cx="${bx + dx}" cy="${by + dy}" r="2.2" fill="#3b2a12"/>`).join('') + `<path d="M${bx - w} ${by}q-14 2 -16 -10" fill="none" stroke="${col}" stroke-width="4" stroke-linecap="round"/>`;
+  const legs = [-w * 0.7, -w * 0.35, w * 0.35, w * 0.7].map((dx, i) => `<rect x="${bx + dx - 4}" y="${by + 6}" width="8" height="${lg + 8}" rx="3" fill="${i % 2 ? col : '#77838a'}" ${PG_OL}/>`).join('');
+  return `<g transform="translate(${x} ${gy}) scale(${s})">${legs}<ellipse cx="${bx}" cy="${by}" rx="${w}" ry="14" fill="${col}" ${PG_OL}/>${t === 'elephant' ? head + extra : extra + head}<circle cx="${bx + w + 9}" cy="${by - 7}" r="1.8" fill="#22313a"/></g>`;
+}
+function pgPerson(t, x, gy, s = 1) {
+  const shirt = { sprinter: '#d9534f', wheelchair: '#3d7fc1', astro: '#f2f4f5', skate: '#2a9d8f', bike: '#e3a51c', canoe: '#d9534f' }[t] || '#3d7fc1';
+  const L = (x1, y1, x2, y2, c, w = 7) => `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+  if (t === 'wheelchair') return `<g transform="translate(${x} ${gy}) scale(${s})"><circle cx="-4" cy="-20" r="20" fill="none" stroke="#22313a" stroke-width="4"/><circle cx="-4" cy="-20" r="4" fill="#22313a"/>${pgWheel(22, -6, 6)}<path d="M-12 -30h22v8" fill="none" stroke="#22313a" stroke-width="3"/>${L(-6, -32, -2, -58, shirt, 10)}${L(-2, -34, 16, -26, '#22313a', 6)}${L(-4, -54, 10, -40, shirt, 6)}<circle cx="0" cy="-68" r="8" fill="#c68b5e" ${PG_OL}/></g>`;
+  if (t === 'astro') return `<g transform="translate(${x} ${gy}) scale(${s})"><rect x="-22" y="-62" width="12" height="26" rx="3" fill="#9aa6ad" ${PG_OL}/><path d="M-20 -46l-14 6" stroke="#f0bf4c" stroke-width="5" stroke-linecap="round"/>${L(-6, -24, -10, -4, shirt, 10)}${L(4, -24, 8, -4, shirt, 10)}<rect x="-14" y="-58" width="26" height="36" rx="10" fill="${shirt}" ${PG_OL}/>${L(10, -50, 22, -42, shirt, 8)}<circle cx="0" cy="-70" r="13" fill="${shirt}" ${PG_OL}/><path d="M-2 -76h10a5 5 0 0 1 0 12h-10z" fill="#e3a51c" ${PG_OL}/></g>`;
+  /* a runner, leaning forward */
+  return `<g transform="translate(${x} ${gy}) scale(${s})">${L(-2, -34, -16, -18, '#2b3a44')}${L(-16, -18, -22, -2, '#2b3a44')}${L(-2, -34, 12, -22, '#2b3a44')}${L(12, -22, 8, -4, '#2b3a44')}${L(-2, -34, 6, -60, shirt, 11)}${L(4, -54, 18, -46, '#c68b5e', 5)}${L(18, -46, 24, -56, '#c68b5e', 5)}${L(4, -54, -10, -48, '#c68b5e', 5)}${L(-10, -48, -14, -38, '#c68b5e', 5)}<circle cx="10" cy="-70" r="8" fill="#c68b5e" ${PG_OL}/></g>`;
+}
+/* one object, standing with its base on y = gy, centred on x */
+function pgThing(t, draw, x, gy, s = 1) {
+  const sc = (inner) => `<g transform="translate(${x} ${gy}) scale(${s})">${inner}</g>`;
+  switch (draw) {
+    case 'sled': return sc(`<path d="M-56 -2h62q8 0 10 -8" fill="none" stroke="#22313a" stroke-width="3" stroke-linecap="round"/><rect x="-52" y="-28" width="52" height="22" rx="3" fill="#b8763a" ${PG_OL}/><path d="M-52 -18h52" stroke="#7a5426" stroke-width="2"/><path d="M4 -16h24" stroke="#8a6a3c" stroke-width="2"/>`
+      + [30, 56].map(dx => `<ellipse cx="${dx}" cy="-20" rx="12" ry="7" fill="#6b7a83" ${PG_OL}/><circle cx="${dx + 13}" cy="-27" r="6" fill="#6b7a83" ${PG_OL}/><path d="M${dx + 10} -32l2 -6 3 5zM${dx + 15} -32l3 -6 1 6z" fill="#6b7a83" ${PG_OL}/><path d="M${dx - 7} -14v12M${dx + 7} -14v12" stroke="#4d5a62" stroke-width="3" stroke-linecap="round"/><ellipse cx="${dx + 2}" cy="-17" rx="6" ry="3" fill="#eef2f4"/>`).join(''));
+    case 'crate': return sc(`<rect x="-26" y="-46" width="52" height="46" rx="2" fill="#c99a5b" stroke="#7a5426" stroke-width="2.5"/><path d="M-26 -46l52 46M26 -46l-52 46" stroke="#7a5426" stroke-width="2"/><rect x="-26" y="-46" width="52" height="46" fill="none" stroke="#7a5426" stroke-width="5"/>`);
+    case 'gummy': return sc(`<ellipse cx="-18" cy="-6" rx="9" ry="6" fill="#e8505b" ${PG_OL}/><ellipse cx="18" cy="-6" rx="9" ry="6" fill="#e8505b" ${PG_OL}/><ellipse cx="0" cy="-26" rx="22" ry="22" fill="#e8505b" ${PG_OL}/><ellipse cx="0" cy="-22" rx="12" ry="13" fill="#f28a92"/><ellipse cx="-22" cy="-30" rx="6" ry="9" fill="#e8505b" ${PG_OL}/><ellipse cx="22" cy="-30" rx="6" ry="9" fill="#e8505b" ${PG_OL}/><circle cx="-12" cy="-60" r="7" fill="#e8505b" ${PG_OL}/><circle cx="12" cy="-60" r="7" fill="#e8505b" ${PG_OL}/><circle cx="0" cy="-54" r="15" fill="#e8505b" ${PG_OL}/><circle cx="-5" cy="-56" r="2" fill="#22313a"/><circle cx="5" cy="-56" r="2" fill="#22313a"/><path d="M-4 -49q4 3 8 0" fill="none" stroke="#22313a" stroke-width="1.6"/><path d="M-12 -66h24l-3 -7h-18z" fill="#1f3a6b" ${PG_OL}/><path d="M22 -30h24" stroke="#8a6a3c" stroke-width="2.5"/>`);
+    case 'pod': return sc(`<path d="M-48 -30l-14 -8v28l14 -8z" fill="#f0bf4c"/><path d="M-50 -27l-8 -4v14l8 -4z" fill="#e8505b"/><rect x="-46" y="-42" width="80" height="36" rx="18" fill="#d5dde2" ${PG_OL}/><path d="M34 -38q16 14 0 28" fill="#9aa6ad" ${PG_OL}/><circle cx="12" cy="-24" r="8" fill="#6aaedc" ${PG_OL}/><path d="M-30 -42l-8 -10h16zM-30 -6l-8 10h16z" fill="#2b5d8f" ${PG_OL}/>`);
+    case 'person': return pgPerson(t, x, gy, s);
+    case 'car': return pgCar(x, gy, t === 'kart' ? '#f0bf4c' : '#d9534f', s, t === 'rover' ? 'rover' : t === 'kart' ? 'kart' : 'car');
+    case 'ball': return pgBall(t === 'tennis' ? 'tennis' : t === 'bowling' ? 'bowling' : t === 'puck' ? 'puck' : 'football', x, gy, s);
+    case 'trolley': return sc(`<path d="M-30 -48h56l-6 30h-44z" fill="#c9d6dd" ${PG_OL}/><path d="M-24 -38h44M-22 -28h40M-12 -48v30M2 -48v30M16 -48v30" stroke="#7d8d96" stroke-width="1.5"/><path d="M-30 -48l-8 -10h-8" fill="none" stroke="#22313a" stroke-width="3" stroke-linecap="round"/><path d="M-24 -18v10h40v-10" fill="none" stroke="#22313a" stroke-width="2.5"/>${pgWheel(-20, -5, 5)}${pgWheel(14, -5, 5)}`);
+    case 'bike': return sc(`<circle cx="-24" cy="-16" r="15" fill="none" stroke="#22313a" stroke-width="3"/><circle cx="24" cy="-16" r="15" fill="none" stroke="#22313a" stroke-width="3"/><path d="M-24 -16l12 -20h24l12 20M-12 -36l10 20h0l14 -20M-2 -16l-22 0" fill="none" stroke="#2a7d48" stroke-width="3" stroke-linejoin="round"/><path d="M-14 -40h8M14 -40l2 -6" stroke="#22313a" stroke-width="3" stroke-linecap="round"/><path d="M-10 -42l6 -24 18 8" fill="none" stroke="#e3a51c" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/><path d="M-8 -42l4 14 -2 12" fill="none" stroke="#2b3a44" stroke-width="6" stroke-linecap="round"/><circle cx="-2" cy="-74" r="7.5" fill="#c68b5e" ${PG_OL}/><path d="M-10 -78q8 -10 16 0z" fill="#e8505b" ${PG_OL}/>`);
+    case 'skateboard': return sc(`${pgWheel(-18, -4, 4)}${pgWheel(18, -4, 4)}<path d="M-34 -12h68q4 0 6 -4M-34 -12q-4 0 -6 -4" fill="none" stroke="#22313a" stroke-width="2"/><rect x="-32" y="-14" width="64" height="5" rx="2" fill="#e3a51c" ${PG_OL}/><path d="M-12 -14l4 -22 8 22M-8 -36l2 -24" fill="none" stroke="#2b3a44" stroke-width="6" stroke-linecap="round"/><path d="M-6 -36l2 -24" stroke="#2a9d8f" stroke-width="12" stroke-linecap="round"/><path d="M-4 -54l16 6M-4 -54l-16 8" stroke="#c68b5e" stroke-width="5" stroke-linecap="round"/><circle cx="-2" cy="-70" r="8" fill="#c68b5e" ${PG_OL}/>`);
+    case 'train': return sc(`<rect x="-80" y="-44" width="76" height="36" rx="6" fill="#3d7fc1" ${PG_OL}/><path d="M0 -44h52q20 0 26 20v16h-78z" fill="#3d7fc1" ${PG_OL}/>${[-72, -52, -32, 8, 26].map(dx => `<rect x="${dx}" y="-36" width="14" height="12" rx="2" fill="#cde6f2" ${PG_OL}/>`).join('')}<path d="M48 -36h14l8 12h-22z" fill="#cde6f2" ${PG_OL}/><rect x="-80" y="-14" width="160" height="5" fill="#f0bf4c"/><path d="M20 -44l8 -10 8 10M28 -54h-14" fill="none" stroke="#22313a" stroke-width="2"/>${[-66, -20, 14, 60].map(dx => pgWheel(dx, -6, 6)).join('')}`);
+    case 'animal': return pgAnimal(t, x, gy, s);
+    case 'lift': return sc(`<path d="M0 -96v26" stroke="#22313a" stroke-width="2.5"/><rect x="-28" y="-72" width="56" height="64" rx="3" fill="#c9d6dd" ${PG_OL}/><rect x="-22" y="-64" width="44" height="50" fill="#e9eef1" ${PG_OL}/><path d="M0 -64v50" stroke="#22313a" stroke-width="2"/><circle cx="18" cy="-70" r="2.5" fill="#e3a51c"/>`);
+    case 'rocket': return sc(`<path d="M-62 -40l-26 -6 6 12 -6 12 26 -6z" fill="#f0bf4c"/><path d="M-62 -36l-14 -2 4 6 -4 6 14 -2z" fill="#e8505b"/><rect x="-62" y="-50" width="80" height="28" rx="6" fill="#e9eef1" ${PG_OL}/><path d="M18 -50q30 14 0 28z" fill="#d9534f" ${PG_OL}/><path d="M-50 -50l-8 -12h16zM-50 -22l-8 10h16z" fill="#d9534f" ${PG_OL}/><rect x="-70" y="-14" width="100" height="8" rx="2" fill="#6b7a83" ${PG_OL}/><circle cx="-4" cy="-36" r="6" fill="#6aaedc" ${PG_OL}/>`);
+    case 'truck': return t === 'bus' ? sc(`<rect x="-78" y="-50" width="150" height="40" rx="7" fill="#f0b429" ${PG_OL}/>${[-70, -48, -26, -4, 18, 40].map(dx => `<rect x="${dx}" y="-44" width="16" height="13" rx="2" fill="#cde6f2" ${PG_OL}/>`).join('')}<rect x="-78" y="-24" width="150" height="4" fill="#22313a"/>${pgWheel(-50, -8, 9)}${pgWheel(46, -8, 9)}`)
+      : sc(`<rect x="-70" y="-58" width="96" height="46" rx="3" fill="#f2f4f5" ${PG_OL}/><path d="M26 -46h24l16 16v18h-40z" fill="#11806f" ${PG_OL}/><path d="M32 -42h16l10 12h-26z" fill="#cde6f2" ${PG_OL}/><text x="-22" y="-30" text-anchor="middle" font-size="12" font-weight="800" fill="#11806f">DELIVERY</text>${pgWheel(-46, -9, 9)}${pgWheel(46, -9, 9)}`);
+    case 'boat': return t === 'canoe' ? sc(`<path d="M-62 -14h124q-10 14 -40 14h-44q-30 0 -40 -14z" fill="#d0743c" ${PG_OL}/>${pgPerson('canoe', 0, -10, 0.7)}<path d="M18 -54l-30 60" stroke="#8a5a33" stroke-width="3" stroke-linecap="round"/><ellipse cx="-14" cy="8" rx="5" ry="9" transform="rotate(26 -14 8)" fill="#8a5a33"/>`)
+      : sc(`<path d="M-60 -20h112l14 -10q-6 30 -40 30h-60q-20 0 -26 -20z" fill="#f2f4f5" ${PG_OL}/><path d="M-60 -20h126" stroke="#d9534f" stroke-width="4"/><path d="M-16 -20v-18h30l14 18z" fill="#cde6f2" ${PG_OL}/><path d="M-76 -6q8 -4 14 0M-90 0q8 -4 14 0" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>`);
+    case 'diver': return sc(`<path d="M-30 -52l-14 -10M30 -52l14 -10M-22 -40l-18 12M22 -40l18 12" stroke="#c68b5e" stroke-width="6" stroke-linecap="round"/><path d="M-18 -46h36" stroke="#3d7fc1" stroke-width="16" stroke-linecap="round"/><path d="M-26 -52l-14 -8M26 -52l14 -8" stroke="#3d7fc1" stroke-width="7" stroke-linecap="round"/><path d="M-14 -40l-20 12M14 -40l20 12" stroke="#2b3a44" stroke-width="7" stroke-linecap="round"/><circle cx="0" cy="-60" r="9" fill="#c68b5e" ${PG_OL}/><path d="M-9 -63q9 -10 18 0z" fill="#e8505b" ${PG_OL}/><rect x="-6" y="-62" width="12" height="4" rx="2" fill="#22313a"/>`);
+  }
+  return sc(`<rect x="-24" y="-40" width="48" height="40" rx="6" fill="#c9d6dd" ${PG_OL}/>`);
+}
+/* where the object is: sky and ground colours */
+const PG_WORLDBG = { moon: ['#1b2233', '#9a9fa6'], mars: ['#e7b48f', '#b5552f'], venus: ['#e9c77b', '#c99a49'], titan: ['#d8a85a', '#a8783c'], jupiter: ['#e2c29a', '#c48a5c'] };
+function pgBg(thing, world) {
+  if (world && PG_WORLDBG[world]) return PG_WORLDBG[world];
+  const k = thing;
+  if (k === 'sled') return ['#dbe9f1', '#f4f8fa'];
+  if (k === 'crate' || k === 'smooshy' || k === 'modeltrain') return ['#e8eef0', '#e2cfa9'];
+  if (k === 'pod' || k === 'astro') return ['#10182b', null];
+  if (k === 'rover') return ['#f0d9c4', '#c97b4a'];
+  if (k === 'dropcrate' || k === 'skydiver') return ['#cfe6f3', null];
+  if (k === 'sprinter' || k === 'wheelchair') return ['#e3eff5', '#c8553d'];
+  if (k === 'football') return ['#e3eff5', '#7fbf6a'];
+  if (k === 'tennis') return ['#e3eff5', '#4f9d69'];
+  if (k === 'puck') return ['#e3eff5', '#dff1f8'];
+  if (k === 'bowling') return ['#e8eef0', '#e2c08a'];
+  if (k === 'rhino' || k === 'elephant' || k === 'cheetah') return ['#f3e6c4', '#d8c37a'];
+  if (k === 'horse') return ['#e3eff5', '#9cc77f'];
+  if (k === 'elevator') return ['#d6dde1', null];
+  if (k === 'rocketsled') return ['#f4e4c8', '#e3c99a'];
+  if (k === 'motorboat' || k === 'canoe') return ['#e3eff5', '#6fb4d2'];
+  if (k === 'trolley') return ['#eef2f3', '#d9dfe2'];
+  return ['#e3eff5', '#9aa3a6'];   // road
+}
+function pgMotion(dir, x, y) {
+  const L = (x1, y1, x2, y2) => `<path d="M${x1} ${y1}L${x2} ${y2}" stroke="#22313a" stroke-width="2.4" stroke-linecap="round" opacity=".45"/>`;
+  if (dir === 'down') return L(x - 14, y - 4, x - 14, y - 18) + L(x, y - 2, x, y - 22) + L(x + 14, y - 4, x + 14, y - 18);   // y: the top of the object
+  if (dir === 'up') return L(x - 12, y + 6, x - 12, y + 22) + L(x + 12, y + 6, x + 12, y + 22);
+  return L(x - 10, y - 30, x - 30, y - 30) + L(x - 4, y - 18, x - 30, y - 18) + L(x - 10, y - 6, x - 30, y - 6);
+}
+/* the picture for q.pic: { thing, draw, dir, world, thing2 } */
+function pgPic(pic) {
+  const t = PR_THING[pic.thing] || {}, name = t.name || 'the object';
+  if (pic.thing2) {
+    const t2 = PR_THING[pic.thing2] || {};
+    return `<svg viewBox="0 0 220 130" role="img" aria-label="${esc(name)} and ${esc(t2.name || '')}"><rect width="220" height="130" rx="10" fill="#e3eff5"/><rect x="0" y="108" width="220" height="22" fill="#cfd8dc"/><path d="M110 18v88" stroke="#9aa6ad" stroke-width="2" stroke-dasharray="4 4"/>${pgThing(pic.thing, t.pic, 56, 108, 0.62)}${pgThing(pic.thing2, t2.pic, 166, 108, 0.62)}</svg>`;
+  }
+  const [sky, gnd] = pgBg(pic.thing, pic.world), dir = pic.dir || 'right', air = !gnd;
+  const big = { train: 0.82, truck: 0.85, rocket: 0.95, bus: 0.85 }[t.pic] || 1, s = pic.thing === 'bus' ? 0.85 : big;
+  const gy = air ? (dir === 'down' ? 96 : 92) : 108, cx = dir === 'up' ? 110 : 116;
+  let bg = `<rect width="220" height="130" rx="10" fill="${sky}"/>`;
+  if (sky === '#10182b' || pic.world === 'moon') bg += [[20, 18], [60, 34], [176, 22], [200, 60], [36, 70], [150, 40]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.4" fill="#e6ecff"/>`).join('');
+  if (pic.thing === 'skydiver' || pic.thing === 'dropcrate') bg += '<ellipse cx="40" cy="104" rx="26" ry="8" fill="#fff" opacity=".8"/><ellipse cx="186" cy="30" rx="22" ry="7" fill="#fff" opacity=".8"/>';
+  if (pic.thing === 'elevator') bg += '<path d="M70 0v130M150 0v130" stroke="#9aa6ad" stroke-width="3"/>';
+  if (gnd) bg += `<rect x="0" y="108" width="220" height="22" fill="${gnd}"/>` + (gnd === '#9aa3a6' ? '<path d="M10 120h20M50 120h20M90 120h20M130 120h20M170 120h20" stroke="#f4f4f4" stroke-width="2.5"/>' : gnd === '#c8553d' ? '<path d="M0 116h220M0 124h220" stroke="#f4e6dc" stroke-width="1.5"/>' : gnd === '#6fb4d2' ? '<path d="M14 118q6 -4 12 0t12 0M120 122q6 -4 12 0t12 0" fill="none" stroke="#e3f3fa" stroke-width="2"/>' : '');
+  if (pic.thing === 'rocketsled') bg += '<path d="M0 104h220" stroke="#6b7a83" stroke-width="3"/>';
+  const wl = pic.world && DZ_WORLDS[pic.world] ? `<rect x="8" y="8" width="${DZ_WORLDS[pic.world].name.length * 7 + 22}" height="20" rx="10" fill="#fff" opacity=".9"/><text x="18" y="22" font-size="11" font-weight="800" fill="#22313a">${DZ_WORLDS[pic.world].name}</text>` : '';
+  return `<svg viewBox="0 0 220 130" role="img" aria-label="A picture of ${esc(name)}${pic.world && DZ_WORLDS[pic.world] ? ' ' + DZ_WORLDS[pic.world].on : ''}">${bg}${pgMotion(dir, dir === 'right' ? cx - 52 * s : cx, dir === 'down' ? gy - (t.pic === 'diver' ? 72 : 50) : gy)}${pgThing(pic.thing, t.pic, cx, gy, s)}${wl}</svg>`;
+}
+/* the free-body sketch: arrows from the centre, labelled with their values (? N for the unknown) */
+function pgFbd(pic) {
+  const A = pic.arrows || [], val = a => parseNum(String(a.label).replace(/\s*N$/, '')), known = A.map(val).filter(v => !isNaN(v)), mx = Math.max(1, ...known);
+  const fwd = pic.dir || 'right', vert = A.some(a => a.dir === 'up' || a.dir === 'down'), W = 300, H = vert ? 170 : 92, cx = 150, cy = vert ? 85 : 48;
+  const len = a => { const v = val(a), horiz = a.dir === 'left' || a.dir === 'right', LMAX = horiz ? 96 : 60, LMIN = horiz ? 34 : 24;
+    if (isNaN(v)) return a.dir === fwd ? LMAX : LMIN + (LMAX - LMIN) * 0.35;          // an unknown force: longer if it points the way the object speeds up
+    const L = LMIN + (LMAX - LMIN) * v / mx; return known.length === A.length ? L : (a.dir === fwd ? L : Math.min(L, LMAX * 0.7)); };
+  const col = a => /weight|gravity/.test(a.name) ? 'var(--vert)' : a.dir === fwd ? 'var(--right)' : 'var(--fric)';
+  const arrows = A.map((a, i) => {
+    const L = len(a), d = { right: [1, 0], left: [-1, 0], up: [0, -1], down: [0, 1] }[a.dir] || [1, 0], x2 = cx + d[0] * L, y2 = cy + d[1] * L, c = col(a), unk = isNaN(val(a));
+    const hx = d[0], hy = d[1], h1 = `${x2 - hx * 10 - hy * 7},${y2 - hy * 10 - hx * 7}`, h2 = `${x2 - hx * 10 + hy * 7},${y2 - hy * 10 + hx * 7}`;
+    let tx, ty, anchor;
+    if (hx) { tx = cx + hx * 27; ty = cy - 14; anchor = hx > 0 ? 'start' : 'end'; }   /* just outside the box, so labels never cover it */ else { tx = cx + 30; ty = cy + hy * Math.max(24, L * 0.75); anchor = 'start'; }
+    return `<g><path d="M${cx} ${cy}L${x2 - hx * 6} ${y2 - hy * 6}" stroke="${c}" stroke-width="5" stroke-linecap="round"${unk ? ' stroke-dasharray="7 5"' : ''}/><polygon points="${x2},${y2} ${h1} ${h2}" fill="${c}"/>
+      <text x="${tx}" y="${ty}" text-anchor="${anchor}" font-size="14" font-weight="800" fill="var(--ink)" font-family="var(--f-num)">${esc(a.label)}</text><text x="${tx}" y="${hx ? cy + 26 : ty + 15}" text-anchor="${anchor}" font-size="12" fill="var(--muted)">${esc(a.name)}</text></g>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Force sketch: ${A.map(a => `${a.name} ${a.label} ${a.dir}`).join(', ')}"><rect x="${cx - 22}" y="${cy - 18}" width="44" height="36" rx="7" fill="var(--chip)" stroke="var(--ink)" stroke-width="2"/>${arrows}<circle cx="${cx}" cy="${cy}" r="4" fill="var(--ink)"/></svg>`;
+}
+
+/* ---------- the summary PDF and the Gym part of "My work so far" ---------- */
+function pgSummaryRows(P) {
+  const T = pgTargetState(P);
+  return { T, tLine: T.on ? `Target: ${esc(T.label.toLowerCase())}. ${T.done ? '✓ Reached' : 'Not reached yet'}${T.lvl ? '' : ` (${Math.min(T.have, T.n)} of ${T.n} right since choosing this target)`}` : 'Target: free practice (no target chosen).' };
+}
+function pgSheetHTML() {
+  const P = pgData(), u = user(), today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }), { T, tLine } = pgSummaryRows(P), B = x => `<span class="stu">${x}</span>`;
+  const sk = pgSkillRows(P.skills), tr = pgTrapRows(P.traps), last = P.hist.slice(-10);
+  const qrow = (hh, i) => { let q = null; try { q = prGen(hh.lvl, hh.seed, hh.opts || {}); } catch (e) { } const story = q ? q.p : '(question)';
+    return `<tr><td>${i + 1}</td><td>${hh.lvl}</td><td style="font-size:8.5pt">${esc(story)}</td><td style="white-space:nowrap">${B(esc(hh.ans || ''))}</td><td style="white-space:nowrap">${hh.ok ? '✓' : '✗'}${hh.ok && hh.tries > 1 ? ' (2nd try)' : ''}${!hh.ok && q ? `<br><span style="font-size:8.5pt">Answer: ${esc(q.ansText + ' ' + q.unit)}</span>` : ''}</td><td style="font-size:8.5pt;white-space:pre-line">${hh.w ? B(esc(hh.w)) : '–'}</td></tr>`; };
+  return `<div class="ws"><div class="page">
+    <div class="hd"><div class="l"><b>FORCE HQ</b><div style="font-size:10pt;color:#cfe0ea">Maths Gym · F = m × a practice</div></div><div class="r"><div style="font-size:14pt;font-weight:800">My Maths Gym practice</div><div style="font-size:10pt">Force, mass and acceleration</div></div></div>
+    <div class="namebar"><div>Name: ${B(esc(u.teacher ? 'Teacher copy' : u.name || ''))}</div><div>Class: ${B(esc(u.cls || ''))}</div><div>Date: ${today}</div></div>
+    <p class="note">Everything printed in blue was added by the student in the sim. Every question was made and marked by the sim.</p>
+    <p style="font-size:12.5pt;font-weight:800;margin:6px 0;padding:6px 10px;border:2px solid ${T.on && T.done ? '#2a7d48' : '#9aa9b0'};border-radius:6px">${B(tLine)}</p>
+    <table><tr><th>Highest level reached</th><th>Level now</th><th>Questions right</th><th>Questions answered</th><th>Goes of 10 finished</th></tr>
+      <tr><td>${B('Level ' + P.best + ': ' + esc(PG_LEVELS[P.best - 1]))}</td><td>${B(P.level)}</td><td>${B(P.right)}</td><td>${B(P.asked)}</td><td>${B(P.goes)}</td></tr></table>
+    <h2>Skills</h2>${sk.length ? `<table><tr><th>Skill</th><th>Questions</th><th>Right</th></tr>${sk.map(([n, r, t]) => `<tr><td>${esc(n)}</td><td>${B(t)}</td><td>${B(r)}</td></tr>`).join('')}</table>` : '<p class="note">No questions answered yet.</p>'}
+    <h2>Mistakes met and fixed</h2>${tr.length ? `<table><tr><th>Mistake the sim spotted</th><th>Times met</th><th>Fixed on the second try</th></tr>${tr.map(([n, m, f]) => `<tr><td>${esc(n)}</td><td>${B(m)}</td><td>${B(f)}</td></tr>`).join('')}</table>` : '<p class="note">No common mistakes spotted.</p>'}
+    <h2>My last ${last.length || 10} questions</h2>${last.length ? `<table style="font-size:9pt"><tr><th style="width:4%">#</th><th style="width:6%">Level</th><th style="width:46%">Question</th><th>My answer</th><th>Right?</th><th style="width:22%">My working</th></tr>${last.map(qrow).join('')}</table>` : '<p class="note">No questions answered yet.</p>'}
+  </div></div>`;
+}
+function pgProgressHTML() {
+  const P = pgData(); if (!P.asked) return '';
+  const { tLine } = pgSummaryRows(P), sk = pgSkillRows(P.skills), tr = pgTrapRows(P.traps), B = x => `<span class="stu">${x}</span>`;
+  return `<div class="page"><h2>Maths Gym (F = m × a practice)</h2><p>${B(tLine)}</p>
+    <p>Highest level reached: ${B('level ' + P.best + ', ' + esc(PG_LEVELS[P.best - 1].toLowerCase()))} · Level now: ${B(P.level)} · Questions right: ${B(P.right + ' of ' + P.asked)}</p>
+    ${sk.length ? `<table><tr><th>Skill</th><th>Questions</th><th>Right</th></tr>${sk.map(([n, r, t]) => `<tr><td>${esc(n)}</td><td>${B(t)}</td><td>${B(r)}</td></tr>`).join('')}</table>` : ''}
+    ${tr.length ? `<p style="margin-top:6px">Mistakes met: ${tr.map(([n, m, f]) => `${esc(n)} (${B(m + '×')}${f ? ', fixed ' + B(f) : ''})`).join('; ')}</p>` : ''}
+    <p class="note">Use "📄 Save my practice" in the Maths Gym for the full summary.</p></div>`;
+}
+
+/* ---------- the teacher page row, prompt lines and AI feedback text ---------- */
+const PG_TCHOICE = ['l3', 'l4', 'l5', 'l6', 'r10', 'r20', 'r30'];
+const pgGymOf = T => T && T.gym && T.gym.on ? { on: true, target: PG_TCHOICE.includes(T.gym.target) ? T.gym.target : 'l4' } : null;
+const pgTeachMins = g => g ? PG_TMIN[g.target] || 20 : 0;
+function pgTeacherRow(T0) {
+  const g = T0.gym || {}, tg = PG_TCHOICE.includes(g.target) ? g.target : 'l4';
+  return `<h3 style="margin:10px 0 2px">🏋️ Maths Gym (F = m × a practice)</h3><p class="scaleNote">Adaptive practice from the home page: questions get harder as students get them right. Students pick the same target in the Gym and upload their practice summary PDF. Best after Chapter 3 Foundation.</p>
+    <div class="row pg-trow" style="border-bottom:1px dashed var(--line);padding:4px 0;justify-content:space-between"><label><input type="checkbox" data-gym ${g.on ? 'checked' : ''}> <span><b>🏋️ Maths Gym</b> · approx. <span id="tGymMin">${PG_TMIN[tg]}</span> min</span></label><label>Target <select id="tGymT" style="font:inherit;padding:4px 6px;border:1.5px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink)">${PG_TCHOICE.map(k => `<option value="${k}"${k === tg ? ' selected' : ''}>${PG_TARGETS[k]}</option>`).join('')}</select></label></div>`;
+}
+const pgTargetVerb = t => t[0] === 'l' ? `until you reach level ${t.slice(1)}` : `until you have got ${t.slice(1)} questions right`;
+/* lines for teacherPrompt (no answers: the questions are generated) */
+function pgPromptParts(g, n) {
+  const T = PG_TARGETS[g.target];
+  return {
+    title: `Maths Gym (${T.toLowerCase()})`,
+    step: `${n}. Maths Gym: on the home page press "Open the Maths Gym". At the top, set "My target" to "${T}". Practise F = m × a ${pgTargetVerb(g.target)} (the target shows ✓ when you get there). Then press "📄 Save my practice" and "⬇ Download my practice (PDF)".`,
+    submit: `- The Maths Gym practice PDF (from "📄 Save my practice"), showing the target "${T}".`,
+    goal: '- Maths Gym: use F = m × a and the formula triangle to find force, mass or acceleration, including problems with more than one step, and give each answer with the right unit.',
+    note: 'The Maths Gym makes and marks its own questions, so there is no answer key for it. Each student gets different numbers.'
+  };
+}
+function pgAiText(g, alone) {
+  const T = PG_TARGETS[g.target], L = [];
+  if (alone) { L.push('All written feedback should be grade 7-8 appropriate language, short and to-the-point, and enthusiastic.'); L.push(''); }
+  L.push('MATHS GYM (F = m × a PRACTICE) · MYP: A ii');
+  L.push('The student uploads a "Force HQ Maths Gym" summary PDF. The sim made and marked every question, so there is no answer key: trust its ticks and crosses. What the student typed (answers and working) is printed in blue.');
+  L.push(`Target set by the teacher: ${T}. Levels: ${PG_LEVELS.map((n, i) => `${i + 1} ${n}`).join(', ')}.`);
+  L.push('Check the summary page against the target:');
+  L.push(`- Target: the line at the top says "${T.toLowerCase()}" with "✓ Reached" or "Not reached yet". If the student chose a different target, say so kindly.`);
+  L.push(g.target[0] === 'l' ? `- Level reached: "Highest level reached" must be level ${g.target.slice(1)} or higher.` : `- Questions right: the target line counts the questions right since the student chose the target. It must be at least ${g.target.slice(1)}.`);
+  L.push('- Working shown: look at "My working" for the last 10 questions. Praise a formula written first and clear steps (Step 1, Step 2). If there is no working, suggest writing the formula and the numbers before the answer.');
+  L.push('- Mistakes met and fixed: the table lists common mistakes the sim spotted (for example "Multiplied instead of dividing") and how many were fixed on the second try. Name a fixed mistake as a strength, and a mistake that is still not fixed as the next step, with a hint rather than the answer.');
+  L.push('Feedback: say clearly whether the target was reached, give one or two strengths, and give one next step. If the target was not reached, encourage the student to keep practising.');
+  L.push(`MYP: this practice is evidence for Criterion A, strand ii (${MYP_STRANDS.Aii}). It has no marks of its own${alone ? ', so give feedback only, with no level' : ', so do not add it to the worksheet marks; mention it in the A ii sentence'}.`);
+  return L.join('\n');
+}
+
 /* ===== Progress backup: save everything to a file (or a code), load it on any device =====
    All progress lives in DB (one object in localStorage). The file holds a copy of it plus a checksum, so a damaged file is caught.
    Teacher unlocks are never saved. A load always asks first, and the progress it replaces is kept so it can be undone. */
@@ -11490,6 +12670,7 @@ function init() {
     const t = e.target;
     const fcb = t.closest('[data-fc]'); if (fcb) { fcClick(fcb); return; }
     if (fcCardTap(e)) return;
+    const pgb = t.closest('[data-pg]'); if (pgb) { pgClick(pgb); return; }
     const exs = t.closest('[data-exscene]'); if (exs && VIEW === 'vExplore') { if (exs.dataset.exscene === 'drop') openExploreDrop(); else if (exs.dataset.exscene === 'heli') openExploreHeli(); else if (exs.dataset.exscene === 'shop') openExploreShop('free'); else openExplore(); return; }
     if (t.closest('[data-journal]')) { if (journalOpen()) closeJournal(); else openJournal(); return; }
     const op = t.closest('[data-open]'); if (op) { if (op.closest('[data-close]') || op.closest('.modal')) closeModal(); openChapter(op.dataset.open); return; }
@@ -11508,7 +12689,8 @@ function init() {
   });
   $('#modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
   document.addEventListener('keydown', e => { if (e.key !== 'Escape') return; if (!$('#modal').hidden) closeModal(); else if (QSTATE === 'pop') qPlace('dock'); else if (journalOpen()) closeJournal(); });
-  document.addEventListener('keydown', fcKey);
+  document.addEventListener('keydown', fcKey); document.addEventListener('keydown', pgKey);
+  document.addEventListener('change', e => { const t = e.target; if (t && t.dataset && t.dataset.pg) pgChange(t); });
   qDragInit();   // the pop-up layer is click-through now, so clicks on the arena reach the arena
   show('vHome');
   if (!user().name && !user().teacher) askWho(true);

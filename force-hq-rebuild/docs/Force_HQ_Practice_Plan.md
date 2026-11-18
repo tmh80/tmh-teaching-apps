@@ -2,7 +2,7 @@
 
 **Tom's request:** a maths practice mode where students practise force, mass and acceleration with the formula triangle. Numbers are generated, but realistic for each object. Questions get harder as students get answers right: decimals, then problems that need more than one step.
 
-**Status:** plan agreed with Tom on 18 Nov 2026 (his decisions are in section 9). The build started the same day.
+**Status:** built 18 Nov 2026 (Tom's decisions are in section 9). Choices made during the build: Chapter 3 counts as done when its stamp is earned or all its Learn steps are done; only a first-try right answer with no clue adds to the run of 3 (a second-try or clue-helped right answer neither adds nor resets it); a twin question uses the failed question's level; "get N right" targets count from when the target is picked; set on its own, the Gym gets feedback only in the AI text, no MYP level. The summary PDF is 2 pages.
 
 ## 0. What already exists (reuse, do not rebuild)
 

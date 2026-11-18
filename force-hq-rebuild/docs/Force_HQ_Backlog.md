@@ -2,7 +2,7 @@
 
 ## To do (added 18 Nov 2026)
 - **Teach changing units in the sim (Tom).** Grams to kg and tonnes to kg (1 kg = 1,000 g; 1 tonne = 1,000 kg) are not taught anywhere in Chapters 1 to 6. The Maths Gym has its own short "Changing units" teach card before its unit questions. A proper Learn step (try it, then name it, with a key-word check) and one Check question belong in Chapter 3, probably the Extension. Ask Tom where it fits.
-- **Maths Gym (F = m × a practice):** being built from `docs/Force_HQ_Practice_Plan.md`.
+- ~~**Maths Gym (F = m × a practice)**~~ built 18 Nov 2026 from `docs/Force_HQ_Practice_Plan.md`. Waiting for Tom's playtest. Open points: the summary PDF is 2 pages (the last-10-questions table does not split); decide whether a second-try or clue-helped right answer should reset the "right in a row" run (today it neither adds nor resets).
 
 ## Next milestones (from the rebuild brief)
 **Now (3 Nov 2026): Chapter 6 is built in full: Parts 1 to 5, the optional Extension (`c6f`) and Build tasks bt1 to bt4, with the Explore Workshop scene. Tom to play Parts 4 and 5, the Extension and the Build tasks.** Next job: Explore "Draw what's happening now" (item 7 below).
