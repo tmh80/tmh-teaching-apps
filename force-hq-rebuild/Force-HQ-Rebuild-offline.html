@@ -5938,6 +5938,8 @@ function dzEnd() {
   if (before && (gst.tasks || []).some((t, i) => !before[i] && t[1]())) toast('✓ Drop recorded. That ticks off the job in your Do this list.', 'good');   // "the step is done" stays separate from "how fast it landed"
 }
 
+/* A person is hurt by a landing at 7 m/s or more (judged on the rounded number the student sees, like the missions' "slower than 7 m/s"). */
+const dzHurt = L => L.obj === 'para' && L.landed && Math.round((L.landV || 0) * 10) / 10 >= 7;
 /* The label drawn on the canvas after a landing. In the Challenge it judges the landing with the mission's own objectives, on the rounded numbers the student sees.
    In Learn and Explore it gives the number and no pass or fail words. */
 function dzVerdict(L, mk) {
@@ -6166,15 +6168,39 @@ function dzCrate(c, x, by, s) {
   const w = 46 * s, hh = 38 * s; c.save(); c.fillStyle = C.crate; c.strokeStyle = C['crate-edge']; c.lineWidth = 3; c.lineJoin = 'round';
   c.beginPath(); c.roundRect(x - w / 2, by - hh, w, hh, 4); c.fill(); c.stroke(); c.lineWidth = 2.2; c.beginPath(); c.moveTo(x - w / 2 + 4, by - hh + 4); c.lineTo(x + w / 2 - 4, by - 4); c.moveTo(x + w / 2 - 4, by - hh + 4); c.lineTo(x - w / 2 + 4, by - 4); c.stroke(); c.restore(); return hh;
 }
-function dzDiver(c, x, by, s, hang) {
+function dzDiver(c, x, by, s, hang, hurt) {
   c.save(); c.translate(x, by); c.scale(s, s); c.lineCap = 'round'; c.lineJoin = 'round';
   const suit = '#c94a34', skin = '#e6b48a', helm = '#e3a51c';
+  const k = hurt ? hurt.k : 0, d = 12 * k;   // a hard landing: the body drops and the legs buckle (k = 0 to 1)
   c.strokeStyle = suit; c.lineWidth = 7;
-  if (hang) { c.beginPath(); c.moveTo(-5, -36); c.lineTo(-11, -58); c.moveTo(5, -36); c.lineTo(11, -58); c.stroke(); c.beginPath(); c.moveTo(-3, -22); c.lineTo(-6, -2); c.moveTo(3, -22); c.lineTo(6, -2); c.stroke(); }
+  if (hurt) {
+    /* broken legs: each knee snaps out and the lower leg bends the wrong way */
+    const leg = (hx, fx0, kx, ky, fx, fy) => { const hy = -22 + d, mx = (hx + fx0) / 2, my = (hy - 2) / 2; c.beginPath(); c.moveTo(hx, hy); c.lineTo(mx + (kx - mx) * k, my + (ky - my) * k); c.lineTo(fx0 + (fx - fx0) * k, -2 + (fy + 2) * k); c.stroke(); };
+    leg(-3, hang ? -6 : -14, -18, -2, -25, -19); leg(3, hang ? 6 : 14, 17, -2, 32, -9);
+    /* arms thrown up, flailing for a moment */
+    const w = RMOTION ? 0 : Math.sin(hurt.since * 22) * 5 * Math.max(0, 1 - hurt.since / 1.6);
+    c.beginPath(); c.moveTo(-5, -38 + d); c.lineTo(-19 + w, -60 + d); c.moveTo(5, -38 + d); c.lineTo(19 - w, -60 + d); c.stroke();
+    /* little snap marks beside each knee */
+    if (k > 0.6) { c.strokeStyle = '#1f1d26'; c.lineWidth = 1.8; [[-18, -2, -1], [17, -2, 1]].forEach(([kx, ky, sd]) => { [-1.2, -0.6, 0].forEach(a => { const ang = sd < 0 ? Math.PI - a : a, ca = Math.cos(ang), sa = Math.sin(ang); c.beginPath(); c.moveTo(kx + ca * 7, ky + sa * 7); c.lineTo(kx + ca * 12, ky + sa * 12); c.stroke(); }); }); }
+  }
+  else if (hang) { c.beginPath(); c.moveTo(-5, -36); c.lineTo(-11, -58); c.moveTo(5, -36); c.lineTo(11, -58); c.stroke(); c.beginPath(); c.moveTo(-3, -22); c.lineTo(-6, -2); c.moveTo(3, -22); c.lineTo(6, -2); c.stroke(); }
   else { c.beginPath(); c.moveTo(-5, -38); c.lineTo(-26, -46); c.moveTo(5, -38); c.lineTo(26, -46); c.stroke(); c.beginPath(); c.moveTo(-3, -22); c.lineTo(-14, -2); c.moveTo(3, -22); c.lineTo(14, -2); c.stroke(); }
-  c.fillStyle = suit; c.beginPath(); c.roundRect(-8, -42, 16, 24, 6); c.fill();
-  c.fillStyle = helm; c.beginPath(); c.arc(0, -50, 8, 0, 7); c.fill(); c.fillStyle = skin; c.beginPath(); c.arc(0, -49, 5, 0, 7); c.fill();
-  c.restore(); return 60 * s;
+  c.fillStyle = suit; c.beginPath(); c.roundRect(-8, -42 + d, 16, 24, 6); c.fill();
+  c.fillStyle = helm; c.beginPath(); c.arc(0, -50 + d, 8, 0, 7); c.fill(); c.fillStyle = skin; c.beginPath(); c.arc(0, -49 + d, 5, 0, 7); c.fill();
+  if (hurt && k > 0.5) { c.fillStyle = '#3a1d14'; c.beginPath(); c.ellipse(0, -47 + d, 1.8, 2.4, 0, 0, 7); c.fill(); }   // mouth open: AHH!
+  c.restore(); return (60 - d) * s;
+}
+/* the speech bubble a hurt skydiver shouts, up and to the right of the head (hx, hy). It pops in. */
+function dzOuch(c, hx, hy, since) {
+  const u = RMOTION ? 1 : clamp(since / 0.22, 0, 1), sc = u < 1 ? 0.4 + 0.6 * u + 0.25 * Math.sin(u * Math.PI) : 1;
+  if (u <= 0) return;
+  const bx = hx + 54, by = hy - 38, f = `900 17px ${C.fn}`; c.save(); c.font = f; const w = c.measureText('AHH!').width + 20, h = 30;
+  c.translate(bx, by); c.scale(sc, sc); c.translate(-bx, -by);
+  c.fillStyle = '#ffffff'; c.strokeStyle = '#1f1d26'; c.lineWidth = 2; c.lineJoin = 'round';
+  c.beginPath(); c.roundRect(bx - w / 2, by - h / 2, w, h, 13); c.fill(); c.stroke();
+  c.beginPath(); c.moveTo(bx - w / 2 + 8, by + h / 2 - 5); c.lineTo(hx + 9, hy - 3); c.lineTo(bx - w / 2 + 20, by + h / 2 - 1); c.closePath(); c.fill(); c.stroke();
+  c.fillRect(bx - w / 2 + 9, by + h / 2 - 6, 10, 4);   // hide the bubble's edge where the tail joins
+  txt(c, 'AHH!', bx, by + 1, '#c0392b', f); c.restore();
 }
 /* the canopy: a dome with stripes, lines down to the object's top (tx, ty). fr = how open it is (0 to 1) */
 function dzCanopy(c, tx, ty, name, fr) {
@@ -6187,12 +6213,12 @@ function dzCanopy(c, tx, ty, name, fr) {
   c.beginPath(); c.moveTo(tx - w / 2, top); c.quadraticCurveTo(tx, top - hgt * 2, tx + w / 2, top); c.stroke(); c.restore();
 }
 /* draw the object with its base at (x, by); returns its height. v = the lane's view of the moment (for the canopy) */
-function dzObject(c, L, v, x, by, s, packed) {
+function dzObject(c, L, v, x, by, s, packed, hurt) {
   const k = dzCoef(L); let hgt;
   if (L.obj === 'feather') hgt = dzFeather(c, x, by, s);
   else if (L.obj === 'basketball') hgt = dzBall(c, x, by, s);
   else if (L.obj === 'crate') hgt = dzCrate(c, x, by, s);
-  else hgt = dzDiver(c, x, by, s, k.has && v.opened != null);
+  else hgt = dzDiver(c, x, by, s, k.has && v.opened != null, hurt);
   if (k.has) {
     if (v.opened != null) dzCanopy(c, x, by - hgt * (L.obj === 'para' ? 0.8 : 0.9), L.canopy, v.fr);
     else if (packed !== false) { c.save(); c.fillStyle = '#7a5426'; c.beginPath(); c.roundRect(x - 9 * s, by - hgt - 7 * s, 18 * s, 8 * s, 2); c.fill(); c.restore(); }
@@ -6323,19 +6349,20 @@ function dzLane(c, L, idx, x0, w, tt) {
   const ox = x0 + (two ? 132 : 330), objY = scr(alt);
   const hy = scr(DZ.height + dzHeliRise(L, v.t)) - 62 - hgtObj; if (hy > -50) { dzHeli(c, ox + 6, hy, tt); if (!L.started) { c.strokeStyle = C.ink; c.lineWidth = 2; c.beginPath(); c.moveTo(ox, hy + 24); c.lineTo(ox, objY - hgtObj - (dzCoef(L).has ? 8 : 0)); c.stroke(); } }
   /* the object (it bounces or rolls when it lands) */
-  let ay = objY, tilt = 0;
+  let ay = objY, tilt = 0, hurt = null;
   if (L.landed) {
     const since = (performance.now() - L.landReal) / 1000, lv = L.landV || 0;
     if (L.obj === 'crate' && lv > 7 && !RMOTION) ay -= Math.abs(Math.sin(since * 7)) * Math.max(0, 1 - since * 1.6) * Math.min(34, lv * 1.3);
-    if (L.obj === 'para' && lv > 7) tilt = Math.min(1.5, since * 6);
+    if (dzHurt(L) && v.landed) hurt = { since, k: RMOTION ? 1 : sstep(clamp(since / 0.25, 0, 1)) };   // too fast for a person: the legs break
     if (lv > 7 && since < 1.2 && !RMOTION) { c.save(); c.fillStyle = 'rgba(235,225,205,.8)'; for (let q = 0; q < 6; q++) { const u = since / 1.2, px = ox + (q - 2.5) * 16 * (0.6 + u), r = 6 + u * 14; c.globalAlpha = (1 - u) * .8; c.beginPath(); c.arc(px, objY - r * .4, r, 0, 7); c.fill(); } c.restore(); }
   }
   c.save(); if (tilt) { c.translate(ox, ay); c.rotate(tilt); c.translate(-ox, -ay); }
   /* the object blurs too: faint copies trail above it (and one just below), more as it speeds up */
   if (sfx > 0.03 && !tilt) { const b = Math.max(3, sfx * 20); [[3, .16], [2, .24], [1, .34], [-1, .2]].forEach(([k, a]) => { c.globalAlpha = a; dzObject(c, L, v, ox, ay - b * k, 1); }); c.globalAlpha = 1 - 0.25 * sfx; }
-  dzObject(c, L, v, ox, ay, 1);
+  const hgtNow = dzObject(c, L, v, ox, ay, 1, undefined, hurt);
   c.restore();
-  if (v.opened == null || !dzCoef(L).has) pill(c, `${fmt(DZ_OBJ[L.obj].m, 3)} kg`, ox, ay - hgtObj - 16, C.ink, 12);
+  if (v.opened == null || !dzCoef(L).has) pill(c, `${fmt(DZ_OBJ[L.obj].m, 3)} kg`, ox - (hurt ? 40 : 0), ay - (hurt ? hgtNow : hgtObj) - 16, C.ink, 12);   // a hurt skydiver's label moves left, out of the speech bubble's way
+  if (hurt) dzOuch(c, ox, ay - hgtNow + 10, hurt.since);
   /* landing and state messages (they sit to the left of the diagram) */
   const mk = dzMasked(L), nx = x0 + 46 + (two ? 86 : 200), nw = two ? 164 : 380;
   if (L.landed) { const vd = dzVerdict(L, mk); dzNote(c, vd.text, nx, 92, vd.col, nw, 14); }

@@ -167,6 +167,8 @@ function dzEnd() {
   if (before && (gst.tasks || []).some((t, i) => !before[i] && t[1]())) toast('✓ Drop recorded. That ticks off the job in your Do this list.', 'good');   // "the step is done" stays separate from "how fast it landed"
 }
 
+/* A person is hurt by a landing at 7 m/s or more (judged on the rounded number the student sees, like the missions' "slower than 7 m/s"). */
+const dzHurt = L => L.obj === 'para' && L.landed && Math.round((L.landV || 0) * 10) / 10 >= 7;
 /* The label drawn on the canvas after a landing. In the Challenge it judges the landing with the mission's own objectives, on the rounded numbers the student sees.
    In Learn and Explore it gives the number and no pass or fail words. */
 function dzVerdict(L, mk) {

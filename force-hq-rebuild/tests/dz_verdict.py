@@ -27,6 +27,11 @@ with sync_playwright() as p:
         chk(f'mission {mi+1} landing {lv} m/s judged on rounded value -> {want}', got == want, got)
     say = ev("(()=>{ const m = CHDATA.c5.challenge.missions[0]; const r={landV:16.2,time:135,openH:240}; return m.objs.map(o=>o.say(r)).join(' | '); })()")
     chk('say wording', 'Landing velocity: 16.2 m/s. Target: slower than 7 m/s. ✗' in say and 'Time: 135 s. Target: within 120 s. ✗' in say and 'Canopy opened at 240 m. Target: above 300 m. ✗' in say, say)
+    # a skydiver landing at 7 m/s or more (rounded) is hurt: legs break and the "AHH!" bubble shows
+    for obj, lv, want in [('para', 6.94, False), ('para', 6.96, True), ('para', 53.5, True), ('crate', 53.5, False)]:
+        got = ev(f"dzHurt({{obj:'{obj}', landed:true, landV:{lv}}})")
+        chk(f'dzHurt {obj} {lv} m/s -> {want}', got == want, got)
+    chk('not hurt before landing', ev("dzHurt({obj:'para', landed:false, landV:null})") == False)
     chk('no console errors', not errs, errs); print('errors', errs)
     b.close()
 raise SystemExit(1 if fails else 0)
