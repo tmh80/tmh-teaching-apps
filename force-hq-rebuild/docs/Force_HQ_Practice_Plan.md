@@ -124,14 +124,37 @@ Each mistake is targeted at least twice, in different stories, before a go ends.
 
 Helper 1 goes first and writes the generator API into this file (section 8). Helper 2 then builds against that API. The helpers stay in their own files, don't read the 2 MB built files whole, and leave git to the main session.
 
-## 8. Generator API (Helper 1 fills in the details)
+## 8. Generator API (built: `src/js/66-practice-gen.js`, tested by `tests/practice_gen.py`)
 
-`prGen(level, seed, opts) → q`, where `q` is a normal `num` question plus:
-- `kind`: for example `'findF'`, `'findA'`, `'twoStepFric'`, `'weightThenA'`, `'dvThenF'`;
-- `traps: [{ans, key}]`: the answers that common mistakes give;
-- `pic: {thing, arrows}`: the picture to draw.
+**`prGen(level 1–6, seed int, opts) → q`.** `opts = { worlds: bool, units: bool, recent: [kind, …] }`. The same three arguments always give the same question (`opts` changes the pick, so store `seed` *and* the opts used). `recent`: kinds in its last 3 entries are avoided when the level has others. Worlds kinds appear only with `opts.worlds`, units kinds only with `opts.units`. Chapter 3's `mq()` is unchanged.
+**`prMatchTrap(q, value)`** (number or typed string) → the matching trap `{ans, key, say, tol}`, or `null` (always `null` for a right answer).
 
-`opts` is `{ worlds, units, recent }`: whether other-worlds and unit-conversion questions are allowed yet, and the kinds seen recently (to avoid repeats). Chapter 3's `mq()` stays as it is.
+`q` is a normal `num` question (works in `renderQuestion` as it is) plus extra fields:
+
+| Field | Type | Meaning |
+|---|---|---|
+| `id`, `type`, `p`, `ans`, `unit`, `units`, `tol`, `hints`, `ladder` | as for `num` | `id` = `'pr'+level+'_'+seed`; `p` is plain text (no HTML); `units` = `UNITS`; 3 hints (what to find first or which letter to cover / numbers in place / calculator keys, never the answer) |
+| `work`, `workLines` | string, string[] | worked answer; `work` = lines joined with `'\n'` (so show it with `white-space: pre-line`). Multi-step lines start "Step 1:", "Step 2:" |
+| `kind`, `level`, `seed`, `skill`, `steps` | string, int, int, string, 1–3 | `skill` is a key of `PR_SKILLS` (labels for the end screen) |
+| `dp`, `ansText` | int, string | decimal places asked for; the answer as shown (e.g. `'1,880.1'`) |
+| `units2`, `world` | bool, string or null | grams/tonnes question; DZ_WORLDS key (`'mars'`) or null for Earth |
+| `find`, `given`, `exact`, `thing` | string, object, number, string | the unknown (`F a m P f da`); the stated numbers; the unrounded answer; `PR_THINGS` key |
+| `traps` | `[{ans, key, say, tol}]` | wrong answers from common mistakes, rounded like the answer; `say` is the feedback sentence |
+| `pic` | `{thing, draw, dir, arrows, world, thing2}` | `draw` = picture key; `dir` = way it moves (`right`, `up`, `down`); `arrows: [{dir, label:'380 N' or '? N', name:'friction'}]`, only when several forces act; `thing2` only for `compare` |
+
+**Kinds** (in `PR_KINDS`; `PR_LEVEL_KINDS[level-1]` lists them):
+- L1 `findF` (F = m × a, whole m, a ≤ 1 dp, exact answer, no rounding line); `findFbrake` (size of a slowing force).
+- L2 `findA`, `findAbrake` (a = F ÷ m); `findM` (m = F ÷ a). Whole masses, answer to 1 dp, and the question says so.
+- L3 `decF`, `decA`, `decM`: decimals in the givens (0.43 kg, 2.65 m/s²), answer to 1 or 2 dp as stated.
+- L4 (2 steps) `fricA`, `fricM` (pull − friction, then a or m); `oppA` (two opposite pushes/pulls, no friction); `needPull` (m × a + friction); `findFric` (pull − m × a).
+- L5 (2 steps) `weightF`, `weightA` (mass = weight ÷ 9.8, then F or a); `dvF`, `dvM` (a = (v − u) ÷ t, then F or m); `brakeDv` (slowing down, then F); **worlds only:** `worldF`, `worldA` (the question states that world's g).
+- L6 `engine` (a from velocities → resultant → + friction, 3 steps); `weightFric` (weight → mass, pull − friction, a); `fall` (weight = m × 9.8, minus air resistance, a); `compare` (how much bigger one acceleration is); `massDv` (pull − friction, a from velocities, m); **units only:** `unitsG` (grams ÷ 1,000), `unitsT` (tonnes × 1,000), each then F or a.
+
+**`pic.draw` keys:** sled, crate, gummy (Captain Smooshy), pod, person, car, ball, trolley, bike, skateboard, train, animal, lift, rocket, truck, boat, diver. 31 objects in `PR_THINGS` (`{key, name, the, pic, m, a, v, push, fw, back, act, grams?, tonnes?, worlds?, fric?, fall?, dir?}`).
+
+**Trap keys:** `mult`, `flip`, `div`, `add`, `weightAsMass`, `oneForce`, `noWeight`, `addOpp`, `g10`, `earthG`, `noConvert`, `convWay`, `earlyRound` (L5–6 only, kept only when it changes the rounded answer), `noFriction`, `subFric`, `gaveResultant`, `noStart`, `noTime`, `dvTimes`, `notDiff`. Traps that would match the answer or each other are dropped; tiny ones (forgot to change grams) are kept at 3 significant figures, with `tol` = half the last asked place.
+
+**Number rules:** g = 9.8 N/kg (other worlds from `DZ_WORLDS`); numbers from 1,000 have commas (`parseNum` strips them; calculator keys in hint 3 have none). `tol` = half a unit in the last asked place, or 1% of the answer from 1,000 up. No answer sits near a rounding edge. Stated forces are 0.01–200,000 N, accelerations 0.05–400 m/s², and masses stay in the object's range. All wording is in `PR_TEXT`.
 
 ## 9. Tom's decisions (18 Nov 2026)
 
