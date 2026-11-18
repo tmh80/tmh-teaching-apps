@@ -2,7 +2,7 @@
 
 **Tom's request:** a maths practice mode where students practise force, mass and acceleration with the formula triangle. Numbers are generated, but realistic for each object. Questions get harder as students get answers right: decimals, then problems that need more than one step.
 
-**Status:** plan only. Nothing is built yet. The questions for Tom are in section 9; the build can start once he answers them.
+**Status:** plan agreed with Tom on 18 Nov 2026 (his decisions are in section 9). The build started the same day.
 
 ## 0. What already exists (reuse, do not rebuild)
 
@@ -15,7 +15,7 @@
 
 ## 1. How it works for a student
 
-1. A new home card, **"🏋️ Maths Gym"** (working name, see section 9), sits beside Flashcards. It opens once Chapter 3 Foundation is finished. Until then it says so and offers "Open it anyway", like Explore does.
+1. A new home card, **"🏋️ Maths Gym"**, sits beside Flashcards. **It is open from the start.** If the student has not finished Chapter 3 Foundation, each time the Gym opens it shows a friendly reminder: "We recommend doing Chapter 3 first. That's where you meet F = m × a and the formula triangle." It has "Go to Chapter 3" and "Practise anyway" buttons. Teacher mode shows no reminder.
 2. A go is **10 questions (approx. 15 min)**. The student can keep going after that, or stop at any time; progress saves after every question.
 3. Each question appears as a card:
    - a short story with a small code-drawn picture of the object;
@@ -45,13 +45,15 @@ Every level mixes the unknown (F, m or a) and the story. Numbers are non-round a
 | 3 | One step, any unknown | Decimals in the given values too (0.43 kg, 2.65 m/s²); answer to 1 or 2 decimal places, as the question says |
 | 4 | Two steps: resultant first | Pull and friction, or two opposite forces, then find a or m. Also: find the friction or the pull needed for a target acceleration |
 | 5 | Two steps: weight or velocity | Mass from weight (W ÷ 9.8), then F = m × a. Or acceleration from a change in velocity (a = (v − u) ÷ t), then F. Other worlds' g once Chapter 5 is done |
-| 6 | Stretch: three steps or comparing | For example: the engine force needed to reach 14 m/s in 6.2 s against 380 N of friction; which of two objects speeds up more; what mass a force can push at a given acceleration. A "units" question only if Tom says yes (section 9) |
+| 6 | Stretch: three steps, comparing, and units | For example: the engine force needed to reach 14 m/s in 6.2 s against 380 N of friction; which of two objects speeds up more; what mass a force can push at a given acceleration. **Unit conversions:** masses given in grams (a 430 g football, a 57 g tennis ball) or tonnes (a 1.4 tonne car, a 2.3 tonne rhino) that must be changed to kg first |
 
 **Moving between levels:**
 - **Up:** 3 right in a row with no clue used. A right answer after a clue counts as right but does not add to the run.
 - **Down:** 2 wrong in a row. The message is kind ("Let's go back a step and build it up again"), followed by a worked example and then a "twin" question: the same skill with new numbers.
 - **Mixing:** about 1 question in 5 comes from a level below, so earlier skills stay fresh.
-- **Gated levels:** level 5's other worlds need Chapter 5, and level 4 needs Chapter 3 Extension (resultant). Teacher mode unlocks everything.
+- **No level is locked by chapter.** The Chapter 3 reminder covers that. Two kinds of question wait until they have been taught:
+  - **Other worlds' g** appears in level 5 only once the Chapter 5 Learn steps (Foundation and Extension) are done.
+  - **Unit conversions (grams and tonnes)** appear in level 6 only after the student has done the Gym's "Changing units" teach card. The card opens the first time a student reaches level 6. It has one idea per card (1 kg = 1,000 g; 1 tonne = 1,000 kg), a picture (a bag of sugar, a small car), a worked example and a key-word gap to check it ("To change grams to kilograms, you ___ by 1,000"). Every units question has a "How do I change units?" fold-out that reopens it. Teacher mode skips the wait.
 
 ## 3. The generator (semi-generative, realistic)
 
@@ -103,15 +105,21 @@ Each mistake is targeted at least twice, in different stories, before a go ends.
 `DB.prac = { level, run, best, goes, hist: [{t, seed, lvl, kind, ok, tries, clue, mistake}], skills: {kind: {right, tries}} }`. It rides along with the 💾 backup.
 
 - **"📄 Save my practice":** a one-page summary PDF with the student's name and class (no name, no PDF). It shows the highest level reached, questions right, the skills table, and the last 10 questions with the student's answers in blue. It also goes into the "My work so far" PDF.
-- **Teacher page (if Tom wants it, section 9):** a "Maths Gym" row with a target ("reach level 4", "20 questions") and a short Toddle prompt. No answer key is needed, because every question is generated and marked by the sim. The Toddle AI text only checks the summary page.
-- **No MYP strands on student screens.** If it becomes a set task, its rows are tagged A ii on the teacher side only.
+- **Teacher page row (Tom said yes).** A "🏋️ Maths Gym" row the teacher can tick, with a target picker: reach level 3, 4, 5 or 6, or get 10, 20 or 30 questions right (default: reach level 4). The row adds:
+  - a time estimate (approx. 15 to 30 min, depending on the target);
+  - a task-maker prompt line ("Practise F = m × a in the Maths Gym until you reach level 4, then save your practice PDF and upload it");
+  - AI feedback text, locked behind the teacher code like the rest.
+
+  No answer key is needed, because every question is generated and marked by the sim. The AI text checks the summary page against the target: level reached, questions right, working shown, and mistakes met and fixed.
+- **The target in the Gym:** the student picks the same target in the Gym from the same list, because the Gym has no link to the teacher page; the target reaches them through the Toddle instructions. The Gym shows the target and progress towards it at the top, and the summary PDF shows it too ("Target: reach level 4. ✓ Reached") so Toddle can check it.
+- **MYP strands:** the teacher-side rows are tagged A ii (applying knowledge to solve problems). They never appear on student screens.
 
 ## 7. Files and who builds what (helpers to save tokens)
 
 | Who | Files | Job |
 |---|---|---|
-| Helper 1 (generator) | `src/js/66-practice-gen.js`, `tests/practice_gen.py` | Object bank, templates for all six levels, number rules, the mistake answers, tolerance. Has `mq()` give the same questions as today for levels 1–5. A script generates 3,000 questions per level and checks: every answer is right, realistic and rounded as stated; no repeats within a go; and every mistake answer differs from the right one |
-| Helper 2 (screens) | `src/js/67-practice.js`, small edits to `index.html`, `20-shell.js`, `app.css`, `60-worksheet.js`, `61-pdf.js` | View, home card, level meter, question card with pictures and the FBD sketch, the adaptive engine (section 2), two tries, end screen, summary PDF |
+| Helper 1 (generator) | `src/js/66-practice-gen.js`, `tests/practice_gen.py` | Object bank, templates for all six levels (including unit conversions), number rules, the mistake answers, tolerance. Leaves Chapter 3's `mq()` as it is. A script generates 3,000 questions per level and checks: every answer is right, realistic and rounded as stated; no repeats within a go; and every mistake answer differs from the right one |
+| Helper 2 (screens) | `src/js/67-practice.js`, small edits to `index.html`, `20-shell.js`, `app.css`, `60-worksheet.js`, `61-pdf.js`, `62-teacher.js` | View, home card, Chapter 3 reminder, level meter, question card with pictures and the FBD sketch, the adaptive engine (section 2), two tries, the "Changing units" teach card, end screen, summary PDF, teacher-page row |
 | Main session | integration, `tests/practice.py`, `tests/run_all.sh`, docs | Join the two parts. Play-through test: level up and down, clues, each mistake message, units, the PDF, phone width, dark mode, no network. Screenshots, delivery |
 
 Helper 1 goes first and writes the generator API into this file (section 8). Helper 2 then builds against that API. The helpers stay in their own files, don't read the 2 MB built files whole, and leave git to the main session.
@@ -123,16 +131,16 @@ Helper 1 goes first and writes the generator API into this file (section 8). Hel
 - `traps: [{ans, key}]`: the answers that common mistakes give;
 - `pic: {thing, arrows}`: the picture to draw.
 
-`opts` holds the chapters done (for gating) and the kinds recently seen (to avoid repeats). `mq(level, seed)` becomes a thin wrapper around `prGen`.
+`opts` is `{ worlds, units, recent }`: whether other-worlds and unit-conversion questions are allowed yet, and the kinds seen recently (to avoid repeats). Chapter 3's `mq()` stays as it is.
 
-## 9. Questions for Tom
+## 9. Tom's decisions (18 Nov 2026)
 
-1. **Name and place:** "Maths Gym", "Calculation Range", or something else? A home card next to Flashcards, or a building on the HQ map?
-2. **Tries:** two tries in practice (proposed), or one go like the Check?
-3. **Units:** should level 6 include grams to kg and tonnes to kg? They aren't taught anywhere yet, so this would need a short "How to convert" card.
-4. **Other worlds:** include other worlds' g in level 5 once Chapter 5 is done?
-5. **Setting it as a task:** do you want to set the Maths Gym from the teacher page with a target (a level or a number of questions) and get a summary PDF on Toddle? Or is it free practice only?
-6. **When it opens:** after Chapter 3 Foundation (proposed)?
+1. **Name:** "Maths Gym", a home card beside Flashcards.
+2. **Tries:** two tries per question.
+3. **Units:** yes, level 6 includes grams and tonnes to kg. It must be taught in the sim, so the Gym has a "Changing units" teach card (section 2). A Chapter 3 Learn step that teaches it properly is on the backlog's to-do list.
+4. **Other worlds:** yes, in level 5, once the Chapter 5 Learn steps are done.
+5. **Teacher page:** yes, a Maths Gym row with a target, and a summary PDF for Toddle (section 6).
+6. **Opening:** open from the start, with a reminder to do Chapter 3 first if it isn't done.
 
 ## 10. Size
 
