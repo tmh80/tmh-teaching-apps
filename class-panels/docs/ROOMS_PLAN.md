@@ -233,6 +233,6 @@ Each phase hands back:
 - **Drag to combine:** drag one timer card onto another. A drop highlight shows "Combine". Dropping makes one timer whose segments are the target's followed by the dragged one's, named "A → B". The combined timer:
   - keeps the target's position and is paused at the start, unless the target was running, in which case it carries on;
   - immediately shows a small **repeat** popover: Once / × N times / ∞ Loop continuously. This uses the existing `repeatInfo` (`{infinite}` or `{total}`) mechanism.
-- **Undo:** an "Undo combine" toast lasts for about 6 s.
+- **Split** (Tom, 20 Nov: instead of an undo toast): every combined timer has a "✂ Split" button that works at any time. A combined timer stores its `parts` (each one's name, segments, repeat and paraphrase settings), so Split puts the original timers back in its place, reset and paused.
 - Combining more than two works by dropping again.
 - Combined timers can be **saved as a template** with the existing save flow.
