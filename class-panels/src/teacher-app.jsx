@@ -1274,15 +1274,217 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
 const SW=114,SH=52,SGR=8;
 const GROUP_PAD=8,GROUP_BAR_H=22; // group boundary padding + tab-bar height, shared with the off-screen drag clamp
 
-/* Desk wood — same grain + tan gradient as the top banner, so tables read as
-   part of the same wooden theme. Layered as a background so a selection tint
-   can be stacked on top without losing the texture. */
-const WOOD_GRAIN="repeating-linear-gradient(115deg,rgba(255,250,240,0.4) 0px,rgba(255,250,240,0.4) 1px,transparent 1px,transparent 5px)";
-const WOOD_FILL="linear-gradient(180deg,#e0c1a0,#d1a97e)";
-const WOOD_PALE="linear-gradient(180deg,#efe0cc,#e6d2b8)";
-const WOOD_BORDER="rgba(120,85,55,0.38)";
-const WOOD_INK="#3b2813";
-const woodBg=(tint)=>`${tint?`linear-gradient(${tint},${tint}),`:""}${WOOD_GRAIN},${WOOD_FILL}`;
+/* ══════════════════════════════════════════════════════════
+   ICON-STYLE DRAWING KIT — coloured-pencil hatching, dark ink outlines, warm
+   wood and mint / sky / cyan, matching the app icon. Pure inline SVG + CSS (no
+   images, fonts or network). Seats, tables and room items are all drawn from
+   these pieces so Phase 3's new table shapes can reuse them:
+     <InkDefs/>        once per canvas — the hatch patterns the others refer to
+     <TableSurface/>   any polygon or rect as hatched wood + ink outline + shadow
+     <Chair/>          a rounded chair that can face any direction
+     <NameTag/>        cream paper tag, fixed tilt per seat id
+     <SeatArt/>        the drawing under one seat (chair + bit of table)
+     <RoomItemArt/>    desk / board / door pictures
+   Colours are CSS variables (CP_THEME_CSS) so the blackboard theme can swap
+   ink to chalk-white and mute the fills without touching any component.
+   ══════════════════════════════════════════════════════════ */
+const CP_THEME_CSS=`
+[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);}
+[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);}
+`;
+const INK="var(--cp-ink)";
+const INK_W=1.6; // outline weight in canvas px
+const CHAIR_COUNT=5;
+const chairColor=i=>`var(--cp-chair-${((i%CHAIR_COUNT)+CHAIR_COUNT)%CHAIR_COUNT})`;
+/* tagTilt/chair colours use hashStr (defined with the seat tags below) so they never jitter. */
+const tagTilt=id=>[-1.5,-0.75,0,0.75,1.5][hashStr(id)%5];
+/* One chair colour per table (group); a lone desk gets one from its id. */
+const chairIndexMap=(seatsIn,groupsIn)=>{
+  const m={};
+  (groupsIn||[]).forEach((g,gi)=>g.seatIds.forEach(id=>{m[id]=gi;}));
+  (seatsIn||[]).forEach(s=>{if(m[s.id]===undefined)m[s.id]=hashStr(s.id);});
+  return m;
+};
+/* Pale tile floor for the canvas background. */
+const floorStyle=(step=32)=>({backgroundColor:"var(--cp-floor)",backgroundImage:"linear-gradient(var(--cp-floor-line) 1px,transparent 1px),linear-gradient(90deg,var(--cp-floor-line) 1px,transparent 1px)",backgroundSize:`${step}px ${step}px`});
+
+/* The same hatched-wood look as TableSurface, as plain CSS, for cards whose size
+   flows with their content (the Groups cards) so no SVG measuring is needed. */
+const hatchedWoodCss=()=>({
+  background:"repeating-linear-gradient(122deg,var(--cp-hatch-light) 0 1.1px,transparent 1.1px 8px),repeating-linear-gradient(122deg,transparent 0 5px,var(--cp-hatch-dark) 5px 5.9px,transparent 5.9px 8px),var(--cp-wood)",
+  border:`${INK_W}px solid var(--cp-ink)`,boxShadow:"2.5px 3.5px 0 var(--cp-shadow)",
+});
+
+/* Render once per canvas: the pencil-hatch patterns. Two sets of diagonal
+   strokes — pale "scratches" and sparse dark ones — like the icon's shading. */
+const InkDefs=()=>(
+  <svg width="0" height="0" style={{position:"absolute",pointerEvents:"none"}} aria-hidden="true" focusable="false">
+    <defs>
+      <pattern id="cp-hatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(32)">
+        <line x1="0" y1="2" x2="8" y2="2" style={{stroke:"var(--cp-hatch-light)",strokeWidth:1.1}}/>
+        <line x1="0" y1="6" x2="8" y2="6" style={{stroke:"var(--cp-hatch-dark)",strokeWidth:0.9}}/>
+      </pattern>
+      <pattern id="cp-hatch-x" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(-45)">
+        <line x1="0" y1="3" x2="6" y2="3" style={{stroke:"#d9534f",strokeWidth:1.3,opacity:0.7}}/>
+      </pattern>
+    </defs>
+  </svg>
+);
+
+const rotPts=(pts,rot,c)=>{
+  if(!rot)return pts;
+  const a=rot*Math.PI/180,co=Math.cos(a),si=Math.sin(a);
+  return pts.map(([x,y])=>[c[0]+(x-c[0])*co-(y-c[1])*si,c[1]+(x-c[0])*si+(y-c[1])*co]);
+};
+/* A table top. Give either `points` ([[x,y],…] in canvas px) or `rect` ({x,y,w,h});
+   `rot` turns it (degrees) about its centre. The SVG sizes itself to the shape, so
+   it can be dropped into any position:absolute parent. One cheap offset copy is
+   the shadow (no SVG filters, so 30+ seats still drag smoothly). */
+const TableSurface=({points,rect,rot=0,fill="var(--cp-wood)",radius=10,shadow=true,selected=false,dashed=false,faded=false})=>{
+  const base=points||(rect?[[rect.x,rect.y],[rect.x+rect.w,rect.y],[rect.x+rect.w,rect.y+rect.h],[rect.x,rect.y+rect.h]]:[]);
+  if(!base.length)return null;
+  const c=[base.reduce((a,p)=>a+p[0],0)/base.length,base.reduce((a,p)=>a+p[1],0)/base.length];
+  const useRect=!points&&rect;
+  const pts=rotPts(base,rot,c);
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  const bx=Math.min(...xs),by=Math.min(...ys),bw=Math.max(...xs)-bx,bh=Math.max(...ys)-by;
+  const M=8;
+  const rt=rot?`rotate(${rot} ${c[0]} ${c[1]})`:"";
+  const shapeProps=useRect
+    ?{x:rect.x,y:rect.y,width:rect.w,height:rect.h,rx:radius}
+    :{points:pts.map(p=>p.join(",")).join(" ")};
+  const Shape=useRect?"rect":"polygon";
+  return(
+    <svg width={bw+M*2} height={bh+M*2} style={{position:"absolute",left:bx-M,top:by-M,overflow:"visible",pointerEvents:"none",opacity:faded?0.55:1}} aria-hidden="true">
+      <g transform={`translate(${M-bx},${M-by})`}>
+        {shadow&&<Shape {...shapeProps} transform={`translate(2.5 3.5) ${useRect?rt:""}`} style={{fill:"var(--cp-shadow)"}}/>}
+        {selected&&<Shape {...shapeProps} transform={useRect?rt:undefined} style={{fill:"none",stroke:"var(--cp-sel-glow)",strokeWidth:9,strokeLinejoin:"round"}}/>}
+        <Shape {...shapeProps} transform={useRect?rt:undefined} style={{fill}}/>
+        <Shape {...shapeProps} transform={useRect?rt:undefined} style={{fill:"url(#cp-hatch)"}}/>
+        <Shape {...shapeProps} transform={useRect?rt:undefined} style={{fill:"none",stroke:selected?"var(--cp-sel)":INK,strokeWidth:selected?2.4:INK_W,strokeLinejoin:"round",strokeDasharray:dashed?"5 3":undefined}}/>
+      </g>
+    </svg>
+  );
+};
+
+/* A chair seen from above: a cushion and a thicker backrest. (x,y) is its centre;
+   `facing` is the direction the sitter faces in degrees — 0 faces up (towards a
+   table above), 90 faces right, and so on. `empty` draws it hollow and dashed. */
+const Chair=({x,y,facing=0,color=0,empty=false,dim=false,w=34,h=18})=>{
+  const fill=typeof color==="number"?chairColor(color):color;
+  const S=Math.max(w,h)+8,hc=S/2,cush=h*0.66,back=h-cush;
+  const st=empty?{fill:"none",stroke:INK,strokeWidth:INK_W,strokeDasharray:"3 2.5"}:{fill,stroke:INK,strokeWidth:INK_W};
+  return(
+    <svg width={S} height={S} style={{position:"absolute",left:x-hc,top:y-hc,overflow:"visible",pointerEvents:"none",opacity:dim?0.45:1}} aria-hidden="true">
+      <g transform={`rotate(${facing} ${hc} ${hc}) translate(${hc-w/2} ${hc-h/2})`}>
+        <rect x={0.5} y={cush} width={w-1} height={back} rx={3} style={st}/>
+        {!empty&&<rect x={0.5} y={cush} width={w-1} height={back} rx={3} style={{fill:"rgba(43,33,24,0.22)"}}/>}
+        <rect x={0.5} y={0.5} width={w-1} height={cush+0.5} rx={5.5} style={st}/>
+        {!empty&&<rect x={0.5} y={0.5} width={w-1} height={cush+0.5} rx={5.5} style={{fill:"url(#cp-hatch)",opacity:0.7}}/>}
+      </g>
+    </svg>
+  );
+};
+
+/* Cream paper name tag with an ink border and a small fixed tilt. Names clamp to
+   two lines and end in "…" rather than overflowing. Children (a lock button,
+   say) are positioned by the caller; `pad` keeps the text clear of them. */
+const NameTag=({name,tilt=0,w,h=26,fontSize=12,pad=6,warn=false,locked=false,onClick,onMouseDown,title,cursor="default",children})=>(
+  <div onClick={onClick} onMouseDown={onMouseDown} title={title||name}
+    style={{width:w,height:h,boxSizing:"border-box",padding:`0 ${pad}px 0 6px`,display:"flex",alignItems:"center",justifyContent:"center",
+      background:"var(--cp-paper)",border:`1.5px solid ${warn?"#c0392b":"var(--cp-tag-ink)"}`,borderRadius:4,
+      boxShadow:"1.5px 2px 0 var(--cp-shadow)",transform:`rotate(${tilt}deg)`,cursor,userSelect:"none",position:"relative"}}>
+    <span style={{fontSize,fontWeight:700,lineHeight:1.1,textAlign:"center",color:locked?"#1f4fa3":warn?"#b0291b":"var(--cp-tag-text)",
+      display:"-webkit-box",WebkitLineClamp:2,WebkitBoxOrient:"vertical",overflow:"hidden",wordBreak:"break-word",fontFamily:"'Source Sans 3',sans-serif"}}>{name}</span>
+    {children}
+  </div>
+);
+
+/* The drawing under one seat: either its own little table (a lone desk) or, in a
+   shared table, a faint seam around the seat's patch of it, then the chair tucked
+   in at the bottom. state: "ok" | "unused" | "unavailable". */
+const SeatArt=({w=SW,h=SH,chair=0,state="ok",standalone=false,hasStudent=true,selected=false})=>{
+  const dim=state==="unused",bad=state==="unavailable";
+  return(
+    <>
+      {standalone&&<TableSurface rect={{x:1,y:1,w:w-2,h:h-2}} radius={8} selected={selected} fill={bad?"var(--cp-coral)":"var(--cp-wood)"} dashed={dim} faded={dim}/>}
+      {!standalone&&(
+        <svg width={w} height={h} style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">
+          <rect x={2} y={2} width={w-4} height={h-4} rx={6} style={{fill:dim?"var(--cp-floor)":bad?"url(#cp-hatch-x)":"none",fillOpacity:dim?0.5:1,stroke:"var(--cp-ink)",strokeOpacity:0.3,strokeWidth:1.2,strokeDasharray:"3 3"}}/>
+        </svg>
+      )}
+      {standalone&&bad&&<svg width={w} height={h} style={{position:"absolute",left:0,top:0,pointerEvents:"none"}} aria-hidden="true"><rect x={2} y={2} width={w-4} height={h-4} rx={7} style={{fill:"url(#cp-hatch-x)"}}/></svg>}
+      <Chair x={w/2} y={h-9} color={chair} empty={!hasStudent||dim||bad} dim={dim}/>
+    </>
+  );
+};
+
+/* Little pictures for the room items. Drawn to the box they're given (w×h), so a
+   rotated desk or board just passes its swapped size. */
+const RoomItemArt=({type,w,h,label,fontSize=10.5})=>{
+  const horiz=w>=h;
+  const tag=(txt,cx,cy)=>{
+    const tw=Math.min((horiz?w:h)-12,txt.length*fontSize*0.62+12);
+    return(
+      <g transform={`translate(${cx} ${cy})`}>
+        <rect x={-tw/2} y={-(fontSize+6)/2} width={tw} height={fontSize+6} rx={3} style={{fill:"var(--cp-paper)",stroke:"var(--cp-tag-ink)",strokeWidth:1.3}}/>
+        <text x={0} y={fontSize*0.36} textAnchor="middle" style={{fontSize,fontWeight:800,fill:"var(--cp-tag-text)",letterSpacing:"0.4px",fontFamily:"'Source Sans 3',sans-serif",textTransform:"uppercase"}}>{txt}</text>
+      </g>
+    );
+  };
+  const wrap=kids=>(<svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">{kids}</svg>);
+  if(type==="desk"){
+    const gr=Math.min(h*0.2,w*0.16,10),gcx=horiz?w-gr-14:w/2,gcy=horiz?gr+8:h-gr-30;
+    const bx=horiz?10:w/2-14,by=horiz?7:8;
+    return wrap(<>
+      <rect x={3} y={4} width={w-4} height={h-4} rx={6} style={{fill:"var(--cp-shadow)"}}/>
+      <rect x={1} y={1} width={w-4} height={h-4} rx={6} style={{fill:"var(--cp-wood)"}}/>
+      <rect x={1} y={1} width={w-4} height={h-4} rx={6} style={{fill:"url(#cp-hatch)"}}/>
+      <rect x={1} y={1} width={w-4} height={h-4} rx={6} style={{fill:"none",stroke:INK,strokeWidth:INK_W}}/>
+      {/* books, like the icon: two stacked with coloured spines */}
+      <rect x={bx} y={by+8} width={26} height={8} rx={1.5} style={{fill:"#e9efc9",stroke:INK,strokeWidth:1.3}}/>
+      <rect x={bx} y={by+8} width={5} height={8} rx={1.5} style={{fill:"#2f7a6b",stroke:INK,strokeWidth:1.1}}/>
+      <rect x={bx+3} y={by} width={24} height={8} rx={1.5} style={{fill:"#f6f1cf",stroke:INK,strokeWidth:1.3}}/>
+      <rect x={bx+3} y={by} width={5} height={8} rx={1.5} style={{fill:"#f08a24",stroke:INK,strokeWidth:1.1}}/>
+      {/* globe */}
+      <circle cx={gcx} cy={gcy} r={gr} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1.4}}/>
+      <path d={`M${gcx-gr*0.6} ${gcy-gr*0.2} q${gr*0.4} ${-gr*0.7} ${gr*0.8} ${-gr*0.3} q${-gr*0.1} ${gr*0.7} ${-gr*0.5} ${gr*0.9} z`} style={{fill:"var(--cp-mint)",stroke:INK,strokeWidth:0.8}}/>
+      <path d={`M${gcx+gr*0.2} ${gcy+gr*0.1} q${gr*0.5} ${-gr*0.1} ${gr*0.5} ${gr*0.4} q${-gr*0.3} ${gr*0.4} ${-gr*0.5} ${gr*0.1} z`} style={{fill:"var(--cp-mint)",stroke:INK,strokeWidth:0.8}}/>
+      <circle cx={gcx} cy={gcy} r={gr} style={{fill:"url(#cp-hatch)"}}/>
+      <path d={`M${gcx-gr*0.7} ${gcy+gr*1.15} h${gr*1.4}`} style={{stroke:INK,strokeWidth:2,strokeLinecap:"round"}}/>
+      {label&&tag(label,w/2,h-11)}
+    </>);
+  }
+  if(type==="board"){
+    const txt={fontSize,fontWeight:800,letterSpacing:"2px",fill:INK,fontFamily:"'Source Sans 3',sans-serif",textTransform:"uppercase"};
+    return wrap(<>
+      <rect x={2} y={4} width={w-2} height={h-2} rx={4} style={{fill:"var(--cp-shadow)"}}/>
+      <rect x={0.8} y={0.8} width={w-3} height={h-3} rx={4} style={{fill:"var(--cp-board-fill)",stroke:INK,strokeWidth:INK_W+0.4}}/>
+      <rect x={4} y={4} width={w-10} height={h-10} rx={2} style={{fill:"url(#cp-hatch)",opacity:0.55}}/>
+      {horiz&&<>
+        <path d={`M${w*0.08} ${h*0.4} q6 -7 12 0 t12 0 t12 0`} style={{fill:"none",stroke:"var(--cp-sky)",strokeWidth:2,strokeLinecap:"round"}}/>
+        <path d={`M${w*0.78} ${h*0.4} h${w*0.12}`} style={{stroke:"var(--cp-coral)",strokeWidth:2,strokeLinecap:"round"}}/>
+      </>}
+      <rect x={w*0.12} y={h-4.5} width={w*0.76} height={3.5} rx={1.5} style={{fill:"var(--cp-wood2)",stroke:INK,strokeWidth:1}}/>
+      {horiz
+        ?<text x={w/2} y={h/2+fontSize*0.3} textAnchor="middle" style={txt}>{label||"Board"}</text>
+        :<text transform={`translate(${w/2} ${h/2}) rotate(90)`} y={fontSize*0.3} textAnchor="middle" style={txt}>{label||"Board"}</text>}
+    </>);
+  }
+  if(type==="door"){
+    return wrap(<>
+      {/* swing area, then the door slab and a thick ink wall stub, like a floor plan */}
+      <path d="M 58 6 A 52 52 0 0 1 6 58 L 6 6 Z" style={{fill:"var(--cp-cyan)",fillOpacity:0.75}}/>
+      <path d="M 58 6 A 52 52 0 0 1 6 58 L 6 6 Z" style={{fill:"url(#cp-hatch)"}}/>
+      <path d="M 58 6 A 52 52 0 0 1 6 58" style={{fill:"none",stroke:INK,strokeWidth:1.3,strokeDasharray:"4 3"}}/>
+      <rect x={6} y={3} width={52} height={6} rx={2} style={{fill:"var(--cp-wood)",stroke:INK,strokeWidth:INK_W}}/>
+      <rect x={6} y={3} width={52} height={6} rx={2} style={{fill:"url(#cp-hatch)"}}/>
+      <circle cx={52} cy={6} r={1.4} style={{fill:INK}}/>
+      <line x1={6} y1={2} x2={6} y2={60} style={{stroke:INK,strokeWidth:5,strokeLinecap:"round"}}/>
+    </>);
+  }
+  return null;
+};
 
 /* The seating canvas used to always be at least 960×680 data-pixels, even for a
    two-table room — which is often bigger than the panel showing it, so centering
@@ -1524,7 +1726,7 @@ const repairSeatGroups=(seatsIn,groupsIn)=>{
 // on the tag, so it's identical everywhere it's ever drawn. Manage Tags
 // (see ManageSeatTagsModal) can still override this per class.
 const SEAT_TAG_COLS={LS:{t:'#b8850a',b:'#fdf5e6'},EAL:{t:'#2e6bce',b:'#eaf1fc'},Front:{t:'#3a8a4e',b:'#edf7ef'},Girl:{t:'#c44',b:'#fdeeed'},Boy:{t:'#2e6bce',b:'#eaf1fc'}};
-const hashStr=s=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;};
+const hashStr=s=>{let h=0;const t=String(s);for(let i=0;i<t.length;i++)h=(h*31+t.charCodeAt(i))>>>0;return h;};
 const stCol=tag=>SEAT_TAG_COLS[tag]||{t:COLORS[hashStr(tag)%COLORS.length].text,b:COLORS[hashStr(tag)%COLORS.length].bg};
 const DEFAULT_SEAT_TAGS=['LS','EAL'];
 
@@ -3285,8 +3487,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           // handles that case directly; "safe" keeps it from clipping content
           // against the top-left edge once it *does* overflow.
           display:"flex",justifyContent:"safe center",alignItems:"safe center",
-          backgroundImage:"radial-gradient(circle,#c8cad2 1.2px,transparent 1.2px)",
-          backgroundSize:"32px 32px",backgroundColor:"#f0f2f5",cursor:"default"
+          ...floorStyle(),cursor:"default"
         }}
       >
         {/* Min-size inner so canvas is always scrollable — CSS zoom scales it (and
@@ -3301,100 +3502,43 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             return <div style={{position:"absolute",left:rx,top:ry,width:rw,height:rh,border:"1.5px solid rgba(66,133,244,0.55)",background:"rgba(66,133,244,0.07)",borderRadius:"3px",pointerEvents:"none",zIndex:50}}/>;
           })()}
 
-          {/* ── Room items: teacher's desk and door ── */}
+          {/* Hatch patterns used by every table, chair and room item below */}
+          <InkDefs/>
+
+          {/* ── Room items: teacher's desk, board and door ── */}
           {roomItems.map(item=>{
+            if(item.type!=='desk'&&item.type!=='board'&&item.type!=='door')return null;
             const isSelRI=selRoomId===item.id;
-            if(item.type==='desk'){
-              const rot=item.rotation||0;
-              const dw=rot===90||rot===270?SH:SW,dh=rot===90||rot===270?SW:SH;
-              return(
-                <div key={item.id} onMouseDown={e=>handleRoomItemMD(e,item.id)}
-                  onClick={e=>{e.stopPropagation();setSel(new Set());setSelRoomId(item.id);}}
-                  onDoubleClick={e=>{e.stopPropagation();rotateRoomItem(item.id);}}
-                  title="Double-click to rotate"
-                  style={{
-                    position:"absolute",left:item.x,top:item.y,
-                    width:dw,height:dh,borderRadius:"8px",
-                    background:"linear-gradient(145deg,#faf5ee,#f0e8d8)",
-                    border:isSelRI?"2px solid #c8a06a":"1.5px solid #d4b896",
-                    boxShadow:isSelRI?"0 2px 12px rgba(200,160,100,0.25)":"0 2px 8px rgba(0,0,0,0.07)",
-                    cursor:"grab",userSelect:"none",display:"flex",flexDirection:"column",
-                    alignItems:"center",justifyContent:"center",gap:"3px",
-                  }}
-                >
-                  <div style={{fontSize:"11px",fontWeight:700,color:"#8a7060",letterSpacing:"0.5px",textTransform:"uppercase",transform:rot===90||rot===270?"rotate(90deg)":"none"}}>Teacher's Desk</div>
-                  {isSelRI&&<div style={{fontSize:"8.5px",color:"rgba(0,0,0,0.25)",whiteSpace:"nowrap",transform:rot===90||rot===270?"rotate(90deg)":"none"}}>dbl-click: rotate · Del: remove</div>}
-                </div>
-              );
-            }
-            if(item.type==='door'){
-              const W=64,H=64;
-              return(
-                <div key={item.id} onMouseDown={e=>handleRoomItemMD(e,item.id)}
-                  onClick={e=>{e.stopPropagation();setSel(new Set());setSelRoomId(item.id);}}
-                  onDoubleClick={e=>{e.stopPropagation();rotateRoomItem(item.id);}}
-                  title="Double-click to rotate"
-                  style={{
-                    position:"absolute",left:item.x,top:item.y,
-                    width:W,height:H,
-                    border:isSelRI?"2px solid #4a9ab0":"1.5px solid transparent",
-                    borderRadius:"4px",cursor:"grab",userSelect:"none",
-                    transform:`rotate(${item.rotation}deg)`,
-                    transformOrigin:"top left",
-                  }}
-                >
-                  <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
-                    {/* Wall stub */}
-                    <line x1="6" y1="4" x2="6" y2="58" stroke="#6a9aaa" strokeWidth="5" strokeLinecap="round"/>
-                    {/* Door slab — closed position, horizontal from hinge */}
-                    <line x1="6" y1="6" x2="58" y2="6" stroke="#6a9aaa" strokeWidth="3.5" strokeLinecap="round"/>
-                    {/* Swing arc — quarter circle from slab tip back to wall */}
-                    <path d="M 58 6 A 52 52 0 0 1 6 58" fill="rgba(100,180,200,0.08)" stroke="#6a9aaa" strokeWidth="1.5"/>
-                  </svg>
-                  {isSelRI&&(
-                    <div style={{position:"absolute",bottom:-18,left:"50%",transform:"translateX(-50%)",fontSize:"8.5px",color:"rgba(0,0,0,0.35)",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif",fontWeight:600}}>dbl-click: rotate</div>
-                  )}
-                </div>
-              );
-            }
-            if(item.type==='board'){
-              return(
-                <div key={item.id} onMouseDown={e=>handleRoomItemMD(e,item.id)}
-                  onClick={e=>{e.stopPropagation();setSel(new Set());setSelRoomId(item.id);}}
-                  onDoubleClick={e=>{e.stopPropagation();rotateRoomItem(item.id);}}
-                  title="Double-click to rotate"
-                  style={{
-                    position:"absolute",left:item.x,top:item.y,
-                    width: item.rotation===90||item.rotation===270 ? 36 : 260,
-                    height: item.rotation===90||item.rotation===270 ? 260 : 36,
-                    borderRadius:"5px",
-                    background:"linear-gradient(180deg,#e8ebe8 0%,#d8dcd6 100%)",
-                    border:isSelRI?"2px solid #7a9a7a":"1.5px solid #a8b8a8",
-                    boxShadow:isSelRI?"0 2px 10px rgba(100,140,100,0.2)":"0 1px 4px rgba(0,0,0,0.08)",
-                    cursor:"grab",userSelect:"none",display:"flex",
-                    alignItems:"center",justifyContent:"center",
-                  }}
-                >
-                  <span style={{
-                    fontSize:"10px",fontWeight:700,color:"#5a7a5a",letterSpacing:"1.5px",
-                    textTransform:"uppercase",
-                    transform: item.rotation===90||item.rotation===270?"rotate(90deg)":"none",
-                  }}>Board</span>
-                  {isSelRI&&(
-                    <div style={{position:"absolute",bottom:-18,left:"50%",transform:"translateX(-50%)",fontSize:"8.5px",color:"rgba(0,0,0,0.35)",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif",fontWeight:600}}>dbl-click: rotate · Del: remove</div>
-                  )}
-                </div>
-              );
-            }
-            return null;
+            const rot=item.rotation||0,vert=rot===90||rot===270;
+            // Same footprints as before so saved positions still line up
+            const[iw,ih]=item.type==='desk'?(vert?[SH,SW]:[SW,SH]):item.type==='board'?(vert?[36,260]:[260,36]):[64,64];
+            return(
+              <div key={item.id} onMouseDown={e=>handleRoomItemMD(e,item.id)}
+                onClick={e=>{e.stopPropagation();setSel(new Set());setSelRoomId(item.id);}}
+                onDoubleClick={e=>{e.stopPropagation();rotateRoomItem(item.id);}}
+                title="Double-click to rotate"
+                style={{
+                  position:"absolute",left:item.x,top:item.y,width:iw,height:ih,
+                  cursor:"grab",userSelect:"none",
+                  ...(item.type==='door'?{transform:`rotate(${item.rotation}deg)`,transformOrigin:"top left"}:{}),
+                }}
+              >
+                {isSelRI&&<div style={{position:"absolute",inset:-4,borderRadius:10,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",pointerEvents:"none"}}/>}
+                <RoomItemArt type={item.type} w={iw} h={ih} label={item.type==='desk'?(vert?"Desk":"Teacher's Desk"):item.type==='board'?"Board":undefined}/>
+                {isSelRI&&(
+                  <div style={{position:"absolute",top:ih+8,left:"50%",transform:`translateX(-50%)${item.type==='door'?` rotate(${-(item.rotation||0)}deg)`:""}`,fontSize:"9.5px",color:"var(--cp-tag-text)",background:"var(--cp-paper)",border:"1px solid var(--cp-tag-ink)",borderRadius:4,padding:"1px 6px",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif",fontWeight:600,pointerEvents:"none",zIndex:5}}>{item.type==='door'?"dbl-click: rotate":"dbl-click: rotate · Del: remove"}</div>
+                )}
+              </div>
+            );
           })}
 
-          {/* Group boundary + tab. The tab is a full-width bar sitting on top of the
-              group, like a folder tab — always visible and always clickable, so it
-              doubles as "here's a group" and "click here to select the whole thing."
-              Three states: neutral (unrelated to current selection), soft (an
-              individual member is selected — the rest of the group is lightly
-              tinted), full (the group itself is selected via its tab). */}
+          {/* Group = one shared table top under its seats, plus a folder-style tab.
+              The tab is a full-width bar sitting on top of the group — always
+              visible and always clickable, so it doubles as "here's a group" and
+              "click here to select the whole thing." Three states: neutral
+              (unrelated to current selection), soft (an individual member is
+              selected — the rest of the table gets a dashed halo), full (the
+              group itself is selected via its tab — blue outline + glow). */}
           {groups.map((g,gi)=>{
             const liveSeatPositions=g.seatIds.map(id=>{
               const s=seats.find(x=>x.id===id);if(!s)return null;
@@ -3408,136 +3552,132 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             const isSoft=!isFull&&selType==='seat'&&sel.size===1&&g.seatIds.includes(Array.from(sel)[0]);
             const gb=gBoundsFromSeats(g,liveSeatPositions);
             const PAD=GROUP_PAD,BAR_H=GROUP_BAR_H;
-            const borderCol=isFull?"rgba(66,133,244,0.55)":isSoft?"rgba(66,133,244,0.3)":"rgba(120,85,55,0.45)";
             return(
               <div key={`gb-${g.id}`}>
-                {/* Boundary around the desks */}
-                <div style={{
-                  position:"absolute",left:gb.x-PAD,top:gb.y-PAD,
-                  width:gb.w+PAD*2,height:gb.h+PAD*2,
-                  borderRadius:"0 0 12px 12px",
-                  background:isFull?"rgba(66,133,244,0.08)":isSoft?"rgba(66,133,244,0.035)":"transparent",
-                  border:`${isFull?"2px":"1.5px"} ${isFull?"solid":"dashed"} ${borderCol}`,borderTop:"none",
-                  boxShadow:isFull?"0 0 0 1px rgba(66,133,244,0.1)":"none",
-                  pointerEvents:"none",transition:"border 0.15s,background 0.15s",
-                }}/>
+                <TableSurface rect={{x:gb.x-PAD,y:gb.y-PAD,w:gb.w+PAD*2,h:gb.h+PAD*2}} radius={12} selected={isFull}/>
+                {isSoft&&<div style={{position:"absolute",left:gb.x-PAD-4,top:gb.y-PAD-4,width:gb.w+PAD*2+8,height:gb.h+PAD*2+8,borderRadius:15,border:"2px dashed var(--cp-sel)",opacity:0.75,pointerEvents:"none"}}/>}
                 {/* Tab bar — click to select the whole group, drag to move it */}
                 <button onMouseDown={e=>handleGroupTabMD(e,g.id)} title="Select or drag the whole group" style={{
                   position:"absolute",left:gb.x-PAD,top:gb.y-PAD-BAR_H,
                   width:gb.w+PAD*2,height:BAR_H,
                   display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",
                   borderRadius:"10px 10px 0 0",
-                  background:isFull?"#2e6bce":isSoft?"rgba(66,133,244,0.12)":`${WOOD_GRAIN},linear-gradient(180deg,rgba(224,193,160,0.75),rgba(209,169,126,0.75))`,
-                  border:`${isFull?"2px":"1.5px"} ${isFull?"solid":"dashed"} ${borderCol}`,borderBottom:"none",
-                  cursor:"grab",fontFamily:"'Source Sans 3',sans-serif",
+                  background:isFull?"var(--cp-sel)":"var(--cp-paper)",
+                  border:`1.5px solid ${isFull||isSoft?"var(--cp-sel)":"var(--cp-tag-ink)"}`,borderBottom:"none",
+                  cursor:"grab",fontFamily:"'Source Sans 3',sans-serif",padding:0,
                 }}>
-                  <span style={{fontSize:"11px",lineHeight:1,opacity:isFull?1:0.7}}>👥</span>
-                  <span style={{fontSize:"11px",fontWeight:800,letterSpacing:"0.3px",lineHeight:1,color:isFull?"#fff":"rgba(74,49,28,0.85)",maxWidth:"70%",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.label||String(gi+1)}</span>
+                  <span style={{width:10,height:10,borderRadius:3,background:chairColor(gi),border:"1.5px solid var(--cp-tag-ink)",flexShrink:0}}/>
+                  <span style={{fontSize:"11px",fontWeight:800,letterSpacing:"0.3px",lineHeight:1,color:isFull?"#fff":"var(--cp-tag-text)",maxWidth:"70%",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{g.label||String(gi+1)}</span>
                 </button>
               </div>
             );
           })}
 
-          {/* Seat rectangles */}
-          {seats.map(s=>{
-            const p=pos[s.id];if(!p)return null;
-            const isSel=sel.has(s.id);
-            const isGroupMate=singleSeatGroupMates.has(s.id);
-            const cleanTags=s.tags.filter(t=>!DEPRECATED_TAGS.has(t));
-            const inActiveGroup=activeGroupId&&s.groupId===activeGroupId;
-            return(
-              <div key={s.id}
-                onClick={e=>{e.stopPropagation();handleSeatClick(e,s.id);}}
-                onMouseDown={e=>e.stopPropagation()} // prevent canvas clearing selection
-                style={{
-                  position:"absolute",left:p.x,top:p.y,width:SW,height:SH,
-                  borderRadius:"7px",
-                  background:s.unavailable?"linear-gradient(180deg,#f2d6cc,#e9c3b6)":!s.used?WOOD_PALE:isSel?woodBg("rgba(66,133,244,0.16)"):isGroupMate?woodBg("rgba(66,133,244,0.08)"):woodBg(),
-                  border:isSel?"2px solid #2e6bce":s.unavailable?"1.5px solid rgba(200,60,60,0.4)":isGroupMate?"1.5px dashed rgba(66,133,244,0.55)":!s.used?"1.5px dashed rgba(120,85,55,0.35)":`1.5px solid ${WOOD_BORDER}`,
-                  boxShadow:isSel?"0 2px 10px rgba(66,133,244,0.25)":"0 1px 4px rgba(74,49,28,0.18)",
-                  userSelect:"none",display:"flex",flexDirection:"column",
-                  boxSizing:"border-box",overflow:"visible",transition:"border 0.12s,background 0.12s",
-                  cursor:"default",
-                }}
-              >
-                {/* Add/remove-from-active-group toggle — only while a group tab is selected */}
-                {activeGroupId&&(
-                  <button
-                    onClick={e=>{e.stopPropagation();inActiveGroup?removeSeatFromGroup(s.id,activeGroupId):addSeatsToGroup([s.id],activeGroupId);}}
-                    onMouseDown={e=>e.stopPropagation()}
-                    title={inActiveGroup?"Remove from group":"Add to group"}
-                    style={{position:"absolute",top:"-7px",right:"-7px",zIndex:6,width:"16px",height:"16px",borderRadius:"50%",
-                      border:"1.5px solid #fff",cursor:"pointer",fontSize:"11px",fontWeight:800,lineHeight:1,padding:0,
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      background:inActiveGroup?"#eb5757":"#2e6bce",color:"#fff",
-                      boxShadow:"0 1px 4px rgba(0,0,0,0.25)",
-                    }}
-                  >{inActiveGroup?"−":"+"}</button>
-                )}
-                {/* Drag tab — grab anywhere on this strip to move the desk */}
-                <div onMouseDown={e=>handleSeatMD(e,s.id)} title="Drag to move this desk" style={{
-                  height:"16px",flexShrink:0,
-                  background:isSel?"rgba(66,133,244,0.16)":isGroupMate?"rgba(66,133,244,0.08)":"rgba(120,85,55,0.16)",
-                  borderBottom:`1px solid ${isSel?"rgba(66,133,244,0.2)":"rgba(120,85,55,0.22)"}`,
-                  borderRadius:"7px 7px 0 0",
-                  display:"flex",alignItems:"center",justifyContent:"flex-end",
-                  padding:"0 5px",cursor:"grab",
-                }}>
-                  {/* Tag dots (colour indicator only) + drag dots */}
-                  <div style={{display:"flex",alignItems:"center",gap:"3px",flexShrink:0}}>
-                    {cleanTags.map((t,i)=>{const tc=colorFor(t);return(
-                      <div key={t} title={t} style={{width:"8px",height:"8px",borderRadius:"50%",background:tc.t,opacity:0.75,flexShrink:0}}/>
-                    );})}
-                    <div style={{display:"flex",gap:"2px",marginLeft:cleanTags.length?"2px":"0"}}>
-                      {[0,1,2].map(i=><div key={i} style={{width:"3px",height:"3px",borderRadius:"50%",background:isSel?"rgba(66,133,244,0.55)":"rgba(74,49,28,0.35)"}}/>)}
+          {/* Seats: a chair tucked against a bit of table, with a paper name tag.
+              A seat in a group has no table of its own (the group's table is
+              drawn above); a lone seat gets a small one. */}
+          {(()=>{
+            const chairMap=chairIndexMap(seats,groups);
+            const grouped=new Set(groups.flatMap(g=>g.seatIds));
+            return seats.map(s=>{
+              const p=pos[s.id];if(!p)return null;
+              const isSel=sel.has(s.id);
+              const isGroupMate=singleSeatGroupMates.has(s.id);
+              const cleanTags=s.tags.filter(t=>!DEPRECATED_TAGS.has(t));
+              const inActiveGroup=activeGroupId&&s.groupId===activeGroupId;
+              const isLifted=!!dd&&(dd.singleSeat?dd.singleSeat===s.id:dd.ids.has(s.id));
+              const state=s.unavailable?"unavailable":!s.used?"unused":"ok";
+              const st=s.studentId?studentById(s.studentId):null;
+              const mismatch=!!st&&cleanTags.length>0&&!studentMatchesSeat(st,s);
+              return(
+                <div key={s.id}
+                  onClick={e=>{e.stopPropagation();handleSeatClick(e,s.id);}}
+                  onMouseDown={e=>e.stopPropagation()} // prevent canvas clearing selection
+                  style={{
+                    position:"absolute",left:p.x,top:p.y,width:SW,height:SH,
+                    userSelect:"none",cursor:"default",
+                    // A dragged seat lifts a little so it's obvious what you're holding
+                    transform:isLifted?"translateY(-3px) scale(1.04)":"none",transition:isLifted?"none":"transform 0.12s",
+                    zIndex:isLifted?30:isSel?5:1,
+                  }}
+                >
+                  <SeatArt chair={chairMap[s.id]} state={state} standalone={!grouped.has(s.id)} hasStudent={!!st} selected={isSel}/>
+                  {isSel&&(selType==='group'
+                    ?<div style={{position:"absolute",inset:1,borderRadius:7,border:"1.5px solid var(--cp-sel)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>
+                    :<div style={{position:"absolute",inset:-3,borderRadius:10,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>)}
+                  {isGroupMate&&!isSel&&<div style={{position:"absolute",inset:-2,borderRadius:9,border:"2px dashed var(--cp-sel)",opacity:0.8,pointerEvents:"none"}}/>}
+                  {/* Add/remove-from-active-group toggle — only while a group tab is selected */}
+                  {activeGroupId&&(
+                    <button
+                      onClick={e=>{e.stopPropagation();inActiveGroup?removeSeatFromGroup(s.id,activeGroupId):addSeatsToGroup([s.id],activeGroupId);}}
+                      onMouseDown={e=>e.stopPropagation()}
+                      title={inActiveGroup?"Remove from group":"Add to group"}
+                      style={{position:"absolute",top:"-7px",right:"-7px",zIndex:6,width:"16px",height:"16px",borderRadius:"50%",
+                        border:"1.5px solid #fff",cursor:"pointer",fontSize:"11px",fontWeight:800,lineHeight:1,padding:0,
+                        display:"flex",alignItems:"center",justifyContent:"center",
+                        background:inActiveGroup?"#eb5757":"#2e6bce",color:"#fff",
+                        boxShadow:"0 1px 4px rgba(0,0,0,0.25)",
+                      }}
+                    >{inActiveGroup?"−":"+"}</button>
+                  )}
+                  {/* Drag strip — grab anywhere along the table edge to move the desk */}
+                  <div onMouseDown={e=>handleSeatMD(e,s.id)} title="Drag to move this desk" style={{
+                    position:"absolute",left:0,top:0,width:SW,height:13,
+                    display:"flex",alignItems:"center",justifyContent:"flex-end",
+                    padding:"0 6px",cursor:"grab",
+                  }}>
+                    {/* Tag dots (colour indicator only) + drag dots */}
+                    <div style={{display:"flex",alignItems:"center",gap:"3px",flexShrink:0}}>
+                      {cleanTags.map(t=>{const tc=colorFor(t);return(
+                        <div key={t} title={t} style={{width:"8px",height:"8px",borderRadius:"50%",background:tc.t,border:"1px solid var(--cp-tag-ink)",flexShrink:0}}/>
+                      );})}
+                      <div style={{display:"flex",gap:"2px",marginLeft:cleanTags.length?"2px":"0"}}>
+                        {[0,1,2].map(i=><div key={i} style={{width:"3px",height:"3px",borderRadius:"50%",background:INK,opacity:0.55}}/>)}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Student name area */}
-                <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:"3px 6px",position:"relative",overflow:"hidden"}}>
-                  {s.studentId?(()=>{
-                    const st=studentById(s.studentId);
-                    const mismatch=cleanTags.length>0&&st&&!studentMatchesSeat(st,s);
-                    return st?(
-                      <div style={{width:"100%",position:"relative"}}>
+                  {/* Name tag (or a dashed placeholder when nobody is sitting here) */}
+                  <div style={{position:"absolute",left:5,top:13,width:SW-10,height:26}}>
+                    {st?(
+                      <>
+                        <NameTag name={st.name} tilt={tagTilt(s.id)} w={SW-10} h={26} fontSize={12} pad={18} warn={mismatch} locked={s.locked}
+                          title={mismatch?`${st.name} doesn't match this seat's tag rule`:st.name}
+                          cursor={s.locked?"default":"grab"}
+                          // Name — click for tags/flags, drag to move
+                          onMouseDown={e=>{e.stopPropagation();!s.locked&&startStudentDrag(e,s.studentId,s.id);}}
+                          onClick={e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}}
+                        />
                         {/* Tag mismatch warning */}
                         {mismatch&&(
-                          <div title={`${st.name} doesn't match this seat's tag rule`} style={{position:"absolute",top:"-2px",right:"14px",zIndex:3,fontSize:"9px",lineHeight:1,background:"#eb5757",color:"#fff",borderRadius:"50%",width:"13px",height:"13px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,cursor:"default"}}>!</div>
+                          <div title={`${st.name} doesn't match this seat's tag rule`} style={{position:"absolute",top:"-5px",right:"16px",zIndex:3,fontSize:"9px",lineHeight:1,background:"#eb5757",color:"#fff",borderRadius:"50%",width:"13px",height:"13px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,cursor:"default",border:"1px solid #fff"}}>!</div>
                         )}
                         {/* Lock icon — only when student is present */}
                         <button onClick={e=>{e.stopPropagation();toggleLock(s.id);}}
                           title={s.locked?"Unlock":"Lock student here"}
-                          style={{position:"absolute",top:"50%",transform:"translateY(-50%)",right:"3px",background:"none",border:"none",cursor:"pointer",fontSize:"10px",opacity:s.locked?0.9:0.3,padding:"1px",lineHeight:1,zIndex:2}}
-                          onMouseEnter={e=>{e.target.style.opacity="1";}}
-                          onMouseLeave={e=>{e.target.style.opacity=s.locked?"0.9":"0.3";}}
+                          style={{position:"absolute",top:"50%",transform:"translateY(-50%)",right:"3px",background:"none",border:"none",cursor:"pointer",fontSize:"11px",opacity:s.locked?1:0.45,padding:"1px",lineHeight:1,zIndex:2}}
+                          onMouseEnter={e=>{e.currentTarget.style.opacity="1";}}
+                          onMouseLeave={e=>{e.currentTarget.style.opacity=s.locked?"1":"0.45";}}
                         >{s.locked?"🔒":"🔓"}</button>
-                        {/* Name — click for tags/flags, drag to move */}
-                        <div onMouseDown={e=>{e.stopPropagation();!s.locked&&startStudentDrag(e,s.studentId,s.id);}}
-                          onClick={e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}}
-                          style={{fontSize:"11px",fontWeight:700,color:s.locked?"#1f4fa3":mismatch?"#c0392b":"#1a1a2e",textAlign:"center",lineHeight:1.25,wordBreak:"break-word",cursor:s.locked?"default":"grab",background:"#fff",borderRadius:"6px",padding:"3px 17px 3px 7px",boxShadow:"0 1px 2px rgba(74,49,28,0.22)",userSelect:"none"}}
-                        >{st.name}</div>
                         {/* × remove */}
                         {!s.locked&&(
                           <button onClick={e=>{e.stopPropagation();removeFromSeat(s.id);}}
-                            title="Remove this student from the seat" style={{position:"absolute",top:"-3px",left:"-3px",background:"rgba(220,60,60,0.12)",border:"none",borderRadius:"50%",cursor:"pointer",fontSize:"12px",color:"rgba(200,50,50,0.7)",padding:"0",lineHeight:1,zIndex:2,width:"18px",height:"18px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}
-                            onMouseEnter={e=>{e.currentTarget.style.background="rgba(220,60,60,0.9)";e.currentTarget.style.color="#fff";}}
-                            onMouseLeave={e=>{e.currentTarget.style.background="rgba(220,60,60,0.12)";e.currentTarget.style.color="rgba(200,50,50,0.7)";}}
+                            title="Remove this student from the seat" style={{position:"absolute",top:"-6px",left:"-6px",background:"rgba(255,250,240,0.85)",border:"1.5px solid rgba(200,50,50,0.4)",borderRadius:"50%",cursor:"pointer",fontSize:"12px",color:"rgba(200,50,50,0.6)",padding:"0",lineHeight:1,zIndex:2,width:"16px",height:"16px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}
+                            onMouseEnter={e=>{e.currentTarget.style.background="rgba(220,60,60,0.95)";e.currentTarget.style.color="#fff";}}
+                            onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,250,240,0.85)";e.currentTarget.style.color="rgba(200,50,50,0.6)";}}
                           >×</button>
                         )}
+                      </>
+                    ):(
+                      <div style={{width:"100%",height:"100%",boxSizing:"border-box",borderRadius:4,border:"1.5px dashed var(--cp-tag-ink)",background:"rgba(255,250,240,0.6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",fontWeight:700,fontStyle:"italic",color:s.unavailable?"#a02a22":"var(--cp-tag-text)",opacity:s.unavailable||!s.used?0.9:0.75,fontFamily:"'Source Sans 3',sans-serif"}}>
+                        {s.unavailable?"unavailable":!s.used?"unused":"empty"}
                       </div>
-                    ):null;
-                  })():(
-                    s.unavailable
-                      ?<span style={{fontSize:"9px",color:"rgba(160,40,40,0.7)",fontStyle:"italic",fontWeight:600}}>unavailable</span>
-                      :!s.used
-                        ?<span style={{fontSize:"9px",color:"rgba(74,49,28,0.45)",fontStyle:"italic"}}>unused</span>
-                        :<span style={{fontSize:"9px",color:"rgba(74,49,28,0.4)",fontStyle:"italic"}}>empty</span>
-                  )}
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            });
+          })()}
 
           {/* Empty state */}
           {seats.length===0&&(
@@ -4182,66 +4322,74 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
   const hasLayout=seats.length>0||roomItems.length>0;
   const canvasSize=canvasContentSize(seats,roomItems);
 
-  const RoomCanvas=({scale=1,interactive=true})=>(
+  const RoomCanvas=({scale=1,interactive=true})=>{
+    const chairMap=chairIndexMap(seats,groups);
+    const grouped=new Set(groups.flatMap(g=>g.seatIds));
+    return(
     <div style={{position:"relative",minWidth:canvasSize.w*scale,minHeight:canvasSize.h*scale,flexShrink:0}}>
+     {/* Everything is laid out in unscaled canvas px; `scale` is applied with CSS zoom (callers pass 1) */}
+     <div style={{position:"absolute",left:0,top:0,zoom:scale}}>
+      <InkDefs/>
       {/* Room items — clearly labelled for student wayfinding */}
       {roomItems.map(item=>{
+        const rot=item.rotation||0,vert=rot===90||rot===270;
         if(item.type==='desk')return(
-          <div key={item.id} style={{position:"absolute",left:item.x*scale,top:item.y*scale,width:200*scale,height:72*scale,borderRadius:8*scale,background:"linear-gradient(145deg,#faf5ee,#f0e8d8)",border:"1.5px solid #d4b896",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2*scale}}>
-            <span style={{fontSize:12*scale,fontWeight:700,color:"#8a7060",letterSpacing:"0.5px",textTransform:"uppercase"}}>Teacher's Desk</span>
+          <div key={item.id} style={{position:"absolute",left:item.x,top:item.y,width:200,height:72}}>
+            <RoomItemArt type="desk" w={200} h={72} label="Teacher's Desk" fontSize={12}/>
           </div>
         );
-        if(item.type==='board')return(
-          <div key={item.id} style={{position:"absolute",left:item.x*scale,top:item.y*scale,width:(item.rotation===90||item.rotation===270?36:260)*scale,height:(item.rotation===90||item.rotation===270?260:36)*scale,borderRadius:5*scale,background:"linear-gradient(180deg,#e8ebe8,#d8dcd6)",border:"1.5px solid #a8b8a8",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <span style={{fontSize:11*scale,fontWeight:700,color:"#5a7a5a",letterSpacing:"1.5px",textTransform:"uppercase",transform:item.rotation===90||item.rotation===270?"rotate(90deg)":"none"}}>Board</span>
-          </div>
-        );
-        if(item.type==='door'){
-          const W=64*scale,H=64*scale;
+        if(item.type==='board'){
+          const bw=vert?36:260,bh=vert?260:36;
           return(
-            <div key={item.id} style={{position:"absolute",left:item.x*scale,top:item.y*scale,width:W,height:H,transform:`rotate(${item.rotation}deg)`,transformOrigin:"top left"}}>
-              <svg width={W} height={H} viewBox="0 0 64 64">
-                <line x1="6" y1="4" x2="6" y2="58" stroke="#6a9aaa" strokeWidth="5" strokeLinecap="round"/>
-                <line x1="6" y1="6" x2="58" y2="6" stroke="#6a9aaa" strokeWidth="3.5" strokeLinecap="round"/>
-                <path d="M 58 6 A 52 52 0 0 1 6 58" fill="rgba(100,180,200,0.08)" stroke="#6a9aaa" strokeWidth="1.5"/>
-              </svg>
-              <div style={{position:"absolute",top:H+3,left:"50%",transform:"translateX(-50%)",fontSize:10*scale,fontWeight:700,color:"#6a9aaa",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif"}}>Door</div>
+            <div key={item.id} style={{position:"absolute",left:item.x,top:item.y,width:bw,height:bh}}>
+              <RoomItemArt type="board" w={bw} h={bh} label="Board" fontSize={11}/>
             </div>
           );
         }
+        if(item.type==='door')return(
+          <div key={item.id} style={{position:"absolute",left:item.x,top:item.y,width:64,height:64,transform:`rotate(${item.rotation}deg)`,transformOrigin:"top left"}}>
+            <RoomItemArt type="door" w={64} h={64}/>
+            <div style={{position:"absolute",top:67,left:"50%",transform:`translateX(-50%) rotate(${-(item.rotation||0)}deg)`,fontSize:11,fontWeight:800,color:"var(--cp-tag-text)",background:"var(--cp-paper)",border:"1px solid var(--cp-tag-ink)",borderRadius:4,padding:"0 6px",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif"}}>Door</div>
+          </div>
+        );
         return null;
       })}
 
-      {/* Group shadow backgrounds */}
+      {/* One shared table top under each group's seats */}
       {groups.map(g=>{
         const gb=gBoundsFromSeats(g,seats);
-        return <div key={`gb-${g.id}`} style={{position:"absolute",left:(gb.x-4)*scale,top:(gb.y-4)*scale,width:(gb.w+8)*scale,height:(gb.h+8)*scale,borderRadius:10*scale,background:"rgba(120,85,55,0.06)",border:"1px solid rgba(120,85,55,0.2)",pointerEvents:"none"}}/>;
+        return <TableSurface key={`gb-${g.id}`} rect={{x:gb.x-GROUP_PAD,y:gb.y-GROUP_PAD,w:gb.w+GROUP_PAD*2,h:gb.h+GROUP_PAD*2}} radius={12}/>;
       })}
 
-      {/* Seat rectangles — names only, no tags, no controls */}
+      {/* Seats — chair + paper name tag, no controls */}
       {seats.map(s=>{
         const p=pos[s.id];if(!p||!s.used)return null;
         const st=s.studentId?studentById(s.studentId):null;
-        const name=st?.name||'';
-        const fsize=Math.max(9,Math.min(14,Math.floor(SW*0.82/(Math.max(name.length,4)*0.58))));
         const studentFlags=st?(flagsByStudent?.get(st.id)||[]):[];
         return(
-          <div key={s.id} style={{position:"absolute",left:p.x*scale,top:p.y*scale,width:SW*scale,height:SH*scale,borderRadius:7*scale,background:st?woodBg():"linear-gradient(180deg,rgba(224,193,160,0.35),rgba(209,169,126,0.35))",border:st?`1.5px solid ${WOOD_BORDER}`:"1px dashed rgba(120,85,55,0.3)",boxShadow:st?"0 1px 4px rgba(74,49,28,0.18)":"none",display:"flex",alignItems:"center",justifyContent:"center",overflow:"visible",position:"absolute"}}>
-            {st&&<div
-              onClick={interactive?e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}:undefined}
-              style={{fontSize:fsize*scale,fontWeight:700,color:"#1a1a2e",textAlign:"center",background:"#fff",borderRadius:6*scale,padding:`${3*scale}px ${8*scale}px`,maxWidth:"calc(100% - 8px)",boxShadow:"0 1px 2px rgba(74,49,28,0.22)",lineHeight:1.25,wordBreak:"break-word",cursor:interactive?"pointer":"default"}}
-            >{st.name}</div>}
+          <div key={s.id} style={{position:"absolute",left:p.x,top:p.y,width:SW,height:SH}}>
+            <SeatArt chair={chairMap[s.id]} state="ok" standalone={!grouped.has(s.id)} hasStudent={!!st}/>
+            {st&&(
+              <div style={{position:"absolute",left:5,top:6,width:SW-10,height:30}}>
+                <NameTag name={st.name} tilt={tagTilt(s.id)} w={SW-10} h={30} fontSize={13} pad={6}
+                  cursor={interactive?"pointer":"default"}
+                  title={st.name}
+                  onClick={interactive?e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}:undefined}/>
+              </div>
+            )}
             {/* Flag indicators */}
             {showFlags&&studentFlags.length>0&&(
-              <div className="flag-indicator" style={{position:"absolute",top:-4*scale,right:-4*scale,zIndex:10}}>
-                <FlagDots flags={studentFlags} scale={scale} onClick={interactive?e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}:undefined}/>
+              <div className="flag-indicator" style={{position:"absolute",top:-4,right:-4,zIndex:10}}>
+                <FlagDots flags={studentFlags} scale={1} onClick={interactive?e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}:undefined}/>
               </div>
             )}
           </div>
         );
       })}
+     </div>
     </div>
-  );
+    );
+  };
 
   const Header=({onDisplayClick})=>(
     <div style={{padding:"12px 18px 10px",borderBottom:"1px solid rgba(0,0,0,0.06)",display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:"8px",background:"#fff",flexShrink:0}}>
@@ -4313,7 +4461,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
         </div>
       ):(
         <div style={{flex:1,position:"relative",overflow:"hidden"}}>
-          <div ref={scrollRef} style={{position:"absolute",inset:0,overflow:"auto",display:"flex",justifyContent:"safe center",alignItems:"safe center",background:"radial-gradient(circle,var(--board-dot) 1.2px,transparent 1.2px)",backgroundSize:"32px 32px",backgroundColor:"var(--board-flat)"}}>
+          <div ref={scrollRef} style={{position:"absolute",inset:0,overflow:"auto",display:"flex",justifyContent:"safe center",alignItems:"safe center",...floorStyle()}}>
             <div style={{zoom}}><RoomCanvas scale={1}/></div>
           </div>
 
@@ -4340,7 +4488,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
             </div>
           </div>
           <div style={{flex:1,position:"relative",overflow:"hidden"}}>
-            <div ref={displayScrollRef} style={{position:"absolute",inset:0,overflow:"auto",display:"flex",justifyContent:"safe center",alignItems:"safe center",backgroundImage:"radial-gradient(circle,var(--board-dot) 1.2px,transparent 1.2px)",backgroundSize:"32px 32px",backgroundColor:"var(--board-flat)"}}
+            <div ref={displayScrollRef} style={{position:"absolute",inset:0,overflow:"auto",display:"flex",justifyContent:"safe center",alignItems:"safe center",...floorStyle()}}
             >
               <div style={{zoom:displayZoom}}><RoomCanvas scale={1} interactive={false}/></div>
             </div>
@@ -5255,14 +5403,22 @@ function StudentGroupsPanel({activeClass,flagsByStudent,showFlags}){
     </div>
   );
 
+  /* A group is a hatched table with its members' paper name tags on it and a
+     chair tucked in per student — same drawing language as the seating view. */
   const GroupBlock=({group,i,big})=>{
     const col=COLORS[i%COLORS.length];
     return(
-      <div style={{borderRadius:big?"18px":"16px",background:col.bg,border:`1px solid ${col.text}28`,padding:big?"20px 24px":"14px 16px",...(big?{minWidth:"180px"}:vertical?{width:"100%"}:{minWidth:"148px",flex:"0 0 auto"}),display:"flex",flexDirection:"column",gap:big?"8px":"6px"}}>
-        <div style={{fontSize:big?"16px":"13px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:col.text}}>{rehydrated.names[i]||`Group ${i+1}`}</div>
-        {group.map(s=>(
-          <div key={s.id} style={{display:"flex",alignItems:"center",gap:big?"8px":"6px",fontSize:big?"19px":"13px",fontWeight:big?700:600,color:"#1a1a2e",padding:big?"6px 12px":"4px 9px",borderRadius:big?"10px":"8px",background:"rgba(255,255,255,0.8)",lineHeight:1.3}}><span style={{flex:1,minWidth:0}}>{s.name}</span>{showFlags&&<FlagDots flags={flagsByStudent?.get(s.id)} size={big?12:8}/>}</div>
-        ))}
+      <div style={{...(big?{minWidth:"180px"}:vertical?{width:"100%"}:{minWidth:"148px",flex:"0 0 auto"})}}>
+        <div style={{...hatchedWoodCss(),borderRadius:big?"18px":"14px",padding:big?"16px 18px":"11px 12px",display:"flex",flexDirection:"column",gap:big?"8px":"6px"}}>
+          <div style={{alignSelf:"flex-start",fontSize:big?"16px":"13px",fontWeight:800,letterSpacing:"1.2px",textTransform:"uppercase",color:col.text,background:col.bg,border:"1.5px solid var(--cp-tag-ink)",borderRadius:"5px",padding:big?"2px 10px":"1px 8px",transform:"rotate(-1deg)",lineHeight:1.35}}>{rehydrated.names[i]||`Group ${i+1}`}</div>
+          {group.map(s=>(
+            <div key={s.id} style={{display:"flex",alignItems:"center",gap:big?"8px":"6px",fontSize:big?"19px":"13px",fontWeight:700,color:"var(--cp-tag-text)",padding:big?"6px 12px":"4px 9px",borderRadius:"5px",background:"var(--cp-paper)",border:"1.5px solid var(--cp-tag-ink)",boxShadow:"1.5px 2px 0 var(--cp-shadow)",transform:`rotate(${tagTilt(s.id)}deg)`,lineHeight:1.3}}><span style={{flex:1,minWidth:0,overflowWrap:"anywhere"}}>{s.name}</span>{showFlags&&<FlagDots flags={flagsByStudent?.get(s.id)} size={big?12:8}/>}</div>
+          ))}
+        </div>
+        {/* One chair per student (up to 8), tucked against the table edge */}
+        <div style={{display:"flex",justifyContent:"center",gap:big?"8px":"6px",marginTop:"-3px",position:"relative"}}>
+          {group.slice(0,8).map((s,k)=><span key={s.id} style={{width:big?30:24,height:big?18:14,borderRadius:"3px 3px 8px 8px",background:chairColor(i),border:"1.5px solid var(--cp-ink)",boxShadow:"inset 0 -4px 0 rgba(43,33,24,0.2)"}}/>)}
+        </div>
       </div>
     );
   };
@@ -5302,7 +5458,7 @@ function StudentGroupsPanel({activeClass,flagsByStudent,showFlags}){
               <div style={{borderRadius:"16px",background:"var(--board-wash)",border:"1px dashed var(--board-border)",padding:"14px 16px",display:"flex",flexDirection:"column",gap:"6px"}}>
                 <div style={{fontSize:"13px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"var(--board-label)"}}>Not in a group</div>
                 {rehydrated.ungrouped.map(s=>(
-                  <div key={s.id} style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"13px",fontWeight:600,color:"#1a1a2e",padding:"4px 9px",borderRadius:"8px",background:"rgba(255,255,255,0.75)",lineHeight:1.3}}><span style={{flex:1,minWidth:0}}>{s.name}</span>{showFlags&&<FlagDots flags={flagsByStudent?.get(s.id)} size={8}/>}</div>
+                  <div key={s.id} style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"13px",fontWeight:700,color:"var(--cp-tag-text)",padding:"4px 9px",borderRadius:"5px",background:"var(--cp-paper)",border:"1.5px dashed var(--cp-tag-ink)",lineHeight:1.3}}><span style={{flex:1,minWidth:0}}>{s.name}</span>{showFlags&&<FlagDots flags={flagsByStudent?.get(s.id)} size={8}/>}</div>
                 ))}
               </div>
             )}
@@ -6488,6 +6644,7 @@ export default function TeacherApp(){
         .drag-bar{-webkit-app-region:drag;app-region:drag}
         .no-drag{-webkit-app-region:no-drag;app-region:no-drag}
         .cp-chips::-webkit-scrollbar{display:none}
+        ${CP_THEME_CSS}
         [data-theme]{--board-bg-top:#f8f9fb;--board-bg-bottom:#eef1f5;--board-side-bg:#fafbfc;--board-heading:#1a1a2e;--board-label:rgba(0,0,0,0.25);--board-muted:rgba(0,0,0,0.2);--board-border:rgba(0,0,0,0.08);--board-wash:rgba(0,0,0,0.025);--board-flat:#f0f2f5;--board-dot:#c8cad2;}
         [data-theme="blackboard"]{--board-bg-top:#1c3829;--board-bg-bottom:#0f2418;--board-side-bg:#173323;--board-heading:#f3f1e7;--board-label:rgba(255,255,255,0.55);--board-muted:rgba(255,255,255,0.32);--board-border:rgba(255,255,255,0.16);--board-wash:rgba(255,255,255,0.05);--board-flat:#173323;--board-dot:rgba(255,255,255,0.18);}
       `}</style>

@@ -100,6 +100,10 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await page.getByText('Manage Seating').click(); await page.waitForTimeout(800);
   ok(await page.getByText('Ava Test').first().isVisible(), 'Manage Seating shows student "Ava Test"');
   await shot(page, '06-manage-seating');
+  // drawing kit: hatch patterns exist, every seat has its drag strip, nothing is an image
+  ok(await page.locator('pattern#cp-hatch').count() >= 1, 'the pencil-hatch pattern is drawn once on the canvas');
+  ok(await page.locator('[title="Drag to move this desk"]').count() === 24, 'all 24 fixture seats are drawn (and draggable)');
+  ok(await page.locator('[title="Select or drag the whole group"]').count() === 6, 'all 6 group tabs are drawn');
   await page.locator(manageMenu).click();
   await page.getByText('Manage Groups').click(); await page.waitForTimeout(800);
   await shot(page, '07-manage-groups');
