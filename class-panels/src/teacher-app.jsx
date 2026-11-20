@@ -143,6 +143,51 @@ const audio={
 async function load(k,d){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):d;}catch{return d;}}
 async function save(k,v){try{await window.storage.set(k,JSON.stringify(v));}catch(e){}}
 
+/* ── Automatic backups ──
+   A safety net for Tom's real data: a snapshot of every saved key, in the same
+   shape as Settings > Export backup (plus a "reason"). Kept in its own real
+   localStorage key, NOT inside 'classboard-storage', so a backup is never part
+   of the data it backs up and a restore can't wipe the backups. In Electron it
+   is also written as a file in Documents (see main.js). Must never throw. */
+const AUTO_BACKUP_KEY='classpanels-auto-backups';
+const AUTO_BACKUP_KEEP=10;
+function readAutoBackups(){ // newest first
+  try{const a=JSON.parse(localStorage.getItem(AUTO_BACKUP_KEY)||'[]');return Array.isArray(a)?a.filter(b=>b&&b.data&&typeof b.data==='object'):[];}catch(e){return[];}
+}
+/* Later phases call autoBackup('before <migration>') before they touch saved data. Resolves true if a backup was made. */
+export async function autoBackup(reason){
+  try{
+    const{keys}=await window.storage.list();
+    if(!keys.length)return false; // nothing saved yet, nothing to protect
+    const data={};
+    for(const k of keys){const r=await window.storage.get(k);if(r)data[k]=r.value;}
+    const when=new Date();
+    const entry={app:'ClassPanels',format:1,exportedAt:when.toISOString(),reason:reason||'manual',data};
+    const list=[entry,...readAutoBackups()].slice(0,AUTO_BACKUP_KEEP);
+    for(;;){ // if the browser's storage is full, let the oldest copies go rather than lose the newest
+      try{localStorage.setItem(AUTO_BACKUP_KEY,JSON.stringify(list));break;}
+      catch(e){if(list.length<=1)throw e;list.pop();}
+    }
+    try{ // Electron only: also a plain file Tom can find in Finder
+      if(window.electronAPI?.writeBackup){
+        const p=n=>String(n).padStart(2,'0');
+        const name=`ClassPanels-auto-${when.getFullYear()}-${p(when.getMonth()+1)}-${p(when.getDate())}-${p(when.getHours())}${p(when.getMinutes())}.json`;
+        Promise.resolve(window.electronAPI.writeBackup(name,JSON.stringify(entry))).catch(()=>{});
+      }
+    }catch(e){}
+    return true;
+  }catch(e){return false;}
+}
+/* At launch: one backup per calendar day */
+async function autoBackupIfNewDay(){
+  try{
+    const today=new Date().toLocaleDateString('sv');
+    const newest=readAutoBackups()[0];
+    if(newest&&new Date(newest.exportedAt).toLocaleDateString('sv')===today)return false;
+    return await autoBackup('launch');
+  }catch(e){return false;}
+}
+
 /* ── Paraphrase helpers ── */
 function isPara(s){return s.task.toLowerCase().includes("paraphrase");}
 function getLeadParas(segs){const i=segs.findIndex(s=>!isPara(s));if(i<=0)return{lead:[],rest:segs};return{lead:segs.slice(0,i),rest:segs.slice(i)};}
@@ -5785,6 +5830,7 @@ function SettingsModal({theme,onSetTheme,timerStyle,onSetTimerStyle,onClose}){
   const[dataMsg,setDataMsg]=useState(null);       // {ok, text} after an export or a failed import
   const[pendingImport,setPendingImport]=useState(null); // {name, data, classNames} waiting for "Replace" to be confirmed
   const fileRef=useRef(null);
+  const[autoBackups]=useState(()=>readAutoBackups()); // newest first
   /* Everything the app saves (classes, seating, groups, checklists, settings) goes into one JSON file, so it can move between computers */
   const exportData=async()=>{
     try{
@@ -5812,6 +5858,7 @@ function SettingsModal({theme,onSetTheme,timerStyle,onSetTimerStyle,onClose}){
   };
   const confirmImport=async()=>{
     try{
+      await autoBackup('before restore'); // one more safety net, on top of the recovery copy below
       // keep a recovery copy of what's here now, in case the wrong file was picked
       try{localStorage.setItem('classboard-storage-before-import',localStorage.getItem('classboard-storage')||'');}catch(err){}
       const{keys}=await window.storage.list();
@@ -5819,6 +5866,13 @@ function SettingsModal({theme,onSetTheme,timerStyle,onSetTimerStyle,onClose}){
       for(const[k,v]of Object.entries(pendingImport.data))await window.storage.set(k,v);
       window.location.reload(); // the app reads its saved data on start
     }catch(e){setPendingImport(null);setDataMsg({ok:false,text:"The restore didn't finish."});}
+  };
+  /* Restore from an automatic backup goes through the same confirm-then-replace step as an imported file */
+  const fmtBackupTime=iso=>{try{return new Date(iso).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return'?';}};
+  const pickAutoBackup=b=>{
+    let classNames=[];
+    try{classNames=JSON.parse(b.data['ta-classes']||'[]').map(c=>c.name);}catch(err){}
+    setDataMsg(null);setPendingImport({name:`automatic backup from ${fmtBackupTime(b.exportedAt)}`,data:b.data,classNames});
   };
   const options=[
     {id:'whiteboard',label:'Whiteboard',bg:'linear-gradient(180deg,#f8f9fb,#eef1f5)',text:'#1a1a2e'},
@@ -5887,6 +5941,21 @@ function SettingsModal({theme,onSetTheme,timerStyle,onSetTimerStyle,onClose}){
           </div>
         )}
         <div style={{fontSize:"11px",color:"rgba(0,0,0,0.35)",marginTop:"12px",lineHeight:1.5}}>Move your classes between computers: export here, then import on the other one. Import replaces what's there.</div>
+        <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"2px",color:"rgba(0,0,0,0.3)",textTransform:"uppercase",margin:"22px 0 10px"}}>Automatic backups</div>
+        {autoBackups.length===0
+          ?<div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.45)",lineHeight:1.5}}>None yet. One is made each day the app is opened.</div>
+          :<div title="Backups the app made by itself, newest first" style={{maxHeight:"132px",overflowY:"auto",border:"1px solid rgba(0,0,0,0.08)",borderRadius:"10px"}}>
+            {autoBackups.map((b,i)=>(
+              <div key={b.exportedAt+i} style={{display:"flex",alignItems:"center",gap:"8px",padding:"6px 10px",borderTop:i?"1px solid rgba(0,0,0,0.06)":"none"}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:"12px",fontWeight:700,color:"#1a1a2e"}}>{fmtBackupTime(b.exportedAt)}</div>
+                  <div style={{fontSize:"10.5px",color:"rgba(0,0,0,0.45)"}}>{b.reason}</div>
+                </div>
+                <button onClick={()=>pickAutoBackup(b)} title={`Go back to how everything was on ${fmtBackupTime(b.exportedAt)} (you'll be asked to confirm first)`} style={{padding:"5px 10px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.12)",background:"#fff",cursor:"pointer",fontSize:"11.5px",fontWeight:700,color:"#1a1a2e",fontFamily:"'Source Sans 3',sans-serif"}}>Restore</button>
+              </div>
+            ))}
+          </div>}
+        <div style={{fontSize:"11px",color:"rgba(0,0,0,0.35)",marginTop:"10px",lineHeight:1.5}}>The app keeps the last {AUTO_BACKUP_KEEP} of these. {window.electronAPI?.writeBackup?'Copies are also saved as files in Documents \u25B8 ClassPanels Backups on this Mac.':'In the Mac app they are also saved as files in Documents \u25B8 ClassPanels Backups.'}</div>
       </div>
     </div>
   );
@@ -6162,6 +6231,9 @@ export default function TeacherApp(){
     setChecklist(next);
     if(activeClassId)save(`checklist-${activeClassId}`,next);
   },[activeClassId]);
+
+  /* Snapshot everything once a day, as early as possible (before this session changes anything) */
+  useEffect(()=>{autoBackupIfNewDay();},[]);
 
   /* Load persisted classes; fall back to sample class on first launch */
   useEffect(()=>{

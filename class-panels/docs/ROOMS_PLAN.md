@@ -82,7 +82,7 @@ setups-<class>            { activeId, list:[{ id, name, icon, roomId?, layoutId?
 sl-<class>                UNCHANGED shape (+ optional pieces/walls fields); = the FIRST setup ("Regular")
 sl-<class>~<setupId>      the same shape as sl-, for every other setup
 rot-<class>               { setupId, stationOrder:[stationId…], groupIds:[…], step, timerId? }
-ta-backups                (Phase 0) the last 10 automatic backups
+classpanels-auto-backups  (Phase 0) the last 10 automatic backups, in plain localStorage OUTSIDE classboard-storage; call `autoBackup(reason)` before any migration
 ```
 
 - **Rules stay class-level** in `sl-<class>`. Every setup uses them, and the Groups panel already reads rules from there.
@@ -195,7 +195,7 @@ The phases run **one at a time** on `classpanels-rooms`, because nearly everythi
 
 | Phase | What | Agent | Why that agent |
 |---|---|---|---|
-| 0 | Safety net: automatic backups (on launch and before any migration; last 10 in `ta-backups`; in Electron also written as a file to `~/Documents/ClassPanels Backups/` through a new preload IPC); fake-data fixture; Playwright smoke tests (load fixture → open each tab → no console errors → data unchanged → export/restore round-trip) | Sonnet | Well specified, mostly plumbing |
+| 0 | Safety net: automatic backups (on launch and before any migration; last 10 in `classpanels-auto-backups`; in Electron also written as a file to `~/Documents/ClassPanels Backups/` through a new preload IPC); fake-data fixture; Playwright smoke tests (load fixture → open each tab → no console errors → data unchanged → export/restore round-trip) | Sonnet | Well specified, mostly plumbing |
 | 1 | Class chips | Sonnet | Small and self-contained |
 | 2 | Drawing kit + new look for seats, tables and room items | Sonnet, then a planner visual review | Needs taste checks, which the planner gives through screenshots |
 | 3 | Shapes, rotation, snapping, joins, seat slots, old-data wrapping | **Opus** | Hardest geometry and the riskiest change to the core seat model |
