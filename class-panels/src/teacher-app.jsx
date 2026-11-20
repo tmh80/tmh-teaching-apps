@@ -16,6 +16,9 @@ const TIME_PRESETS = [
   {label:"30s",seconds:30},{label:"1m",seconds:60},{label:"2m",seconds:120},
   {label:"5m",seconds:300},{label:"10m",seconds:600},{label:"30m",seconds:1800},
 ];
+/* Quick-start lengths: the − / + chips in the ⚡ Quick menu step through these. */
+const QUICK_STEPS = [30,60,90,120,180,300,420,600,900,1200,1800];
+const DEFAULT_QUICK_SECS = 120;
 const DEFAULT_TEMPLATES = [
   {name:"Think & Share",builtin:true,segments:[{task:"Think",minutes:2,seconds:0},{task:"Share",minutes:3,seconds:0}]},
   {name:"Read & Explain",builtin:true,segments:[{task:"Read",minutes:3,seconds:0},{task:"Explain",minutes:4,seconds:0},{task:"Reflect",minutes:2,seconds:0}]},
@@ -199,6 +202,27 @@ function getEffSegs(t){
   if(r.current===1)return rest;
   if(!r.infinite&&r.current===r.total)return[...t.segments,...lead];
   return t.segments;
+}
+function fmtLen(secs){const m=Math.floor(secs/60),s=secs%60;return m&&s?`${m}m ${s}s`:m?`${m}m`:`${s}s`;}
+function stepLen(cur,dir){return dir>0?(QUICK_STEPS.find(x=>x>cur)||QUICK_STEPS[QUICK_STEPS.length-1]):([...QUICK_STEPS].reverse().find(x=>x<cur)||QUICK_STEPS[0]);}
+/* Drag-to-combine: the target's segments, then the dragged timer's. The target
+   keeps its id (so it keeps its place and selection). Paraphrase mode only
+   looks at *leading* paraphrase segments, so it is kept from the target and
+   dropped from the dragged timer (its paraphrase steps are now mid-timeline and
+   just run as normal steps). The dragged timer's own repeat is dropped; the
+   repeat popover sets the new one. Parts keep their own repeat for Split. */
+/* A combined timer remembers its parts (in order) so Split can rebuild the originals.
+   Combining something already combined just flattens the parts. */
+function partOf(t){return t.parts&&t.parts.length>1?t.parts:[{name:t.name,segments:t.segments.map(x=>({...x})),repeat:t.repeatInfo?(t.repeatInfo.infinite?{infinite:true}:{total:t.repeatInfo.total}):null,paraphraseMode:!!t.paraphraseMode}];}
+function combineTimers(t,d){
+  const ri=t.repeatInfo;
+  // paraphrase "final round" view has extra segments appended after the target's own,
+  // so a saved position inside it would no longer line up: restart cleanly instead.
+  const paraFinal=t.paraphraseMode&&ri&&!ri.infinite&&ri.current>1&&ri.current===ri.total;
+  const keep=t.running&&!paraFinal;
+  return{...t,parts:[...partOf(t),...partOf(d)],name:`${t.name} → ${d.name}`,segments:[...t.segments.map(x=>({...x})),...d.segments.map(x=>({...x}))],paraphraseMode:!!t.paraphraseMode,
+    running:keep,currentSegIdx:keep?t.currentSegIdx:0,segElapsed:keep?t.segElapsed:0,
+    repeatInfo:ri?{...ri,current:keep?ri.current:1}:null};
 }
 function shouldShowPara(segs){return segs.length>0&&isPara(segs[0])&&segs.some(s=>!isPara(s));}
 
@@ -396,7 +420,7 @@ function SegBar({segments,currentIdx,segElapsed,totalDuration}){
 }
 
 /* ── Timer Card ── */
-function TimerCard({timer,onDelete,onToggle,onReset,onSelect,onDisplay,isSelected,continuousAlarm,compact,timerStyle}){
+function TimerCard({timer,onDelete,onToggle,onReset,onSelect,onDisplay,onRepeat,onSplit,isSelected,continuousAlarm,compact,timerStyle}){
   const eff=getEffSegs(timer);
   const{currentSegIdx:ci,segElapsed:se,running,finished,repeatInfo:ri}=timer;
   const seg=eff[ci]||eff[0];
@@ -434,6 +458,9 @@ function TimerCard({timer,onDelete,onToggle,onReset,onSelect,onDisplay,isSelecte
         <button onClick={e=>{e.stopPropagation();onToggle(timer.id);}} style={{fontSize:"13px",fontWeight:600,padding:compact?"8px 16px":"9px 26px",borderRadius:"10px",border:"none",cursor:"pointer",background:finished?"#eb5757":running?"rgba(0,0,0,0.05)":"#1a1a2e",color:finished?"#fff":running?"#555":"#fff",}}>{finished?"Dismiss":running?"Pause":"Start"}</button>
         {!finished&&<button onClick={e=>{e.stopPropagation();onReset(timer.id);}} style={{fontSize:"13px",fontWeight:600,padding:compact?"8px 12px":"9px 18px",borderRadius:"10px",cursor:"pointer",background:"none",border:"1px solid rgba(0,0,0,0.07)",color:"rgba(0,0,0,0.3)",}} onMouseEnter={e=>{e.target.style.borderColor="rgba(0,0,0,0.18)";e.target.style.color="rgba(0,0,0,0.55)";}} onMouseLeave={e=>{e.target.style.borderColor="rgba(0,0,0,0.07)";e.target.style.color="rgba(0,0,0,0.3)";}}>Reset</button>}
         {!finished&&<button onClick={e=>{e.stopPropagation();onDisplay(timer.id);}} title="Projector view" style={{fontSize:"15px",fontWeight:600,padding:compact?"8px 10px":"9px 12px",borderRadius:"10px",cursor:"pointer",background:"none",border:"1px solid rgba(0,0,0,0.07)",color:"rgba(0,0,0,0.25)",lineHeight:1,}} onMouseEnter={e=>{e.target.style.borderColor="rgba(66,133,244,0.3)";e.target.style.color="#2e6bce";e.target.style.background="#eaf1fc";}} onMouseLeave={e=>{e.target.style.borderColor="rgba(0,0,0,0.07)";e.target.style.color="rgba(0,0,0,0.25)";e.target.style.background="none";}}>⛶</button>}
+        {!finished&&onSplit&&timer.parts&&timer.parts.length>1&&<button onClick={e=>{e.stopPropagation();onSplit(timer.id);}} title="Split back into the separate timers" style={{fontSize:"13px",fontWeight:600,padding:compact?"8px 10px":"9px 12px",borderRadius:"10px",cursor:"pointer",background:"none",border:"1px solid rgba(0,0,0,0.07)",color:"rgba(0,0,0,0.4)",lineHeight:1,}}>✂ Split</button>}
+        {/* Repeat: Once / × N / ∞ Loop. onMouseDown is stopped so the popover's outside-click closer doesn't fight this toggle. */}
+        {!finished&&onRepeat&&<button onMouseDown={e=>e.stopPropagation()} onClick={e=>{e.stopPropagation();onRepeat(timer.id);}} title={ri?(ri.infinite?"Repeat: looping continuously. Click to change":`Repeat: ${ri.total} times. Click to change`):"Repeat: once. Click to repeat or loop this timer"} style={{fontSize:"13px",fontWeight:600,padding:compact?"8px 10px":"9px 12px",borderRadius:"10px",cursor:"pointer",background:ri?"#eaf1fc":"none",border:ri?"1px solid rgba(66,133,244,0.3)":"1px solid rgba(0,0,0,0.07)",color:ri?"#2e6bce":"rgba(0,0,0,0.25)",lineHeight:1,}}>{"↻"}{ri?(ri.infinite?" ∞":` ×${ri.total}`):""}</button>}
       </div>
     </div>
   );
@@ -1065,6 +1092,9 @@ function ManageClassModal({classToEdit,onSave,onClose}){
 function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDismissColdCall,timerStyle}){
   const[timers,setTimers]=useState([]);const[selectedId,setSelectedId]=useState(null);const[showBuilder,setShowBuilder]=useState(false);const[showActions,setShowActions]=useState(false);const[showTemplatesManager,setShowTemplatesManager]=useState(false);const[continuousAlarm,setContinuousAlarm]=useState(true);const[countdownBeeps,setCountdownBeeps]=useState(true);const[savedTemplates,setSavedTemplates]=useState([]);const[actions,setActions]=useState(DEFAULT_ACTIONS);const[customMin,setCustomMin]=useState("");const[customSec,setCustomSec]=useState("");const[displayMode,setDisplayMode]=useState(false);
   const[optionsOpen,setOptionsOpen]=useState(false); // narrow-view "⋯ More" dropdown
+  const[quickOpen,setQuickOpen]=useState(false);const[quickSecs,setQuickSecs]=useState({}); // ⚡ Quick menu + remembered length per action
+  const[dragId,setDragId]=useState(null);const[overId,setOverId]=useState(null); // drag-to-combine
+  const[repeatFor,setRepeatFor]=useState(null); // which card has the repeat popover open
 
   /* Narrow-view ("side banner") layout: collapse timer building/type-selection
      controls behind a dropdown so the countdown numbers stay the star of the
@@ -1074,7 +1104,9 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
   const compact=panelWidth>0&&panelWidth<380;
   useEffect(()=>{if(!compact)setOptionsOpen(false);},[compact]);
 
-  useEffect(()=>{load("saved-templates",[]).then(t=>setSavedTemplates(t));load("actions",DEFAULT_ACTIONS).then(a=>{if(a&&a.length)setActions(a);});},[]);
+  useEffect(()=>{load("saved-templates",[]).then(t=>setSavedTemplates(t));load("actions",DEFAULT_ACTIONS).then(a=>{if(a&&a.length)setActions(a);});load("quick-lengths",{}).then(q=>{if(q&&typeof q==="object")setQuickSecs(q);});},[]);
+  useEffect(()=>{if(!repeatFor)return;const h=()=>setRepeatFor(null);document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[repeatFor]);
+  useEffect(()=>{if(!quickOpen)return;const h=()=>setQuickOpen(false);document.addEventListener('mousedown',h);return()=>document.removeEventListener('mousedown',h);},[quickOpen]);
   useEffect(()=>{
     if(!optionsOpen)return;
     const h=()=>setOptionsOpen(false);
@@ -1086,9 +1118,9 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
   const saveActions=a=>{setActions(a);save("actions",a);};
   const saveTemplatesList=useCallback(list=>{setSavedTemplates(list);save("saved-templates",list);},[]);
 
-  const addTimer=useCallback((name,segments,repeat,paraMode=false)=>{
+  const addTimer=useCallback((name,segments,repeat,paraMode=false,autoStart=false)=>{
     const id=Date.now()+Math.random();
-    setTimers(p=>[...p,{id,name,segments,running:false,finished:false,currentSegIdx:0,segElapsed:0,repeatInfo:repeat?{...repeat,current:1}:null,paraphraseMode:paraMode}]);
+    setTimers(p=>[...p,{id,name,segments,running:!!autoStart,finished:false,currentSegIdx:0,segElapsed:0,repeatInfo:repeat?{...repeat,current:1}:null,paraphraseMode:paraMode}]);
     setSelectedId(prev=>prev||id);
   },[]);
 
@@ -1110,6 +1142,43 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
   const toggleTimer=useCallback(id=>{setTimers(p=>p.map(t=>{if(t.id!==id)return t;if(t.finished){audio.stopAlarm(id);return null;}return{...t,running:!t.running};}).filter(Boolean));},[]);
   const resetTimer=useCallback(id=>{audio.stopAlarm(id);setTimers(p=>p.map(t=>t.id===id?{...t,running:false,finished:false,currentSegIdx:0,segElapsed:0,repeatInfo:t.repeatInfo?{...t.repeatInfo,current:1}:null}:t));},[]);
   const startAll=useCallback(()=>{setTimers(p=>p.map(t=>t.finished?t:{...t,running:true}));},[]);
+
+  /* ⚡ Quick: one click starts a single-step timer for a saved action (or a saved template). */
+  const quickLen=task=>quickSecs[task]||DEFAULT_QUICK_SECS;
+  const nudgeQuick=(task,dir)=>{const n={...quickSecs,[task]:stepLen(quickLen(task),dir)};setQuickSecs(n);save("quick-lengths",n);};
+  const quickStart=task=>{const secs=quickLen(task);addTimer(task,[{task,minutes:Math.floor(secs/60),seconds:secs%60}],null,false,true);setQuickOpen(false);};
+  const quickStartTpl=t=>{const segs=t.segments.map(x=>({...x}));const rep=t.repeatMode==="infinite"?{infinite:true}:t.repeatMode==="count"?{total:parseInt(t.repeatCount)||1}:null;addTimer(t.name,segs,rep,!!t.paraphraseMode&&shouldShowPara(segs),true);setQuickOpen(false);};
+
+  /* Combine: drop `fromId` onto `toId` (parts are remembered so Split can undo it at any time). */
+  const combineInto=(toId,fromId)=>{
+    const t=timers.find(x=>x.id===toId),d=timers.find(x=>x.id===fromId);
+    if(!t||!d||t.id===d.id||t.finished||d.finished)return;
+    audio.stopAlarm(fromId);
+    setTimers(p=>{const tt=p.find(x=>x.id===toId),dd=p.find(x=>x.id===fromId);if(!tt||!dd)return p;const c=combineTimers(tt,dd);return p.filter(x=>x.id!==fromId).map(x=>x.id===toId?c:x);});
+    setSelectedId(s=>s===fromId?toId:s);
+    setRepeatFor(toId); // straight away offer Once / × N / ∞
+  };
+  /* Split: put the original timers back in the combined card's place, each reset and paused.
+     If it was running, the part that was in progress becomes the selected one. */
+  const splitTimer=id=>{
+    const c=timers.find(x=>x.id===id);if(!c||!c.parts||c.parts.length<2)return;
+    audio.stopAlarm(id);
+    const eff=getEffSegs(c);
+    // paraphrase first round hides the leading paraphrase steps, so shift the index back to the full list
+    const full=Math.min(c.currentSegIdx+(c.segments.length-Math.min(eff.length,c.segments.length)),c.segments.length-1);
+    let acc=0,active=0;c.parts.forEach((pt,i)=>{if(full>=acc)active=i;acc+=pt.segments.length;});
+    const stamp=Date.now()+Math.random();
+    const made=c.parts.map((pt,i)=>({id:stamp+i/1000,name:pt.name,segments:pt.segments.map(x=>({...x})),running:false,finished:false,currentSegIdx:0,segElapsed:0,repeatInfo:pt.repeat?{...pt.repeat,current:1}:null,paraphraseMode:!!pt.paraphraseMode}));
+    setTimers(p=>{const i=p.findIndex(x=>x.id===id);if(i<0)return p;const a=[...p];a.splice(i,1,...made);return a;});
+    if(c.running)setSelectedId(made[active].id);else if(selectedId===id)setSelectedId(made[0].id);
+    setRepeatFor(null);
+  };
+  /* Repeat popover: mode "once" | "count" | "loop". Keeps the current round number (capped to the new total). */
+  const setRepeat=(id,mode,n)=>setTimers(p=>p.map(t=>{
+    if(t.id!==id)return t;const cur=t.repeatInfo?t.repeatInfo.current:1;
+    const ri=mode==="once"?null:mode==="loop"?{infinite:true,current:cur}:{total:Math.max(2,n),current:Math.min(cur,Math.max(2,n))};
+    return{...t,repeatInfo:ri};
+  }));
 
   const handlePresetNew=(label,secs)=>addTimer(label,[{task:"Timer",minutes:Math.floor(secs/60),seconds:secs%60}],null,false);
   const handlePresetAdd=(secs)=>{if(currentId)addToCurrent(Math.floor(secs/60),secs%60);else handlePresetNew(TIME_PRESETS.find(p=>p.seconds===secs)?.label||"Timer",secs);};
@@ -1149,6 +1218,26 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
   const switchBtn=(on,onClick,help)=>(
     <button onClick={onClick} title={help} style={{width:"36px",height:"20px",borderRadius:"10px",border:"none",background:on?"#1a1a2e":"rgba(0,0,0,0.1)",cursor:"pointer",position:"relative",padding:0,flexShrink:0}}><div style={{width:"16px",height:"16px",borderRadius:"50%",background:"#fff",position:"absolute",top:"2px",left:on?"18px":"2px",transition:"left 0.2s cubic-bezier(0.4,0,0.2,1)",boxShadow:"0 1px 3px rgba(0,0,0,0.15)"}}/></button>
   );
+  const quickMenu=(
+    <div onMouseDown={e=>e.stopPropagation()} style={{position:"relative"}}>
+      <button onClick={()=>{setQuickOpen(o=>!o);setOptionsOpen(false);}} title="Quick start: pick an action (Think, Share…) and a timer starts straight away" style={{fontSize:compact?"12.5px":"13.5px",fontWeight:600,padding:compact?"8px 12px":"10px 20px",borderRadius:compact?"10px":"11px",border:"1px solid rgba(234,170,60,0.4)",background:quickOpen?"#fdf5e6":"#fff",color:"#8a6d20",cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>⚡ Quick</button>
+      {quickOpen&&(
+        <div style={{position:"absolute",top:"calc(100% + 6px)",left:0,zIndex:70,width:"262px",maxWidth:"calc(100vw - 24px)",maxHeight:"60vh",overflowY:"auto",background:"#fff",borderRadius:"12px",boxShadow:"0 4px 24px rgba(0,0,0,0.15)",border:"1px solid rgba(0,0,0,0.08)",padding:"8px",display:"flex",flexDirection:"column",gap:"3px",fontFamily:"'Source Sans 3',sans-serif",textAlign:"left"}}>
+          <div style={{fontSize:"10px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.3)",padding:"2px 6px"}}>Actions</div>
+          {actions.map((task,i)=>{const c=COLORS[i%COLORS.length];const chip={width:"24px",height:"24px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.08)",background:"#fff",color:"rgba(0,0,0,0.5)",cursor:"pointer",fontSize:"14px",lineHeight:1,padding:0,fontFamily:"'Source Sans 3',sans-serif"};return(
+            <div key={task+i} style={{display:"flex",alignItems:"center",gap:"4px"}}>
+              <button onClick={()=>quickStart(task)} title={`Start a ${fmtLen(quickLen(task))} "${task}" timer now`} style={{flex:1,minWidth:0,textAlign:"left",padding:"7px 10px",borderRadius:"9px",border:"none",background:c.bg,color:c.text,fontSize:"13px",fontWeight:600,cursor:"pointer",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif"}}>▶ {task}</button>
+              <button onClick={()=>nudgeQuick(task,-1)} title={`Shorter default length for ${task}`} style={chip}>−</button>
+              <span style={{minWidth:"40px",textAlign:"center",fontSize:"12px",fontWeight:600,color:"rgba(0,0,0,0.55)",fontVariantNumeric:"tabular-nums"}} title={`Default length for ${task} (remembered)`}>{fmtLen(quickLen(task))}</span>
+              <button onClick={()=>nudgeQuick(task,1)} title={`Longer default length for ${task}`} style={chip}>+</button>
+            </div>);})}
+          <div style={{fontSize:"10px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.3)",padding:"8px 6px 2px",borderTop:"1px solid rgba(0,0,0,0.06)",marginTop:"4px"}}>Templates</div>
+          {[...DEFAULT_TEMPLATES,...savedTemplates].map((t,i)=>{const tot=t.segments.reduce((a,x)=>a+(x.minutes||0)*60+(x.seconds||0),0);return(
+            <button key={t.name+i} onClick={()=>quickStartTpl(t)} title={`Start the "${t.name}" template now: ${t.segments.map(x=>x.task).join(" → ")}`} style={{display:"flex",justifyContent:"space-between",gap:"8px",alignItems:"center",textAlign:"left",padding:"7px 10px",borderRadius:"9px",border:"1px solid rgba(0,0,0,0.06)",background:"#fafbfc",color:"#1a1a2e",fontSize:"13px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}><span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>▶ {t.name}</span><span style={{fontSize:"11.5px",fontWeight:500,color:"rgba(0,0,0,0.4)",flexShrink:0}}>{fmtLen(tot)}{t.repeatMode==="count"?` ×${t.repeatCount}`:t.repeatMode==="infinite"?" ∞":""}</span></button>);})}
+        </div>
+      )}
+    </div>
+  );
   const customTimeRow=(
     <div style={{display:"flex",alignItems:"center",gap:"6px",justifyContent:"center"}}>
       <input type="number" value={customMin} onChange={e=>setCustomMin(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleCustomGo()} placeholder="m" min="0" style={inp} onFocus={e=>e.target.style.borderColor="rgba(0,0,0,0.2)"} onBlur={e=>e.target.style.borderColor="rgba(0,0,0,0.08)"}/>
@@ -1182,10 +1271,11 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
               about building/configuring a timer lives behind "⋯ More" so the
               narrow banner is mostly just the running timer's numbers. */}
           <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"14px",position:"relative"}}>
+            {quickMenu}
             {hasColdCall&&(
               <button onClick={onColdCall} title={`Pick from ${activeClass.name} (${activeClass.students.length} students)`} style={{fontSize:"12.5px",fontWeight:600,padding:"8px 14px",borderRadius:"10px",border:"1px solid rgba(26,26,46,0.12)",background:coldCallStudent?"#eaf1fc":"#fff",color:coldCallStudent?"#2e6bce":"rgba(0,0,0,0.45)",cursor:"pointer"}}>🎲 Cold Call</button>
             )}
-            <button onClick={()=>setOptionsOpen(o=>!o)} style={{fontSize:"12.5px",fontWeight:600,padding:"8px 12px",borderRadius:"10px",border:"1px solid rgba(0,0,0,0.1)",background:optionsOpen?"#f0f1f4":"#fff",color:"rgba(0,0,0,0.5)",cursor:"pointer"}}>⋯ More</button>
+            <button onClick={()=>{setOptionsOpen(o=>!o);setQuickOpen(false);}} title="More timer options: alarm, countdown, build a timer, custom time" style={{fontSize:"12.5px",fontWeight:600,padding:"8px 12px",borderRadius:"10px",border:"1px solid rgba(0,0,0,0.1)",background:optionsOpen?"#f0f1f4":"#fff",color:"rgba(0,0,0,0.5)",cursor:"pointer"}}>⋯ More</button>
             {optionsOpen&&(
               <div onMouseDown={e=>e.stopPropagation()} style={{position:"absolute",top:"calc(100% + 6px)",left:0,zIndex:60,background:"#fff",borderRadius:"12px",boxShadow:"0 4px 24px rgba(0,0,0,0.15)",border:"1px solid rgba(0,0,0,0.08)",padding:"12px",display:"flex",flexDirection:"column",gap:"10px",minWidth:"210px"}}>
                 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
@@ -1224,6 +1314,7 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
               <span style={{fontSize:"11px",color:"rgba(0,0,0,0.3)",fontWeight:500}}>🔔 Countdown</span>
               {switchBtn(countdownBeeps,()=>setCountdownBeeps(!countdownBeeps),"Tick in the last 5 seconds of each segment")}
             </div>
+            {quickMenu}
             <button onClick={()=>setShowBuilder(true)} title="Build a custom multi-step timer with named tasks" style={{fontSize:"13.5px",fontWeight:600,padding:"10px 24px",borderRadius:"11px",border:"none",background:"#1a1a2e",color:"#fff",cursor:"pointer",boxShadow:"0 2px 10px rgba(26,26,46,0.15)"}} onMouseEnter={e=>e.target.style.background="#2a2a4e"} onMouseLeave={e=>e.target.style.background="#1a1a2e"}>+ Build Timer</button>
             {hasTimers&&timers.filter(t=>!t.finished).length>1&&(<button onClick={startAll} title="Start every timer that isn't already running" style={{fontSize:"12px",fontWeight:600,padding:"8px 16px",borderRadius:"9px",border:"1px solid rgba(0,0,0,0.1)",background:"#fff",color:"rgba(0,0,0,0.5)",cursor:"pointer"}} onMouseEnter={e=>{e.target.style.background="#f0f1f4";}} onMouseLeave={e=>{e.target.style.background="#fff";}}>Start All</button>)}
             {/* Cold Call button — only shows when class has students */}
@@ -1251,10 +1342,41 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
 
       {/* Timer cards */}
       {!hasTimers?(
-        <div style={{color:"var(--board-muted)",fontSize:"14px",fontStyle:"italic",marginTop:"40px"}}>tap a time or build a timer to get started</div>
+        <div style={{color:"var(--board-muted)",fontSize:"14px",fontStyle:"italic",marginTop:"40px"}}>tap ⚡ Quick, pick a time or build a timer to get started</div>
       ):(
         <div style={{display:"flex",flexWrap:"wrap",gap:compact?"14px":"20px",justifyContent:"center",maxWidth:"960px"}}>
-          {timers.map((t,i)=>(<div key={t.id} style={{animation:`fadeIn 0.4s ease ${i*0.05}s both`}}><TimerCard timer={t} onDelete={deleteTimer} onToggle={toggleTimer} onReset={resetTimer} onSelect={setSelectedId} onDisplay={id=>{setSelectedId(id);setDisplayMode(true);}} isSelected={t.id===currentId} continuousAlarm={continuousAlarm} compact={compact} timerStyle={timerStyle}/></div>))}
+          {timers.map((t,i)=>{
+            const canDrop=dragId!=null&&dragId!==t.id&&!t.finished;
+            const ri=t.repeatInfo;const mode=!ri?"once":ri.infinite?"loop":"count";const n=ri&&!ri.infinite?ri.total:3;
+            const modeBtn=(on)=>({fontSize:"12px",fontWeight:600,padding:"7px 10px",borderRadius:"8px",border:on?"1px solid rgba(66,133,244,0.4)":"1px solid rgba(0,0,0,0.08)",background:on?"#eaf1fc":"#fff",color:on?"#2e6bce":"rgba(0,0,0,0.5)",cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"});
+            return(
+            /* HTML5 drag (same as the builder chips). A real drag never fires the card's click, so it can't select/start it. */
+            <div key={t.id} data-timer-card draggable={!t.finished} title={t.finished?undefined:"Drag this timer onto another to combine them"}
+              onDragStart={e=>{e.dataTransfer.setData("text/plain","cp-timer");e.dataTransfer.effectAllowed="move";setDragId(t.id);setRepeatFor(null);}}
+              onDragEnd={()=>{setDragId(null);setOverId(null);}}
+              onDragOver={e=>{if(!canDrop)return;e.preventDefault();e.dataTransfer.dropEffect="move";if(overId!==t.id)setOverId(t.id);}}
+              onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget)&&overId===t.id)setOverId(null);}}
+              onDrop={e=>{if(!canDrop)return;e.preventDefault();const from=dragId;setDragId(null);setOverId(null);combineInto(t.id,from);}}
+              style={{position:"relative",opacity:dragId===t.id?0.45:1,animation:`fadeIn 0.4s ease ${i*0.05}s both`}}>
+              <TimerCard timer={t} onDelete={deleteTimer} onToggle={toggleTimer} onReset={resetTimer} onSelect={setSelectedId} onDisplay={id=>{setSelectedId(id);setDisplayMode(true);}} onRepeat={id=>setRepeatFor(r=>r===id?null:id)} onSplit={splitTimer} isSelected={t.id===currentId} continuousAlarm={continuousAlarm} compact={compact} timerStyle={timerStyle}/>
+              {canDrop&&overId===t.id&&<div title="Drop to combine" style={{position:"absolute",inset:0,borderRadius:"22px",border:"2px dashed #2e6bce",background:"rgba(66,133,244,0.12)",display:"flex",alignItems:"center",justifyContent:"center",pointerEvents:"none",zIndex:30}}><span style={{background:"#2e6bce",color:"#fff",fontWeight:700,fontSize:"14px",padding:"6px 16px",borderRadius:"14px"}}>Combine</span></div>}
+              {repeatFor===t.id&&!t.finished&&(
+                <div onMouseDown={e=>e.stopPropagation()} style={{position:"absolute",top:"calc(100% - 8px)",left:"50%",transform:"translateX(-50%)",zIndex:40,width:"236px",background:"#fff",borderRadius:"12px",boxShadow:"0 4px 24px rgba(0,0,0,0.18)",border:"1px solid rgba(0,0,0,0.08)",padding:"10px",display:"flex",flexDirection:"column",gap:"8px",fontFamily:"'Source Sans 3',sans-serif"}}>
+                  <div style={{fontSize:"10px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.3)"}}>Repeat</div>
+                  <div style={{display:"flex",gap:"5px",flexWrap:"wrap"}}>
+                    <button onClick={()=>setRepeat(t.id,"once")} title="Run through the timeline a single time" style={modeBtn(mode==="once")}>Once</button>
+                    <button onClick={()=>setRepeat(t.id,"count",n)} title="Run through the timeline a set number of times" style={modeBtn(mode==="count")}>× N times</button>
+                    <button onClick={()=>setRepeat(t.id,"loop")} title="Keep looping the timeline until you stop it" style={modeBtn(mode==="loop")}>∞ Loop</button>
+                  </div>
+                  {mode==="count"&&<div style={{display:"flex",alignItems:"center",gap:"8px",justifyContent:"center"}}>
+                    <button onClick={()=>setRepeat(t.id,"count",n-1)} title="One fewer round" style={{...modeBtn(false),padding:"4px 10px"}}>−</button>
+                    <span title="Number of rounds" style={{fontSize:"14px",fontWeight:700,minWidth:"56px",textAlign:"center"}}>{n} times</span>
+                    <button onClick={()=>setRepeat(t.id,"count",n+1)} title="One more round" style={{...modeBtn(false),padding:"4px 10px"}}>+</button>
+                  </div>}
+                  <button onClick={()=>setRepeatFor(null)} title="Close this repeat box" style={{fontSize:"12px",fontWeight:600,padding:"6px 0",borderRadius:"8px",border:"none",background:"#1a1a2e",color:"#fff",cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Done</button>
+                </div>
+              )}
+            </div>);})}
         </div>
       )}
 
