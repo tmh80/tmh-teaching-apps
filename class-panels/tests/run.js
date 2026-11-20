@@ -23,7 +23,20 @@ catch (e) {
 const ROOT = path.join(__dirname, '..');
 const SHOT_DIR = process.env.SHOT_DIR || '/tmp/cp-shots';
 const FIXTURE = JSON.parse(fs.readFileSync(path.join(__dirname, 'fixtures', 'sample-data.json'), 'utf8'));
-const URL = 'file://' + path.join(ROOT, 'index.html');
+/* Served over a tiny local web server, not file://: headless Chromium gives file:// pages
+   a storage area that is wiped on every reload, which made the reload/restore checks
+   pass or fail by luck. Over http, saved data survives reloads like it does in the app. */
+const http = require('http');
+let URL = '';
+function startServer() {
+  return new Promise(resolve => {
+    const srv = http.createServer((req, res) => {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(fs.readFileSync(path.join(ROOT, 'index.html')));
+    });
+    srv.listen(0, '127.0.0.1', () => { URL = `http://127.0.0.1:${srv.address().port}/index.html`; resolve(srv); });
+  });
+}
 
 let failures = 0, passes = 0;
 const ok = (cond, msg) => {
@@ -55,6 +68,7 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   const warnings = (buildOut.match(/\[WARNING\]/g) || []).length;
   ok(warnings <= 1, `build has no new warnings (${warnings} known)`);
 
+  const server = await startServer();
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 1 });
   const problems = [];
@@ -167,6 +181,7 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   ok(problems.length === 0, 'no console errors or page errors' + (problems.length ? '\n    ' + problems.join('\n    ') : ''));
 
   await browser.close();
+  server.close();
   console.log(`\n${passes} passed, ${failures} failed. Screenshots: ${SHOT_DIR}`);
   process.exit(failures ? 1 : 0);
 })().catch(e => { console.error('Test run crashed:', e); process.exit(1); });
