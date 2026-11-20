@@ -100,13 +100,13 @@ The units are canvas pixels on the existing 8 px grid. A seat slot draws as a **
 | `pair` | 200×64 rect | 2 |
 | `long4` | 208×96 rect | 4: 2 on each long side, none on the ends; the end slots exist but are off |
 | `long6` | 296×96 rect | 6 |
-| `trap` | Isosceles trapezoid: long base 180, short base 90, 60° angles (height ≈ 78; slanted sides = 90) | 4: 2 on the long base, 1 on each slanted side. The short-base slot exists but is **off**. The maximum is 4. |
+| `trap` | Isosceles trapezoid: long base 180, short base 90, 60° angles (height ≈ 78; slanted sides = 90) | 4: **one on each side** (long base, short base, both slanted sides). Tom confirmed this on 20 Nov. |
 | `round` | Circle, diameter 150 | 4 (or 5/6, chosen in the piece menu) |
 | `bench` | 320×80 lab bench rect, `roles:['workstation']` | 4 on one side (and optionally the other) |
 
 - **Rotation:** a rotate handle snaps to 15° steps, and holding Shift rotates freely. There are also keyboard shortcuts `[` / `]` and a "⟳ 90°" button in the selection bar.
 - **Snapping:** while dragging, compare the dragged piece's edges with nearby pieces' edges. When two edges are close (< 18 px), almost anti-parallel (< 12°) and overlap along their length, **rotate and slide the piece so the edges meet exactly**. Show a highlighted join line as a preview. Equal edges snap centre to centre; unequal collinear edges (long tables end to end) snap flush at the nearer end.
-- **Joined edges:** store `joins:[{a:pieceId,ea:edge,b:pieceId,eb:edge}]` on the layout. Slots on a joined edge are hidden. Two trapezoids joined long base to long base make a **hexagon**: the long-base slots hide, and each piece's short-base slot switches on, giving **6 seats**. A per-piece override (`seatsOff`) always wins.
+- **Joined edges:** store `joins:[{a:pieceId,ea:edge,b:pieceId,eb:edge}]` on the layout. Slots on a joined edge are hidden. Two trapezoids joined long base to long base make a **hexagon**: the long-base slots hide, leaving the short base and both slanted sides of each piece, which gives **6 seats**. A per-piece override (`seatsOff`) always wins.
 - **Clusters:** connected pieces form one group. Dragging any piece moves the cluster. **Alt-drag**, or the "Separate" button, pulls a single piece off.
 - **Add-table menu:** show little drawings of each shape, plus ready-made combos (hexagon of 2 trapezoids, "long table of 8" = 2×long4, horseshoe).
 - The geometry helpers are pure functions (`shapeDef`, `pieceToWorld`, `findSnap`, `slotsForLayout`). They live in their own block near the other seat helpers and have **unit tests** in `tests/geometry.test.js`, run with node.
@@ -203,6 +203,7 @@ The phases run **one at a time** on `classpanels-rooms`, because nearly everythi
 | 5 | Setups: tabs, usable furniture, migration | **Opus** | Data migration on Tom's real data, so correctness matters most |
 | 6 | Groups into setups | Sonnet | Builds on 5 |
 | 7 | Stations + timer rotation + display | Sonnet | Builds on 4 and 5; a clear spec |
+| T | Timer quick actions + drag to combine + repeat (section 15) | Sonnet | Only touches the Timer panel, so it can run alongside the other phases |
 | 8 | Final pass: Help-mode titles, README, `class-panels/README.md`, full regression, screenshots for Tom | Sonnet + planner review | |
 
 Each phase hands back:
@@ -217,8 +218,21 @@ Each phase hands back:
 - He makes a backup (Settings) before trying any new build. Phase 0 makes this automatic as well.
 - `main` is only updated once Tom says the new version works with his real classes.
 
-## 14. Open questions for Tom (ask when the phase gets there; don't block earlier phases)
+## 14. Tom's answers (20 Nov 2026)
 
-- Trapezoids: is "2 on the long side + 1 on each slanted side" the right 4? Or would he rather have 3 on the long side + 1 on the short side?
-- Should stations rotate **forwards** (1→2→3) for every group, or in **alternate directions** for half the groups?
-- Changeover time between stations: should it be on by default (e.g. 30 s), or off?
+- **Trapezoid:** one seat on each side, 4 in total.
+- **Rotation direction:** offer both. The default is everyone moving forwards (1→2→3). An option, "Alternate directions", makes every second group go backwards.
+- **Changeover:** on by default at 30 s. It can be edited per rotation (0 s to 3 min), and Tom can also lengthen or shorten it live with the timer's existing +/- time buttons.
+
+## 15. Timer quick actions and combining (Phase T: Timer panel only, can run alongside the seating phases)
+
+- **Quick actions:** a "⚡ Quick" dropdown in the Timer panel lists the saved **actions** (the `actions` key, the task names from Manage Tasks such as Think, Share, Read…) and **templates**. Clicking an action starts a single-segment timer straight away.
+  - Each action shows a default length that can be changed with small − / + chips in the menu row. The last-used length is remembered per action.
+  - No builder is needed.
+  - The dropdown also works in the compact (side banner) layout.
+- **Drag to combine:** drag one timer card onto another. A drop highlight shows "Combine". Dropping makes one timer whose segments are the target's followed by the dragged one's, named "A → B". The combined timer:
+  - keeps the target's position and is paused at the start, unless the target was running, in which case it carries on;
+  - immediately shows a small **repeat** popover: Once / × N times / ∞ Loop continuously. This uses the existing `repeatInfo` (`{infinite}` or `{total}`) mechanism.
+- **Undo:** an "Undo combine" toast lasts for about 6 s.
+- Combining more than two works by dropping again.
+- Combined timers can be **saved as a template** with the existing save flow.
