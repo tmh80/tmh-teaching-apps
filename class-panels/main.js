@@ -1,5 +1,6 @@
 const { app, BrowserWindow, shell, ipcMain, nativeImage } = require('electron');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow;
 
@@ -56,6 +57,21 @@ ipcMain.on('resize-for-panels', (event, count) => {
   const [currentW, h] = mainWindow.getSize();
   const newW = Math.max(currentW, targetW);
   if (newW !== currentW) mainWindow.setSize(newW, h, true);
+});
+
+/* Automatic backups: save as a file Tom can find in Documents, keep the newest 30 */
+ipcMain.handle('write-backup', async (event, name, json) => {
+  try {
+    // only our own file names, so the page can never write anywhere else
+    if (typeof name !== 'string' || !/^ClassPanels-auto-\d{4}-\d{2}-\d{2}-\d{4}\.json$/.test(name)) return false;
+    if (typeof json !== 'string') return false;
+    const dir = path.join(app.getPath('documents'), 'ClassPanels Backups');
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, name), json);
+    const old = fs.readdirSync(dir).filter(f => /^ClassPanels-auto-.*\.json$/.test(f)).sort().reverse().slice(30);
+    for (const f of old) { try { fs.unlinkSync(path.join(dir, f)); } catch (e) {} }
+    return true;
+  } catch (e) { return false; } // a backup problem must never bother the app
 });
 
 app.on('window-all-closed', () => {
