@@ -1411,8 +1411,8 @@ const GROUP_PAD=8,GROUP_BAR_H=22; // group boundary padding + tab-bar height, sh
    ink to chalk-white and mute the fills without touching any component.
    ══════════════════════════════════════════════════════════ */
 const CP_THEME_CSS=`
-[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);}
-[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);}
+[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);--cp-bench:#bfd3d6;--cp-join:#2fa36b;}
+[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);--cp-bench:#5d7b80;--cp-join:#7fe0a8;}
 `;
 const INK="var(--cp-ink)";
 const INK_W=1.6; // outline weight in canvas px
@@ -1608,14 +1608,95 @@ const RoomItemArt=({type,w,h,label,fontSize=10.5})=>{
   return null;
 };
 
+/* Table pieces (shapes that can rotate and join — see the geometry block below):
+   chairs just outside each seat's edge, facing in, then one continuous table
+   top per cluster of joined pieces. A cluster's outlines all go in one SVG,
+   ink first at double width and wood on top, so where two pieces meet the
+   wood covers the seam and only a very faint dotted line is left. Used by both
+   Manage Seating and the class Seating view, so the two can't drift apart.
+   seatByKey maps "pieceId:slot" → seat (for chair colour / empty / unused). */
+const isWorkstationPiece=p=>(p.roles||[]).includes('workstation')&&!(p.roles||[]).includes('desk');
+const PieceTables=({pieces,joins,slots,seatByKey,chairMap,selectedIds,hideUnused=false,snapLine=null})=>{
+  if(!pieces?.length)return null;
+  const W=new Map(pieces.map(p=>[p.id,pieceToWorld(p)]));
+  const sel=selectedIds||new Set();
+  const shape=(w,props,key)=>w.circle
+    ?<circle key={key} cx={w.center[0]} cy={w.center[1]} r={w.circle} {...props}/>
+    :<polygon key={key} points={w.poly.map(p=>p.join(",")).join(" ")} {...props}/>;
+  return(
+    <>
+      {slots.filter(s=>s.state==='on').map(s=>{
+        const seat=seatByKey?.get(s.key);
+        if(hideUnused&&seat&&!seat.used)return null;
+        const bad=!!seat?.unavailable;
+        return <Chair key={`ch-${s.key}`} x={s.chair.x} y={s.chair.y} facing={s.chair.facing}
+          color={bad?"var(--cp-coral)":(chairMap?.[seat?.id]??0)} empty={!bad&&(!seat?.studentId||!seat?.used)} dim={!!seat&&!seat.used}/>;
+      })}
+      <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">
+        {clustersFromJoins(pieces,joins).map(ids=>{
+          const ws=ids.map(id=>W.get(id));
+          const isSel=ids.some(id=>sel.has(id));
+          const seams=(joins||[]).filter(j=>ids.includes(j.a)&&ids.includes(j.b)).map(j=>{
+            const ea=W.get(j.a)?.edges[j.ea],eb=W.get(j.b)?.edges[j.eb];if(!ea||!eb)return null;
+            const[u0,u1]=pgOverlap(ea,eb);
+            return[[ea.a[0]+ea.dir[0]*u0,ea.a[1]+ea.dir[1]*u0],[ea.a[0]+ea.dir[0]*u1,ea.a[1]+ea.dir[1]*u1]];
+          }).filter(Boolean);
+          return(
+            <g key={ids[0]}>
+              {ws.map(w=>shape(w,{transform:"translate(2.5 3.5)",style:{fill:"var(--cp-shadow)"}},`sh${w.id}`))}
+              {isSel&&ws.map(w=>shape(w,{style:{fill:"none",stroke:"var(--cp-sel-glow)",strokeWidth:12,strokeLinejoin:"round"}},`gl${w.id}`))}
+              {ws.map(w=>shape(w,{style:{fill:"none",stroke:isSel&&sel.has(w.id)?"var(--cp-sel)":INK,strokeWidth:(isSel&&sel.has(w.id)?2.4:INK_W)*2,strokeLinejoin:"round"}},`ol${w.id}`))}
+              {ws.map(w=>shape(w,{style:{fill:isWorkstationPiece(w.piece)?"var(--cp-bench)":"var(--cp-wood)"}},`fl${w.id}`))}
+              {ws.map(w=>shape(w,{style:{fill:"url(#cp-hatch)"}},`ht${w.id}`))}
+              {seams.map(([a,b],i)=><line key={`sm${i}`} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} style={{stroke:INK,strokeOpacity:0.16,strokeWidth:1.2,strokeDasharray:"1.5 4",strokeLinecap:"round"}}/>)}
+              {ws.filter(w=>w.piece.label).map(w=>(
+                <text key={`lb${w.id}`} x={w.center[0]} y={w.center[1]+4} textAnchor="middle" style={{fontSize:11,fontWeight:800,letterSpacing:"1.5px",textTransform:"uppercase",fill:INK,fillOpacity:0.5,fontFamily:"'Source Sans 3',sans-serif"}}>{w.piece.label}</text>
+              ))}
+            </g>
+          );
+        })}
+        {/* While dragging: where the table will join, as a bright line */}
+        {snapLine&&<line x1={snapLine[0][0]} y1={snapLine[0][1]} x2={snapLine[1][0]} y2={snapLine[1][1]} style={{stroke:"var(--cp-join)",strokeWidth:6,strokeLinecap:"round",opacity:0.9}}/>}
+      </svg>
+    </>
+  );
+};
+
+/* Tiny drawing of a shape or ready-made combo for the menus — the same geometry
+   as the real thing, scaled down, with chairs as little rounded blocks. */
+const pieceThumbCache=new Map();
+const PieceThumb=({kind,seatCount,size=44})=>{
+  const ck=`${kind}:${seatCount||''}`;
+  if(!pieceThumbCache.has(ck)){
+    let n=0;const set=buildPieceSet(kind,()=>`t${n++}`,{seatCount});
+    const slots=slotsForLayout(set.pieces,set.joins).filter(s=>s.state==='on');
+    const ws=set.pieces.map(pieceToWorld);
+    const pts=[...ws.flatMap(w=>w.poly),...slots.map(s=>[s.chair.x,s.chair.y])];
+    const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+    pieceThumbCache.set(ck,{ws,slots,box:[Math.min(...xs)-14,Math.min(...ys)-14,Math.max(...xs)-Math.min(...xs)+28,Math.max(...ys)-Math.min(...ys)+28]});
+  }
+  const{ws,slots,box}=pieceThumbCache.get(ck);
+  const sc=Math.max(box[2],box[3])/size; // world px per thumbnail px, so ink stays a constant weight
+  return(
+    <svg width={size} height={size} viewBox={box.join(" ")} style={{flexShrink:0,overflow:"visible"}} aria-hidden="true">
+      {slots.map(s=><rect key={s.key} x={-12} y={-7} width={24} height={14} rx={4} transform={`translate(${s.chair.x} ${s.chair.y}) rotate(${s.chair.facing})`} style={{fill:"var(--cp-chair-1)",stroke:"#2b2118",strokeWidth:1.2*sc}}/>)}
+      {ws.map(w=>w.circle
+        ?<circle key={w.id} cx={w.center[0]} cy={w.center[1]} r={w.circle} style={{fill:isWorkstationPiece(w.piece)?"#bfd3d6":"#cc9d74",stroke:"#2b2118",strokeWidth:1.3*sc}}/>
+        :<polygon key={w.id} points={w.poly.map(p=>p.join(",")).join(" ")} style={{fill:isWorkstationPiece(w.piece)?"#bfd3d6":"#cc9d74",stroke:"#2b2118",strokeWidth:1.3*sc,strokeLinejoin:"round"}}/>)}
+    </svg>
+  );
+};
+
 /* The seating canvas used to always be at least 960×680 data-pixels, even for a
    two-table room — which is often bigger than the panel showing it, so centering
    (whether by scroll position or by flexbox) had no effect: the oversized empty
    canvas was what got "centered", not the actual desks. Sizing it to the real
    content (with a sensible floor) fixes that at the source. */
-const canvasContentSize=(seatsIn,roomItemsIn)=>{
-  const xs=[0,...(seatsIn||[]).map(s=>s.x+SW),...(roomItemsIn||[]).map(r=>r.x+260)];
-  const ys=[0,...(seatsIn||[]).map(s=>s.y+SH),...(roomItemsIn||[]).map(r=>r.y+80)];
+const canvasContentSize=(seatsIn,roomItemsIn,piecesIn,slotsIn)=>{
+  // table pieces reach past their seat boxes (chairs, table corners), so count their drawn bounds too
+  const pb=piecesIn?.length?piecesBounds(piecesIn,slotsIn):null;
+  const xs=[0,...(seatsIn||[]).map(s=>s.x+SW),...(roomItemsIn||[]).map(r=>r.x+260),...(pb?[pb.x+pb.w]:[])];
+  const ys=[0,...(seatsIn||[]).map(s=>s.y+SH),...(roomItemsIn||[]).map(r=>r.y+80),...(pb?[pb.y+pb.h]:[])];
   return{w:Math.max(400,Math.max(...xs)+40),h:Math.max(300,Math.max(...ys)+40)};
 };
 /* Keep-apart/keep-together rules now hold a studentIds list (2 or more) rather
@@ -1839,6 +1920,412 @@ const repairSeatGroups=(seatsIn,groupsIn)=>{
   });
   return{seats:repairedSeats,groups:cleanedGroups};
 };
+
+/* @geometry-begin ════════════════════════════════════════════════════════
+   TABLE PIECES — pure geometry for table shapes, rotation, snapping and joins.
+   No JSX and no references to anything outside this block, so
+   tests/geometry.test.js can lift it out of this file and run it in plain node.
+
+   A piece is {id, shape, x, y, rot, roles, seatsOff?, seatsOn?, seatCount?, label?}:
+   (x,y) is where its local origin (the shape's centre) sits on the canvas and
+   rot turns it clockwise in degrees. Seats are still the thing the randomiser
+   and rules read — pieces just *generate* them (syncPieceSeats), each one
+   tagged with its pieceId and slot number so who sits there survives any move,
+   rotate, join or split.
+   ════════════════════════════════════════════════════════════════════════ */
+const PG={
+  SEAT_W:114,SEAT_H:52,   // the notional seat box every seat still has (must match SW/SH)
+  CHAIR_OFF:10,           // chair centre this far outside its table edge (its front just tucks in)
+  SNAP_DIST:18,SNAP_ANGLE:12,
+  JOIN_MARGIN:12,         // a slot this close to a joined stretch of edge hides too (its chair would hit the other table)
+};
+const pgR=v=>Math.round(v*100)/100;
+const pgNorm=a=>{a=((a%360)+360)%360;return a>180?a-360:a;};   // → (-180,180]
+const pgNorm360=a=>pgR(((a%360)+360)%360);
+const pgSub=(a,b)=>[a[0]-b[0],a[1]-b[1]];
+const pgDot=(a,b)=>a[0]*b[0]+a[1]*b[1];
+const pgLen=a=>Math.hypot(a[0],a[1]);
+const pgMid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+const pgAng=d=>Math.atan2(d[1],d[0])*180/Math.PI;
+const pgRot=(p,deg,c=[0,0])=>{
+  const r=deg*Math.PI/180,co=Math.cos(r),si=Math.sin(r),dx=p[0]-c[0],dy=p[1]-c[1];
+  return[c[0]+dx*co-dy*si,c[1]+dx*si+dy*co];
+};
+const pgInPoly=(pt,poly)=>{
+  let ins=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const[xi,yi]=poly[i],[xj,yj]=poly[j];
+    if(((yi>pt[1])!==(yj>pt[1]))&&(pt[0]<(xj-xi)*(pt[1]-yi)/(yj-yi)+xi))ins=!ins;
+  }
+  return ins;
+};
+
+/* Outlines are listed clockwise on screen, so edge i runs poly[i]→poly[i+1]
+   and its outward normal is (dy,-dx). Rect edges: 0 top, 1 right, 2 bottom, 3 left. */
+const pgRect=(w,h)=>[[-w/2,-h/2],[w/2,-h/2],[w/2,h/2],[-w/2,h/2]];
+const pgAlong=(edge,n,on=true)=>Array.from({length:n},(_,i)=>({edge,t:(i+0.5)/n,on}));
+const TRAP_H=Math.sqrt(90*90-45*45); // ≈77.94: long base 180, short base 90, 60° base angles, slanted sides 90
+/* Slot numbers are saved with each seat, so never reorder a shape's slots —
+   only add new ones on the end. `on:false` slots exist but start switched off. */
+const SHAPES={
+  single:{name:'Single desk',w:104,h:64,poly:pgRect(104,64),slots:[{edge:2,t:0.5,on:true},{edge:0,t:0.5,on:false}],roles:['desk']},
+  pair:{name:'Pair desk',w:200,h:64,poly:pgRect(200,64),slots:[...pgAlong(2,2),...pgAlong(0,2,false)],roles:['desk']},
+  long4:{name:'Long table',w:208,h:96,poly:pgRect(208,96),slots:[...pgAlong(0,2),...pgAlong(2,2),{edge:1,t:0.5,on:false},{edge:3,t:0.5,on:false}],roles:['desk']},
+  long6:{name:'Long table of 6',w:296,h:96,poly:pgRect(296,96),slots:[...pgAlong(0,3),...pgAlong(2,3),{edge:1,t:0.5,on:false},{edge:3,t:0.5,on:false}],roles:['desk']},
+  trap:{name:'Trapezoid',w:180,h:TRAP_H,poly:[[-45,-TRAP_H/2],[45,-TRAP_H/2],[90,TRAP_H/2],[-90,TRAP_H/2]],
+    slots:[{edge:0,t:0.5,on:true},{edge:1,t:0.5,on:true},{edge:2,t:0.5,on:true},{edge:3,t:0.5,on:true}],roles:['desk']},
+  round:{name:'Round table',w:150,h:150,circle:75,seats:4,roles:['desk']},
+  bench:{name:'Lab bench',w:320,h:80,poly:pgRect(320,80),slots:[...pgAlong(2,4),...pgAlong(0,4,false)],roles:['workstation']},
+};
+
+const shapeDef=(shape,piece)=>{
+  const s=SHAPES[shape]||SHAPES.single;
+  if(s.circle){
+    // a round table has no straight edges, so it never snaps; seats spread evenly from the bottom
+    const n=Math.max(3,Math.min(8,piece?.seatCount||s.seats));
+    const poly=Array.from({length:48},(_,i)=>{const a=i/48*2*Math.PI;return[s.circle*Math.cos(a),s.circle*Math.sin(a)];});
+    return{...s,key:shape,poly,edges:[],slots:Array.from({length:n},(_,i)=>({idx:i,angle:90+i*360/n,on:true}))};
+  }
+  const edges=s.poly.map((a,i)=>{const b=s.poly[(i+1)%s.poly.length];return{i,a,b,len:pgLen(pgSub(b,a))};});
+  return{...s,key:shape,edges,slots:s.slots.map((sl,i)=>({...sl,idx:i}))};
+};
+
+/* A piece in canvas coordinates: outline, edges (with direction and outward
+   normal) and each slot's point on the edge plus its outward normal. */
+const pieceToWorld=piece=>{
+  const d=shapeDef(piece.shape,piece);
+  const rot=piece.rot||0,c=[piece.x,piece.y];
+  const W=p=>{const r=pgRot(p,rot);return[r[0]+c[0],r[1]+c[1]];};
+  const poly=d.poly.map(W);
+  const edges=d.edges.map(e=>{
+    const a=W(e.a),b=W(e.b),v=pgSub(b,a),L=pgLen(v)||1,dir=[v[0]/L,v[1]/L];
+    return{i:e.i,a,b,len:e.len,dir,n:[dir[1],-dir[0]]};
+  });
+  const slots=d.slots.map(sl=>{
+    if(sl.angle!=null){
+      const a=(sl.angle+rot)*Math.PI/180,n=[Math.cos(a),Math.sin(a)];
+      return{idx:sl.idx,on:sl.on,edge:-1,p:[c[0]+n[0]*d.circle,c[1]+n[1]*d.circle],n};
+    }
+    const e=edges[sl.edge];
+    return{idx:sl.idx,on:sl.on,edge:sl.edge,t:sl.t,p:[e.a[0]+(e.b[0]-e.a[0])*sl.t,e.a[1]+(e.b[1]-e.a[1])*sl.t],n:e.n};
+  });
+  return{id:piece.id,piece,def:d,center:c,rot,poly,edges,slots,circle:d.circle||0};
+};
+const pgInside=(pt,w)=>w.circle?pgLen(pgSub(pt,w.center))<=w.circle:pgInPoly(pt,w.poly);
+
+/* Stretch [u0,u1] of edge e (measured from e.a) that edge f covers. */
+const pgOverlap=(e,f)=>{
+  const ua=pgDot(pgSub(f.a,e.a),e.dir),ub=pgDot(pgSub(f.b,e.a),e.dir);
+  return[Math.max(0,Math.min(ua,ub)),Math.min(e.len,Math.max(ua,ub))];
+};
+/* Do two edges touch: anti-parallel, on the same line and overlapping? */
+const pgTouch=(e,f,tolDist=2,tolAng=1.5)=>{
+  if(Math.abs(pgNorm(pgAng(e.dir)-pgAng([-f.dir[0],-f.dir[1]])))>tolAng)return false;
+  if(Math.abs(pgDot(pgSub(e.a,f.a),f.n))>tolDist||Math.abs(pgDot(pgSub(e.b,f.a),f.n))>tolDist)return false;
+  const[u0,u1]=pgOverlap(e,f);
+  return u1-u0>8;
+};
+
+/* Every touching edge pair between `moving` pieces and `others` (or between all
+   pieces when others is omitted) — used after a snap to catch every contact,
+   e.g. a piece dropped into a gap that touches two tables at once. */
+const detectJoins=(moving,others)=>{
+  const A=moving.map(pieceToWorld),B=others?others.map(pieceToWorld):A;
+  const out=[],seen=new Set();
+  A.forEach(m=>B.forEach(o=>{
+    if(m.id===o.id)return;
+    m.edges.forEach(e=>o.edges.forEach(f=>{
+      if(!pgTouch(e,f))return;
+      const k=[`${m.id}:${e.i}`,`${o.id}:${f.i}`].sort().join('|');
+      if(seen.has(k))return;seen.add(k);
+      out.push({a:m.id,ea:e.i,b:o.id,eb:f.i});
+    }));
+  }));
+  return out;
+};
+
+/* Connected pieces → clusters (arrays of piece ids, in piece order). */
+const clustersFromJoins=(pieces,joins)=>{
+  const parent={};pieces.forEach(p=>{parent[p.id]=p.id;});
+  const find=x=>parent[x]===x?x:(parent[x]=find(parent[x]));
+  (joins||[]).forEach(j=>{if(parent[j.a]!=null&&parent[j.b]!=null)parent[find(j.a)]=find(j.b);});
+  const byRoot=new Map();
+  pieces.forEach(p=>{const r=find(p.id);if(!byRoot.has(r))byRoot.set(r,[]);byRoot.get(r).push(p.id);});
+  return[...byRoot.values()];
+};
+
+/* Move/rotate some pieces rigidly: rotate by drot about pivot, then shift. */
+const transformPieces=(pieces,ids,{dx=0,dy=0,drot=0,pivot=[0,0]}={})=>{
+  const set=new Set(ids);
+  return pieces.map(p=>{
+    if(!set.has(p.id))return p;
+    const c=drot?pgRot([p.x,p.y],drot,pivot):[p.x,p.y];
+    return{...p,x:pgR(c[0]+dx),y:pgR(c[1]+dy),rot:pgNorm360((p.rot||0)+drot)};
+  });
+};
+const piecesCentre=pieces=>{
+  const ws=pieces.map(pieceToWorld),pts=ws.flatMap(w=>w.poly);
+  if(!pts.length)return[0,0];
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  return[(Math.min(...xs)+Math.max(...xs))/2,(Math.min(...ys)+Math.max(...ys))/2];
+};
+
+/* Turn and slide `mp` so its edge ei lies on tp's edge ej, facing it.
+   mode: 'center' (midpoints meet), 'start' / 'end' (flush with tp's edge start / end). */
+const alignPieceToEdge=(mp,ei,tp,ej,mode='center')=>{
+  const T=pieceToWorld(tp).edges[ej],M0=pieceToWorld(mp).edges[ei];
+  const drot=pgNorm(pgAng([-T.dir[0],-T.dir[1]])-pgAng(M0.dir));
+  const r1=transformPieces([mp],[mp.id],{drot,pivot:[mp.x,mp.y]})[0];
+  const M=pieceToWorld(r1).edges[ei];
+  const[from,to]=mode==='start'?[M.b,T.a]:mode==='end'?[M.a,T.b]:[pgMid(M.a,M.b),pgMid(T.a,T.b)];
+  return{...r1,x:pgR(r1.x+to[0]-from[0]),y:pgR(r1.y+to[1]-from[1])};
+};
+
+/* Snapping while dragging. `moving` is one piece or a cluster (array); the
+   result rotates it by drot about pivot and then shifts it by (dx,dy) so one of
+   its edges lies exactly on a nearby edge of `others`: equal edges centre on
+   each other, unequal ones sit flush with the nearer end. null = no snap. */
+const findSnap=(moving,others)=>{
+  const mv=[].concat(moving);
+  if(!mv.length||!others?.length)return null;
+  const pivot=piecesCentre(mv);
+  const MW=mv.map(pieceToWorld),OW=others.map(pieceToWorld);
+  let best=null;
+  MW.forEach(m=>m.edges.forEach(e1=>OW.forEach(o=>o.edges.forEach(e2=>{
+    const drot=pgNorm(pgAng([-e2.dir[0],-e2.dir[1]])-pgAng(e1.dir));
+    if(Math.abs(drot)>PG.SNAP_ANGLE)return;
+    const a1=pgRot(e1.a,drot,pivot),b1=pgRot(e1.b,drot,pivot);
+    const s=pgDot(pgSub(pgMid(a1,b1),e2.a),e2.n);
+    if(Math.abs(s)>PG.SNAP_DIST)return;
+    const ua=pgDot(pgSub(a1,e2.a),e2.dir),ub=pgDot(pgSub(b1,e2.a),e2.dir);
+    const lo=Math.min(ua,ub),hi=Math.max(ua,ub);
+    if(Math.min(hi,e2.len)-Math.max(lo,0)<4)return;
+    let shift;
+    if(Math.abs(e1.len-e2.len)<3)shift=e2.len/2-(lo+hi)/2;
+    else{const s1=-lo,s2=e2.len-hi;shift=Math.abs(s1)<=Math.abs(s2)?s1:s2;}
+    const dx=-s*e2.n[0]+shift*e2.dir[0],dy=-s*e2.n[1]+shift*e2.dir[1];
+    // the moving piece has to end up on the outside of the edge, not on top of the table
+    const mc=pgRot(m.center,drot,pivot);
+    if(pgDot(pgSub([mc[0]+dx,mc[1]+dy],e2.a),e2.n)<=0)return;
+    const score=Math.abs(s)+Math.abs(shift)*0.35+Math.abs(drot)*0.8;
+    if(best&&score>=best.score)return;
+    const l0=Math.max(lo+shift,0),l1=Math.min(hi+shift,e2.len);
+    best={score,dx,dy,drot,line:[[e2.a[0]+e2.dir[0]*l0,e2.a[1]+e2.dir[1]*l0],[e2.a[0]+e2.dir[0]*l1,e2.a[1]+e2.dir[1]*l1]]};
+  }))));
+  if(!best)return null;
+  const moved=transformPieces(mv,mv.map(p=>p.id),{dx:best.dx,dy:best.dy,drot:best.drot,pivot});
+  // reject a snap that would drop the piece on top of another table
+  const MW2=moved.map(pieceToWorld);
+  if(MW2.some(m=>OW.some(o=>pgInside(m.center,o)||pgInside(o.center,m))))return null;
+  return{dx:pgR(best.dx),dy:pgR(best.dy),drot:pgR(best.drot),pivot,joins:detectJoins(moved,others),line:best.line};
+};
+
+/* Name tags stay horizontal whatever the rotation. Each table (cluster) tries
+   to fit every tag on the table top just inside its edge — wide tags first,
+   then narrow two-line ones — and if they won't all fit without overlapping,
+   the whole table puts its tags on the chairs instead, so one table never
+   mixes the two looks. */
+const TAG_SIZES=[{w:92,h:26,font:12},{w:66,h:32,font:11}];
+const CHAIR_TAG={w:84,h:26,font:11.5};
+const pgPlaceTags=(slots,worlds)=>{
+  if(!slots.length)return;
+  const inside=pt=>worlds.some(w=>pgInside(pt,w));
+  const fits=(c,w,h)=>{
+    const m=3,x0=c[0]-w/2-m,x1=c[0]+w/2+m,y0=c[1]-h/2-m,y1=c[1]+h/2+m;
+    return[[x0,y0],[x1,y0],[x1,y1],[x0,y1],[c[0],y0],[c[0],y1],[x0,c[1]],[x1,c[1]]].every(inside);
+  };
+  const clash=(a,b)=>Math.abs(a.x-b.x)*2<a.w+b.w+8&&Math.abs(a.y-b.y)*2<a.h+b.h+8;
+  for(const sz of TAG_SIZES){
+    const placed=[];
+    for(const s of slots){
+      const sup=sz.w/2*Math.abs(s.n[0])+sz.h/2*Math.abs(s.n[1]);
+      let got=null;
+      for(let d=sup+4;d<=sup+60&&!got;d+=2){
+        const c=[s.p[0]-s.n[0]*d,s.p[1]-s.n[1]*d],r={x:c[0],y:c[1],w:sz.w,h:sz.h};
+        if(fits(c,sz.w,sz.h)&&placed.every(q=>!clash(q,r)))got=r;
+      }
+      if(!got)break;
+      placed.push(got);
+    }
+    if(placed.length===slots.length){
+      slots.forEach((s,i)=>{const r=placed[i];s.tag={x:pgR(r.x),y:pgR(r.y),w:sz.w,h:sz.h,font:sz.font,mode:'table'};});
+      return;
+    }
+  }
+  slots.forEach(s=>{
+    const sup=CHAIR_TAG.w/2*Math.abs(s.n[0])+CHAIR_TAG.h/2*Math.abs(s.n[1]);
+    const d=PG.CHAIR_OFF+sup+1; // just past the chair's cushion, over its backrest
+    s.tag={x:pgR(s.p[0]+s.n[0]*d),y:pgR(s.p[1]+s.n[1]*d),w:CHAIR_TAG.w,h:CHAIR_TAG.h,font:CHAIR_TAG.font,mode:'chair'};
+  });
+};
+
+/* Every slot of every piece with its state:
+     'on'     — a seat (gets a chair and a name tag)
+     'off'    — switched off (default off, or in seatsOff); can be switched on
+     'joined' — on an edge that's joined to another table, so it can't be used
+   A per-piece seatsOff always wins; seatsOn switches on a default-off slot. */
+const slotsForLayout=(pieces,joins)=>{
+  const W=new Map((pieces||[]).map(p=>[p.id,pieceToWorld(p)]));
+  const cover=new Map();
+  const addCover=(pid,ei,iv)=>{if(iv[1]-iv[0]<4)return;const k=`${pid}:${ei}`;cover.set(k,[...(cover.get(k)||[]),iv]);};
+  (joins||[]).forEach(j=>{
+    const A=W.get(j.a),B=W.get(j.b);if(!A||!B)return;
+    const ea=A.edges[j.ea],eb=B.edges[j.eb];if(!ea||!eb)return;
+    addCover(j.a,j.ea,pgOverlap(ea,eb));addCover(j.b,j.eb,pgOverlap(eb,ea));
+  });
+  const out=[];
+  (pieces||[]).forEach(p=>{
+    const w=W.get(p.id),off=new Set(p.seatsOff||[]),on=new Set(p.seatsOn||[]);
+    w.slots.forEach(sl=>{
+      let state=sl.on||on.has(sl.idx)?'on':'off';
+      if(off.has(sl.idx))state='off';
+      if(sl.edge>=0){
+        const u=sl.t*w.edges[sl.edge].len;
+        if((cover.get(`${p.id}:${sl.edge}`)||[]).some(([u0,u1])=>u>=u0-PG.JOIN_MARGIN&&u<=u1+PG.JOIN_MARGIN))state='joined';
+      }
+      const facing=pgR(Math.atan2(-sl.n[0],sl.n[1])*180/Math.PI); // Chair: 0 = sitter faces up
+      out.push({key:`${p.id}:${sl.idx}`,pieceId:p.id,slot:sl.idx,state,p:sl.p,n:sl.n,
+        chair:{x:pgR(sl.p[0]+sl.n[0]*PG.CHAIR_OFF),y:pgR(sl.p[1]+sl.n[1]*PG.CHAIR_OFF),facing}});
+    });
+  });
+  clustersFromJoins(pieces||[],joins).forEach(ids=>{
+    const set=new Set(ids);
+    pgPlaceTags(out.filter(s=>set.has(s.pieceId)&&s.state==='on'),ids.map(id=>W.get(id)));
+  });
+  return out;
+};
+
+/* Canvas-space bounds of some pieces, including their chairs and tags. */
+const piecesBounds=(pieces,slots)=>{
+  const ids=new Set(pieces.map(p=>p.id));
+  const pts=pieces.flatMap(p=>pieceToWorld(p).poly);
+  (slots||slotsForLayout(pieces,[])).filter(s=>ids.has(s.pieceId)&&s.state==='on').forEach(s=>{
+    pts.push([s.chair.x-14,s.chair.y-14],[s.chair.x+14,s.chair.y+14]);
+    if(s.tag)pts.push([s.tag.x-s.tag.w/2,s.tag.y-s.tag.h/2],[s.tag.x+s.tag.w/2,s.tag.y+s.tag.h/2]);
+  });
+  if(!pts.length)return null;
+  const xs=pts.map(p=>p[0]),ys=pts.map(p=>p[1]);
+  return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};
+};
+
+/* Rebuild the seats (and table groups) that pieces make. Seats without a
+   pieceId are left exactly as they are. A piece seat keeps its id, student,
+   tags, tag rule, lock and used/unavailable flags by pieceId:slot; only its x/y
+   (a 114×52 box centred on its name tag) and groupId are recomputed. Each
+   cluster of joined pieces with 2+ seats is one group: an existing group is
+   reused (id and label) where the cluster's seats were already in it, so
+   joining merges groups and separating splits them. Students whose seat
+   disappears are returned in `bumped`, so the caller can say so — they're
+   never silently lost (they just show up in the unplaced list again). */
+const syncPieceSeats=({seats=[],groups=[],pieces=[],joins=[]},{uid,nextLabel})=>{
+  const slots=slotsForLayout(pieces,joins).filter(s=>s.state==='on');
+  const slotByKey=new Map(slots.map(s=>[s.key,s]));
+  const bumped=[];
+  const box=s=>({x:Math.round(s.tag.x-PG.SEAT_W/2),y:Math.round(s.tag.y-PG.SEAT_H/2)});
+  const kept=new Set();
+  let nextSeats=[];
+  seats.forEach(s=>{
+    if(!s.pieceId){nextSeats.push(s);return;}
+    const key=`${s.pieceId}:${s.slot}`,sl=slotByKey.get(key);
+    if(!sl||kept.has(key)){if(s.studentId)bumped.push(s.studentId);return;}
+    kept.add(key);
+    nextSeats.push({...s,...box(sl)});
+  });
+  slots.forEach(sl=>{
+    if(kept.has(sl.key))return;
+    nextSeats.push({id:uid(),groupId:null,...box(sl),tags:[],tagRule:'OR',studentId:null,locked:false,used:true,pieceId:sl.pieceId,slot:sl.slot});
+  });
+  const seatIdByKey=new Map(nextSeats.filter(s=>s.pieceId).map(s=>[`${s.pieceId}:${s.slot}`,s.id]));
+  const pieceSeatIds=new Set(seatIdByKey.values());
+  // plain groups lose any piece seats (a table's seats belong to its cluster)
+  const plain=groups.map(g=>({...g,seatIds:g.seatIds.filter(id=>!pieceSeatIds.has(id))})).filter(g=>g.seatIds.length>=2);
+  const used=new Set(plain.map(g=>g.id));
+  const outGroups=[...plain];
+  clustersFromJoins(pieces,joins).forEach(ids=>{
+    const set=new Set(ids);
+    const members=slots.filter(s=>set.has(s.pieceId)).map(s=>seatIdByKey.get(s.key)).filter(Boolean);
+    if(members.length<2)return;
+    const mem=new Set(members);
+    const prev=groups.filter(g=>!used.has(g.id)).map(g=>({g,n:g.seatIds.filter(id=>mem.has(id)).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n)[0];
+    const g=prev?{...prev.g,seatIds:members}:{id:uid(),seatIds:members,label:nextLabel([...outGroups,...groups])};
+    used.add(g.id);outGroups.push(g);
+  });
+  const groupOf={};outGroups.forEach(g=>g.seatIds.forEach(id=>{groupOf[id]=g.id;}));
+  nextSeats=nextSeats.map(s=>{const gid=groupOf[s.id]||null;return s.groupId===gid?s:{...s,groupId:gid};});
+  // keep the original group order where possible, so colours and labels don't shuffle
+  const order=new Map(groups.map((g,i)=>[g.id,i]));
+  outGroups.sort((a,b)=>(order.has(a.id)?order.get(a.id):1e9)-(order.has(b.id)?order.get(b.id):1e9));
+  return{seats:nextSeats,groups:outGroups,bumped};
+};
+
+/* Reading order: top row first, left to right (rows within `tol` px count as one row). */
+const readingOrder=(items,xy,tol=24)=>{
+  const arr=items.map(it=>({it,p:xy(it)})).sort((a,b)=>a.p[1]-b.p[1]);
+  const rows=[];
+  arr.forEach(e=>{const r=rows[rows.length-1];if(r&&Math.abs(e.p[1]-r[0].p[1])<=tol)r.push(e);else rows.push([e]);});
+  return rows.flatMap(r=>r.sort((a,b)=>a.p[0]-b.p[0]).map(e=>e.it));
+};
+
+/* New pieces and ready-made combos, built around the origin. */
+const newPiece=(shape,uid,extra={})=>({id:uid(),shape,x:0,y:0,rot:0,roles:[...(SHAPES[shape]?.roles||['desk'])],seatsOff:[],...(shape==='round'?{seatCount:SHAPES.round.seats}:{}),...extra});
+const pgRow=(shapes,uid)=>{
+  const pieces=[newPiece(shapes[0],uid)],joins=[];
+  for(let i=1;i<shapes.length;i++){
+    const prev=pieces[i-1],p=alignPieceToEdge(newPiece(shapes[i],uid),3,prev,1);
+    pieces.push(p);joins.push({a:prev.id,ea:1,b:p.id,eb:3});
+  }
+  return{pieces,joins};
+};
+const PIECE_COMBOS={
+  hexagon:{name:'Hexagon',hint:'2 trapezoids, 6 seats',build:uid=>{
+    const a=newPiece('trap',uid),b=alignPieceToEdge(newPiece('trap',uid,{rot:180}),2,a,2);
+    return{pieces:[a,b],joins:[{a:a.id,ea:2,b:b.id,eb:2}]};
+  }},
+  long8:{name:'Long table of 8',hint:'2 long tables',build:uid=>pgRow(['long4','long4'],uid)},
+  horseshoe:{name:'Horseshoe',hint:'a U of 3 long tables, 9 seats round the outside',build:uid=>{
+    // three long tables of 6: one along the bottom and one standing up at each
+    // end, opening upwards (towards the board). Everyone sits round the outside
+    // and the inside is left open, like a real horseshoe — the inside seats can
+    // be switched on with Edit seats. (Three trapezoids — a half hexagonal ring
+    // — were tried first, but the inside of that ring is too tight to be useful.)
+    const base=newPiece('long6',uid);
+    const l=alignPieceToEdge(newPiece('long6',uid),1,base,0,'start'),r=alignPieceToEdge(newPiece('long6',uid),3,base,0,'end');
+    const pieces=[l,base,r],joins=[{a:l.id,ea:1,b:base.id,eb:0},{a:r.id,ea:3,b:base.id,eb:0}];
+    const inner=slotsForLayout(pieces,joins).filter(s=>s.state==='on'&&(s.pieceId===base.id?s.n[1]<-0.5:s.n[0]*(base.x-s.p[0])>0));
+    return{pieces:pieces.map(p=>({...p,seatsOff:inner.filter(s=>s.pieceId===p.id).map(s=>s.slot)})),joins};
+  }},
+  long10:{name:'Long table of 10',hint:'long 6 + long 4',build:uid=>pgRow(['long6','long4'],uid)},
+  long12:{name:'Long table of 12',hint:'2 long tables of 6',build:uid=>pgRow(['long6','long6'],uid)},
+};
+/* Build a shape or combo; `opts.seatCount` sets a round table's seats. */
+const buildPieceSet=(kind,uid,opts={})=>{
+  if(PIECE_COMBOS[kind])return PIECE_COMBOS[kind].build(uid);
+  if(/^row\d+$/.test(kind))return pgRow(Array.from({length:+kind.slice(3)},()=>'long6'),uid);
+  return{pieces:[newPiece(kind,uid,opts.seatCount?{seatCount:opts.seatCount}:{})],joins:[]};
+};
+/* Shift a built set so its drawn bounds (chairs and tags too) start at (x,y). */
+const placePieceSet=(set,x,y)=>{
+  const b=piecesBounds(set.pieces,slotsForLayout(set.pieces,set.joins));
+  if(!b)return set;
+  return{...set,pieces:transformPieces(set.pieces,set.pieces.map(p=>p.id),{dx:x-b.x,dy:y-b.y})};
+};
+const seatCountOf=set=>slotsForLayout(set.pieces,set.joins).filter(s=>s.state==='on').length;
+
+/* "Convert to table" choices for n seats: anything that seats n with at most
+   two spare seats; very big groups get a row of long tables. */
+const CONVERT_KINDS=[
+  {kind:'single'},{kind:'pair'},{kind:'trap'},{kind:'long4'},{kind:'round',seatCount:4},{kind:'round',seatCount:5},
+  {kind:'bench'},{kind:'long6'},{kind:'round',seatCount:6},{kind:'hexagon'},{kind:'long8'},{kind:'horseshoe'},{kind:'long10'},{kind:'long12'},
+];
+const convertOptions=n=>{
+  const fake=(()=>{let i=0;return()=>`c${i++}`;})();
+  const out=CONVERT_KINDS.map(o=>({...o,seats:seatCountOf(buildPieceSet(o.kind,fake,o))})).filter(o=>o.seats>=n&&o.seats<=n+2);
+  if(!out.length){const k=Math.ceil(n/6);out.push({kind:`row${k}`,seats:6*k});}
+  return out;
+};
+
+const PIECE_GEOMETRY={PG,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly};
+/* @geometry-end */
 
 // Tag colours. Custom tags used to get whatever COLORS[i] fell out of
 // their position in whichever list happened to be rendering them — so the
@@ -2080,19 +2567,28 @@ const bestFitReseat=(oldSeats,targetSeats)=>{
   });
   return targetSeats.map(s=>assignment[s.id]?{...s,studentId:assignment[s.id],locked:false}:s);
 };
+/* The saved sl-<class> object. pieces/joins are only written once a room has
+   table pieces, so a room without any keeps exactly the shape it always had. */
+const slLayoutObj=(s,g,t,ri,rl,pc,jn)=>{
+  const o={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[]};
+  if(pc?.length){o.pieces=pc;o.joins=jn||[];}
+  return o;
+};
 /* Structural fingerprint used to detect "has the room layout changed since
    the last save/load" — deliberately ignores who's sitting where. */
-const roomStructureKey=(seatsArr,groupsArr,roomItemsArr)=>JSON.stringify({
+const roomStructureKey=(seatsArr,groupsArr,roomItemsArr,piecesArr,joinsArr)=>JSON.stringify({
   seats:(seatsArr||[]).map(s=>({id:s.id,groupId:s.groupId,x:s.x,y:s.y,tags:s.tags,tagRule:s.tagRule,used:s.used,unavailable:s.unavailable})),
   groups:(groupsArr||[]).map(g=>({id:g.id,seatIds:g.seatIds,label:g.label})),
   roomItems:roomItemsArr||[],
+  pieces:piecesArr||[],joins:joinsArr||[],
 });
 /* Id-independent room shape — two rooms built separately (e.g. a saved
    arrangement vs. the current layout) never share seat ids, so comparing by
    position is how we tell whether they're really the same physical room. */
-const roomShapeSignature=(seatsArr,roomItemsArr)=>JSON.stringify({
+const roomShapeSignature=(seatsArr,roomItemsArr,piecesArr)=>JSON.stringify({
   seats:(seatsArr||[]).filter(s=>s.used).map(s=>`${s.x},${s.y}`).sort(),
   roomItems:(roomItemsArr||[]).map(r=>`${r.type}:${r.x},${r.y}`).sort(),
+  pieces:(piecesArr||[]).map(p=>`${p.shape}:${p.x},${p.y},${p.rot||0}`).sort(),
 });
 /* Who's sitting where, for detecting unconfirmed seating changes */
 const seatingSignature=seatsArr=>JSON.stringify((seatsArr||[]).filter(s=>s.studentId).map(s=>[s.id,s.studentId]).sort((a,b)=>a[0]<b[0]?-1:1));
@@ -2368,6 +2864,18 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const[seats,setSeats]=useState([]);
   const[groups,setGroups]=useState([]);
   const[roomItems,setRoomItems]=useState([]);
+  /* Table pieces (shapes that rotate and snap together) and the edges joining
+     them. Optional and additive: seats made by a piece carry pieceId+slot,
+     every other seat is drawn and behaves exactly as before. */
+  const[pieces,setPieces]=useState([]);
+  const[joins,setJoins]=useState([]);
+  const[selPieces,setSelPieces]=useState(new Set()); // pieces picked on the canvas (a whole cluster, or one with Alt)
+  const[focusPiece,setFocusPiece]=useState(null);    // the piece actually clicked, for Separate / seats / label
+  const[pieceDrag,setPieceDrag]=useState(null);      // {ids, steps:[transform…], snap} while moving/rotating
+  const[editSeats,setEditSeats]=useState(false);     // click chairs to switch seats on/off
+  const[pieceDeleteAsk,setPieceDeleteAsk]=useState(false);
+  const[notice,setNotice]=useState(null);            // short message, e.g. who went back to the student list
+  const noticeTimer=useRef(null);
   const[selRoomId,setSelRoomId]=useState(null);
   const[avTags,setAvTags]=useState(DEFAULT_SEAT_TAGS);
   const[rules,setRules]=useState([]);   // [{id,type:'apart'|'together',aId,bId}]
@@ -2387,6 +2895,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const randomizeOptionsMenu=useAnchoredMenu();
   const layoutsMenu=useAnchoredMenu();
   const arrangementsMenu=useAnchoredMenu();
+  const convertMenu=useAnchoredMenu();
   /* Undo — one committed-state stack per class, session-only. doSave (below)
      pushes the state that was current just before each change. */
   const undoStackRef=useRef([]);
@@ -2448,10 +2957,11 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   };
 
   /* ── Center canvas on content ── */
-  const centerCanvas=useCallback((s,ri)=>{
+  const centerCanvas=useCallback((s,ri,pc)=>{
     const canvas=canvasRef.current;
     if(!canvas||!s.length)return;
-    const allItems=[...s.filter(x=>x.x!==undefined).map(x=>({x:x.x,y:x.y,w:SW,h:SH})),...(ri||[]).map(r=>({x:r.x,y:r.y,w:SW,h:SH}))];
+    const pb=pc?.length?piecesBounds(pc,slotsForLayout(pc,[])):null;
+    const allItems=[...s.filter(x=>x.x!==undefined).map(x=>({x:x.x,y:x.y,w:SW,h:SH})),...(ri||[]).map(r=>({x:r.x,y:r.y,w:SW,h:SH})),...(pb?[pb]:[])];
     if(!allItems.length)return;
     const minX=Math.min(...allItems.map(i=>i.x));
     const minY=Math.min(...allItems.map(i=>i.y));
@@ -2468,9 +2978,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
      is why centering looked like it was stuck on the left. Center once the seats
      have actually painted (double rAF), then again whenever the window finishes
      resizing, for as long as a resize could plausibly still be running. */
-  const centerCanvasWhenReady=useCallback((s,ri)=>{
-    let raf1=requestAnimationFrame(()=>{raf1=requestAnimationFrame(()=>centerCanvas(s,ri));});
-    const recenter=()=>centerCanvas(s,ri);
+  const centerCanvasWhenReady=useCallback((s,ri,pc)=>{
+    let raf1=requestAnimationFrame(()=>{raf1=requestAnimationFrame(()=>centerCanvas(s,ri,pc));});
+    const recenter=()=>centerCanvas(s,ri,pc);
     window.addEventListener('resize',recenter);
     const stop=setTimeout(()=>window.removeEventListener('resize',recenter),700);
     return()=>{cancelAnimationFrame(raf1);window.removeEventListener('resize',recenter);clearTimeout(stop);};
@@ -2494,11 +3004,15 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     load(`sl-${activeClass.id}`,null).then(layout=>{
       if(layout){
         const rawSeats=(layout.seats||[]).map(s=>({...s,tags:(s.tags||[]).filter(t=>!DEPRECATED_TAGS.has(t))}));
-        const{seats:loadedSeats,groups:loadedGroups}=repairSeatGroups(rawSeats,layout.groups||[]);
+        const loadedPieces=layout.pieces||[],loadedJoins=layout.joins||[];
+        let{seats:loadedSeats,groups:loadedGroups}=repairSeatGroups(rawSeats,layout.groups||[]);
+        // tables: make sure their seats match the pieces (heals a half-written save; a no-op normally)
+        if(loadedPieces.length)({seats:loadedSeats,groups:loadedGroups}=syncPieceSeats({seats:loadedSeats,groups:loadedGroups,pieces:loadedPieces,joins:loadedJoins},{uid:sUid,nextLabel:nextGroupLabel}));
         const loadedRI=layout.roomItems||[];
         setSeats(loadedSeats);
         setGroups(loadedGroups);
         setRoomItems(loadedRI);
+        setPieces(loadedPieces);setJoins(loadedJoins);
         setRules(layout.rules||[]);
         if(layout.tags?.length){
           const cleaned=layout.tags.filter(t=>!DEPRECATED_TAGS.has(t));
@@ -2506,35 +3020,40 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         }
         // If the saved layout had drifted (a past bug could do this), persist the
         // repair immediately so the corruption doesn't keep coming back on load.
-        if(JSON.stringify(loadedGroups)!==JSON.stringify(layout.groups||[])){
-          save(`sl-${activeClass.id}`,{seats:loadedSeats,groups:loadedGroups,tags:layout.tags,roomItems:loadedRI,rules:layout.rules||[]});
+        if(JSON.stringify(loadedGroups)!==JSON.stringify(layout.groups||[])||(loadedPieces.length&&JSON.stringify(loadedSeats)!==JSON.stringify(rawSeats))){
+          save(`sl-${activeClass.id}`,slLayoutObj(loadedSeats,loadedGroups,layout.tags,loadedRI,layout.rules,loadedPieces,loadedJoins));
         }
-        cleanupCenter=centerCanvasWhenReady(loadedSeats,loadedRI);
-        lastCommittedRef.current={seats:loadedSeats,groups:loadedGroups,tags:layout.tags?.length?layout.tags.filter(t=>!DEPRECATED_TAGS.has(t)):DEFAULT_SEAT_TAGS,roomItems:loadedRI,rules:layout.rules||[]};
-        roomBaselineRef.current=roomStructureKey(loadedSeats,loadedGroups,loadedRI);
+        cleanupCenter=centerCanvasWhenReady(loadedSeats,loadedRI,loadedPieces);
+        lastCommittedRef.current={seats:loadedSeats,groups:loadedGroups,tags:layout.tags?.length?layout.tags.filter(t=>!DEPRECATED_TAGS.has(t)):DEFAULT_SEAT_TAGS,roomItems:loadedRI,rules:layout.rules||[],pieces:loadedPieces,joins:loadedJoins};
+        roomBaselineRef.current=roomStructureKey(loadedSeats,loadedGroups,loadedRI,loadedPieces,loadedJoins);
         seatingBaselineRef.current=seatingSignature(loadedSeats);
       } else {
-        setSeats([]);setGroups([]);setRoomItems([]);setRules([]);
-        lastCommittedRef.current={seats:[],groups:[],tags:DEFAULT_SEAT_TAGS,roomItems:[],rules:[]};
+        setSeats([]);setGroups([]);setRoomItems([]);setRules([]);setPieces([]);setJoins([]);
+        lastCommittedRef.current={seats:[],groups:[],tags:DEFAULT_SEAT_TAGS,roomItems:[],rules:[],pieces:[],joins:[]};
         roomBaselineRef.current=roomStructureKey([],[],[]);
         seatingBaselineRef.current=seatingSignature([]);
       }
-      setSel(new Set());setSelRoomId(null);
+      setSel(new Set());setSelRoomId(null);setSelPieces(new Set());setPieceDrag(null);setEditSeats(false);setNotice(null);
     });
     return()=>cleanupCenter();
   },[activeClass?.id]);
 
   /* ── Debounced save (also the one chokepoint every edit flows through, so
      it doubles as where we snapshot undo history) ── */
-  const doSave=useCallback((s,g,t,ri,rl)=>{
+  /* pc/jn (pieces, joins) are optional: the many edits that don't touch table
+     pieces leave them out, and the last committed pieces are carried forward —
+     so no save path can quietly drop them. */
+  const doSave=useCallback((s,g,t,ri,rl,pc,jn)=>{
     if(!activeClass?.id)return;
-    if(lastCommittedRef.current){
-      undoStackRef.current=[...undoStackRef.current,lastCommittedRef.current].slice(-20);
+    const prevC=lastCommittedRef.current;
+    const pcs=pc??prevC?.pieces??[],jns=jn??prevC?.joins??[];
+    if(prevC){
+      undoStackRef.current=[...undoStackRef.current,prevC].slice(-20);
       setCanUndo(true);
     }
-    lastCommittedRef.current={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[]};
+    lastCommittedRef.current={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[],pieces:pcs,joins:jns};
     if(saveTimer.current)clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(()=>save(`sl-${activeClass.id}`,{seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[]}),400);
+    saveTimer.current=setTimeout(()=>save(`sl-${activeClass.id}`,slLayoutObj(s,g,t,ri,rl,pcs,jns)),400);
   },[activeClass?.id]);
 
   const handleUndo=useCallback(()=>{
@@ -2545,9 +3064,10 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     setCanUndo(undoStackRef.current.length>0);
     lastCommittedRef.current=prev;
     setSeats(prev.seats);setGroups(prev.groups);setAvTags(prev.tags?.length?prev.tags:DEFAULT_SEAT_TAGS);setRoomItems(prev.roomItems);setRules(prev.rules||[]);
-    setSel(new Set());setSelRoomId(null);
+    setPieces(prev.pieces||[]);setJoins(prev.joins||[]);
+    setSel(new Set());setSelRoomId(null);setSelPieces(new Set());setPieceDrag(null);
     if(saveTimer.current)clearTimeout(saveTimer.current);
-    save(`sl-${activeClass.id}`,{seats:prev.seats,groups:prev.groups,tags:prev.tags,roomItems:prev.roomItems,rules:prev.rules||[]});
+    save(`sl-${activeClass.id}`,slLayoutObj(prev.seats,prev.groups,prev.tags,prev.roomItems,prev.rules,prev.pieces,prev.joins));
   },[activeClass?.id]);
 
   /* Self-heal against a student who's been removed from the roster (deleted, or
@@ -2573,11 +3093,12 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     // Strip student assignments — template is structure only
     const templateSeats=seats.map(s=>({...s,studentId:null,locked:false}));
     const template={id:sUid(),name:name.trim(),seats:templateSeats,groups,roomItems,createdAt:Date.now()};
+    if(pieces.length){template.pieces=pieces;template.joins=joins;}
     const next=[...savedLayouts,template];
     setSavedLayouts(next);
     save('ta-saved-layouts',next);
-    roomBaselineRef.current=roomStructureKey(seats,groups,roomItems);
-  },[seats,groups,roomItems,savedLayouts]);
+    roomBaselineRef.current=roomStructureKey(seats,groups,roomItems,pieces,joins);
+  },[seats,groups,roomItems,pieces,joins,savedLayouts]);
 
   /* ── Load a saved layout template into current class, re-seating whoever
      was already placed as closely as their old groups allow ── */
@@ -2587,26 +3108,29 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     // useful, e.g. a "front row" convention) — if one doesn't belong here,
     // it's still fully manageable afterwards via 🎨 Manage in the Tags
     // section (recolour, or delete it and it comes off every seat).
-    const idMap={};
-    const blankSeats=template.seats.map(s=>{const nid=sUid();idMap[s.id]=nid;return{...s,id:nid,studentId:null,locked:false};});
+    const idMap={},pieceMap={};
+    (template.pieces||[]).forEach(p=>{pieceMap[p.id]=sUid();});
+    const newPieces=(template.pieces||[]).map(p=>({...p,id:pieceMap[p.id]}));
+    const newJoins=(template.joins||[]).filter(j=>pieceMap[j.a]&&pieceMap[j.b]).map(j=>({...j,a:pieceMap[j.a],b:pieceMap[j.b]}));
+    const blankSeats=template.seats.map(s=>{const nid=sUid();idMap[s.id]=nid;return{...s,id:nid,studentId:null,locked:false,...(s.pieceId?{pieceId:pieceMap[s.pieceId]||s.pieceId}:{})};});
     const newGroups=template.groups.map(g=>({...g,id:sUid(),seatIds:g.seatIds.map(id=>idMap[id]||id)}));
-    const newRI=template.roomItems.map(r=>({...r,id:sUid()}));
+    const newRI=(template.roomItems||[]).map(r=>({...r,id:sUid()}));
     const newSeats=bestFitReseat(seats,blankSeats);
-    setSeats(newSeats);setGroups(newGroups);setRoomItems(newRI);
-    setSel(new Set());setShowLoadLayout(false);
-    doSave(newSeats,newGroups,avTags,newRI,rules);
-    roomBaselineRef.current=roomStructureKey(newSeats,newGroups,newRI);
+    setSeats(newSeats);setGroups(newGroups);setRoomItems(newRI);setPieces(newPieces);setJoins(newJoins);
+    setSel(new Set());setSelPieces(new Set());setShowLoadLayout(false);
+    doSave(newSeats,newGroups,avTags,newRI,rules,newPieces,newJoins);
+    roomBaselineRef.current=roomStructureKey(newSeats,newGroups,newRI,newPieces,newJoins);
     seatingBaselineRef.current=seatingSignature(newSeats);
   },[seats,avTags,rules,doSave]);
 
   /* ── Ask first if the current room or seating hasn't been saved/recorded
      yet, so switching layouts can't silently throw either away ── */
   const requestLoadLayout=useCallback((template)=>{
-    const layoutDirty=roomBaselineRef.current!==roomStructureKey(seats,groups,roomItems);
+    const layoutDirty=roomBaselineRef.current!==roomStructureKey(seats,groups,roomItems,pieces,joins);
     const seatingDirty=seatingBaselineRef.current!==seatingSignature(seats);
     if(layoutDirty||seatingDirty)setPendingLayoutLoad({template,layoutDirty,seatingDirty});
     else loadLayout(template);
-  },[seats,groups,roomItems,loadLayout]);
+  },[seats,groups,roomItems,pieces,joins,loadLayout]);
 
   /* ── Delete a saved layout ── */
   const deleteLayout=useCallback((id)=>{
@@ -2621,13 +3145,14 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const confirmSeating=useCallback(()=>{
     if(!activeClass?.id)return;
     const entry={id:sUid(),name:fmtArrangementDate(Date.now()),createdAt:Date.now(),seats,groups,roomItems};
+    if(pieces.length){entry.pieces=pieces;entry.joins=joins;}
     setSeatHistory(prev=>{
       const next=[entry,...prev].slice(0,10);
       save(`sh-${activeClass.id}`,next);
       return next;
     });
     seatingBaselineRef.current=seatingSignature(seats);
-  },[activeClass?.id,seats,groups,roomItems]);
+  },[activeClass?.id,seats,groups,roomItems,pieces,joins]);
 
   /* ── Restore a past arrangement from history. When it was made for a
      different room (bestFit=true), the current room's furniture is left
@@ -2644,11 +3169,13 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     } else {
       const newSeats=entry.seats.map(s=>({...s}));
       const newGroups=entry.groups.map(g=>({...g,seatIds:[...g.seatIds]}));
-      const newRI=entry.roomItems.map(r=>({...r}));
-      setSeats(newSeats);setGroups(newGroups);setRoomItems(newRI);
-      setSel(new Set());
-      doSave(newSeats,newGroups,avTags,newRI,rules);
-      roomBaselineRef.current=roomStructureKey(newSeats,newGroups,newRI);
+      const newRI=(entry.roomItems||[]).map(r=>({...r}));
+      // an arrangement from before tables had pieces simply has none
+      const newPieces=(entry.pieces||[]).map(p=>({...p})),newJoins=(entry.joins||[]).map(j=>({...j}));
+      setSeats(newSeats);setGroups(newGroups);setRoomItems(newRI);setPieces(newPieces);setJoins(newJoins);
+      setSel(new Set());setSelPieces(new Set());
+      doSave(newSeats,newGroups,avTags,newRI,rules,newPieces,newJoins);
+      roomBaselineRef.current=roomStructureKey(newSeats,newGroups,newRI,newPieces,newJoins);
       seatingBaselineRef.current=seatingSignature(newSeats);
     }
   },[seats,groups,roomItems,avTags,rules,doSave]);
@@ -2656,11 +3183,11 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   /* ── Ask first if there's a room-shape mismatch (offer a best-fit reseat)
      or unrecorded current seating, before restoring an old arrangement ── */
   const requestRestoreArrangement=useCallback((entry)=>{
-    const mismatched=roomShapeSignature(seats,roomItems)!==roomShapeSignature(entry.seats,entry.roomItems);
+    const mismatched=roomShapeSignature(seats,roomItems,pieces)!==roomShapeSignature(entry.seats,entry.roomItems,entry.pieces);
     const seatingDirty=seatingBaselineRef.current!==seatingSignature(seats);
     if(mismatched||seatingDirty)setPendingArrangementLoad({entry,mismatched,seatingDirty});
     else restoreArrangement(entry);
-  },[seats,roomItems,restoreArrangement]);
+  },[seats,roomItems,pieces,restoreArrangement]);
 
   /* ── Delete a history entry ── */
   const deleteArrangement=useCallback((id)=>{
@@ -2690,9 +3217,35 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     return labels;
   },[seatHistory]);
 
+  /* ── Table pieces as they look right now, including mid-drag / mid-rotate ── */
+  const livePieces=useMemo(()=>pieceDrag?pieceDrag.steps.reduce((ps,st)=>transformPieces(ps,pieceDrag.ids,st),pieces):pieces,[pieces,pieceDrag]);
+  const liveSlots=useMemo(()=>slotsForLayout(livePieces,joins),[livePieces,joins]);
+  const liveSlotByKey=useMemo(()=>new Map(liveSlots.map(s=>[s.key,s])),[liveSlots]);
+  const seatByKey=useMemo(()=>new Map(seats.filter(s=>s.pieceId).map(s=>[`${s.pieceId}:${s.slot}`,s])),[seats]);
+
   /* ── Computed seat positions (includes live drag) ── */
-  const pos=useMemo(()=>sPosMap(seats,groups,dd),[seats,groups,dd]);
-  const canvasSize=useMemo(()=>canvasContentSize(seats,roomItems),[seats,roomItems]);
+  const pos=useMemo(()=>{
+    const p=sPosMap(seats,groups,dd);
+    // a table's seats ride along with it while it's dragged or turned
+    if(pieceDrag)seats.forEach(s=>{
+      if(!s.pieceId)return;
+      const sl=liveSlotByKey.get(`${s.pieceId}:${s.slot}`);
+      if(sl?.tag)p[s.id]={x:Math.round(sl.tag.x-SW/2),y:Math.round(sl.tag.y-SH/2)};
+    });
+    return p;
+  },[seats,groups,dd,pieceDrag,liveSlotByKey]);
+  const canvasSize=useMemo(()=>canvasContentSize(seats,roomItems,livePieces,liveSlots),[seats,roomItems,livePieces,liveSlots]);
+
+  /* The pieces picked on the canvas — only while the seat selection is still
+     exactly those pieces' seats (clicking a seat or the floor moves on from it). */
+  const activeSelPieces=useMemo(()=>{
+    const ids=[...selPieces].filter(id=>pieces.some(p=>p.id===id));
+    if(!ids.length)return[];
+    const set=new Set(ids);
+    const mine=seats.filter(s=>set.has(s.pieceId)).map(s=>s.id);
+    if(mine.length!==sel.size||mine.some(id=>!sel.has(id)))return[];
+    return ids;
+  },[selPieces,pieces,seats,sel]);
 
   const[rubberBand,setRubberBand]=useState(null);
 
@@ -2723,6 +3276,222 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
       const nextS=[...seats,...ns],nextG=[...groups,ng];
       setSeats(nextS);setGroups(nextG);doSave(nextS,nextG,avTags,roomItems,rules);
     }
+  };
+
+  /* ══ Table pieces: add, drag + snap, rotate, join, separate, seats on/off ══ */
+  const showNotice=msg=>{
+    setNotice(msg);
+    if(noticeTimer.current)clearTimeout(noticeTimer.current);
+    noticeTimer.current=setTimeout(()=>setNotice(null),7000);
+  };
+  const clusterOfPiece=(pid,pcs=pieces,jns=joins)=>clustersFromJoins(pcs,jns).find(c=>c.includes(pid))||[pid];
+  const cleanJoins=(pcs,jns)=>{
+    const ids=new Set(pcs.map(p=>p.id)),seen=new Set();
+    return jns.filter(j=>{
+      if(!ids.has(j.a)||!ids.has(j.b)||j.a===j.b)return false;
+      const k=[`${j.a}:${j.ea}`,`${j.b}:${j.eb}`].sort().join('|');
+      if(seen.has(k))return false;seen.add(k);return true;
+    });
+  };
+  /* Keep moved/turned pieces on the canvas (nothing can be reached above or left of 0,0) */
+  const keepOnCanvas=(pcs,ids,jns)=>{
+    const set=new Set(ids),moved=pcs.filter(p=>set.has(p.id));
+    const b=piecesBounds(moved,slotsForLayout(moved,jns.filter(j=>set.has(j.a)&&set.has(j.b))));
+    if(!b||(b.x>=4&&b.y>=4))return pcs;
+    return transformPieces(pcs,ids,{dx:Math.max(0,Math.ceil(4-b.x)),dy:Math.max(0,Math.ceil(4-b.y))});
+  };
+  /* Every table-piece change ends here: rebuild the seats and groups the pieces
+     make (students keep their seat by pieceId:slot), save it as ONE undo step,
+     and say who — if anyone — lost their seat and went back to the list. */
+  const commitPieces=(pc,jn,base={})=>{
+    const cj=cleanJoins(pc,jn);
+    const r=syncPieceSeats({seats:base.seats||seats,groups:base.groups||groups,pieces:pc,joins:cj},{uid:sUid,nextLabel:nextGroupLabel});
+    let rs=r.seats,rg=r.groups;
+    if(base.after)({seats:rs,groups:rg}=base.after(rs,rg));
+    setPieces(pc);setJoins(cj);setSeats(rs);setGroups(rg);
+    doSave(rs,rg,avTags,roomItems,rules,pc,cj);
+    const names=r.bumped.map(id=>studentById(id)?.name).filter(Boolean);
+    if(names.length){
+      const who=names.length===1?names[0]:`${names.slice(0,-1).join(', ')} and ${names[names.length-1]}`;
+      showNotice(`${who} went back to the student list — ${names.length===1?'that seat is':'those seats are'} no longer there.`);
+    }
+    return{seats:rs,groups:rg,pieces:pc,joins:cj};
+  };
+  const selectPieces=(ids,focus,seatsArr=seats)=>{
+    const set=new Set(ids);
+    const seatIds=seatsArr.filter(s=>set.has(s.pieceId)).map(s=>s.id);
+    setSelPieces(set);setFocusPiece(focus??ids[0]);setPieceDeleteAsk(false);
+    setSel(new Set(seatIds));setSelType(seatIds.length>1?'group':'seat');setSelRoomId(null);setTagConfirm(null);
+  };
+
+  /* First free spot (top-left first) for a new table, so it never lands on another */
+  const freeSpotFor=set=>{
+    const b=piecesBounds(set.pieces,slotsForLayout(set.pieces,set.joins));
+    const boxes=[
+      ...seats.filter(s=>!s.pieceId).map(s=>({x:s.x,y:s.y,w:SW,h:SH})),
+      ...roomItems.map(r=>{const v=r.rotation===90||r.rotation===270;return r.type==='board'?{x:r.x,y:r.y,w:v?36:260,h:v?260:36}:{x:r.x,y:r.y,w:r.type==='door'?64:(v?SH:SW),h:r.type==='door'?64:(v?SW:SH)};}),
+      ...clustersFromJoins(pieces,joins).map(c=>piecesBounds(pieces.filter(p=>c.includes(p.id)),liveSlots)).filter(Boolean),
+    ];
+    const M=20;
+    for(let y=40;y<3000;y+=24)for(let x=40;x<1300;x+=24){
+      if(boxes.every(o=>x+b.w+M<=o.x||o.x+o.w+M<=x||y+b.h+M<=o.y||o.y+o.h+M<=y))return[x,y];
+    }
+    return[40,40];
+  };
+  const addPieceSet=(kind,opts={})=>{
+    const built=buildPieceSet(kind,sUid,opts);
+    const[x,y]=freeSpotFor(built);
+    const set=placePieceSet(built,x,y);
+    const r=commitPieces([...pieces,...set.pieces],[...joins,...set.joins]);
+    selectPieces(set.pieces.map(p=>p.id),set.pieces[0].id,r.seats);
+    setEditSeats(false);
+  };
+
+  /* Drag a table: the whole joined cluster moves; Alt (Option) pulls just this
+     piece off and turns snapping off. Near another table's edge it snaps — a
+     bright line shows where — and the join is made on mouse-up. */
+  const handlePieceMD=(e,pid)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();
+    if(e.shiftKey||e.metaKey||e.ctrlKey)return;
+    const alone=e.altKey;
+    const ids=alone?[pid]:clusterOfPiece(pid);
+    selectPieces(ids,pid);setEditSeats(false);
+    const moving=pieces.filter(p=>ids.includes(p.id)),others=pieces.filter(p=>!ids.includes(p.id));
+    const b0=piecesBounds(moving,liveSlots);
+    const sx=e.clientX,sy=e.clientY;let moved=false;
+    const compute=ev=>{
+      let dx=sSnap((ev.clientX-sx)/zoom),dy=sSnap((ev.clientY-sy)/zoom);
+      if(b0){dx=Math.max(dx,Math.ceil(4-b0.x));dy=Math.max(dy,Math.ceil(4-b0.y));}
+      const steps=[{dx,dy}];let snap=null;
+      if(!ev.altKey&&others.length){
+        snap=findSnap(transformPieces(moving,ids,{dx,dy}),others);
+        if(snap)steps.push({dx:snap.dx,dy:snap.dy,drot:snap.drot,pivot:snap.pivot});
+      }
+      return{ids,steps,snap};
+    };
+    const mm=ev=>{
+      if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<4)return;
+      moved=true;setPieceDrag(compute(ev));
+    };
+    const mu=ev=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      setPieceDrag(null);
+      if(!moved)return;
+      const d=compute(ev);
+      const next=d.steps.reduce((ps,st)=>transformPieces(ps,ids,st),pieces);
+      let nj=alone?joins.filter(j=>j.a!==pid&&j.b!==pid):joins;
+      if(d.snap)nj=[...nj,...d.snap.joins];
+      const r=commitPieces(next,nj);
+      selectPieces(clusterOfPiece(pid,r.pieces,r.joins),pid,r.seats);
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+
+  /* Turn pieces about their middle. A piece turned on its own (picked with Alt)
+     comes away from the rest of its table, since its edges no longer meet. */
+  const rotatePiecesBy=(ids,deg)=>{
+    if(!ids.length||!deg)return;
+    const set=new Set(ids);
+    const pivot=piecesCentre(pieces.filter(p=>set.has(p.id)));
+    const nj=joins.filter(j=>set.has(j.a)===set.has(j.b));
+    const next=keepOnCanvas(transformPieces(pieces,ids,{drot:deg,pivot}),ids,nj);
+    const r=commitPieces(next,nj);
+    selectPieces(ids,focusPiece,r.seats);
+  };
+  const handleRotateMD=(e,ids)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();
+    const pivot=piecesCentre(pieces.filter(p=>ids.includes(p.id)));
+    const ang=ev=>{const c=toCanvasCoords(ev.clientX,ev.clientY);return Math.atan2(c.y-pivot[1],c.x-pivot[0])*180/Math.PI;};
+    const a0=ang(e);
+    // 15° steps, or free with Shift
+    const step=ev=>{const d=pgNorm(ang(ev)-a0);return ev.shiftKey?Math.round(d):Math.round(d/15)*15;};
+    const mm=ev=>setPieceDrag({ids,steps:[{drot:step(ev),pivot}],snap:null,rotating:true});
+    const mu=ev=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      setPieceDrag(null);
+      rotatePiecesBy(ids,step(ev));
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+
+  /* Pull one piece out of its table, nudged a little way off so it's clearly apart */
+  const separatePiece=pid=>{
+    const cl=clusterOfPiece(pid);if(cl.length<2)return;
+    const me=pieces.find(p=>p.id===pid);
+    const rc=piecesCentre(pieces.filter(p=>cl.includes(p.id)&&p.id!==pid));
+    let v=[me.x-rc[0],me.y-rc[1]];const L=Math.hypot(v[0],v[1]);v=L?[v[0]/L,v[1]/L]:[0,1];
+    const nj=joins.filter(j=>j.a!==pid&&j.b!==pid);
+    const next=keepOnCanvas(transformPieces(pieces,[pid],{dx:Math.round(v[0]*32),dy:Math.round(v[1]*32)}),[pid],nj);
+    const r=commitPieces(next,nj);
+    selectPieces([pid],pid,r.seats);
+  };
+
+  const deletePieces=ids=>{
+    const set=new Set(ids);
+    commitPieces(pieces.filter(p=>!set.has(p.id)),joins.filter(j=>!set.has(j.a)&&!set.has(j.b)));
+    setSelPieces(new Set());setSel(new Set());setPieceDeleteAsk(false);setEditSeats(false);
+  };
+  // asks first only when somebody is sitting at it
+  const requestDeletePieces=ids=>{
+    if(seats.some(s=>ids.includes(s.pieceId)&&s.studentId))setPieceDeleteAsk(true);
+    else deletePieces(ids);
+  };
+
+  /* Switch one of a piece's seats on or off (seatsOff wins; seatsOn turns on a
+     seat that starts off, like a long table's ends or a bench's back) */
+  const toggleSlot=(pid,idx)=>{
+    const p=pieces.find(x=>x.id===pid);if(!p)return;
+    const def=shapeDef(p.shape,p).slots[idx];if(!def)return;
+    const off=new Set(p.seatsOff||[]),on=new Set(p.seatsOn||[]);
+    const isOn=(def.on||on.has(idx))&&!off.has(idx);
+    if(isOn){off.add(idx);on.delete(idx);}
+    else{off.delete(idx);if(!def.on)on.add(idx);}
+    const np={...p,seatsOff:[...off].sort((a,b)=>a-b)};
+    if(on.size)np.seatsOn=[...on].sort((a,b)=>a-b);else delete np.seatsOn;
+    const r=commitPieces(pieces.map(x=>x.id===pid?np:x),joins);
+    selectPieces([...selPieces],focusPiece,r.seats);
+  };
+  const updatePieces=(ids,fn)=>{
+    const r=commitPieces(pieces.map(p=>ids.includes(p.id)?fn(p):p),joins);
+    selectPieces(ids,focusPiece,r.seats);
+  };
+
+  /* "Convert to table": swap a plain group (or lone seat) for real table pieces
+     at the same spot, moving everyone across in the same reading order (top row
+     first, left to right) along with their seat's tags, lock and flags. One
+     undo step puts it all back. */
+  const convertTargetIds=(()=>{
+    if(activeSelPieces.length)return null;
+    const ss=Array.from(sel).map(id=>seats.find(s=>s.id===id)).filter(Boolean);
+    if(!ss.length||ss.some(s=>s.pieceId))return null;
+    if(ss.length===1&&!ss[0].groupId)return[ss[0].id];
+    const gid=ss[0].groupId,g=groups.find(x=>x.id===gid);
+    if(selType==='group'&&g&&ss.every(s=>s.groupId===gid)&&g.seatIds.every(id=>sel.has(id)))return[...g.seatIds];
+    return null;
+  })();
+  const convertTo=opt=>{
+    const ids=convertTargetIds;if(!ids)return;
+    const idSet=new Set(ids);
+    const old=readingOrder(ids.map(id=>seats.find(s=>s.id===id)).filter(Boolean),s=>[s.x,s.y]);
+    const oldGroup=groups.find(g=>g.seatIds.some(id=>idSet.has(id))&&g.seatIds.every(id=>idSet.has(id)));
+    const set=placePieceSet(buildPieceSet(opt.kind,sUid,opt),Math.max(8,Math.min(...old.map(s=>s.x))),Math.max(8,Math.min(...old.map(s=>s.y))));
+    const newIds=new Set(set.pieces.map(p=>p.id));
+    const baseSeats=seats.filter(s=>!idSet.has(s.id));
+    const baseGroups=groups.filter(g=>g!==oldGroup).map(g=>({...g,seatIds:g.seatIds.filter(id=>!idSet.has(id))}));
+    const r=commitPieces([...pieces,...set.pieces],[...joins,...set.joins],{seats:baseSeats,groups:baseGroups,after:(rs,rg)=>{
+      const fresh=readingOrder(rs.filter(s=>newIds.has(s.pieceId)),s=>[s.x,s.y]);
+      const carry={};
+      fresh.forEach((s,i)=>{const o=old[i];if(o)carry[s.id]={studentId:o.studentId||null,locked:!!(o.locked&&o.studentId),tags:o.tags||[],tagRule:o.tagRule||'OR',used:o.used!==false,...(o.unavailable?{unavailable:true}:{})};});
+      const seats2=rs.map(s=>carry[s.id]?{...s,...carry[s.id]}:s);
+      // the new table keeps the old group's name
+      const gid=seats2.find(s=>newIds.has(s.pieceId)&&s.groupId)?.groupId;
+      const groups2=oldGroup&&gid?rg.map(g=>g.id===gid?{...g,label:oldGroup.label}:g):rg;
+      return repairSeatGroups(seats2,groups2);
+    }});
+    selectPieces(clusterOfPiece(set.pieces[0].id,r.pieces,r.joins),set.pieces[0].id,r.seats);
+    convertMenu.close();
   };
 
   /* ── Click: always selects the individual seat. The whole group is selected
@@ -2828,7 +3597,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         });
         setSel(inBand);setSelType('seat');
       } else {
-        setSel(new Set());setSelRoomId(null);setTagConfirm(null);
+        setSel(new Set());setSelRoomId(null);setTagConfirm(null);setSelPieces(new Set());setEditSeats(false);
       }
       setRubberBand(null);
     };
@@ -2862,6 +3631,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const h=e=>{
       if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.tagName==='SELECT')return;
       if(e.key==='Delete'||e.key==='Backspace'){e.preventDefault();kbRef.current.handleDelete();}
+      else if((e.key==='['||e.key===']')&&!e.metaKey&&!e.ctrlKey){kbRef.current.rotateSel?.(e.key===']'?15:-15);}
       else if(!e.metaKey&&!e.ctrlKey&&!e.altKey){
         if(e.key==='1')kbRef.current.addTable(1);
         else if(e.key==='2')kbRef.current.addTable(2);
@@ -3021,8 +3791,30 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
 
   /* ── Delete selected seats AND selected room item ── */
   const handleDelete=()=>{
+    // a picked table is deleted as a whole (asking first if anyone sits there)
+    if(activeSelPieces.length&&!selRoomId){requestDeletePieces(activeSelPieces);return;}
     let didSomething=false;
     let nextS=seats,nextG=groups,nextRI=roomItems;
+    // a seat that's part of a table is switched off rather than removed — the table still has that place
+    const offSlots=Array.from(sel).map(id=>seats.find(s=>s.id===id)).filter(s=>s?.pieceId);
+    if(offSlots.length){
+      const nextP=pieces.map(p=>{
+        const mine=offSlots.filter(s=>s.pieceId===p.id).map(s=>s.slot);
+        return mine.length?{...p,seatsOff:[...new Set([...(p.seatsOff||[]),...mine])].sort((a,b)=>a-b),seatsOn:(p.seatsOn||[]).filter(i=>!mine.includes(i))}:p;
+      });
+      const rest=new Set(Array.from(sel).filter(id=>!offSlots.some(s=>s.id===id)));
+      if(selRoomId){nextRI=roomItems.filter(r=>r.id!==selRoomId);setRoomItems(nextRI);setSelRoomId(null);}
+      // any plain seats picked along with them are removed as usual
+      const plainS=seats.filter(s=>!rest.has(s.id));
+      const plainG=groups.map(g=>({...g,seatIds:g.seatIds.filter(id=>!rest.has(id))}));
+      const r=syncPieceSeats({seats:plainS,groups:plainG,pieces:nextP,joins},{uid:sUid,nextLabel:nextGroupLabel});
+      const rep=repairSeatGroups(r.seats,r.groups);
+      setPieces(nextP);setSeats(rep.seats);setGroups(rep.groups);setSel(new Set());
+      doSave(rep.seats,rep.groups,avTags,nextRI,rules,nextP,joins);
+      const names=r.bumped.map(id=>studentById(id)?.name).filter(Boolean);
+      if(names.length)showNotice(`${names.join(', ')} went back to the student list.`);
+      return;
+    }
     if(selRoomId){
       nextRI=roomItems.filter(r=>r.id!==selRoomId);
       setRoomItems(nextRI);setSelRoomId(null);didSomething=true;
@@ -3189,7 +3981,11 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         // Use latest posRef
         const targetSeatId=Object.entries(posRef.current).find(([id,p])=>{
           const seat=seats.find(s=>s.id===id);
-          return seat?.used&&mx>=p.x&&mx<=p.x+SW&&my>=p.y&&my<=p.y+SH;
+          if(!seat?.used)return false;
+          // a table seat's drop target is its name tag (round tables pack tags closer than a seat box)
+          const t=seat.pieceId?liveSlotByKey.get(`${seat.pieceId}:${seat.slot}`)?.tag:null;
+          if(t)return Math.abs(mx-t.x)<=t.w/2+8&&Math.abs(my-t.y)<=t.h/2+8;
+          return mx>=p.x&&mx<=p.x+SW&&my>=p.y&&my<=p.y+SH;
         })?.[0];
         if(targetSeatId&&targetSeatId!==fromSeatId){
           const targetSeat=seats.find(s=>s.id===targetSeatId);
@@ -3281,9 +4077,13 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     return null;
   },[sel,selType,seats]);
 
-  /* Keep kbRef fresh on every render — must be after all handlers are defined */
-  kbRef.current={handleDelete,addTable,addRoomItem,randomize};
+  /* A table made of pieces manages its own seats, so no +/- add-to-group buttons for it */
+  const activeGroupIsTable=!!activeGroupId&&seats.some(s=>s.groupId===activeGroupId&&s.pieceId);
 
+  /* Keep kbRef fresh on every render — must be after all handlers are defined */
+  kbRef.current={handleDelete,addTable,addRoomItem,randomize,rotateSel:deg=>{if(activeSelPieces.length)rotatePiecesBy(activeSelPieces,deg);}};
+
+  const menuHead={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.3)",margin:"2px 2px 5px"};
   const btnS={padding:"7px 10px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.08)",background:"#fff",color:"rgba(0,0,0,0.5)",fontSize:"12px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif",transition:"all 0.12s"};
 
   return(
@@ -3401,8 +4201,37 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           )}
         </div>
         {addTableMenu.pos&&createPortal(
-          <div ref={addTableMenu.menuRef} style={{position:"fixed",left:addTableMenu.pos.left,...(addTableMenu.pos.top!=null?{top:addTableMenu.pos.top}:{bottom:addTableMenu.pos.bottom}),maxHeight:addTableMenu.pos.maxHeight,overflowY:"auto",zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"216px",fontFamily:"'Source Sans 3',sans-serif"}}>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"4px"}}>
+          <div ref={addTableMenu.menuRef} style={{position:"fixed",left:addTableMenu.pos.left,...(addTableMenu.pos.top!=null?{top:addTableMenu.pos.top}:{bottom:addTableMenu.pos.bottom}),maxHeight:addTableMenu.pos.maxHeight,overflowY:"auto",zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"276px",fontFamily:"'Source Sans 3',sans-serif"}}>
+            {/* Table shapes: they rotate, and snap together edge to edge */}
+            <div style={menuHead}>Tables</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px",marginBottom:"10px"}}>
+              {[
+                {kind:'single',label:'Single desk',tip:'One desk, one seat'},
+                {kind:'pair',label:'Pair',tip:'A desk for two'},
+                {kind:'long4',label:'Long table',tip:'Long table: 2 seats on each long side (the ends can be switched on too)'},
+                {kind:'long6',label:'Long of 6',tip:'Long table: 3 seats on each long side'},
+                {kind:'trap',label:'Trapezoid',tip:'Trapezoid: one seat on each side. Two joined long side to long side make a hexagon'},
+                {kind:'round',label:'Round',tip:'Round table for 4 (5 or 6 from its menu once added)'},
+                {kind:'bench',label:'Lab bench',tip:'Lab bench (a workstation): 4 seats on one side, the back can be switched on'},
+              ].map(o=>(
+                <button key={o.kind} onClick={()=>{addPieceSet(o.kind);addTableMenu.close();}} title={`Add: ${o.tip}`} style={{...btnS,padding:"7px 3px 5px",display:"flex",flexDirection:"column",alignItems:"center",gap:"4px"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
+                  onMouseLeave={e=>e.currentTarget.style.background="#fff"}
+                ><PieceThumb kind={o.kind} size={42}/><span style={{fontSize:"10px",color:"rgba(0,0,0,0.5)",lineHeight:1.1}}>{o.label}</span></button>
+              ))}
+            </div>
+            <div style={menuHead}>Ready-made</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px",marginBottom:"10px"}}>
+              {['hexagon','long8','horseshoe'].map(k=>(
+                <button key={k} onClick={()=>{addPieceSet(k);addTableMenu.close();}} title={`Add: ${PIECE_COMBOS[k].name} (${PIECE_COMBOS[k].hint}), already joined`} style={{...btnS,padding:"7px 3px 5px",display:"flex",flexDirection:"column",alignItems:"center",gap:"4px"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
+                  onMouseLeave={e=>e.currentTarget.style.background="#fff"}
+                ><PieceThumb kind={k} size={46}/><span style={{fontSize:"10px",color:"rgba(0,0,0,0.5)",lineHeight:1.1,textAlign:"center"}}>{PIECE_COMBOS[k].name}</span></button>
+              ))}
+            </div>
+            {/* The original seat boxes, for anyone who prefers them */}
+            <div style={menuHead}>Simple seats</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px"}}>
               {[
                 {n:1,o:'H',label:'1 seat',lay:[{c:0,r:0}]},
                 {n:2,o:'H',label:'2 horiz',lay:[{c:0,r:0},{c:1,r:0}]},
@@ -3467,19 +4296,105 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           </div>,
           document.body
         )}
-        {sel.size>0&&(
+        {(sel.size>0||activeSelPieces.length>0)&&(
           <div>
             <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"2px",color:"rgba(0,0,0,0.25)",textTransform:"uppercase",marginBottom:"8px"}}>
-              Selected ({sel.size})
+              {activeSelPieces.length?'Selected table':`Selected (${sel.size})`}
             </div>
             <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-              {sel.size>=2&&(
+              {activeSelPieces.length>0&&(()=>{
+                /* ── Piece menu: rotate, seats on/off, roles, label, separate, delete ── */
+                const selP=pieces.filter(p=>activeSelPieces.includes(p.id));
+                const focus=selP.find(p=>p.id===focusPiece)||selP[0];
+                const nSeats=seats.filter(s=>activeSelPieces.includes(s.pieceId)).length;
+                const cl=clusterOfPiece(focus.id);
+                const roleOf=r=>(r||[]).includes('workstation')?((r||[]).includes('desk')?'both':'workstation'):'desk';
+                const curRole=roleOf(focus.roles);
+                const seatedHere=seats.filter(s=>activeSelPieces.includes(s.pieceId)&&s.studentId).length;
+                const seg=(on)=>({flex:1,padding:"5px 0",border:"none",cursor:"pointer",fontSize:"10.5px",fontWeight:700,background:on?"#1a1a2e":"#fff",color:on?"#fff":"rgba(0,0,0,0.45)",fontFamily:"'Source Sans 3',sans-serif"});
+                return(
+                  <>
+                    <div style={{fontSize:"12.5px",fontWeight:700,color:"#1a1a2e",lineHeight:1.3}}>
+                      {selP.length===1?SHAPES[focus.shape]?.name:`${selP.length} pieces joined`}
+                      <span style={{fontWeight:500,color:"rgba(0,0,0,0.4)"}}> · {nSeats} seat{nSeats!==1?'s':''}</span>
+                    </div>
+                    <div style={{display:"flex",gap:"4px"}}>
+                      <button onClick={()=>rotatePiecesBy(activeSelPieces,-15)} title="Turn 15° anticlockwise (key: [ )" style={{...btnS,flex:1,padding:"6px 0"}}>↺ 15°</button>
+                      <button onClick={()=>rotatePiecesBy(activeSelPieces,90)} title="Turn a quarter turn clockwise" style={{...btnS,flex:1.3,padding:"6px 0",color:"#1a1a2e"}}>⟳ 90°</button>
+                      <button onClick={()=>rotatePiecesBy(activeSelPieces,15)} title="Turn 15° clockwise (key: ] )" style={{...btnS,flex:1,padding:"6px 0"}}>↻ 15°</button>
+                    </div>
+                    <button onClick={()=>setEditSeats(v=>!v)} title="Click the chairs round the table to switch seats on or off, e.g. the ends of a long table or the back of a lab bench"
+                      style={{...btnS,background:editSeats?"#eaf1fc":"#fff",color:editSeats?"#2e6bce":"rgba(0,0,0,0.5)",border:`1px solid ${editSeats?"rgba(66,133,244,0.35)":"rgba(0,0,0,0.08)"}`}}>{editSeats?'✓ Done editing seats':'✎ Edit seats…'}</button>
+                    {focus.shape==='round'&&(
+                      <div title="How many seats round this table" style={{display:"flex",alignItems:"center",gap:"6px"}}>
+                        <span style={{fontSize:"10.5px",color:"rgba(0,0,0,0.4)",fontWeight:600}}>Seats</span>
+                        <div style={{display:"flex",flex:1,borderRadius:"7px",overflow:"hidden",border:"1px solid rgba(0,0,0,0.08)"}}>
+                          {[4,5,6].map(n=><button key={n} onClick={()=>updatePieces([focus.id],p=>({...p,seatCount:n,seatsOff:(p.seatsOff||[]).filter(i=>i<n)}))} title={`${n} seats round this table`} style={seg((focus.seatCount||4)===n)}>{n}</button>)}
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.25)",margin:"4px 0 4px"}}>Use for</div>
+                      <div style={{display:"flex",borderRadius:"7px",overflow:"hidden",border:"1px solid rgba(0,0,0,0.08)"}}>
+                        {[['desk','Table',['desk']],['workstation','Workstation',['workstation']],['both','Both',['desk','workstation']]].map(([k,lbl,roles])=>(
+                          <button key={k} onClick={()=>updatePieces(activeSelPieces,p=>({...p,roles}))} title={k==='desk'?"An everyday table (used by regular seating)":k==='workstation'?"A lab workstation (used by lab seating)":"Counts as both a table and a workstation"} style={seg(curRole===k)}>{lbl}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <input value={focus.label||''} maxLength={24} placeholder="Label on the table…" title="A label written on the table top, e.g. Bench A"
+                      onChange={e=>{const v=e.target.value.slice(0,24);updatePieces([focus.id],p=>{const q={...p};if(v)q.label=v;else delete q.label;return q;});}}
+                      style={{padding:"6px 8px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",width:"100%",boxSizing:"border-box"}}/>
+                    {cl.length>1&&(
+                      <button onClick={()=>separatePiece(focus.id)} title="Pull this piece away from the table it's joined to (or Alt-drag it)" style={btnS}>✂ Separate this piece</button>
+                    )}
+                    {!pieceDeleteAsk?(
+                      <button onClick={()=>requestDeletePieces(activeSelPieces)} title="Remove this table from the room" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete table</button>
+                    ):(
+                      <div style={{padding:"8px",borderRadius:"8px",background:"#fdeeed",border:"1px solid rgba(200,60,60,0.2)"}}>
+                        <div style={{fontSize:"11px",color:"#a33",fontWeight:600,lineHeight:1.4,marginBottom:"6px"}}>{seatedHere} student{seatedHere!==1?'s':''} will go back to the student list. Delete this table?</div>
+                        <div style={{display:"flex",gap:"4px"}}>
+                          <button onClick={()=>deletePieces(activeSelPieces)} title="Yes, delete the table" style={{...btnS,flex:1,background:"#eb5757",color:"#fff",border:"none",padding:"5px 0"}}>Delete</button>
+                          <button onClick={()=>setPieceDeleteAsk(false)} title="Keep the table" style={{...btnS,flex:1,padding:"5px 0"}}>Cancel</button>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+              {/* Plain desks → a real table shape */}
+              {convertTargetIds&&(
+                <div ref={convertMenu.anchorRef}>
+                  <button onClick={convertMenu.toggle} title="Swap these desks for a table shape (long table, trapezoid, hexagon…). Everyone moves across in the same order, and Undo puts it back"
+                    style={{...btnS,width:"100%",display:"flex",justifyContent:"space-between",background:convertMenu.pos?"#eaf1fc":"#fff",color:"#2e6bce",border:"1px solid rgba(66,133,244,0.25)"}}>
+                    <span>Convert to table</span><span>▸</span>
+                  </button>
+                </div>
+              )}
+              {convertTargetIds&&convertMenu.pos&&createPortal(
+                <div ref={convertMenu.menuRef} style={{position:"fixed",left:convertMenu.pos.left+190,...(convertMenu.pos.top!=null?{top:convertMenu.pos.top-34}:{bottom:convertMenu.pos.bottom}),maxHeight:convertMenu.pos.maxHeight,overflowY:"auto",zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"210px",display:"flex",flexDirection:"column",gap:"4px",fontFamily:"'Source Sans 3',sans-serif"}}>
+                  <div style={menuHead}>{convertTargetIds.length} seat{convertTargetIds.length!==1?'s':''} → which table?</div>
+                  {convertOptions(convertTargetIds.length).map(o=>{
+                    const name=o.kind==='round'?`Round table (${o.seatCount})`:SHAPES[o.kind]?.name||PIECE_COMBOS[o.kind]?.name||`Row of ${o.kind.slice(3)} long tables`;
+                    return(
+                      <button key={o.kind+(o.seatCount||'')} onClick={()=>convertTo(o)} title={`Make this a ${name.toLowerCase()} with ${o.seats} seats`} style={{...btnS,display:"flex",alignItems:"center",gap:"8px",padding:"5px 8px",textAlign:"left"}}
+                        onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
+                        onMouseLeave={e=>e.currentTarget.style.background="#fff"}>
+                        <PieceThumb kind={o.kind} seatCount={o.seatCount} size={34}/>
+                        <span style={{flex:1,fontSize:"11.5px",color:"#1a1a2e"}}>{name}</span>
+                        <span style={{fontSize:"10px",color:"rgba(0,0,0,0.35)"}}>{o.seats}</span>
+                      </button>
+                    );
+                  })}
+                </div>,
+                document.body
+              )}
+              {sel.size>=2&&!selSeats.some(s=>s.pieceId)&&(
                 <button onClick={handleGroup} title="Combine the selected desks into one table group" style={{...btnS,background:"#eaf1fc",color:"#2e6bce",border:"1px solid rgba(66,133,244,0.2)"}}
                   onMouseEnter={e=>e.currentTarget.style.background="#d4e4fb"}
                   onMouseLeave={e=>e.currentTarget.style.background="#eaf1fc"}
                 >Group</button>
               )}
-              {anyGrouped&&(
+              {anyGrouped&&!selSeats.some(s=>s.pieceId)&&(
                 <button onClick={handleUngroup} title="Dissolve the table group — seats stay where they are" style={btnS}
                   onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
                   onMouseLeave={e=>e.currentTarget.style.background="#fff"}
@@ -3506,10 +4421,12 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                   >{allUnavailable?'✓ Unavailable':anyUnavailable?'Unavailable (partial)':'Mark unavailable'}</button>
                 );
               })()}
-              <button onClick={handleDelete} title="Remove the selected seat(s) or room item from the room entirely" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}
-                onMouseEnter={e=>{e.currentTarget.style.background="#fdeeed";}}
-                onMouseLeave={e=>{e.currentTarget.style.background="#fff";}}
-              >Delete</button>
+              {!activeSelPieces.length&&(
+                <button onClick={handleDelete} title={selSeats.some(s=>s.pieceId)?"Switch the selected seat(s) off — the table keeps that place, and Edit seats can switch it back on":"Remove the selected seat(s) or room item from the room entirely"} style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}
+                  onMouseEnter={e=>{e.currentTarget.style.background="#fdeeed";}}
+                  onMouseLeave={e=>{e.currentTarget.style.background="#fff";}}
+                >{selSeats.length&&selSeats.every(s=>s.pieceId)?'Switch seat off':'Delete'}</button>
+              )}
             </div>
           </div>
         )}
@@ -3654,6 +4571,65 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             );
           })}
 
+          {/* ── Table pieces: chairs round the outside, one table top per joined cluster ── */}
+          {livePieces.length>0&&(()=>{
+            const chairMap=chairIndexMap(seats,groups);
+            const selIds=new Set(activeSelPieces);
+            const clusters=clustersFromJoins(livePieces,joins);
+            const groupOfSeat={};groups.forEach((g,gi)=>g.seatIds.forEach(id=>{groupOfSeat[id]={g,gi};}));
+            const selB=activeSelPieces.length?piecesBounds(livePieces.filter(p=>selIds.has(p.id)),liveSlots):null;
+            return(
+              <>
+                <PieceTables pieces={livePieces} joins={joins} slots={liveSlots} seatByKey={seatByKey} chairMap={chairMap} selectedIds={selIds} snapLine={pieceDrag?.snap?.line}/>
+                {/* Invisible hit areas over each table top: click to pick the table, drag to move it */}
+                <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:1}}>
+                  {livePieces.map(p=>{
+                    const w=pieceToWorld(p);
+                    const hit={onMouseDown:e=>handlePieceMD(e,p.id),onClick:e=>e.stopPropagation(),title:"Drag to move this table (it snaps onto other tables' edges). Alt-drag pulls one piece off, or moves it without snapping.",style:{fill:"transparent",pointerEvents:"all",cursor:pieceDrag?"grabbing":"grab"}};
+                    return w.circle?<circle key={p.id} cx={w.center[0]} cy={w.center[1]} r={w.circle} {...hit}/>:<polygon key={p.id} points={w.poly.map(q=>q.join(",")).join(" ")} {...hit}/>;
+                  })}
+                </svg>
+                {/* A small paper tab with the table's group name, above each table of 2+ seats */}
+                {clusters.map(ids=>{
+                  const seatId=seats.find(s=>ids.includes(s.pieceId)&&groupOfSeat[s.id])?.id;
+                  if(!seatId)return null;
+                  const{g,gi}=groupOfSeat[seatId];
+                  const b=piecesBounds(livePieces.filter(p=>ids.includes(p.id)),liveSlots);if(!b)return null;
+                  const isSel=ids.some(id=>selIds.has(id));
+                  return(
+                    <button key={`tab-${ids[0]}`} onMouseDown={e=>handlePieceMD(e,ids[0])} onClick={e=>e.stopPropagation()} title="Select or drag this table"
+                      style={{position:"absolute",left:b.x+b.w/2,top:b.y-24,transform:"translateX(-50%)",zIndex:3,height:20,display:"flex",alignItems:"center",gap:5,padding:"0 9px",borderRadius:"8px 8px 3px 3px",
+                        background:isSel?"var(--cp-sel)":"var(--cp-paper)",border:`1.5px solid ${isSel?"var(--cp-sel)":"var(--cp-tag-ink)"}`,boxShadow:"1.5px 2px 0 var(--cp-shadow)",cursor:"grab",fontFamily:"'Source Sans 3',sans-serif",whiteSpace:"nowrap"}}>
+                      <span style={{width:9,height:9,borderRadius:3,background:chairColor(gi),border:"1.5px solid var(--cp-tag-ink)",flexShrink:0}}/>
+                      <span style={{fontSize:"11px",fontWeight:800,lineHeight:1,color:isSel?"#fff":"var(--cp-tag-text)",maxWidth:120,overflow:"hidden",textOverflow:"ellipsis"}}>{g.label||String(gi+1)}</span>
+                    </button>
+                  );
+                })}
+                {/* Rotate handle on the picked table: drag round (15° steps, Shift = free) */}
+                {selB&&(!pieceDrag||pieceDrag.rotating)&&(
+                  <>
+                    <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:3}} aria-hidden="true">
+                      <line x1={selB.x+selB.w} y1={selB.y} x2={selB.x+selB.w+14} y2={selB.y-14} style={{stroke:"var(--cp-sel)",strokeWidth:1.5,strokeDasharray:"3 2"}}/>
+                    </svg>
+                    <button onMouseDown={e=>handleRotateMD(e,activeSelPieces)} onClick={e=>e.stopPropagation()} title="Drag to rotate this table (snaps to 15°; hold Shift to turn freely). Keys: [ and ]"
+                      style={{position:"absolute",left:selB.x+selB.w+14-13,top:selB.y-14-13,width:26,height:26,borderRadius:"50%",zIndex:4,border:"2px solid var(--cp-sel)",background:"var(--cp-paper)",color:"var(--cp-sel)",fontSize:"15px",fontWeight:800,lineHeight:1,padding:0,cursor:"crosshair",boxShadow:"0 0 0 4px var(--cp-sel-glow)",display:"flex",alignItems:"center",justifyContent:"center"}}>⟳</button>
+                    {pieceDrag?.rotating&&<div style={{position:"absolute",left:selB.x+selB.w+20,top:selB.y-44,zIndex:4,fontSize:"11px",fontWeight:800,color:"#fff",background:"var(--cp-sel)",borderRadius:5,padding:"1px 6px",pointerEvents:"none"}}>{Math.round(pieceDrag.steps[0].drot)}°</div>}
+                  </>
+                )}
+                {/* "Edit seats": every place round the picked table, click to switch it on/off */}
+                {editSeats&&activeSelPieces.length>0&&!pieceDrag&&liveSlots.filter(sl=>selIds.has(sl.pieceId)&&sl.state!=='joined').map(sl=>{
+                  const on=sl.state==='on';
+                  return(
+                    <button key={`es-${sl.key}`} onClick={e=>{e.stopPropagation();toggleSlot(sl.pieceId,sl.slot);}} onMouseDown={e=>e.stopPropagation()}
+                      title={on?"Switch this seat off (whoever sits here goes back to the student list)":"Switch a seat on here"}
+                      style={{position:"absolute",left:sl.chair.x-15,top:sl.chair.y-15,width:30,height:30,borderRadius:"50%",zIndex:7,padding:0,cursor:"pointer",
+                        border:`2px ${on?"solid":"dashed"} var(--cp-sel)`,background:on?"var(--cp-sel)":"rgba(255,255,255,0.75)",color:on?"#fff":"var(--cp-sel)",fontSize:"15px",fontWeight:800,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.2)"}}>{on?"✓":"+"}</button>
+                  );
+                })}
+              </>
+            );
+          })()}
+
           {/* Group = one shared table top under its seats, plus a folder-style tab.
               The tab is a full-width bar sitting on top of the group — always
               visible and always clickable, so it doubles as "here's a group" and
@@ -3662,6 +4638,8 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
               selected — the rest of the table gets a dashed halo), full (the
               group itself is selected via its tab — blue outline + glow). */}
           {groups.map((g,gi)=>{
+            // a table made of pieces draws itself (above); this is for plain seat groups
+            if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null;
             const liveSeatPositions=g.seatIds.map(id=>{
               const s=seats.find(x=>x.id===id);if(!s)return null;
               let x=s.x,y=s.y;
@@ -3711,6 +4689,40 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
               const state=s.unavailable?"unavailable":!s.used?"unused":"ok";
               const st=s.studentId?studentById(s.studentId):null;
               const mismatch=!!st&&cleanTags.length>0&&!studentMatchesSeat(st,s);
+              if(s.pieceId){
+                /* A table piece's seat: just its name tag (horizontal, wherever the
+                   table points) — the chair and table top are drawn by PieceTables. */
+                const t=liveSlotByKey.get(`${s.pieceId}:${s.slot}`)?.tag;if(!t)return null;
+                return(
+                  <div key={s.id} onClick={e=>{e.stopPropagation();handleSeatClick(e,s.id);}} onMouseDown={e=>e.stopPropagation()}
+                    style={{position:"absolute",left:t.x-t.w/2,top:t.y-t.h/2,width:t.w,height:t.h,userSelect:"none",zIndex:isSel?6:2}}>
+                    {isSel&&<div style={{position:"absolute",inset:-4,borderRadius:8,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",pointerEvents:"none"}}/>}
+                    {st?(
+                      <>
+                        <NameTag name={st.name} tilt={tagTilt(s.id)} w={t.w} h={t.h} fontSize={t.font} pad={15} warn={mismatch} locked={s.locked}
+                          title={mismatch?`${st.name} doesn't match this seat's tag rule`:st.name} cursor={s.locked?"default":"grab"}
+                          onMouseDown={e=>{e.stopPropagation();!s.locked&&startStudentDrag(e,s.studentId,s.id);}}
+                          onClick={e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}}/>
+                        {mismatch&&<div title={`${st.name} doesn't match this seat's tag rule`} style={{position:"absolute",top:"-6px",right:"12px",zIndex:3,fontSize:"9px",lineHeight:1,background:"#eb5757",color:"#fff",borderRadius:"50%",width:"13px",height:"13px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,border:"1px solid #fff"}}>!</div>}
+                        <button onClick={e=>{e.stopPropagation();toggleLock(s.id);}} onMouseDown={e=>e.stopPropagation()} title={s.locked?"Unlock":"Lock student here"}
+                          style={{position:"absolute",top:"50%",transform:"translateY(-50%)",right:"1px",background:"none",border:"none",cursor:"pointer",fontSize:"10px",opacity:s.locked?1:0.45,padding:"1px",lineHeight:1,zIndex:2}}>{s.locked?"🔒":"🔓"}</button>
+                        {!s.locked&&<button onClick={e=>{e.stopPropagation();removeFromSeat(s.id);}} onMouseDown={e=>e.stopPropagation()} title="Remove this student from the seat"
+                          style={{position:"absolute",top:"-7px",left:"-7px",background:"rgba(255,250,240,0.9)",border:"1.5px solid rgba(200,50,50,0.4)",borderRadius:"50%",cursor:"pointer",fontSize:"11px",color:"rgba(200,50,50,0.65)",padding:0,lineHeight:1,zIndex:2,width:"15px",height:"15px",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>×</button>}
+                      </>
+                    ):(
+                      <div title={s.unavailable?"This seat is unavailable":!s.used?"This seat is out of use":"Empty seat — drag a student here, or click to select it"}
+                        style={{width:"100%",height:"100%",boxSizing:"border-box",borderRadius:4,border:"1.5px dashed var(--cp-tag-ink)",background:"rgba(255,250,240,0.6)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"10.5px",fontWeight:700,fontStyle:"italic",color:s.unavailable?"#a02a22":"var(--cp-tag-text)",opacity:s.unavailable||!s.used?0.9:0.7,fontFamily:"'Source Sans 3',sans-serif",cursor:"pointer"}}>
+                        {s.unavailable?"unavailable":!s.used?"unused":"empty"}
+                      </div>
+                    )}
+                    {cleanTags.length>0&&(
+                      <div style={{position:"absolute",top:-5,right:st?14:4,display:"flex",gap:2,zIndex:3,pointerEvents:"none"}}>
+                        {cleanTags.map(tg=>{const tc=colorFor(tg);return <div key={tg} style={{width:8,height:8,borderRadius:"50%",background:tc.t,border:"1px solid var(--cp-tag-ink)"}}/>;})}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
               return(
                 <div key={s.id}
                   onClick={e=>{e.stopPropagation();handleSeatClick(e,s.id);}}
@@ -3729,7 +4741,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                     :<div style={{position:"absolute",inset:-3,borderRadius:10,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>)}
                   {isGroupMate&&!isSel&&<div style={{position:"absolute",inset:-2,borderRadius:9,border:"2px dashed var(--cp-sel)",opacity:0.8,pointerEvents:"none"}}/>}
                   {/* Add/remove-from-active-group toggle — only while a group tab is selected */}
-                  {activeGroupId&&(
+                  {activeGroupId&&!activeGroupIsTable&&(
                     <button
                       onClick={e=>{e.stopPropagation();inActiveGroup?removeSeatFromGroup(s.id,activeGroupId):addSeatsToGroup([s.id],activeGroupId);}}
                       onMouseDown={e=>e.stopPropagation()}
@@ -3821,6 +4833,14 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         <button onClick={()=>setZoom(1)} title="Reset zoom" style={{minWidth:"38px",padding:"0 4px",height:"24px",borderRadius:"6px",border:"none",background:"none",color:"rgba(0,0,0,0.4)",fontSize:"11px",fontWeight:700,cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"} onMouseLeave={e=>e.currentTarget.style.background="none"}>{Math.round(zoom*100)}%</button>
         <button onClick={()=>setZoom(z=>Math.min(ZOOM_MAX,+(z+0.15).toFixed(2)))} title="Zoom in" style={{width:"24px",height:"24px",borderRadius:"6px",border:"none",background:"none",color:"rgba(0,0,0,0.45)",fontSize:"15px",fontWeight:600,cursor:"pointer",lineHeight:1}} onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"} onMouseLeave={e=>e.currentTarget.style.background="none"}>+</button>
       </div>
+
+      {/* Short notices, e.g. who went back to the student list when a join hid their seat */}
+      {notice&&(
+        <div role="status" style={{position:"absolute",bottom:"14px",left:"50%",transform:"translateX(-50%)",zIndex:61,maxWidth:"min(560px,70%)",display:"flex",alignItems:"center",gap:"10px",padding:"8px 10px 8px 14px",borderRadius:"10px",background:"#1a1a2e",color:"#fff",fontSize:"12px",fontWeight:600,lineHeight:1.4,boxShadow:"0 4px 18px rgba(0,0,0,0.25)",fontFamily:"'Source Sans 3',sans-serif"}}>
+          <span>{notice}</span>
+          <button onClick={()=>setNotice(null)} title="Dismiss" style={{background:"none",border:"none",color:"rgba(255,255,255,0.6)",cursor:"pointer",fontSize:"15px",lineHeight:1,padding:"0 2px"}}>×</button>
+        </div>
+      )}
 
       {/* Undo — reverts the last change to seats/groups/room items/rules.
           Session-only history, one step back per click. */}
@@ -4374,9 +5394,10 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
     setLayout(next);save(`sl-${activeClass.id}`,next);
   };
 
-  const centerScroll=(ref,seats,roomItems)=>{
+  const centerScroll=(ref,seats,roomItems,pieces)=>{
     const el=ref.current;if(!el||!seats.length)return;
-    const allItems=[...seats.filter(s=>s.x!==undefined).map(s=>({x:s.x,y:s.y,w:SW,h:SH})),...(roomItems||[]).map(r=>({x:r.x,y:r.y,w:SW,h:SH}))];
+    const pb=pieces?.length?piecesBounds(pieces,slotsForLayout(pieces,[])):null;
+    const allItems=[...seats.filter(s=>s.x!==undefined).map(s=>({x:s.x,y:s.y,w:SW,h:SH})),...(roomItems||[]).map(r=>({x:r.x,y:r.y,w:SW,h:SH})),...(pb?[pb]:[])];
     if(!allItems.length)return;
     const minX=Math.min(...allItems.map(i=>i.x));
     const minY=Math.min(...allItems.map(i=>i.y));
@@ -4391,9 +5412,9 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
      the window's old, narrower width — which is why this looked "stuck" on the
      left. Center after the seats paint, then again once the window actually
      finishes resizing. */
-  const centerScrollWhenReady=(ref,seats,roomItems)=>{
-    let raf1=requestAnimationFrame(()=>{raf1=requestAnimationFrame(()=>centerScroll(ref,seats,roomItems));});
-    const recenter=()=>centerScroll(ref,seats,roomItems);
+  const centerScrollWhenReady=(ref,seats,roomItems,pieces)=>{
+    let raf1=requestAnimationFrame(()=>{raf1=requestAnimationFrame(()=>centerScroll(ref,seats,roomItems,pieces));});
+    const recenter=()=>centerScroll(ref,seats,roomItems,pieces);
     window.addEventListener('resize',recenter);
     const stop=setTimeout(()=>window.removeEventListener('resize',recenter),700);
     return()=>{cancelAnimationFrame(raf1);window.removeEventListener('resize',recenter);clearTimeout(stop);};
@@ -4411,7 +5432,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
       }
       const loaded=l||{seats:[],groups:[],roomItems:[]};
       setLayout(loaded);
-      cleanupCenter=centerScrollWhenReady(scrollRef,loaded.seats||[],loaded.roomItems||[]);
+      cleanupCenter=centerScrollWhenReady(scrollRef,loaded.seats||[],loaded.roomItems||[],loaded.pieces||[]);
     });
     return()=>cleanupCenter();
   },[activeClass?.id]);
@@ -4428,7 +5449,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
   useEffect(()=>{
     if(!displayMode||!layout)return;
     setDisplayZoom(1);
-    return centerScrollWhenReady(displayScrollRef,layout.seats||[],layout.roomItems||[]);
+    return centerScrollWhenReady(displayScrollRef,layout.seats||[],layout.roomItems||[],layout.pieces||[]);
   },[displayMode,layout]);
 
   if(!activeClass)return(
@@ -4438,11 +5459,15 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",background:"linear-gradient(180deg,var(--board-bg-top),var(--board-bg-bottom))",color:"var(--board-muted)",fontSize:"13px",fontFamily:"'Source Sans 3',sans-serif"}}>Loading…</div>
   );
 
-  const{seats=[],groups=[],roomItems=[]}=layout;
+  const{seats=[],groups=[],roomItems=[],pieces=[],joins=[]}=layout;
   const pos=sPosMap(seats,groups,null);
   const studentById=id=>(activeClass?.students||[]).find(s=>s.id===id);
-  const hasLayout=seats.length>0||roomItems.length>0;
-  const canvasSize=canvasContentSize(seats,roomItems);
+  const hasLayout=seats.length>0||roomItems.length>0||pieces.length>0;
+  // table pieces: the same geometry and drawing as Manage Seating, read-only here
+  const pieceSlots=slotsForLayout(pieces,joins);
+  const pieceSlotByKey=new Map(pieceSlots.map(sl=>[sl.key,sl]));
+  const pieceSeatByKey=new Map(seats.filter(s=>s.pieceId).map(s=>[`${s.pieceId}:${s.slot}`,s]));
+  const canvasSize=canvasContentSize(seats,roomItems,pieces,pieceSlots);
 
   const RoomCanvas=({scale=1,interactive=true})=>{
     const chairMap=chairIndexMap(seats,groups);
@@ -4477,8 +5502,12 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
         return null;
       })}
 
+      {/* Table pieces: chairs round the outside and one table top per joined cluster */}
+      <PieceTables pieces={pieces} joins={joins} slots={pieceSlots} seatByKey={pieceSeatByKey} chairMap={chairMap} hideUnused/>
+
       {/* One shared table top under each group's seats */}
       {groups.map(g=>{
+        if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null; // a piece table draws itself
         const gb=gBoundsFromSeats(g,seats);
         return <TableSurface key={`gb-${g.id}`} rect={{x:gb.x-GROUP_PAD,y:gb.y-GROUP_PAD,w:gb.w+GROUP_PAD*2,h:gb.h+GROUP_PAD*2}} radius={12}/>;
       })}
@@ -4488,6 +5517,23 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
         const p=pos[s.id];if(!p||!s.used)return null;
         const st=s.studentId?studentById(s.studentId):null;
         const studentFlags=st?(flagsByStudent?.get(st.id)||[]):[];
+        if(s.pieceId){
+          // a table seat: its name tag sits where the table puts it (the chair is already drawn)
+          const t=pieceSlotByKey.get(`${s.pieceId}:${s.slot}`)?.tag;
+          if(!t||!st)return null;
+          return(
+            <div key={s.id} style={{position:"absolute",left:t.x-t.w/2,top:t.y-t.h/2,width:t.w,height:t.h,zIndex:2}}>
+              <NameTag name={st.name} tilt={tagTilt(s.id)} w={t.w} h={t.h} fontSize={t.font+0.5} pad={5}
+                cursor={interactive?"pointer":"default"} title={st.name}
+                onClick={interactive?e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}:undefined}/>
+              {showFlags&&studentFlags.length>0&&(
+                <div className="flag-indicator" style={{position:"absolute",top:-6,right:-6,zIndex:10}}>
+                  <FlagDots flags={studentFlags} scale={1} onClick={interactive?e=>{e.stopPropagation();const r=e.currentTarget.getBoundingClientRect();setNameClick({studentId:st.id,name:st.name,x:r.left+r.width/2,y:r.bottom});}:undefined}/>
+                </div>
+              )}
+            </div>
+          );
+        }
         return(
           <div key={s.id} style={{position:"absolute",left:p.x,top:p.y,width:SW,height:SH}}>
             <SeatArt chair={chairMap[s.id]} state="ok" standalone={!grouped.has(s.id)} hasStudent={!!st}/>

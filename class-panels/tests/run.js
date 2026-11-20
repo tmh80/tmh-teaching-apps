@@ -62,6 +62,13 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
 (async () => {
   fs.mkdirSync(SHOT_DIR, { recursive: true });
 
+  console.log('Geometry unit tests (tests/geometry.test.js)');
+  let geomOut = '', geomOk = true;
+  try { geomOut = execSync('node ' + JSON.stringify(path.join(__dirname, 'geometry.test.js')), { cwd: ROOT }).toString(); }
+  catch (e) { geomOk = false; geomOut = (e.stdout || '').toString(); }
+  const geomSummary = (geomOut.match(/(\d+) passed, (\d+) failed/) || [])[0] || 'no summary';
+  ok(geomOk, `table geometry: ${geomSummary}` + (geomOk ? '' : '\n' + geomOut.split('\n').filter(l => l.includes('FAIL')).join('\n')));
+
   console.log('Building…');
   const buildOut = execSync('node build.js 2>&1', { cwd: ROOT }).toString();
   // one duplicate-key warning in the Seating view is known and left alone
