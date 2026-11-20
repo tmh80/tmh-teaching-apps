@@ -4452,6 +4452,7 @@ function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetS
   const[groupRules,setGroupRules]=useState([]);       // the actual rules grouping uses — a single editable list, optionally imported from Manage Seating
   const[finalised,setFinalised]=useState(false);
   const[historyClearing,setHistoryClearing]=useState(false);
+  const loadedForRef=useRef(null); // which class the panel state currently belongs to
   const[loaded,setLoaded]=useState(false); // guards the save-effect until the initial load has landed
   const[savedGroupings,setSavedGroupings]=useState([]); // named, archived arrangements — e.g. "Persuasive Essay Groups"
   const[showSaveGrouping,setShowSaveGrouping]=useState(false);
@@ -4535,13 +4536,15 @@ function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetS
       } else {
         setMode('size');setSizeVal('3');setCountVal('4');setFairness(false);setGroupRules([]);setFinalised(false);
       }
-      setLoaded(true);
+      loadedForRef.current=classAtLoad.id;setLoaded(true);
     });
   },[activeClass?.id]);
 
   /* Persist this panel's state so it survives closing and reopening the tab. */
   useEffect(()=>{
-    if(!activeClass?.id||!loaded)return;
+    /* On a class switch this effect runs with the OLD class's state before the
+       reload lands; loadedForRef stops it overwriting the new class's saved settings. */
+    if(!activeClass?.id||!loaded||loadedForRef.current!==activeClass.id)return;
     save(`gp-${activeClass.id}`,{
       mode,sizeVal,countVal,fairness,groupRules,finalised,groupNames,
       resultGroupIds:result?result.groups.map(g=>g.map(s=>s.id)):null,
