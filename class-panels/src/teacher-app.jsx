@@ -618,6 +618,57 @@ function BuilderPanel({onAdd,onClose,savedTemplates,onSaveTemplate,onDeleteTempl
 }
 
 /* ══════════════════════════════════════════════════════════
+   CLASS CHIPS — one-click class switching in the banner
+   ══════════════════════════════════════════════════════════ */
+const CHIP_PALETTE=["#b2efc4","#9ccaf9","#d2f5fb","#ffd98a","#ffb3a1"]; // the app icon's mint, sky, cyan, sunny, coral
+const CHIP_INK="#2b2118";
+function ClassChips({classes,activeClassId,onSetActiveClass}){
+  const rowRef=useRef(null);
+  /* Mouse wheel scrolls the row sideways (the scrollbar is hidden). Native
+     listener because React's onWheel is passive and can't preventDefault. */
+  useEffect(()=>{
+    const el=rowRef.current;if(!el)return;
+    const onWheel=e=>{
+      if(el.scrollWidth<=el.clientWidth)return;
+      e.preventDefault();
+      el.scrollLeft+=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
+    };
+    el.addEventListener("wheel",onWheel,{passive:false});
+    return()=>el.removeEventListener("wheel",onWheel);
+  },[]);
+  /* Keep the active chip visible. Done by hand with scrollLeft because
+     scrollIntoView can also scroll the page vertically. */
+  useEffect(()=>{
+    const el=rowRef.current;if(!el)return;
+    const chip=[...el.children].find(c=>c.dataset.classId===activeClassId);
+    if(!chip)return;
+    const l=chip.offsetLeft,r=l+chip.offsetWidth;
+    if(l<el.scrollLeft)el.scrollLeft=Math.max(0,l-6);
+    else if(r>el.scrollLeft+el.clientWidth)el.scrollLeft=r-el.clientWidth+6;
+  },[activeClassId,classes.length]);
+  return(
+    <div ref={rowRef} className="no-drag cp-chips" style={{display:"flex",alignItems:"center",gap:"6px",flex:"1 1 0",minWidth:0,overflowX:"auto",overflowY:"hidden",scrollbarWidth:"none",padding:"3px 4px"}}>
+      {classes.map((c,i)=>{
+        const active=c.id===activeClassId;
+        const colour=c.color||c.colour||CHIP_PALETTE[i%CHIP_PALETTE.length];
+        const n=c.students.length;
+        return(
+          <button key={c.id} data-class-id={c.id} onClick={()=>{if(!active)onSetActiveClass(c.id);}}
+            title={`${active?"Current class":"Switch to"} ${c.name} (${n} student${n!==1?"s":""})${i<9?` — Alt+${i+1}`:""}`}
+            style={{flexShrink:0,display:"flex",alignItems:"center",gap:"6px",maxWidth:"170px",padding:"4px 12px",borderRadius:"999px",border:`1.6px solid ${active?CHIP_INK:"rgba(43,33,24,0.45)"}`,background:active?colour:"transparent",color:CHIP_INK,fontSize:"12.5px",fontWeight:active?700:600,fontFamily:"'Source Sans 3',sans-serif",cursor:active?"default":"pointer",boxShadow:active?"1.5px 2px 0 rgba(43,33,24,0.55)":"none",transition:"background 0.12s"}}
+            onMouseEnter={e=>{if(!active)e.currentTarget.style.background=colour+"99";}}
+            onMouseLeave={e=>{if(!active)e.currentTarget.style.background="transparent";}}
+          >
+            {!active&&<span style={{width:"8px",height:"8px",borderRadius:"50%",background:colour,border:`1px solid ${CHIP_INK}`,flexShrink:0}}/>}
+            <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
    DOTS MENU
    ══════════════════════════════════════════════════════════ */
 function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageClass,onDeleteClass}){
@@ -645,32 +696,9 @@ function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageCla
             {activeClass?.isDemo&&<div style={{fontSize:"10.5px",color:"#b8850a",marginTop:"2px",fontWeight:500}}>Demo data — click Manage class to replace</div>}
             {activeClass&&!activeClass.isDemo&&<div style={{fontSize:"10.5px",color:"rgba(0,0,0,0.3)",marginTop:"2px"}}>{activeClass.students.length} student{activeClass.students.length!==1?"s":""}</div>}
           </div>
-          {/* Class list */}
+          {/* Classes are switched with the chips in the banner now; this menu keeps the class admin. */}
           <div style={{padding:"6px 0",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
-            {classes.map(c=>(
-              confirmDeleteId===c.id?(
-                <div key={c.id} style={{padding:"8px 16px",background:"#fdeeed"}}>
-                  <div style={{fontSize:"12px",color:"#c44",fontWeight:600,marginBottom:"7px",lineHeight:1.4}}>Delete "{c.name}"? This removes its roster, seating and checklist.</div>
-                  <div style={{display:"flex",gap:"6px"}}>
-                    <button onClick={()=>{onDeleteClass(c.id);setConfirmDeleteId(null);setOpen(false);}} style={{flex:1,padding:"6px 0",borderRadius:"7px",border:"none",background:"#eb5757",color:"#fff",fontSize:"11.5px",fontWeight:700,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Delete</button>
-                    <button onClick={()=>setConfirmDeleteId(null)} style={{flex:1,padding:"6px 0",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.1)",background:"#fff",color:"rgba(0,0,0,0.5)",fontSize:"11.5px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Cancel</button>
-                  </div>
-                </div>
-              ):(
-                <div key={c.id} style={{display:"flex",alignItems:"center",background:c.id===activeClassId?"#eaf1fc":"none"}}
-                  onMouseEnter={e=>{if(c.id!==activeClassId)e.currentTarget.style.background="rgba(0,0,0,0.03)";}}
-                  onMouseLeave={e=>{if(c.id!==activeClassId)e.currentTarget.style.background="none";}}
-                >
-                  <button onClick={()=>{onSetActiveClass(c.id);setOpen(false);}} style={{...menuItem,background:"none",color:c.id===activeClassId?"#2e6bce":"#1a1a2e",fontWeight:c.id===activeClassId?600:400,flex:1,minWidth:0}}>
-                    <span style={{fontSize:"8px",color:c.id===activeClassId?"#2e6bce":"rgba(0,0,0,0.2)"}}>●</span>
-                    <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</span>
-                    {c.isDemo&&<span style={{fontSize:"9px",color:"#b8850a",fontWeight:600,marginLeft:"auto",flexShrink:0}}>demo</span>}
-                  </button>
-                  <button onClick={()=>setConfirmDeleteId(c.id)} title="Delete class" style={{background:"none",border:"none",color:"rgba(0,0,0,0.18)",cursor:"pointer",fontSize:"14px",padding:"6px 12px",lineHeight:1,flexShrink:0}} onMouseEnter={e=>e.currentTarget.style.color="#eb5757"} onMouseLeave={e=>e.currentTarget.style.color="rgba(0,0,0,0.18)"}>×</button>
-                </div>
-              )
-            ))}
-            <button onClick={()=>{onNewClass();setOpen(false);}} style={{...menuItem,color:"rgba(0,0,0,0.4)",}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,0.03)"} onMouseLeave={e=>e.currentTarget.style.background="none"}>
+            <button onClick={()=>{onNewClass();setOpen(false);}} title="Add a new class with its own roster" style={{...menuItem,color:"rgba(0,0,0,0.55)",}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,0.03)"} onMouseLeave={e=>e.currentTarget.style.background="none"}>
               <span style={{fontSize:"15px",lineHeight:1}}>+</span><span>New class</span>
             </button>
           </div>
@@ -679,6 +707,19 @@ function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageCla
             <button onClick={()=>{onManageClass();setOpen(false);}} style={{...menuItem,fontWeight:600}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,0.03)"} onMouseLeave={e=>e.currentTarget.style.background="none"}>
               <span>Manage class</span><span style={{marginLeft:"auto",color:"rgba(0,0,0,0.25)",fontSize:"12px"}}>→</span>
             </button>
+            {activeClass&&(confirmDeleteId===activeClass.id?(
+              <div style={{padding:"8px 16px",background:"#fdeeed"}}>
+                <div style={{fontSize:"12px",color:"#c44",fontWeight:600,marginBottom:"7px",lineHeight:1.4}}>Delete "{activeClass.name}"? This removes its roster, seating and checklist.</div>
+                <div style={{display:"flex",gap:"6px"}}>
+                  <button onClick={()=>{onDeleteClass(activeClass.id);setConfirmDeleteId(null);setOpen(false);}} style={{flex:1,padding:"6px 0",borderRadius:"7px",border:"none",background:"#eb5757",color:"#fff",fontSize:"11.5px",fontWeight:700,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Delete</button>
+                  <button onClick={()=>setConfirmDeleteId(null)} style={{flex:1,padding:"6px 0",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.1)",background:"#fff",color:"rgba(0,0,0,0.5)",fontSize:"11.5px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Cancel</button>
+                </div>
+              </div>
+            ):(
+              <button onClick={()=>setConfirmDeleteId(activeClass.id)} title={`Delete ${activeClass.name} and its seating, groups and checklist`} style={{...menuItem,color:"#c44"}} onMouseEnter={e=>e.currentTarget.style.background="rgba(235,87,87,0.07)"} onMouseLeave={e=>e.currentTarget.style.background="none"}>
+                <span>Delete this class…</span>
+              </button>
+            ))}
           </div>
         </div>
       )}
@@ -4411,6 +4452,7 @@ function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetS
   const[groupRules,setGroupRules]=useState([]);       // the actual rules grouping uses — a single editable list, optionally imported from Manage Seating
   const[finalised,setFinalised]=useState(false);
   const[historyClearing,setHistoryClearing]=useState(false);
+  const loadedForRef=useRef(null); // which class the panel state currently belongs to
   const[loaded,setLoaded]=useState(false); // guards the save-effect until the initial load has landed
   const[savedGroupings,setSavedGroupings]=useState([]); // named, archived arrangements — e.g. "Persuasive Essay Groups"
   const[showSaveGrouping,setShowSaveGrouping]=useState(false);
@@ -4494,13 +4536,15 @@ function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetS
       } else {
         setMode('size');setSizeVal('3');setCountVal('4');setFairness(false);setGroupRules([]);setFinalised(false);
       }
-      setLoaded(true);
+      loadedForRef.current=classAtLoad.id;setLoaded(true);
     });
   },[activeClass?.id]);
 
   /* Persist this panel's state so it survives closing and reopening the tab. */
   useEffect(()=>{
-    if(!activeClass?.id||!loaded)return;
+    /* On a class switch this effect runs with the OLD class's state before the
+       reload lands; loadedForRef stops it overwriting the new class's saved settings. */
+    if(!activeClass?.id||!loaded||loadedForRef.current!==activeClass.id)return;
     save(`gp-${activeClass.id}`,{
       mode,sizeVal,countVal,fairness,groupRules,finalised,groupNames,
       resultGroupIds:result?result.groups.map(g=>g.map(s=>s.id)):null,
@@ -5979,7 +6023,9 @@ function TabStrip({openPanels,onToggle,onTabClickFromManageSeating,timerStatus,c
   return(
     <div className="drag-bar" style={{display:"flex",alignItems:"center",height:"50px",padding:"0 12px",background:"repeating-linear-gradient(115deg,rgba(255,250,240,0.4) 0px,rgba(255,250,240,0.4) 1px,transparent 1px,transparent 5px),linear-gradient(180deg,#e0c1a0,#d1a97e)",borderBottom:"1px solid rgba(120,85,55,0.22)",flexShrink:0,zIndex:100,position:"relative"}}>
       <div style={{width:"72px",flexShrink:0}}/>
-      <div ref={tabsOuterRef} style={{display:"flex",gap:"3px",flex:1,minWidth:0,justifyContent:"center",alignItems:"center",position:"relative"}}>
+      {/* Chips and tabs each get an equal share (flex 1 1 0, minWidth 0), so neither can push into the other or the right-hand cluster; the tabs already collapse to "Panels" when their share is too small. */}
+      <ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass}/>
+      <div ref={tabsOuterRef} style={{display:"flex",gap:"3px",flex:"1 1 0",minWidth:0,justifyContent:"center",alignItems:"center",position:"relative"}}>
         {/* Hidden always-full-size copy, purely to measure whether all four
             tabs would fit — never shown, never interactive. */}
         <div ref={tabsMeasureRef} aria-hidden="true" style={{position:"absolute",top:0,left:"50%",visibility:"hidden",pointerEvents:"none",display:"flex",gap:"3px",alignItems:"center",whiteSpace:"nowrap"}}>
@@ -6228,6 +6274,22 @@ export default function TeacherApp(){
     save("ta-active-class",id);
   },[]);
 
+  /* Alt/Option+1…9 jumps to class 1–9. Uses e.code because on a Mac Option+1
+     types "¡" in e.key. Ignored while typing in a field. */
+  useEffect(()=>{
+    const h=e=>{
+      if(!e.altKey||e.ctrlKey||e.metaKey||e.shiftKey||e.repeat)return;
+      const m=/^Digit([1-9])$/.exec(e.code);if(!m)return;
+      const t=e.target,tag=t&&t.tagName;
+      if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(t&&t.isContentEditable))return;
+      const c=classes[+m[1]-1];if(!c)return;
+      e.preventDefault();
+      if(c.id!==activeClassId)handleSetActiveClass(c.id);
+    };
+    window.addEventListener("keydown",h);
+    return()=>window.removeEventListener("keydown",h);
+  },[classes,activeClassId,handleSetActiveClass]);
+
   /* Delete a class — wipes its roster, seating layout, pairing history and checklist */
   const handleDeleteClass=useCallback(id=>{
     ['sl-','sh-','ph-','flags-','checklist-','tag-colors-'].forEach(prefix=>{try{window.storage?.delete(`${prefix}${id}`);}catch(e){}});
@@ -6353,6 +6415,7 @@ export default function TeacherApp(){
         *{box-sizing:border-box}
         .drag-bar{-webkit-app-region:drag;app-region:drag}
         .no-drag{-webkit-app-region:no-drag;app-region:no-drag}
+        .cp-chips::-webkit-scrollbar{display:none}
         [data-theme]{--board-bg-top:#f8f9fb;--board-bg-bottom:#eef1f5;--board-side-bg:#fafbfc;--board-heading:#1a1a2e;--board-label:rgba(0,0,0,0.25);--board-muted:rgba(0,0,0,0.2);--board-border:rgba(0,0,0,0.08);--board-wash:rgba(0,0,0,0.025);--board-flat:#f0f2f5;--board-dot:#c8cad2;}
         [data-theme="blackboard"]{--board-bg-top:#1c3829;--board-bg-bottom:#0f2418;--board-side-bg:#173323;--board-heading:#f3f1e7;--board-label:rgba(255,255,255,0.55);--board-muted:rgba(255,255,255,0.32);--board-border:rgba(255,255,255,0.16);--board-wash:rgba(255,255,255,0.05);--board-flat:#173323;--board-dot:rgba(255,255,255,0.18);}
       `}</style>
