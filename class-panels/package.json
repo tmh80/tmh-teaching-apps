@@ -1,0 +1,50 @@
+{
+  "name": "classpanels",
+  "version": "1.0.0",
+  "description": "Classroom companion — timer, seating, groups",
+  "main": "main.js",
+  "scripts": {
+    "build": "node build.js",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --mac --arm64",
+    "dist:dmg": "npm run build && electron-builder --mac dmg --arm64"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "electron": "^33.4.3",
+    "electron-builder": "^25.1.8",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "build": {
+    "appId": "com.classpanels.app",
+    "productName": "ClassPanels",
+    "copyright": "Copyright © 2025",
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.education",
+      "icon": "assets/icon.icns",
+      "identity": null,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": ["arm64"]
+        },
+        {
+          "target": "dir",
+          "arch": ["arm64"]
+        }
+      ]
+    },
+    "dmg": {
+      "title": "ClassPanels",
+      "background": "assets/dmg-background.png",
+      "window": { "width": 540, "height": 380 }
+    }
+  }
+}

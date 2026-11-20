@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClassPanels</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body, #root { height: 100%; }
+  body { font-family: -apple-system, sans-serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- Storage polyfill: provides window.storage backed by localStorage.
+     The 'classboard-storage' key name is intentionally left as-is even
+     after the ClassBoard → ClassPanels rename — it's just an internal
+     localStorage key, not user-facing branding, and changing it would
+     orphan every class/seating record already saved under it. -->
+<script>
+if (!window.storage) {
+  const store = {};
+  try {
+    const s = localStorage.getItem('classboard-storage');
+    if (s) Object.assign(store, JSON.parse(s));
+  } catch(e) {}
+  const persist = () => {
+    try { localStorage.setItem('classboard-storage', JSON.stringify(store)); } catch(e) {}
+  };
+  window.storage = {
+    get: (key) => Promise.resolve(store[key] !== undefined ? { key, value: store[key] } : null),
+    set: (key, value) => { store[key] = value; persist(); return Promise.resolve({ key, value }); },
+    delete: (key) => { delete store[key]; persist(); return Promise.resolve({ key, deleted: true }); },
+    list: (prefix) => {
+      const keys = Object.keys(store).filter(k => !prefix || k.startsWith(prefix));
+      return Promise.resolve({ keys, prefix });
+    },
+  };
+}
+</script>
+
+<!-- BUNDLE_PLACEHOLDER -->
+
+</body>
+</html>
