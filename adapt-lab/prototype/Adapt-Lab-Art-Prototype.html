@@ -28,6 +28,7 @@ b.gen{font-variant-numeric:tabular-nums;min-width:9.5em}
     <h2>1. One rig per body plan</h2>
     <p>Sixteen animals from five rigs: four-legged, bird, fish, lizard and insect. Predators use the same rigs as prey.</p>
     <canvas id="gal"></canvas>
+    <canvas id="predgal"></canvas>
   </section>
   <section>
     <h2>2. Variation, and change over generations</h2>
@@ -130,7 +131,14 @@ function drawQuad(c,s,po){
   const stride=leg*.62*mv,lift=leg*.2*mv;
   const l1=hh*.525,l2=hh*.5;
   const LEGS=[{x:hipX-L*.02,off:.5,far:1,hind:1},{x:shX+L*.05,off:.75,far:1,hind:0},{x:hipX-L*.08,off:0,far:0,hind:1},{x:shX-L*.01,off:.25,far:0,hind:0}];
-  function drawLeg(g){const[dx,dy]=step(ph,g.off,stride,lift);const fx=g.x+dx+(g.hind?-L*.02:L*.02),fy=dy;
+  function drawLeg(g){
+    // lying down: back legs folded under the haunch, front legs stretched forward along the ground (backlog: untidy lying legs)
+    if(lie>.5){const tone=g.far?col.shade:col.base,gy=-lw*.45,pawC=g.far?col.shade:col.paw||tone;
+      if(g.hind){fill(c,tone,p=>{ell(p,g.x+L*.02,jy+lw*.2,lw*2.4,Math.max(lw*1.4,-jy*.8));seg(p,g.x+L*.04,gy,g.x+L*.16,gy,lw*1.1,lw*.9)});fill(c,pawC,p=>ell(p,g.x+L*.17,gy+lw*.05,lw*.8,lw*.42))}
+      else{const fx=g.x+L*(g.far?.24:.3);fill(c,tone,p=>{seg(p,g.x,jy,g.x+L*.06,gy,lw*1.6,lw*1.1);seg(p,g.x+L*.06,gy,fx,gy,lw*1.1,lw*.85)});
+        if(s.feet==='hoof')fill(c,col.dark,p=>ell(p,fx+lw*.3,gy,lw*.6,lw*.45));else fill(c,pawC,p=>ell(p,fx+lw*.3,gy+lw*.05,lw*.85,lw*.42))}
+      return}
+    const[dx,dy]=step(ph,g.off,stride,lift);const fx=g.x+dx+(g.hind?-L*.02:L*.02),fy=dy;
     const k=ik(g.x,jy,fx,fy,l1,l2,g.hind?1:-1);const tone=g.far?col.shade:col.base;
     fill(c,tone,p=>{seg(p,g.x,jy,k[0],k[1],lw*(g.hind?2.3:1.8),lw*1.15);seg(p,k[0],k[1],fx,fy-lw*.35,lw*1.15,lw*.85)});
     if(s.pattern==='stripes'||s.pattern==='spots'){c.save();c.strokeStyle=col.mark;c.fillStyle=col.mark;c.globalAlpha=g.far?.55:1;c.lineWidth=lw*.36;c.lineCap='butt';
@@ -144,9 +152,10 @@ function drawQuad(c,s,po){
   const tx=hipX-L*.18,ty=top+D*.34,sw=Math.sin(t*2.2+(s.seed||0))*.25+mv*Math.sin(ph*TAU)*.2;
   if(s.tailType==='stub')fill(c,col.belly,p=>ell(p,tx-D*.05,ty-D*.04,D*.17,D*.16));
   else{const tl=s.tail,droop=s.tailType==='bushy'?.55:1.05;const pts=[];for(let i=0;i<=4;i++){const u=i/4;const a=Math.PI-droop*u*.9+sw*u*.6+(s.tailType==='bushy'?-.25:0);pts.push([tx+Math.cos(a)*tl*u+2,ty-Math.sin(a)*tl*u*.2+tl*u*u*droop*.75])}
-    const w=s.tailType==='bushy'?[D*.16,D*.3,D*.36,D*.3,D*.1]:[D*.11,D*.085,D*.07,D*.06,D*.05];
+    const w=s.tailType==='bushy'?[D*.16,D*.3,D*.36,D*.3,D*.1]:s.tailType==='medium'?[D*.17,D*.15,D*.14,D*.13,D*.12]:[D*.11,D*.085,D*.07,D*.06,D*.05];
     fill(c,col.base,p=>tube(p,pts,w));
     if(s.tailType==='bushy')fill(c,col.belly,p=>ell(p,pts[4][0],pts[4][1],D*.12,D*.1));
+    if(s.tailType==='medium'&&s.pattern==='spots'){fill(c,col.mark,p=>{ell(p,pts[4][0],pts[4][1],D*.075,D*.075);[.62,.8].forEach(u=>{const q=pts[Math.floor(u*4)],r=pts[Math.ceil(u*4)],f=u*4%1;ell(p,lerp(q[0],r[0],f),lerp(q[1],r[1],f),D*.035,D*.08,Math.atan2(r[1]-q[1],r[0]-q[0]))})})}
     if(s.tailType==='tuft')fill(c,col.dark,p=>leaf(p,pts[4][0],pts[4][1],D*.3,D*.11,Math.atan2(pts[4][1]-pts[3][1],pts[4][0]-pts[3][0])))}
   if(s.spiny){c.fillStyle=col.dark;for(let i=0;i<9;i++){const u=i/8,x=lerp(hipX-L*.16,shX+L*.1,u),y=top+D*.1+Math.abs(u-.5)*D*.12;c.beginPath();c.moveTo(x-L*.045,y+D*.1);c.lineTo(x-L*.05-D*.05,y-D*(.3+.1*Math.sin(u*9)));c.lineTo(x+L*.035,y+D*.1);c.closePath();c.fill()}}
   if(s.wingQ){c.save();c.translate(shX-L*.05,top+D*.2);c.rotate(-.35+Math.sin(t*2)*.03);fill(c,col.shade,p=>smooth(p,[[0,0],[-L*.1,-D*(.5+.5*s.wingQ)],[-L*(.45+.25*s.wingQ),-D*(.35+.3*s.wingQ)],[-L*(.5+.3*s.wingQ),D*.05],[-L*.25,D*.1]],true));c.restore()}
@@ -159,10 +168,10 @@ function drawQuad(c,s,po){
   // neck and head
   const wx=shX+L*.06,wy=top+D*.3;const A=s.neckUp,N=s.neck,hr=s.head;
   const hx=lerp(wx+Math.cos(A)*N+L*.1,wx+L*.2+hr*.6,hd*.95),hy=lerp(wy-Math.sin(A)*N-D*.04+(1-mv)*Math.sin(t*1.7)*.6,-hr*.95,hd*.95);
-  const ha=lerp(.1+(s.neckUp>.9?.3:0),1.2,hd);
+  const ha=lerp(.1+(s.neckUp>.9?.3:0)+(s.snoutDown||0),1.2,hd);
   const neck=new Path2D();tube(neck,[[wx-L*.06,wy+D*.12],[(wx+hx)/2-L*.01,(wy+hy)/2+D*.04],[hx-hr*.2,hy+hr*.1]],[D*.62,lerp(D*.5,hr*1.5,.55),hr*1.45]);
   const sl=hr*(.55+s.snout*.9),sx=hx+Math.cos(ha)*(hr*.35+sl*.6),sy=hy+Math.sin(ha)*(hr*.35+sl*.6);
-  const head=new Path2D();ell(head,hx,hy,hr,hr*.94);ell(head,sx,sy,sl,hr*(.62-.08*s.snout),ha);
+  const head=new Path2D();ell(head,hx,hy,hr,hr*.94);ell(head,sx,sy,sl,hr*(.62-.08*s.snout)*(s.snoutDepth||1),ha);
   const ex=hx-hr*.5,ey=hy-hr*.75,ea=-Math.PI/2-.35+(s.earLop||0)+Math.sin(t*3+(s.seed||0)*2)*.04;
   const tw=po.twitch?Math.sin(t*30)*.12:0;
   // far ear
@@ -199,7 +208,9 @@ function drawBird(c,s,po){
   const flap=Math.sin(po.flap||t*9);
   const wing=(far)=>{const sxw=cx+B*.1,syw=cy-B*.1;c.save();c.translate(sxw,syw);
     const v=fly>.5?clamp(flap,-1,1):0;const ys=fly>.5?(Math.abs(v)<.18?(v<0?-.18:.18):v):0;
-    if(fly>.5){c.scale(1,ys);c.rotate(-.3);const W=s.wing*1.15;fill(c,far?col.shade:col.wing,p=>smooth(p,[[W*.14,0],[W*.2,-W*.42],[W*.06,-W*.86],[-W*.2,-W*1.2],[-W*.25,-W*.92],[-W*.36,-W*.86],[-W*.34,-W*.62],[-W*.46,-W*.52],[-W*.4,-W*.3],[-W*.5,-W*.16],[-W*.4,0]],true,1));
+    if(fly>.5){c.scale(1,ys);c.rotate(-.3);const W=s.wing*1.15;// a real wing outline (backlog: the old one read as a leaf): straight leading edge to the wrist, then separate
+      // "finger" feathers at the tip and a scalloped trailing edge
+      fill(c,far?col.shade:col.wing,p=>smooth(p,[[W*.16,0],[W*.21,-W*.36],[W*.15,-W*.7],[W*.02,-W*1.1],[-W*.05,-W*.9],[-W*.12,-W*1.1],[-W*.16,-W*.88],[-W*.24,-W*1.03],[-W*.26,-W*.82],[-W*.35,-W*.92],[-W*.34,-W*.68],[-W*.44,-W*.56],[-W*.38,-W*.42],[-W*.48,-W*.3],[-W*.4,-W*.16],[-W*.46,-W*.04],[-W*.36,0]],true,.55));
       c.strokeStyle=col.shade;c.lineWidth=B*.012;c.globalAlpha=.5;for(let i=1;i<4;i++){c.beginPath();c.moveTo(-W*.07*i,-W*.08);c.lineTo(-W*.09*i+W*.02,-W*(.9-.16*i));c.stroke()}}
     c.restore()};
   if(fly>.5)wing(true);
@@ -331,14 +342,23 @@ function planOf(t){
   if((t.cov==='scales'||t.cov==='skin')&&t.legs!=='0')return'lizard';
   return'quad';
 }
+/* Face types (Tom, 16 Nov 2026: snouts were all alike and the cheetah's was too long).
+   Chosen from the traits, so a student's design gets the face that fits what it eats and how big it is.
+   snout: length · snoutDepth: how deep the muzzle is · snoutDown: how far it points down · headK: head size */
+const FACE={cat:{snout:.1,snoutDepth:1.02,snoutDown:.14,headK:1.1},dog:{snout:.6,snoutDepth:.6,snoutDown:.04,headK:1},
+  grazer:{snout:.58,snoutDepth:.8,snoutDown:.5,headK:.95},rodent:{snout:.2,snoutDepth:.95,snoutDown:.22,headK:1.04},omni:{snout:.4,snoutDepth:.62,snoutDown:.12,headK:1}};
+function faceOf(t){const n=k=>(t[k]??50)/100;
+  if(t.diet==='meat')return t.pattern==='spots'||t.shape==='round'||(n('ears')<=.2&&t.senses!=='smell')?'cat':'dog';
+  if(t.diet==='both')return'omni';
+  return n('size')>=.65||t.shape==='tall'?'grazer':'rodent'}
 function specOf(t,seed){
   const n=k=>(t[k]??50)/100,col=colours(t),plan=planOf(t),fat=t.fatWhere==='all'?n('fat'):0;
   const ex=EXTRA.find(e=>e.name===plan);if(ex)return{plan,seed,pattern:t.pattern,col,...ex.spec(t,seed,col)};
   if(plan==='quad'){const sh=t.shape||'round';const base={round:{L:86,D:58,neck:7,neckUp:.6,lg:[13,34]},long:{L:122,D:42,neck:18,neckUp:.3,lg:[18,50]},tall:{L:104,D:54,neck:50,neckUp:1.0,lg:[44,52]},stream:{L:120,D:44,neck:14,neckUp:.2,lg:[16,40]}}[sh];
     const big=n('size')>.6||sh==='tall';
     return{plan,seed,col,pattern:t.pattern,L:base.L,D:base.D*(1+.3*fat+.12*n('insul')),leg:base.lg[0]+base.lg[1]*n('legLen'),legW:lerp(8.5,10.5,n('size')),neck:base.neck*(sh==='tall'?.8+.6*n('legLen'):1),neckUp:base.neckUp,
-      head:sh==='tall'?16.5:lerp(25,18,n('size')),snout:sh==='tall'?.75:t.diet==='meat'?.52:t.diet==='both'?.42:.25,ear:7+44*n('ears'),earW:n('ears')>.6?9:8,earLop:0,
-      tail:14+70*n('tail'),tailType:n('tail')<.15?'stub':(sh==='long'&&n('insul')>.5?'bushy':sh==='tall'?'tuft':'thin'),
+      face:faceOf(t),...(({headK,...f})=>f)(FACE[faceOf(t)]),head:(sh==='tall'?16.5:lerp(25,18,n('size')))*FACE[faceOf(t)].headK,ear:7+44*n('ears'),earW:n('ears')>.6?9:8,earLop:0,
+      tail:14+70*n('tail'),tailType:n('tail')<.15?'stub':(sh==='long'&&n('insul')>.5?'bushy':sh==='tall'?'tuft':faceOf(t)==='cat'?'medium':'thin'),
       fluff:n('insul'),fat,hump:t.fatWhere==='hump'?n('fat'):0,eyeR:.15+.12*n('eyes'),spiny:t.defence==='spines',shell:t.defence==='shell',wingQ:t.wings!=='none'?.3+.7*n('wingSize'):0,feet:big?'hoof':'paw',mane:sh==='tall'&&t.pattern==='stripes',cheek:!big}}
   if(plan==='bird'){const tall=t.shape==='tall';const owl=n('eyes')>.8&&!tall;
     const bare='#d9b6a4';return{plan,seed,col:tall?{...col,head:bare,neck:bare,leg:'#cfa893',beak:'#e3b98a'}:{...col,head:col.base,neck:col.base},pattern:t.pattern,B:tall?100:78,tilt:tall?.06:owl?.75:.42,leg:tall?46+60*n('legLen'):12+34*n('legLen'),legW:tall?5.5:3.2,thigh:tall,thinNeck:tall,
@@ -351,12 +371,12 @@ function specOf(t,seed){
 function draw(c,s,po){const ex=EXTRA.find(e=>e.name===s.plan);if(ex)return ex.draw(c,s,po||{});({quad:drawQuad,bird:drawBird,fish:drawFish,lizard:drawLizard,insect:drawInsect})[s.plan](c,s,po)}
 // a young animal of the same species: smaller body, bigger head, shorter legs. The caller also draws it at about 0.55 scale.
 function youngOf(s){const ex=EXTRA.find(e=>e.name===s.plan);if(ex&&ex.young)return ex.young(s);const y={...s,young:true};
-  if(s.plan==='quad')Object.assign(y,{L:s.L*.82,D:s.D*.9,leg:s.leg*.72,neck:s.neck*.7,head:s.head*1.22,snout:s.snout*.6,ear:s.ear*.85,tail:s.tail*.7,cheek:true,hump:(s.hump||0)*.4,mane:false});
+  if(s.plan==='quad')Object.assign(y,{L:s.L*.82,D:s.D*.9,leg:s.leg*.72,neck:s.neck*.7,head:s.head*1.22,snout:s.snout*.6,snoutDown:(s.snoutDown||0)*.6,ear:s.ear*.85,tail:s.tail*.7,cheek:true,hump:(s.hump||0)*.4,mane:false});
   if(s.plan==='bird')Object.assign(y,{leg:s.leg*.7,neck:s.neck*.6,head:s.head*1.25,wing:s.wing*.6,tail:s.tail*.5,beak:s.beak*.7,canFly:false});
   return y}
 // rough size in local units, for fitting an animal into a box: {len, height}
 function sizeOf(s){const ex=EXTRA.find(e=>e.name===s.plan);if(ex&&ex.size)return ex.size(s);
-  if(s.plan==='quad')return{len:s.L*1.25,height:s.leg+s.D+Math.max(0,Math.sin(s.neckUp)*s.neck)+s.head+s.ear*.6};
+  if(s.plan==='quad')return{len:Math.max(s.L*1.25,s.L*.95+s.tail*(s.tailType==='bushy'?.75:.45)+s.head),dx:s.tailType==='bushy'?s.tail*.18:0,height:s.leg+s.D+Math.max(0,Math.sin(s.neckUp)*s.neck)+s.head+s.ear*.6};
   if(s.plan==='bird')return{len:s.B*1.5,height:s.leg+s.B*.8+s.neck+s.head};
   if(s.plan==='fish')return{len:s.L,height:s.D*2,swims:true};
   if(s.plan==='lizard')return{len:150,height:s.leg+s.D*1.6};
@@ -390,7 +410,7 @@ const zoo={
 // soft ground shadow, drawn before the animal
 function shadow(c,w,alpha){c.save();c.scale(1,.2);const g=c.createRadialGradient(0,0,0,0,0,w);g.addColorStop(0,`rgba(30,25,40,${alpha||.28})`);g.addColorStop(1,'rgba(30,25,40,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,w,0,TAU);c.fill();c.restore()}
 
-root.Rig={draw,specOf,planOf,sizeOf,youngOf,register,colours,shadow,PAL,DEF,A,zoo,smooth,tube,seg,ik,step,ell,leaf,fill,eye,pattern,area,rng,mix,hex,lerp,clamp,TAU};
+root.Rig={FACE,faceOf,draw,specOf,planOf,sizeOf,youngOf,register,colours,shadow,PAL,DEF,A,zoo,smooth,tube,seg,ik,step,ell,leaf,fill,eye,pattern,area,rng,mix,hex,lerp,clamp,TAU};
 })(typeof window!=='undefined'?window:globalThis);
 
 </script>
@@ -428,7 +448,7 @@ function drawFrog(c,s,po){
     const rest=[hip[0]-11-o*.4,-3.2],full=s.thigh+s.shin;
     const st=[hip[0]+Math.cos(back)*full*.97,hip[1]+Math.sin(back)*full*.97];
     const ank=[lerp(rest[0],st[0],ext),Math.min(-3.2,lerp(rest[1],st[1],ext))];
-    const kn=ik(hip[0],hip[1],ank[0],ank[1],s.thigh,s.shin,-1);
+    const kn=ik(hip[0],hip[1],ank[0],ank[1],s.thigh,s.shin,-1);kn[1]=Math.min(kn[1],-s.legW*1.1);   // the knee never dips below the ground
     const tg=[rest[0]+s.foot,-2],ta=[ank[0]+Math.cos(back)*s.foot,ank[1]+Math.sin(back)*s.foot];
     const toe=[lerp(tg[0],ta[0],k),Math.min(-2,lerp(tg[1],ta[1],k))];
     const tone=far?col.shade:limb;
@@ -482,7 +502,7 @@ R.register('frog',{
       spiny:t.defence==='spines',pads:L>.8}},
   draw:drawFrog,
   // the box has to hold the whole hop: legs trailing behind and the body in the air
-  size:s=>({len:s.L+s.foot*.5+(s.thigh+s.shin)*.62,height:s.sit+s.B*2+s.eye*1.6+34*Math.sin(s.tilt)+s.hopH*.95,dx:16+(s.thigh+s.shin)*.2}),
+  size:s=>({len:s.L+s.foot*.5+(s.thigh+s.shin)*.62,height:s.sit+s.B*2+s.eye*1.6+34*Math.sin(s.tilt)+s.hopH*.95,dx:(s.thigh+s.shin)*.2-16}),
   young:s=>({...s,young:true,thigh:s.thigh*.8,shin:s.shin*.8,foot:s.foot*.85,hopH:s.hopH*.7,eye:s.eye*1.2})
 });
 const A=R.A;
@@ -663,6 +683,11 @@ R.zoo['Coral snake']=R.A({cov:'scales',blood:'cold',shape:'long',legs:'0',color:
 (function(){
 "use strict";
 const R=window.Rig,{lerp,clamp,TAU,fill,ell,tube,leaf,mix}=R;
+// a sea-mammal flipper (Tom, 16 Nov 2026: the seal looked like a fish): a broad webbed paddle with scalloped toes,
+// not a pointed fish fin. len along angle a, wid across. claws: small dark tips on the toes (fore flippers).
+function flipper(p,x,y,len,wid,a){const c=Math.cos(a),s=Math.sin(a),P=(u,v)=>[x+c*len*u-s*wid*v,y+s*len*u+c*wid*v];
+  R.smooth(p,[P(0,-.32),P(.5,-.5),P(.97,-.62),P(.86,-.3),P(1.02,-.08),P(.88,.14),P(1.0,.38),P(.82,.5),P(.45,.44),P(0,.3)],true,1)}
+function claws(c,x,y,len,wid,a,col){const cs=Math.cos(a),sn=Math.sin(a);c.fillStyle=col;[-.62,-.08,.38].forEach(v=>{const u=v<-.5?.97:v<0?1.02:1.0;c.beginPath();c.ellipse(x+cs*len*u-sn*wid*v,y+sn*len*u+cs*wid*v,wid*.09,wid*.06,a,0,TAU);c.fill()})}
 const sst=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
 const PROF=[.2,.34,.52,.72,.9,1,1,.94,.82,.68,.58];
 function drawSeal(c,s,po){
@@ -678,15 +703,16 @@ function drawSeal(c,s,po){
   const tail=sp[0],td=[sp[0][0]-sp[1][0],sp[0][1]-sp[1][1]],ta=Math.atan2(td[1],td[0]);
   const flap=Math.sin(ph*TAU*(land?0:1))*(land?0:1);
   // far flippers (shade)
-  const fl=L*.2*(.65+.6*s.fin),sx=sp[6][0],sy=sp[6][1]+w[6]*.3;
-  const foreA=land?1.15:2.1+Math.sin(ph*TAU+1.2)*.5*mv;
-  fill(c,col.shade,p=>leaf(p,sx+L*.05,sy-D*.02,fl*.9,fl*.26,land?.95:foreA+.5));
+  const fl=L*.2*(.65+.6*s.fin),sx=sp[8][0]+L*.02,sy=sp[8][1]+w[8]*.12;
+  const foreA=land?1.25:1.95+Math.sin(ph*TAU+1.2)*.45*mv;
+  if(!s.otter)fill(c,col.shade,p=>flipper(p,sx+L*.05,sy-D*.04,fl*.7,fl*.42,land?1.05:foreA+.35));
+  else fill(c,col.shade,p=>leaf(p,sx+L*.05,sy-D*.02,fl*.9,fl*.26,land?.95:foreA+.5));
   if(s.otter){ // thick tapering tail, then small hind paws
     const tp=[];for(let i=0;i<=5;i++){const u=i/5;tp.push([tail[0]+Math.cos(ta)*s.tail*u,tail[1]+Math.sin(ta)*s.tail*u+Math.sin(ph*TAU-2.2-u*1.6)*D*.22*u*(land?0:1)+(land?D*.1*u:0)])}
     fill(c,col.base,p=>tube(p,tp,[w[0]*.95,w[0]*.82,w[0]*.66,w[0]*.5,w[0]*.34,w[0]*.16]));
     fill(c,col.shade,p=>leaf(p,sp[1][0],sp[1][1]+w[1]*.35,fl*.6,fl*.2,land?1.3:2.5+flap*.3));
   }else{
-    fill(c,col.shade,p=>leaf(p,tail[0]+Math.cos(ta)*D*.02,tail[1],fl*1.05,fl*.3,ta-.42-flap*.22));
+    fill(c,col.shade,p=>flipper(p,tail[0]+Math.cos(ta)*D*.02,tail[1]-D*.03,fl*.95,fl*.5,ta-.2-flap*.18));
   }
   // body and head
   const body=new Path2D();tube(body,sp,w);ell(body,hx,hy,hr,hr*.95);ell(body,mx,my,mz,mz*.74,ha);
@@ -698,9 +724,10 @@ function drawSeal(c,s,po){
   c.restore();
   R.pattern(c,body,s,[sp[0][0],Math.min(sp[5][1],head[1])-D*.6,hx-hr*.2,Math.max(sp[5][1],sp[2][1])+D*.25],s.seed);
   // near flippers
-  if(!s.otter)fill(c,col.fin,p=>leaf(p,tail[0]+Math.cos(ta)*D*.02,tail[1]+D*.02,fl*1.1,fl*.32,ta+.36+flap*.22));
+  if(!s.otter)fill(c,col.fin,p=>flipper(p,tail[0]+Math.cos(ta)*D*.02,tail[1]+D*.04,fl,fl*.52,ta+.16+flap*.18));
   else fill(c,col.fin,p=>leaf(p,sp[1][0]+L*.02,sp[1][1]+w[1]*.38,fl*.62,fl*.2,land?1.2:2.7-flap*.3));
-  fill(c,col.fin,p=>leaf(p,sx,sy,fl,fl*.3,foreA));
+  if(!s.otter){fill(c,col.fin,p=>flipper(p,sx,sy,fl*.78,fl*.46,foreA));claws(c,sx,sy,fl*.78,fl*.46,foreA,col.dark)}
+  else fill(c,col.fin,p=>leaf(p,sx,sy,fl,fl*.3,foreA));
   // face
   if(s.ear>.12)fill(c,col.shade,p=>ell(p,hx-hr*.5,hy-hr*.62,hr*.2,hr*.17));
   R.eye(c,hx+hr*.3,hy-hr*.2,hr*.22,{blink:po.blink,dark:col.dark});
@@ -714,7 +741,7 @@ function drawSeal(c,s,po){
 R.register('seal',{
   test:t=>t.cov==='fur'&&t.fins==='fins',
   spec:(t,seed,col)=>{const n=k=>(t[k]??50)/100;const fat=t.fatWhere==='all'?n('fat'):0;const otter=n('tail')>.3;
-    return{L:otter?132:128,D:(otter?33:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
+    return{L:otter?132:128,D:(otter?39:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
       headK:otter?1.18:.92,snout:t.diet==='plants'?.2:.5,ear:n('ears'),cheek:false}},
   draw:drawSeal,
   size:s=>({len:(s.L+s.tail*.8)*1.02,height:s.D*2.5,swims:true,dx:s.otter?s.tail*.3:0}),
@@ -846,9 +873,9 @@ function predSpec(j,seed){
   if(j.kind==='shark'){const col=tint(R.colours({color:'grey'}),j.col);s={plan:'shark',seed,L:150,D:36,col:{...col,belly:'#f1f4f5',dark:'#1d2226'}}}
   else{s=R.specOf(traitsFor(j),seed||7);s={...s,col:tint(s.col,j.col)};
     if(s.plan==='quad'){s.cheek=false;
-      if(j.kind==='cat'||j.kind==='lion'){s.snout=.1;s.earW=11;s.head*=1.14;s.neckUp=.22;s.cheek=false;if(j.id!=='lynx')s.ear=Math.min(s.ear,13);if(j.id==='lynx')s.tailType='stub'}
-      if(j.kind==='canid'||j.kind==='wolf'){s.snout=.7;s.earW=9;s.neckUp=.26}
-      if(j.id==='hyena'){s.neckUp=.42;s.tailType='tuft'}
+      if(j.kind==='cat'||j.kind==='lion'){Object.assign(s,R.FACE.cat,{earW:11,neckUp:.22,cheek:false,tailType:'medium'});delete s.headK;if(j.id!=='lynx')s.ear=Math.min(s.ear,13);if(j.id==='lynx')s.tailType='stub'}
+      if(j.kind==='canid'||j.kind==='wolf'){Object.assign(s,{snout:.6,snoutDepth:.6,snoutDown:.04,earW:9,neckUp:.26});if(j.id==='coyote')Object.assign(s,{snout:.5,snoutDepth:.58})}
+      if(j.id==='hyena'){Object.assign(s,{neckUp:.42,tailType:'tuft',snout:.36,snoutDepth:.82,snoutDown:.16})}
       if(j.kind==='lion'){s.tailType='tuft';s.col.belly=mix(j.col,'#ffffff',.4);s={plan:'lion',seed,col:s.col,quad:s,mane:true,maneCol:mix(j.col,'#4a2a12',.62)}}}
     if(s.plan==='bird'){
       if(j.kind==='owl'){s.col.belly=mix(j.col,'#ffffff',.7);s.col.eyeRing='#f2c230'}
@@ -1107,10 +1134,15 @@ const R=window.Rig,{lerp,clamp,TAU,rng,mix,fill,ell,smooth}=R,{fit,blinkAt,label
 const ZOO=R.zoo,A=R.A;
 const heightOf=s=>R.sizeOf(s).height;
 /* ---------- 1. gallery ---------- */
-function gallery(t){
-  const cv=document.getElementById('gal');const names=Object.keys(ZOO);const narrow=cv.clientWidth<640;const cols=narrow?2:4,rows=Math.ceil(names.length/cols);
+// every predator in the sim's bank, once each (Session 2 check: all predators draw from their real data)
+function predList(){const seen={},out=[];Object.values(R.PRED_BANK||{}).forEach(list=>list.forEach(j=>{if(!seen[j.id]){seen[j.id]=1;out.push(j)}}));
+  Object.values(R.INVADERS||{}).forEach(j=>{if(!seen[j.id]){seen[j.id]=1;out.push(j)}});return out}
+const PSPEC={};
+function gallery(t,id){
+  const cv=document.getElementById(id||'gal');if(!cv)return;const preds=id==='predgal'?predList():null;
+  const names=preds?preds.map(j=>j.name):Object.keys(ZOO);const narrow=cv.clientWidth<640;const cols=narrow?2:4,rows=Math.ceil(names.length/cols);
   const{c,w,h}=fit(cv,rows/cols*.82);c.clearRect(0,0,w,h);const cw=w/cols,ch=h/rows;
-  names.forEach((nm,i)=>{const x0=(i%cols)*cw,y0=Math.floor(i/cols)*ch;const s=R.specOf(ZOO[nm],i+1);
+  names.forEach((nm,i)=>{const x0=(i%cols)*cw,y0=Math.floor(i/cols)*ch;const s=preds?(PSPEC[preds[i].id]||(PSPEC[preds[i].id]=R.predSpec(preds[i],i+1))):R.specOf(ZOO[nm],i+1);
     const pad=cw*.045;c.fillStyle=['#e8f0ec','#f3ecdc','#e6eef4','#efe9f1'][(i+Math.floor(i/cols))%4];c.beginPath();c.roundRect(x0+pad,y0+pad,cw-2*pad,ch-2*pad,14);c.fill();
     const zs=R.sizeOf(s),fish=!!zs.swims;const gy=y0+ch*.74,cx=x0+cw*.5;
     const sc=Math.min(cw*.62/zs.len,ch*.6/zs.height);
@@ -1135,7 +1167,7 @@ function variation(t){
   label(c,g<.3?'Warm years: thin brown coats, long ears and long legs lose heat':g<.7?'The climate is cooling: thicker, paler coats are surviving more often':'Ice age: thick white coats, small ears and short legs keep heat in',w/2,h*.13,Math.max(11,Math.min(15,w*.022)),'#24352d',600);
 }
 let T=0,last=0;const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;if(document.getElementById('gal'))gallery(T);if(document.getElementById('vary'))variation(T);if(!still)requestAnimationFrame(frame)}
+function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;if(document.getElementById('gal'))gallery(T);if(document.getElementById('predgal'))gallery(T,'predgal');if(document.getElementById('vary'))variation(T);if(!still)requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
 })();
 

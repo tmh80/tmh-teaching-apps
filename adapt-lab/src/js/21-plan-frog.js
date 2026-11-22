@@ -31,7 +31,7 @@ function drawFrog(c,s,po){
     const rest=[hip[0]-11-o*.4,-3.2],full=s.thigh+s.shin;
     const st=[hip[0]+Math.cos(back)*full*.97,hip[1]+Math.sin(back)*full*.97];
     const ank=[lerp(rest[0],st[0],ext),Math.min(-3.2,lerp(rest[1],st[1],ext))];
-    const kn=ik(hip[0],hip[1],ank[0],ank[1],s.thigh,s.shin,-1);
+    const kn=ik(hip[0],hip[1],ank[0],ank[1],s.thigh,s.shin,-1);kn[1]=Math.min(kn[1],-s.legW*1.1);   // the knee never dips below the ground
     const tg=[rest[0]+s.foot,-2],ta=[ank[0]+Math.cos(back)*s.foot,ank[1]+Math.sin(back)*s.foot];
     const toe=[lerp(tg[0],ta[0],k),Math.min(-2,lerp(tg[1],ta[1],k))];
     const tone=far?col.shade:limb;
@@ -85,7 +85,7 @@ R.register('frog',{
       spiny:t.defence==='spines',pads:L>.8}},
   draw:drawFrog,
   // the box has to hold the whole hop: legs trailing behind and the body in the air
-  size:s=>({len:s.L+s.foot*.5+(s.thigh+s.shin)*.62,height:s.sit+s.B*2+s.eye*1.6+34*Math.sin(s.tilt)+s.hopH*.95,dx:16+(s.thigh+s.shin)*.2}),
+  size:s=>({len:s.L+s.foot*.5+(s.thigh+s.shin)*.62,height:s.sit+s.B*2+s.eye*1.6+34*Math.sin(s.tilt)+s.hopH*.95,dx:(s.thigh+s.shin)*.2-16}),
   young:s=>({...s,young:true,thigh:s.thigh*.8,shin:s.shin*.8,foot:s.foot*.85,hopH:s.hopH*.7,eye:s.eye*1.2})
 });
 const A=R.A;

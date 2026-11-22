@@ -24,11 +24,12 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 - Night scenes where nocturnal animals come out, so "active at night" is something students see.
 - Plants and animals in the same scene, with grazers eating the student's plant.
 
-## Known art flaws (15 Nov 2026)
+## Known art flaws (15 Nov 2026; fixed ones struck out 22 Nov)
 
-- A sitting frog sits right of centre in gallery cells; the otter is thin; hyena and coyote snouts are long; the heron is small in its cell.
-- A lying four-legged animal folds its legs untidily.
+- ~~A sitting frog sits right of centre~~; ~~the otter is thin~~; ~~hyena and coyote snouts are long~~; the heron is small in its cell.
+- ~~A lying four-legged animal folds its legs untidily.~~
 - A very fat, very thick-coated animal reads as a blob.
+- New (22 Nov): the grazing hare's face looks odd; flying birds overflow their gallery cell; the fennec looks a little like a donkey; add a cheetah tear line.
 
 ## Tom's feedback (16 Nov 2026)
 

@@ -429,7 +429,15 @@ Skills: `wab-sim-toddle-outputs`.
   - **Tom's answer 3:** backbone animals can now jump to the insect and crab branch (links marked `notReal` in `16-cost.js`, at least 20 points, so more than two eras). Every cost item on that route carries `notReal` and the sentence "In real life this has never happened…". The designer does not show that flag yet: Session 5 must show it on the option and in the era summary.
   - **Tom's answer 5:** new pair `poison_camo` (Poison + good camouflage, clash, −8 on predators). The "few young with lots of care" pattern is left for the Run (Session 6).
   - So Session 5 no longer needs to do feedback 5 or 6, only show the `notReal` flag, plus the layout work.
-- [ ] Session 2
+- [~] **Session 2 · 22 Nov 2026, late (Opus 5.5, Tom asleep, using the end of the weekly limit). Mostly done; see "Still to do".**
+  - **Art moved into `src/`:** `20-rig.js`, `21-plan-frog/crab/snake/seal.js`, `22-predators.js`, `23-plants.js`. The prototype pages now load them from `../src/js/`, so there is one copy. `gallery.js`, `biomes.js` and `scene.js` stay in `prototype/` until Session 4.
+  - **Tom's feedback 1, snouts:** five face types chosen from the traits (`Rig.FACE`, `Rig.faceOf`): cat (short, deep muzzle), dog (long, narrow), grazer (long, pointing down), rodent (short, blunt) and omnivore (medium, pointed). Cheetah, puma, lynx, lion and feral cat now have short cat faces; hyena and coyote snouts are shorter.
+  - **Tom's feedback 2, cat tail:** new `medium` tail type, between thin and bushy, used for cats. Spotted cats get dark rings and a dark tip.
+  - **Tom's feedback 3, seal:** new `flipper()` shape: a broad webbed paddle with scalloped toes, not a fish fin. Front flippers moved up towards the head, with claws. Back flippers are two webbed paddles. Checked swimming and hauled out.
+  - **Backlog flaws fixed:** a lying animal folds its back legs under its haunch and stretches its front legs forward; a sitting frog's knee no longer dips below the ground, and frogs sit nearer the centre of their cell; the otter is thicker; the flying wing has a straight front edge and separate "finger" feathers at the tip instead of a leaf shape; long bushy tails (Arctic fox) no longer run out of their gallery cell.
+  - **Checks:** a predator gallery (`#predgal`) shows all 27 predators and invaders from their real data. `tests/art_shots.js` was rewritten to screenshot both galleries at 1100 and 390 px (the old version broke on the scene buttons). Contact sheets and close-ups looked at, three rounds. `sh tests/run_all.sh` passes; the root build now includes the art (20 modules).
+  - **Still to do (next art session):** heads of short-necked grazers do reach the ground now, but the hare's face looks odd when grazing; the very fat, very thick-coated animal is still a lumpy blob; the heron is small in its cell; birds in flight are sized for standing, so big wings run off their cell; the fennec fox reads a little like a donkey (long legs and huge ears); a cheetah "tear line" marking would make it more recognisable (Alba lesson: two or three bold markings). The rubric line "every trait changes the picture" was not re-checked this session.
+- [ ] Session 2 (finish the list above)
 - [ ] Session 3
 - [ ] Session 4
 - [ ] Session 5

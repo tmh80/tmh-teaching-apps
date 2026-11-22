@@ -5,10 +5,15 @@ const R=window.Rig,{lerp,clamp,TAU,rng,mix,fill,ell,smooth}=R,{fit,blinkAt,label
 const ZOO=R.zoo,A=R.A;
 const heightOf=s=>R.sizeOf(s).height;
 /* ---------- 1. gallery ---------- */
-function gallery(t){
-  const cv=document.getElementById('gal');const names=Object.keys(ZOO);const narrow=cv.clientWidth<640;const cols=narrow?2:4,rows=Math.ceil(names.length/cols);
+// every predator in the sim's bank, once each (Session 2 check: all predators draw from their real data)
+function predList(){const seen={},out=[];Object.values(R.PRED_BANK||{}).forEach(list=>list.forEach(j=>{if(!seen[j.id]){seen[j.id]=1;out.push(j)}}));
+  Object.values(R.INVADERS||{}).forEach(j=>{if(!seen[j.id]){seen[j.id]=1;out.push(j)}});return out}
+const PSPEC={};
+function gallery(t,id){
+  const cv=document.getElementById(id||'gal');if(!cv)return;const preds=id==='predgal'?predList():null;
+  const names=preds?preds.map(j=>j.name):Object.keys(ZOO);const narrow=cv.clientWidth<640;const cols=narrow?2:4,rows=Math.ceil(names.length/cols);
   const{c,w,h}=fit(cv,rows/cols*.82);c.clearRect(0,0,w,h);const cw=w/cols,ch=h/rows;
-  names.forEach((nm,i)=>{const x0=(i%cols)*cw,y0=Math.floor(i/cols)*ch;const s=R.specOf(ZOO[nm],i+1);
+  names.forEach((nm,i)=>{const x0=(i%cols)*cw,y0=Math.floor(i/cols)*ch;const s=preds?(PSPEC[preds[i].id]||(PSPEC[preds[i].id]=R.predSpec(preds[i],i+1))):R.specOf(ZOO[nm],i+1);
     const pad=cw*.045;c.fillStyle=['#e8f0ec','#f3ecdc','#e6eef4','#efe9f1'][(i+Math.floor(i/cols))%4];c.beginPath();c.roundRect(x0+pad,y0+pad,cw-2*pad,ch-2*pad,14);c.fill();
     const zs=R.sizeOf(s),fish=!!zs.swims;const gy=y0+ch*.74,cx=x0+cw*.5;
     const sc=Math.min(cw*.62/zs.len,ch*.6/zs.height);
@@ -33,6 +38,6 @@ function variation(t){
   label(c,g<.3?'Warm years: thin brown coats, long ears and long legs lose heat':g<.7?'The climate is cooling: thicker, paler coats are surviving more often':'Ice age: thick white coats, small ears and short legs keep heat in',w/2,h*.13,Math.max(11,Math.min(15,w*.022)),'#24352d',600);
 }
 let T=0,last=0;const still=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;if(document.getElementById('gal'))gallery(T);if(document.getElementById('vary'))variation(T);if(!still)requestAnimationFrame(frame)}
+function frame(ts){const dt=Math.min(.05,(ts-last)/1000||0);last=ts;T+=dt;if(document.getElementById('gal'))gallery(T);if(document.getElementById('predgal'))gallery(T,'predgal');if(document.getElementById('vary'))variation(T);if(!still)requestAnimationFrame(frame)}
 requestAnimationFrame(frame);
 })();

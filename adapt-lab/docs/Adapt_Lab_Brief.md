@@ -18,6 +18,7 @@ A Grade 6 (MYP Year 1) simulation about adaptations and evolution, taught in Mar
 | `src/js/19-notes.js` | The explanation sentences | Moved, not yet tested |
 | `src/js/16-cost.js`, `17-combos.js` | Cost of change, traits that work together | See the progress log |
 | `build.js`, `src/index.html`, `src/*.css`, `src/js/99-init.js` | Build and first page (model check). Output in `dist/`; test hook `window.__adapt` in `dist/test.html` | Working, 22 Nov |
+| `src/js/20-rig.js` to `23-plants.js` | Animal rigs (with face types), body plans, predators, plants | Moved from `prototype/` on 22 Nov; the prototype pages load them from here |
 | `prototype/` | The new art and screens, as working pages | See the progress log |
 | `tests/` | `sh tests/run_all.sh` runs everything, builds, and runs the browser check | All pass (22 Nov) |
 | `docs/` | Plan, this brief, backlog, chapter scripts, CER design | |

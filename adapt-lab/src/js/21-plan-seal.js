@@ -8,6 +8,11 @@
 (function(){
 "use strict";
 const R=window.Rig,{lerp,clamp,TAU,fill,ell,tube,leaf,mix}=R;
+// a sea-mammal flipper (Tom, 16 Nov 2026: the seal looked like a fish): a broad webbed paddle with scalloped toes,
+// not a pointed fish fin. len along angle a, wid across. claws: small dark tips on the toes (fore flippers).
+function flipper(p,x,y,len,wid,a){const c=Math.cos(a),s=Math.sin(a),P=(u,v)=>[x+c*len*u-s*wid*v,y+s*len*u+c*wid*v];
+  R.smooth(p,[P(0,-.32),P(.5,-.5),P(.97,-.62),P(.86,-.3),P(1.02,-.08),P(.88,.14),P(1.0,.38),P(.82,.5),P(.45,.44),P(0,.3)],true,1)}
+function claws(c,x,y,len,wid,a,col){const cs=Math.cos(a),sn=Math.sin(a);c.fillStyle=col;[-.62,-.08,.38].forEach(v=>{const u=v<-.5?.97:v<0?1.02:1.0;c.beginPath();c.ellipse(x+cs*len*u-sn*wid*v,y+sn*len*u+cs*wid*v,wid*.09,wid*.06,a,0,TAU);c.fill()})}
 const sst=x=>{x=clamp(x,0,1);return x*x*(3-2*x)};
 const PROF=[.2,.34,.52,.72,.9,1,1,.94,.82,.68,.58];
 function drawSeal(c,s,po){
@@ -23,15 +28,16 @@ function drawSeal(c,s,po){
   const tail=sp[0],td=[sp[0][0]-sp[1][0],sp[0][1]-sp[1][1]],ta=Math.atan2(td[1],td[0]);
   const flap=Math.sin(ph*TAU*(land?0:1))*(land?0:1);
   // far flippers (shade)
-  const fl=L*.2*(.65+.6*s.fin),sx=sp[6][0],sy=sp[6][1]+w[6]*.3;
-  const foreA=land?1.15:2.1+Math.sin(ph*TAU+1.2)*.5*mv;
-  fill(c,col.shade,p=>leaf(p,sx+L*.05,sy-D*.02,fl*.9,fl*.26,land?.95:foreA+.5));
+  const fl=L*.2*(.65+.6*s.fin),sx=sp[8][0]+L*.02,sy=sp[8][1]+w[8]*.12;
+  const foreA=land?1.25:1.95+Math.sin(ph*TAU+1.2)*.45*mv;
+  if(!s.otter)fill(c,col.shade,p=>flipper(p,sx+L*.05,sy-D*.04,fl*.7,fl*.42,land?1.05:foreA+.35));
+  else fill(c,col.shade,p=>leaf(p,sx+L*.05,sy-D*.02,fl*.9,fl*.26,land?.95:foreA+.5));
   if(s.otter){ // thick tapering tail, then small hind paws
     const tp=[];for(let i=0;i<=5;i++){const u=i/5;tp.push([tail[0]+Math.cos(ta)*s.tail*u,tail[1]+Math.sin(ta)*s.tail*u+Math.sin(ph*TAU-2.2-u*1.6)*D*.22*u*(land?0:1)+(land?D*.1*u:0)])}
     fill(c,col.base,p=>tube(p,tp,[w[0]*.95,w[0]*.82,w[0]*.66,w[0]*.5,w[0]*.34,w[0]*.16]));
     fill(c,col.shade,p=>leaf(p,sp[1][0],sp[1][1]+w[1]*.35,fl*.6,fl*.2,land?1.3:2.5+flap*.3));
   }else{
-    fill(c,col.shade,p=>leaf(p,tail[0]+Math.cos(ta)*D*.02,tail[1],fl*1.05,fl*.3,ta-.42-flap*.22));
+    fill(c,col.shade,p=>flipper(p,tail[0]+Math.cos(ta)*D*.02,tail[1]-D*.03,fl*.95,fl*.5,ta-.2-flap*.18));
   }
   // body and head
   const body=new Path2D();tube(body,sp,w);ell(body,hx,hy,hr,hr*.95);ell(body,mx,my,mz,mz*.74,ha);
@@ -43,9 +49,10 @@ function drawSeal(c,s,po){
   c.restore();
   R.pattern(c,body,s,[sp[0][0],Math.min(sp[5][1],head[1])-D*.6,hx-hr*.2,Math.max(sp[5][1],sp[2][1])+D*.25],s.seed);
   // near flippers
-  if(!s.otter)fill(c,col.fin,p=>leaf(p,tail[0]+Math.cos(ta)*D*.02,tail[1]+D*.02,fl*1.1,fl*.32,ta+.36+flap*.22));
+  if(!s.otter)fill(c,col.fin,p=>flipper(p,tail[0]+Math.cos(ta)*D*.02,tail[1]+D*.04,fl,fl*.52,ta+.16+flap*.18));
   else fill(c,col.fin,p=>leaf(p,sp[1][0]+L*.02,sp[1][1]+w[1]*.38,fl*.62,fl*.2,land?1.2:2.7-flap*.3));
-  fill(c,col.fin,p=>leaf(p,sx,sy,fl,fl*.3,foreA));
+  if(!s.otter){fill(c,col.fin,p=>flipper(p,sx,sy,fl*.78,fl*.46,foreA));claws(c,sx,sy,fl*.78,fl*.46,foreA,col.dark)}
+  else fill(c,col.fin,p=>leaf(p,sx,sy,fl,fl*.3,foreA));
   // face
   if(s.ear>.12)fill(c,col.shade,p=>ell(p,hx-hr*.5,hy-hr*.62,hr*.2,hr*.17));
   R.eye(c,hx+hr*.3,hy-hr*.2,hr*.22,{blink:po.blink,dark:col.dark});
@@ -59,7 +66,7 @@ function drawSeal(c,s,po){
 R.register('seal',{
   test:t=>t.cov==='fur'&&t.fins==='fins',
   spec:(t,seed,col)=>{const n=k=>(t[k]??50)/100;const fat=t.fatWhere==='all'?n('fat'):0;const otter=n('tail')>.3;
-    return{L:otter?132:128,D:(otter?33:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
+    return{L:otter?132:128,D:(otter?39:36)*(1+.34*fat+.08*n('insul')),rear:otter?1:.92,fat,fin:n('finSize'),otter,tail:otter?30+50*n('tail'):0,
       headK:otter?1.18:.92,snout:t.diet==='plants'?.2:.5,ear:n('ears'),cheek:false}},
   draw:drawSeal,
   size:s=>({len:(s.L+s.tail*.8)*1.02,height:s.D*2.5,swims:true,dx:s.otter?s.tail*.3:0}),

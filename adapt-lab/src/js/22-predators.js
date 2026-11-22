@@ -118,9 +118,9 @@ function predSpec(j,seed){
   if(j.kind==='shark'){const col=tint(R.colours({color:'grey'}),j.col);s={plan:'shark',seed,L:150,D:36,col:{...col,belly:'#f1f4f5',dark:'#1d2226'}}}
   else{s=R.specOf(traitsFor(j),seed||7);s={...s,col:tint(s.col,j.col)};
     if(s.plan==='quad'){s.cheek=false;
-      if(j.kind==='cat'||j.kind==='lion'){s.snout=.1;s.earW=11;s.head*=1.14;s.neckUp=.22;s.cheek=false;if(j.id!=='lynx')s.ear=Math.min(s.ear,13);if(j.id==='lynx')s.tailType='stub'}
-      if(j.kind==='canid'||j.kind==='wolf'){s.snout=.7;s.earW=9;s.neckUp=.26}
-      if(j.id==='hyena'){s.neckUp=.42;s.tailType='tuft'}
+      if(j.kind==='cat'||j.kind==='lion'){Object.assign(s,R.FACE.cat,{earW:11,neckUp:.22,cheek:false,tailType:'medium'});delete s.headK;if(j.id!=='lynx')s.ear=Math.min(s.ear,13);if(j.id==='lynx')s.tailType='stub'}
+      if(j.kind==='canid'||j.kind==='wolf'){Object.assign(s,{snout:.6,snoutDepth:.6,snoutDown:.04,earW:9,neckUp:.26});if(j.id==='coyote')Object.assign(s,{snout:.5,snoutDepth:.58})}
+      if(j.id==='hyena'){Object.assign(s,{neckUp:.42,tailType:'tuft',snout:.36,snoutDepth:.82,snoutDown:.16})}
       if(j.kind==='lion'){s.tailType='tuft';s.col.belly=mix(j.col,'#ffffff',.4);s={plan:'lion',seed,col:s.col,quad:s,mane:true,maneCol:mix(j.col,'#4a2a12',.62)}}}
     if(s.plan==='bird'){
       if(j.kind==='owl'){s.col.belly=mix(j.col,'#ffffff',.7);s.col.eyeRing='#f2c230'}
