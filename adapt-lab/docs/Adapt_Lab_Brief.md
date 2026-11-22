@@ -14,10 +14,12 @@ A Grade 6 (MYP Year 1) simulation about adaptations and evolution, taught in Mar
 | `Adapt-Lab.html` | Old single-file source | Reference only |
 | `src/js/00-util.js` to `18-classify.js` | The science model, moved out of the old file | Proven equal to the old app by tests |
 | `src/js/14-run.js` | The evolving population, with no drawing in it | Proven equal for five species to generation 50 |
-| `src/js/15-foodweb.js`, `19-notes.js` | Food web model, the explanation sentences | Moved, not yet tested |
+| `src/js/15-foodweb.js` | Food web model | Proven equal to the old app (`tests/foodweb.test.js`, 22 Nov) |
+| `src/js/19-notes.js` | The explanation sentences | Moved, not yet tested |
 | `src/js/16-cost.js`, `17-combos.js` | Cost of change, traits that work together | See the progress log |
+| `build.js`, `src/index.html`, `src/*.css`, `src/js/99-init.js` | Build and first page (model check). Output in `dist/`; test hook `window.__adapt` in `dist/test.html` | Working, 22 Nov |
 | `prototype/` | The new art and screens, as working pages | See the progress log |
-| `tests/` | `sh tests/run_all.sh` runs everything | Model and run tests pass |
+| `tests/` | `sh tests/run_all.sh` runs everything, builds, and runs the browser check | All pass (22 Nov) |
 | `docs/` | Plan, this brief, backlog, chapter scripts, CER design | |
 
 ## The model in one page

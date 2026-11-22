@@ -1,0 +1,18 @@
+<main class="app" id="app">
+  <header class="top">
+    <h1>Adapt Lab <span class="tag">rebuild · model check</span></h1>
+    <p class="lead">This page proves the new build works. Pick a real organism and a biome to see its survival bars, worked out by the same science model as the old app.</p>
+  </header>
+  <section class="pick">
+    <label>Organism <select id="pickOrg"></select></label>
+    <label>Biome <select id="pickBiome"></select></label>
+  </section>
+  <section class="card">
+    <h2 id="title"></h2>
+    <div class="year"><span>Chance of surviving a year</span><b id="year"></b></div>
+    <div id="bars" class="bars"></div>
+    <h3>Traits that work together, and traits that clash</h3>
+    <div id="chips" class="chips"></div>
+  </section>
+  <footer class="foot">Built from <code>adapt-lab/src/</code> by <code>node adapt-lab/build.js</code>. The real game screens arrive in later sessions.</footer>
+</main>

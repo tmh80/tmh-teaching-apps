@@ -8,9 +8,12 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 2. The Year 1 Criterion C strand wording to tag data and CER questions with. (plan section 7)
 3. Two or three screenshots of programs whose look you like, for `docs/reference/`.
 4. Chapter 1 script: is the European rabbit the right "test visitor", do you want "biotic" and "abiotic" in Grade 6, and are negative temperatures secure by March? (end of the Chapter 1 script)
-5. The cost of changing body plan and the combination list are science judgements: please read `Cost_and_Combos_Notes.md` when it exists.
+5. The cost of changing body plan and the combination list are science judgements: please read `docs/Cost_and_Combos_Notes.md` (written 22 Nov): it ends with five short questions.
 
 ## Banked ideas
+
+- Test `19-notes.js` (the explanation sentences), including the wrong "too hot in the cold winter" sentence from Tom's feedback (Session 5).
+- Two combination pairs from the plan are not in the table: poison + camouflage, and few young with lots of care in a safe biome. Waiting on Tom (notes, question 5).
 
 - Tap an animal to see its traits beside the herd average; follow a family through the generations (plan 5.5).
 - "Same world again" for fair tests; two runs on one graph.

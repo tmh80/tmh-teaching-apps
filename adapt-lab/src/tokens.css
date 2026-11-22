@@ -1,0 +1,8 @@
+/* Adapt Lab design tokens: flat colours, one font stack, sizes. Change the look here, not in app.css. */
+:root{
+  --bg:#f4efe4; --card:#fffdf8; --ink:#2b2a26; --muted:#6b675c; --line:#e3dccb;
+  --good:#3f8f4a; --good-bg:#e4f2e2; --bad:#b8432f; --bad-bg:#f8e3dd; --accent:#d9792b;
+  --bar-bg:#ece5d4; --radius:14px; --gap:16px;
+  --font:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+[hidden]{display:none !important}

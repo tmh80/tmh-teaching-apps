@@ -69,10 +69,10 @@
       A: t => t.escape === 'flee', B: t => t.defence === 'shell' || (t.fatWhere === 'all' && t.fat >= 60), where: (t, B) => !B.aquatic, inModel: true,
       demo: { biome: 'grassland', t: { escape: 'flee', fatWhere: 'all', fat: 90 }, alt: { fatWhere: 'none' } } },
     { id: 'hide_small', good: true, a: 'Hides away', b: 'Small body', text: 'Small animals fit into burrows and cracks.', pressure: 'pred',
-      A: t => t.escape === 'hide', B: t => t.size <= 30, opposite: 'hide_huge', inModel: false, effect: 8,
+      A: t => t.escape === 'hide', B: t => t.size <= 30, opposite: 'hide_huge', inModel: false, effect: 10,
       demo: { biome: 'forest', t: { escape: 'hide', size: 20 }, alt: { size: 60 } } },
     { id: 'hide_huge', good: false, a: 'Hides away', b: 'Huge body', text: 'Nowhere is big enough to hide.', pressure: 'pred',
-      A: t => t.escape === 'hide', B: t => t.size >= 75, opposite: 'hide_small', inModel: false, effect: -12,
+      A: t => t.escape === 'hide', B: t => t.size >= 75, opposite: 'hide_small', inModel: false, effect: -20,
       demo: { biome: 'grassland', t: { escape: 'hide', size: 90 }, alt: { size: 50 } } },
     { id: 'herd_stripes', good: true, a: 'Lives in a group', b: 'Stripes', text: 'A predator cannot pick out one animal.', pressure: 'pred',
       A: t => t.social === 'herd', B: t => t.pattern === 'stripes', where: (t, B) => B.id === 'grassland', inModel: true,
@@ -135,9 +135,10 @@
     { id: 'fly_small', good: true, a: 'Wings that fly', b: 'Small body', text: 'A light body can take off and fly away.', pressure: 'pred',
       A: t => t.wings === 'fly', B: t => t.size <= 35, where: (t, B) => !B.aquatic, opposite: 'fly_heavy', inModel: true,
       demo: { biome: 'forest', t: { cov: 'feathers', legs: '2', wings: 'fly', wingSize: 70, size: 20 }, alt: { wings: 'none' } } },
-    { id: 'fly_heavy', good: false, a: 'Wings that fly', b: 'Huge body', text: 'It is too heavy for its wings to lift.', pressure: 'food',
-      A: t => t.wings === 'fly', B: t => t.size >= 75, opposite: 'fly_small', inModel: true,
-      demo: { biome: 'grassland', t: { cov: 'feathers', legs: '2', wings: 'fly', wingSize: 80, size: 90 }, alt: { wings: 'none' } } }
+    { id: 'fly_heavy', good: false, a: 'Huge body', b: 'Wings too small', text: 'Its wings are too small to lift such a heavy body.', pressure: 'pred',
+      // same rule as the model's flying ability (moveAbility): a bigger body needs bigger wings to fly
+      A: t => t.wings === 'fly' && t.size >= 75, B: t => t.wingSize < 15 + .6 * t.size, opposite: 'fly_small', inModel: true,
+      demo: { biome: 'grassland', t: { cov: 'feathers', legs: '2', wings: 'fly', wingSize: 45, size: 90 }, alt: { wingSize: 95 } } }
   ];
   const BY_ID = {}; COMBOS.forEach(r => { BY_ID[r.id] = r; });
 
