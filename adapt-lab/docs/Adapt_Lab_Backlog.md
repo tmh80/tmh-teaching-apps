@@ -4,7 +4,7 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 
 ## Questions for Tom
 
-1. Which home-screen concept: field station, deep time, species passport or ark seed bank? (plan section 6)
+1. ~~Home-screen concept~~ Answered 22 Nov: **field station**.
 2. The Year 1 Criterion C strand wording to tag data and CER questions with. (plan section 7)
 3. Two or three screenshots of programs whose look you like, for `docs/reference/`.
 4. Chapter 1 script: is the European rabbit the right "test visitor", do you want "biotic" and "abiotic" in Grade 6, and are negative temperatures secure by March? (end of the Chapter 1 script)

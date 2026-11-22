@@ -434,4 +434,6 @@ Skills: `wab-sim-toddle-outputs`.
 - [ ] Session 13
 - [ ] Session 14
 
-Open questions for Tom: concept choice (section 6); Criterion C strand wording (section 7); reference pictures (Session 1).
+**Concept chosen (Tom, 22 Nov 2026): Field station** (option 1 in section 6: a map of six biome stations, each chapter an expedition, the Journal a field notebook).
+
+Open questions for Tom: Criterion C strand wording (section 7); reference pictures (Session 1).
