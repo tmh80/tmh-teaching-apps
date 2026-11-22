@@ -51,3 +51,7 @@ There are **30 pairs**. Each shows in the designer as a green "Works well togeth
 ## 3. One thing to know
 
 Because three pairs add an effect, a few survival numbers now differ slightly from the old app. For example, the plains zebra in the savanna shows 78% a year in the new build (old app: 77%), because it lives in a herd and cares for its young. The science model itself is unchanged, and the golden tests still check it against the old app without the pairs added.
+
+## Tom's answers (22 Nov 2026)
+
+1. 10 points per era: yes. 2. Poison costs 3: yes. 3. Insects and crabs: **make them reachable** at a high price, flagged as not real, so the class can discuss what is accurate. 4. The three added effects: yes. 5. The two missing pairs: yes (poison + camouflage as a new rule; few young with care shown in the Run). All three changes are scheduled in Session 5.

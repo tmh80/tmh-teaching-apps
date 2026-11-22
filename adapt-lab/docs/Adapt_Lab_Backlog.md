@@ -6,9 +6,9 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 
 1. ~~Home-screen concept~~ Answered 22 Nov: **field station**.
 2. The Year 1 Criterion C strand wording to tag data and CER questions with. (plan section 7)
-3. Two or three screenshots of programs whose look you like, for `docs/reference/`.
+3. ~~Reference screenshots~~ Answered 22 Nov: Spore and Alba, in `docs/reference/`.
 4. Chapter 1 script: is the European rabbit the right "test visitor", do you want "biotic" and "abiotic" in Grade 6, and are negative temperatures secure by March? (end of the Chapter 1 script)
-5. The cost of changing body plan and the combination list are science judgements: please read `docs/Cost_and_Combos_Notes.md` (written 22 Nov): it ends with five short questions.
+5. The cost of changing body plan and the combination list are science judgements: ~~Cost and combos questions~~ Answered 22 Nov (see the end of `docs/Cost_and_Combos_Notes.md`).
 
 ## Banked ideas
 

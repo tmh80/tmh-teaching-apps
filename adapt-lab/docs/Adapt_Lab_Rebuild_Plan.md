@@ -362,6 +362,9 @@ Skills: `wab-science-sim-builder`.
 
 **Session 5 · The designer on one screen**
 Skills: add `wab-sim-open-builders`.
+- **Tom's layout (22 Nov, from his Spore reference in `docs/reference/`):** the animal is big and **centred** at all times, on a small stage with its biome behind it. Trait groups are a row of **tabs**; one group is open at a time, so the page never scrolls. Survival bars and "this era: 7 of 10 points" stay in view. Options are big labelled tiles, not tiny icons.
+- **Insects and crabs (Tom, 22 Nov):** let students change a backbone animal into an insect or crab and back, at a high price. Then flag it ("In real life this has never happened") so the class can discuss what is accurate. Change `16-cost.js` and `UNREACHABLE_FROM_DEFAULT` in `tests/cost.test.js` to match.
+- **Combinations (Tom, 22 Nov):** add poison + camouflage as a new rule; show "few young with lots of care" as a pattern in the Run, not as a chip.
 - New layout: big animal in the middle, trait groups as tabs beside it, survival bars always in view, no scrolling on a laptop.
 - Ancestors for six biomes. Cost by distance (5.2). `COMBOS` chips (5.3). Undo, reset, compare with a real organism.
 - Checks: cost tests; every ancestor survives 50–65% in its biome; every `COMBOS` row changes a survival bar; phone, tablet and laptop screenshots.
@@ -436,4 +439,6 @@ Skills: `wab-sim-toddle-outputs`.
 
 **Concept chosen (Tom, 22 Nov 2026): Field station** (option 1 in section 6: a map of six biome stations, each chapter an expedition, the Journal a field notebook).
 
-Open questions for Tom: Criterion C strand wording (section 7); reference pictures (Session 1).
+**Tom's answers, 22 Nov 2026:** 10 points per era, yes; poison costs 3, yes; insects and crabs reachable (see Session 5); the three added effects (+10, −20, +5), yes; the two missing pairs, yes (see Session 5). Reference pictures are in `docs/reference/` with notes on what he likes.
+
+Open questions for Tom: Criterion C strand wording (section 7).
