@@ -351,17 +351,20 @@ Skills: `wab-science-sim-builder`.
 - Checks: the 4.4 rubric on the full gallery; all 16 animal presets and all predators in `PRED_BANK` draw from their real data.
 
 **Session 3 · Art 2: plants, actions and behaviours**
+- **Added 23 Nov (Tom approved):** hopper and climber bodies and movement cycles, with a short branch-to-branch swing for long-armed climbers; red squirrel and jerboa in the gallery. See `docs/Locomotion_Proposal.md` section 5.
 - Plant rigs for the four growth forms with roots, leaves, spines, wax shine, storage, seasons (leaves dropping, dying back).
 - Actions: graze, drink, sleep, hide in a burrow, freeze, flee, huddle, bask, carry food, feed young; die and be born.
 - Checks: the rubric; all 8 plant presets; each behaviour trait has a visible action.
 
 **Session 4 · Art 3: six biomes that feel alive**
+- **Added 23 Nov:** trees in every land scene, and climbers that run up a tree to escape (Locomotion proposal, section 7).
 - Port `prototype/scene.js`. Six biomes, four seasons with cross-fades, day and night, weather, event looks (4.5).
 - Herd behaviour, predator stalk and chase, the 40-animal cap, level of detail.
 - Checks: the rubric on every biome in every season; frame time under 16 ms with 40 animals; phone width.
 
 **Session 5 · The designer on one screen**
 Skills: add `wab-sim-open-builders`.
+- **Added 23 Nov (Tom approved):** the "How it gets around on land" trait (walks, hops, climbs): the `trees` biome value, the model rules, cost, six new combination chips, red squirrel and jerboa presets, with tests. See `docs/Locomotion_Proposal.md` sections 3 and 4. This is a deliberate change to the science model: the golden tests must still pass for every animal that walks.
 - **Tom's layout (22 Nov, from his Spore reference in `docs/reference/`):** the animal is big and **centred** at all times, on a small stage with its biome behind it. Trait groups are a row of **tabs**; one group is open at a time, so the page never scrolls. Survival bars and "this era: 7 of 10 points" stay in view. Options are big labelled tiles, not tiny icons.
 - **Insects and crabs (Tom, 22 Nov):** let students change a backbone animal into an insect or crab and back, at a high price. Then flag it ("In real life this has never happened") so the class can discuss what is accurate. Change `16-cost.js` and `UNREACHABLE_FROM_DEFAULT` in `tests/cost.test.js` to match.
 - **Combinations (Tom, 22 Nov):** add poison + camouflage as a new rule; show "few young with lots of care" as a pattern in the Run, not as a chip.
@@ -437,7 +440,7 @@ Skills: `wab-sim-toddle-outputs`.
   - **Backlog flaws fixed:** a lying animal folds its back legs under its haunch and stretches its front legs forward; a sitting frog's knee no longer dips below the ground, and frogs sit nearer the centre of their cell; the otter is thicker; the flying wing has a straight front edge and separate "finger" feathers at the tip instead of a leaf shape; long bushy tails (Arctic fox) no longer run out of their gallery cell.
   - **Checks:** a predator gallery (`#predgal`) shows all 27 predators and invaders from their real data. `tests/art_shots.js` was rewritten to screenshot both galleries at 1100 and 390 px (the old version broke on the scene buttons). Contact sheets and close-ups looked at, three rounds. `sh tests/run_all.sh` passes; the root build now includes the art (20 modules).
   - **Still to do (next art session):** heads of short-necked grazers do reach the ground now, but the hare's face looks odd when grazing; the very fat, very thick-coated animal is still a lumpy blob; the heron is small in its cell; birds in flight are sized for standing, so big wings run off their cell; the fennec fox reads a little like a donkey (long legs and huge ears); (cheetah tear line: done the same night; meat-eaters no longer get pink cheeks). The rubric line "every trait changes the picture" was not re-checked this session.
-- [ ] Session 2 (finish the list above)
+- [ ] Session 2 (finish the list above). **Also:** lower small animals (rabbits, porcupines, armadillos), section 6 of `docs/Locomotion_Proposal.md`.
 - [ ] Session 3
 - [ ] Session 4
 - [ ] Session 5

@@ -2,7 +2,7 @@
 
 Written 23 Nov 2026 for Tom, from his note: "rodents might need to be lower to the ground (armadillo, rabbit). One locomotion option should be a hop or a chimp-like climb or swing. The hop would make back legs bigger like a rabbit. Tree swinging would get it out of the way of predators and find new food. Think about how it fits completely before adding it in."
 
-Nothing here is built yet. It waits for Tom's answers (section 8).
+Nothing here is built yet. **Approved by Tom on 23 Nov 2026** (answers at the end of section 8).
 
 ## 1. The idea in one paragraph
 
@@ -80,3 +80,5 @@ This changes only the drawing, not the science model, so it can be done first, w
 2. Is the trade-off right: climbers are safer from foxes but easier for owls and hawks?
 3. Swinging: a short swing as part of climbing now, and a rainforest biome later (if ever)? Or skip swinging?
 4. New presets: a red squirrel (forest climber) and a jerboa (desert hopper)?
+
+**Tom's answers (23 Nov 2026):** 1. Both: walks, hops and climbs. 2. Yes, keep the bird-of-prey trade-off. 3. A short swing as part of climbing, no new biome. 4. Add both presets: red squirrel (forest climber) and jerboa (desert hopper).
