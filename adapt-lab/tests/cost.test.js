@@ -11,7 +11,7 @@ function test(name, fn) { fn(); passed++; console.log('  ok  ' + name); }
 const ROWS = []; M.A_SECTIONS.forEach(sec => sec.rows.forEach(r => ROWS.push(r)));
 const CHOICE = ROWS.filter(r => !r.num).map(r => ({ k: r.k, opts: r.opts.map(o => String(o[0])) }));
 const DEF = { ...M.DEF_A };
-const UNREACHABLE_FROM_DEFAULT = { cov: ['exo'], breathe: ['tubes'], legs: ['6'] };   // the arthropod branch
+const UNREACHABLE_FROM_DEFAULT = {};   // since 22 Nov 2026 every option can be reached (the insect and crab jump is allowed but flagged)
 
 // a small seeded random number maker, so failures can be repeated
 function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -68,7 +68,7 @@ test('going by way of a third design is never cheaper than going direct', () => 
   }
 });
 
-test('from the default animal every option has a price, except the insect and crab branch', () => {
+test('from the default animal every option has a price', () => {
   CHOICE.forEach(c => c.opts.forEach(o => {
     const p = C.optionCost(DEF, c.k, o); const blocked = (UNREACHABLE_FROM_DEFAULT[c.k] || []).includes(o);
     if (blocked) { assert.strictEqual(p, Infinity, `${c.k}=${o} should not be reachable from a mammal`); assert.strictEqual(C.reachable(DEF, c.k, o), false); }
@@ -77,12 +77,30 @@ test('from the default animal every option has a price, except the insect and cr
   }));
 });
 
-test('an insect can become a crab, but a mammal cannot get air tubes', () => {
-  const insect = { ...DEF, ...C.PLANS.insect }, crab = { ...DEF, ...C.PLANS.crab };
-  assert(Number.isFinite(C.cost(insect, crab).total));
-  assert.strictEqual(C.optionCost(insect, 'breathe', 'gills'), C.WEIGHTS.plan);
-  assert.strictEqual(C.optionCost({ ...DEF, breathe: 'gills' }, 'breathe', 'tubes'), Infinity);
+test('an insect can become a crab; a backbone animal can jump to the insect branch, at full price and flagged as not real', () => {
+  const insect = { ...DEF, cov: 'exo', breathe: 'tubes', legs: '6' };
+  assert.strictEqual(C.optionCost(insect, 'breathe', 'gills'), 4);
+  const toBug = C.cost(DEF, { ...DEF, cov: 'exo', breathe: 'tubes', legs: '6' });
+  assert(isFinite(toBug.total) && toBug.total >= 12, 'the jump should cost at least 12, got ' + toBug.total);
+  assert(toBug.notReal && toBug.items.every(i => i.notReal), 'every part of the jump must be flagged');
+  assert(toBug.items[0].why.includes('never happened'));
+  const real = C.cost(DEF, { ...DEF, cov: 'scales', blood: 'cold' });
+  assert(!real.notReal && real.items.every(i => !i.notReal), 'real moves must not be flagged');
 });
+
+test('afford() never lets the total go over the budget, and says why in Tom\'s words', () => {
+  const base = { ...DEF, size: 50 };
+  const mid = { ...base, size: 30 };   // 2 points spent
+  assert.deepStrictEqual(C.afford(base, mid, 'size', 50).ok, true);   // undoing is always allowed
+  const near = { ...base, size: 30, legLen: base.legLen + 60 };   // 8 points spent
+  const r = C.afford(base, near, 'defence', 'spines');   // costs 3, only 2 left
+  assert.strictEqual(r.ok, false); assert.strictEqual(r.price, 3); assert.strictEqual(r.left, 2);
+  assert.strictEqual(r.message, "You can't afford this. It costs 3 and you have 2 points left.");
+  assert.strictEqual(C.afford(base, base, 'size', 40).ok, true);
+  const one = { ...base, legLen: base.legLen + 90 };   // 9 spent, 1 left
+  assert.strictEqual(C.afford(base, one, 'defence', 'spines').message, "You can't afford this. It costs 3 and you have 1 point left.");
+});
+
 
 test('optionCost agrees with cost, and items are listed most expensive first', () => {
   const R = rng(4);
@@ -110,9 +128,9 @@ test('prices follow the plan: number 1 per 10, behaviour 1, looks 1, body 2, def
 test('a whole move between neighbouring body plans costs 8 points or more', () => {
   C.PLAN_LINKS.forEach(([a, b]) => { const p = C.planMoveCost(a, b); assert(p >= 8 || (a === 'insect' && b === 'crab'), `${a} to ${b} costs only ${p}`); assert(Number.isFinite(p)); });
   assert.strictEqual(C.planMoveCost('mammal', 'lizard'), 8);
-  assert.strictEqual(C.planMoveCost('mammal', 'insect'), Infinity);
+  assert(C.planMoveCost('mammal', 'insect') >= 20, 'the jump to an insect should take more than two eras of points');   // allowed since 22 Nov, flagged as not real
   assert.strictEqual(C.planSteps('fish', 'bird'), 3);
-  assert.strictEqual(C.planSteps('mammal', 'crab'), Infinity);
+  assert.strictEqual(C.planSteps('mammal', 'crab'), Infinity);   // the real family tree still has no link
 });
 
 test('real animals are sorted into the right body plan', () => {

@@ -423,6 +423,12 @@ Skills: `wab-sim-toddle-outputs`.
   - **`docs/Cost_and_Combos_Notes.md`** written for Tom, with five questions.
   - **Browser check** (`tests/page_check.js`): no console errors, no internet requests, every organism in every biome draws its bars, no sideways scrolling at 390 px. `tests/run_all.sh` now also builds and runs it.
   - Not done: `19-notes.js` (explanation sentences) still has no test; the two combination pairs the plan lists but the table lacks (poison + camouflage, few young + care) are left as questions for Tom.
+- [x] **Extra, 22 Nov 2026 (same evening, Opus 5.5): non-art fixes pulled forward from Session 5.** Done and checked:
+  - **Feedback 5, wrong threat sentence:** new `src/js/19-threat.js` names the season where the temperature score is worst and says hot or cold from that season. Tom's case now reads "Its fat and coat are too thick, so it overheats in the summer." `tests/threat.test.js` checks 1,896 design-and-biome sentences: hot never pairs with the coldest season, cold never with the hottest. Grassland reads "when the rains begin".
+  - **Feedback 6, overspending:** `AdaptCost.afford()` plus the designer prototype. Options that cost too much look greyed out before they are tapped; tapping one shows "You can't afford this. It costs 3 and you have 2 points left." and leaves the design unchanged; sliders stop at the last value the student can afford. `tests/designer_check.js` taps every option in two biomes: never above 10 of 10. Screenshot looked at.
+  - **Tom's answer 3:** backbone animals can now jump to the insect and crab branch (links marked `notReal` in `16-cost.js`, at least 20 points, so more than two eras). Every cost item on that route carries `notReal` and the sentence "In real life this has never happened…". The designer does not show that flag yet: Session 5 must show it on the option and in the era summary.
+  - **Tom's answer 5:** new pair `poison_camo` (Poison + good camouflage, clash, −8 on predators). The "few young with lots of care" pattern is left for the Run (Session 6).
+  - So Session 5 no longer needs to do feedback 5 or 6, only show the `notReal` flag, plus the layout work.
 - [ ] Session 2
 - [ ] Session 3
 - [ ] Session 4

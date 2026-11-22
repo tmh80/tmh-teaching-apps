@@ -95,6 +95,10 @@
     { id: 'poison_warn', good: true, a: 'Poison', b: 'Bright colour or bold pattern', text: 'Predators learn the warning and stay away.', pressure: 'pred',
       A: t => t.defence === 'poison', B: t => warns(t), inModel: true,
       demo: { biome: 'forest', t: { defence: 'poison', color: 'orange' }, alt: { color: 'white' } } },
+    { id: 'poison_camo', good: false, a: 'Poison', b: 'Good camouflage', text: 'Predators never see a warning, so they never learn to stay away.', pressure: 'pred',
+      // added 22 Nov 2026 (Tom): not in the old maths, so it carries its own effect
+      A: t => t.defence === 'poison', B: (t, B) => camo(t, B) >= .6 && !warns(t), opposite: 'poison_warn', inModel: false, effect: -8,
+      demo: { biome: 'forest', t: { defence: 'poison', color: 'brown', pattern: 'plain' }, alt: { color: 'orange' } } },
     { id: 'store_active', good: true, a: 'Stores food', b: 'Stays active all year', text: 'It has food when there is none to find.', pressure: 'food',
       A: t => t.store === 'cache', B: t => t.season === 'active', inModel: true,
       demo: { biome: 'tundra', t: { store: 'cache', season: 'active', insul: 80 }, alt: { store: 'none' } } },

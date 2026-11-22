@@ -209,6 +209,9 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-of
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 
+/* options the student cannot afford look unavailable before they are tapped (Tom, 16 Nov 2026) */
+.chip[data-over="1"]{opacity:.45;filter:saturate(.4)}
+
 </style>
 </head>
 <body>
@@ -1865,7 +1868,9 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
        behaviour 1 · looks (colour, pattern) 1 · body feature 2 · defence 3 · body-plan trait 4.
    - Body-plan traits are covering, body heat, breathing, number of legs and wings. Their maps follow the family tree
      fish – frog – lizard – bird and lizard – mammal, so a whole move between two neighbouring plans costs 8 points or more.
-     Insects and crabs are a separate branch: an exoskeleton, air tubes and six legs cannot be reached from the vertebrates.
+     Insects and crabs are a separate branch of the real family tree. Tom (22 Nov 2026) wants students to be able to make
+     the jump anyway, so the class can discuss what is accurate: links marked { notReal: true } allow it at full price,
+     and every cost item that uses one carries notReal and a sentence saying it has never happened in real life.
    The total is the sum over all traits, so it is zero for no change, the same in both directions, and going by way of a
    third design is never cheaper than going direct. */
 (function (root, factory) {
@@ -1906,10 +1911,10 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
     // ---- defences: 3 points per step
     defence: { group: 'defence', links: [['none', 'spines'], ['none', 'poison'], ['none', 'shell'], ['spines', 'shell']] },
     // ---- body-plan traits: 4 points per step, following fish – frog – lizard – bird and lizard – mammal
-    cov: { group: 'plan', links: [['skin', 'scales'], ['scales', 'feathers'], ['scales', 'fur']], values: ['fur', 'feathers', 'scales', 'skin', 'exo'] },
+    cov: { group: 'plan', links: [['skin', 'scales'], ['scales', 'feathers'], ['scales', 'fur'], ['scales', 'exo', { notReal: true }]], values: ['fur', 'feathers', 'scales', 'skin', 'exo'] },
     blood: { group: 'plan', links: [['cold', 'warm']] },
-    breathe: { group: 'plan', links: [['gills', 'skinlungs'], ['skinlungs', 'lungs'], ['tubes', 'gills', { only: ['cov', 'exo'] }]] },
-    legs: { group: 'plan', links: [['0', '4'], ['4', '2']], values: ['0', '2', '4', '6'] },
+    breathe: { group: 'plan', links: [['gills', 'skinlungs'], ['skinlungs', 'lungs'], ['tubes', 'gills', { only: ['cov', 'exo'] }], ['lungs', 'tubes', { notReal: true }]] },
+    legs: { group: 'plan', links: [['0', '4'], ['4', '2'], ['4', '6', { notReal: true }]], values: ['0', '2', '4', '6'] },
     wings: { group: 'plan', links: [['none', 'flightless'], ['flightless', 'fly']] }
   };
 
@@ -1953,6 +1958,13 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
     }
     return null;
   }
+  const NOT_REAL_TEXT = 'In real life this has never happened: animals with a backbone and insects or crabs are separate branches of the family tree.';
+  // true when the cheapest route uses a link that real evolution never took
+  function usesNotReal(key, path) {
+    if (!path || path.length < 2) return false; const map = NEIGHBOURS[key];
+    for (let i = 1; i < path.length; i++) for (const l of map.links) if (l[2] && l[2].notReal && ((l[0] === path[i - 1] && l[1] === path[i]) || (l[1] === path[i - 1] && l[0] === path[i]))) return true;
+    return false;
+  }
   function steps(key, a, b, fromT, toT) { const p = pathOf(key, a, b, fromT, toT); return p ? p.length - 1 : Infinity; }
 
   // price of changing ONE trait from value a to value b. fromT and toT are the whole designs (needed for the arthropod-only link).
@@ -1963,32 +1975,32 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
     }
     const map = NEIGHBOURS[key]; if (!map) return { points: 0, path: null, group: null };
     const p = pathOf(key, a, b, fromT, toT);
-    return { points: p ? (p.length - 1) * WEIGHTS[map.group] : Infinity, path: p, group: map.group };
+    return { points: p ? (p.length - 1) * WEIGHTS[map.group] : Infinity, path: p, group: map.group, notReal: usesNotReal(key, p) };
   }
   function whyOf(key, c, a, b) {
     if (c.group === 'number') return `1 point for every ${NUM_UNITS_PER_POINT} units of change.`;
     if (!isFinite(c.points)) return `This cannot evolve from here. ${key === 'cov' || key === 'legs' || key === 'breathe' ? 'Insects and crabs are a separate branch of the family tree.' : ''}`.trim();
     const n = c.path.length - 1, w = WEIGHTS[c.group];
     const route = c.path.map(v => word(key, v)).join(' → ');
-    return `${n} step${n === 1 ? '' : 's'} (${route}). This is ${GROUP_WORD[c.group]}: ${w} point${w === 1 ? '' : 's'} a step.`;
+    return `${n} step${n === 1 ? '' : 's'} (${route}). This is ${GROUP_WORD[c.group]}: ${w} point${w === 1 ? '' : 's'} a step.` + (c.notReal ? ' ' + NOT_REAL_TEXT : '');
   }
 
   const KEYS = NUM.concat(Object.keys(NEIGHBOURS));
 
   // total cost of changing one whole design into another
   function cost(fromT, toT) {
-    const items = []; let total = 0;
+    const items = []; let total = 0, notReal = false;
     for (const key of KEYS) {
       if (!(key in fromT) || !(key in toT)) continue;
       const a = fromT[key], b = toT[key];
       if (String(a) === String(b)) continue;
       const c = traitCost(key, a, b, fromT, toT);
       if (!c.points) continue;
-      total += c.points;
-      items.push({ key, label: LABEL[key] || key, from: a, to: b, fromWord: word(key, a), toWord: word(key, b), points: c.points, group: c.group, why: whyOf(key, c, a, b) });
+      total += c.points; if (c.notReal) notReal = true;
+      items.push({ notReal: !!c.notReal, key, label: LABEL[key] || key, from: a, to: b, fromWord: word(key, a), toWord: word(key, b), points: c.points, group: c.group, why: whyOf(key, c, a, b) });
     }
     items.sort((x, y) => y.points - x.points || KEYS.indexOf(x.key) - KEYS.indexOf(y.key));
-    return { total, items };
+    return { total, items, notReal };
   }
   // points to change one trait to one value from the current design (0 when it already has that value; Infinity when it cannot be reached)
   function optionCost(traits, key, value) {
@@ -1996,6 +2008,16 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
     return traitCost(key, traits[key], value, traits, { ...traits, [key]: value }).points;
   }
   function reachable(traits, key, value) { return isFinite(optionCost(traits, key, value)); }
+  // Can the student make this change this era? base = the design at the start of the era, current = the design now.
+  // Never lets the total go over the budget (Tom's feedback, 16 Nov 2026): the designer must not apply an option when ok is false.
+  function afford(base, current, key, value, budget) {
+    budget = budget == null ? BUDGET_PER_ERA : budget;
+    const now = cost(base, current).total, after = cost(base, { ...current, [key]: value }).total;
+    const price = after - now, left = Math.max(0, budget - now), pts = n => n + ' point' + (n === 1 ? '' : 's');
+    if (!isFinite(after)) return { ok: false, price: Infinity, left, message: 'This cannot evolve from here.' };
+    if (after <= budget) return { ok: true, price, left, message: '' };
+    return { ok: false, price, left, message: `You can't afford this. It costs ${price} and you have ${pts(left)} left.` };
+  }
 
   // ---- body plans
   const PLANS = {
@@ -2029,7 +2051,7 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
   // the cheapest whole move from one plan's standard design to another's, for the notes and for teacher checks
   function planMoveCost(a, b) { return cost({ ...PLANS[a] }, { ...PLANS[b] }).total; }
 
-  return { BUDGET_PER_ERA, WEIGHTS, NUM, NUM_UNITS_PER_POINT, NEIGHBOURS, LABEL, VALUE_WORD, PLANS, PLAN_LINKS, PLAN_WORD,
+  return { afford, NOT_REAL_TEXT, BUDGET_PER_ERA, WEIGHTS, NUM, NUM_UNITS_PER_POINT, NEIGHBOURS, LABEL, VALUE_WORD, PLANS, PLAN_LINKS, PLAN_WORD,
     cost, optionCost, reachable, steps, pathOf, planOf, planSteps, planMoveCost, word };
 });
 
@@ -2106,10 +2128,10 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
       A: t => t.escape === 'flee', B: t => t.defence === 'shell' || (t.fatWhere === 'all' && t.fat >= 60), where: (t, B) => !B.aquatic, inModel: true,
       demo: { biome: 'grassland', t: { escape: 'flee', fatWhere: 'all', fat: 90 }, alt: { fatWhere: 'none' } } },
     { id: 'hide_small', good: true, a: 'Hides away', b: 'Small body', text: 'Small animals fit into burrows and cracks.', pressure: 'pred',
-      A: t => t.escape === 'hide', B: t => t.size <= 30, opposite: 'hide_huge', inModel: false, effect: 8,
+      A: t => t.escape === 'hide', B: t => t.size <= 30, opposite: 'hide_huge', inModel: false, effect: 10,
       demo: { biome: 'forest', t: { escape: 'hide', size: 20 }, alt: { size: 60 } } },
     { id: 'hide_huge', good: false, a: 'Hides away', b: 'Huge body', text: 'Nowhere is big enough to hide.', pressure: 'pred',
-      A: t => t.escape === 'hide', B: t => t.size >= 75, opposite: 'hide_small', inModel: false, effect: -12,
+      A: t => t.escape === 'hide', B: t => t.size >= 75, opposite: 'hide_small', inModel: false, effect: -20,
       demo: { biome: 'grassland', t: { escape: 'hide', size: 90 }, alt: { size: 50 } } },
     { id: 'herd_stripes', good: true, a: 'Lives in a group', b: 'Stripes', text: 'A predator cannot pick out one animal.', pressure: 'pred',
       A: t => t.social === 'herd', B: t => t.pattern === 'stripes', where: (t, B) => B.id === 'grassland', inModel: true,
@@ -2132,6 +2154,10 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
     { id: 'poison_warn', good: true, a: 'Poison', b: 'Bright colour or bold pattern', text: 'Predators learn the warning and stay away.', pressure: 'pred',
       A: t => t.defence === 'poison', B: t => warns(t), inModel: true,
       demo: { biome: 'forest', t: { defence: 'poison', color: 'orange' }, alt: { color: 'white' } } },
+    { id: 'poison_camo', good: false, a: 'Poison', b: 'Good camouflage', text: 'Predators never see a warning, so they never learn to stay away.', pressure: 'pred',
+      // added 22 Nov 2026 (Tom): not in the old maths, so it carries its own effect
+      A: t => t.defence === 'poison', B: (t, B) => camo(t, B) >= .6 && !warns(t), opposite: 'poison_warn', inModel: false, effect: -8,
+      demo: { biome: 'forest', t: { defence: 'poison', color: 'brown', pattern: 'plain' }, alt: { color: 'orange' } } },
     { id: 'store_active', good: true, a: 'Stores food', b: 'Stays active all year', text: 'It has food when there is none to find.', pressure: 'food',
       A: t => t.store === 'cache', B: t => t.season === 'active', inModel: true,
       demo: { biome: 'tundra', t: { store: 'cache', season: 'active', insul: 80 }, alt: { store: 'none' } } },
@@ -2172,9 +2198,10 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
     { id: 'fly_small', good: true, a: 'Wings that fly', b: 'Small body', text: 'A light body can take off and fly away.', pressure: 'pred',
       A: t => t.wings === 'fly', B: t => t.size <= 35, where: (t, B) => !B.aquatic, opposite: 'fly_heavy', inModel: true,
       demo: { biome: 'forest', t: { cov: 'feathers', legs: '2', wings: 'fly', wingSize: 70, size: 20 }, alt: { wings: 'none' } } },
-    { id: 'fly_heavy', good: false, a: 'Wings that fly', b: 'Huge body', text: 'It is too heavy for its wings to lift.', pressure: 'food',
-      A: t => t.wings === 'fly', B: t => t.size >= 75, opposite: 'fly_small', inModel: true,
-      demo: { biome: 'grassland', t: { cov: 'feathers', legs: '2', wings: 'fly', wingSize: 80, size: 90 }, alt: { wings: 'none' } } }
+    { id: 'fly_heavy', good: false, a: 'Huge body', b: 'Wings too small', text: 'Its wings are too small to lift such a heavy body.', pressure: 'pred',
+      // same rule as the model's flying ability (moveAbility): a bigger body needs bigger wings to fly
+      A: t => t.wings === 'fly' && t.size >= 75, B: t => t.wingSize < 15 + .6 * t.size, opposite: 'fly_small', inModel: true,
+      demo: { biome: 'grassland', t: { cov: 'feathers', legs: '2', wings: 'fly', wingSize: 45, size: 90 }, alt: { wingSize: 95 } } }
   ];
   const BY_ID = {}; COMBOS.forEach(r => { BY_ID[r.id] = r; });
 
@@ -2200,6 +2227,57 @@ window.Biomes={ids,info,state,draw,deco,front,yOf,scOf,horizon:hzOf};
   }
 
   return { COMBOS, BIOME_FACTS, find, apply, fires, camo, biomeOf, byId: id => BY_ID[id] };
+});
+
+</script>
+<script>
+/* Adapt Lab: the one-line "biggest threat" sentence under the survival bars.
+   Fixes Tom's feedback of 16 Nov 2026: the designer said "It gets too hot in the cold winter" because it always named the
+   harshest season and guessed hot or cold. Now the sentence names the season where the temperature score is worst, and says
+   hot or cold from that season's own direction. When the animal overheats because of a thick coat or fat, it says so.
+   Pure logic, no DOM. Works in the browser (window.AdaptThreat) and in Node (module.exports). */
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.AdaptThreat = api;
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : null), function () {
+  'use strict';
+  // "in the cold winter", "when the rains begin"
+  function inSeason(name) {
+    const n = String(name || '').toLowerCase();
+    return /^rains /.test(n) ? 'when the ' + n : 'in the ' + n;
+  }
+  // the season with the worst temperature score (sleeping or migrated seasons are skipped). null if every season is fine.
+  function worstTemp(sc) {
+    let best = null;
+    (sc && sc.ts || []).forEach((x, i) => { if (!x || x.dormant || x.away || !x.dir) return; if (!best || x.s < best.s) best = { i, s: x.s, dir: x.dir, T: x.T }; });
+    return best;
+  }
+  function tempSentence(sc, B, t) {
+    const w = worstTemp(sc), seasons = (B && B.seasons) || [];
+    if (!w) return `It struggles with the temperature ${inSeason(seasons[B && B.hs] || 'harshest season')}.`;
+    const when = inSeason(seasons[w.i]);
+    if (w.dir < 0) return `It gets too cold ${when}.`;
+    t = t || {};
+    const coat = (t.cov === 'fur' || t.cov === 'feathers') && t.insul >= 60, fat = t.fatWhere === 'all' && t.fat >= 50;
+    if (coat && fat) return `Its fat and coat are too thick, so it overheats ${when}.`;
+    if (coat) return `Its coat is too thick, so it overheats ${when}.`;
+    if (fat) return `Its fat layer is too thick, so it overheats ${when}.`;
+    return `It gets too hot ${when}.`;
+  }
+  // worstKey: the pressure with the lowest bar ('temp', 'breath', 'pred', 'food', 'water'); lethal: from lethalOf()
+  function threatSentence(worstKey, sc, B, t, lethal) {
+    if (lethal) return 'It cannot live here: ' + lethal.why + '.';
+    const harsh = inSeason((B.seasons || [])[B.hs] || 'harshest season');
+    return {
+      temp: () => tempSentence(sc, B, t),
+      breath: () => 'It struggles to get enough oxygen.',
+      pred: () => `Predators catch it too easily: ${String(B.preds || '').toLowerCase()}.`,
+      food: () => `It cannot find enough food, most of all ${harsh}.`,
+      water: () => B.aquatic ? 'The salt in the water is wrong for its body.' : 'It loses water faster than it can drink.'
+    }[worstKey]();
+  }
+  return { threatSentence, tempSentence, worstTemp, inSeason };
 });
 
 </script>
@@ -2298,6 +2376,7 @@ function assess(t,bk){
   return{sc,bars,year:Math.round(year*100),lethal};
 }
 function threatText(a,bk){const B=M.BIOMES[bk];
+  if(window.AdaptThreat){const worst=PRESS.reduce((m,p)=>a.bars[p.k]<a.bars[m.k]?p:m,PRESS[0]);return AdaptThreat.threatSentence(worst.k,a.sc,B,S.t,a.lethal)}
   if(a.lethal)return'It cannot live here: '+a.lethal.why+'.';
   const worst=PRESS.reduce((m,p)=>a.bars[p.k]<a.bars[m.k]?p:m,PRESS[0]);const harsh=B.seasons[B.hs].toLowerCase();
   const cold=(a.sc.ts||[]).some(x=>x.dir<0&&x.s<90);
@@ -2315,6 +2394,7 @@ function renderTabs(cost){
 }
 function priceFor(k,v,total){const r=costOf(S.anc,{...S.t,[k]:v});return isFinite(r.total)?r.total-total:Infinity}
 function whyFar(k,v){const r=costOf(S.anc,{...S.t,[k]:v});const it=r.items.find(x=>!isFinite(x.points));return(it&&it.why)||'This body design is too different to evolve from your ancestor.'}
+function cantAfford(k,v){const now=costOf(S.anc,S.t).total,price=costOf(S.anc,{...S.t,[k]:v}).total-now,left=Math.max(0,BUDGET-now);return`You can't afford this. It costs ${price} and you have ${left} point${left===1?'':'s'} left.`}
 function priceHtml(d,total,isCur,isStart){
   if(isCur)return`<span class="price">${isStart?'start':'chosen'}</span>`;
   if(!isFinite(d))return'<span class="price over">too far</span>';
@@ -2336,7 +2416,7 @@ function renderOpts(cost,force){
     host.scrollTop=st}
   // refresh pressed states and prices in place (no rebuild, so nothing jumps while a slider is dragged)
   host.querySelectorAll('.chip').forEach(b=>{const k=b.dataset.k,v=b.dataset.v,cur=String(S.t[k])===v;b.setAttribute('aria-pressed',cur);
-    const d=cur?0:priceFor(k,v,cost.total);b.dataset.far=isFinite(d)?'':'1';b.querySelector('.pw').innerHTML=priceHtml(d,cost.total,cur,String(S.anc[k])===v)});
+    const d=cur?0:priceFor(k,v,cost.total);b.dataset.far=isFinite(d)?'':'1';b.dataset.over=isFinite(d)&&d>0&&cost.total+d>BUDGET?'1':'';b.querySelector('.pw').innerHTML=priceHtml(d,cost.total,cur,String(S.anc[k])===v)});
   host.querySelectorAll('input[data-k]').forEach(inp=>{if(document.activeElement!==inp||inp.type==='range')inp.value=S.t[inp.dataset.k]});
   host.querySelectorAll('[data-p]').forEach(p=>{const it=cost.items.find(x=>x.key===p.dataset.p);p.textContent=it?'+'+it.points:'free';p.title=it&&it.why?it.why:'';p.className='price'+(it?'':' free')});
 }
@@ -2386,8 +2466,12 @@ $('biomes').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;S.tab=+b.dataset.tab;$('opts').scrollTop=0;render(false)});
 $('opts').addEventListener('click',e=>{const vt=e.target.closest('.vterm');if(vt){const d=M.VOCAB[vt.dataset.term];if(d)pop(vt,`<b>${esc(d[0])}</b>${esc(d[1])}`);e.stopPropagation();return}
   const c=e.target.closest('.chip');if(!c)return;const k=c.dataset.k;const cur=S.anc[k];
-  if(c.dataset.far){pop(c,'<b>Too far to evolve</b>'+esc(whyFar(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}setTrait(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)});
-$('opts').addEventListener('input',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='range')return;setTrait(inp.dataset.k,+inp.value)});
+  if(c.dataset.far){pop(c,'<b>Too far to evolve</b>'+esc(whyFar(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}
+  if(c.dataset.over){pop(c,'<b>Not enough points</b>'+esc(cantAfford(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}setTrait(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)});
+$('opts').addEventListener('input',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='range')return;const k=inp.dataset.k,want=+inp.value;
+  // never go over the points: stop the slider at the furthest value the student can afford (Tom's feedback, 16 Nov 2026)
+  let v=want;if(costOf(S.anc,{...S.t,[k]:v}).total>BUDGET){const dir=Math.sign(want-S.t[k]);v=S.t[k];while(v!==want&&costOf(S.anc,{...S.t,[k]:v+dir}).total<=BUDGET)v+=dir;inp.value=v;if(performance.now()-(pop.at||0)>1500)pop(inp,'<b>Not enough points</b>'+esc(cantAfford(k,want)))}
+  setTrait(k,v)});
 $('opts').addEventListener('change',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='number')return;const v=clamp(Math.round(+inp.value||0),0,100);inp.value=v;setTrait(inp.dataset.k,v)});
 $('opts').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input[type=number]'))e.target.blur()});
 $('changes').addEventListener('click',e=>{const b=e.target.closest('[data-undo]');if(b)setTrait(b.dataset.undo,S.anc[b.dataset.undo])});

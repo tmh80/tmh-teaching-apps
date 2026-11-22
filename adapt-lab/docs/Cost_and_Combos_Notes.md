@@ -55,3 +55,5 @@ Because three pairs add an effect, a few survival numbers now differ slightly fr
 ## Tom's answers (22 Nov 2026)
 
 1. 10 points per era: yes. 2. Poison costs 3: yes. 3. Insects and crabs: **make them reachable** at a high price, flagged as not real, so the class can discuss what is accurate. 4. The three added effects: yes. 5. The two missing pairs: yes (poison + camouflage as a new rule; few young with care shown in the Run). All three changes are scheduled in Session 5.
+
+Done the same evening: the insect and crab jump is allowed (more than two eras of points, flagged as never having happened), and poison + camouflage is a clash (−8 on the predator bar). The table now has 31 pairs.

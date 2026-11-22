@@ -8,7 +8,9 @@
        behaviour 1 · looks (colour, pattern) 1 · body feature 2 · defence 3 · body-plan trait 4.
    - Body-plan traits are covering, body heat, breathing, number of legs and wings. Their maps follow the family tree
      fish – frog – lizard – bird and lizard – mammal, so a whole move between two neighbouring plans costs 8 points or more.
-     Insects and crabs are a separate branch: an exoskeleton, air tubes and six legs cannot be reached from the vertebrates.
+     Insects and crabs are a separate branch of the real family tree. Tom (22 Nov 2026) wants students to be able to make
+     the jump anyway, so the class can discuss what is accurate: links marked { notReal: true } allow it at full price,
+     and every cost item that uses one carries notReal and a sentence saying it has never happened in real life.
    The total is the sum over all traits, so it is zero for no change, the same in both directions, and going by way of a
    third design is never cheaper than going direct. */
 (function (root, factory) {
@@ -49,10 +51,10 @@
     // ---- defences: 3 points per step
     defence: { group: 'defence', links: [['none', 'spines'], ['none', 'poison'], ['none', 'shell'], ['spines', 'shell']] },
     // ---- body-plan traits: 4 points per step, following fish – frog – lizard – bird and lizard – mammal
-    cov: { group: 'plan', links: [['skin', 'scales'], ['scales', 'feathers'], ['scales', 'fur']], values: ['fur', 'feathers', 'scales', 'skin', 'exo'] },
+    cov: { group: 'plan', links: [['skin', 'scales'], ['scales', 'feathers'], ['scales', 'fur'], ['scales', 'exo', { notReal: true }]], values: ['fur', 'feathers', 'scales', 'skin', 'exo'] },
     blood: { group: 'plan', links: [['cold', 'warm']] },
-    breathe: { group: 'plan', links: [['gills', 'skinlungs'], ['skinlungs', 'lungs'], ['tubes', 'gills', { only: ['cov', 'exo'] }]] },
-    legs: { group: 'plan', links: [['0', '4'], ['4', '2']], values: ['0', '2', '4', '6'] },
+    breathe: { group: 'plan', links: [['gills', 'skinlungs'], ['skinlungs', 'lungs'], ['tubes', 'gills', { only: ['cov', 'exo'] }], ['lungs', 'tubes', { notReal: true }]] },
+    legs: { group: 'plan', links: [['0', '4'], ['4', '2'], ['4', '6', { notReal: true }]], values: ['0', '2', '4', '6'] },
     wings: { group: 'plan', links: [['none', 'flightless'], ['flightless', 'fly']] }
   };
 
@@ -96,6 +98,13 @@
     }
     return null;
   }
+  const NOT_REAL_TEXT = 'In real life this has never happened: animals with a backbone and insects or crabs are separate branches of the family tree.';
+  // true when the cheapest route uses a link that real evolution never took
+  function usesNotReal(key, path) {
+    if (!path || path.length < 2) return false; const map = NEIGHBOURS[key];
+    for (let i = 1; i < path.length; i++) for (const l of map.links) if (l[2] && l[2].notReal && ((l[0] === path[i - 1] && l[1] === path[i]) || (l[1] === path[i - 1] && l[0] === path[i]))) return true;
+    return false;
+  }
   function steps(key, a, b, fromT, toT) { const p = pathOf(key, a, b, fromT, toT); return p ? p.length - 1 : Infinity; }
 
   // price of changing ONE trait from value a to value b. fromT and toT are the whole designs (needed for the arthropod-only link).
@@ -106,32 +115,32 @@
     }
     const map = NEIGHBOURS[key]; if (!map) return { points: 0, path: null, group: null };
     const p = pathOf(key, a, b, fromT, toT);
-    return { points: p ? (p.length - 1) * WEIGHTS[map.group] : Infinity, path: p, group: map.group };
+    return { points: p ? (p.length - 1) * WEIGHTS[map.group] : Infinity, path: p, group: map.group, notReal: usesNotReal(key, p) };
   }
   function whyOf(key, c, a, b) {
     if (c.group === 'number') return `1 point for every ${NUM_UNITS_PER_POINT} units of change.`;
     if (!isFinite(c.points)) return `This cannot evolve from here. ${key === 'cov' || key === 'legs' || key === 'breathe' ? 'Insects and crabs are a separate branch of the family tree.' : ''}`.trim();
     const n = c.path.length - 1, w = WEIGHTS[c.group];
     const route = c.path.map(v => word(key, v)).join(' → ');
-    return `${n} step${n === 1 ? '' : 's'} (${route}). This is ${GROUP_WORD[c.group]}: ${w} point${w === 1 ? '' : 's'} a step.`;
+    return `${n} step${n === 1 ? '' : 's'} (${route}). This is ${GROUP_WORD[c.group]}: ${w} point${w === 1 ? '' : 's'} a step.` + (c.notReal ? ' ' + NOT_REAL_TEXT : '');
   }
 
   const KEYS = NUM.concat(Object.keys(NEIGHBOURS));
 
   // total cost of changing one whole design into another
   function cost(fromT, toT) {
-    const items = []; let total = 0;
+    const items = []; let total = 0, notReal = false;
     for (const key of KEYS) {
       if (!(key in fromT) || !(key in toT)) continue;
       const a = fromT[key], b = toT[key];
       if (String(a) === String(b)) continue;
       const c = traitCost(key, a, b, fromT, toT);
       if (!c.points) continue;
-      total += c.points;
-      items.push({ key, label: LABEL[key] || key, from: a, to: b, fromWord: word(key, a), toWord: word(key, b), points: c.points, group: c.group, why: whyOf(key, c, a, b) });
+      total += c.points; if (c.notReal) notReal = true;
+      items.push({ notReal: !!c.notReal, key, label: LABEL[key] || key, from: a, to: b, fromWord: word(key, a), toWord: word(key, b), points: c.points, group: c.group, why: whyOf(key, c, a, b) });
     }
     items.sort((x, y) => y.points - x.points || KEYS.indexOf(x.key) - KEYS.indexOf(y.key));
-    return { total, items };
+    return { total, items, notReal };
   }
   // points to change one trait to one value from the current design (0 when it already has that value; Infinity when it cannot be reached)
   function optionCost(traits, key, value) {
@@ -139,6 +148,16 @@
     return traitCost(key, traits[key], value, traits, { ...traits, [key]: value }).points;
   }
   function reachable(traits, key, value) { return isFinite(optionCost(traits, key, value)); }
+  // Can the student make this change this era? base = the design at the start of the era, current = the design now.
+  // Never lets the total go over the budget (Tom's feedback, 16 Nov 2026): the designer must not apply an option when ok is false.
+  function afford(base, current, key, value, budget) {
+    budget = budget == null ? BUDGET_PER_ERA : budget;
+    const now = cost(base, current).total, after = cost(base, { ...current, [key]: value }).total;
+    const price = after - now, left = Math.max(0, budget - now), pts = n => n + ' point' + (n === 1 ? '' : 's');
+    if (!isFinite(after)) return { ok: false, price: Infinity, left, message: 'This cannot evolve from here.' };
+    if (after <= budget) return { ok: true, price, left, message: '' };
+    return { ok: false, price, left, message: `You can't afford this. It costs ${price} and you have ${pts(left)} left.` };
+  }
 
   // ---- body plans
   const PLANS = {
@@ -172,6 +191,6 @@
   // the cheapest whole move from one plan's standard design to another's, for the notes and for teacher checks
   function planMoveCost(a, b) { return cost({ ...PLANS[a] }, { ...PLANS[b] }).total; }
 
-  return { BUDGET_PER_ERA, WEIGHTS, NUM, NUM_UNITS_PER_POINT, NEIGHBOURS, LABEL, VALUE_WORD, PLANS, PLAN_LINKS, PLAN_WORD,
+  return { afford, NOT_REAL_TEXT, BUDGET_PER_ERA, WEIGHTS, NUM, NUM_UNITS_PER_POINT, NEIGHBOURS, LABEL, VALUE_WORD, PLANS, PLAN_LINKS, PLAN_WORD,
     cost, optionCost, reachable, steps, pathOf, planOf, planSteps, planMoveCost, word };
 });

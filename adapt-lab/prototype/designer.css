@@ -201,3 +201,6 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--sig);outline-of
   .btn.go{padding:10px 12px;font-size:13.5px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+
+/* options the student cannot afford look unavailable before they are tapped (Tom, 16 Nov 2026) */
+.chip[data-over="1"]{opacity:.45;filter:saturate(.4)}

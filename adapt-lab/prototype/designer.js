@@ -92,6 +92,7 @@ function assess(t,bk){
   return{sc,bars,year:Math.round(year*100),lethal};
 }
 function threatText(a,bk){const B=M.BIOMES[bk];
+  if(window.AdaptThreat){const worst=PRESS.reduce((m,p)=>a.bars[p.k]<a.bars[m.k]?p:m,PRESS[0]);return AdaptThreat.threatSentence(worst.k,a.sc,B,S.t,a.lethal)}
   if(a.lethal)return'It cannot live here: '+a.lethal.why+'.';
   const worst=PRESS.reduce((m,p)=>a.bars[p.k]<a.bars[m.k]?p:m,PRESS[0]);const harsh=B.seasons[B.hs].toLowerCase();
   const cold=(a.sc.ts||[]).some(x=>x.dir<0&&x.s<90);
@@ -109,6 +110,7 @@ function renderTabs(cost){
 }
 function priceFor(k,v,total){const r=costOf(S.anc,{...S.t,[k]:v});return isFinite(r.total)?r.total-total:Infinity}
 function whyFar(k,v){const r=costOf(S.anc,{...S.t,[k]:v});const it=r.items.find(x=>!isFinite(x.points));return(it&&it.why)||'This body design is too different to evolve from your ancestor.'}
+function cantAfford(k,v){const now=costOf(S.anc,S.t).total,price=costOf(S.anc,{...S.t,[k]:v}).total-now,left=Math.max(0,BUDGET-now);return`You can't afford this. It costs ${price} and you have ${left} point${left===1?'':'s'} left.`}
 function priceHtml(d,total,isCur,isStart){
   if(isCur)return`<span class="price">${isStart?'start':'chosen'}</span>`;
   if(!isFinite(d))return'<span class="price over">too far</span>';
@@ -130,7 +132,7 @@ function renderOpts(cost,force){
     host.scrollTop=st}
   // refresh pressed states and prices in place (no rebuild, so nothing jumps while a slider is dragged)
   host.querySelectorAll('.chip').forEach(b=>{const k=b.dataset.k,v=b.dataset.v,cur=String(S.t[k])===v;b.setAttribute('aria-pressed',cur);
-    const d=cur?0:priceFor(k,v,cost.total);b.dataset.far=isFinite(d)?'':'1';b.querySelector('.pw').innerHTML=priceHtml(d,cost.total,cur,String(S.anc[k])===v)});
+    const d=cur?0:priceFor(k,v,cost.total);b.dataset.far=isFinite(d)?'':'1';b.dataset.over=isFinite(d)&&d>0&&cost.total+d>BUDGET?'1':'';b.querySelector('.pw').innerHTML=priceHtml(d,cost.total,cur,String(S.anc[k])===v)});
   host.querySelectorAll('input[data-k]').forEach(inp=>{if(document.activeElement!==inp||inp.type==='range')inp.value=S.t[inp.dataset.k]});
   host.querySelectorAll('[data-p]').forEach(p=>{const it=cost.items.find(x=>x.key===p.dataset.p);p.textContent=it?'+'+it.points:'free';p.title=it&&it.why?it.why:'';p.className='price'+(it?'':' free')});
 }
@@ -180,8 +182,12 @@ $('biomes').addEventListener('click',e=>{const b=e.target.closest('[data-b]');if
 $('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(!b)return;S.tab=+b.dataset.tab;$('opts').scrollTop=0;render(false)});
 $('opts').addEventListener('click',e=>{const vt=e.target.closest('.vterm');if(vt){const d=M.VOCAB[vt.dataset.term];if(d)pop(vt,`<b>${esc(d[0])}</b>${esc(d[1])}`);e.stopPropagation();return}
   const c=e.target.closest('.chip');if(!c)return;const k=c.dataset.k;const cur=S.anc[k];
-  if(c.dataset.far){pop(c,'<b>Too far to evolve</b>'+esc(whyFar(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}setTrait(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)});
-$('opts').addEventListener('input',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='range')return;setTrait(inp.dataset.k,+inp.value)});
+  if(c.dataset.far){pop(c,'<b>Too far to evolve</b>'+esc(whyFar(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}
+  if(c.dataset.over){pop(c,'<b>Not enough points</b>'+esc(cantAfford(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)));e.stopPropagation();return}setTrait(k,typeof cur==='number'?+c.dataset.v:c.dataset.v)});
+$('opts').addEventListener('input',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='range')return;const k=inp.dataset.k,want=+inp.value;
+  // never go over the points: stop the slider at the furthest value the student can afford (Tom's feedback, 16 Nov 2026)
+  let v=want;if(costOf(S.anc,{...S.t,[k]:v}).total>BUDGET){const dir=Math.sign(want-S.t[k]);v=S.t[k];while(v!==want&&costOf(S.anc,{...S.t,[k]:v+dir}).total<=BUDGET)v+=dir;inp.value=v;if(performance.now()-(pop.at||0)>1500)pop(inp,'<b>Not enough points</b>'+esc(cantAfford(k,want)))}
+  setTrait(k,v)});
 $('opts').addEventListener('change',e=>{const inp=e.target.closest('input[data-k]');if(!inp||inp.type!=='number')return;const v=clamp(Math.round(+inp.value||0),0,100);inp.value=v;setTrait(inp.dataset.k,v)});
 $('opts').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input[type=number]'))e.target.blur()});
 $('changes').addEventListener('click',e=>{const b=e.target.closest('[data-undo]');if(b)setTrait(b.dataset.undo,S.anc[b.dataset.undo])});
