@@ -144,6 +144,8 @@ function drawQuad(c,s,po){
   fill(c,col.base,p=>ell(p,ex+hr*.1,ey+hr*.25,hr*.3,hr*.26));
   eye(c,hx+hr*.3+Math.cos(ha)*hr*.1,hy-hr*.16,hr*(s.eyeR||.2),{blink:po.blink||po.sleep,dark:col.dark});
   const nx=sx+Math.cos(ha)*sl*.86,ny=sy+Math.sin(ha)*sl*.86-hr*.1;
+  // cheetah "tear line": a bold dark stripe from the eye to the mouth (spotted, long-legged cats). One strong marking, Alba-style.
+  if(s.tears){c.strokeStyle=col.dark;c.lineCap='round';c.lineWidth=hr*.09;const ex2=hx+hr*.3+Math.cos(ha)*hr*.1,ey2=hy-hr*.16;c.beginPath();c.moveTo(ex2+hr*.08,ey2+hr*.18);c.quadraticCurveTo(ex2+hr*.02,ey2+hr*.5,nx-sl*.5,ny+hr*.42);c.stroke()}
   fill(c,col.nose||col.dark,p=>ell(p,nx,ny,hr*.16,hr*.12,ha));
   if(s.cheek)fill(c,col.cheek,p=>ell(p,hx+hr*.2,hy+hr*.3,hr*.2,hr*.13));
 }
@@ -308,7 +310,7 @@ function specOf(t,seed){
     return{plan,seed,col,pattern:t.pattern,L:base.L,D:base.D*(1+.3*fat+.12*n('insul')),leg:base.lg[0]+base.lg[1]*n('legLen'),legW:lerp(8.5,10.5,n('size')),neck:base.neck*(sh==='tall'?.8+.6*n('legLen'):1),neckUp:base.neckUp,
       face:faceOf(t),...(({headK,...f})=>f)(FACE[faceOf(t)]),head:(sh==='tall'?16.5:lerp(25,18,n('size')))*FACE[faceOf(t)].headK,ear:7+44*n('ears'),earW:n('ears')>.6?9:8,earLop:0,
       tail:14+70*n('tail'),tailType:n('tail')<.15?'stub':(sh==='long'&&n('insul')>.5?'bushy':sh==='tall'?'tuft':faceOf(t)==='cat'?'medium':'thin'),
-      fluff:n('insul'),fat,hump:t.fatWhere==='hump'?n('fat'):0,eyeR:.15+.12*n('eyes'),spiny:t.defence==='spines',shell:t.defence==='shell',wingQ:t.wings!=='none'?.3+.7*n('wingSize'):0,feet:big?'hoof':'paw',mane:sh==='tall'&&t.pattern==='stripes',cheek:!big}}
+      fluff:n('insul'),fat,hump:t.fatWhere==='hump'?n('fat'):0,eyeR:.15+.12*n('eyes'),spiny:t.defence==='spines',shell:t.defence==='shell',wingQ:t.wings!=='none'?.3+.7*n('wingSize'):0,feet:big?'hoof':'paw',mane:sh==='tall'&&t.pattern==='stripes',cheek:!big&&t.diet!=='meat',tears:faceOf(t)==='cat'&&t.pattern==='spots'&&n('legLen')>=.8}}
   if(plan==='bird'){const tall=t.shape==='tall';const owl=n('eyes')>.8&&!tall;
     const bare='#d9b6a4';return{plan,seed,col:tall?{...col,head:bare,neck:bare,leg:'#cfa893',beak:'#e3b98a'}:{...col,head:col.base,neck:col.base},pattern:t.pattern,B:tall?100:78,tilt:tall?.06:owl?.75:.42,leg:tall?46+60*n('legLen'):12+34*n('legLen'),legW:tall?5.5:3.2,thigh:tall,thinNeck:tall,
       neck:tall?66:owl?4:12,neckUp:tall?1.2:.9,head:owl?24:tall?12.5:17,beak:owl?7:t.diet==='meat'?13:10,beakType:t.diet==='meat'?'hook':'cone',bigEye:owl,face:owl,

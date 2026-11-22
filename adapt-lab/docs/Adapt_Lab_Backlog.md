@@ -29,7 +29,7 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 - ~~A sitting frog sits right of centre~~; ~~the otter is thin~~; ~~hyena and coyote snouts are long~~; the heron is small in its cell.
 - ~~A lying four-legged animal folds its legs untidily.~~
 - A very fat, very thick-coated animal reads as a blob.
-- New (22 Nov): the grazing hare's face looks odd; flying birds overflow their gallery cell; the fennec looks a little like a donkey; add a cheetah tear line.
+- New (22 Nov): the grazing hare's face looks odd; flying birds overflow their gallery cell; the fennec looks a little like a donkey; ~~add a cheetah tear line~~ (done).
 
 ## Tom's feedback (16 Nov 2026)
 
