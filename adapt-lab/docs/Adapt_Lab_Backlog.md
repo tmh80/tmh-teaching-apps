@@ -12,6 +12,8 @@ Ideas and questions banked for later. The ordered work is in `Adapt_Lab_Rebuild_
 
 ## Banked ideas
 
+- **Hopping and climbing (Tom, 23 Nov):** a new "How it gets around on land" trait, and lower small animals. Full proposal and four questions in `docs/Locomotion_Proposal.md`. Lower small animals is art-only and can go ahead in the next art session; the rest waits for Tom's answers.
+
 - Test `19-notes.js` (the explanation sentences), including the wrong "too hot in the cold winter" sentence from Tom's feedback (Session 5).
 - Two combination pairs from the plan are not in the table: poison + camouflage, and few young with lots of care in a safe biome. Waiting on Tom (notes, question 5).
 
