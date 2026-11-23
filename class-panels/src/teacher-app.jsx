@@ -1411,8 +1411,8 @@ const GROUP_PAD=8,GROUP_BAR_H=22; // group boundary padding + tab-bar height, sh
    ink to chalk-white and mute the fills without touching any component.
    ══════════════════════════════════════════════════════════ */
 const CP_THEME_CSS=`
-[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);--cp-bench:#bfd3d6;--cp-join:#2fa36b;}
-[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);--cp-bench:#5d7b80;--cp-join:#7fe0a8;}
+[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);--cp-bench:#bfd3d6;--cp-join:#2fa36b;--cp-wall:#d9cdb8;--cp-wall-hatch:rgba(43,33,24,0.36);--cp-window:#cdeefa;}
+[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);--cp-bench:#5d7b80;--cp-join:#7fe0a8;--cp-wall:#456a55;--cp-wall-hatch:rgba(239,233,216,0.34);--cp-window:#4f8aa0;}
 `;
 const INK="var(--cp-ink)";
 const INK_W=1.6; // outline weight in canvas px
@@ -1445,6 +1445,9 @@ const InkDefs=()=>(
       <pattern id="cp-hatch" patternUnits="userSpaceOnUse" width="8" height="8" patternTransform="rotate(32)">
         <line x1="0" y1="2" x2="8" y2="2" style={{stroke:"var(--cp-hatch-light)",strokeWidth:1.1}}/>
         <line x1="0" y1="6" x2="8" y2="6" style={{stroke:"var(--cp-hatch-dark)",strokeWidth:0.9}}/>
+      </pattern>
+      <pattern id="cp-hatch-wall" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
+        <line x1="0" y1="3" x2="6" y2="3" style={{stroke:"var(--cp-wall-hatch)",strokeWidth:1.5}}/>
       </pattern>
       <pattern id="cp-hatch-x" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(-45)">
         <line x1="0" y1="3" x2="6" y2="3" style={{stroke:"#d9534f",strokeWidth:1.3,opacity:0.7}}/>
@@ -1656,7 +1659,392 @@ const RoomItemArt=({type,w,h,label,fontSize=10.5})=>{
       <line x1={6} y1={2} x2={6} y2={60} style={{stroke:INK,strokeWidth:5,strokeLinecap:"round"}}/>
     </>);
   }
+  return moreItemArt(type,w,h,label,fontSize);
+};
+
+/* The rest of the catalogue, in the same icon style: ink outlines, pencil hatching,
+   mint / sky / coral from the theme, and the usual safety colours (green for
+   first aid and eyewash, red for fire and emergency stop, yellow for hazards).
+   Each picture is drawn to the box it is given, so resizing never distorts the ink. */
+const SAFE_GREEN="#2fa36b",SAFE_RED="#d8402f",SAFE_YELLOW="#f4c430",SAFE_ORANGE="#f08a24";
+const BOOK_COLOURS=["#e0766a","#f4c430","#5aa0e0","#6ec28a","#b98ad9","#f08a24","#e9efc9"];
+const moreItemArt=(type,w,h,label,fontSize)=>{
+  const wrap=kids=>(<svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">{kids}</svg>);
+  const ln=(o={})=>({fill:"none",stroke:INK,strokeWidth:1.3,strokeLinejoin:"round",strokeLinecap:"round",...o});
+  /* a flat slab: soft shadow, colour, pencil hatching, ink outline */
+  const slab=(fill,rx=4,x=1,y=1,ww=w-3,hh=h-3)=>(<>
+    <rect x={x+1.5} y={y+2.5} width={ww} height={hh} rx={rx} style={{fill:"var(--cp-shadow)"}}/>
+    <rect x={x} y={y} width={ww} height={hh} rx={rx} style={{fill}}/>
+    <rect x={x} y={y} width={ww} height={hh} rx={rx} style={{fill:"url(#cp-hatch)"}}/>
+    <rect x={x} y={y} width={ww} height={hh} rx={rx} style={{fill:"none",stroke:INK,strokeWidth:INK_W}}/>
+  </>);
+  const ell=(fill,extra)=>(<>
+    <ellipse cx={w/2+1.5} cy={h/2+2.5} rx={w/2-2} ry={h/2-2} style={{fill:"var(--cp-shadow)"}}/>
+    <ellipse cx={w/2} cy={h/2} rx={w/2-2} ry={h/2-2} style={{fill}}/>
+    <ellipse cx={w/2} cy={h/2} rx={w/2-2} ry={h/2-2} style={{fill:"url(#cp-hatch)"}}/>
+    <ellipse cx={w/2} cy={h/2} rx={w/2-2} ry={h/2-2} style={{fill:"none",stroke:INK,strokeWidth:INK_W,...extra}}/>
+  </>);
+  /* a safety sign: coloured square with a white (or ink) picture, scaled to the box */
+  const s=Math.min(w,h)/32;
+  const sign=(fill,glyph)=>wrap(<>
+    {slab(fill,6)}
+    <g transform={`translate(${(w-3)/2+1} ${(h-3)/2+1}) scale(${s})`}>{glyph}</g>
+  </>);
+  const WH={fill:"#fff",stroke:"rgba(43,33,24,0.45)",strokeWidth:0.9,strokeLinejoin:"round"};
+  const WL={fill:"none",stroke:"#fff",strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round"};
+
+  if(type==="eyewash")return sign(SAFE_GREEN,<>
+    <path d="M-11 -3 Q0 -13 11 -3 Q0 7 -11 -3Z" style={WH}/>
+    <circle cx={0} cy={-3} r={3.6} style={{fill:"#1c6b46"}}/><circle cx={-1} cy={-4} r={1} style={{fill:"#fff"}}/>
+    <path d="M-7 9 q-1.5 3 0 5 M0 9 q-1.5 3 0 5 M7 9 q-1.5 3 0 5" style={WL}/>
+  </>);
+  if(type==="shower")return sign(SAFE_GREEN,<>
+    <path d="M0 -13 V-9 M0 -13 H7" style={WL}/>
+    <path d="M-10 -3 a10 6 0 0 1 20 0Z" style={WH}/>
+    <path d="M-6 2 l-1.5 4 M0 2 l-1.5 4 M6 2 l-1.5 4 M-3 8 l-1.5 4 M3 8 l-1.5 4" style={{...WL,strokeWidth:1.8}}/>
+  </>);
+  if(type==="firstaid")return sign(SAFE_GREEN,<>
+    <rect x={-3.8} y={-11} width={7.6} height={22} rx={1.5} style={WH}/><rect x={-11} y={-3.8} width={22} height={7.6} rx={1.5} style={WH}/>
+  </>);
+  if(type==="extinguisher")return sign(SAFE_RED,<>
+    <rect x={-5.5} y={-3} width={11} height={16} rx={3.2} style={WH}/>
+    <rect x={-5.5} y={3} width={11} height={4.5} style={{fill:SAFE_RED,opacity:0.85}}/>
+    <rect x={-2.2} y={-7} width={4.4} height={4.5} style={WH}/>
+    <path d="M-6 -9.5 H4 L7 -6.5" style={WL}/>
+    <path d="M5.5 -6 q8 0 8 9" style={{...WL,strokeWidth:1.7}}/>
+  </>);
+  if(type==="blanket")return sign(SAFE_RED,<>
+    <path d="M-3 -9 V-12.5 H3 V-9" style={{...WL,strokeWidth:1.7}}/>
+    <rect x={-9} y={-9} width={18} height={19} rx={2.5} style={WH}/>
+    <path d="M-9 -2 H9 M-9 4 H9" style={{...ln({stroke:SAFE_RED,strokeWidth:1.4})}}/>
+  </>);
+  if(type==="gas")return sign(SAFE_YELLOW,<>
+    <path d="M0 -14 q5 4.5 3.6 8 a3.6 3.6 0 0 1 -7.2 0 q0 -3.5 3.6 -8Z" style={{fill:SAFE_RED,stroke:INK,strokeWidth:1.1}}/>
+    <circle cx={0} cy={5} r={7} style={ln({strokeWidth:2.2})}/>
+    <path d="M-7 5 H7 M0 -2 V12" style={ln({strokeWidth:1.6})}/><circle cx={0} cy={5} r={2} style={{fill:INK}}/>
+  </>);
+  if(type==="estop")return sign(SAFE_YELLOW,<>
+    <circle cx={0} cy={0} r={12.5} style={ln({strokeWidth:1.2,opacity:0.55})}/>
+    <circle cx={0} cy={0} r={9.5} style={{fill:SAFE_RED,stroke:INK,strokeWidth:1.7}}/>
+    <path d="M-5.5 -3 a6.5 6.5 0 0 1 6.5 -4.2" style={{...WL,opacity:0.75,strokeWidth:1.8}}/>
+  </>);
+  if(type==="isolator")return sign("#5c6770",<>
+    <path d="M3 -12 L-7 2 H-1 L-4 12 L8 -3 H2 Z" style={{fill:SAFE_YELLOW,stroke:INK,strokeWidth:1.2,strokeLinejoin:"round"}}/>
+  </>);
+  if(type==="bin"||type==="recycling"||type==="glassbin"){
+    const rec=type==="recycling",gl=type==="glassbin";
+    const b=Math.min(w,h)/2,cx=w/2,cy=h/2;
+    return wrap(<>
+      {ell(rec?SAFE_GREEN:gl?SAFE_ORANGE:"#c3ccd0")}
+      <ellipse cx={cx} cy={cy} rx={w/2-6} ry={h/2-6} style={{fill:rec?"#27895a":gl?"#d9731a":"#a3afb5",stroke:INK,strokeWidth:1.1}}/>
+      {!rec&&!gl&&<path d={`M${cx-b*0.35} ${cy} h${b*0.7}`} style={ln({strokeWidth:1.6})}/>}
+      {rec&&<g transform={`translate(${cx} ${cy}) scale(${b/16})`}>{[0,120,240].map(a=>(
+        <g key={a} transform={`rotate(${a})`}><path d="M-1.3 -7.4 A7.5 7.5 0 0 1 6.5 -3.75" style={{...WL,strokeWidth:2.2}}/><path d="M8.1 -1 L8.9 -5.3 L4.2 -2.4Z" style={{fill:"#fff"}}/></g>
+      ))}</g>}
+      {gl&&<g transform={`translate(${cx} ${cy}) scale(${b/16})`}>
+        <path d="M-7 -3 L-1 -8 L1 -1Z" style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.1,strokeLinejoin:"round"}}/>
+        <path d="M2 -2 L8 -5 L6 3Z" style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.1,strokeLinejoin:"round"}}/>
+        <path d="M-5 3 L1 1 L-1 8Z" style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.1,strokeLinejoin:"round"}}/>
+      </g>}
+    </>);
+  }
+  if(type==="plant"){
+    const b=Math.min(w,h)/2,cx=w/2,cy=h/2;
+    return wrap(<>
+      <circle cx={cx+1.5} cy={cy+2.5} r={b-1.5} style={{fill:"var(--cp-shadow)"}}/>
+      <circle cx={cx} cy={cy} r={b-1.5} style={{fill:"#d98b5f",stroke:INK,strokeWidth:INK_W}}/>
+      <circle cx={cx} cy={cy} r={b*0.78} style={{fill:"#8a5a3a",stroke:INK,strokeWidth:1}}/>
+      {[0,60,120,180,240,300].map(a=><ellipse key={a} cx={cx} cy={cy-b*0.42} rx={b*0.23} ry={b*0.46} transform={`rotate(${a+15} ${cx} ${cy})`} style={{fill:a%120===0?"#5fbf7a":"#79d08f",stroke:INK,strokeWidth:1.1}}/>)}
+      <circle cx={cx} cy={cy} r={b*0.17} style={{fill:"#3f9a5c",stroke:INK,strokeWidth:1}}/>
+    </>);
+  }
+  if(type==="rug"){
+    const ticks=[];
+    if(w>=h)for(let y=6;y<h-6;y+=6){ticks.push(<path key={`l${y}`} d={`M1 ${y} h-4 M${w-2} ${y} h4`} style={ln({strokeWidth:1,opacity:0.6})}/>);}
+    else for(let x=6;x<w-6;x+=6){ticks.push(<path key={`t${x}`} d={`M${x} 1 v-4 M${x} ${h-2} v4`} style={ln({strokeWidth:1,opacity:0.6})}/>);}
+    return wrap(<>{ticks}{slab("var(--cp-coral)",8)}
+      <rect x={7} y={7} width={w-17} height={h-17} rx={4} style={ln({strokeDasharray:"4 3",opacity:0.55})}/>
+      <rect x={14} y={14} width={Math.max(2,w-31)} height={Math.max(2,h-31)} rx={3} style={{fill:"var(--cp-cyan)",fillOpacity:0.7,stroke:INK,strokeWidth:1,strokeOpacity:0.5}}/>
+    </>);
+  }
+  if(type==="sofa"){
+    const n=w>=110?3:2,arm=Math.min(14,w*0.12),back=Math.min(16,h*0.3),cw=(w-3-arm*2)/n;
+    return wrap(<>
+      {slab("var(--cp-sky)",9)}
+      <rect x={1+arm} y={1} width={w-3-arm*2} height={back} rx={5} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1.3}}/>
+      {Array.from({length:n},(_,i)=><rect key={i} x={1+arm+i*cw+1.5} y={back+1.5} width={cw-3} height={h-3-back-4} rx={5} style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.3}}/>)}
+      <rect x={1} y={1} width={arm} height={h-3} rx={5} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1.4}}/>
+      <rect x={w-3-arm+1} y={1} width={arm} height={h-3} rx={5} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1.4}}/>
+      <rect x={1} y={1} width={arm} height={h-3} rx={5} style={{fill:"url(#cp-hatch)"}}/><rect x={w-3-arm+1} y={1} width={arm} height={h-3} rx={5} style={{fill:"url(#cp-hatch)"}}/>
+    </>);
+  }
+  if(type==="bookshelf"){
+    const spines=[];let x=5,i=0;
+    while(x<w-9){const sw=4+((i*5)%4),sh=h-10-((i*3)%4);spines.push(<rect key={i} x={x} y={h-6-sh} width={sw} height={sh} rx={1} style={{fill:BOOK_COLOURS[i%BOOK_COLOURS.length],stroke:INK,strokeWidth:1}}/>);x+=sw+0.8;i++;}
+    return wrap(<>{slab("var(--cp-wood)",3)}<rect x={3.5} y={3.5} width={w-8} height={h-8} rx={2} style={{fill:"var(--cp-wood2)",stroke:INK,strokeWidth:1,fillOpacity:0.85}}/>{spines}</>);
+  }
+  if(type==="cupboard"||type==="goggles"||type==="chemstore"){
+    const chem=type==="chemstore",gg=type==="goggles";
+    const fill=chem?SAFE_YELLOW:gg?"#e9f0f1":"var(--cp-wood)";
+    return wrap(<>{slab(fill,3)}
+      <path d={`M${w/2-1} 3 V${h-4}`} style={ln()}/>
+      {!gg&&!chem&&<><circle cx={w/2-6} cy={h/2} r={1.9} style={{fill:INK}}/><circle cx={w/2+4} cy={h/2} r={1.9} style={{fill:INK}}/></>}
+      {chem&&<>
+        <path d={`M${w*0.27} ${h/2-10} L${w*0.27+10} ${h/2} L${w*0.27} ${h/2+10} L${w*0.27-10} ${h/2}Z`} style={{fill:"#fff",stroke:SAFE_RED,strokeWidth:2.2,strokeLinejoin:"round"}}/>
+        <path d={`M${w*0.27} ${h/2-5} q3 3 2 5 a2 2 0 0 1 -4 0 q0 -2 2 -5Z`} style={{fill:INK}}/>
+        <path d={`M${w*0.73} ${h/2-10} L${w*0.73+10} ${h/2} L${w*0.73} ${h/2+10} L${w*0.73-10} ${h/2}Z`} style={{fill:"#fff",stroke:SAFE_RED,strokeWidth:2.2,strokeLinejoin:"round"}}/>
+        <path d={`M${w*0.73-4} ${h/2-3} l8 6 M${w*0.73+4} ${h/2-3} l-8 6`} style={ln({strokeWidth:1.6})}/>
+      </>}
+      {gg&&[w*0.27,w*0.73].map((cx,i)=><g key={i}>
+        <path d={`M${cx-12} ${h/2} H${cx-8} M${cx+8} ${h/2} H${cx+12}`} style={ln({strokeWidth:1.6})}/>
+        <circle cx={cx-4} cy={h/2} r={Math.min(5.5,h*0.2)} style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.3}}/><circle cx={cx+4} cy={h/2} r={Math.min(5.5,h*0.2)} style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.3}}/>
+      </g>)}
+    </>);
+  }
+  if(type==="filing"){
+    const tall=h>=w,n=3,gap=(tall?h:w)/n;
+    return wrap(<>{slab("#bcc7cc",3)}
+      {Array.from({length:n},(_,i)=>tall
+        ?<g key={i}><rect x={4} y={3+i*gap} width={w-11} height={gap-4} rx={2} style={{fill:"#cfd8dc",stroke:INK,strokeWidth:1.1}}/><path d={`M${w/2-6} ${3+i*gap+gap/2-2} h10`} style={ln({strokeWidth:1.8})}/></g>
+        :<g key={i}><rect x={3+i*gap} y={4} width={gap-4} height={h-11} rx={2} style={{fill:"#cfd8dc",stroke:INK,strokeWidth:1.1}}/><path d={`M${3+i*gap+gap/2-2} ${h/2-5} v10`} style={ln({strokeWidth:1.8})}/></g>)}
+    </>);
+  }
+  if(type==="computer"){
+    const mw=w*0.5,mx=(w-3-mw)/2+1;
+    return wrap(<>{slab("var(--cp-wood)",5)}
+      <rect x={mx} y={5} width={mw} height={h*0.38} rx={2} style={{fill:"#394b59",stroke:INK,strokeWidth:1.3}}/>
+      <rect x={mx+2.5} y={7.5} width={mw-5} height={h*0.38-5} rx={1} style={{fill:"var(--cp-sky)"}}/>
+      <rect x={w/2-5} y={5+h*0.38} width={7} height={3.5} style={{fill:"#394b59",stroke:INK,strokeWidth:1}}/>
+      <rect x={mx} y={h*0.62} width={mw} height={h*0.17} rx={2} style={{fill:"#fffaf0",stroke:INK,strokeWidth:1.2}}/>
+      <circle cx={mx+mw+8} cy={h*0.7} r={3} style={{fill:"#fffaf0",stroke:INK,strokeWidth:1.1}}/>
+    </>);
+  }
+  if(type==="printer")return wrap(<>
+    <rect x={w*0.2} y={1} width={w*0.6} height={10} rx={1.5} style={{fill:"#fff",stroke:INK,strokeWidth:1.2}}/>
+    <path d={`M${w*0.3} 5 h${w*0.4}`} style={ln({strokeWidth:1,opacity:0.5})}/>
+    {slab("#d5dde0",5,1,8,w-3,h-11)}
+    <rect x={w*0.18} y={h-18} width={w*0.64} height={7} rx={1.5} style={{fill:"#fff",stroke:INK,strokeWidth:1.1}}/>
+    <rect x={w-16} y={14} width={8} height={4} rx={1} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1}}/><circle cx={10} cy={16} r={1.8} style={{fill:SAFE_GREEN,stroke:INK,strokeWidth:0.8}}/>
+  </>);
+  if(type==="tv")return wrap(<>
+    <rect x={2.5} y={3.5} width={w-3} height={h-3} rx={3} style={{fill:"var(--cp-shadow)"}}/>
+    <rect x={1} y={1} width={w-3} height={h-3} rx={3} style={{fill:"#2f3b46",stroke:INK,strokeWidth:INK_W}}/>
+    <rect x={4} y={4} width={w-9} height={h-9} rx={1.5} style={{fill:"var(--cp-sky)"}}/>
+    <path d={`M${w*0.2} ${h-6} L${w*0.35} 4 M${w*0.32} ${h-6} L${w*0.47} 4`} style={{stroke:"#fff",strokeWidth:2,opacity:0.5}}/>
+    <rect x={4} y={4} width={w-9} height={h-9} rx={1.5} style={{fill:"url(#cp-hatch)"}}/>
+  </>);
+  if(type==="screen")return wrap(<>
+    <rect x={2} y={3.5} width={w-2} height={h-3} rx={1.5} style={{fill:"var(--cp-shadow)"}}/>
+    <rect x={1} y={5} width={w-3} height={h-6} rx={1.5} style={{fill:"var(--cp-board-fill)",stroke:INK,strokeWidth:INK_W}}/>
+    <rect x={1} y={5} width={w-3} height={h-6} rx={1.5} style={{fill:"url(#cp-hatch)",opacity:0.5}}/>
+    <rect x={0} y={0.5} width={w-1} height={5.5} rx={2.7} style={{fill:"#7b8790",stroke:INK,strokeWidth:1.4}}/>
+    <circle cx={w/2} cy={h-2} r={1.8} style={{fill:"#7b8790",stroke:INK,strokeWidth:1}}/>
+  </>);
+  if(type==="hooks"){
+    const n=Math.max(2,Math.floor(w/18)),gap=(w-3)/n;
+    return wrap(<>{slab("var(--cp-wood)",3)}
+      {Array.from({length:n},(_,i)=>{const cx=1+gap*(i+0.5);return <g key={i}><circle cx={cx} cy={h/2} r={Math.min(3.4,h*0.24)} style={{fill:i%2?"#ffd98a":BOOK_COLOURS[i%BOOK_COLOURS.length],stroke:INK,strokeWidth:1.1}}/></g>;})}
+    </>);
+  }
+  if(type==="sink"){
+    const two=w>=96,bw=two?(w-3-22)/2:w-3-16,bx=two?[8,14+bw]:[8];
+    return wrap(<>{slab("#e7eef0",5)}
+      {bx.map((x,i)=><g key={i}><rect x={x} y={h*0.3} width={bw} height={h*0.56} rx={4} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1.3}}/><rect x={x} y={h*0.3} width={bw} height={h*0.56} rx={4} style={{fill:"url(#cp-hatch)"}}/><circle cx={x+bw/2} cy={h*0.6} r={1.8} style={{fill:INK}}/></g>)}
+      <circle cx={w/2} cy={h*0.15+1} r={3} style={{fill:"#b8c3c8",stroke:INK,strokeWidth:1.2}}/>
+      <path d={`M${w/2} ${h*0.15+3} v${h*0.14}`} style={ln({strokeWidth:2.4,stroke:"#8b979d"})}/>
+    </>);
+  }
+  if(type==="demo"){
+    const fx=w*0.2,bx=w*0.42,tx=w*0.64;
+    return wrap(<>{slab("var(--cp-bench)",5)}
+      <g transform={`translate(${fx} ${h/2+3})`}>
+        <path d="M-3 -17 V-8 L-10 6 H10 L3 -8 V-17Z" style={{fill:"#fff",fillOpacity:0.85,stroke:INK,strokeWidth:1.3,strokeLinejoin:"round"}}/>
+        <path d="M-7.5 0 H7.5 L10 6 H-10Z" style={{fill:SAFE_GREEN,stroke:INK,strokeWidth:1,strokeLinejoin:"round"}}/>
+      </g>
+      <g transform={`translate(${bx} ${h/2})`}>
+        <rect x={-7} y={-10} width={14} height={18} rx={1.5} style={{fill:"#fff",fillOpacity:0.85,stroke:INK,strokeWidth:1.3}}/>
+        <rect x={-7} y={-2} width={14} height={10} rx={1.5} style={{fill:"var(--cp-sky)",stroke:INK,strokeWidth:1}}/>
+      </g>
+      {[0,1,2].map(i=><g key={i} transform={`translate(${tx+i*9} ${h/2})`}><rect x={-3} y={-10} width={6} height={17} rx={3} style={{fill:"#fff",fillOpacity:0.85,stroke:INK,strokeWidth:1.1}}/><rect x={-3} y={0} width={6} height={7} rx={3} style={{fill:["#e0766a","#f4c430","#6ec28a"][i],stroke:INK,strokeWidth:1}}/></g>)}
+    </>);
+  }
+  if(type==="fume"){
+    return wrap(<>{slab("#cdd6da",4)}
+      <rect x={6} y={6} width={w-15} height={h-20} rx={2} style={{fill:"var(--cp-cyan)",stroke:INK,strokeWidth:1.4}}/>
+      <path d={`M${w*0.18} ${h-16} L${w*0.34} 8 M${w*0.3} ${h-16} L${w*0.46} 8`} style={{stroke:"#fff",strokeWidth:2.2,opacity:0.7}}/>
+      <path d={`M6 ${h*0.4} H${w-9}`} style={ln({strokeWidth:1.6})}/><rect x={w/2-8} y={h*0.4-2.5} width={14} height={5} rx={2.5} style={{fill:"#cdd6da",stroke:INK,strokeWidth:1.2}}/>
+      <rect x={4} y={h-11} width={w-11} height={6} rx={1.5} style={{fill:SAFE_YELLOW,stroke:INK,strokeWidth:1.2}}/>
+      <path d={Array.from({length:Math.floor((w-14)/9)},(_,i)=>`M${8+i*9} ${h-5.5} l5 -5`).join(" ")} style={ln({strokeWidth:1.3})}/>
+    </>);
+  }
+  if(type==="prepdoor"){
+    const sw=w-12,sh=h-12;
+    return wrap(<>
+      <path d={`M ${6+sw} 6 A ${sw} ${sh} 0 0 1 6 ${6+sh} L 6 6 Z`} style={{fill:"var(--cp-cyan)",fillOpacity:0.75}}/>
+      <path d={`M ${6+sw} 6 A ${sw} ${sh} 0 0 1 6 ${6+sh} L 6 6 Z`} style={{fill:"url(#cp-hatch)"}}/>
+      <path d={`M ${6+sw} 6 A ${sw} ${sh} 0 0 1 6 ${6+sh}`} style={ln({strokeDasharray:"4 3"})}/>
+      <rect x={6} y={3} width={sw} height={6} rx={2} style={{fill:"var(--cp-wood)",stroke:INK,strokeWidth:INK_W}}/>
+      <rect x={6} y={3} width={sw} height={6} rx={2} style={{fill:"url(#cp-hatch)"}}/>
+      <circle cx={6+sw-6} cy={6} r={1.4} style={{fill:INK}}/>
+      <line x1={6} y1={2} x2={6} y2={h-4} style={{stroke:INK,strokeWidth:5,strokeLinecap:"round"}}/>
+    </>);
+  }
+  if(type==="box"){
+    const fs=Math.min(fontSize*1.15,h*0.4);
+    return wrap(<>
+      <rect x={1} y={1} width={w-3} height={h-3} rx={6} style={{fill:"var(--cp-sky)",fillOpacity:0.5}}/>
+      <rect x={1} y={1} width={w-3} height={h-3} rx={6} style={{fill:"url(#cp-hatch)"}}/>
+      <rect x={1} y={1} width={w-3} height={h-3} rx={6} style={{fill:"none",stroke:INK,strokeWidth:INK_W,strokeDasharray:"7 4"}}/>
+      {label&&<text x={(w-3)/2+1} y={(h-3)/2+1+fs*0.34} textAnchor="middle" style={{fontSize:fs,fontWeight:800,fill:INK,fontFamily:"'Source Sans 3',sans-serif"}}>{label}</text>}
+    </>);
+  }
+  if(type==="text"){
+    const txt=label||"Label",fs=Math.max(9,Math.min(20,h*0.5,(w-14)/Math.max(3,txt.length*0.56)));
+    return wrap(<>
+      <rect x={2.5} y={3.5} width={w-3} height={h-3} rx={4} style={{fill:"var(--cp-shadow)"}}/>
+      <rect x={1} y={1} width={w-3} height={h-3} rx={4} style={{fill:"var(--cp-paper)",stroke:"var(--cp-tag-ink)",strokeWidth:1.6}}/>
+      <text x={(w-3)/2+1} y={(h-3)/2+1+fs*0.35} textAnchor="middle" style={{fontSize:fs,fontWeight:800,fill:"var(--cp-tag-text)",fontFamily:"'Source Sans 3',sans-serif"}}>{txt}</text>
+    </>);
+  }
+  if(type==="arrow"){
+    const cy=h/2,sh=h*0.46,hl=Math.min(h*0.95,w*0.42);
+    const pts=`1,${cy-sh/2} ${w-hl},${cy-sh/2} ${w-hl},1 ${w-2},${cy} ${w-hl},${h-2} ${w-hl},${cy+sh/2} 1,${cy+sh/2}`;
+    return wrap(<>
+      <polygon points={pts} transform="translate(1.5 2.5)" style={{fill:"var(--cp-shadow)"}}/>
+      <polygon points={pts} style={{fill:"#ffd98a"}}/><polygon points={pts} style={{fill:"url(#cp-hatch)"}}/>
+      <polygon points={pts} style={{fill:"none",stroke:INK,strokeWidth:INK_W,strokeLinejoin:"round"}}/>
+    </>);
+  }
   return null;
+};
+
+/* A small drawing of an item for the catalogue (it scales the real art down to fit) */
+const ItemThumb=({type,size=48})=>{
+  const t=ROOM_ITEM_TYPES[type];if(!t)return null;
+  const k=Math.min(size/t.w,size/t.h,type==="board"||type==="screen"?1:1.6);
+  return(
+    <div data-theme="whiteboard" style={{width:size,height:size,position:"relative",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"visible"}}>
+      <div style={{position:"relative",width:t.w*k,height:t.h*k}}>
+        <div style={{position:"absolute",left:0,top:0,width:t.w,height:t.h,transform:`scale(${k})`,transformOrigin:"top left"}}>
+          <RoomItemArt type={type} w={t.w} h={t.h} label={type==="text"?"Aa":undefined} fontSize={11}/>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* A numbered station badge (and its name, if it has one) */
+const StationBadge=({x,y,station})=>(
+  <div title={`Station ${station.n}${station.name?` — ${station.name}`:""}`} style={{position:"absolute",left:x,top:y,zIndex:8,display:"flex",alignItems:"center",pointerEvents:"none",fontFamily:"'Source Sans 3',sans-serif",transform:"translate(-6px,-9px)"}}>
+    <span style={{minWidth:22,height:22,boxSizing:"border-box",padding:"0 5px",borderRadius:11,background:"#ffd98a",border:"2px solid var(--cp-tag-ink)",color:"#1a1208",fontSize:13,fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"1.5px 2px 0 var(--cp-shadow)"}}>{station.n}</span>
+    {station.name&&<span style={{marginLeft:-6,paddingLeft:9,paddingRight:6,height:18,borderRadius:"0 9px 9px 0",background:"var(--cp-paper)",border:"1.5px solid var(--cp-tag-ink)",color:"var(--cp-tag-text)",fontSize:11.5,fontWeight:800,display:"flex",alignItems:"center",whiteSpace:"nowrap",boxShadow:"1.5px 2px 0 var(--cp-shadow)"}}>{station.name}</span>}
+  </div>
+);
+/* Badges for every flagged item and table. Used by the editor and the class Seating view. */
+const StationBadges=({items,pieces})=>(
+  <>
+    {(items||[]).filter(i=>i.station).map(i=>{const b=itemBounds(i);return <StationBadge key={`sb-${i.id}`} x={b.x} y={b.y} station={i.station}/>;})}
+    {(pieces||[]).filter(p=>p.station).map(p=>{
+      const w=pieceToWorld(p),xs=w.poly.map(q=>q[0]),ys=w.poly.map(q=>q[1]);
+      return <StationBadge key={`sb-${p.id}`} x={Math.min(...xs)+4} y={Math.min(...ys)+4} station={p.station}/>;
+    })}
+  </>
+);
+
+/* A paper label under an item, always level however the item is turned */
+const ItemTag=({text,cx,top,fs=12})=>(
+  <div style={{position:"absolute",left:cx,top,transform:"translateX(-50%)",zIndex:5,pointerEvents:"none",maxWidth:170,padding:"1px 7px",borderRadius:4,background:"var(--cp-paper)",border:"1.4px solid var(--cp-tag-ink)",boxShadow:"1.5px 2px 0 var(--cp-shadow)",color:"var(--cp-tag-text)",fontSize:fs,fontWeight:700,lineHeight:1.25,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",fontFamily:"'Source Sans 3',sans-serif"}}>{text}</div>
+);
+/* Items whose label is part of the drawing (so no separate paper tag) */
+const ITEM_INLINE_LABEL=new Set(["desk","board","box","text"]);
+
+/* One room item on the map. The same component draws it in the editor (with
+   mouse handlers) and in the class Seating view (without), so they can't drift apart. */
+const RoomItemView=({item,selected=false,onMouseDown,onClick,onDoubleClick,title,cursor,fontScale=1})=>{
+  const g=itemGeom(item),b=itemBounds(item);
+  const inline=ITEM_INLINE_LABEL.has(item.type);
+  const vert=g.legacy&&g.w<g.h;
+  const artLabel=inline?(item.label??(item.type==="desk"?(vert?"Desk":"Teacher's Desk"):item.type==="board"?"Board":undefined)):undefined;
+  const tagText=inline?null:(item.label??(g.legacy&&item.type==="door"?"Door":null));
+  return(
+    <>
+      <div onMouseDown={onMouseDown} onClick={onClick} onDoubleClick={onDoubleClick} title={title}
+        style={{position:"absolute",left:g.x,top:g.y,width:g.w,height:g.h,transform:g.rot?`rotate(${g.rot}deg)`:undefined,transformOrigin:g.origin==="tl"?"top left":"center",cursor:cursor||"default",userSelect:"none",pointerEvents:onMouseDown||onClick?"auto":"none"}}>
+        {selected&&<div style={{position:"absolute",inset:-4,borderRadius:8,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",pointerEvents:"none"}}/>}
+        <RoomItemArt type={item.type} w={g.w} h={g.h} label={artLabel} fontSize={(item.type==="board"?11:12)*fontScale}/>
+      </div>
+      {tagText&&<ItemTag text={tagText} cx={b.x+b.w/2} top={b.y+b.h+4} fs={12*fontScale}/>}
+    </>
+  );
+};
+
+/* Walls and openings, drawn as one picture: thick ink-outlined lines with pencil
+   hatching (outlines first, then fills, so corners join cleanly), a gap in the
+   wall for each door with its swing, and a glazed strip for each window. With
+   `edit` set it also adds the invisible hit areas and end handles for Edit room. */
+const WallsLayer=({walls,openings,selWallId,selOpeningId,draft,edit})=>{
+  const ws=walls||[],byId=new Map(ws.map(w=>[w.id,w]));
+  const T=WALL_T;
+  const ops=(openings||[]).map(o=>{const w=byId.get(o.wallId);return w?{o,w,f:openingFrame(w,o)}:null;}).filter(Boolean);
+  if(!ws.length&&!draft)return null;
+  const line=(w,st,extra)=><line key={w.id+(extra||"")} x1={w.x1} y1={w.y1} x2={w.x2} y2={w.y2} style={st}/>;
+  const swingPath=(r,s)=>`M ${r} 0 A ${r} ${r} 0 0 ${s===-1?0:1} 0 ${s*r}`;
+  /* a door leaf of width r hinged at the origin, opened to the side s */
+  const leaf=(r,s)=>(
+    <g>
+      <path d={`M 0 0 L ${r} 0 A ${r} ${r} 0 0 ${s===-1?0:1} 0 ${s*r} Z`} style={{fill:"var(--cp-cyan)",fillOpacity:0.7}}/>
+      <path d={`M 0 0 L ${r} 0 A ${r} ${r} 0 0 ${s===-1?0:1} 0 ${s*r} Z`} style={{fill:"url(#cp-hatch)"}}/>
+      <path d={swingPath(r,s)} style={{fill:"none",stroke:INK,strokeWidth:1.2,strokeDasharray:"4 3"}}/>
+      <rect x={-2.5} y={s===1?0:-r} width={5} height={r} rx={1.5} style={{fill:"var(--cp-wood)",stroke:INK,strokeWidth:1.5}}/>
+      <rect x={-2.5} y={s===1?0:-r} width={5} height={r} rx={1.5} style={{fill:"url(#cp-hatch)"}}/>
+    </g>
+  );
+  return(
+    <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:0}} aria-hidden={edit?undefined:"true"}>
+      {ws.map(w=>w.id===selWallId&&line(w,{stroke:"var(--cp-sel-glow)",strokeWidth:T+14,strokeLinecap:"round"},"g"))}
+      {ws.map(w=>line(w,{stroke:w.id===selWallId?"var(--cp-sel)":INK,strokeWidth:T+(w.id===selWallId?4.4:3.2),strokeLinecap:"square"},"o"))}
+      {ws.map(w=>line(w,{stroke:"var(--cp-wall)",strokeWidth:T,strokeLinecap:"square"},"f"))}
+      {ws.map(w=>line(w,{stroke:"url(#cp-hatch-wall)",strokeWidth:T,strokeLinecap:"square"},"h"))}
+      {ops.map(({o,f})=>{
+        const r=o.width||56,s=o.swing===-1?-1:1,sel=o.id===selOpeningId;
+        const jamb=x=><line key={x} x1={x} y1={-T/2-1.5} x2={x} y2={T/2+1.5} style={{stroke:INK,strokeWidth:2.6,strokeLinecap:"butt"}}/>;
+        return(
+          <g key={o.id} transform={`translate(${f.c[0]} ${f.c[1]}) rotate(${f.ang})`}>
+            {sel&&<rect x={-r/2-5} y={-T/2-6} width={r+10} height={T+12} rx={5} style={{fill:"none",stroke:"var(--cp-sel)",strokeWidth:2.4}}/>}
+            {sel&&<rect x={-r/2-5} y={-T/2-6} width={r+10} height={T+12} rx={5} style={{fill:"none",stroke:"var(--cp-sel-glow)",strokeWidth:8}}/>}
+            {o.type==="window"?(
+              <>
+                <rect x={-r/2} y={-T/2} width={r} height={T} style={{fill:"var(--cp-window)",stroke:INK,strokeWidth:1.6}}/>
+                <rect x={-r/2} y={-T/2} width={r} height={T} style={{fill:"url(#cp-hatch)"}}/>
+                <line x1={-r/2} y1={0} x2={r/2} y2={0} style={{stroke:INK,strokeWidth:1.1}}/>
+                {jamb(-r/2)}{jamb(r/2)}
+              </>
+            ):(
+              <>
+                <rect x={-r/2} y={-T/2-2} width={r} height={T+4} style={{fill:"var(--cp-floor)"}}/>
+                {jamb(-r/2)}{jamb(r/2)}
+                {o.type==="double-door"
+                  ?<><g transform={`translate(${-r/2} 0)`}>{leaf(r/2,s)}</g><g transform={`translate(${r/2} 0) scale(-1 1)`}>{leaf(r/2,s)}</g></>
+                  :<g transform={o.flip?`translate(${r/2} 0) scale(-1 1)`:`translate(${-r/2} 0)`}>{leaf(r,s)}</g>}
+              </>
+            )}
+          </g>
+        );
+      })}
+      {draft&&<line x1={draft.x1} y1={draft.y1} x2={draft.x2} y2={draft.y2} style={{stroke:"var(--cp-sel)",strokeWidth:T,strokeLinecap:"square",opacity:0.55}}/>}
+      {edit&&ws.map(w=><line key={`hit-${w.id}`} x1={w.x1} y1={w.y1} x2={w.x2} y2={w.y2} onMouseDown={e=>edit.onWallMD(e,w.id)} onClick={e=>e.stopPropagation()}
+        title="Click to select this wall, drag to move it. Drag its end dots to stretch it." style={{stroke:"transparent",strokeWidth:T+10,pointerEvents:"stroke",cursor:"move"}}/>)}
+      {edit&&ops.map(({o,f})=>(
+        <rect key={`oh-${o.id}`} x={-(o.width||56)/2} y={-T/2-5} width={o.width||56} height={T+10} transform={`translate(${f.c[0]} ${f.c[1]}) rotate(${f.ang})`}
+          onMouseDown={e=>edit.onOpeningMD(e,o.id)} onClick={e=>e.stopPropagation()}
+          title={`${OPENING_TYPES[o.type]?.name||"Opening"} — click to select, drag along the wall to slide it`} style={{fill:"transparent",pointerEvents:"all",cursor:"grab"}}/>
+      ))}
+      {edit&&ws.filter(w=>w.id===selWallId).map(w=>[[w.x1,w.y1,"a"],[w.x2,w.y2,"b"]].map(([x,y,end])=>(
+        <circle key={`end-${w.id}-${end}`} cx={x} cy={y} r={7} onMouseDown={e=>edit.onEndMD(e,w.id,end)} onClick={e=>e.stopPropagation()}
+          title="Drag to move this end of the wall (corners that meet here move together)" style={{fill:"#fff",stroke:"var(--cp-sel)",strokeWidth:2.4,pointerEvents:"all",cursor:"crosshair"}}/>
+      )))}
+    </svg>
+  );
 };
 
 /* Table pieces (shapes that can rotate and join — see the geometry block below):
@@ -1744,11 +2132,13 @@ const PieceThumb=({kind,seatCount,size=44})=>{
    (whether by scroll position or by flexbox) had no effect: the oversized empty
    canvas was what got "centered", not the actual desks. Sizing it to the real
    content (with a sensible floor) fixes that at the source. */
-const canvasContentSize=(seatsIn,roomItemsIn,piecesIn,slotsIn)=>{
+const canvasContentSize=(seatsIn,roomItemsIn,piecesIn,slotsIn,wallsIn)=>{
   // table pieces reach past their seat boxes (chairs, table corners), so count their drawn bounds too
   const pb=piecesIn?.length?piecesBounds(piecesIn,slotsIn):null;
-  const xs=[0,...(seatsIn||[]).map(s=>s.x+SW),...(roomItemsIn||[]).map(r=>r.x+260),...(pb?[pb.x+pb.w]:[])];
-  const ys=[0,...(seatsIn||[]).map(s=>s.y+SH),...(roomItemsIn||[]).map(r=>r.y+80),...(pb?[pb.y+pb.h]:[])];
+  const wb=wallsBounds(wallsIn);
+  const ib=(roomItemsIn||[]).map(itemBounds);
+  const xs=[0,...(seatsIn||[]).map(s=>s.x+SW),...ib.map(b=>b.x+Math.max(b.w,90)),...(pb?[pb.x+pb.w]:[]),...(wb?[wb.x+wb.w]:[])];
+  const ys=[0,...(seatsIn||[]).map(s=>s.y+SH),...ib.map(b=>b.y+b.h+30),...(pb?[pb.y+pb.h]:[]),...(wb?[wb.y+wb.h]:[])];
   return{w:Math.max(400,Math.max(...xs)+40),h:Math.max(300,Math.max(...ys)+40)};
 };
 /* Keep-apart/keep-together rules now hold a studentIds list (2 or more) rather
@@ -2423,7 +2813,225 @@ const legacyChairs=(items,rect)=>{
   return out;
 };
 
-const PIECE_GEOMETRY={PG,legacyChairs,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly};
+/* ── Room shell (Phase 4): walls, openings (doors/windows that sit on a wall),
+   the item catalogue's data, and the room library's pure helpers. Still no JSX
+   and no outside references. ───────────────────────────────────────────────
+
+   A wall is {id,x1,y1,x2,y2}. An opening is {id,type,wallId,t,width,flip,swing}:
+   t (0–1) is where its middle sits along the wall, flip puts the hinge at the
+   other end, swing (1 or -1) picks which side the door opens to. A room item is
+   {id,type,x,y,w?,h?,rot?,label?,fixed?,station?}: (x,y) is the top-left of the
+   box *before* it is turned, and it turns about its middle. The three original
+   items (desk, board, door) have no w/h/rot — they keep their old fixed sizes and
+   `rotation`, and are only converted if Tom resizes or turns them. */
+const WALL_T=10,WALL_GRID=8,WALL_JOIN=14;
+const wallLen=w=>Math.hypot(w.x2-w.x1,w.y2-w.y1);
+const wallDir=w=>{const L=wallLen(w)||1;return[(w.x2-w.x1)/L,(w.y2-w.y1)/L];};
+const wallPointAt=(w,t)=>[w.x1+(w.x2-w.x1)*t,w.y1+(w.y2-w.y1)*t];
+/* The nearest point of a wall to pt: {t (0–1 along it), dist, p} */
+const closestOnWall=(w,pt)=>{
+  const L=wallLen(w);
+  if(!L)return{t:0,dist:Math.hypot(pt[0]-w.x1,pt[1]-w.y1),p:[w.x1,w.y1]};
+  const d=wallDir(w),u=Math.max(0,Math.min(L,(pt[0]-w.x1)*d[0]+(pt[1]-w.y1)*d[1]));
+  const p=[w.x1+d[0]*u,w.y1+d[1]*u];
+  return{t:u/L,dist:Math.hypot(pt[0]-p[0],pt[1]-p[1]),p};
+};
+const nearestWall=(walls,pt,reach=36)=>{
+  let best=null;
+  (walls||[]).forEach(w=>{const c=closestOnWall(w,pt);if(c.dist<=reach&&(!best||c.dist<best.dist))best={wall:w,...c};});
+  return best;
+};
+/* An opening can't poke out past the end of its wall (a wall shorter than it centres it) */
+const clampOpeningT=(w,width,t)=>{const L=wallLen(w);if(L<=width)return 0.5;const h=width/2/L;return pgR(Math.max(h,Math.min(1-h,t)));};
+/* Where a dropped / dragged opening lands: the nearest wall within reach, and its spot on it */
+const openingAtPoint=(walls,pt,width,reach=36)=>{
+  const n=nearestWall(walls,pt,reach);
+  return n?{wallId:n.wall.id,t:clampOpeningT(n.wall,width,n.t)}:null;
+};
+/* The opening in canvas space: centre, direction along the wall, its normal, the wall's angle, both ends */
+const openingFrame=(w,op)=>{
+  const d=wallDir(w),c=wallPointAt(w,op.t),h=(op.width||56)/2;
+  return{c,dir:d,n:[-d[1],d[0]],ang:pgR(pgAng(d)),a:[c[0]-d[0]*h,c[1]-d[1]*h],b:[c[0]+d[0]*h,c[1]+d[1]*h]};
+};
+const OPENING_TYPES={door:{name:'Door',width:56},'double-door':{name:'Double door',width:104},window:{name:'Window',width:80}};
+/* A point the cursor is at → where a wall end goes. Ends first snap onto a nearby
+   wall end (so corners join exactly); otherwise they snap to the 8 px grid and,
+   when there is an anchor (the wall's other end), to 0°, 45° or 90° from it. */
+const wallSnapPoint=(raw,walls,o={})=>{
+  const grid=o.grid||WALL_GRID,reach=o.reach??WALL_JOIN;
+  let best=null;
+  (walls||[]).forEach(w=>{
+    if(w.id===o.ignoreId)return;
+    [[w.x1,w.y1],[w.x2,w.y2]].forEach(q=>{const d=Math.hypot(raw[0]-q[0],raw[1]-q[1]);if(d<=reach&&(!best||d<best.d))best={d,q};});
+  });
+  if(best)return{p:[best.q[0],best.q[1]],joined:true};
+  let p=[Math.round(raw[0]/grid)*grid,Math.round(raw[1]/grid)*grid];
+  if(o.anchor){
+    const dx=raw[0]-o.anchor[0],dy=raw[1]-o.anchor[1],a=Math.round(Math.atan2(dy,dx)/(Math.PI/4));
+    if(a%2===0){ // straight along one axis: the other coordinate stays put
+      if(Math.abs(Math.cos(a*Math.PI/4))>0.5)p=[Math.round(raw[0]/grid)*grid,o.anchor[1]];
+      else p=[o.anchor[0],Math.round(raw[1]/grid)*grid];
+    }else{
+      const d=Math.round((Math.abs(dx)+Math.abs(dy))/2/grid)*grid;
+      p=[o.anchor[0]+Math.sign(dx)*d,o.anchor[1]+Math.sign(dy)*d];
+    }
+  }
+  return{p,joined:false};
+};
+/* Four walls round a box, clockwise from the top left, on the 8 px grid */
+const rectRoomWalls=(b,uid)=>{
+  const g=WALL_GRID,x1=Math.max(g,Math.floor(b.x/g)*g),y1=Math.max(g,Math.floor(b.y/g)*g),x2=Math.ceil((b.x+b.w)/g)*g,y2=Math.ceil((b.y+b.h)/g)*g;
+  return[{id:uid(),x1,y1,x2,y2:y1},{id:uid(),x1:x2,y1,x2,y2},{id:uid(),x1:x2,y1:y2,x2:x1,y2},{id:uid(),x1,y1:y2,x2:x1,y2:y1}];
+};
+const wallsBounds=walls=>{
+  if(!walls?.length)return null;
+  const xs=walls.flatMap(w=>[w.x1,w.x2]),ys=walls.flatMap(w=>[w.y1,w.y2]);
+  return{x:Math.min(...xs)-WALL_T,y:Math.min(...ys)-WALL_T,w:Math.max(...xs)-Math.min(...xs)+WALL_T*2,h:Math.max(...ys)-Math.min(...ys)+WALL_T*2};
+};
+
+/* The item catalogue: size (before turning), whether it is normally part of the
+   room itself (fixed), and the words the search looks at. Order is the order shown. */
+const ROOM_ITEM_TYPES={
+  desk:{name:"Teacher's desk",w:128,h:56,fixed:false,kw:'teacher table'},
+  board:{name:'Whiteboard',w:256,h:32,fixed:true,kw:'board blackboard'},
+  screen:{name:'Projector screen',w:192,h:16,fixed:true,kw:'projector screen'},
+  tv:{name:'TV',w:80,h:24,fixed:true,kw:'tv television display monitor'},
+  bookshelf:{name:'Bookshelf',w:128,h:32,fixed:false,kw:'books shelf library'},
+  cupboard:{name:'Cupboard',w:80,h:40,fixed:true,kw:'storage cabinet'},
+  filing:{name:'Filing cabinet',w:40,h:48,fixed:false,kw:'files drawers cabinet'},
+  bin:{name:'Bin',w:32,h:32,fixed:false,kw:'rubbish trash waste'},
+  recycling:{name:'Recycling',w:32,h:32,fixed:false,kw:'recycle bin paper'},
+  computer:{name:'Computer station',w:72,h:48,fixed:false,kw:'pc computer desk laptop'},
+  printer:{name:'Printer',w:48,h:40,fixed:false,kw:'copier'},
+  sofa:{name:'Sofa / reading corner',w:128,h:56,fixed:false,kw:'couch reading corner'},
+  rug:{name:'Rug',w:128,h:96,fixed:false,kw:'carpet mat'},
+  plant:{name:'Plant',w:32,h:32,fixed:false,kw:'pot tree'},
+  hooks:{name:'Coat hooks',w:96,h:16,fixed:true,kw:'coats bags'},
+  sink:{name:'Sink',w:64,h:40,fixed:true,kw:'tap basin wash water'},
+  demo:{name:'Demo bench',w:192,h:56,fixed:true,kw:'teacher bench demonstration'},
+  fume:{name:'Fume cupboard',w:88,h:48,fixed:true,kw:'fume hood extraction'},
+  eyewash:{name:'Eyewash station',w:32,h:32,fixed:true,kw:'eye wash safety'},
+  shower:{name:'Safety shower',w:32,h:32,fixed:true,kw:'emergency shower safety'},
+  blanket:{name:'Fire blanket',w:32,h:32,fixed:true,kw:'fire safety'},
+  extinguisher:{name:'Fire extinguisher',w:32,h:32,fixed:true,kw:'fire safety'},
+  firstaid:{name:'First-aid kit',w:32,h:32,fixed:true,kw:'first aid medical safety'},
+  gas:{name:'Gas shut-off',w:32,h:32,fixed:true,kw:'gas valve safety tap'},
+  estop:{name:'Emergency stop',w:32,h:32,fixed:true,kw:'stop button safety e-stop'},
+  chemstore:{name:'Chemical store',w:72,h:40,fixed:true,kw:'chemicals cabinet flammable'},
+  prepdoor:{name:'Prep-room door',w:64,h:64,fixed:true,kw:'preparation room technician door'},
+  goggles:{name:'Goggles cabinet',w:64,h:32,fixed:true,kw:'safety glasses eye protection'},
+  glassbin:{name:'Broken-glass bin',w:32,h:32,fixed:false,kw:'sharps glass bin'},
+  isolator:{name:'Power isolator',w:32,h:32,fixed:true,kw:'electricity power switch safety'},
+  box:{name:'Box',w:96,h:64,fixed:false,kw:'rectangle shape zone area'},
+  text:{name:'Text label',w:128,h:32,fixed:false,kw:'words note sign'},
+  arrow:{name:'Arrow',w:96,h:24,fixed:false,kw:'direction pointer'},
+};
+const ROOM_ITEM_SECTIONS=[
+  {id:'classroom',name:'Classroom',types:['desk','board','screen','tv','bookshelf','cupboard','filing','bin','recycling','computer','printer','sofa','rug','plant','hooks','sink']},
+  {id:'lab',name:'Science lab',types:['demo','sink','fume','eyewash','shower','blanket','extinguisher','firstaid','gas','estop','chemstore','prepdoor','goggles','glassbin','isolator']},
+  {id:'free',name:'Free shapes',types:['box','text','arrow']},
+];
+/* the original three: their sizes, from before items had w/h */
+const LEGACY_ITEM_SIZE={desk:[114,52],board:[260,36],door:[64,64]};
+const itemGeom=it=>{
+  const legacy=!!LEGACY_ITEM_SIZE[it.type]&&it.w==null&&it.h==null&&it.rot==null;
+  if(legacy){
+    const[bw,bh]=LEGACY_ITEM_SIZE[it.type],r=(((it.rotation||0)%360)+360)%360;
+    if(it.type==='door')return{x:it.x,y:it.y,w:bw,h:bh,rot:r,origin:'tl',legacy:true}; // the old door turned about its top-left corner
+    const vert=r===90||r===270; // the old desk and board were redrawn on their side, not turned
+    return{x:it.x,y:it.y,w:vert?bh:bw,h:vert?bw:bh,rot:0,origin:'c',legacy:true};
+  }
+  const t=ROOM_ITEM_TYPES[it.type]||{};
+  return{x:it.x,y:it.y,w:it.w??t.w??64,h:it.h??t.h??40,rot:it.rot??it.rotation??0,origin:'c',legacy:false};
+};
+const itemPivot=g=>g.origin==='tl'?[g.x,g.y]:[g.x+g.w/2,g.y+g.h/2];
+const itemCorners=g=>{
+  const pv=itemPivot(g);
+  return[[g.x,g.y],[g.x+g.w,g.y],[g.x+g.w,g.y+g.h],[g.x,g.y+g.h]].map(p=>pgRot(p,g.rot,pv));
+};
+const itemCentre=g=>pgRot([g.x+g.w/2,g.y+g.h/2],g.rot,itemPivot(g));
+/* Bounding box of the item as it looks on the canvas (turned) */
+const itemBounds=it=>{
+  const cs=itemCorners(itemGeom(it)),xs=cs.map(p=>p[0]),ys=cs.map(p=>p[1]);
+  return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};
+};
+/* An original item becomes a normal one (w, h, rot) with the same look and place */
+const upgradeLegacyItem=it=>{
+  const g=itemGeom(it);
+  if(!g.legacy)return it;
+  const[bw,bh]=LEGACY_ITEM_SIZE[it.type];
+  if(it.type==='door'){
+    const c=pgRot([it.x+bw/2,it.y+bh/2],g.rot,[it.x,it.y]);
+    return{...it,x:pgR(c[0]-bw/2),y:pgR(c[1]-bh/2),w:bw,h:bh,rot:g.rot,rotation:g.rot};
+  }
+  const q=(((it.rotation||0)%360)+360)%360,r=q===90||q===270?q:0;
+  return{...it,x:pgR(g.x+g.w/2-bw/2),y:pgR(g.y+g.h/2-bh/2),w:bw,h:bh,rot:r,rotation:r};
+};
+const newRoomItem=(type,uid,x=80,y=80)=>{
+  const t=ROOM_ITEM_TYPES[type];
+  return{id:uid(),type,x,y,w:t.w,h:t.h,rot:0,rotation:0,label:type==='text'?'Label':t.name,fixed:!!t.fixed};
+};
+/* Next free station number across items and tables */
+const nextStationNumber=(items,pieces)=>{
+  const ns=[...(items||[]),...(pieces||[])].map(o=>o.station?.n).filter(n=>Number.isFinite(n));
+  return ns.length?Math.max(...ns)+1:1;
+};
+
+/* ── Room library helpers (the ta-rooms key) ──
+   A room is {id,name,shell:{walls,openings,items},layouts:[{id,name,pieces,joins,seats,groups,items}]}.
+   The *shell* is the part of a class's room that never moves (walls, openings
+   and fixed items); a *layout* is the movable furniture, with blank seats.
+   Everything works on the saved class object (sl-<class>). */
+const cloneJ=v=>JSON.parse(JSON.stringify(v));
+const extractShell=lo=>({
+  walls:cloneJ(lo.walls||[]),openings:cloneJ(lo.openings||[]),
+  items:cloneJ((lo.roomItems||[]).filter(i=>i.fixed)),
+});
+const extractLayout=lo=>({
+  pieces:cloneJ(lo.pieces||[]),joins:cloneJ(lo.joins||[]),
+  seats:cloneJ(lo.seats||[]).map(s=>({...s,studentId:null,locked:false})),
+  groups:cloneJ(lo.groups||[]),
+  items:cloneJ((lo.roomItems||[]).filter(i=>!i.fixed)),
+});
+/* The class object with the room's shell swapped in. Walls, openings and fixed
+   items come from the room; the class's furniture, seats, students, rules and
+   everything else are left exactly as they were. */
+const applyRoomShell=(lo,room)=>{
+  const sh=room?.shell||{};
+  const out={...lo,roomItems:[...cloneJ(sh.items||[]),...(lo.roomItems||[]).filter(i=>!i.fixed)]};
+  if(sh.walls?.length)out.walls=cloneJ(sh.walls);else delete out.walls;
+  if(sh.openings?.length)out.openings=cloneJ(sh.openings);else delete out.openings;
+  return out;
+};
+const sameShell=(lo,room)=>JSON.stringify(extractShell(lo))===JSON.stringify({walls:room?.shell?.walls||[],openings:room?.shell?.openings||[],items:room?.shell?.items||[]});
+/* A saved layout with fresh ids everywhere (so two classes never share a seat id),
+   no students, pieces/joins/groups/seats remapped together. */
+const instantiateLayout=(layout,uid)=>{
+  const pm={},sm={},gm={};
+  (layout.pieces||[]).forEach(p=>{pm[p.id]=uid();});
+  (layout.seats||[]).forEach(s=>{sm[s.id]=uid();});
+  (layout.groups||[]).forEach(g=>{gm[g.id]=uid();});
+  return{
+    pieces:(layout.pieces||[]).map(p=>({...cloneJ(p),id:pm[p.id]})),
+    joins:(layout.joins||[]).filter(j=>pm[j.a]&&pm[j.b]).map(j=>({...j,a:pm[j.a],b:pm[j.b]})),
+    seats:(layout.seats||[]).map(s=>({...cloneJ(s),id:sm[s.id],groupId:s.groupId?(gm[s.groupId]||null):null,studentId:null,locked:false,...(s.pieceId?{pieceId:pm[s.pieceId]||s.pieceId}:{})})),
+    groups:(layout.groups||[]).map(g=>({...cloneJ(g),id:gm[g.id],seatIds:g.seatIds.map(id=>sm[id]).filter(Boolean)})),
+    items:(layout.items||[]).map(i=>({...cloneJ(i),id:uid()})),
+  };
+};
+/* The first time Tom saves to the library, his old "Saved layouts" come along as a
+   room called "My saved layouts" (one layout each, no shell). The old key is never
+   touched, and doing it twice changes nothing. */
+const migrateLegacyLayouts=(rooms,legacy)=>{
+  if(!legacy?.length||rooms.some(r=>r.legacy))return rooms;
+  return[...rooms,{id:'room-legacy',name:'My saved layouts',legacy:true,shell:{walls:[],openings:[],items:[]},
+    layouts:legacy.map(l=>({id:l.id,name:l.name,createdAt:l.createdAt||0,pieces:cloneJ(l.pieces||[]),joins:cloneJ(l.joins||[]),seats:cloneJ(l.seats||[]),groups:cloneJ(l.groups||[]),items:cloneJ(l.roomItems||[])}))}];
+};
+
+const PIECE_GEOMETRY={PG,legacyChairs,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly,
+  WALL_T,WALL_GRID,WALL_JOIN,wallLen,wallDir,wallPointAt,closestOnWall,nearestWall,clampOpeningT,openingAtPoint,openingFrame,OPENING_TYPES,wallSnapPoint,rectRoomWalls,wallsBounds,
+  ROOM_ITEM_TYPES,ROOM_ITEM_SECTIONS,LEGACY_ITEM_SIZE,itemGeom,itemPivot,itemCorners,itemCentre,itemBounds,upgradeLegacyItem,newRoomItem,nextStationNumber,
+  extractShell,extractLayout,applyRoomShell,sameShell,instantiateLayout,migrateLegacyLayouts};
 /* @geometry-end */
 
 // Tag colours. Custom tags used to get whatever COLORS[i] fell out of
@@ -2668,11 +3276,44 @@ const bestFitReseat=(oldSeats,targetSeats)=>{
 };
 /* The saved sl-<class> object. pieces/joins are only written once a room has
    table pieces, so a room without any keeps exactly the shape it always had. */
-const slLayoutObj=(s,g,t,ri,rl,pc,jn)=>{
+const slLayoutObj=(s,g,t,ri,rl,pc,jn,ex)=>{
   const o={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[]};
   if(pc?.length){o.pieces=pc;o.joins=jn||[];}
+  /* Room builder (Phase 4): walls, openings and the link to a library room are
+     written only once they exist, so an old room keeps exactly its old shape. */
+  if(ex?.walls?.length)o.walls=ex.walls;
+  if(ex?.openings?.length)o.openings=ex.openings;
+  if(ex?.room)o.room=ex.room;
   return o;
 };
+/* What counts as "the shell" of a room (walls, openings, fixed items) — compared
+   to tell whether an edit touched it, which is what a linked room asks about. */
+const shellSig=(walls,openings,items)=>JSON.stringify([walls||[],openings||[],(items||[]).filter(i=>i.fixed)]);
+/* ta-rooms: the room library (see ROOMS_PLAN section 4). The first write of a
+   session takes an automatic backup, and the first save ever brings the old
+   "Saved layouts" in as a room called "My saved layouts" (the old key stays). */
+let roomsBackedUp=false;
+async function loadRooms(){const r=await load('ta-rooms',[]);return Array.isArray(r)?r:[];}
+async function saveRooms(rooms){
+  if(!roomsBackedUp){roomsBackedUp=true;await autoBackup('before room library');}
+  const legacy=await load('ta-saved-layouts',[]);
+  const next=migrateLegacyLayouts(rooms,legacy);
+  await save('ta-rooms',next);
+  return next;
+}
+/* A class that is linked to a library room picks up the room's current shell
+   (walls, openings, fixed items) whenever it loads — never its furniture or students.
+   A class that said "just this class" (shellLocal) keeps its own. Saves only if something changed. */
+async function syncClassWithRoom(classId,layout){
+  const link=layout?.room;
+  if(!layout||!link?.roomId||link.shellLocal)return layout;
+  const room=(await loadRooms()).find(r=>r.id===link.roomId);
+  if(!room||sameShell(layout,room))return layout;
+  if(!roomsBackedUp){roomsBackedUp=true;await autoBackup('before room library');}
+  const next=applyRoomShell(layout,room);
+  await save(`sl-${classId}`,next);
+  return next;
+}
 /* Structural fingerprint used to detect "has the room layout changed since
    the last save/load" — deliberately ignores who's sitting where. */
 const roomStructureKey=(seatsArr,groupsArr,roomItemsArr,piecesArr,joinsArr)=>JSON.stringify({
@@ -2801,11 +3442,11 @@ function LayoutCard({layout,onLoad,onDelete}){
             onMouseEnter={e=>e.currentTarget.style.background="#eaf1fc"}
             onMouseLeave={e=>e.currentTarget.style.background="none"}
           >⤓</button>
-          <button onClick={()=>setConfirming(true)} title={`Delete "${layout.name}"`}
+          {onDelete&&<button onClick={()=>setConfirming(true)} title={`Delete "${layout.name}"`}
             style={{background:"none",border:"none",color:"rgba(0,0,0,0.18)",cursor:"pointer",fontSize:"15px",lineHeight:1,padding:"4px 6px",flexShrink:0,borderRadius:"5px"}}
             onMouseEnter={e=>e.target.style.color="#eb5757"}
             onMouseLeave={e=>e.target.style.color="rgba(0,0,0,0.18)"}
-          >×</button>
+          >×</button>}
         </div>
       ):(
         <div style={{padding:"8px 10px"}}>
@@ -2822,6 +3463,197 @@ function LayoutCard({layout,onLoad,onDelete}){
               onMouseLeave={e=>e.currentTarget.style.background="#fff"}
             >Cancel</button>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── The item catalogue popover: a search box and small drawings, grouped
+   Classroom / Science lab / Free shapes (same style as the Add table menu) ── */
+function ItemCatalogBody({onAddItem,onAddBench,btnS,menuHead}){
+  const[q,setQ]=useState('');
+  const needle=q.trim().toLowerCase();
+  const match=t=>!needle||`${ROOM_ITEM_TYPES[t].name} ${ROOM_ITEM_TYPES[t].kw}`.toLowerCase().includes(needle);
+  const benchMatch=!needle||'lab bench seats workstation table'.includes(needle);
+  const secs=ROOM_ITEM_SECTIONS.map(sec=>({...sec,types:sec.types.filter(match)})).filter(sec=>sec.types.length||(sec.id==='lab'&&benchMatch));
+  const tile={...btnS,padding:"6px 2px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",minWidth:0};
+  const hov={onMouseEnter:e=>e.currentTarget.style.background="#f0f1f4",onMouseLeave:e=>e.currentTarget.style.background="#fff"};
+  return(
+    <div>
+      <input autoFocus value={q} onChange={e=>setQ(e.target.value)} placeholder="Search: sink, eyewash, bin…" title="Search the catalogue by name"
+        style={{width:"100%",boxSizing:"border-box",padding:"6px 9px",borderRadius:"7px",border:"1px solid rgba(66,133,244,0.4)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",marginBottom:"8px"}}/>
+      {secs.length===0&&<div style={{fontSize:"11px",color:"rgba(0,0,0,0.3)",fontStyle:"italic",padding:"6px 2px"}}>Nothing matches "{q}"</div>}
+      {secs.map(sec=>(
+        <div key={sec.id} style={{marginBottom:"8px"}}>
+          <div style={menuHead}>{sec.name}</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"4px"}}>
+            {sec.id==="lab"&&benchMatch&&(
+              <button onClick={onAddBench} title="Add item: a lab bench with seats (a table piece you can seat students at, used for lab setups)" style={tile} {...hov}>
+                <PieceThumb kind="bench" size={44}/><span style={{fontSize:"9.5px",color:"rgba(0,0,0,0.55)",lineHeight:1.1,textAlign:"center"}}>Lab bench (seats)</span>
+              </button>
+            )}
+            {sec.types.map(t=>(
+              <button key={t} onClick={()=>onAddItem(t)} title={`Add item: ${ROOM_ITEM_TYPES[t].name}${ROOM_ITEM_TYPES[t].fixed?" (part of the room)":""}`} style={tile} {...hov}>
+                <ItemThumb type={t} size={44}/><span style={{fontSize:"9.5px",color:"rgba(0,0,0,0.55)",lineHeight:1.1,textAlign:"center"}}>{ROOM_ITEM_TYPES[t].name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── The Rooms popover: the room library (ta-rooms). A room is a shell (walls,
+   doors, windows, fixed items) plus saved layouts of its movable furniture.
+   Old "Saved layouts" show under "My saved layouts" until the first save moves
+   them into the library. ── */
+function RoomsPopover({rooms,legacy,link,onSaveNew,onSaveLayout,onUse,onRename,onDuplicate,onDelete,onDeleteLayout,onLoadLegacy,onShare,onAdopt,btnS,menuHead}){
+  const[mode,setMode]=useState(null);           // 'new' | 'save'
+  const[name,setName]=useState('');
+  const[pickRoom,setPickRoom]=useState(null);   // room chosen under "Save layout to room"
+  const[confirm,setConfirm]=useState(null);     // {kind,roomId,layoutId?,name?}
+  const[renaming,setRenaming]=useState(null);
+  const[openRooms,setOpenRooms]=useState(()=>new Set(link?[link.roomId]:[]));
+  const linked=link?rooms.find(r=>r.id===link.roomId):null;
+  const linkedLayout=linked?.layouts.find(l=>l.id===link?.layoutId);
+  const real=rooms.filter(r=>!r.legacy);
+  const inp={padding:"6px 8px",borderRadius:"7px",border:"1px solid rgba(66,133,244,0.4)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",width:"100%",boxSizing:"border-box"};
+  const small={...btnS,fontSize:"10.5px",padding:"4px 7px"};
+  const hov={onMouseEnter:e=>e.currentTarget.style.background="#f0f1f4",onMouseLeave:e=>e.currentTarget.style.background="#fff"};
+  const toggleOpen=id=>setOpenRooms(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n;});
+  const nameRow=(placeholder,onGo)=>(
+    <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+      <input value={name} onChange={e=>setName(e.target.value)} autoFocus placeholder={placeholder} title={placeholder}
+        onKeyDown={e=>{if(e.key==='Enter'&&name.trim()){onGo(name);setName('');setMode(null);setPickRoom(null);}if(e.key==='Escape'){setMode(null);setPickRoom(null);}}} style={inp}/>
+      <div style={{display:"flex",gap:"4px"}}>
+        <button onClick={()=>{if(name.trim()){onGo(name);setName('');setMode(null);setPickRoom(null);}}} title="Save with this name" style={{...btnS,flex:1,background:"#1a1a2e",color:"#fff",border:"none",fontSize:"11px",padding:"5px 0"}}>Save</button>
+        <button onClick={()=>{setMode(null);setPickRoom(null);}} title="Cancel" style={{...btnS,fontSize:"11px",padding:"5px 8px"}} {...hov}>Cancel</button>
+      </div>
+    </div>
+  );
+  const ask=(text,yes,yesLabel="Yes")=>(
+    <div style={{padding:"7px 8px",borderRadius:"8px",background:"#fdf6e8",border:"1px solid rgba(200,150,40,0.3)"}}>
+      <div style={{fontSize:"11px",fontWeight:600,color:"#7a5a10",lineHeight:1.4,marginBottom:"6px"}}>{text}</div>
+      <div style={{display:"flex",gap:"4px"}}>
+        <button onClick={()=>{yes();setConfirm(null);}} title={yesLabel} style={{...btnS,flex:1,background:"#1a1a2e",color:"#fff",border:"none",fontSize:"11px",padding:"5px 0"}}>{yesLabel}</button>
+        <button onClick={()=>setConfirm(null)} title="Cancel" style={{...btnS,flex:1,fontSize:"11px",padding:"5px 0"}} {...hov}>Cancel</button>
+      </div>
+    </div>
+  );
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+      {/* where this class is now */}
+      <div style={{fontSize:"11px",color:"rgba(0,0,0,0.5)",lineHeight:1.4,padding:"2px 2px 0"}}>
+        {linked?<>This class uses <b style={{color:"#1a1a2e"}}>{linked.name}</b>{linkedLayout?<> · layout <b style={{color:"#1a1a2e"}}>{linkedLayout.name}</b></>:null}</>:"This class isn't using a saved room yet."}
+      </div>
+      {linked&&link.shellLocal&&(
+        <div style={{padding:"7px 8px",borderRadius:"8px",background:"#eaf1fc",border:"1px solid rgba(66,133,244,0.2)",fontSize:"10.5px",color:"#2e4f85",lineHeight:1.4}}>
+          This class has its own walls and fixed items.
+          <div style={{display:"flex",gap:"4px",marginTop:"5px"}}>
+            <button onClick={onShare} title={`Save this class's walls, doors and fixed items into ${linked.name}, so every class that uses it gets them`} style={{...small,flex:1}} {...hov}>Update {linked.name} for every class</button>
+          </div>
+          <button onClick={onAdopt} title={`Throw away this class's own walls and use ${linked.name}'s again`} style={{...small,width:"100%",marginTop:"4px"}} {...hov}>Use {linked.name}'s shape again</button>
+        </div>
+      )}
+
+      {/* save */}
+      {mode==='new'?nameRow("Room name, e.g. Lab 204",n=>onSaveNew(n)):(
+        <button onClick={()=>{setName('');setMode('new');}} title="Save the walls, doors and fixed items of this room, plus the current furniture as its first layout, under a name like Lab 204" style={{...btnS,fontSize:"11.5px",textAlign:"left"}} {...hov}>💾 Save as new room…</button>
+      )}
+      {real.length>0&&(mode==='save'?(
+        <div style={{display:"flex",flexDirection:"column",gap:"4px",padding:"6px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.08)"}}>
+          <div style={menuHead}>Save layout to…</div>
+          {!pickRoom?real.map(r=>(
+            <button key={r.id} onClick={()=>setPickRoom(r.id)} title={`Save this furniture as a layout of ${r.name}`} style={{...btnS,fontSize:"11.5px",textAlign:"left",display:"flex",justifyContent:"space-between"}} {...hov}><span>{r.name}</span><span>▸</span></button>
+          )):(()=>{
+            const r=real.find(x=>x.id===pickRoom);if(!r)return null;
+            return(
+              <>
+                <div style={{fontSize:"11px",fontWeight:700,color:"#1a1a2e"}}>{r.name}</div>
+                {confirm?.kind==='update'?ask(`Replace layout "${confirm.name}" with the furniture as it is now?`,()=>{onSaveLayout(r.id,confirm.layoutId,null);setMode(null);setPickRoom(null);},"Replace"):(
+                  <>
+                    {r.layouts.map(l=>(
+                      <button key={l.id} onClick={()=>setConfirm({kind:'update',roomId:r.id,layoutId:l.id,name:l.name})} title={`Update layout "${l.name}" with the furniture as it is now (asks first)`} style={{...btnS,fontSize:"11px",textAlign:"left"}} {...hov}>↻ Update "{l.name}"</button>
+                    ))}
+                    {nameRow("New layout name, e.g. Clusters",n=>onSaveLayout(r.id,null,n))}
+                  </>
+                )}
+              </>
+            );
+          })()}
+        </div>
+      ):(
+        <button onClick={()=>{setMode('save');setPickRoom(null);setConfirm(null);}} title="Save the furniture as it is now as another layout of a room you've saved (a new layout, or update one)" style={{...btnS,fontSize:"11.5px",textAlign:"left",display:"flex",justifyContent:"space-between"}} {...hov}><span>📐 Save layout to room</span><span>▸</span></button>
+      ))}
+
+      {/* the library */}
+      {rooms.length>0&&<div style={menuHead}>Rooms</div>}
+      {rooms.map(r=>{
+        const isOpen=openRooms.has(r.id),isLinked=link?.roomId===r.id;
+        return(
+          <div key={r.id} style={{borderRadius:"9px",border:`1px solid ${isLinked?"rgba(66,133,244,0.35)":"rgba(0,0,0,0.08)"}`,background:isLinked?"#f6f9fe":"#fff",overflow:"hidden"}}>
+            <div style={{display:"flex",alignItems:"center",gap:"4px",padding:"5px 5px 5px 8px"}}>
+              <button onClick={()=>toggleOpen(r.id)} title="Show or hide this room's layouts" style={{background:"none",border:"none",cursor:"pointer",fontSize:"9px",color:"rgba(0,0,0,0.4)",padding:"2px"}}>{isOpen?"▼":"▶"}</button>
+              {renaming===r.id?(
+                <input autoFocus defaultValue={r.name} onBlur={e=>{onRename(r.id,e.target.value);setRenaming(null);}} onKeyDown={e=>{if(e.key==='Enter')e.target.blur();if(e.key==='Escape'){e.target.value=r.name;e.target.blur();}}} title="Type the new name, then press Enter" style={{...inp,flex:1,padding:"3px 6px"}}/>
+              ):(
+                <span style={{flex:1,minWidth:0,fontSize:"12px",fontWeight:700,color:"#1a1a2e",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={r.name}>{r.legacy?"📁":"🏫"} {r.name}<span style={{fontWeight:500,color:"rgba(0,0,0,0.35)"}}> · {r.layouts.length}</span></span>
+              )}
+            </div>
+            {isOpen&&(
+              <div style={{padding:"0 6px 7px",display:"flex",flexDirection:"column",gap:"3px"}}>
+                {r.layouts.map(l=>(
+                  <div key={l.id} style={{display:"flex",alignItems:"center",gap:"2px",padding:"2px 2px 2px 6px",borderRadius:"6px",background:isLinked&&link.layoutId===l.id?"#eaf1fc":"rgba(0,0,0,0.025)"}}>
+                    <span style={{flex:1,minWidth:0,fontSize:"11px",fontWeight:600,color:"#1a1a2e",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}} title={l.name}>{l.name}</span>
+                    <button onClick={()=>setConfirm({kind:'use',roomId:r.id,layoutId:l.id,name:l.name})} title={`Use layout "${l.name}": ${r.legacy?"its furniture":"the room's walls and fixed items plus this furniture"} replace this class's room. Students are reseated.`} style={{background:"none",border:"none",color:"#2e6bce",cursor:"pointer",fontSize:"14px",lineHeight:1,padding:"3px 5px"}}>⤓</button>
+                    <button onClick={()=>setConfirm({kind:'deleteLayout',roomId:r.id,layoutId:l.id,name:l.name})} title={`Delete layout "${l.name}"`} style={{background:"none",border:"none",color:"rgba(0,0,0,0.25)",cursor:"pointer",fontSize:"14px",lineHeight:1,padding:"3px 5px"}}>×</button>
+                  </div>
+                ))}
+                {confirm&&confirm.roomId===r.id&&confirm.kind==='use'&&ask(`Replace this class's ${r.legacy?"furniture":"room"} with ${r.legacy?"":`${r.name} · `}${confirm.name}? Students are reseated as closely as their groups allow. Undo brings it back.`,()=>{const lay=r.layouts.find(l=>l.id===confirm.layoutId);if(lay)onUse(r,lay);},"Use it")}
+                {confirm&&confirm.roomId===r.id&&confirm.kind==='deleteLayout'&&ask(`Delete layout "${confirm.name}"?`,()=>onDeleteLayout(r.id,confirm.layoutId),"Delete")}
+                {confirm&&confirm.roomId===r.id&&confirm.kind==='deleteRoom'&&ask(`Delete ${r.name} and all its layouts? Classes keep their own copy of the room.`,()=>onDelete(r.id),"Delete")}
+                {confirm&&confirm.roomId===r.id&&confirm.kind==='useRoom'&&ask(`Replace this class's room with ${r.name}${(r.layouts.find(l=>l.id===link?.layoutId)||r.layouts[0])?` · ${(r.layouts.find(l=>l.id===link?.layoutId)||r.layouts[0]).name}`:""}? Students are reseated. Undo brings it back.`,()=>{const lay=r.layouts.find(l=>l.id===link?.layoutId)||r.layouts[0];if(lay)onUse(r,lay);},"Use it")}
+                <div style={{display:"flex",gap:"3px",flexWrap:"wrap",marginTop:"2px"}}>
+                  {r.layouts.length>0&&<button onClick={()=>setConfirm({kind:'useRoom',roomId:r.id})} title={r.legacy?"Load the first of these layouts":`Use ${r.name}: load its walls, doors and fixed items with its ${isLinked?"current":"first"} layout`} style={{...small,background:"#1a1a2e",color:"#fff",border:"none"}}>Use room</button>}
+                  <button onClick={()=>setRenaming(r.id)} title="Rename this room" style={small} {...hov}>Rename</button>
+                  <button onClick={()=>onDuplicate(r.id)} title="Make a copy of this room with all its layouts" style={small} {...hov}>Duplicate</button>
+                  <button onClick={()=>setConfirm({kind:'deleteRoom',roomId:r.id})} title="Delete this room from the library (asks first)" style={{...small,color:"#c44"}} {...hov}>Delete</button>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+      {rooms.length===0&&legacy.length===0&&<div style={{fontSize:"11px",color:"rgba(0,0,0,0.3)",fontStyle:"italic",padding:"2px"}}>No saved rooms yet. Build the room, then Save as new room.</div>}
+
+      {/* the old Saved layouts, until the first save brings them into the library */}
+      {legacy.length>0&&(
+        <div>
+          <div style={menuHead}>My saved layouts</div>
+          <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+            {legacy.map(l=><LayoutCard key={l.id} layout={l} onLoad={()=>onLoadLegacy(l)}/>)}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* "Mark as station": a numbered badge on the map for an item or a table (a station-rotation setup uses these) */
+function StationEditor({station,onToggle,onSet,btnS}){
+  const f={padding:"5px 7px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",boxSizing:"border-box"};
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+      <button onClick={onToggle} title={station?"Take this off the station list":"Mark this as a station: it gets a numbered badge on the map, used for station rotations"}
+        style={{...btnS,background:station?"#fff6dc":"#fff",color:station?"#8a6200":"rgba(0,0,0,0.5)",border:`1px solid ${station?"rgba(200,150,20,0.4)":"rgba(0,0,0,0.08)"}`}}>{station?`★ Station ${station.n}`:"☆ Mark as station"}</button>
+      {station&&(
+        <div style={{display:"flex",gap:"4px"}}>
+          <input key={`n${station.n}`} type="number" min={1} max={99} defaultValue={station.n} title="Station number" style={{...f,width:"46px"}}
+            onBlur={e=>{const n=Math.max(1,Math.min(99,parseInt(e.target.value)||station.n));if(n!==station.n)onSet({n});}} onKeyDown={e=>{if(e.key==='Enter')e.target.blur();e.stopPropagation();}}/>
+          <input key={`s${station.name||''}`} defaultValue={station.name||''} maxLength={24} placeholder="Name, e.g. Circuits" title="An optional name for this station" style={{...f,flex:1,minWidth:0}}
+            onBlur={e=>{if(e.target.value!==(station.name||''))onSet({name:e.target.value.slice(0,24)});}} onKeyDown={e=>{if(e.key==='Enter')e.target.blur();e.stopPropagation();}}/>
         </div>
       )}
     </div>
@@ -2979,6 +3811,22 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const[notice,setNotice]=useState(null);            // short message, e.g. who went back to the student list
   const noticeTimer=useRef(null);
   const[selRoomId,setSelRoomId]=useState(null);
+  /* Room builder (Phase 4). walls/openings/roomLink are part of the saved class
+     layout (optional fields); the rest is just what's happening on screen. */
+  const[walls,setWalls]=useState([]);               // [{id,x1,y1,x2,y2}]
+  const[openings,setOpenings]=useState([]);         // [{id,type,wallId,t,width,flip,swing}]
+  const[roomLink,setRoomLink]=useState(null);       // {roomId,layoutId,shellLocal?} when this class uses a library room
+  const[roomMode,setRoomMode]=useState(false);      // "Edit room": walls/openings/items editable, tables dimmed
+  const[selWall,setSelWall]=useState(null);
+  const[selOpening,setSelOpening]=useState(null);
+  const[wallDraft,setWallDraft]=useState(null);     // the wall being drawn: {x1,y1,x2,y2}
+  const[openingDrag,setOpeningDrag]=useState(null);  // a door/window being carried from the palette: {type,x,y,hit}
+  const[rooms,setRooms]=useState([]);               // the room library (ta-rooms)
+  const[shellAsk,setShellAsk]=useState(false);       // "Update <room> for every class?" is showing
+  const shellAnswerRef=useRef(null);                 // 'yes' once Tom agreed for this class; later shell edits then follow along
+  const shellEditRef=useRef(null);
+  const roomRef=useRef({});                          // what the canvas mouse-down handler needs (it is built once per zoom level)
+  const[showCatalog,setShowCatalog]=useState(false);
   const[avTags,setAvTags]=useState(DEFAULT_SEAT_TAGS);
   const[rules,setRules]=useState([]);   // [{id,type:'apart'|'together',aId,bId}]
   const[savedLayouts,setSavedLayouts]=useState([]);
@@ -2993,7 +3841,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
      popover floats via a portal (see useAnchoredMenu) so it can spill out
      over the seating canvas instead of being clipped at the sidebar's edge. */
   const addTableMenu=useAnchoredMenu();
-  const roomMenu=useAnchoredMenu();
+  const roomMenu=useAnchoredMenu(); // the item catalogue
   const randomizeOptionsMenu=useAnchoredMenu();
   const layoutsMenu=useAnchoredMenu();
   const arrangementsMenu=useAnchoredMenu();
@@ -3103,7 +3951,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     });
     load(`sh-${activeClass.id}`,[]).then(h=>setSeatHistory(h||[]));
     load(`tag-colors-${activeClass.id}`,{}).then(tc=>setTagColors(tc||{}));
-    load(`sl-${activeClass.id}`,null).then(layout=>{
+    shellAnswerRef.current=null;setShellAsk(false);setRoomMode(false);setSelWall(null);setSelOpening(null);
+    loadRooms().then(setRooms);
+    load(`sl-${activeClass.id}`,null).then(l0=>syncClassWithRoom(activeClass.id,l0)).then(layout=>{
       if(layout){
         const rawSeats=(layout.seats||[]).map(s=>({...s,tags:(s.tags||[]).filter(t=>!DEPRECATED_TAGS.has(t))}));
         const loadedPieces=layout.pieces||[],loadedJoins=layout.joins||[];
@@ -3115,6 +3965,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         setGroups(loadedGroups);
         setRoomItems(loadedRI);
         setPieces(loadedPieces);setJoins(loadedJoins);
+        setWalls(layout.walls||[]);setOpenings(layout.openings||[]);setRoomLink(layout.room||null);
         setRules(layout.rules||[]);
         if(layout.tags?.length){
           const cleaned=layout.tags.filter(t=>!DEPRECATED_TAGS.has(t));
@@ -3123,15 +3974,15 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         // If the saved layout had drifted (a past bug could do this), persist the
         // repair immediately so the corruption doesn't keep coming back on load.
         if(JSON.stringify(loadedGroups)!==JSON.stringify(layout.groups||[])||(loadedPieces.length&&JSON.stringify(loadedSeats)!==JSON.stringify(rawSeats))){
-          save(`sl-${activeClass.id}`,slLayoutObj(loadedSeats,loadedGroups,layout.tags,loadedRI,layout.rules,loadedPieces,loadedJoins));
+          save(`sl-${activeClass.id}`,slLayoutObj(loadedSeats,loadedGroups,layout.tags,loadedRI,layout.rules,loadedPieces,loadedJoins,{walls:layout.walls,openings:layout.openings,room:layout.room}));
         }
         cleanupCenter=centerCanvasWhenReady(loadedSeats,loadedRI,loadedPieces);
-        lastCommittedRef.current={seats:loadedSeats,groups:loadedGroups,tags:layout.tags?.length?layout.tags.filter(t=>!DEPRECATED_TAGS.has(t)):DEFAULT_SEAT_TAGS,roomItems:loadedRI,rules:layout.rules||[],pieces:loadedPieces,joins:loadedJoins};
+        lastCommittedRef.current={seats:loadedSeats,groups:loadedGroups,tags:layout.tags?.length?layout.tags.filter(t=>!DEPRECATED_TAGS.has(t)):DEFAULT_SEAT_TAGS,roomItems:loadedRI,rules:layout.rules||[],pieces:loadedPieces,joins:loadedJoins,walls:layout.walls||[],openings:layout.openings||[],room:layout.room||null};
         roomBaselineRef.current=roomStructureKey(loadedSeats,loadedGroups,loadedRI,loadedPieces,loadedJoins);
         seatingBaselineRef.current=seatingSignature(loadedSeats);
       } else {
-        setSeats([]);setGroups([]);setRoomItems([]);setRules([]);setPieces([]);setJoins([]);
-        lastCommittedRef.current={seats:[],groups:[],tags:DEFAULT_SEAT_TAGS,roomItems:[],rules:[],pieces:[],joins:[]};
+        setSeats([]);setGroups([]);setRoomItems([]);setRules([]);setPieces([]);setJoins([]);setWalls([]);setOpenings([]);setRoomLink(null);
+        lastCommittedRef.current={seats:[],groups:[],tags:DEFAULT_SEAT_TAGS,roomItems:[],rules:[],pieces:[],joins:[],walls:[],openings:[],room:null};
         roomBaselineRef.current=roomStructureKey([],[],[]);
         seatingBaselineRef.current=seatingSignature([]);
       }
@@ -3145,17 +3996,24 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   /* pc/jn (pieces, joins) are optional: the many edits that don't touch table
      pieces leave them out, and the last committed pieces are carried forward —
      so no save path can quietly drop them. */
-  const doSave=useCallback((s,g,t,ri,rl,pc,jn)=>{
+  const doSave=useCallback((s,g,t,ri,rl,pc,jn,ex)=>{
     if(!activeClass?.id)return;
     const prevC=lastCommittedRef.current;
     const pcs=pc??prevC?.pieces??[],jns=jn??prevC?.joins??[];
+    /* walls / openings / room link ride along the same way: `ex` is optional and
+       whatever it leaves out is carried forward from the last committed state */
+    const wls=ex?.walls??prevC?.walls??[],ops=ex?.openings??prevC?.openings??[];
+    const room=ex&&'room' in ex?ex.room:(prevC?.room??null);
     if(prevC){
       undoStackRef.current=[...undoStackRef.current,prevC].slice(-20);
       setCanUndo(true);
     }
-    lastCommittedRef.current={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[],pieces:pcs,joins:jns};
+    lastCommittedRef.current={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[],pieces:pcs,joins:jns,walls:wls,openings:ops,room};
+    const obj=slLayoutObj(s,g,t,ri,rl,pcs,jns,{walls:wls,openings:ops,room});
     if(saveTimer.current)clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(()=>save(`sl-${activeClass.id}`,slLayoutObj(s,g,t,ri,rl,pcs,jns)),400);
+    saveTimer.current=setTimeout(()=>save(`sl-${activeClass.id}`,obj),400);
+    // editing the shared part of a room that other classes use → offer to update it for them
+    if(prevC&&room&&!ex?.quiet&&shellSig(prevC.walls,prevC.openings,prevC.roomItems)!==shellSig(wls,ops,ri))shellEditRef.current?.(obj);
   },[activeClass?.id]);
 
   const handleUndo=useCallback(()=>{
@@ -3166,10 +4024,10 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     setCanUndo(undoStackRef.current.length>0);
     lastCommittedRef.current=prev;
     setSeats(prev.seats);setGroups(prev.groups);setAvTags(prev.tags?.length?prev.tags:DEFAULT_SEAT_TAGS);setRoomItems(prev.roomItems);setRules(prev.rules||[]);
-    setPieces(prev.pieces||[]);setJoins(prev.joins||[]);
-    setSel(new Set());setSelRoomId(null);setSelPieces(new Set());setPieceDrag(null);
+    setPieces(prev.pieces||[]);setJoins(prev.joins||[]);setWalls(prev.walls||[]);setOpenings(prev.openings||[]);setRoomLink(prev.room||null);
+    setSel(new Set());setSelRoomId(null);setSelPieces(new Set());setPieceDrag(null);setSelWall(null);setSelOpening(null);
     if(saveTimer.current)clearTimeout(saveTimer.current);
-    save(`sl-${activeClass.id}`,slLayoutObj(prev.seats,prev.groups,prev.tags,prev.roomItems,prev.rules,prev.pieces,prev.joins));
+    save(`sl-${activeClass.id}`,slLayoutObj(prev.seats,prev.groups,prev.tags,prev.roomItems,prev.rules,prev.pieces,prev.joins,{walls:prev.walls,openings:prev.openings,room:prev.room}));
   },[activeClass?.id]);
 
   /* Self-heal against a student who's been removed from the roster (deleted, or
@@ -3216,14 +4074,15 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const newJoins=(template.joins||[]).filter(j=>pieceMap[j.a]&&pieceMap[j.b]).map(j=>({...j,a:pieceMap[j.a],b:pieceMap[j.b]}));
     const blankSeats=template.seats.map(s=>{const nid=sUid();idMap[s.id]=nid;return{...s,id:nid,studentId:null,locked:false,...(s.pieceId?{pieceId:pieceMap[s.pieceId]||s.pieceId}:{})};});
     const newGroups=template.groups.map(g=>({...g,id:sUid(),seatIds:g.seatIds.map(id=>idMap[id]||id)}));
-    const newRI=(template.roomItems||[]).map(r=>({...r,id:sUid()}));
+    /* the room's own fixed items (sinks, boards…) stay; an old saved layout only brings its furniture */
+    const newRI=[...roomItems.filter(r=>r.fixed),...(template.roomItems||[]).filter(r=>!r.fixed).map(r=>({...r,id:sUid()}))];
     const newSeats=bestFitReseat(seats,blankSeats);
     setSeats(newSeats);setGroups(newGroups);setRoomItems(newRI);setPieces(newPieces);setJoins(newJoins);
     setSel(new Set());setSelPieces(new Set());setShowLoadLayout(false);
     doSave(newSeats,newGroups,avTags,newRI,rules,newPieces,newJoins);
     roomBaselineRef.current=roomStructureKey(newSeats,newGroups,newRI,newPieces,newJoins);
     seatingBaselineRef.current=seatingSignature(newSeats);
-  },[seats,avTags,rules,doSave]);
+  },[seats,roomItems,avTags,rules,doSave]);
 
   /* ── Ask first if the current room or seating hasn't been saved/recorded
      yet, so switching layouts can't silently throw either away ── */
@@ -3271,7 +4130,8 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     } else {
       const newSeats=entry.seats.map(s=>({...s}));
       const newGroups=entry.groups.map(g=>({...g,seatIds:[...g.seatIds]}));
-      const newRI=(entry.roomItems||[]).map(r=>({...r}));
+      // walls, openings and the room's fixed items always stay as they are now: an arrangement brings only its furniture
+      const newRI=[...roomItems.filter(r=>r.fixed),...(entry.roomItems||[]).filter(r=>!r.fixed).map(r=>({...r}))];
       // an arrangement from before tables had pieces simply has none
       const newPieces=(entry.pieces||[]).map(p=>({...p})),newJoins=(entry.joins||[]).map(j=>({...j}));
       setSeats(newSeats);setGroups(newGroups);setRoomItems(newRI);setPieces(newPieces);setJoins(newJoins);
@@ -3336,7 +4196,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     });
     return p;
   },[seats,groups,dd,pieceDrag,liveSlotByKey]);
-  const canvasSize=useMemo(()=>canvasContentSize(seats,roomItems,livePieces,liveSlots),[seats,roomItems,livePieces,liveSlots]);
+  const canvasSize=useMemo(()=>canvasContentSize(seats,roomItems,livePieces,liveSlots,walls),[seats,roomItems,livePieces,liveSlots,walls]);
 
   /* The pieces picked on the canvas — only while the seat selection is still
      exactly those pieces' seats (clicking a seat or the floor moves on from it). */
@@ -3693,6 +4553,23 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     e.preventDefault();
     if(!canvasRef.current)return;
     const{x:x1,y:y1}=toCanvasCoords(e.clientX,e.clientY);
+    const rr=roomRef.current;
+    if(rr.roomMode){ // Edit room: dragging on the floor draws a wall (snapped to the grid, 0/45/90° and nearby wall ends)
+      const a=document.activeElement;if(a&&a.tagName==='INPUT')a.blur();
+      const s0=wallSnapPoint([x1,y1],rr.walls).p;let draft=null;
+      const mm2=e2=>{
+        const c=toCanvasCoords(e2.clientX,e2.clientY);
+        if(!draft&&Math.hypot(c.x-x1,c.y-y1)<6)return;
+        const en=wallSnapPoint([c.x,c.y],rr.walls,{anchor:s0}).p;
+        draft={x1:s0[0],y1:s0[1],x2:Math.max(0,en[0]),y2:Math.max(0,en[1])};setWallDraft(draft);
+      };
+      const mu2=()=>{
+        window.removeEventListener('mousemove',mm2);window.removeEventListener('mouseup',mu2);setWallDraft(null);
+        if(draft&&Math.hypot(draft.x2-draft.x1,draft.y2-draft.y1)>=16)rr.addWall(draft);else rr.clearSel();
+      };
+      window.addEventListener('mousemove',mm2);window.addEventListener('mouseup',mu2);
+      return;
+    }
     let moved=false;
     const mm=e2=>{
       const{x:x2,y:y2}=toCanvasCoords(e2.clientX,e2.clientY);
@@ -3711,7 +4588,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         });
         setSel(inBand);setSelType('seat');
       } else {
-        setSel(new Set());setSelRoomId(null);setTagConfirm(null);setSelPieces(new Set());setEditSeats(false);
+        setSel(new Set());setSelRoomId(null);setTagConfirm(null);setSelPieces(new Set());setEditSeats(false);setSelWall(null);setSelOpening(null);
       }
       setRubberBand(null);
     };
@@ -3905,6 +4782,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
 
   /* ── Delete selected seats AND selected room item ── */
   const handleDelete=()=>{
+    // a picked wall or door/window goes first (they can only be picked in Edit room)
+    if(selOpening){commitWalls(walls,openings.filter(o=>o.id!==selOpening));setSelOpening(null);return;}
+    if(selWall){commitWalls(walls.filter(w=>w.id!==selWall),openings.filter(o=>o.wallId!==selWall));setSelWall(null);return;}
     // a picked table is deleted as a whole (asking first if anyone sits there)
     if(activeSelPieces.length&&!selRoomId){requestDeletePieces(activeSelPieces);return;}
     let didSomething=false;
@@ -3948,13 +4828,41 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     if(didSomething)doSave(nextS,nextG,avTags,nextRI,rules);
   };
 
-  /* ── Add room item (teacher's desk or door) ── */
-  const addRoomItem=type=>{
-    const offset=sSnap((roomItems.length*32)%240);
-    const ri={id:sUid(),type,x:80+offset,y:80+offset,rotation:0};
-    const nextRI=[...roomItems,ri];
-    setRoomItems(nextRI);doSave(seats,groups,avTags,nextRI,rules);
+  /* ══ Room builder (Phase 4): items, walls, openings and the room library ══ */
+  const blurInput=()=>{const a=document.activeElement;if(a&&a.tagName==='INPUT')a.blur();}; // a mouse-down that calls preventDefault would otherwise leave a text box focused
+  const commitRoom=(nextRI,ex)=>{setRoomItems(nextRI);doSave(seats,groups,avTags,nextRI,rules,undefined,undefined,ex);};
+  const commitWalls=(nextWalls,nextOpenings)=>{
+    setWalls(nextWalls);setOpenings(nextOpenings);
+    doSave(seats,groups,avTags,cRI(),rules,undefined,undefined,{walls:nextWalls,openings:nextOpenings});
   };
+  /* the latest committed state — a mouse-up can land after another edit (a label typed in the side panel just lost focus), so never build from a render-time snapshot */
+  const cRI=()=>lastCommittedRef.current?.roomItems||roomItems,cWalls=()=>lastCommittedRef.current?.walls||walls,cOps=()=>lastCommittedRef.current?.openings||openings;
+  const viewCentre=()=>{const el=canvasRef.current;if(!el)return{x:240,y:200};const r=el.getBoundingClientRect();return toCanvasCoords(r.left+r.width/2,r.top+r.height/2);};
+  const selectItem=id=>{blurInput();setSelRoomId(id);setSel(new Set());setSelPieces(new Set());setSelWall(null);setSelOpening(null);setTagConfirm(null);};
+  const selItem=selRoomId?roomItems.find(r=>r.id===selRoomId):null;
+
+  /* ── Add a catalogue item in the middle of what's on screen ── */
+  const addRoomItem=type=>{
+    if(!ROOM_ITEM_TYPES[type]){ // the original freestanding door
+      const offset=sSnap((roomItems.length*32)%240);
+      commitRoom([...roomItems,{id:sUid(),type,x:80+offset,y:80+offset,rotation:0}]);
+      return;
+    }
+    const t=ROOM_ITEM_TYPES[type],c=viewCentre(),k=(roomItems.length%6)*16;
+    const it=newRoomItem(type,sUid,Math.max(8,sSnap(c.x-t.w/2+k)),Math.max(8,sSnap(c.y-t.h/2+k)));
+    commitRoom([...roomItems,it]);selectItem(it.id);
+    if(it.fixed&&!roomMode)showNotice(`${t.name} is marked as part of the room (fixed). You can change that in the selection panel.`);
+  };
+  /* An original item (desk/board/door) is converted to a normal one the first time it is resized or turned */
+  const patchItem=(id,fn,upgrade=false)=>commitRoom(roomItems.map(r=>r.id===id?fn(upgrade?upgradeLegacyItem(r):r):r));
+  const rotateRoomItem=(id,deg)=>patchItem(id,r=>{const q=(((r.rot||0)+deg)%360+360)%360;return{...r,rot:q,rotation:q};},true);
+  const setItemLabel=(id,text)=>patchItem(id,r=>({...r,label:(text||'').trim().slice(0,40)}));
+  const toggleItemFixed=id=>patchItem(id,r=>({...r,fixed:!r.fixed}));
+  const toggleItemStation=id=>patchItem(id,r=>{const q={...r};if(q.station)delete q.station;else q.station={n:nextStationNumber(roomItems,pieces),name:''};return q;});
+  const setItemStation=(id,patch)=>patchItem(id,r=>({...r,station:{...r.station,...patch}}));
+  const togglePieceStation=pid=>updatePieces([pid],p=>{const q={...p};if(q.station)delete q.station;else q.station={n:nextStationNumber(roomItems,pieces),name:''};return q;});
+  const setPieceStation=(pid,patch)=>updatePieces([pid],p=>({...p,station:{...p.station,...patch}}));
+  const[editingLabel,setEditingLabel]=useState(null); // item id whose label is being typed on the canvas
 
   /* ── Drag a room item ── */
   const handleRoomItemMD=(e,id)=>{
@@ -3962,28 +4870,266 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     e.stopPropagation();
     if(e.shiftKey||e.metaKey||e.ctrlKey){e.preventDefault();return;}
     e.preventDefault();
-    setSel(new Set());setSelRoomId(id);
+    selectItem(id);
     const item=roomItems.find(r=>r.id===id);if(!item)return;
     const sx=e.clientX,sy=e.clientY;
-    let cx=item.x,cy=item.y;
+    let cx=item.x,cy=item.y,moved=false;
     const mm=e2=>{
+      if(!moved&&Math.hypot(e2.clientX-sx,e2.clientY-sy)<3)return;
+      moved=true;
       cx=sSnap(Math.max(0,item.x+(e2.clientX-sx)/zoom));
       cy=sSnap(Math.max(0,item.y+(e2.clientY-sy)/zoom));
       setRoomItems(p=>p.map(r=>r.id===id?{...r,x:cx,y:cy}:r));
     };
     const mu=()=>{
       window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
-      const nextRI=roomItems.map(r=>r.id===id?{...r,x:cx,y:cy}:r);
-      setRoomItems(nextRI);doSave(seats,groups,avTags,nextRI,rules);
+      if(moved)commitRoom(cRI().map(r=>r.id===id?{...r,x:cx,y:cy}:r));
     };
     window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
   };
 
-  /* ── Rotate a door 90° ── */
-  const rotateRoomItem=id=>{
-    const nextRI=roomItems.map(r=>r.id===id?{...r,rotation:(r.rotation+90)%360}:r);
-    setRoomItems(nextRI);doSave(seats,groups,avTags,nextRI,rules);
+  /* ── Resize an item by one of its 8 handles. Works in the item's own turned frame,
+     so a tilted item stretches along its own edges and the opposite edge stays put. ── */
+  const handleItemResizeMD=(e,id,hx,hy)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();
+    const it0=upgradeLegacyItem(roomItems.find(r=>r.id===id));
+    const g=itemGeom(it0),c=itemCentre(g),th=g.rot*Math.PI/180,co=Math.cos(th),si=Math.sin(th);
+    const MIN=16;let live=null;
+    const compute=ev=>{
+      const p=toCanvasCoords(ev.clientX,ev.clientY),dx=p.x-c[0],dy=p.y-c[1];
+      const P=[dx*co+dy*si,-dx*si+dy*co]; // the pointer in the item's own frame
+      let nw=g.w,nh=g.h,lx=0,ly=0;
+      if(hx){const ax=-hx*g.w/2;nw=Math.max(MIN,Math.round((P[0]-ax)*hx/8)*8);lx=ax+hx*nw/2;}
+      if(hy){const ay=-hy*g.h/2;nh=Math.max(MIN,Math.round((P[1]-ay)*hy/8)*8);ly=ay+hy*nh/2;}
+      const wc=[c[0]+lx*co-ly*si,c[1]+lx*si+ly*co];
+      return{...it0,w:nw,h:nh,x:Math.max(0,Math.round(wc[0]-nw/2)),y:Math.max(0,Math.round(wc[1]-nh/2))};
+    };
+    const mm=ev=>{live=compute(ev);setRoomItems(p=>p.map(r=>r.id===id?live:r));};
+    const mu=()=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      if(live)commitRoom(cRI().map(r=>r.id===id?live:r));
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
   };
+  /* ── Turn an item with its round handle: 15° steps, or free with Shift (same as tables) ── */
+  const handleItemRotateMD=(e,id)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();
+    const it0=upgradeLegacyItem(roomItems.find(r=>r.id===id)),g=itemGeom(it0),c=itemCentre(g);
+    const ang=ev=>{const p=toCanvasCoords(ev.clientX,ev.clientY);return Math.atan2(p.y-c[1],p.x-c[0])*180/Math.PI;};
+    const a0=ang(e);let live=null;
+    const rotFor=ev=>{const d=pgNorm(ang(ev)-a0),s=ev.shiftKey?Math.round(d):Math.round(d/15)*15;return(((g.rot+s)%360)+360)%360;};
+    const mm=ev=>{const r=rotFor(ev);live={...it0,rot:r,rotation:r};setRoomItems(p=>p.map(x=>x.id===id?live:x));};
+    const mu=()=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      if(live)commitRoom(cRI().map(x=>x.id===id?live:x));
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+
+  /* ── Walls ── */
+  const addWallDraft=d=>{const w={id:sUid(),...d};commitWalls([...walls,w],openings);setSelWall(w.id);setSelOpening(null);setSelRoomId(null);};
+  const handleWallMD=(e,id)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();blurInput();
+    setSelWall(id);setSelOpening(null);setSelRoomId(null);setSel(new Set());setSelPieces(new Set());
+    const w0=walls.find(w=>w.id===id);if(!w0)return;
+    const sx=e.clientX,sy=e.clientY,minX=Math.min(w0.x1,w0.x2),minY=Math.min(w0.y1,w0.y2);
+    let moved=false,dx=0,dy=0;
+    const build=()=>walls.map(w=>w.id===id?{...w,x1:w0.x1+dx,y1:w0.y1+dy,x2:w0.x2+dx,y2:w0.y2+dy}:w);
+    const mm=ev=>{
+      if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<4)return;
+      moved=true;dx=Math.max(-minX,sSnap((ev.clientX-sx)/zoom));dy=Math.max(-minY,sSnap((ev.clientY-sy)/zoom));
+      setWalls(build());
+    };
+    const mu=()=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      if(moved)commitWalls(build(),cOps());
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+  /* Drag one end of a wall. Any other wall ending at the same corner comes with it, so a room's corners stay closed. */
+  const handleWallEndMD=(e,id,end)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();
+    const w0=walls.find(w=>w.id===id);if(!w0)return;
+    const mine=end==='a'?[w0.x1,w0.y1]:[w0.x2,w0.y2],anchor=end==='a'?[w0.x2,w0.y2]:[w0.x1,w0.y1];
+    const same=(x,y)=>Math.abs(x-mine[0])<0.5&&Math.abs(y-mine[1])<0.5;
+    const others=walls.filter(w=>w.id!==id&&!same(w.x1,w.y1)&&!same(w.x2,w.y2));
+    const build=p=>walls.map(w=>{
+      if(w.id===id)return end==='a'?{...w,x1:p[0],y1:p[1]}:{...w,x2:p[0],y2:p[1]};
+      let q=w;
+      if(same(w.x1,w.y1))q={...q,x1:p[0],y1:p[1]};
+      if(same(w.x2,w.y2))q={...q,x2:p[0],y2:p[1]};
+      return q;
+    });
+    let cur=null;
+    const mm=ev=>{
+      const c=toCanvasCoords(ev.clientX,ev.clientY),sn=wallSnapPoint([c.x,c.y],others,{anchor});
+      const p=[Math.max(0,sn.p[0]),Math.max(0,sn.p[1])];
+      if(Math.hypot(p[0]-anchor[0],p[1]-anchor[1])<8)return; // never collapse a wall to nothing
+      cur=build(p);setWalls(cur);
+    };
+    const mu=()=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      if(!cur)return;
+      commitWalls(cur,cOps().map(o=>{const w=cur.find(x=>x.id===o.wallId);return w?{...o,t:clampOpeningT(w,o.width,o.t)}:o;}));
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+  /* "Rectangle room": four walls round whatever is already on the canvas, with a margin */
+  const addRectRoom=()=>{
+    const bs=[];
+    seats.filter(s=>!s.pieceId).forEach(s=>{const p=pos[s.id]||s;bs.push({x:p.x,y:p.y-GROUP_BAR_H,w:SW,h:SH+GROUP_BAR_H});});
+    const pb=livePieces.length?piecesBounds(livePieces,liveSlots):null;if(pb)bs.push({x:pb.x,y:pb.y-26,w:pb.w,h:pb.h+26});
+    roomItems.forEach(r=>{const b=itemBounds(r);bs.push({x:b.x,y:b.y,w:b.w,h:b.h+26});});
+    const M=48;
+    const box=bs.length
+      ?{x:Math.min(...bs.map(b=>b.x))-M,y:Math.min(...bs.map(b=>b.y))-M,w:Math.max(...bs.map(b=>b.x+b.w))-Math.min(...bs.map(b=>b.x))+M*2,h:Math.max(...bs.map(b=>b.y+b.h))-Math.min(...bs.map(b=>b.y))+M*2}
+      :{x:48,y:48,w:704,h:480};
+    const nw=rectRoomWalls(box,sUid);
+    commitWalls([...walls,...nw],openings);setSelWall(nw[0].id);setSelOpening(null);
+  };
+
+  /* ── Doors and windows on walls ── */
+  const freeT=(wall,width)=>{
+    const L=wallLen(wall),taken=openings.filter(o=>o.wallId===wall.id);
+    for(const t0 of[0.5,0.25,0.75,0.125,0.875,0.375,0.625]){const t=clampOpeningT(wall,width,t0);if(taken.every(o=>Math.abs(o.t-t)*L>(o.width+width)/2+4))return t;}
+    return clampOpeningT(wall,width,0.5);
+  };
+  const addOpening=(type,where)=>{
+    const width=OPENING_TYPES[type].width;
+    let hit=where;
+    if(!hit){
+      const w=walls.find(x=>x.id===selWall)||[...walls].sort((a,b)=>wallLen(b)-wallLen(a))[0];
+      if(!w){showNotice('Draw a wall first, then drop doors and windows onto it.');return;}
+      hit={wallId:w.id,t:freeT(w,width)};
+    }
+    const op={id:sUid(),type,wallId:hit.wallId,t:hit.t,width,flip:false,swing:1};
+    commitWalls(walls,[...openings,op]);setSelOpening(op.id);setSelWall(null);setSelRoomId(null);
+  };
+  /* Carry a door or window from the palette to a wall: click = put it on the selected wall (or the longest) */
+  const startOpeningDrag=(e,type)=>{
+    if(e.button!==0)return;
+    e.preventDefault();
+    const width=OPENING_TYPES[type].width,sx=e.clientX,sy=e.clientY;
+    let moved=false,hit=null;
+    const mm=ev=>{
+      if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<5)return;
+      moved=true;
+      const c=toCanvasCoords(ev.clientX,ev.clientY);
+      hit=openingAtPoint(walls,[c.x,c.y],width,44);
+      setOpeningDrag({type,cx:ev.clientX,cy:ev.clientY,hit});
+    };
+    const mu=()=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      setOpeningDrag(null);
+      if(!moved){addOpening(type,null);return;}
+      if(hit)addOpening(type,hit);else showNotice('Drop it on a wall to put a door or window there.');
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+  /* Slide an opening along its wall (or onto another wall) */
+  const handleOpeningMD=(e,id)=>{
+    if(e.button!==0)return;
+    e.stopPropagation();e.preventDefault();blurInput();
+    setSelOpening(id);setSelWall(null);setSelRoomId(null);setSel(new Set());setSelPieces(new Set());
+    const op0=openings.find(o=>o.id===id);if(!op0)return;
+    const sx=e.clientX,sy=e.clientY;let moved=false,cur=openings;
+    const mm=ev=>{
+      if(!moved&&Math.hypot(ev.clientX-sx,ev.clientY-sy)<3)return;
+      const c=toCanvasCoords(ev.clientX,ev.clientY),hit=openingAtPoint(walls,[c.x,c.y],op0.width,60);
+      if(!hit)return;
+      moved=true;cur=openings.map(o=>o.id===id?{...o,...hit}:o);setOpenings(cur);
+    };
+    const mu=()=>{
+      window.removeEventListener('mousemove',mm);window.removeEventListener('mouseup',mu);
+      if(moved)commitWalls(cWalls(),cur);
+    };
+    window.addEventListener('mousemove',mm);window.addEventListener('mouseup',mu);
+  };
+  const patchOpening=(id,fn)=>commitWalls(walls,openings.map(o=>o.id===id?fn(o):o));
+
+  /* ── Room library (ta-rooms) ── */
+  const curLayoutObj=()=>slLayoutObj(seats,groups,avTags,roomItems,rules,pieces,joins,{walls,openings,room:roomLink});
+  const persistRooms=async fn=>{ // always from what is on disk now, so another class's change is never overwritten
+    const saved=await saveRooms(fn(await loadRooms()));
+    setRooms(saved);return saved;
+  };
+  const linkClass=link=>{setRoomLink(link);doSave(seats,groups,avTags,roomItems,rules,undefined,undefined,{room:link,quiet:true});};
+  const linkTo=(room,layoutId)=>{ // a class whose own shell differs from the room's keeps it (shellLocal) until Tom shares it
+    const same=sameShell(curLayoutObj(),room);
+    linkClass({roomId:room.id,layoutId,...(same?{}:{shellLocal:true})});
+  };
+  const saveAsNewRoom=async name=>{
+    const lo=curLayoutObj(),room={id:sUid(),name:name.trim()||'New room',shell:extractShell(lo),layouts:[{id:sUid(),name:'Layout 1',createdAt:Date.now(),...extractLayout(lo)}]};
+    await persistRooms(cur=>[...cur,room]);
+    linkClass({roomId:room.id,layoutId:room.layouts[0].id});
+    shellAnswerRef.current=null;
+  };
+  const saveLayoutToRoom=async(roomId,layoutId,name)=>{
+    const lay=extractLayout(curLayoutObj());let outRoom=null,outLid=layoutId;
+    await persistRooms(cur=>cur.map(r=>{
+      if(r.id!==roomId)return r;
+      const layouts=layoutId?r.layouts.map(l=>l.id===layoutId?{...l,...lay}:l):[...r.layouts,{id:(outLid=sUid()),name:(name||'').trim()||`Layout ${r.layouts.length+1}`,createdAt:Date.now(),...lay}];
+      outRoom={...r,layouts};return outRoom;
+    }));
+    if(outRoom&&!outRoom.legacy)linkTo(outRoom,outLid);
+  };
+  /* Use a room: its shell and one layout replace this class's room; students are reseated as closely as their old groups allow */
+  const useRoomLayout=(room,layout)=>{
+    const inst=instantiateLayout(layout,sUid);
+    const newSeats=bestFitReseat(seats,inst.seats);
+    let newRI,ex;
+    if(room.legacy){newRI=[...roomItems.filter(r=>r.fixed),...inst.items];ex={quiet:true};} // old saved layouts are furniture only
+    else{
+      const sh=cloneJ(room.shell||{});
+      newRI=[...(sh.items||[]),...inst.items];
+      ex={walls:sh.walls||[],openings:sh.openings||[],room:{roomId:room.id,layoutId:layout.id},quiet:true};
+      setWalls(ex.walls);setOpenings(ex.openings);setRoomLink(ex.room);
+    }
+    setSeats(newSeats);setGroups(inst.groups);setRoomItems(newRI);setPieces(inst.pieces);setJoins(inst.joins);
+    setSel(new Set());setSelPieces(new Set());setSelRoomId(null);setSelWall(null);setSelOpening(null);
+    shellAnswerRef.current=null;setShellAsk(false);
+    doSave(newSeats,inst.groups,avTags,newRI,rules,inst.pieces,inst.joins,ex);
+    roomBaselineRef.current=roomStructureKey(newSeats,inst.groups,newRI,inst.pieces,inst.joins);
+    seatingBaselineRef.current=seatingSignature(newSeats);
+  };
+  const renameRoom=(id,name)=>persistRooms(cur=>cur.map(r=>r.id===id?{...r,name:name.trim()||r.name}:r));
+  const duplicateRoom=id=>persistRooms(cur=>{
+    const r=cur.find(x=>x.id===id);if(!r)return cur;
+    return[...cur,{...cloneJ(r),id:sUid(),name:`${r.name} copy`,legacy:undefined,layouts:r.layouts.map(l=>({...cloneJ(l),id:sUid()}))}];
+  });
+  const deleteRoom=id=>{
+    persistRooms(cur=>cur.filter(r=>r.id!==id));
+    if(roomLink?.roomId===id)linkClass(null);
+  };
+  const deleteRoomLayout=(roomId,layoutId)=>persistRooms(cur=>cur.map(r=>r.id===roomId?{...r,layouts:r.layouts.filter(l=>l.id!==layoutId)}:r));
+  /* Share this class's shell with the library room (and so every class that uses it) */
+  const pushShell=async(obj,keepGoing)=>{
+    const link=obj.room;if(!link)return;
+    await persistRooms(cur=>cur.map(r=>r.id===link.roomId?{...r,shell:extractShell(obj)}:r));
+    if(link.shellLocal){linkClass({roomId:link.roomId,layoutId:link.layoutId});}
+    if(keepGoing)shellAnswerRef.current='yes';
+  };
+  const committedObj=()=>{const c=lastCommittedRef.current||{};return slLayoutObj(c.seats||[],c.groups||[],c.tags,c.roomItems||[],c.rules,c.pieces,c.joins,{walls:c.walls,openings:c.openings,room:c.room});};
+  const pushTimer=useRef(null);
+  shellEditRef.current=obj=>{ // called from doSave when the shell of a linked room was edited
+    const link=obj.room;if(!link||link.shellLocal)return;
+    if(shellAnswerRef.current==='yes'){
+      if(pushTimer.current)clearTimeout(pushTimer.current);
+      pushTimer.current=setTimeout(()=>pushShell(committedObj(),true),500);
+    }else setShellAsk(true);
+  };
+  const adoptSharedShell=()=>{ // drop this class's own shape and take the library room's again
+    const room=rooms.find(r=>r.id===roomLink?.roomId);if(!room)return;
+    const next=applyRoomShell(curLayoutObj(),room);
+    setWalls(next.walls||[]);setOpenings(next.openings||[]);setRoomItems(next.roomItems);
+    const link={roomId:roomLink.roomId,layoutId:roomLink.layoutId};setRoomLink(link);
+    doSave(seats,groups,avTags,next.roomItems,rules,undefined,undefined,{walls:next.walls||[],openings:next.openings||[],room:link,quiet:true});
+  };
+  roomRef.current={roomMode,walls,addWall:addWallDraft,clearSel:()=>{setSelWall(null);setSelOpening(null);setSelRoomId(null);setSel(new Set());setSelPieces(new Set());}};
 
   /* ── Tag helpers ── */
   const applyTagToSeats=(sids,tag)=>{
@@ -4195,7 +5341,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const activeGroupIsTable=!!activeGroupId&&seats.some(s=>s.groupId===activeGroupId&&s.pieceId);
 
   /* Keep kbRef fresh on every render — must be after all handlers are defined */
-  kbRef.current={handleDelete,addTable,addRoomItem,randomize,rotateSel:deg=>{if(activeSelPieces.length)rotatePiecesBy(activeSelPieces,deg);}};
+  kbRef.current={handleDelete,addTable,addRoomItem,randomize,rotateSel:deg=>{if(activeSelPieces.length)rotatePiecesBy(activeSelPieces,deg);else if(selRoomId)rotateRoomItem(selRoomId,deg);}};
 
   const menuHead={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.3)",margin:"2px 2px 5px"};
   const btnS={padding:"7px 10px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.08)",background:"#fff",color:"rgba(0,0,0,0.5)",fontSize:"12px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif",transition:"all 0.12s"};
@@ -4300,6 +5446,76 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           </div>
         )}
 
+        {/* Edit room: walls, doors and windows, and the room's fixed items. Tables are dimmed while it's on. */}
+        {activeClass&&(()=>{
+          const wObj=roomMode&&selWall?walls.find(w=>w.id===selWall):null;
+          const oObj=roomMode&&selOpening?openings.find(o=>o.id===selOpening):null;
+          const oWall=oObj?walls.find(w=>w.id===oObj.wallId):null;
+          const sec={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.3)"};
+          const seg=on=>({flex:1,padding:"5px 0",border:"none",cursor:"pointer",fontSize:"10px",fontWeight:700,background:on?"#1a1a2e":"#fff",color:on?"#fff":"rgba(0,0,0,0.45)",fontFamily:"'Source Sans 3',sans-serif"});
+          return(
+            <div style={{display:"flex",flexDirection:"column",gap:"6px"}}>
+              <button onClick={()=>{const n=!roomMode;setRoomMode(n);setSelWall(null);setSelOpening(null);setWallDraft(null);if(n){setSel(new Set());setSelPieces(new Set());}}}
+                title="Edit room: draw walls, doors and windows, and arrange the room's fixed items. Tables are dimmed while this is on, so they can't be moved by accident."
+                style={{...btnS,width:"100%",textAlign:"left",display:"flex",justifyContent:"space-between",background:roomMode?"#eaf1fc":"#fff",color:roomMode?"#2e6bce":"rgba(0,0,0,0.5)",border:`1px solid ${roomMode?"rgba(66,133,244,0.4)":"rgba(0,0,0,0.08)"}`}}>
+                <span>🧱 Edit room</span>{roomMode&&<span style={{fontSize:"10px"}}>✓ on</span>}
+              </button>
+              {roomMode&&(
+                <div style={{padding:"8px",borderRadius:"9px",background:"#f4f8fe",border:"1px solid rgba(66,133,244,0.2)",display:"flex",flexDirection:"column",gap:"6px"}}>
+                  <div style={{fontSize:"10.5px",color:"#2e4f85",lineHeight:1.4}}>Drag on the floor to draw a wall (it snaps to the grid and to 0°, 45° and 90°). Drag a door or window onto a wall.</div>
+                  <button onClick={addRectRoom} title="Draw four walls round everything that's on the canvas now, with a margin" style={{...btnS,fontSize:"11.5px",textAlign:"left"}}>▭ Rectangle room</button>
+                  <div style={sec}>Doors &amp; windows</div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px"}}>
+                    {Object.entries(OPENING_TYPES).map(([k,o])=>(
+                      <button key={k} onMouseDown={e=>startOpeningDrag(e,k)} title={`${o.name}: drag it onto a wall (or click to put it on the selected wall)`}
+                        style={{...btnS,padding:"6px 2px 4px",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px",cursor:"grab"}}>
+                        <svg width="38" height="26" viewBox="0 0 38 26" aria-hidden="true">
+                          <rect x="0" y="9" width="38" height="8" style={{fill:"#d9cdb8",stroke:"#2b2118",strokeWidth:1.2}}/>
+                          {k==="window"
+                            ?<><rect x="9" y="9" width="20" height="8" style={{fill:"#cdeefa",stroke:"#2b2118",strokeWidth:1.3}}/><line x1="9" y1="13" x2="29" y2="13" style={{stroke:"#2b2118",strokeWidth:1}}/></>
+                            :<><rect x="9" y="8" width="20" height="10" style={{fill:"#f3f8f6"}}/><line x1="9" y1="7" x2="9" y2="19" style={{stroke:"#2b2118",strokeWidth:2}}/><line x1="29" y1="7" x2="29" y2="19" style={{stroke:"#2b2118",strokeWidth:2}}/>
+                              {k==="door"?<path d="M9 18 L9 25 A14 14 0 0 0 23 18" style={{fill:"rgba(210,245,251,0.8)",stroke:"#2b2118",strokeWidth:1,strokeDasharray:"2 2"}}/>:<><path d="M9 18 L9 25 A7 7 0 0 0 16 18" style={{fill:"rgba(210,245,251,0.8)",stroke:"#2b2118",strokeWidth:1,strokeDasharray:"2 2"}}/><path d="M29 18 L29 25 A7 7 0 0 1 22 18" style={{fill:"rgba(210,245,251,0.8)",stroke:"#2b2118",strokeWidth:1,strokeDasharray:"2 2"}}/></>}</>}
+                        </svg>
+                        <span style={{fontSize:"9.5px",color:"rgba(0,0,0,0.5)",lineHeight:1.1}}>{k==="double-door"?"Double":o.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {wObj&&(
+                    <div style={{display:"flex",flexDirection:"column",gap:"4px",paddingTop:"4px",borderTop:"1px solid rgba(66,133,244,0.15)"}}>
+                      <div style={{fontSize:"12px",fontWeight:700,color:"#1a1a2e"}}>Wall <span style={{fontWeight:500,color:"rgba(0,0,0,0.4)"}}>· {Math.round(wallLen(wObj))} px · {openings.filter(o=>o.wallId===wObj.id).length} opening{openings.filter(o=>o.wallId===wObj.id).length===1?"":"s"}</span></div>
+                      <div style={{fontSize:"10px",color:"rgba(0,0,0,0.4)",lineHeight:1.35}}>Drag it to move it, or drag its end dots to stretch it.</div>
+                      <button onClick={handleDelete} title="Remove this wall (and any door or window on it). Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete wall</button>
+                    </div>
+                  )}
+                  {oObj&&(
+                    <div style={{display:"flex",flexDirection:"column",gap:"4px",paddingTop:"4px",borderTop:"1px solid rgba(66,133,244,0.15)"}}>
+                      <div style={{fontSize:"12px",fontWeight:700,color:"#1a1a2e"}}>{OPENING_TYPES[oObj.type]?.name}</div>
+                      <div style={{display:"flex",borderRadius:"7px",overflow:"hidden",border:"1px solid rgba(0,0,0,0.08)"}}>
+                        {Object.entries(OPENING_TYPES).map(([k,o])=>(
+                          <button key={k} onClick={()=>patchOpening(oObj.id,x=>({...x,type:k,width:oWall?Math.min(o.width,Math.max(32,wallLen(oWall)-8)):o.width,t:oWall?clampOpeningT(oWall,o.width,x.t):x.t}))} title={`Make this a ${o.name.toLowerCase()}`} style={seg(oObj.type===k)}>{k==="double-door"?"Double":o.name}</button>
+                        ))}
+                      </div>
+                      {oObj.type!=="window"&&(
+                        <div style={{display:"flex",gap:"4px"}}>
+                          {oObj.type==="door"&&<button onClick={()=>patchOpening(oObj.id,x=>({...x,flip:!x.flip}))} title="Move the hinge to the other end of the door" style={{...btnS,flex:1,padding:"6px 0"}}>⇆ Flip</button>}
+                          <button onClick={()=>patchOpening(oObj.id,x=>({...x,swing:x.swing===-1?1:-1}))} title="Make the door open to the other side of the wall" style={{...btnS,flex:1,padding:"6px 0"}}>⇅ Swing</button>
+                        </div>
+                      )}
+                      <div style={{display:"flex",alignItems:"center",gap:"4px"}}>
+                        <span style={{fontSize:"10.5px",color:"rgba(0,0,0,0.4)",fontWeight:600,flex:1}}>Width {oObj.width}</span>
+                        <button onClick={()=>patchOpening(oObj.id,x=>{const w=Math.max(32,x.width-8);return{...x,width:w,t:oWall?clampOpeningT(oWall,w,x.t):x.t};})} title="Make it narrower" style={{...btnS,padding:"4px 10px"}}>−</button>
+                        <button onClick={()=>patchOpening(oObj.id,x=>{const w=Math.min(oWall?Math.max(32,wallLen(oWall)-8):160,x.width+8);return{...x,width:w,t:oWall?clampOpeningT(oWall,w,x.t):x.t};})} title="Make it wider" style={{...btnS,padding:"4px 10px"}}>+</button>
+                      </div>
+                      <button onClick={handleDelete} title="Remove this door or window. Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete {OPENING_TYPES[oObj.type]?.name.toLowerCase()}</button>
+                    </div>
+                  )}
+                  <button onClick={()=>{setRoomMode(false);setSelWall(null);setSelOpening(null);}} title="Finish editing the room" style={{...btnS,background:"#1a1a2e",color:"#fff",border:"none",fontSize:"11.5px"}}>Done</button>
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* Add table presets — tucked into a popover so the six presets don't
             sit permanently expanded, taking up a third of a narrow sidebar */}
         <div ref={addTableMenu.anchorRef} style={{position:"relative"}}>
@@ -4347,40 +5563,16 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           document.body
         )}
 
-        {/* Room items — same popover treatment as Add table */}
+        {/* Room items: the catalogue (searchable, with small drawings) — same popover style as Add table */}
         <div ref={roomMenu.anchorRef} style={{position:"relative"}}>
-          <button onClick={roomMenu.toggle} title="Add a non-seat item to the room — desk, board, door" style={{...btnS,width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:roomMenu.pos?"#f0f1f4":"#fff"}}
+          <button onClick={roomMenu.toggle} title="Add a classroom or science-lab item to the room (sink, fume cupboard, eyewash, bin, board…) and give it a label" style={{...btnS,width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:roomMenu.pos?"#f0f1f4":"#fff"}}
             onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
             onMouseLeave={e=>e.currentTarget.style.background=roomMenu.pos?"#f0f1f4":"#fff"}
-          ><span>+ Add room item</span><span style={{fontSize:"9px",color:"rgba(0,0,0,0.3)"}}>▾</span></button>
+          ><span>+ Room items</span><span style={{fontSize:"9px",color:"rgba(0,0,0,0.3)"}}>▾</span></button>
         </div>
         {roomMenu.pos&&createPortal(
-          <div ref={roomMenu.menuRef} style={{position:"fixed",left:roomMenu.pos.left,...(roomMenu.pos.top!=null?{top:roomMenu.pos.top}:{bottom:roomMenu.pos.bottom}),maxHeight:roomMenu.pos.maxHeight,overflowY:"auto",zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"6px",minWidth:"168px",display:"flex",flexDirection:"column",gap:"4px",fontFamily:"'Source Sans 3',sans-serif"}}>
-            <button onClick={()=>{addRoomItem('desk');roomMenu.close();}} title="Mark where the teacher's desk sits in the room" style={{...btnS,display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px"}}
-              onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
-              onMouseLeave={e=>e.currentTarget.style.background="#fff"}
-            >
-              <div style={{width:"20px",height:"12px",borderRadius:"2px",background:"#d4b896",flexShrink:0}}/>
-              <span style={{fontSize:"11px"}}>Teacher's desk</span>
-            </button>
-            <button onClick={()=>{addRoomItem('board');roomMenu.close();}} title="Mark where the whiteboard/screen is" style={{...btnS,display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px"}}
-              onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
-              onMouseLeave={e=>e.currentTarget.style.background="#fff"}
-            >
-              <div style={{width:"22px",height:"7px",borderRadius:"1px",background:"#a8b8a8",flexShrink:0}}/>
-              <span style={{fontSize:"11px"}}>Board</span>
-            </button>
-            <button onClick={()=>{addRoomItem('door');roomMenu.close();}} title="Mark where the door is" style={{...btnS,display:"flex",alignItems:"center",gap:"8px",padding:"8px 10px"}}
-              onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
-              onMouseLeave={e=>e.currentTarget.style.background="#fff"}
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" style={{flexShrink:0}}>
-                <line x1="2" y1="2" x2="2" y2="16" stroke="#88aabb" strokeWidth="2.5" strokeLinecap="round"/>
-                <line x1="2" y1="2" x2="14" y2="2" stroke="#88aabb" strokeWidth="2" strokeLinecap="round"/>
-                <path d="M 2 16 A 14 14 0 0 1 16 2" fill="none" stroke="#88aabb" strokeWidth="1.5" strokeDasharray="3,2"/>
-              </svg>
-              <span style={{fontSize:"11px"}}>Door</span>
-            </button>
+          <div ref={roomMenu.menuRef} style={{position:"fixed",left:roomMenu.pos.left,...(roomMenu.pos.top!=null?{top:roomMenu.pos.top}:{bottom:roomMenu.pos.bottom}),maxHeight:Math.min(580,roomMenu.pos.maxHeight),overflowY:"auto",zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"324px",fontFamily:"'Source Sans 3',sans-serif"}}>
+            <ItemCatalogBody onAddItem={t=>{addRoomItem(t);roomMenu.close();}} onAddBench={()=>{addPieceSet('bench');roomMenu.close();}} btnS={btnS} menuHead={menuHead}/>
           </div>,
           document.body
         )}
@@ -4434,6 +5626,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                     <input value={focus.label||''} maxLength={24} placeholder="Label on the table…" title="A label written on the table top, e.g. Bench A"
                       onChange={e=>{const v=e.target.value.slice(0,24);updatePieces([focus.id],p=>{const q={...p};if(v)q.label=v;else delete q.label;return q;});}}
                       style={{padding:"6px 8px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",width:"100%",boxSizing:"border-box"}}/>
+                    <StationEditor station={focus.station} onToggle={()=>togglePieceStation(focus.id)} onSet={p=>setPieceStation(focus.id,p)} btnS={btnS}/>
                     {cl.length>1&&(
                       <button onClick={()=>separatePiece(focus.id)} title="Pull this piece away from the table it's joined to (or Alt-drag it)" style={btnS}>✂ Separate this piece</button>
                     )}
@@ -4521,54 +5714,55 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           </div>
         )}
 
-        {/* Saved layouts — tucked into a popover; the list can get long and
-            doesn't need to sit permanently expanded in the sidebar */}
+        {/* The picked room item: label, turn, fixed, station, delete. Size is by the handles on the map. */}
+        {selItem&&(()=>{
+          const t=ROOM_ITEM_TYPES[selItem.type],g=itemGeom(selItem);
+          const shown=selItem.label??t?.name??'';
+          return(
+            <div>
+              <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"2px",color:"rgba(0,0,0,0.25)",textTransform:"uppercase",marginBottom:"8px"}}>Selected item</div>
+              <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
+                <div style={{fontSize:"12.5px",fontWeight:700,color:"#1a1a2e",lineHeight:1.3}}>{t?.name||'Door'}<span style={{fontWeight:500,color:"rgba(0,0,0,0.4)"}}> · {Math.round(g.w)}×{Math.round(g.h)}</span></div>
+                <input key={`${selItem.id}:${shown}`} defaultValue={shown} maxLength={40} placeholder="Label…" title="The name shown on the map in a little paper tag, e.g. Sink A. Leave it empty for no label. (You can also double-click the item.)"
+                  onBlur={e=>{if(e.target.value!==shown)setItemLabel(selItem.id,e.target.value);}}
+                  onKeyDown={e=>{if(e.key==='Enter')e.target.blur();e.stopPropagation();}}
+                  style={{padding:"6px 8px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",width:"100%",boxSizing:"border-box"}}/>
+                <div style={{display:"flex",gap:"4px"}}>
+                  <button onClick={()=>rotateRoomItem(selItem.id,-15)} title="Turn 15° anticlockwise (key: [ )" style={{...btnS,flex:1,padding:"6px 0"}}>↺ 15°</button>
+                  <button onClick={()=>rotateRoomItem(selItem.id,90)} title="Turn a quarter turn clockwise" style={{...btnS,flex:1.3,padding:"6px 0",color:"#1a1a2e"}}>⟳ 90°</button>
+                  <button onClick={()=>rotateRoomItem(selItem.id,15)} title="Turn 15° clockwise (key: ] )" style={{...btnS,flex:1,padding:"6px 0"}}>↻ 15°</button>
+                </div>
+                <label title="Fixed items are part of the room itself (sinks, fume cupboards, boards). They are saved with the room and stay put when you load a different layout of it." style={{display:"flex",alignItems:"center",gap:"6px",fontSize:"11.5px",fontWeight:600,color:"rgba(0,0,0,0.55)",cursor:"pointer"}}>
+                  <input type="checkbox" checked={!!selItem.fixed} onChange={()=>toggleItemFixed(selItem.id)}/> Fixed — part of the room
+                </label>
+                <StationEditor station={selItem.station} onToggle={()=>toggleItemStation(selItem.id)} onSet={p=>setItemStation(selItem.id,p)} btnS={btnS}/>
+                <button onClick={handleDelete} title="Remove this item from the room. Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete</button>
+              </div>
+            </div>
+          );
+        })()}
+
+        {/* Rooms — the room library: a room is its walls, doors, windows and fixed items, plus saved layouts
+            of its movable furniture. Tucked into a popover like the others. */}
         <div style={{borderTop:"1px solid rgba(0,0,0,0.06)",paddingTop:"14px"}}>
           <div ref={layoutsMenu.anchorRef} style={{position:"relative"}}>
-            <button onClick={layoutsMenu.toggle} title="Save this room layout to reuse for another class, or load a saved one" style={{...btnS,width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:layoutsMenu.pos?"#f0f1f4":"#fff"}}
+            <button onClick={()=>{loadRooms().then(setRooms);layoutsMenu.toggle();}} title="Rooms: save this room (walls, doors, fixed items) and several layouts of its furniture, then use them for any class" style={{...btnS,width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:layoutsMenu.pos?"#f0f1f4":"#fff"}}
               onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
               onMouseLeave={e=>e.currentTarget.style.background=layoutsMenu.pos?"#f0f1f4":"#fff"}
             >
-              <span>📁 Layouts{savedLayouts.length>0?` (${savedLayouts.length})`:''}</span>
+              <span>🏫 Rooms{rooms.filter(r=>!r.legacy).length>0?` (${rooms.filter(r=>!r.legacy).length})`:''}</span>
               <span style={{fontSize:"9px",color:"rgba(0,0,0,0.3)"}}>▾</span>
             </button>
           </div>
         </div>
         {layoutsMenu.pos&&createPortal(
-          <div ref={layoutsMenu.menuRef} style={{position:"fixed",left:layoutsMenu.pos.left,...(layoutsMenu.pos.top!=null?{top:layoutsMenu.pos.top}:{bottom:layoutsMenu.pos.bottom}),zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"216px",maxHeight:Math.min(360,layoutsMenu.pos.maxHeight),overflowY:"auto",display:"flex",flexDirection:"column",gap:"6px",fontFamily:"'Source Sans 3',sans-serif"}}>
-            {!showSaveLayout?(
-              <button onClick={()=>{setLayoutName('');setShowSaveLayout(true);}} title="Save the room shape (tables, tags, rules) as a reusable template" style={{...btnS,fontSize:"11px",width:"100%",textAlign:"left"}}
-                onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
-                onMouseLeave={e=>e.currentTarget.style.background="#fff"}
-              >💾 Save current layout…</button>
-            ):(
-              <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-                <input value={layoutName} onChange={e=>setLayoutName(e.target.value)}
-                  onKeyDown={e=>{if(e.key==='Enter'&&layoutName.trim()){saveLayout(layoutName);setShowSaveLayout(false);}if(e.key==='Escape')setShowSaveLayout(false);}}
-                  autoFocus placeholder="Layout name…"
-                  style={{padding:"6px 8px",borderRadius:"7px",border:"1px solid rgba(66,133,244,0.4)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e"}}
-                />
-                <div style={{display:"flex",gap:"4px"}}>
-                  <button onClick={()=>{if(layoutName.trim()){saveLayout(layoutName);setShowSaveLayout(false);}}}
-                    title="Save with this name" style={{...btnS,flex:1,background:"#1a1a2e",color:"#fff",border:"none",fontSize:"11px",padding:"5px 0"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="#2a2a4e"}
-                    onMouseLeave={e=>e.currentTarget.style.background="#1a1a2e"}
-                  >Save</button>
-                  <button onClick={()=>setShowSaveLayout(false)} title="Cancel" style={{...btnS,fontSize:"11px",padding:"5px 8px"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
-                    onMouseLeave={e=>e.currentTarget.style.background="#fff"}
-                  >Cancel</button>
-                </div>
-              </div>
-            )}
-            {savedLayouts.length===0&&!showSaveLayout&&(
-              <div style={{fontSize:"11px",color:"rgba(0,0,0,0.22)",fontStyle:"italic"}}>No saved layouts yet</div>
-            )}
-            <div style={{display:"flex",flexDirection:"column",gap:"4px"}}>
-              {savedLayouts.map(l=>(
-                <LayoutCard key={l.id} layout={l} onLoad={()=>{requestLoadLayout(l);layoutsMenu.close();}} onDelete={()=>deleteLayout(l.id)}/>
-              ))}
-            </div>
+          <div ref={layoutsMenu.menuRef} style={{position:"fixed",left:layoutsMenu.pos.left,...(layoutsMenu.pos.top!=null?{top:layoutsMenu.pos.top}:{bottom:layoutsMenu.pos.bottom}),zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"292px",maxHeight:Math.min(560,layoutsMenu.pos.maxHeight),overflowY:"auto",fontFamily:"'Source Sans 3',sans-serif"}}>
+            <RoomsPopover rooms={rooms} legacy={rooms.some(r=>r.legacy)?[]:savedLayouts} link={roomLink} btnS={btnS} menuHead={menuHead}
+              onSaveNew={saveAsNewRoom} onSaveLayout={saveLayoutToRoom}
+              onUse={(room,layout)=>{useRoomLayout(room,layout);layoutsMenu.close();}}
+              onRename={renameRoom} onDuplicate={duplicateRoom} onDelete={deleteRoom} onDeleteLayout={deleteRoomLayout}
+              onLoadLegacy={l=>{requestLoadLayout(l);layoutsMenu.close();}}
+              onShare={()=>pushShell(committedObj(),true)} onAdopt={adoptSharedShell}/>
           </div>,
           document.body
         )}
@@ -4634,32 +5828,53 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
           {/* Hatch patterns used by every table, chair and room item below */}
           <InkDefs/>
 
-          {/* ── Room items: teacher's desk, board and door ── */}
-          {roomItems.map(item=>{
-            if(item.type!=='desk'&&item.type!=='board'&&item.type!=='door')return null;
-            const isSelRI=selRoomId===item.id;
-            const rot=item.rotation||0,vert=rot===90||rot===270;
-            // Same footprints as before so saved positions still line up
-            const[iw,ih]=item.type==='desk'?(vert?[SH,SW]:[SW,SH]):item.type==='board'?(vert?[36,260]:[260,36]):[64,64];
+          {/* ── Room shell: walls, doors and windows. Only pickable in Edit room, so they can't be nudged by accident. ── */}
+          <WallsLayer walls={walls}
+            openings={openingDrag?.hit?[...openings,{id:'ghost',type:openingDrag.type,width:OPENING_TYPES[openingDrag.type].width,flip:false,swing:1,...openingDrag.hit}]:openings}
+            selWallId={roomMode?selWall:null} selOpeningId={roomMode?selOpening:null} draft={wallDraft}
+            edit={roomMode?{onWallMD:handleWallMD,onOpeningMD:handleOpeningMD,onEndMD:handleWallEndMD}:null}/>
+
+          {/* ── Room items (the catalogue): always movable; labels, size and turning from the selection ── */}
+          {roomItems.map(item=>(
+            <RoomItemView key={item.id} item={item} selected={selRoomId===item.id} cursor="grab"
+              onMouseDown={e=>handleRoomItemMD(e,item.id)}
+              onClick={e=>{e.stopPropagation();selectItem(item.id);}}
+              onDoubleClick={e=>{e.stopPropagation();selectItem(item.id);setEditingLabel(item.id);}}
+              title={`${ROOM_ITEM_TYPES[item.type]?.name||'Door'}${item.label?` "${item.label}"`:''} — drag to move, double-click to name it. Del removes it.`}/>
+          ))}
+          {/* Resize handles and the turn handle for the picked item, in its own (turned) frame */}
+          {selItem&&!editingLabel&&(()=>{
+            const g=itemGeom(selItem),small=g.w<56||g.h<56;
+            const hs=small?[[1,1],[-1,-1],[1,-1],[-1,1]]:[[-1,-1],[0,-1],[1,-1],[1,0],[1,1],[0,1],[-1,1],[-1,0]];
+            const cur=(hx,hy)=>hx&&hy?(hx*hy>0?"nwse-resize":"nesw-resize"):hx?"ew-resize":"ns-resize";
             return(
-              <div key={item.id} onMouseDown={e=>handleRoomItemMD(e,item.id)}
-                onClick={e=>{e.stopPropagation();setSel(new Set());setSelRoomId(item.id);}}
-                onDoubleClick={e=>{e.stopPropagation();rotateRoomItem(item.id);}}
-                title="Double-click to rotate"
-                style={{
-                  position:"absolute",left:item.x,top:item.y,width:iw,height:ih,
-                  cursor:"grab",userSelect:"none",
-                  ...(item.type==='door'?{transform:`rotate(${item.rotation}deg)`,transformOrigin:"top left"}:{}),
-                }}
-              >
-                {isSelRI&&<div style={{position:"absolute",inset:-4,borderRadius:10,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",pointerEvents:"none"}}/>}
-                <RoomItemArt type={item.type} w={iw} h={ih} label={item.type==='desk'?(vert?"Desk":"Teacher's Desk"):item.type==='board'?"Board":undefined}/>
-                {isSelRI&&(
-                  <div style={{position:"absolute",top:ih+8,left:"50%",transform:`translateX(-50%)${item.type==='door'?` rotate(${-(item.rotation||0)}deg)`:""}`,fontSize:"9.5px",color:"var(--cp-tag-text)",background:"var(--cp-paper)",border:"1px solid var(--cp-tag-ink)",borderRadius:4,padding:"1px 6px",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif",fontWeight:600,pointerEvents:"none",zIndex:5}}>{item.type==='door'?"dbl-click: rotate":"dbl-click: rotate · Del: remove"}</div>
-                )}
+              <div style={{position:"absolute",left:g.x,top:g.y,width:g.w,height:g.h,transform:g.rot?`rotate(${g.rot}deg)`:undefined,transformOrigin:g.origin==="tl"?"top left":"center",pointerEvents:"none",zIndex:9}}>
+                {hs.map(([hx,hy])=>(
+                  <div key={`${hx},${hy}`} onMouseDown={e=>handleItemResizeMD(e,selItem.id,hx,hy)} onClick={e=>e.stopPropagation()} title="Drag to resize"
+                    style={{position:"absolute",left:(hx+1)*g.w/2-5,top:(hy+1)*g.h/2-5,width:10,height:10,boxSizing:"border-box",background:"#fff",border:"2px solid var(--cp-sel)",borderRadius:2,pointerEvents:"auto",cursor:cur(hx,hy)}}/>
+                ))}
+                <svg width="1" height="1" style={{position:"absolute",left:g.w/2,top:0,overflow:"visible"}} aria-hidden="true"><line x1={0} y1={0} x2={0} y2={-20} style={{stroke:"var(--cp-sel)",strokeWidth:1.5,strokeDasharray:"3 2"}}/></svg>
+                <button onMouseDown={e=>handleItemRotateMD(e,selItem.id)} onClick={e=>e.stopPropagation()} title="Drag to turn this item (snaps to 15°; hold Shift to turn freely). Keys: [ and ]"
+                  style={{position:"absolute",left:g.w/2-12,top:-44,width:24,height:24,borderRadius:"50%",border:"2px solid var(--cp-sel)",background:"var(--cp-paper)",color:"var(--cp-sel)",fontSize:14,fontWeight:800,lineHeight:1,padding:0,cursor:"crosshair",pointerEvents:"auto",boxShadow:"0 0 0 4px var(--cp-sel-glow)",display:"flex",alignItems:"center",justifyContent:"center"}}>⟳</button>
               </div>
             );
-          })}
+          })()}
+          {/* Double-click an item to type its label right on the map */}
+          {editingLabel&&(()=>{
+            const it=roomItems.find(r=>r.id===editingLabel);if(!it)return null;
+            const b=itemBounds(it);
+            return(
+              <input autoFocus defaultValue={it.label??(ROOM_ITEM_TYPES[it.type]?.name||'')} maxLength={40} title="Type a label, then press Enter. Leave it empty for no label." placeholder="Label…"
+                onMouseDown={e=>e.stopPropagation()} onClick={e=>e.stopPropagation()}
+                onFocus={e=>e.target.select()}
+                onBlur={e=>{if(e.target.dataset.cancel!=='1')setItemLabel(it.id,e.target.value);setEditingLabel(null);}}
+                onKeyDown={e=>{if(e.key==='Enter')e.target.blur();else if(e.key==='Escape'){e.target.dataset.cancel='1';e.target.blur();}e.stopPropagation();}}
+                style={{position:"absolute",left:b.x+b.w/2,top:b.y+b.h/2-14,transform:"translateX(-50%)",zIndex:30,width:150,boxSizing:"border-box",padding:"5px 8px",borderRadius:7,border:"2px solid var(--cp-sel)",background:"#fff",fontSize:13,fontWeight:700,outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",boxShadow:"0 3px 12px rgba(0,0,0,0.2)"}}/>
+            );
+          })()}
+
+          {/* Everything below is the furniture. In Edit room it is dimmed and can't be picked. */}
+          <div style={{position:"absolute",left:0,top:0,right:0,bottom:0,opacity:roomMode?0.38:1,pointerEvents:roomMode?"none":undefined,transition:"opacity 0.15s"}}>
 
           {/* ── Table pieces: chairs round the outside, one table top per joined cluster ── */}
           {livePieces.length>0&&(()=>{
@@ -4673,7 +5888,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 <PieceTables pieces={livePieces} joins={joins} slots={liveSlots} seatByKey={seatByKey} chairMap={chairMap} selectedIds={selIds} snapLine={pieceDrag?.snap?.line}/>
                 {/* Invisible hit areas over each table top: click to pick the table, drag to move it */}
                 <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:1}}>
-                  {livePieces.map(p=>{
+                  {!roomMode&&livePieces.map(p=>{
                     const w=pieceToWorld(p);
                     const hit={onMouseDown:e=>handlePieceMD(e,p.id),onClick:e=>e.stopPropagation(),title:"Drag to move this table (it snaps onto other tables' edges). Alt-drag pulls one piece off, or moves it without snapping.",style:{fill:"transparent",pointerEvents:"all",cursor:pieceDrag?"grabbing":"grab"}};
                     return w.circle?<circle key={p.id} cx={w.center[0]} cy={w.center[1]} r={w.circle} {...hit}/>:<polygon key={p.id} points={w.poly.map(q=>q.join(",")).join(" ")} {...hit}/>;
@@ -4907,8 +6122,11 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             });
           })()}
 
+          </div>
+          <StationBadges items={roomItems} pieces={livePieces}/>
+
           {/* Empty state */}
-          {seats.length===0&&(
+          {seats.length===0&&walls.length===0&&roomItems.length===0&&(
             <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"14px",pointerEvents:"none"}}>
               <div style={{fontSize:"44px",opacity:0.12}}>🪑</div>
               <div style={{fontSize:"13px",color:"rgba(0,0,0,0.2)",textAlign:"center",lineHeight:1.8,fontWeight:500}}>
@@ -4927,6 +6145,19 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         <button onClick={()=>setZoom(1)} title="Reset zoom" style={{minWidth:"38px",padding:"0 4px",height:"24px",borderRadius:"6px",border:"none",background:"none",color:"rgba(0,0,0,0.4)",fontSize:"11px",fontWeight:700,cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"} onMouseLeave={e=>e.currentTarget.style.background="none"}>{Math.round(zoom*100)}%</button>
         <button onClick={()=>setZoom(z=>Math.min(ZOOM_MAX,+(z+0.15).toFixed(2)))} title="Zoom in" style={{width:"24px",height:"24px",borderRadius:"6px",border:"none",background:"none",color:"rgba(0,0,0,0.45)",fontSize:"15px",fontWeight:600,cursor:"pointer",lineHeight:1}} onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"} onMouseLeave={e=>e.currentTarget.style.background="none"}>+</button>
       </div>
+
+      {/* A linked room's shell was edited: offer to update it for every class that uses it */}
+      {shellAsk&&roomLink&&(()=>{
+        const rm=rooms.find(r=>r.id===roomLink.roomId);
+        return(
+          <div role="dialog" style={{position:"absolute",top:"12px",left:"50%",transform:"translateX(-50%)",zIndex:62,maxWidth:"min(640px,86%)",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",justifyContent:"center",padding:"9px 14px",borderRadius:"12px",background:"#fff",border:"1px solid rgba(66,133,244,0.35)",boxShadow:"0 6px 24px rgba(0,0,0,0.18)",fontFamily:"'Source Sans 3',sans-serif",fontSize:"12.5px",color:"#1a1a2e",fontWeight:600}}>
+            <span>Update <b>{rm?.name||'this room'}</b> for every class that uses it?</span>
+            <button onClick={()=>{setShellAsk(false);pushShell(committedObj(),true);}} title="Save these walls, doors and fixed items into the room. Other classes that use it pick them up the next time they open. Their furniture and students are never touched." style={{padding:"6px 12px",borderRadius:"8px",border:"none",background:"#1a1a2e",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Yes, update</button>
+            <button onClick={()=>{setShellAsk(false);linkClass({...roomLink,shellLocal:true});}} title="Keep these changes in this class only. You can still share them later from Rooms." style={{padding:"6px 12px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.12)",background:"#fff",color:"rgba(0,0,0,0.6)",fontSize:"12px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Just this class</button>
+          </div>
+        );
+      })()}
+      {openingDrag&&<div style={{position:"fixed",left:openingDrag.cx+14,top:openingDrag.cy+14,zIndex:700,pointerEvents:"none",padding:"3px 9px",borderRadius:"6px",background:openingDrag.hit?"#1a1a2e":"#8a8a95",color:"#fff",fontSize:"11px",fontWeight:700,fontFamily:"'Source Sans 3',sans-serif"}}>{OPENING_TYPES[openingDrag.type].name}{openingDrag.hit?"":" — drop on a wall"}</div>}
 
       {/* Short notices, e.g. who went back to the student list when a join hid their seat */}
       {notice&&(
@@ -5519,7 +6750,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
     setZoom(1);
     setConflicts([]);prevSeatsRef.current=null;setCanUndoRandom(false);
     let cleanupCenter=()=>{};
-    load(`sl-${activeClass.id}`,null).then(l=>{
+    load(`sl-${activeClass.id}`,null).then(l0=>syncClassWithRoom(activeClass.id,l0)).then(l=>{
       if(l){
         const{seats:repairedSeats,groups:repairedGroups}=repairSeatGroups(l.seats||[],l.groups||[]);
         l={...l,seats:repairedSeats,groups:repairedGroups};
@@ -5553,15 +6784,15 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",height:"100%",background:"linear-gradient(180deg,var(--board-bg-top),var(--board-bg-bottom))",color:"var(--board-muted)",fontSize:"13px",fontFamily:"'Source Sans 3',sans-serif"}}>Loading…</div>
   );
 
-  const{seats=[],groups=[],roomItems=[],pieces=[],joins=[]}=layout;
+  const{seats=[],groups=[],roomItems=[],pieces=[],joins=[],walls=[],openings=[]}=layout;
   const pos=sPosMap(seats,groups,null);
   const studentById=id=>(activeClass?.students||[]).find(s=>s.id===id);
-  const hasLayout=seats.length>0||roomItems.length>0||pieces.length>0;
+  const hasLayout=seats.length>0||roomItems.length>0||pieces.length>0||walls.length>0;
   // table pieces: the same geometry and drawing as Manage Seating, read-only here
   const pieceSlots=slotsForLayout(pieces,joins);
   const pieceSlotByKey=new Map(pieceSlots.map(sl=>[sl.key,sl]));
   const pieceSeatByKey=new Map(seats.filter(s=>s.pieceId).map(s=>[`${s.pieceId}:${s.slot}`,s]));
-  const canvasSize=canvasContentSize(seats,roomItems,pieces,pieceSlots);
+  const canvasSize=canvasContentSize(seats,roomItems,pieces,pieceSlots,walls);
 
   const RoomCanvas=({scale=1,interactive=true})=>{
     const chairMap=chairIndexMap(seats,groups);
@@ -5571,30 +6802,9 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
      {/* Everything is laid out in unscaled canvas px; `scale` is applied with CSS zoom (callers pass 1) */}
      <div style={{position:"absolute",left:0,top:0,zoom:scale}}>
       <InkDefs/>
-      {/* Room items — clearly labelled for student wayfinding */}
-      {roomItems.map(item=>{
-        const rot=item.rotation||0,vert=rot===90||rot===270;
-        if(item.type==='desk')return(
-          <div key={item.id} style={{position:"absolute",left:item.x,top:item.y,width:200,height:72}}>
-            <RoomItemArt type="desk" w={200} h={72} label="Teacher's Desk" fontSize={12}/>
-          </div>
-        );
-        if(item.type==='board'){
-          const bw=vert?36:260,bh=vert?260:36;
-          return(
-            <div key={item.id} style={{position:"absolute",left:item.x,top:item.y,width:bw,height:bh}}>
-              <RoomItemArt type="board" w={bw} h={bh} label="Board" fontSize={11}/>
-            </div>
-          );
-        }
-        if(item.type==='door')return(
-          <div key={item.id} style={{position:"absolute",left:item.x,top:item.y,width:64,height:64,transform:`rotate(${item.rotation}deg)`,transformOrigin:"top left"}}>
-            <RoomItemArt type="door" w={64} h={64}/>
-            <div style={{position:"absolute",top:67,left:"50%",transform:`translateX(-50%) rotate(${-(item.rotation||0)}deg)`,fontSize:11,fontWeight:800,color:"var(--cp-tag-text)",background:"var(--cp-paper)",border:"1px solid var(--cp-tag-ink)",borderRadius:4,padding:"0 6px",whiteSpace:"nowrap",fontFamily:"'Source Sans 3',sans-serif"}}>Door</div>
-          </div>
-        );
-        return null;
-      })}
+      {/* The room: walls, doors and windows, then the labelled items — the same drawing as the editor, read-only */}
+      <WallsLayer walls={walls} openings={openings}/>
+      {roomItems.map(item=><RoomItemView key={item.id} item={item} fontScale={1.08}/>)}
 
       {/* Table pieces: chairs round the outside and one table top per joined cluster */}
       <PieceTables pieces={pieces} joins={joins} slots={pieceSlots} seatByKey={pieceSeatByKey} chairMap={chairMap} hideUnused/>
@@ -5650,6 +6860,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
           </div>
         );
       })}
+      <StationBadges items={roomItems} pieces={pieces}/>
      </div>
     </div>
     );
