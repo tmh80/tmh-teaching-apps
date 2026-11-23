@@ -181,11 +181,12 @@ export async function autoBackup(reason){
     return true;
   }catch(e){return false;}
 }
-/* At launch: one backup per calendar day */
+/* At launch: one backup per calendar day. Only an earlier *launch* backup counts:
+   a migration's "before …" backup made a moment ago (Phase 5) must not stand in for it. */
 async function autoBackupIfNewDay(){
   try{
     const today=new Date().toLocaleDateString('sv');
-    const newest=readAutoBackups()[0];
+    const newest=readAutoBackups().find(b=>b.reason==='launch');
     if(newest&&new Date(newest.exportedAt).toLocaleDateString('sv')===today)return false;
     return await autoBackup('launch');
   }catch(e){return false;}
@@ -1392,6 +1393,7 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
 
 /* ── Seat/group constants & helpers ── */
 const SW=114,SH=52,SGR=8;
+const SETUP_BAR=42; // height of the class-setup tab strip above the Manage Seating floor (Phase 5)
 const GROUP_PAD=8,GROUP_BAR_H=22; // group boundary padding + tab-bar height, shared with the off-screen drag clamp
 
 /* ══════════════════════════════════════════════════════════
@@ -3584,15 +3586,132 @@ async function saveRooms(rooms){
 /* A class that is linked to a library room picks up the room's current shell
    (walls, openings, fixed items) whenever it loads — never its furniture or students.
    A class that said "just this class" (shellLocal) keeps its own. Saves only if something changed. */
-async function syncClassWithRoom(classId,layout){
+async function syncClassWithRoom(classId,layout,key){ // key: the setup's own sl- key (Phase 5); each setup has its own room link
   const link=layout?.room;
   if(!layout||!link?.roomId||link.shellLocal)return layout;
   const room=(await loadRooms()).find(r=>r.id===link.roomId);
   if(!room||sameShell(layout,room))return layout;
   if(!roomsBackedUp){roomsBackedUp=true;await autoBackup('before room library');}
   const next=applyRoomShell(layout,room);
-  await save(`sl-${classId}`,next);
+  await save(key||`sl-${classId}`,next);
   return next;
+}
+
+/* ── Class setups: storage (Phase 5, see ROOMS_PLAN section 9) ──
+   setups-<class> lists the setups; Regular's seating stays in sl-<class>, the
+   others in sl-<class>~<id>. Seat tags (the class's tag list) and keep-apart /
+   together rules are class-level: they live only in sl-<class>, and a setup's
+   own key keeps them empty. */
+const SETUPS_EVENT='cp-setups-changed';
+const notifySetups=classId=>{try{window.dispatchEvent(new CustomEvent(SETUPS_EVENT,{detail:{classId}}));}catch(e){}};
+const hasKey=async k=>!!(await window.storage.get(k));
+/* The first launch with setups: back up once, give every class a "Regular" setup
+   (using tables AND workstations, so generation is exactly as before), and leave
+   sl-<class> alone (main only reads that, so rolling back still works). cp-schema
+   becomes 2 only once every class has its entry. Safe to run again, or after a
+   crash halfway: classes that already have an entry are skipped. */
+async function migrateSetups(){
+  try{
+    if((await load('cp-schema',0))>=2)return true;
+    const classes=await load('ta-classes',[]);
+    const ids=(Array.isArray(classes)?classes:[]).map(c=>c&&c.id).filter(Boolean);
+    const missing=[];
+    for(const id of ids)if(!(await hasKey(`setups-${id}`)))missing.push(id);
+    if(missing.length){
+      await autoBackup('before setups');
+      const now=Date.now();
+      for(const id of missing)if(!(await hasKey(`setups-${id}`)))await window.storage.set(`setups-${id}`,JSON.stringify(defaultSetups(now)));
+    }
+    for(const id of ids)if(!(await hasKey(`setups-${id}`)))return false;
+    await window.storage.set('cp-schema',JSON.stringify(2));
+    return true;
+  }catch(e){return false;}
+}
+let setupsMigration=null;
+const ensureSetupsMigrated=()=>setupsMigration||(setupsMigration=migrateSetups());
+/* A class's setups (Regular only, in memory, if it has none saved yet) */
+async function loadSetups(classId){
+  await ensureSetupsMigrated();
+  return normalizeSetups(await load(`setups-${classId}`,null));
+}
+async function saveSetups(classId,data){await save(`setups-${classId}`,normalizeSetups(data));}
+export async function loadSetupLayout(classId,setupId){return load(setupSlKey(classId,setupId),null);}
+/* A setup's seating. For a setup other than Regular the class-level tags and
+   rules are left out (they stay in sl-<class>); Regular keeps the ones already
+   saved when the object doesn't bring its own. */
+const stripClassLevel=obj=>({...obj,tags:[],rules:[]});
+export async function saveSetupLayout(classId,setupId,obj){
+  if(!setupId||setupId===REGULAR_SETUP){
+    const cur=await load(`sl-${classId}`,null);
+    await save(`sl-${classId}`,{...obj,tags:obj.tags??cur?.tags??[],rules:obj.rules??cur?.rules??[]});
+  }else await save(setupSlKey(classId,setupId),stripClassLevel(obj));
+}
+/* Class-level tags and rules, written into sl-<class> without touching its seating */
+async function saveClassLevel(classId,{tags,rules}){
+  const cur=await load(`sl-${classId}`,null);
+  const base=cur||{seats:[],groups:[],tags:[],roomItems:[],rules:[]};
+  if(JSON.stringify(base.tags||[])===JSON.stringify(tags||[])&&JSON.stringify(base.rules||[])===JSON.stringify(rules||[]))return;
+  await save(`sl-${classId}`,{...base,tags:tags||[],rules:rules||[]});
+}
+/* Phase 6/7 hook: which seats a setup generates into — usableSeats(layoutObj,setup) (pure, in the geometry block) */
+export{usableSeats};
+/* The furniture a new setup starts from: a copy of a layout (students optional), a
+   room layout from the library, or an empty room. */
+async function startingLayout({fromLayout,withStudents,fromRoom}){
+  if(fromLayout){
+    const c=cloneJ(fromLayout);
+    if(!withStudents)c.seats=(c.seats||[]).map(s=>({...s,studentId:null,locked:false}));
+    return stripClassLevel(c);
+  }
+  if(fromRoom?.roomId){
+    const room=(await loadRooms()).find(r=>r.id===fromRoom.roomId);
+    const layout=room&&(room.layouts.find(l=>l.id===fromRoom.layoutId)||room.layouts[0]);
+    if(layout){
+      const inst=instantiateLayout(layout,sUid);
+      const sh=room.legacy?{}:cloneJ(room.shell||{});
+      return slLayoutObj(inst.seats,inst.groups,[],[...(sh.items||[]),...inst.items],[],inst.pieces,inst.joins,
+        room.legacy?{}:{walls:sh.walls||[],openings:sh.openings||[],room:{roomId:room.id,layoutId:layout.id}});
+    }
+  }
+  return slLayoutObj([],[],[],[],[]);
+}
+/* Phase 6/7 hook: make a setup in code. Returns the new setup. With activate:true
+   it also becomes the class's active setup. Open panels hear about it (SETUPS_EVENT). */
+export async function createSetup(classId,{name,icon,use,fromLayout,withStudents=false,fromRoom,offPieces,activate=false}={}){
+  const cur=await loadSetups(classId);
+  const setup={id:`su${sUid()}`,name:(name||'').trim()||'New setup',icon:icon||'🪑',use:SETUP_USES[useKey(use||useForName(name))].slice(),offPieces:fromLayout&&Array.isArray(offPieces)?[...offPieces]:[],createdAt:Date.now()};
+  // the seating first, then the list: a crash in between leaves an unused key, never a tab with no seating
+  await save(setupSlKey(classId,setup.id),await startingLayout({fromLayout,withStudents,fromRoom}));
+  await saveSetups(classId,{...cur,list:[...cur.list,setup],...(activate?{activeId:setup.id}:{})});
+  notifySetups(classId);
+  return setup;
+}
+/* Delete a setup (never Regular). Its seating goes to ta-trash first and the key is
+   removed only once that copy is safely saved; the trash keeps it 30 days. */
+async function deleteSetup(classId,setupId){
+  if(!setupId||setupId===REGULAR_SETUP)return false;
+  const key=setupSlKey(classId,setupId);
+  const cur=await loadSetups(classId);
+  const raw=await window.storage.get(key);
+  if(raw){
+    const entry={key,value:JSON.parse(raw.value),deletedAt:Date.now(),classId,setup:cur.list.find(s=>s.id===setupId)||null};
+    const trash=await load('ta-trash',[]);
+    await window.storage.set('ta-trash',JSON.stringify([...(Array.isArray(trash)?trash:[]),entry]));
+    const check=await load('ta-trash',[]);
+    if(!Array.isArray(check)||!check.some(t=>t.key===key&&t.deletedAt===entry.deletedAt))return false; // the copy didn't stick: keep the original
+  }
+  await saveSetups(classId,{...cur,activeId:cur.activeId===setupId?REGULAR_SETUP:cur.activeId,list:cur.list.filter(s=>s.id!==setupId)});
+  if(raw)await window.storage.delete(key);
+  notifySetups(classId);
+  return true;
+}
+/* On launch: anything in the trash for more than 30 days goes for good */
+async function purgeTrash(now=Date.now()){
+  try{
+    const t=await load('ta-trash',null);if(!Array.isArray(t))return;
+    const kept=purgeTrashList(t,now);
+    if(kept.length!==t.length)await save('ta-trash',kept);
+  }catch(e){}
 }
 /* Structural fingerprint used to detect "has the room layout changed since
    the last save/load" — deliberately ignores who's sitting where. */
@@ -3953,6 +4072,209 @@ function StationEditor({station,onToggle,onSet,btnS}){
 }
 
 /* ── Manage groups: rename any group from one place, not just the selected one ── */
+/* ══════════════════════════════════════════════════════════
+   CLASS SETUPS (Phase 5) — the tab row, its ⋯ menu, the New setup
+   dialog, and the faded look of furniture a setup doesn't use.
+   ══════════════════════════════════════════════════════════ */
+const USE_LABELS=[['desk','Tables'],['workstation','Workstations'],['both','Both']];
+const useHelp=k=>k==='desk'?'Generate into tables only (lab benches are left free)':k==='workstation'?'Generate into workstations only, e.g. lab benches':'Generate into tables and workstations';
+const setupUseText=s=>({desk:'tables',workstation:'workstations',both:'tables and workstations'})[useKey(s?.use)];
+/* Tables / Workstations / Both, as one segmented control */
+function SetupUsePicker({value,onChange,small=false}){
+  return(
+    <div style={{display:"flex",gap:"4px"}}>
+      {USE_LABELS.map(([k,lbl])=>(
+        <button key={k} className={cpc("",value===k)} onClick={()=>onChange(k)} title={useHelp(k)}
+          style={{flex:1,padding:small?"4px 0":"6px 0",borderRadius:"8px",fontSize:small?"11px":"12px",fontWeight:value===k?700:600}}>{lbl}</button>
+      ))}
+    </div>
+  );
+}
+/* The tab row: one click switches setup. With `manage` (Manage Seating) each tab
+   has a ⋯ menu, tabs drag to reorder, and ＋ adds a setup. */
+function SetupTabs({setups,onSwitch,manage=false,onNew,onReorder,renderMenu,extra}){
+  const[dragId,setDragId]=useState(null);
+  const[overId,setOverId]=useState(null);
+  const[menu,setMenu]=useState(null); // {id,left,top}
+  const menuRef=useRef(null);
+  useEffect(()=>{
+    if(!menu)return;
+    const away=e=>{if(menuRef.current?.contains(e.target)||e.target.closest?.('[data-setup-menu-btn]'))return;setMenu(null);};
+    const esc=e=>{if(e.key==='Escape')setMenu(null);};
+    document.addEventListener('mousedown',away);window.addEventListener('keydown',esc);
+    return()=>{document.removeEventListener('mousedown',away);window.removeEventListener('keydown',esc);};
+  },[menu]);
+  if(!setups)return null;
+  const drop=targetId=>{if(dragId&&dragId!==targetId)onReorder?.(dragId,targetId);setDragId(null);setOverId(null);};
+  return(
+    <div role="tablist" aria-label="Class setups" style={{display:"flex",alignItems:"center",gap:"6px",minWidth:0}}>
+      {setups.list.map(s=>{
+        const on=s.id===setups.activeId;
+        return(
+          <div key={s.id} draggable={manage} data-setup-tab={s.id}
+            onDragStart={e=>{if(!manage)return;setDragId(s.id);try{e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',s.id);}catch(err){}}}
+            onDragOver={e=>{if(!dragId)return;e.preventDefault();if(overId!==s.id)setOverId(s.id);}}
+            onDragLeave={()=>{if(overId===s.id)setOverId(null);}}
+            onDrop={e=>{e.preventDefault();drop(s.id);}}
+            onDragEnd={()=>{setDragId(null);setOverId(null);}}
+            style={{display:"flex",alignItems:"center",flexShrink:0,borderRadius:"999px",opacity:dragId===s.id?0.45:1,
+              boxShadow:overId===s.id&&dragId!==s.id?"-3px 0 0 var(--cp-sel)":"none"}}>
+            <button role="tab" aria-selected={on} className={cpc("tab",on)} onClick={()=>{if(!on)onSwitch(s.id);}}
+              title={`${on?'Showing':'Switch to'} ${s.name}: its own seating, generated into ${setupUseText(s)}${manage?'. Drag to reorder':''}`}
+              style={{display:"flex",alignItems:"center",gap:"5px",padding:manage?"4px 4px 4px 11px":"4px 12px",fontSize:"12.5px",whiteSpace:"nowrap","--tab-fill":"var(--cpb-sunny)",cursor:on?"default":"pointer"}}>
+              <span aria-hidden="true">{s.icon}</span><span style={{maxWidth:"150px",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</span>
+              {manage&&(
+                <span data-setup-menu-btn role="button" tabIndex={0} aria-label={`More for ${s.name}`}
+                  title={`${s.name}: rename, change icon, use for, duplicate${s.id===REGULAR_SETUP?'':', delete'}`}
+                  onClick={e=>{e.stopPropagation();if(menu?.id===s.id){setMenu(null);return;}const r=e.currentTarget.getBoundingClientRect();setMenu({id:s.id,left:Math.min(r.left,window.innerWidth-250),top:r.bottom+6});}}
+                  onKeyDown={e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.currentTarget.click();}}}
+                  style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:"20px",height:"20px",borderRadius:"50%",fontSize:"13px",fontWeight:800,lineHeight:1,marginLeft:"2px",
+                    background:menu?.id===s.id?"rgba(43,33,24,0.14)":"transparent",color:"rgba(43,33,24,0.6)"}}
+                  onMouseEnter={e=>e.currentTarget.style.background="rgba(43,33,24,0.12)"} onMouseLeave={e=>e.currentTarget.style.background=menu?.id===s.id?"rgba(43,33,24,0.14)":"transparent"}>⋯</span>
+              )}
+            </button>
+          </div>
+        );
+      })}
+      {manage&&<button className={cpc("dashed")} onClick={onNew} title="New class setup, e.g. Lab or Lab partners: its own seating that never changes Regular's"
+        style={{flexShrink:0,padding:"4px 11px",borderRadius:"999px",fontSize:"13px",fontWeight:800,lineHeight:1.2}}>＋</button>}
+      {extra}
+      {menu&&renderMenu&&createPortal(
+        <div ref={menuRef} className="cp-pop" style={{position:"fixed",left:menu.left,top:menu.top,zIndex:520,borderRadius:"10px",padding:"8px",width:"236px",fontFamily:"'Source Sans 3',sans-serif"}}>
+          {renderMenu(setups.list.find(x=>x.id===menu.id),()=>setMenu(null))}
+        </div>,
+        document.body
+      )}
+    </div>
+  );
+}
+/* What's inside a tab's ⋯ menu */
+function SetupMenuBody({setup,canDelete,onRename,onIcon,onUse,onDuplicate,onDelete,onClose}){
+  const[name,setName]=useState(setup?.name||'');
+  const[asking,setAsking]=useState(false);
+  if(!setup)return null;
+  const head={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.35)",margin:"8px 2px 4px"};
+  const commitName=()=>{const v=name.trim();if(v&&v!==setup.name)onRename(v);};
+  return(
+    <div onMouseDown={e=>e.stopPropagation()}>
+      <div style={{...head,marginTop:"2px"}}>Rename</div>
+      <input value={name} maxLength={28} onChange={e=>setName(e.target.value)} onBlur={commitName}
+        onKeyDown={e=>{if(e.key==='Enter'){commitName();onClose();}e.stopPropagation();}} title="The setup's name on its tab"
+        style={{width:"100%",boxSizing:"border-box",padding:"6px 8px",borderRadius:"7px",fontSize:"12.5px",fontWeight:600,fontFamily:"'Source Sans 3',sans-serif",outline:"none"}}/>
+      <div style={head}>Icon</div>
+      <div style={{display:"flex",gap:"3px",flexWrap:"wrap"}}>
+        {SETUP_ICONS.map(ic=><button key={ic} className={cpc("ghost",setup.icon===ic)} onClick={()=>onIcon(ic)} title={`Use ${ic} as the icon`} style={{width:"28px",height:"28px",borderRadius:"7px",fontSize:"15px",padding:0,lineHeight:1}}>{ic}</button>)}
+      </div>
+      <div style={head}>Use for seating</div>
+      <SetupUsePicker value={useKey(setup.use)} onChange={k=>onUse(k)} small/>
+      <div style={{height:"1px",background:"rgba(0,0,0,0.08)",margin:"10px 0 6px"}}/>
+      <button className={cpc("item")} onClick={()=>{onDuplicate();onClose();}} title="Make a copy of this setup, seating and all" style={{width:"100%",textAlign:"left",padding:"6px 8px",borderRadius:"7px",fontSize:"12.5px",fontWeight:600}}>⧉ Duplicate</button>
+      {canDelete&&(!asking?(
+        <button className={cpc("item")} onClick={()=>setAsking(true)} title="Delete this setup (it asks first)" style={{width:"100%",textAlign:"left",padding:"6px 8px",borderRadius:"7px",fontSize:"12.5px",fontWeight:600,color:"var(--cpb-bad)"}}>🗑 Delete…</button>
+      ):(
+        <div style={{marginTop:"4px",padding:"8px",borderRadius:"8px",background:"#fdeeed",border:"1px solid rgba(200,60,60,0.2)"}}>
+          <div style={{fontSize:"11.5px",color:"#a33",fontWeight:600,lineHeight:1.4,marginBottom:"6px"}}>Delete "{setup.name}"? Its seating is kept in the trash for 30 days. Regular is not touched.</div>
+          <div style={{display:"flex",gap:"4px"}}>
+            <button className={cpc("danger")} onClick={()=>{onDelete();onClose();}} title={`Yes, delete ${setup.name}`} style={{flex:1,padding:"5px 0",borderRadius:"7px",fontSize:"12px",fontWeight:700}}>Delete</button>
+            <button className={cpc()} onClick={()=>setAsking(false)} title="Keep this setup" style={{flex:1,padding:"5px 0",borderRadius:"7px",fontSize:"12px",fontWeight:600}}>Cancel</button>
+          </div>
+        </div>
+      ))}
+      {!canDelete&&<div style={{fontSize:"10.5px",color:"rgba(0,0,0,0.4)",padding:"4px 8px",lineHeight:1.35}}>Regular can be renamed but not deleted.</div>}
+    </div>
+  );
+}
+/* New setup: name + icon, what it starts from, and which furniture it seats students at */
+function NewSetupDialog({current,rooms,onCreate,onClose}){
+  const[name,setName]=useState('');
+  const[icon,setIcon]=useState('🧪');
+  const[from,setFrom]=useState('copy'); // 'copy' | 'copy-students' | 'room' | 'empty'
+  const roomChoices=(rooms||[]).flatMap(r=>(r.layouts||[]).map(l=>({roomId:r.id,layoutId:l.id,label:`${r.name} · ${l.name}`})));
+  const[roomPick,setRoomPick]=useState(roomChoices[0]?`${roomChoices[0].roomId}|${roomChoices[0].layoutId}`:'');
+  const[use,setUse]=useState(null); // null = follow the name ("lab" → Workstations)
+  const useNow=use||useKey(useForName(name));
+  const[busy,setBusy]=useState(false);
+  const opt=(k,label,help,disabled=false)=>(
+    <button className={cpc("item",from===k)} disabled={disabled} onClick={()=>setFrom(k)} title={help}
+      style={{width:"100%",textAlign:"left",padding:"7px 9px",borderRadius:"8px",fontSize:"12.5px",fontWeight:from===k?700:600,display:"flex",alignItems:"center",gap:"8px"}}>
+      <span style={{width:"14px",height:"14px",borderRadius:"50%",border:"1.5px solid #2b2118",background:from===k?"#2b2118":"transparent",boxShadow:"inset 0 0 0 2.5px var(--cpb-bg)",flexShrink:0}}/>{label}
+    </button>
+  );
+  const create=async()=>{
+    if(busy)return;setBusy(true);
+    const[roomId,layoutId]=roomPick.split('|');
+    await onCreate({name:name.trim()||'New setup',icon,use:SETUP_USES[useNow],
+      ...(from==='copy'||from==='copy-students'?{copy:true,withStudents:from==='copy-students'}:{}),
+      ...(from==='room'&&roomId?{fromRoom:{roomId,layoutId}}:{})});
+  };
+  const head={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.35)",margin:"12px 2px 5px"};
+  return createPortal(
+    <div onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:600,background:"rgba(20,14,8,0.32)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Source Sans 3',sans-serif"}}>
+      <div className="cp-pop" role="dialog" aria-label="New class setup" style={{width:"372px",maxWidth:"calc(100vw - 32px)",maxHeight:"calc(100vh - 40px)",overflowY:"auto",borderRadius:"14px",padding:"16px 18px"}}>
+        <div style={{fontSize:"16px",fontWeight:800,color:"#2b2118"}}>New class setup</div>
+        <div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.5)",marginTop:"2px",lineHeight:1.4}}>Its own seating, e.g. for lab partners or a project. Switching tabs never changes another setup's seating.</div>
+        <div style={head}>Name and icon</div>
+        <input autoFocus value={name} maxLength={28} placeholder="e.g. Lab, Lab partners, Rocket project" title="The name on the setup's tab"
+          onChange={e=>setName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')create();if(e.key==='Escape')onClose();e.stopPropagation();}}
+          style={{width:"100%",boxSizing:"border-box",padding:"8px 10px",borderRadius:"8px",fontSize:"13.5px",fontWeight:600,fontFamily:"'Source Sans 3',sans-serif",outline:"none"}}/>
+        <div style={{display:"flex",gap:"4px",marginTop:"7px"}}>
+          {SETUP_ICONS.map(ic=><button key={ic} className={cpc("",icon===ic)} onClick={()=>setIcon(ic)} title={`Use ${ic} as the icon`} style={{width:"34px",height:"32px",borderRadius:"8px",fontSize:"16px",padding:0,lineHeight:1}}>{ic}</button>)}
+        </div>
+        <div style={head}>Start from</div>
+        <div style={{display:"flex",flexDirection:"column",gap:"2px"}}>
+          {opt('copy',`A copy of ${current?.icon||''} ${current?.name||'this setup'}: room and furniture, no students`,'Same room and tables, everyone unseated, ready to generate')}
+          {opt('copy-students',`A copy of ${current?.name||'this setup'} with students in their seats`,'Same room, tables and seating')}
+          {opt('room','A room layout from 🏫 Rooms',roomChoices.length?'Use a room and one of its saved layouts':'Save a room in 🏫 Rooms first',!roomChoices.length)}
+          {from==='room'&&roomChoices.length>0&&(
+            <select value={roomPick} onChange={e=>setRoomPick(e.target.value)} title="Which room and layout" style={{margin:"2px 0 4px 30px",padding:"5px 8px",borderRadius:"7px",fontSize:"12.5px",fontFamily:"'Source Sans 3',sans-serif"}}>
+              {roomChoices.map(c=><option key={`${c.roomId}|${c.layoutId}`} value={`${c.roomId}|${c.layoutId}`}>{c.label}</option>)}
+            </select>
+          )}
+          {opt('empty','An empty room','No furniture yet: add tables or benches yourself')}
+        </div>
+        <div style={head}>Use for seating</div>
+        <SetupUsePicker value={useNow} onChange={setUse}/>
+        <div style={{fontSize:"11px",color:"rgba(0,0,0,0.45)",marginTop:"5px",lineHeight:1.35}}>Randomize only seats students at {({desk:'tables (lab benches stay free)',workstation:'workstations such as lab benches',both:'tables and workstations'})[useNow]}. A table set to "Both" counts for either.</div>
+        <div style={{display:"flex",justifyContent:"flex-end",gap:"6px",marginTop:"16px"}}>
+          <button className={cpc()} onClick={onClose} title="Don't make a new setup" style={{padding:"8px 14px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>Cancel</button>
+          <button className={cpc("primary")} onClick={create} disabled={busy} title="Make the setup and switch to it" style={{padding:"8px 16px",borderRadius:"9px",fontSize:"12.5px",fontWeight:700}}>Create setup</button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+/* Furniture this setup doesn't use: a pale wash and a light hatch over the table and
+   its chairs (the drawing underneath is left alone). Students already sitting there
+   stay put; generating just doesn't put anyone new there. */
+const UnusedFurniture=({pieces,slots,offIds,setupName,hint=false})=>{
+  if(!offIds?.size)return null;
+  const ps=(pieces||[]).filter(p=>offIds.has(p.id));
+  if(!ps.length)return null;
+  const wash={fill:"var(--cp-floor)",fillOpacity:0.5};
+  return(
+    <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:1}}>
+      <defs>
+        <pattern id="cp-hatch-off" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(-38)">
+          <line x1="0" y1="3.5" x2="7" y2="3.5" style={{stroke:"var(--cp-ink)",strokeOpacity:0.32,strokeWidth:1.1}}/>
+        </pattern>
+      </defs>
+      {ps.map(p=>{
+        const w=pieceToWorld(p);
+        const shape=(st,key)=>w.circle?<circle key={key} cx={w.center[0]} cy={w.center[1]} r={w.circle+1} style={st}/>:<polygon key={key} points={w.poly.map(q=>q.join(",")).join(" ")} style={{...st,strokeLinejoin:"round"}}/>;
+        return(
+          <g key={p.id} data-cp="unused" style={{pointerEvents:hint?"all":"none"}}>
+            {hint&&<title>{`Not used in ${setupName}`}</title>}
+            {(slots||[]).filter(sl=>sl.pieceId===p.id&&sl.state==='on').map(sl=><circle key={sl.key} cx={sl.chair.x} cy={sl.chair.y} r={15} style={wash}/>)}
+            {shape({...wash,stroke:"var(--cp-floor)",strokeWidth:3},'w')}
+            {shape({fill:"url(#cp-hatch-off)"},'h')}
+          </g>
+        );
+      })}
+    </svg>
+  );
+};
+
 function ManageGroupsModal({groups,onRename,onDelete,onClose,isTable}){
   const inp={padding:"7px 10px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",color:"#1a1a2e",fontSize:"13px",fontWeight:500,outline:"none",fontFamily:"'Source Sans 3',sans-serif"};
   const[confirmDelete,setConfirmDelete]=useState(null); // groupId pending a second click
@@ -4101,7 +4423,15 @@ function useChairsMatch(classId){
   const set=useCallback(v=>{setOn(v);if(!classId)return;save(`cp-chairmatch-${classId}`,v);window.dispatchEvent(new CustomEvent('cp-chairmatch',{detail:{classId,on:v}}));},[classId]);
   return[on,set];
 }
-function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist,onUpdateStudentTags}){
+function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist,onUpdateStudentTags}){
+  /* Class setups (Phase 5): which setup is showing and where its seating is saved.
+     slKey stays null until this class's setups have loaded, and nothing loads or saves till then. */
+  const setup=setups?setups.list.find(x=>x.id===setups.activeId)||null:null;
+  const setupId=setup?.id||null;
+  const isRegular=!setupId||setupId===REGULAR_SETUP;
+  const slKey=activeClass?.id&&setups?setupSlKey(activeClass.id,setupId):null;
+  const classLevelRef=useRef(null); // the class's tags+rules as loaded, so a setup only writes them back to sl-<class> when they really changed
+  const pendingSaveRef=useRef(null); // {key,obj,regular,classId} waiting for the 400 ms save delay
   const[seats,setSeats]=useState([]);
   const[groups,setGroups]=useState([]);
   const[roomItems,setRoomItems]=useState([]);
@@ -4246,9 +4576,24 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   },[centerCanvas]);
 
   const DEPRECATED_TAGS=new Set(['Front','Board','Window','Door']);
-  /* ── Load layout from storage per class ── */
+  /* Write a setup's seating. Regular: sl-<class> as always. Any other setup: its own
+     key without tags/rules, which go to sl-<class> only if they were changed here. */
+  const persistLayout=useCallback(({key,obj,regular,classId})=>{
+    if(regular)return save(key,obj);
+    const cl=JSON.stringify([obj.tags||[],obj.rules||[]]);
+    const jobs=[save(key,stripClassLevel(obj))];
+    if(classLevelRef.current!==cl){classLevelRef.current=cl;jobs.push(saveClassLevel(classId,{tags:obj.tags,rules:obj.rules}));}
+    return Promise.all(jobs);
+  },[]);
+  const flushPendingSave=useCallback(()=>{
+    if(saveTimer.current){clearTimeout(saveTimer.current);saveTimer.current=null;}
+    const p=pendingSaveRef.current;pendingSaveRef.current=null;
+    return p?persistLayout(p):Promise.resolve();
+  },[persistLayout]);
+  /* ── Load layout from storage per class and setup ── */
   useEffect(()=>{
-    if(!activeClass?.id)return;
+    if(!activeClass?.id||!slKey)return;
+    let alive=true;
     setZoom(1);
     setRandomizeConflicts(null);
     undoStackRef.current=[];setCanUndo(false);lastCommittedRef.current=null;
@@ -4262,7 +4607,15 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     load(`tag-colors-${activeClass.id}`,{}).then(tc=>setTagColors(tc||{}));
     shellAnswerRef.current=null;setShellAsk(false);setRoomMode(false);setSelWall(null);setSelOpening(null);
     loadRooms().then(setRooms);
-    load(`sl-${activeClass.id}`,null).then(l0=>syncClassWithRoom(activeClass.id,l0)).then(layout=>{
+    const classId=activeClass.id,key=slKey,regular=isRegular;
+    /* an edit still waiting to be saved goes to the setup it was made in, before the next one loads */
+    flushPendingSave().then(()=>Promise.all([
+      load(key,null).then(l0=>syncClassWithRoom(classId,l0,key)),
+      regular?null:load(`sl-${classId}`,null), // tags and rules are the class's, kept with Regular
+    ])).then(([l1,classObj])=>{
+      if(!alive)return;
+      // another setup shows its own furniture but the class's tags and rules
+      const layout=l1&&!regular?{...l1,tags:classObj?.tags||[],rules:classObj?.rules||[]}:(!l1&&!regular&&classObj?{seats:[],groups:[],roomItems:[],tags:classObj.tags||[],rules:classObj.rules||[]}:l1);
       if(layout){
         const rawSeats=(layout.seats||[]).map(s=>({...s,tags:(s.tags||[]).filter(t=>!DEPRECATED_TAGS.has(t))}));
         const loadedPieces=layout.pieces||[],loadedJoins=layout.joins||[];
@@ -4282,24 +4635,29 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
         }
         // If the saved layout had drifted (a past bug could do this), persist the
         // repair immediately so the corruption doesn't keep coming back on load.
-        if(JSON.stringify(loadedGroups)!==JSON.stringify(layout.groups||[])||(loadedPieces.length&&JSON.stringify(loadedSeats)!==JSON.stringify(rawSeats))){
-          save(`sl-${activeClass.id}`,slLayoutObj(loadedSeats,loadedGroups,layout.tags,loadedRI,layout.rules,loadedPieces,loadedJoins,{walls:layout.walls,openings:layout.openings,room:layout.room}));
+        if(l1&&(JSON.stringify(loadedGroups)!==JSON.stringify(layout.groups||[])||(loadedPieces.length&&JSON.stringify(loadedSeats)!==JSON.stringify(rawSeats)))){
+          const fixed=slLayoutObj(loadedSeats,loadedGroups,layout.tags,loadedRI,layout.rules,loadedPieces,loadedJoins,{walls:layout.walls,openings:layout.openings,room:layout.room});
+          save(key,regular?fixed:stripClassLevel(fixed));
         }
         cleanupCenter=centerCanvasWhenReady(loadedSeats,loadedRI,loadedPieces);
         if(layout.walls?.length)requestAnimationFrame(()=>requestAnimationFrame(()=>setZoom(fitZoomFor(canvasRef.current,layout))));
         lastCommittedRef.current={seats:loadedSeats,groups:loadedGroups,tags:layout.tags?.length?layout.tags.filter(t=>!DEPRECATED_TAGS.has(t)):DEFAULT_SEAT_TAGS,roomItems:loadedRI,rules:layout.rules||[],pieces:loadedPieces,joins:loadedJoins,walls:layout.walls||[],openings:layout.openings||[],room:layout.room||null};
+        classLevelRef.current=JSON.stringify([lastCommittedRef.current.tags,lastCommittedRef.current.rules]);
         roomBaselineRef.current=roomStructureKey(loadedSeats,loadedGroups,loadedRI,loadedPieces,loadedJoins);
         seatingBaselineRef.current=seatingSignature(loadedSeats);
       } else {
         setSeats([]);setGroups([]);setRoomItems([]);setRules([]);setPieces([]);setJoins([]);setWalls([]);setOpenings([]);setRoomLink(null);
         lastCommittedRef.current={seats:[],groups:[],tags:DEFAULT_SEAT_TAGS,roomItems:[],rules:[],pieces:[],joins:[],walls:[],openings:[],room:null};
+        classLevelRef.current=JSON.stringify([DEFAULT_SEAT_TAGS,[]]);
         roomBaselineRef.current=roomStructureKey([],[],[]);
         seatingBaselineRef.current=seatingSignature([]);
       }
       setSel(new Set());setSelRoomId(null);setSelPieces(new Set());setPieceDrag(null);setEditSeats(false);setNotice(null);
     });
-    return()=>cleanupCenter();
-  },[activeClass?.id]);
+    return()=>{alive=false;cleanupCenter();};
+  },[activeClass?.id,slKey]);
+  /* leaving the panel: save anything still waiting */
+  useEffect(()=>()=>{flushPendingSave();},[flushPendingSave]);
 
   /* ── Debounced save (also the one chokepoint every edit flows through, so
      it doubles as where we snapshot undo history) ── */
@@ -4307,7 +4665,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
      pieces leave them out, and the last committed pieces are carried forward —
      so no save path can quietly drop them. */
   const doSave=useCallback((s,g,t,ri,rl,pc,jn,ex)=>{
-    if(!activeClass?.id)return;
+    if(!activeClass?.id||!slKey)return;
     const prevC=lastCommittedRef.current;
     const pcs=pc??prevC?.pieces??[],jns=jn??prevC?.joins??[];
     /* walls / openings / room link ride along the same way: `ex` is optional and
@@ -4321,10 +4679,11 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     lastCommittedRef.current={seats:s,groups:g,tags:t,roomItems:ri,rules:rl||[],pieces:pcs,joins:jns,walls:wls,openings:ops,room};
     const obj=slLayoutObj(s,g,t,ri,rl,pcs,jns,{walls:wls,openings:ops,room});
     if(saveTimer.current)clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(()=>save(`sl-${activeClass.id}`,obj),400);
+    pendingSaveRef.current={key:slKey,obj,regular:isRegular,classId:activeClass.id};
+    saveTimer.current=setTimeout(()=>{saveTimer.current=null;const p=pendingSaveRef.current;pendingSaveRef.current=null;if(p)persistLayout(p);},400);
     // editing the shared part of a room that other classes use → offer to update it for them
     if(prevC&&room&&!ex?.quiet&&shellSig(prevC.walls,prevC.openings,prevC.roomItems)!==shellSig(wls,ops,ri))shellEditRef.current?.(obj);
-  },[activeClass?.id]);
+  },[activeClass?.id,slKey,isRegular,persistLayout]);
 
   const handleUndo=useCallback(()=>{
     const stack=undoStackRef.current;
@@ -4337,8 +4696,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     setPieces(prev.pieces||[]);setJoins(prev.joins||[]);setWalls(prev.walls||[]);setOpenings(prev.openings||[]);setRoomLink(prev.room||null);
     setSel(new Set());setSelRoomId(null);setSelPieces(new Set());setPieceDrag(null);setSelWall(null);setSelOpening(null);
     if(saveTimer.current)clearTimeout(saveTimer.current);
-    save(`sl-${activeClass.id}`,slLayoutObj(prev.seats,prev.groups,prev.tags,prev.roomItems,prev.rules,prev.pieces,prev.joins,{walls:prev.walls,openings:prev.openings,room:prev.room}));
-  },[activeClass?.id]);
+    pendingSaveRef.current=null;
+    persistLayout({key:slKey,obj:slLayoutObj(prev.seats,prev.groups,prev.tags,prev.roomItems,prev.rules,prev.pieces,prev.joins,{walls:prev.walls,openings:prev.openings,room:prev.room}),regular:isRegular,classId:activeClass.id});
+  },[activeClass?.id,slKey,isRegular,persistLayout]);
 
   /* Self-heal against a student who's been removed from the roster (deleted, or
      dropped by re-importing a shorter list) — clears them out of any seat they
@@ -4417,13 +4777,16 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     if(!activeClass?.id)return;
     const entry={id:sUid(),name:fmtArrangementDate(Date.now()),createdAt:Date.now(),seats,groups,roomItems};
     if(pieces.length){entry.pieces=pieces;entry.joins=joins;}
+    if(!isRegular)entry.setupId=setupId; // old entries have none and count as Regular's
     setSeatHistory(prev=>{
-      const next=[entry,...prev].slice(0,10);
+      // the last 10 per setup, so a busy Lab never pushes Regular's history out
+      const sid=e=>e.setupId||REGULAR_SETUP,mine=sid(entry);
+      let n=0;const next=[entry,...prev].filter(e=>sid(e)!==mine||++n<=10);
       save(`sh-${activeClass.id}`,next);
       return next;
     });
     seatingBaselineRef.current=seatingSignature(seats);
-  },[activeClass?.id,seats,groups,roomItems,pieces,joins]);
+  },[activeClass?.id,seats,groups,roomItems,pieces,joins,isRegular,setupId]);
 
   /* ── Restore a past arrangement from history. When it was made for a
      different room (bestFit=true), the current room's furniture is left
@@ -4470,24 +4833,26 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
 
   /* ── Display labels for history entries: "SEP 2", or "SEP 2 (1)"/"(2)" when
      more than one was confirmed the same day, numbered by confirm order ── */
+  /* Previous arrangements of the setup that's showing (entries from before setups are Regular's) */
+  const setupHistory=useMemo(()=>seatHistory.filter(h=>(h.setupId||REGULAR_SETUP)===(setupId||REGULAR_SETUP)),[seatHistory,setupId]);
   const arrangementLabels=useMemo(()=>{
     const byDay={};
-    seatHistory.forEach((h,i)=>{
+    setupHistory.forEach((h,i)=>{
       const d=new Date(h.createdAt);
       const key=`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
       (byDay[key]=byDay[key]||[]).push(i);
     });
     const labels={};
     Object.values(byDay).forEach(idxs=>{
-      const sorted=[...idxs].sort((a,b)=>seatHistory[a].createdAt-seatHistory[b].createdAt);
+      const sorted=[...idxs].sort((a,b)=>setupHistory[a].createdAt-setupHistory[b].createdAt);
       const multiple=sorted.length>1;
       sorted.forEach((idx,pos)=>{
-        const base=fmtArrangementDate(seatHistory[idx].createdAt);
-        labels[seatHistory[idx].id]=multiple?`${base} (${pos+1})`:base;
+        const base=fmtArrangementDate(setupHistory[idx].createdAt);
+        labels[setupHistory[idx].id]=multiple?`${base} (${pos+1})`:base;
       });
     });
     return labels;
-  },[seatHistory]);
+  },[setupHistory]);
 
   /* ── Table pieces as they look right now, including mid-drag / mid-rotate ── */
   const livePieces=useMemo(()=>pieceDrag?pieceDrag.steps.reduce((ps,st)=>transformPieces(ps,pieceDrag.ids,st),pieces):pieces,[pieces,pieceDrag]);
@@ -5480,6 +5845,46 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const addLineDraft=d=>{const it=lineItemFromPoints([d.x1,d.y1],[d.x2,d.y2],sUid);commitRoom([...roomItems,it]);selectItem(it.id);};
   roomRef.current={roomMode,walls,tool:drawTool,addLine:addLineDraft,addWall:addWallDraft,clearSel:()=>{setSelWall(null);setSelOpening(null);setSelRoomId(null);setSel(new Set());setSelPieces(new Set());}};
 
+  /* ── Class setups (Phase 5): switch, add, rename, reorder, duplicate, delete ── */
+  const[showNewSetup,setShowNewSetup]=useState(false);
+  const clearSelection=()=>{setSel(new Set());setSelRoomId(null);setTagConfirm(null);setSelPieces(new Set());setEditSeats(false);setSelWall(null);setSelOpening(null);};
+  const switchSetup=id=>{if(setups&&id!==setups.activeId)onChangeSetups?.({...setups,activeId:id});}; // the load effect saves any waiting edit first
+  const patchSetup=(id,fn)=>{if(setups)onChangeSetups?.({...setups,list:setups.list.map(x=>x.id===id?fn(x):x)});};
+  const reorderSetups=(fromId,toId)=>{
+    if(!setups)return;
+    const list=[...setups.list],a=list.findIndex(x=>x.id===fromId),b=list.findIndex(x=>x.id===toId);
+    if(a<0||b<0)return;
+    const[m]=list.splice(a,1);list.splice(b,0,m); // dropped on a tab to its right: lands after it; to its left: before it
+    onChangeSetups?.({...setups,list});
+  };
+  const createNewSetup=async({name,icon,use,copy,withStudents,fromRoom})=>{
+    if(!activeClass?.id)return;
+    await flushPendingSave();
+    await createSetup(activeClass.id,{name,icon,use,fromLayout:copy?curLayoutObj():undefined,withStudents,fromRoom,activate:true});
+    setShowNewSetup(false);
+  };
+  const duplicateSetup=async s=>{
+    if(!activeClass?.id||!s)return;
+    await flushPendingSave();
+    const lo=s.id===setupId?curLayoutObj():await loadSetupLayout(activeClass.id,s.id);
+    await createSetup(activeClass.id,{name:`${s.name} copy`.slice(0,28),icon:s.icon,use:s.use,fromLayout:lo||slLayoutObj([],[],[],[],[]),withStudents:true,offPieces:s.offPieces,activate:true});
+  };
+  const removeSetup=async s=>{
+    if(!activeClass?.id||!s||s.id===REGULAR_SETUP)return;
+    if(s.id===setupId)await flushPendingSave(); // its latest seating goes into the trash too
+    await deleteSetup(activeClass.id,s.id);
+  };
+  /* Furniture this setup uses (worked out, never saved into the seats) */
+  const usableIds=useMemo(()=>usableSeatIds({seats,pieces},setup),[seats,pieces,setup]);
+  const offPieceIds=useMemo(()=>unusablePieceIds(pieces,setup),[pieces,setup]);
+  const notUsedHere=useMemo(()=>new Set(seats.filter(s=>s.used&&!s.unavailable&&!usableIds.has(s.id)).map(s=>s.id)),[seats,usableIds]); // in use, but not by this setup
+  const groupNotUsedHere=g=>{const live=g.seatIds.filter(id=>seats.find(x=>x.id===id&&x.used&&!x.unavailable));return live.length>0&&live.every(id=>notUsedHere.has(id));};
+  const strandedCount=seats.filter(s=>s.studentId&&notUsedHere.has(s.id)).length;
+  const toggleOffPieces=(ids,turnOff)=>{
+    if(!setup)return;
+    patchSetup(setup.id,x=>{const cur=new Set(x.offPieces||[]);ids.forEach(id=>turnOff?cur.add(id):cur.delete(id));return{...x,offPieces:[...cur]};});
+  };
+
   /* ── Tag helpers ── */
   const applyTagToSeats=(sids,tag)=>{
     const nextS=seats.map(s=>{
@@ -5558,7 +5963,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   /* ── Randomize — respects tag matching, keep-apart/together rules, optional smart shuffle.
      The algorithm itself lives in randomizeSeating (shared with the Seating tab). ── */
   const randomize=()=>{
-    const res=randomizeSeating({students:activeClass?.students||[],seats,rules,smartShuffle,hardTagRules,pairingHistory:seatPairingHistory});
+    /* only the furniture this setup uses is filled (unusable seats go in marked unavailable, on copies) */
+    const res=randomizeSeating({students:activeClass?.students||[],seats:seatsForSetup({seats,pieces},setup),rules,smartShuffle,hardTagRules,pairingHistory:seatPairingHistory});
+    res.nextSeats=restoreSeatFlags(res.nextSeats,seats);
     setSeats(res.nextSeats);doSave(res.nextSeats,groups,avTags,roomItems,rules);
     setRandomizeConflicts(res.placed?res.conflicts:[]);
     /* Committing an arrangement by placing it on the seats is the moment to
@@ -5982,6 +6389,21 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                         ))}
                       </div>
                     </div>
+                    {/* Class setups (Phase 5): leave this table out of generating in the setup that's showing */}
+                    {/* shown once the class has a second setup (or this table is already off), so a one-setup class's bar stays short */}
+                    {setup&&((setups?.list.length||0)>1||activeSelPieces.some(id=>(setup.offPieces||[]).includes(id)))&&(()=>{
+                      const off=activeSelPieces.every(id=>(setup.offPieces||[]).includes(id));
+                      const roleOk=selP.some(p=>(p.roles?.length?p.roles:['desk']).some(r=>(setup.use||[]).includes(r)));
+                      return(
+                        <div>
+                          <button className="cpb" onClick={()=>toggleOffPieces(activeSelPieces,!off)} title={off?`Use this table again when generating in ${setup.name}`:`Leave this table out when generating in ${setup.name} (other setups are not changed)`}
+                            style={{...btnS,width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"6px",padding:"5px 8px 5px 10px"}}>
+                            <span style={{textAlign:"left",lineHeight:1.2}}>Use in {setup.icon} {setup.name}</span><CPSwitch on={!off} small/>
+                          </button>
+                          {!off&&!roleOk&&<div style={{fontSize:"10.5px",color:"rgba(0,0,0,0.45)",lineHeight:1.35,marginTop:"3px"}}>{setup.name} seats students at {setupUseText(setup)} only, so this one stays free. Change "Use for" above to include it.</div>}
+                        </div>
+                      );
+                    })()}
                     <input value={focus.label||''} maxLength={24} placeholder="Label on the table…" title="A label written on the table top, e.g. Bench A"
                       onChange={e=>{const v=e.target.value.slice(0,24);updatePieces([focus.id],p=>{const q={...p};if(v)q.label=v;else delete q.label;return q;});}}
                       style={{padding:"6px 8px",borderRadius:"7px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",fontSize:"12px",outline:"none",fontFamily:"'Source Sans 3',sans-serif",color:"#1a1a2e",width:"100%",boxSizing:"border-box"}}/>
@@ -6172,17 +6594,17 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
               onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
               onMouseLeave={e=>e.currentTarget.style.background=arrangementsMenu.pos?"#f0f1f4":"#fff"}
             >
-              <span>🕐 Previous arrangements{seatHistory.length>0?` (${seatHistory.length})`:''}</span>
+              <span>🕐 Previous arrangements{setupHistory.length>0?` (${setupHistory.length})`:''}</span>
               <span style={{fontSize:"9px",color:"rgba(0,0,0,0.3)"}}>▾</span>
             </button>
           </div>
         </div>
         {arrangementsMenu.pos&&createPortal(
           <div className="cp-pop" ref={arrangementsMenu.menuRef} style={{position:"fixed",left:arrangementsMenu.pos.left,...(arrangementsMenu.pos.top!=null?{top:arrangementsMenu.pos.top}:{bottom:arrangementsMenu.pos.bottom}),zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"216px",maxHeight:Math.min(360,arrangementsMenu.pos.maxHeight),overflowY:"auto",display:"flex",flexDirection:"column",gap:"4px",fontFamily:"'Source Sans 3',sans-serif"}}>
-            {seatHistory.length===0&&(
+            {setupHistory.length===0&&(
               <div style={{fontSize:"11px",color:"rgba(0,0,0,0.22)",fontStyle:"italic"}}>Hit "Confirm seating" above to start keeping a history</div>
             )}
-            {seatHistory.map(h=>(
+            {setupHistory.map(h=>(
               <LayoutCard key={h.id} layout={{...h,name:arrangementLabels[h.id]}} onLoad={()=>{requestRestoreArrangement(h);arrangementsMenu.close();}} onDelete={()=>deleteArrangement(h.id)}/>
             ))}
           </div>,
@@ -6199,8 +6621,27 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
 
       {/* ── Canvas ── */}
       <div style={{flex:1,position:"relative",overflow:"hidden"}}>
+      {/* Class setups (Phase 5): a tab per setup above the floor — always shown here, with ＋,
+          so the feature can be found. Clicking the empty part of the strip deselects, like the floor. */}
+      <div onMouseDown={e=>{if(e.target===e.currentTarget)clearSelection();}}
+        style={{position:"absolute",left:0,right:0,top:0,height:SETUP_BAR,boxSizing:"border-box",zIndex:61,display:"flex",alignItems:"center",gap:"10px",padding:"0 12px",background:"#fafbfc",borderBottom:"1px solid rgba(0,0,0,0.07)"}}>
+        <SetupTabs setups={setups} manage onSwitch={switchSetup} onNew={()=>{loadRooms().then(setRooms);setShowNewSetup(true);}} onReorder={reorderSetups}
+          renderMenu={(s,close)=>(
+            <SetupMenuBody key={s?.id} setup={s} canDelete={s?.id!==REGULAR_SETUP} onClose={close}
+              onRename={v=>patchSetup(s.id,x=>({...x,name:v}))} onIcon={ic=>patchSetup(s.id,x=>({...x,icon:ic}))}
+              onUse={k=>patchSetup(s.id,x=>({...x,use:SETUP_USES[k].slice()}))}
+              onDuplicate={()=>duplicateSetup(s)} onDelete={()=>removeSetup(s)}/>
+          )}/>
+        {strandedCount>0&&setup&&(
+          <span title={`Randomize won't seat anyone new there, and moves them when it runs. Furniture ${setup.name} doesn't use looks faded.`}
+            style={{flexShrink:0,marginLeft:"auto",fontSize:"11.5px",fontWeight:700,color:"#7a5a12",background:"#fdf3d6",border:"1.5px solid rgba(184,133,10,0.45)",borderRadius:"999px",padding:"3px 10px",whiteSpace:"nowrap"}}>
+            ⚠ {strandedCount} student{strandedCount!==1?'s are':' is'} at furniture not used in {setup.name}
+          </span>
+        )}
+      </div>
+      {showNewSetup&&<NewSetupDialog current={setup} rooms={rooms} onCreate={createNewSetup} onClose={()=>setShowNewSetup(false)}/>}
       <div ref={canvasRef} onMouseDown={handleCanvasMD}
-        style={{position:"absolute",inset:0,overflow:"auto",
+        style={{position:"absolute",left:0,right:0,top:SETUP_BAR,bottom:0,overflow:"auto",
           // Scroll-position centering (below) only helps once content is bigger
           // than the viewport — when it's smaller, there's nothing to scroll, so
           // it just sits at the top-left. Flex-centering the single content div
@@ -6279,11 +6720,12 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             return(
               <>
                 <PieceTables pieces={livePieces} joins={joins} slots={liveSlots} seatByKey={seatByKey} chairMap={chairMap} selectedIds={selIds} snapLine={pieceDrag?.snap?.line} groups={groups} chairMatch={chairsMatch}/>
+                <UnusedFurniture pieces={livePieces} slots={liveSlots} offIds={offPieceIds} setupName={setup?.name}/>
                 {/* Invisible hit areas over each table top: click to pick the table, drag to move it */}
                 <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:1}}>
                   {!roomMode&&livePieces.map(p=>{
                     const w=pieceToWorld(p);
-                    const hit={onMouseDown:e=>handlePieceMD(e,p.id),onClick:e=>e.stopPropagation(),title:"Drag to move this table (it snaps onto other tables' edges). Alt-drag pulls one piece off, or moves it without snapping.",style:{fill:"transparent",pointerEvents:"all",cursor:pieceDrag?"grabbing":"grab"}};
+                    const hit={onMouseDown:e=>handlePieceMD(e,p.id),onClick:e=>e.stopPropagation(),title:"Drag to move this table (it snaps onto other tables' edges). Alt-drag pulls one piece off, or moves it without snapping."+(offPieceIds.has(p.id)?` Not used in ${setup?.name}.`:""),style:{fill:"transparent",pointerEvents:"all",cursor:pieceDrag?"grabbing":"grab"}};
                     return w.circle?<circle key={p.id} cx={w.center[0]} cy={w.center[1]} r={w.circle} {...hit}/>:<polygon key={p.id} points={w.poly.map(q=>q.join(",")).join(" ")} {...hit}/>;
                   })}
                 </svg>
@@ -6355,7 +6797,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             const PAD=GROUP_PAD,BAR_H=GROUP_BAR_H;
             return(
               <div key={`gb-${g.id}`}>
-                <TableSurface rect={{x:gb.x-PAD,y:gb.y-PAD,w:gb.w+PAD*2,h:gb.h+PAD*2}} radius={12} selected={isFull} fill={tableFill(g.color)}/>
+                <TableSurface rect={{x:gb.x-PAD,y:gb.y-PAD,w:gb.w+PAD*2,h:gb.h+PAD*2}} radius={12} selected={isFull} fill={tableFill(g.color)} faded={groupNotUsedHere(g)}/>
                 {isSoft&&<div style={{position:"absolute",left:gb.x-PAD-4,top:gb.y-PAD-4,width:gb.w+PAD*2+8,height:gb.h+PAD*2+8,borderRadius:15,border:"2px dashed var(--cp-sel)",opacity:0.75,pointerEvents:"none"}}/>}
                 {/* Tab bar — click to select the whole group, drag to move it */}
                 <button onMouseDown={e=>handleGroupTabMD(e,g.id)} title="Select or drag the whole group" style={{
@@ -6435,6 +6877,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                     // A dragged seat lifts a little so it's obvious what you're holding
                     transform:isLifted?"translateY(-3px) scale(1.04)":"none",transition:isLifted?"none":"transform 0.12s",
                     zIndex:isLifted?30:isSel?5:1,
+                    opacity:notUsedHere.has(s.id)?0.5:1, // a desk this setup doesn't use (Phase 5)
                   }}
                 >
                   <SeatArt state={state} standalone={!grouped.has(s.id)} selected={isSel} color={s.color}/>
@@ -6543,7 +6986,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
       {shellAsk&&roomLink&&(()=>{
         const rm=rooms.find(r=>r.id===roomLink.roomId);
         return(
-          <div className="cp-pop" role="dialog" style={{position:"absolute",top:"12px",left:"50%",transform:"translateX(-50%)",zIndex:62,maxWidth:"min(640px,86%)",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",justifyContent:"center",padding:"9px 14px",borderRadius:"12px",background:"#fff",border:"1px solid rgba(66,133,244,0.35)",boxShadow:"0 6px 24px rgba(0,0,0,0.18)",fontFamily:"'Source Sans 3',sans-serif",fontSize:"12.5px",color:"#1a1a2e",fontWeight:600}}>
+          <div className="cp-pop" role="dialog" style={{position:"absolute",top:SETUP_BAR+12,left:"50%",transform:"translateX(-50%)",zIndex:62,maxWidth:"min(640px,86%)",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap",justifyContent:"center",padding:"9px 14px",borderRadius:"12px",background:"#fff",border:"1px solid rgba(66,133,244,0.35)",boxShadow:"0 6px 24px rgba(0,0,0,0.18)",fontFamily:"'Source Sans 3',sans-serif",fontSize:"12.5px",color:"#1a1a2e",fontWeight:600}}>
             <span>Update <b>{rm?.name||'this room'}</b> for every class that uses it?</span>
             <button className="cpb cpb-primary" onClick={()=>{setShellAsk(false);pushShell(committedObj(),true);}} title="Save these walls, doors and fixed items into the room. Other classes that use it pick them up the next time they open. Their furniture and students are never touched." style={{padding:"6px 12px",borderRadius:"8px",border:"none",background:"#1a1a2e",color:"#fff",fontSize:"12px",fontWeight:700,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Yes, update</button>
             <button className="cpb" onClick={()=>{setShellAsk(false);linkClass({...roomLink,shellLocal:true});}} title="Keep these changes in this class only. You can still share them later from Rooms." style={{padding:"6px 12px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.12)",background:"#fff",color:"rgba(0,0,0,0.6)",fontSize:"12px",fontWeight:600,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>Just this class</button>
@@ -7023,8 +7466,13 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
 /* ══════════════════════════════════════════════════════════
    STUDENT SEATING PANEL — clean read-only view, no tags
    ══════════════════════════════════════════════════════════ */
-function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist}){
+function StudentSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist}){
   const[chairsMatch]=useChairsMatch(activeClass?.id);
+  /* Class setups (Phase 5): the same active setup as Manage Seating (it lives in TeacherApp) */
+  const setup=setups?setups.list.find(x=>x.id===setups.activeId)||null:null;
+  const isRegular=!setup||setup.id===REGULAR_SETUP;
+  const slKey=activeClass?.id&&setups?setupSlKey(activeClass.id,setup?.id):null;
+  const[classRules,setClassRules]=useState([]); // keep-apart/together rules are the class's (kept in sl-<class>), whichever setup is showing
   const[layout,setLayout]=useState(null);
   const[displayMode,setDisplayMode]=useState(false);
   const[nameClick,setNameClick]=useState(null); // {studentId, name, x, y} — opened by clicking either the name or a flag dot
@@ -7098,10 +7546,11 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
     const mode=m==='separate'?'separate':'combined';
     const history=await load(phKey(activeClass.id,mode,'seating'),{});
     const seatsIn=(layout.seats||[]).map(s=>({...s,tags:(s.tags||[]).filter(t=>!LEGACY_SEAT_TAGS.has(t))}));
-    const res=randomizeSeating({students:activeClass.students||[],seats:seatsIn,rules:layout.rules||[],smartShuffle:!!opts?.smartShuffle,hardTagRules:opts?.hardTagRules!==false,pairingHistory:history});
+    // only the furniture this setup uses is filled; the rules are the class's
+    const res=randomizeSeating({students:activeClass.students||[],seats:seatsForSetup({seats:seatsIn,pieces:layout.pieces},setup),rules:(isRegular?layout.rules:classRules)||[],smartShuffle:!!opts?.smartShuffle,hardTagRules:opts?.hardTagRules!==false,pairingHistory:history});
     prevSeatsRef.current=layout.seats;setCanUndoRandom(true);
-    const next={...layout,seats:res.nextSeats};
-    setLayout(next);save(`sl-${activeClass.id}`,next);
+    const next={...layout,seats:restoreSeatFlags(res.nextSeats,seatsIn)};
+    setLayout(next);save(slKey,next); // this setup's own key only
     setConflicts(res.placed?res.conflicts:[]);
     if(res.placed)save(phKey(activeClass.id,mode,'seating'),res.nextHistory);
     setRandomising(false);
@@ -7110,7 +7559,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
     if(!prevSeatsRef.current||!layout||!activeClass?.id)return;
     const next={...layout,seats:prevSeatsRef.current};
     prevSeatsRef.current=null;setCanUndoRandom(false);setConflicts([]);
-    setLayout(next);save(`sl-${activeClass.id}`,next);
+    setLayout(next);save(slKey,next);
   };
 
   const centerScroll=(ref,seats,roomItems,pieces)=>{
@@ -7140,11 +7589,15 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
   };
 
   useEffect(()=>{
-    if(!activeClass?.id)return;
+    if(!activeClass?.id||!slKey)return;
+    let alive=true;
     setZoom(1);
     setConflicts([]);prevSeatsRef.current=null;setCanUndoRandom(false);
     let cleanupCenter=()=>{};
-    load(`sl-${activeClass.id}`,null).then(l0=>syncClassWithRoom(activeClass.id,l0)).then(l=>{
+    const classId=activeClass.id,key=slKey;
+    if(isRegular)setClassRules([]);else load(`sl-${classId}`,null).then(c=>{if(alive)setClassRules(c?.rules||[]);});
+    load(key,null).then(l0=>syncClassWithRoom(classId,l0,key)).then(l=>{
+      if(!alive)return;
       if(l){
         const{seats:repairedSeats,groups:repairedGroups}=repairSeatGroups(l.seats||[],l.groups||[]);
         l={...l,seats:repairedSeats,groups:repairedGroups};
@@ -7154,8 +7607,8 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
       cleanupCenter=centerScrollWhenReady(scrollRef,loaded.seats||[],loaded.roomItems||[],loaded.pieces||[]);
       if(loaded.walls?.length)requestAnimationFrame(()=>requestAnimationFrame(()=>setZoom(fitZoomFor(scrollRef.current,loaded))));
     });
-    return()=>cleanupCenter();
-  },[activeClass?.id]);
+    return()=>{alive=false;cleanupCenter();};
+  },[activeClass?.id,slKey]);
 
   useEffect(()=>{
     if(!displayMode)return;
@@ -7189,6 +7642,11 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
   const pieceSlotByKey=new Map(pieceSlots.map(sl=>[sl.key,sl]));
   const pieceSeatByKey=new Map(seats.filter(s=>s.pieceId).map(s=>[`${s.pieceId}:${s.slot}`,s]));
   const canvasSize=canvasContentSize(seats,roomItems,pieces,pieceSlots,walls);
+  /* furniture this setup doesn't use is drawn faded (worked out here, never saved) */
+  const usableIds=usableSeatIds({seats,pieces},setup);
+  const notUsedHere=new Set(seats.filter(s=>s.used&&!s.unavailable&&!usableIds.has(s.id)).map(s=>s.id));
+  const offPieceIds=unusablePieceIds(pieces,setup);
+  const manySetups=(setups?.list.length||0)>1;
 
   const RoomCanvas=({scale=1,interactive=true})=>{
     const chairMap=chairIndexMap(seats,groups);
@@ -7205,6 +7663,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
 
       {/* Table pieces: chairs round the outside and one table top per joined cluster */}
       <PieceTables pieces={pieces} joins={joins} slots={pieceSlots} seatByKey={pieceSeatByKey} chairMap={chairMap} hideUnused groups={groups} chairMatch={chairsMatch}/>
+      <UnusedFurniture pieces={pieces} slots={pieceSlots} offIds={offPieceIds} setupName={setup?.name} hint={interactive}/>
 
       {/* Chairs first, so the table tops below cover them and only their backs show */}
       <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairMap} hideUnused chairMatch={chairsMatch}/>
@@ -7212,7 +7671,8 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
       {groups.map(g=>{
         if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null; // a piece table draws itself
         const gb=gBoundsFromSeats(g,seats);
-        return <TableSurface key={`gb-${g.id}`} rect={{x:gb.x-GROUP_PAD,y:gb.y-GROUP_PAD,w:gb.w+GROUP_PAD*2,h:gb.h+GROUP_PAD*2}} radius={12} fill={tableFill(g.color)}/>;
+        const live=g.seatIds.filter(id=>seats.some(x=>x.id===id&&x.used&&!x.unavailable));
+        return <TableSurface key={`gb-${g.id}`} rect={{x:gb.x-GROUP_PAD,y:gb.y-GROUP_PAD,w:gb.w+GROUP_PAD*2,h:gb.h+GROUP_PAD*2}} radius={12} fill={tableFill(g.color)} faded={live.length>0&&live.every(id=>notUsedHere.has(id))}/>;
       })}
 
       {/* Seats — chair + paper name tag, no controls */}
@@ -7238,7 +7698,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
           );
         }
         return(
-          <div key={s.id} style={{position:"absolute",left:p.x,top:p.y,width:SW,height:SH}}>
+          <div key={s.id} style={{position:"absolute",left:p.x,top:p.y,width:SW,height:SH,opacity:notUsedHere.has(s.id)?0.5:1}} title={notUsedHere.has(s.id)&&interactive?`Not used in ${setup?.name}`:undefined}>
             <SeatArt state="ok" standalone={!grouped.has(s.id)} color={s.color}/>
             {st&&(
               <div style={{position:"absolute",left:5,top:6,width:SW-10,height:30}}>
@@ -7291,6 +7751,12 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
   return(
     <div style={{height:"100%",display:"flex",flexDirection:"column",background:"linear-gradient(180deg,var(--board-bg-top),var(--board-bg-bottom))",fontFamily:"'Source Sans 3',sans-serif",overflow:"hidden"}}>
       <Header onDisplayClick={()=>setDisplayMode(true)}/>
+      {/* Class setups (Phase 5): a slim tab row, only once the class has more than one setup */}
+      {manySetups&&(
+        <div style={{padding:"6px 14px",borderBottom:"1px solid rgba(0,0,0,0.06)",background:"#fff",flexShrink:0,overflowX:"auto",scrollbarWidth:"none"}}>
+          <SetupTabs setups={setups} onSwitch={id=>onChangeSetups?.({...setups,activeId:id})}/>
+        </div>
+      )}
 
       {conflicts.length>0&&(
         <div style={{margin:"10px 14px 0",padding:"9px 10px",borderRadius:"9px",background:"#fdeeed",border:"1px solid rgba(220,60,60,0.18)",display:"flex",flexDirection:"column",gap:"4px",flexShrink:0}}>
@@ -7350,7 +7816,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
         <div className="no-drag" style={{position:"fixed",inset:0,zIndex:400,background:"var(--board-flat)",display:"flex",flexDirection:"column",overflow:"hidden",fontFamily:"'Source Sans 3',sans-serif"}}>
           <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 20px",background:"#fff",borderBottom:"1px solid rgba(0,0,0,0.06)",flexShrink:0}}>
             <button className="cpb" onClick={()=>setDisplayMode(false)} style={{fontSize:"13px",fontWeight:600,padding:"7px 14px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.08)",background:"#fff",color:"rgba(0,0,0,0.4)",cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>← Exit</button>
-            <div style={{fontSize:"16px",fontWeight:700,color:"#1a1a2e"}}>{activeClass.name}</div>
+            <div style={{fontSize:"16px",fontWeight:700,color:"#1a1a2e"}}>{activeClass.name}{manySetups&&setup?<span style={{fontWeight:600,color:"rgba(0,0,0,0.45)"}}> · {setup.icon} {setup.name}</span>:null}</div>
             <div style={{minWidth:"100px",display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"8px"}}>
               {conflicts.length>0&&<span title={conflicts.join("\n")} style={{fontSize:"11px",fontWeight:700,color:"#c44",background:"#fdeeed",padding:"4px 8px",borderRadius:"7px"}}>⚠ {conflicts.length} rule conflict{conflicts.length!==1?'s':''}</span>}
               {canUndoRandom&&<button className="cpb" onClick={undoRandomise} title="Put everyone back where they were before the last Randomise" style={{fontSize:"12px",fontWeight:600,padding:"7px 11px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.08)",background:"none",color:"rgba(0,0,0,0.45)",cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>↺ Undo</button>}
@@ -9253,7 +9719,8 @@ export default function TeacherApp(){
   },[activeClassId]);
 
   /* Snapshot everything once a day, as early as possible (before this session changes anything) */
-  useEffect(()=>{autoBackupIfNewDay();},[]);
+  /* Setups (Phase 5) first, which backs up before it migrates, then the daily backup and a trash clear-out */
+  useEffect(()=>{ensureSetupsMigrated().then(()=>autoBackupIfNewDay()).then(()=>purgeTrash());},[]);
 
   /* Load persisted classes; fall back to sample class on first launch */
   useEffect(()=>{
@@ -9283,6 +9750,26 @@ export default function TeacherApp(){
   },[activeClassId,persistClasses]);
 
   const activeClass=classes.find(c=>c.id===activeClassId)||null;
+
+  /* Class setups (Phase 5): the active class's setups-<class>, held here so Manage
+     Seating and the class Seating view always show the same setup. Tagged with its
+     class id, so while another class's setups are still loading neither panel uses them. */
+  const[setupsState,setSetupsState]=useState(null); // {classId, data}
+  useEffect(()=>{
+    if(!activeClassId)return;
+    let cancelled=false;
+    const reload=()=>loadSetups(activeClassId).then(d=>{if(!cancelled)setSetupsState({classId:activeClassId,data:d});});
+    reload();
+    const onChanged=e=>{if(e.detail?.classId===activeClassId)reload();}; // createSetup / deleteSetup, also from Phase 6 code
+    window.addEventListener(SETUPS_EVENT,onChanged);
+    return()=>{cancelled=true;window.removeEventListener(SETUPS_EVENT,onChanged);};
+  },[activeClassId]);
+  const setups=setupsState?.classId===activeClassId?setupsState.data:null;
+  const changeSetups=useCallback(next=>{
+    const n=normalizeSetups(next);
+    setSetupsState({classId:activeClassId,data:n});
+    saveSetups(activeClassId,n);
+  },[activeClassId]);
 
   /* Load the active class's checklist (migrating its old flags the first time) */
   useEffect(()=>{
@@ -9319,11 +9806,12 @@ export default function TeacherApp(){
      a ghost entry in the checklist — clear them out of both wherever they show up. */
   const cleanupRemovedStudents=useCallback((classId,removedIds)=>{
     const removedSet=new Set(removedIds);
-    load(`sl-${classId}`,null).then(layout=>{
+    // every setup's seating, not just Regular's (Phase 5)
+    loadSetups(classId).then(su=>su.list.map(x=>setupSlKey(classId,x.id))).then(keys=>keys.forEach(key=>load(key,null).then(layout=>{
       if(!layout)return;
       const nextSeats=(layout.seats||[]).map(s=>removedSet.has(s.studentId)?{...s,studentId:null,locked:false}:s);
-      if(nextSeats.some((s,i)=>s!==layout.seats[i]))save(`sl-${classId}`,{...layout,seats:nextSeats});
-    });
+      if(nextSeats.some((s,i)=>s!==layout.seats[i]))save(key,{...layout,seats:nextSeats});
+    })));
     load(`checklist-${classId}`,null).then(cl=>{
       if(!cl||!cl.cells)return;
       const cells={};
@@ -9384,6 +9872,8 @@ export default function TeacherApp(){
 
   /* Delete a class — wipes its roster, seating layout, pairing history and checklist */
   const handleDeleteClass=useCallback(id=>{
+    // its setups too: every non-Regular setup's seating, then the list itself
+    load(`setups-${id}`,null).then(su=>{(su?.list||[]).filter(x=>x.id!==REGULAR_SETUP).forEach(x=>{try{window.storage?.delete(setupSlKey(id,x.id));}catch(e){}});try{window.storage?.delete(`setups-${id}`);}catch(e){}});
     ['sl-','sh-','ph-','flags-','checklist-','tag-colors-'].forEach(prefix=>{try{window.storage?.delete(`${prefix}${id}`);}catch(e){}});
     const remaining=classes.filter(c=>c.id!==id);
     if(remaining.length===0){
@@ -9526,7 +10016,7 @@ export default function TeacherApp(){
         {/* Manage Seating / Manage Groups — full-width teacher views, hide other panels */}
         {manageSeatingOpen?(
           <div style={{flex:1,overflow:"hidden"}}>
-            <ManageSeatingPanel activeClass={activeClass} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist} onUpdateStudentTags={updateStudentTags}/>
+            <ManageSeatingPanel activeClass={activeClass} setups={setups} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist} onUpdateStudentTags={updateStudentTags}/>
           </div>
         ):manageGroupsOpen?(
           <div style={{flex:1,overflow:"hidden"}}>
@@ -9540,7 +10030,7 @@ export default function TeacherApp(){
             </div>
             {openPanels.timer&&!isLastOpen("timer")&&<ResizeHandle panelId="timer"/>}
 
-            {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist}/></div>)}
+            {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} setups={setups} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist}/></div>)}
             {openPanels.seating&&!isLastOpen("seating")&&<ResizeHandle panelId="seating"/>}
 
             {openPanels.groups&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("groups")?{flex:1,minWidth:PANEL_MIN.groups}:{width:colWidth("groups"),flexShrink:0}),overflow:"hidden auto"}}><StudentGroupsPanel activeClass={activeClass} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups}/></div>)}
