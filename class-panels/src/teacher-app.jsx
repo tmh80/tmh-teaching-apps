@@ -434,7 +434,7 @@ function TimerCard({timer,onDelete,onToggle,onReset,onSelect,onDisplay,onRepeat,
   const uniqueTasks=[];
   eff.forEach((s,i)=>{if(i===0||s.task!==eff[i-1].task)uniqueTasks.push({task:s.task,startIdx:i,count:1});else uniqueTasks[uniqueTasks.length-1].count++;});
   return(
-    <div onClick={()=>onSelect(timer.id)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:compact?"7px":"10px",padding:compact?"16px 16px 14px":"24px 24px 20px",borderRadius:"22px",cursor:"pointer",background:finished?"linear-gradient(145deg,#fff5f5,#fff9f9)":"#ffffff",border:isSelected?"2px solid #2e6bce":finished?"1px solid rgba(235,87,87,0.18)":"1px solid rgba(0,0,0,0.05)",boxShadow:isSelected?"0 0 0 3px rgba(66,133,244,0.12)":finished?"0 4px 24px rgba(235,87,87,0.08)":"0 2px 20px rgba(0,0,0,0.04)",animation:finished&&continuousAlarm?"shake 0.4s ease-in-out infinite":"none",position:"relative",width:compact?"100%":"280px",maxWidth:compact?"230px":"280px",transition:"border 0.2s, box-shadow 0.2s",}}>
+    <div className="cp-light" onClick={()=>onSelect(timer.id)} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:compact?"7px":"10px",padding:compact?"16px 16px 14px":"24px 24px 20px",borderRadius:"22px",cursor:"pointer",background:finished?"linear-gradient(145deg,#fff5f5,#fff9f9)":"#ffffff",border:isSelected?"2px solid #2e6bce":finished?"1px solid rgba(235,87,87,0.18)":"1px solid rgba(0,0,0,0.05)",boxShadow:isSelected?"0 0 0 3px rgba(66,133,244,0.12)":finished?"0 4px 24px rgba(235,87,87,0.08)":"0 2px 20px rgba(0,0,0,0.04)",animation:finished&&continuousAlarm?"shake 0.4s ease-in-out infinite":"none",position:"relative",width:compact?"100%":"280px",maxWidth:compact?"230px":"280px",transition:"border 0.2s, box-shadow 0.2s",}}>
       {isSelected&&!finished&&<div style={{position:"absolute",top:"-10px",left:"50%",transform:"translateX(-50%)",fontSize:"9px",fontWeight:700,color:"#fff",background:"#2e6bce",padding:"2px 10px",borderRadius:"8px",letterSpacing:"1px",textTransform:"uppercase"}}>Current</div>}
       <button className="cpb cpb-ghost" onClick={e=>{e.stopPropagation();onDelete(timer.id);}} style={{position:"absolute",top:"10px",right:"12px",background:"none",border:"none",color:"rgba(0,0,0,0.15)",fontSize:"18px",cursor:"pointer",padding:"4px 8px",borderRadius:"6px",lineHeight:1,}} onMouseEnter={e=>e.target.style.color="#eb5757"} onMouseLeave={e=>e.target.style.color="rgba(0,0,0,0.15)"}>×</button>
       <span style={{fontSize:"10.5px",letterSpacing:"2.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.24)",fontWeight:600}}>{timer.name}{repLabel?` (${repLabel})`:""}</span>
@@ -659,7 +659,7 @@ function BuilderPanel({onAdd,onClose,savedTemplates,onSaveTemplate,onDeleteTempl
           <button className="cpb cpb-ghost cpb-link" onClick={onManageTasks} title="Add, rename or delete your saved tasks" style={{background:"none",border:"none",color:"#2e6bce",cursor:"pointer",fontSize:"11px",fontWeight:600,padding:0}}>🗂 Manage tasks</button>
         </div>
         <div style={{display:"flex",gap:"6px",flexWrap:"wrap",maxHeight:"106px",overflowY:"auto",paddingRight:"2px"}}>
-          {actions.map((task,i)=>{const c=COLORS[i%COLORS.length];return(<div key={task+i} draggable onDragStart={e=>dragStart(e,task)} onClick={()=>setSegments(p=>[...p,{task,minutes:2,seconds:0}])} title={`Add "${task}" as the next step in the timeline (or drag it in)`} style={{padding:"6px 14px",borderRadius:"14px",cursor:"pointer",background:c.bg,fontSize:"12.5px",fontWeight:600,color:c.text,userSelect:"none",transition:"transform 0.15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>{task}</div>);})}
+          {actions.map((task,i)=>{const c=COLORS[i%COLORS.length];return(<div className="cpo" key={task+i} draggable onDragStart={e=>dragStart(e,task)} onClick={()=>setSegments(p=>[...p,{task,minutes:2,seconds:0}])} title={`Add "${task}" as the next step in the timeline (or drag it in)`} style={{padding:"6px 14px",borderRadius:"14px",cursor:"pointer",background:c.bg,fontSize:"12.5px",fontWeight:600,color:c.text,userSelect:"none",transition:"transform 0.15s"}} onMouseEnter={e=>e.currentTarget.style.transform="translateY(-2px)"} onMouseLeave={e=>e.currentTarget.style.transform="translateY(0)"}>{task}</div>);})}
         </div>
         <div style={{display:"flex",gap:"6px",marginTop:"8px"}}>
           <input value={customTask} onChange={e=>setCustomTask(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&customTask.trim()){setSegments(p=>[...p,{task:customTask.trim(),minutes:2,seconds:0}]);setCustomTask("");}}} placeholder="Custom task…" style={{...inp,flex:1}}/>
@@ -1422,7 +1422,8 @@ const CP_THEME_CSS=`
    Use:  className={cpc("primary")}            solid main action (Go, Save, Randomise)
          className={cpc("mint")}               positive / confirm
          className={cpc("sky")} / "sunny"      informational / highlight
-         className={cpc("danger")}             destructive confirm (coral)
+         className={cpc("danger")}             destructive confirm (coral fill)
+         className={cpc("warn")}               delete trigger: cream, coral text, coral on hover
          className={cpc()}                     secondary: cream + ink outline
          className={cpc("ghost")}              small icon button (× − + ⟳)
          className={cpc("tab",on)}             tab / chip: pill, filled when `on`
@@ -1440,6 +1441,7 @@ const CP_THEME_CSS=`
 const CP_BUTTON_CSS=`
 [data-theme],.cp-pop,.cp-light{--cpb-ink:#2b2118;--cpb-fg:#2b2118;--cpb-bg:#fffaf0;--cpb-hover:#ffeec8;--cpb-line:rgba(43,33,24,0.42);--cpb-shadow:rgba(43,33,24,0.55);--cpb-prim:#2b2118;--cpb-prim-fg:#fff6e2;--cpb-prim-hover:#4d3828;--cpb-mint:#b2efc4;--cpb-sky:#9ccaf9;--cpb-sunny:#ffd98a;--cpb-coral:#ffb3a1;--cpb-cyan:#d2f5fb;--cpb-off:#e8dcc4;--cpb-bad:#b3392a;--cpb-link:#2858b0;--cpb-field:#fffdf6;--cpb-pop-shadow:rgba(43,33,24,0.2);}
 [data-theme="blackboard"] .cp-onboard{--cpb-ink:#efe9d8;--cpb-fg:#f3efe0;--cpb-bg:#264b39;--cpb-hover:#31604a;--cpb-line:rgba(239,233,216,0.42);--cpb-shadow:rgba(0,0,0,0.5);--cpb-prim:#efe9d8;--cpb-prim-fg:#14281d;--cpb-prim-hover:#fffaf0;--cpb-mint:#6fb08a;--cpb-sky:#6f9bc8;--cpb-sunny:#cdac62;--cpb-coral:#cc8e7e;--cpb-cyan:#80b6c0;--cpb-off:#3a5a49;--cpb-bad:#f0a595;--cpb-link:#a9cdf5;--cpb-field:#1d3a2c;}
+.cp-pop,.cp-light{--board-heading:#1a1a2e;--board-label:rgba(0,0,0,0.25);--board-muted:rgba(0,0,0,0.2);--board-border:rgba(0,0,0,0.08);--board-wash:rgba(0,0,0,0.025);--board-flat:#f0f2f5;--board-dot:#c8cad2;}
 .cpb{--f:var(--cpb-bg);--fh:var(--cpb-hover);--t:var(--cpb-fg);background:var(--f) !important;color:var(--t) !important;border:1.5px solid var(--cpb-ink) !important;box-shadow:none !important;font-family:'Source Sans 3',sans-serif;cursor:pointer;transition:background 0.12s,box-shadow 0.12s,transform 0.06s,border-color 0.12s;}
 .cpb:hover:not(:disabled){background:var(--fh) !important;box-shadow:1.5px 2px 0 var(--cpb-shadow) !important;}
 .cpb:active:not(:disabled){transform:translateY(1px);box-shadow:0.5px 1px 0 var(--cpb-shadow) !important;}
@@ -1460,6 +1462,7 @@ const CP_BUTTON_CSS=`
 .cpb-ghost:hover:not(:disabled){border-color:var(--cpb-ink) !important;color:var(--cpb-fg) !important;}
 .cpb-ghost.on{--f:var(--cpb-sky);border-color:var(--cpb-ink) !important;}
 .cpb-bad{--t:var(--cpb-bad);}
+.cpb-warn{--t:var(--cpb-bad);--fh:color-mix(in srgb,var(--cpb-coral) 60%,var(--cpb-bg));}
 .cpb-ghost.cpb-bad:hover:not(:disabled){color:var(--cpb-bad) !important;}
 .cpb-link{--t:var(--cpb-link);}
 .cpb-dashed{--f:transparent;border-style:dashed !important;border-color:var(--cpb-line) !important;}
@@ -1491,8 +1494,8 @@ const CP_BUTTON_CSS=`
 .cp-swbtn:hover .cp-sw{box-shadow:1.5px 2px 0 var(--cpb-shadow,rgba(43,33,24,0.5));}
 .cp-pop{background:var(--cpb-bg) !important;border:1.5px solid #2b2118 !important;box-shadow:3px 4px 0 var(--cpb-pop-shadow) !important;}
 .cp-toast{background:#2b2118 !important;color:#fff6e2 !important;border:1.5px solid #2b2118 !important;box-shadow:2px 3px 0 rgba(43,33,24,0.3) !important;}
-input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not(.cp-raw),select:not(.cp-raw),textarea:not(.cp-raw){border:1.5px solid var(--cpb-ink,#2b2118) !important;background-color:var(--cpb-field,#fffdf6) !important;color:var(--cpb-fg,#2b2118);transition:box-shadow 0.12s,border-color 0.12s;}
-input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not(.cp-raw):focus,select:not(.cp-raw):focus,textarea:not(.cp-raw):focus{box-shadow:2px 2px 0 var(--cp-sky,#9ccaf9) !important;outline:none;}
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not(.cp-raw):not([style*="border-style: none"]),select:not(.cp-raw):not([style*="border-style: none"]),textarea:not(.cp-raw):not([style*="border-style: none"]){border:1.5px solid var(--cpb-ink,#2b2118) !important;background-color:var(--cpb-field,#fffdf6) !important;color:var(--cpb-fg,#2b2118);transition:box-shadow 0.12s,border-color 0.12s;}
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not(.cp-raw):not([style*="border-style: none"]):focus,select:not(.cp-raw):not([style*="border-style: none"]):focus,textarea:not(.cp-raw):not([style*="border-style: none"]):focus{box-shadow:2px 2px 0 var(--cp-sky,#9ccaf9) !important;outline:none;}
 input[type=checkbox],input[type=radio]{accent-color:#2b2118;}
 `;
 /* class names for the kit: cpc("primary"), cpc("tab",isActive), cpc("",isOn) … */
@@ -3777,7 +3780,7 @@ function RoomsPopover({rooms,legacy,link,onSaveNew,onSaveLayout,onUse,onRename,o
                   {r.layouts.length>0&&<button className="cpb cpb-primary" onClick={()=>setConfirm({kind:'useRoom',roomId:r.id})} title={r.legacy?"Load the first of these layouts":`Use ${r.name}: load its walls, doors and fixed items with its ${isLinked?"current":"first"} layout`} style={{...small,background:"#1a1a2e",color:"#fff",border:"none"}}>Use room</button>}
                   <button className="cpb" onClick={()=>setRenaming(r.id)} title="Rename this room" style={small} {...hov}>Rename</button>
                   <button className="cpb" onClick={()=>onDuplicate(r.id)} title="Make a copy of this room with all its layouts" style={small} {...hov}>Duplicate</button>
-                  <button className="cpb cpb-danger" onClick={()=>setConfirm({kind:'deleteRoom',roomId:r.id})} title="Delete this room from the library (asks first)" style={{...small,color:"#c44"}} {...hov}>Delete</button>
+                  <button className="cpb cpb-warn" onClick={()=>setConfirm({kind:'deleteRoom',roomId:r.id})} title="Delete this room from the library (asks first)" style={{...small,color:"#c44"}} {...hov}>Delete</button>
                 </div>
               </div>
             )}
@@ -5654,7 +5657,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                     <div style={{display:"flex",flexDirection:"column",gap:"4px",paddingTop:"4px",borderTop:"1px solid rgba(66,133,244,0.15)"}}>
                       <div style={{fontSize:"12px",fontWeight:700,color:"#1a1a2e"}}>Wall <span style={{fontWeight:500,color:"rgba(0,0,0,0.4)"}}>· {Math.round(wallLen(wObj))} px · {openings.filter(o=>o.wallId===wObj.id).length} opening{openings.filter(o=>o.wallId===wObj.id).length===1?"":"s"}</span></div>
                       <div style={{fontSize:"10px",color:"rgba(0,0,0,0.4)",lineHeight:1.35}}>Drag it to move it, or drag its end dots to stretch it.</div>
-                      <button className="cpb cpb-danger" onClick={handleDelete} title="Remove this wall (and any door or window on it). Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete wall</button>
+                      <button className="cpb cpb-warn" onClick={handleDelete} title="Remove this wall (and any door or window on it). Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete wall</button>
                     </div>
                   )}
                   {oObj&&(
@@ -5676,7 +5679,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                         <button className="cpb" onClick={()=>patchOpening(oObj.id,x=>{const w=Math.max(32,x.width-8);return{...x,width:w,t:oWall?clampOpeningT(oWall,w,x.t):x.t};})} title="Make it narrower" style={{...btnS,padding:"4px 10px"}}>−</button>
                         <button className="cpb" onClick={()=>patchOpening(oObj.id,x=>{const w=Math.min(oWall?Math.max(32,wallLen(oWall)-8):160,x.width+8);return{...x,width:w,t:oWall?clampOpeningT(oWall,w,x.t):x.t};})} title="Make it wider" style={{...btnS,padding:"4px 10px"}}>+</button>
                       </div>
-                      <button className="cpb cpb-danger" onClick={handleDelete} title="Remove this door or window. Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete {OPENING_TYPES[oObj.type]?.name.toLowerCase()}</button>
+                      <button className="cpb cpb-warn" onClick={handleDelete} title="Remove this door or window. Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete {OPENING_TYPES[oObj.type]?.name.toLowerCase()}</button>
                     </div>
                   )}
                   <button className="cpb cpb-primary" onClick={()=>{setRoomMode(false);setSelWall(null);setSelOpening(null);}} title="Finish editing the room" style={{...btnS,background:"#1a1a2e",color:"#fff",border:"none",fontSize:"11.5px"}}>Done</button>
@@ -5801,7 +5804,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                       <button className="cpb" onClick={()=>separatePiece(focus.id)} title="Pull this piece away from the table it's joined to (or Alt-drag it)" style={btnS}>✂ Separate this piece</button>
                     )}
                     {!pieceDeleteAsk?(
-                      <button className="cpb cpb-danger" onClick={()=>requestDeletePieces(activeSelPieces)} title="Remove this table from the room" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete table</button>
+                      <button className="cpb cpb-warn" onClick={()=>requestDeletePieces(activeSelPieces)} title="Remove this table from the room" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete table</button>
                     ):(
                       <div style={{padding:"8px",borderRadius:"8px",background:"#fdeeed",border:"1px solid rgba(200,60,60,0.2)"}}>
                         <div style={{fontSize:"11px",color:"#a33",fontWeight:600,lineHeight:1.4,marginBottom:"6px"}}>{seatedHere} student{seatedHere!==1?'s':''} will go back to the student list. Delete this table?</div>
@@ -5875,7 +5878,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 );
               })()}
               {!activeSelPieces.length&&(
-                <button className="cpb cpb-danger" onClick={handleDelete} title={selSeats.some(s=>s.pieceId)?"Switch the selected seat(s) off — the table keeps that place, and Edit seats can switch it back on":"Remove the selected seat(s) or room item from the room entirely"} style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}
+                <button className="cpb cpb-warn" onClick={handleDelete} title={selSeats.some(s=>s.pieceId)?"Switch the selected seat(s) off — the table keeps that place, and Edit seats can switch it back on":"Remove the selected seat(s) or room item from the room entirely"} style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}
                   onMouseEnter={e=>{e.currentTarget.style.background="#fdeeed";}}
                   onMouseLeave={e=>{e.currentTarget.style.background="#fff";}}
                 >{selSeats.length&&selSeats.every(s=>s.pieceId)?'Switch seat off':'Delete'}</button>
@@ -5921,7 +5924,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                   <input type="checkbox" checked={!!selItem.fixed} onChange={()=>toggleItemFixed(selItem.id)}/> Fixed — part of the room
                 </label>
                 <StationEditor station={selItem.station} onToggle={()=>toggleItemStation(selItem.id)} onSet={p=>setItemStation(selItem.id,p)} btnS={btnS}/>
-                <button className="cpb cpb-danger" onClick={handleDelete} title="Remove this item from the room. Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete</button>
+                <button className="cpb cpb-warn" onClick={handleDelete} title="Remove this item from the room. Key: Delete" style={{...btnS,color:"#c44",border:"1px solid rgba(200,60,60,0.15)"}}>Delete</button>
               </div>
             </div>
           );
@@ -8251,7 +8254,7 @@ function ChecklistColumnEditor({col,x,y,categories,onChangeCategories,onUpdate,o
       </div>
 
       {!confirmDel?(
-        <button className="cpb cpb-danger" onClick={()=>setConfirmDel(true)} title="Delete this item and everyone's status for it" style={{...ckSmallBtn,color:"#c44",borderColor:"rgba(200,60,60,0.25)",textAlign:"center"}}>Delete item</button>
+        <button className="cpb cpb-warn" onClick={()=>setConfirmDel(true)} title="Delete this item and everyone's status for it" style={{...ckSmallBtn,color:"#c44",borderColor:"rgba(200,60,60,0.25)",textAlign:"center"}}>Delete item</button>
       ):(
         <div>
           <div style={{fontSize:"12px",color:"#c44",fontWeight:600,marginBottom:"7px",lineHeight:1.4}}>Delete "{col.name}"? This removes everyone's status for it.</div>
@@ -8699,7 +8702,7 @@ function SettingsModal({theme,onSetTheme,timerStyle,onSetTimerStyle,onClose}){
           {options.map(opt=>{
             const active=theme===opt.id;
             return(
-              <button className="cpb cpb-card" key={opt.id} onClick={()=>onSetTheme(opt.id)} style={{flex:1,padding:0,borderRadius:"12px",border:active?"2px solid #2e6bce":"2px solid rgba(0,0,0,0.08)",cursor:"pointer",overflow:"hidden",background:"#fff",textAlign:"left",fontFamily:"'Source Sans 3',sans-serif"}}>
+              <button className={`cpb cpb-card${active?" on":""}`} key={opt.id} onClick={()=>onSetTheme(opt.id)} style={{flex:1,padding:0,borderRadius:"12px",border:active?"2px solid #2e6bce":"2px solid rgba(0,0,0,0.08)",cursor:"pointer",overflow:"hidden",background:"#fff",textAlign:"left",fontFamily:"'Source Sans 3',sans-serif"}}>
                 <div style={{height:"56px",background:opt.bg,display:"flex",alignItems:"center",justifyContent:"center"}}>
                   <span style={{fontSize:"12px",fontWeight:700,color:opt.text}}>Aa</span>
                 </div>
@@ -8721,7 +8724,7 @@ function SettingsModal({theme,onSetTheme,timerStyle,onSetTimerStyle,onClose}){
           ].map(opt=>{
             const active=timerStyle===opt.id;
             return(
-              <button className="cpb cpb-card" key={opt.id} onClick={()=>{audio.style=opt.id;audio.ding();onSetTimerStyle(opt.id);}} title={opt.help} style={{flex:1,minWidth:0,padding:0,borderRadius:"12px",border:active?"2px solid #2e6bce":"2px solid rgba(0,0,0,0.08)",cursor:"pointer",overflow:"hidden",background:"#fff",textAlign:"left",fontFamily:"'Source Sans 3',sans-serif"}}>
+              <button className={`cpb cpb-card${active?" on":""}`} key={opt.id} onClick={()=>{audio.style=opt.id;audio.ding();onSetTimerStyle(opt.id);}} title={opt.help} style={{flex:1,minWidth:0,padding:0,borderRadius:"12px",border:active?"2px solid #2e6bce":"2px solid rgba(0,0,0,0.08)",cursor:"pointer",overflow:"hidden",background:"#fff",textAlign:"left",fontFamily:"'Source Sans 3',sans-serif"}}>
                 <div style={{height:"84px",background:"#f8f9fb",display:"flex",alignItems:"center",justifyContent:"center",padding:"0 6px",pointerEvents:"none"}}>{opt.preview}</div>
                 <div style={{padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:"4px"}}>
                   <span style={{fontSize:"11.5px",fontWeight:700,color:"#1a1a2e",whiteSpace:"nowrap"}}>{opt.label}</span>
