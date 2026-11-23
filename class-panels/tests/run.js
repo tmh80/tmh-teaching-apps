@@ -973,6 +973,172 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await p5.keyboard.press('Escape'); await w5(200);
   await ctx5.close();
 
+  /* ── Seat these groups into a setup (Phase 6) ──
+     Its own browser profile with the Phase 5 fixture's class 8C: 10 students, four long tables (used as
+     tables) and three 4-place lab benches (workstations). Regular's seating must never change. */
+  console.log('Seat these groups: new setup from groups of 2');
+  const ctx6 = await browser.newContext({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 1 });
+  await ctx6.addInitScript(fixture => {
+    try { if (localStorage.getItem('classboard-storage') === null) localStorage.setItem('classboard-storage', JSON.stringify(fixture)); } catch (e) {}
+  }, seed5);
+  const p6 = await ctx6.newPage();
+  p6.on('console', m => { if (m.type() === 'error') problems.push('console (seat groups): ' + m.text()); });
+  p6.on('pageerror', e => problems.push('pageerror (seat groups): ' + e.message));
+  p6.on('dialog', d => d.dismiss());
+  const w6 = ms => p6.waitForTimeout(ms);
+  const store6 = () => readStore(p6);
+  const S6 = async k => { const v = (await store6())[k]; return v === undefined ? undefined : JSON.parse(v); };
+  const shot6 = name => p6.screenshot({ path: path.join(SHOT_DIR, name + '.png') });
+  const GCK = G5.GROUP_COLOR_KEYS;
+  await p6.goto(URL); await w6(1200);
+  const regular0 = (await store6())['sl-fx-8c'];
+  ok(regular0 === seed5['sl-fx-8c'], 'before we start, Regular\'s seating is exactly the fixture\'s');
+  const openManageGroups = async () => { await p6.locator(manageMenu).click(); await p6.getByText('Manage Groups').click(); await w6(800); };
+  const makeGroups = async size => {
+    await p6.locator('input[type="number"][min="2"]').fill(String(size)); await w6(150);
+    await p6.getByRole('button', { name: /^Create (new )?groups/ }).click(); await w6(700);
+  };
+  const seatBtn = () => p6.locator('[data-seat-groups] button').first();
+  const summary6 = () => p6.locator('[role="status"][aria-label="Seat groups summary"]');
+  await openManageGroups();
+  await makeGroups(2);
+  const gp6 = await S6('gp-fx-8c');
+  ok(gp6.resultGroupIds.length === 5 && gp6.resultGroupIds.every(g => g.length === 2), 'Manage Groups made 5 groups of 2');
+  ok(await seatBtn().isVisible() && /Seat these groups/.test(await seatBtn().innerText()) && !!(await seatBtn().getAttribute('title')), 'the "🪑 Seat these groups ▸" button is there, with a tooltip');
+  await seatBtn().click(); await w6(300);
+  ok(await p6.getByRole('menuitem', { name: /New setup…/ }).isVisible() && await p6.locator('[data-seat-regular]').isVisible(), 'its menu offers New setup… and shows Regular as not available');
+  ok(/never replaced/.test(await p6.locator('[data-seat-regular]').getAttribute('title')) && (await p6.getByRole('menuitem').count()) === 1, 'Regular can\'t be chosen: a tooltip explains why, and no existing setup is listed yet');
+  await shot6('70-seat-groups-menu-whiteboard');
+  await p6.getByRole('menuitem', { name: /New setup…/ }).click(); await w6(300);
+  const dlg6 = p6.locator('[role="dialog"][aria-label^="Seat these groups"]');
+  ok(await dlg6.locator('input').first().inputValue() === 'Lab partners', 'the new setup is called "Lab partners" by default when the groups are pairs');
+  ok(await dlg6.locator('[title^="Generate into workstations only"]').evaluate(b => b.classList.contains('on')), 'and it uses Workstations (the name says lab)');
+  ok(await dlg6.getByText('The current room and furniture', { exact: false }).isVisible() && await dlg6.getByText('Room', { exact: true }).isVisible(), 'the dialog asks for the room (the current one by default)');
+  await shot6('71-seat-groups-dialog-whiteboard');
+  await dlg6.getByRole('button', { name: 'Seat the groups' }).click(); await w6(1200);
+  let st6 = await store6();
+  let su6 = JSON.parse(st6['setups-fx-8c']);
+  const lp = su6.list.find(s => s.name === 'Lab partners');
+  ok(lp && su6.list.length === 2 && su6.activeId === lp.id && lp.icon === '👥' && lp.use.join() === 'workstation', 'a "Lab partners" tab was made and is now the active setup');
+  ok(lp && lp.fromGroups && lp.fromGroups.names.length === 5 && Number.isFinite(lp.fromGroups.at), 'the setup remembers it was made from the Groups (fromGroups)');
+  ok(st6['sl-fx-8c'] === regular0, 'Regular (sl-fx-8c) is byte-for-byte unchanged');
+  ok(await summary6().isVisible() && /5 groups seated in/.test(await summary6().innerText()) && /Lab partners/.test(await summary6().innerText()), 'a summary says "5 groups seated in Lab partners"');
+  ok(/share a bench/.test(await summary6().innerText()) && /Regular is not changed/.test(await summary6().innerText()), 'it says one group has to share a bench (only 3 benches for 5 pairs), and that Regular is not changed');
+  ok(await summary6().getByRole('button', { name: 'Go to setup' }).isVisible(), 'and offers Go to setup');
+  await shot6('72-seat-groups-summary-whiteboard');
+  const labKey6 = `sl-fx-8c~${lp.id}`;
+  const lab6 = JSON.parse(st6[labKey6]);
+  const seatByStudent = (lo, id) => lo.seats.find(s => s.studentId === id);
+  let pairsOk = true, coloursOk = true;
+  gp6.resultGroupIds.forEach((ids, gi) => {
+    const a = seatByStudent(lab6, ids[0]), b = seatByStudent(lab6, ids[1]);
+    if (!a || !b || a.pieceId !== b.pieceId || Math.abs(a.slot - b.slot) !== 1 || !c8.benchIds.includes(a.pieceId)) pairsOk = false;
+  });
+  // each bench takes the colour of the lowest-numbered group sitting on it
+  const benchGroups = {};
+  gp6.resultGroupIds.forEach((ids, gi) => { const pid = seatByStudent(lab6, ids[0]).pieceId; (benchGroups[pid] = benchGroups[pid] || []).push(gi); });
+  Object.entries(benchGroups).forEach(([pid, gis]) => {
+    const gid = lab6.seats.find(s => s.pieceId === pid).groupId;
+    if (lab6.groups.find(g => g.id === gid).color !== GCK[Math.min(...gis) % GCK.length]) coloursOk = false;
+  });
+  ok(pairsOk, 'every pair is at one bench, side by side (neighbouring places)');
+  ok(coloursOk && Object.keys(benchGroups).length === 3, 'the three benches are coloured with their group\'s colour (group 1 blue, 2 green, 3 gold…), and named after it');
+  ok(lab6.seats.filter(s => s.studentId).length === 10 && !lab6.seats.some(s => s.studentId && c8.deskIds.includes(s.pieceId)), 'all 10 students are seated, and none at the long tables (not used by Workstations)');
+  ok(lab6.pieces.filter(p => benchGroups[p.id]).every(p => /^Group \d$/.test(p.label || '')), 'each bench is labelled with a group name');
+  ok(JSON.stringify(lab6.rules) === '[]' && JSON.stringify(lab6.tags) === '[]', 'the new setup\'s own tags and rules stay empty (they belong to the class)');
+
+  console.log('Seat these groups: into an existing setup (asks first)');
+  await makeGroups(3);
+  const gp6b = await S6('gp-fx-8c');
+  ok(gp6b.resultGroupIds.length === 4, 'new groups of 3 (4 groups: 3, 3, 2, 2)');
+  const labBefore = st6[labKey6];
+  await seatBtn().click(); await w6(300);
+  const items = await p6.getByRole('menuitem').allInnerTexts();
+  ok(items.length === 2 && /Lab partners/.test(items[1]) && /from Groups/.test(items[1]), 'the menu now lists "Lab partners" (and not Regular) as an existing setup');
+  await p6.getByRole('menuitem', { name: /Lab partners/ }).click(); await w6(250);
+  ok(/Replace the seating in Lab partners with these 4 groups\?/.test(await p6.locator('[role="menu"]').innerText()) && /Regular is not changed/.test(await p6.locator('[role="menu"]').innerText()), 'it asks "Replace the seating in Lab partners with these 4 groups? Regular is not changed."');
+  ok((await store6())[labKey6] === labBefore, 'and nothing has changed yet');
+  await shot6('73-seat-groups-replace-question-whiteboard');
+  await p6.getByRole('button', { name: 'Replace', exact: true }).click(); await w6(1000);
+  st6 = await store6();
+  ok(st6[labKey6] !== labBefore && JSON.parse(st6['setups-fx-8c']).list.length === 2 && JSON.parse(st6['setups-fx-8c']).activeId === lp.id, 'after confirming, only Lab partners was replaced (still 2 setups, same one active)');
+  ok(st6['sl-fx-8c'] === regular0, 'Regular is still byte-for-byte unchanged');
+  const lab6b = JSON.parse(st6[labKey6]);
+  const sameBench = gp6b.resultGroupIds.map(ids => new Set(ids.map(id => seatByStudent(lab6b, id)?.pieceId)).size);
+  ok(lab6b.seats.filter(s => s.studentId).length === 10 && sameBench.every(n => n === 1) && JSON.parse(st6['setups-fx-8c']).list.find(s => s.id === lp.id).fromGroups.names.length === 4, 'all 4 new groups (3,3,2,2) each sit at one bench, and fromGroups was updated');
+  ok(await summary6().isVisible() && /4 groups seated in/.test(await summary6().innerText()), 'the summary updates');
+
+  console.log('Seat these groups: groups of 5 split across tables');
+  await makeGroups(5);
+  const gp6c = await S6('gp-fx-8c');
+  ok(gp6c.resultGroupIds.length === 2 && gp6c.resultGroupIds.every(g => g.length === 5), '2 groups of 5');
+  await seatBtn().click(); await w6(300);
+  await p6.getByRole('menuitem', { name: /New setup…/ }).click(); await w6(300);
+  const nm = await dlg6.locator('input').first().inputValue();
+  ok(/^Groups \d{1,2} [A-Z][a-z]{2}$/.test(nm), `the default name is "Groups <date>" (${nm})`);
+  ok(await dlg6.locator('[title^="Generate into tables only"]').evaluate(b => b.classList.contains('on')), 'with Tables as the default use');
+  await dlg6.getByRole('button', { name: 'Seat the groups' }).click(); await w6(1200);
+  st6 = await store6();
+  su6 = JSON.parse(st6['setups-fx-8c']);
+  const gs = su6.list.find(s => s.name === nm);
+  const gsLay = JSON.parse(st6[`sl-fx-8c~${gs.id}`]);
+  ok(gs && su6.activeId === gs.id && su6.list.length === 3, 'a third tab was made and is active');
+  const tablesOfGroup = ids => [...new Set(ids.map(id => seatByStudent(gsLay, id).pieceId))];
+  const t5 = gp6c.resultGroupIds.map(tablesOfGroup);
+  ok(t5.every(t => t.length === 2) && t5.every(t => t.every(id => c8.deskIds.includes(id))), 'each group of 5 is split over two of the 4-seat tables');
+  const px = id => gsLay.pieces.find(p => p.id === id).x;
+  ok(t5.every(t => Math.abs(px(t[0]) - px(t[1])) === 280), 'the two tables are neighbours');
+  ok(await summary6().isVisible() && /was split across 2 tables/.test(await summary6().innerText()), 'the summary says a group was split across 2 tables: ' + (await summary6().innerText()).replace(/\n/g, ' | '));
+  ok(st6['sl-fx-8c'] === regular0 && st6[labKey6] === JSON.stringify(lab6b), 'Regular and Lab partners are unchanged');
+  await shot6('74-seat-groups-split-summary-whiteboard');
+
+  console.log('Seat these groups: the seating views and back to Regular');
+  await summary6().getByRole('button', { name: 'Go to setup' }).click(); await w6(900);
+  const tab6 = name => p6.locator(`[role="tab"][data-setup="${name}"]:visible`);
+  ok(await tab6(nm).getAttribute('aria-selected') === 'true' && await p6.getByText(/Group 1/).first().isVisible(), 'Go to setup opens the Seating view on the new setup');
+  ok(/Made from Groups on \d{1,2} [A-Z][a-z]{2}/.test(await tab6(nm).getAttribute('title')), 'the tab\'s tooltip says it was made from Groups on <date>');
+  await shot6('75-seat-groups-class-view-split-whiteboard');
+  await tab6('Lab partners').click(); await w6(900);
+  const classFills = await p6.evaluate(() => [...document.querySelectorAll('svg *')].map(e => (e.getAttribute('style') || '') + ' ' + (e.getAttribute('fill') || '')).join(' '));
+  ok(GCK.slice(0, 3).every(k => classFills.includes(`--cp-table-${k}`)), 'the class Seating view paints the benches in the group colours (blue, green, gold…)');
+  await shot6('76-seat-groups-class-view-lab-partners-whiteboard');
+  await tab6('Regular').click(); await w6(900);
+  ok(await p6.getByText('Aria Fake').first().isVisible() && (await store6())['sl-fx-8c'] === regular0, 'switching back to Regular shows the original seating, byte for byte');
+  await p6.reload(); await w6(1200);
+  st6 = await store6();
+  ok(JSON.parse(st6['setups-fx-8c']).list.map(s => s.name).join() === `Regular,Lab partners,${nm}`, 'after a reload all three tabs are still there');
+  await p6.locator(TAB.seating).click(); await w6(600);
+  await tab6('Lab partners').click(); await w6(900);
+  ok(JSON.stringify(JSON.parse((await store6())[labKey6]).seats.map(s => s.studentId)) === JSON.stringify(lab6b.seats.map(s => s.studentId)), 'and Lab partners still has its seating after the reload');
+  // Manage Seating shows the coloured benches too
+  await p6.locator(manageMenu).click(); await p6.getByText('Manage Seating').click(); await w6(1000);
+  ok(await tab6('Lab partners').count() === 1, 'Manage Seating has the Lab partners tab');
+  await tab6('Lab partners').click(); await w6(900);
+  await shot6('77-seat-groups-manage-seating-whiteboard');
+  ok((await store6())['sl-fx-8c'] === regular0, 'Regular is still unchanged after all of that');
+
+  // blackboard
+  await p6.evaluate(async () => { await window.storage.set('ta-theme', JSON.stringify('blackboard')); });
+  await p6.reload(); await w6(1000);
+  await p6.locator(manageMenu).click(); await p6.getByText('Manage Seating').click(); await w6(900);
+  await tab6('Lab partners').click(); await w6(800);
+  await shot6('77-seat-groups-manage-seating-blackboard');
+  await p6.locator(manageMenu).click(); await p6.getByText('Manage Groups').click(); await w6(900);
+  await seatBtn().click(); await w6(300);
+  await shot6('70-seat-groups-menu-blackboard');
+  await p6.getByRole('menuitem', { name: /New setup…/ }).click(); await w6(300);
+  await shot6('71-seat-groups-dialog-blackboard');
+  await p6.keyboard.press('Escape'); await w6(300);
+  await seatBtn().click(); await w6(300);
+  await p6.getByRole('menuitem', { name: /Lab partners/ }).click(); await w6(250);
+  await shot6('73-seat-groups-replace-question-blackboard');
+  await p6.getByRole('button', { name: 'Replace', exact: true }).click(); await w6(1000);
+  await shot6('72-seat-groups-summary-blackboard');
+  await summary6().getByRole('button', { name: 'Go to setup' }).click(); await w6(900);
+  await shot6('76-seat-groups-class-view-lab-partners-blackboard');
+  ok((await store6())['sl-fx-8c'] === regular0, 'Regular is unchanged in the blackboard run too');
+  await ctx6.close();
+
   console.log('Console');
   ok(problems.length === 0, 'no console errors or page errors' + (problems.length ? '\n    ' + problems.join('\n    ') : ''));
 

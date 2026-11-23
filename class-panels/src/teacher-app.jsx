@@ -3397,7 +3397,11 @@ const placeGroupsInSetup=({layout,setup,groups=[],ungroupedIds=[],rules=[],clear
           next=pool.sort((a,b)=>d(a)-d(b)||a.taken.length-b.taken.length||b.seats.length-a.seats.length||a.order-b.order)[0];
         }
         used.push(next);
-        const ids=left.splice(0,Math.min(next.seats.length,left.length));
+        // who goes to this table: keep-apart pairs in the group are kept on different tables where possible
+        const take=Math.min(next.seats.length,left.length),ids=[];
+        for(const id of left){if(ids.length>=take)break;if(!ids.some(x=>apart.get(id)?.has(x)))ids.push(id);}
+        for(const id of left){if(ids.length>=take)break;if(!ids.includes(id))ids.push(id);}
+        ids.forEach(id=>left.splice(left.indexOf(id),1));
         res.tables.push(next.key);res.seatIds.push(...put(g,next,ids).map(s=>s.id));
       }
       res.split=res.tables.length>1;
@@ -8131,6 +8135,176 @@ const fillRemainingGroups=({groups,waiting,rules,fairness,pairingHistory,student
 };
 
 /* ── GroupCard ── */
+/* ── 🪑 Seat these groups ▸ (Phase 6) ──
+   A self-contained block: the button and its menu, the New-setup dialog, the "replace this
+   setup's seating?" question, and the summary card. Used by Manage Groups and the Groups tab.
+   `groups` is [{name, ids, colorIndex}] and `ungroupedIds` everyone not in a group (see
+   seatGroupsIntoSetup / placeGroupsInSetup). Regular is never offered: it is the seating
+   the class goes back to. */
+function SeatGroupsDialog({groups,current,setups,rooms,onCreate,onClose}){
+  const pairs=groups.length>0&&groups.every(g=>g.ids.length===2);
+  const[name,setName]=useState(pairs?'Lab partners':`Groups ${fmtSetupDate(Date.now())}`);
+  const[icon,setIcon]=useState('👥');
+  const roomChoices=(rooms||[]).flatMap(r=>(r.layouts||[]).map(l=>({value:`room|${r.id}|${l.id}`,label:`${r.name} · ${l.name}`})));
+  const others=(setups?.list||[]).filter(x=>x.id!==current?.id);
+  const[room,setRoom]=useState('current');
+  const[roomPick,setRoomPick]=useState(roomChoices[0]?.value||'');
+  const[otherPick,setOtherPick]=useState(others[0]?.id||'');
+  const[use,setUse]=useState(null); // null = follows the name ("lab" → Workstations)
+  const useNow=use||useKey(useForName(name));
+  const[busy,setBusy]=useState(false);
+  const opt=(k,label,help,disabled=false)=>(
+    <button className={cpc("item",room===k)} disabled={disabled} onClick={()=>setRoom(k)} title={help}
+      style={{width:"100%",textAlign:"left",padding:"7px 9px",borderRadius:"8px",fontSize:"12.5px",fontWeight:room===k?700:600,display:"flex",alignItems:"center",gap:"8px"}}>
+      <span style={{width:"14px",height:"14px",borderRadius:"50%",border:"1.5px solid #2b2118",background:room===k?"#2b2118":"transparent",boxShadow:"inset 0 0 0 2.5px var(--cpb-bg)",flexShrink:0}}/>{label}
+    </button>
+  );
+  const create=async()=>{
+    if(busy||!name.trim())return;setBusy(true);
+    const from=room==='room'&&roomPick?{kind:'room',roomId:roomPick.split('|')[1],layoutId:roomPick.split('|')[2]}
+      :room==='setup'&&otherPick?{kind:'setup',setupId:otherPick}:{kind:'current'};
+    await onCreate({name:name.trim(),icon,use:SETUP_USES[useNow],from});
+  };
+  const head={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.35)",margin:"12px 2px 5px"};
+  const selectS={margin:"2px 0 4px 30px",padding:"5px 8px",borderRadius:"7px",fontSize:"12.5px",fontFamily:"'Source Sans 3',sans-serif"};
+  return createPortal(
+    <div onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:600,background:"rgba(20,14,8,0.32)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Source Sans 3',sans-serif"}}>
+      <div className="cp-pop" role="dialog" aria-label="Seat these groups in a new setup" style={{width:"380px",maxWidth:"calc(100vw - 32px)",maxHeight:"calc(100vh - 40px)",overflowY:"auto",borderRadius:"14px",padding:"16px 18px"}}>
+        <div style={{fontSize:"16px",fontWeight:800,color:"#2b2118"}}>🪑 Seat these groups in a new setup</div>
+        <div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.5)",marginTop:"2px",lineHeight:1.4}}>{groups.length} group{groups.length!==1?"s":""} go onto tables, each table coloured like its group. Your Regular seating is not changed: switch back to it any time.</div>
+        <div style={head}>Name and icon</div>
+        <input autoFocus value={name} maxLength={28} placeholder="e.g. Lab partners" title="The name on the setup's tab"
+          onChange={e=>setName(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')create();if(e.key==='Escape')onClose();e.stopPropagation();}}
+          style={{width:"100%",boxSizing:"border-box",padding:"8px 10px",borderRadius:"8px",fontSize:"13.5px",fontWeight:600,fontFamily:"'Source Sans 3',sans-serif",outline:"none"}}/>
+        <div style={{display:"flex",gap:"4px",marginTop:"7px"}}>
+          {SETUP_ICONS.map(ic=><button key={ic} className={cpc("",icon===ic)} onClick={()=>setIcon(ic)} title={`Use ${ic} as the icon`} style={{width:"34px",height:"32px",borderRadius:"8px",fontSize:"16px",padding:0,lineHeight:1}}>{ic}</button>)}
+        </div>
+        <div style={head}>Room</div>
+        <div style={{display:"flex",flexDirection:"column",gap:"2px"}}>
+          {opt('current',`The current room and furniture (${current?.icon||''} ${current?.name||'this setup'}), no students`,'Same room and tables as the setup you are on now')}
+          {opt('room','A room layout from 🏫 Rooms',roomChoices.length?'Use a room and one of its saved layouts':'Save a room in 🏫 Rooms first',!roomChoices.length)}
+          {room==='room'&&roomChoices.length>0&&(
+            <select value={roomPick} onChange={e=>setRoomPick(e.target.value)} title="Which room and layout" style={selectS}>
+              {roomChoices.map(c=><option key={c.value} value={c.value}>{c.label}</option>)}
+            </select>
+          )}
+          {opt('setup','Another setup\'s furniture',others.length?'Use the room and furniture of one of your other setups':'You have no other setup yet',!others.length)}
+          {room==='setup'&&others.length>0&&(
+            <select value={otherPick} onChange={e=>setOtherPick(e.target.value)} title="Which setup's furniture" style={selectS}>
+              {others.map(x=><option key={x.id} value={x.id}>{x.icon} {x.name}</option>)}
+            </select>
+          )}
+        </div>
+        <div style={head}>Use</div>
+        <SetupUsePicker value={useNow} onChange={setUse}/>
+        <div style={{fontSize:"11px",color:"rgba(0,0,0,0.45)",marginTop:"5px",lineHeight:1.35}}>Groups are seated at {({desk:'tables (lab benches stay free)',workstation:'workstations such as lab benches',both:'tables and workstations'})[useNow]}.</div>
+        <div style={{display:"flex",justifyContent:"flex-end",gap:"6px",marginTop:"16px"}}>
+          <button className={cpc()} onClick={onClose} title="Don't seat the groups" style={{padding:"8px 14px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>Cancel</button>
+          <button className={cpc("primary")} onClick={create} disabled={busy||!name.trim()} title="Make the setup, seat the groups in it and switch to it" style={{padding:"8px 16px",borderRadius:"9px",fontSize:"12.5px",fontWeight:700}}>Seat the groups</button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+function SeatGroupsButton({classId,students,groups,ungroupedIds,onGoToSetup,compact=false,inline=false}){
+  const menu=useAnchoredMenu();
+  const[setups,setSetups]=useState(null);
+  const[rooms,setRooms]=useState([]);
+  const[asking,setAsking]=useState(null); // a setup waiting for "Replace the seating?" yes/no
+  const[dialog,setDialog]=useState(false);
+  const[busy,setBusy]=useState(false);
+  const[summary,setSummary]=useState(null);
+  const seatable=groups.filter(g=>g.ids.length>0);
+  const nameOf=id=>students.find(s=>s.id===id)?.name||'someone';
+  const open=()=>{
+    if(!menu.pos){setAsking(null);loadSetups(classId).then(setSetups);loadRooms().then(setRooms);}
+    menu.toggle();
+  };
+  const current=setups?setups.list.find(x=>x.id===setups.activeId):null;
+  const noun=s=>useKey(s?.use)==='workstation'?'bench':'table';
+  const plural=s=>noun(s)==='bench'?'benches':'tables';
+  const summarise=({setup,res,created})=>{
+    const n=noun(setup),lines=[];
+    const splits=res.placed.filter(p=>p.split);
+    splits.forEach(p=>lines.push(`${p.name} was split across ${p.tables.length} ${plural(setup)}`));
+    const shared=res.placed.filter(p=>p.shared).length;
+    if(shared)lines.push(`${shared} group${shared!==1?'s':''} share a ${n} with another group (not enough free ${plural(setup)})`);
+    if(res.unplaced.length)lines.push(`${res.unplaced.length} student${res.unplaced.length!==1?'s':''} not placed (no free seat): ${res.unplaced.map(nameOf).join(', ')}`);
+    if(res.conflicts.length)lines.push(`Keep-apart rule not possible for ${res.conflicts.map(c=>`${nameOf(c.aId)} and ${nameOf(c.bId)}`).join('; ')}`);
+    if(res.lockedKept)lines.push(`${res.lockedKept} locked seat${res.lockedKept!==1?'s':''} left alone`);
+    setSummary({setupName:setup.name,icon:setup.icon,count:res.placed.length,lines,replaced:!created});
+  };
+  const run=async target=>{
+    if(busy)return;setBusy(true);
+    try{
+      const out=await seatGroupsIntoSetup(classId,{target,groups:seatable,ungroupedIds});
+      setDialog(false);menu.close();setAsking(null);summarise(out);
+    }catch(e){
+      setDialog(false);menu.close();setAsking(null);
+      setSummary({setupName:'',icon:'',count:0,lines:[`Could not seat the groups: ${e.message}`],failed:true});
+    }
+    setBusy(false);
+  };
+  const itemS={width:"100%",textAlign:"left",padding:"7px 9px",borderRadius:"8px",fontSize:"12.5px",fontWeight:600,display:"flex",alignItems:"center",gap:"7px"};
+  const head={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.35)",margin:"8px 4px 4px"};
+  const others=setups?setups.list.filter(x=>x.id!==REGULAR_SETUP):[];
+  const card=summary&&(
+    <div role="status" aria-label="Seat groups summary" className="cp-pop" style={inline?{flexBasis:"100%",borderRadius:"12px",padding:"11px 14px",fontFamily:"'Source Sans 3',sans-serif"}:{position:"fixed",left:"50%",bottom:"22px",transform:"translateX(-50%)",zIndex:650,width:"420px",maxWidth:"calc(100vw - 32px)",borderRadius:"14px",padding:"13px 16px",fontFamily:"'Source Sans 3',sans-serif"}}>
+      <div style={{display:"flex",alignItems:"flex-start",gap:"10px"}}>
+        <div style={{flex:1,minWidth:0}}>
+          {summary.failed?<div style={{fontSize:"13px",fontWeight:700,color:"var(--cpb-bad)"}}>{summary.lines[0]}</div>:(<>
+            <div style={{fontSize:"13.5px",fontWeight:800,color:"#2b2118",lineHeight:1.35}}>{summary.count} group{summary.count!==1?'s':''} seated in <i>{summary.icon} {summary.setupName}</i>.</div>
+            {summary.lines.map((l,i)=><div key={i} style={{fontSize:"12px",color:"rgba(0,0,0,0.62)",marginTop:"3px",lineHeight:1.4}}>{l}.</div>)}
+            <div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.45)",marginTop:"4px"}}>Regular is not changed.</div>
+          </>)}
+        </div>
+        <button className={cpc("ghost")} onClick={()=>setSummary(null)} title="Close this message" aria-label="Close" style={{fontSize:"17px",lineHeight:1,padding:"0 4px",borderRadius:"6px"}}>×</button>
+      </div>
+      {!summary.failed&&onGoToSetup&&<div style={{display:"flex",justifyContent:"flex-end",marginTop:"9px"}}>
+        <button className={cpc("primary")} onClick={()=>{setSummary(null);onGoToSetup();}} title={`Open the ${summary.setupName} seating`} style={{padding:"6px 14px",borderRadius:"9px",fontSize:"12.5px",fontWeight:700}}>Go to setup</button>
+      </div>}
+    </div>
+  );
+  return(<>
+    <div ref={menu.anchorRef} data-seat-groups style={{display:"inline-block",position:"relative"}}>
+      <button className={cpc("",!!menu.pos)} onClick={open} disabled={!seatable.length}
+        title={seatable.length?"Put these groups at tables in a seating setup, each table coloured like its group. Your Regular seating is not changed.":"Make some groups first"}
+        style={{display:"flex",alignItems:"center",gap:"5px",fontSize:compact?"12px":"12.5px",fontWeight:700,padding:compact?"7px 11px":"7px 13px",borderRadius:"9px",whiteSpace:"nowrap"}}>🪑 Seat these groups ▸</button>
+      {menu.pos&&createPortal(
+        <div className="cp-pop" ref={menu.menuRef} role="menu" aria-label="Seat these groups" style={{position:"fixed",left:Math.min(menu.pos.left,window.innerWidth-276),...(menu.pos.top!=null?{top:menu.pos.top}:{bottom:menu.pos.bottom}),maxHeight:menu.pos.maxHeight,overflowY:"auto",zIndex:500,width:"264px",borderRadius:"12px",padding:"8px",fontFamily:"'Source Sans 3',sans-serif"}}>
+          {asking?(
+            <div style={{padding:"4px"}}>
+              <div style={{fontSize:"12.5px",fontWeight:700,color:"#2b2118",lineHeight:1.4}}>Replace the seating in {asking.name} with these {seatable.length} group{seatable.length!==1?'s':''}?</div>
+              <div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.55)",lineHeight:1.4,margin:"4px 0 8px"}}>Regular is not changed.</div>
+              <div style={{display:"flex",gap:"5px"}}>
+                <button className={cpc("primary")} disabled={busy} onClick={()=>run({setupId:asking.id})} title={`Yes, replace the seating in ${asking.name}`} style={{flex:1,padding:"6px 0",borderRadius:"8px",fontSize:"12px",fontWeight:700}}>Replace</button>
+                <button className={cpc()} onClick={()=>setAsking(null)} title="Go back" style={{flex:1,padding:"6px 0",borderRadius:"8px",fontSize:"12px",fontWeight:600}}>Cancel</button>
+              </div>
+            </div>
+          ):(<>
+            <div style={{...head,marginTop:"2px"}}>Seat the groups in…</div>
+            <button className={cpc("item")} role="menuitem" onClick={()=>{menu.close();setDialog(true);}} title="Make a new setup tab for these groups (Regular stays as it is)" style={itemS}>＋ New setup…</button>
+            {others.length>0&&<div style={head}>An existing setup (replaces its seating)</div>}
+            {others.map(x=>(
+              <button key={x.id} className={cpc("item")} role="menuitem" onClick={()=>setAsking(x)} title={`Replace the seating in ${x.name} with these groups (it asks first)`} style={itemS}>
+                <span aria-hidden="true">{x.icon}</span><span style={{flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{x.name}</span>{x.fromGroups&&<span style={{fontSize:"10px",color:"rgba(0,0,0,0.4)"}}>from Groups</span>}
+              </button>
+            ))}
+            <div style={{height:"1px",background:"rgba(0,0,0,0.08)",margin:"7px 0 4px"}}/>
+            <div data-seat-regular title="Regular can't be a target: it is the seating your class goes back to, so it is never replaced. Make a new setup instead." style={{...itemS,cursor:"not-allowed",opacity:0.5,fontWeight:600}}>
+              <span aria-hidden="true">🪑</span><span style={{flex:1}}>Regular</span><span style={{fontSize:"10px"}}>never changed</span>
+            </div>
+          </>)}
+        </div>,
+        document.body
+      )}
+      {dialog&&<SeatGroupsDialog groups={seatable} current={current} setups={setups} rooms={rooms} onCreate={t=>run(t)} onClose={()=>setDialog(false)}/>}
+    </div>
+    {summary&&(inline?card:createPortal(card,document.body))}
+  </>);
+}
+
 function GroupCard({group,index,vertical,onStudentMouseDown,draggingId,isDragOver,dragOverInsert,name,onRename,onRemove,flagsByStudent}){
   const col=COLORS[index%COLORS.length];
   const insertAt=dragOverInsert&&dragOverInsert.bucket===index?dragOverInsert.index:null;
@@ -8159,7 +8333,7 @@ function GroupCard({group,index,vertical,onStudentMouseDown,draggingId,isDragOve
 }
 
 /* ── Manage Groups Panel — teacher editor: settings, rules, drag-to-edit ── */
-function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetShowFlags}){
+function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetShowFlags,onGoToSeating}){
   const[mode,setMode]=useState('size');
   const[sizeVal,setSizeVal]=useState('3');
   const[countVal,setCountVal]=useState('4');
@@ -8677,6 +8851,13 @@ function ManageGroupsPanel({activeClass,guardRef,flagsByStudent,showFlags,onSetS
                 {finalised?"New groups will use the updated history.":"Finalise to record pairings for smart shuffle."}
               </div>
             </div>
+            {/* Seat these groups (Phase 6): its own block, so the stations work can sit beside it */}
+            <div data-seat-groups-block style={{display:"flex",gap:"10px",alignItems:"center",flexWrap:"wrap",padding:"10px 12px",borderRadius:"12px",background:"rgba(255,255,255,0.55)",border:"1px dashed rgba(0,0,0,0.14)"}}>
+              <SeatGroupsButton classId={activeClass.id} students={students} inline onGoToSetup={()=>onGoToSeating?.()}
+                groups={result.groups.map((g,i)=>({name:groupNames[i]||`Group ${i+1}`,colorIndex:i,ids:g.map(s=>s.id)}))}
+                ungroupedIds={(()=>{const inG=new Set(result.groups.flat().map(s=>s.id));return students.filter(s=>!inG.has(s.id)).map(s=>s.id);})()}/>
+              <div style={{fontSize:"11px",color:"rgba(0,0,0,0.4)",fontWeight:500,flex:1,minWidth:"180px",lineHeight:1.4}}>Put these groups at tables in a seating setup, e.g. lab partners. Your Regular seating is not changed.</div>
+            </div>
           </div>
         )}
 
@@ -8847,7 +9028,7 @@ const usePinchZoom=(ref,setZoom,active)=>{
   },[active]);
 };
 
-function StudentGroupsPanel({activeClass,flagsByStudent,showFlags}){
+function StudentGroupsPanel({activeClass,flagsByStudent,showFlags,onGoToSeating}){
   const[gp,setGp]=useState(null); // raw saved Manage Groups state — settings, rules, last result
   const[displayMode,setDisplayMode]=useState(false);
   const containerRef=useRef(null);
@@ -8960,6 +9141,9 @@ function StudentGroupsPanel({activeClass,flagsByStudent,showFlags}){
         </div>
         <div style={{display:"flex",alignItems:"center",gap:"8px"}}>
           {hasGroups&&<ZoomControl zoom={zoom} onChange={setZoomSaved}/>}
+          {hasGroups&&<SeatGroupsButton classId={activeClass.id} students={students} compact onGoToSetup={()=>onGoToSeating?.()}
+            groups={rehydrated.groups.map((g,i)=>({name:rehydrated.names[i]||`Group ${i+1}`,colorIndex:i,ids:g.map(s=>s.id)}))}
+            ungroupedIds={students.filter(s=>!rehydrated.groups.some(g=>g.some(m=>m.id===s.id))).map(s=>s.id)}/>}
           <button className="cpb cpb-primary" onClick={randomize} title="Shuffle students into new groups, using whatever mode/size/rules are set up in Manage Groups" style={{fontSize:"12.5px",fontWeight:700,padding:"8px 16px",borderRadius:"9px",border:"none",background:"#1a1a2e",color:"#fff",cursor:"pointer"}}
             onMouseEnter={e=>e.currentTarget.style.background="#2a2a4e"} onMouseLeave={e=>e.currentTarget.style.background="#1a1a2e"}
           >🎲 Randomise</button>
@@ -10122,6 +10306,12 @@ export default function TeacherApp(){
       return next;
     });
   }),[withGroupsGuard]);
+  /* "Go to setup" after Seat these groups: straight to the class Seating tab. No finalise question
+     here: the groups are already saved, and Tom is only going to look at the seating. */
+  const goToSeatingTab=useCallback(()=>{
+    setManageSeatingOpen(false);setManageGroupsOpen(false);
+    setOpenPanels(prev=>{const next={...prev,seating:true};window.electronAPI?.resizeForPanels(Object.values(next).filter(Boolean).length);return next;});
+  },[]);
 
   /* "Open in Checklist" from a seating popup: opens (never closes) the Checklist
      tab and tells it which student (and item) to scroll to, via a one-shot
@@ -10214,7 +10404,7 @@ export default function TeacherApp(){
           </div>
         ):manageGroupsOpen?(
           <div style={{flex:1,overflow:"hidden"}}>
-            <ManageGroupsPanel activeClass={activeClass} guardRef={groupsGuardRef} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups} onSetShowFlags={handleSetShowFlagsGroups}/>
+            <ManageGroupsPanel activeClass={activeClass} onGoToSeating={goToSeatingTab} guardRef={groupsGuardRef} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups} onSetShowFlags={handleSetShowFlagsGroups}/>
           </div>
         ):(
           <>
@@ -10227,7 +10417,7 @@ export default function TeacherApp(){
             {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} setups={setups} seatRev={setupsState?.rev} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist}/></div>)}
             {openPanels.seating&&!isLastOpen("seating")&&<ResizeHandle panelId="seating"/>}
 
-            {openPanels.groups&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("groups")?{flex:1,minWidth:PANEL_MIN.groups}:{width:colWidth("groups"),flexShrink:0}),overflow:"hidden auto"}}><StudentGroupsPanel activeClass={activeClass} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups}/></div>)}
+            {openPanels.groups&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("groups")?{flex:1,minWidth:PANEL_MIN.groups}:{width:colWidth("groups"),flexShrink:0}),overflow:"hidden auto"}}><StudentGroupsPanel activeClass={activeClass} onGoToSeating={goToSeatingTab} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups}/></div>)}
             {openPanels.groups&&!isLastOpen("groups")&&<ResizeHandle panelId="groups"/>}
 
             {openPanels.checklist&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("checklist")?{flex:1,minWidth:PANEL_MIN.checklist}:{width:colWidth("checklist"),flexShrink:0}),overflow:"hidden auto"}}><ChecklistPanel activeClass={activeClass} classes={classes} data={checklist} onChange={updateChecklist} onCopyItems={copyChecklistItems} categories={checkCategories} onChangeCategories={updateCheckCategories} now={now} focus={pendingChecklistFocus} onFocusHandled={()=>setPendingChecklistFocus(null)}/></div>)}

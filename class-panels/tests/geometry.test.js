@@ -472,6 +472,12 @@ console.log('Seating groups into a setup (Phase 6)');
     const forced = placeGroupsInSetup({ layout: mk([['long4', 200, 200]]), setup: tablesOnly, groups: mkGroups([2]), ungroupedIds: ['u1', 'u2'], rules: [{ id: 'r', type: 'apart', aId: 'u1', bId: 'u2' }] });
     ok(forced.unplaced.length === 0 && forced.conflicts.length === 1, 'a keep-apart pair that cannot be separated is reported, not failed');
   }
+  // a split group keeps its own keep-apart pair on different tables
+  {
+    const lo = mk([['long4', 200, 200], ['long4', 480, 200]]);
+    const res = placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: [{ name: 'A', colorIndex: 0, ids: ['s1', 's2', 's3', 's4', 's5'] }], ungroupedIds: [], rules: [{ id: 'r', type: 'apart', aId: 's1', bId: 's2' }] });
+    ok(res.placed[0].split && seatOfStudent(res, 's1').groupId !== seatOfStudent(res, 's2').groupId && res.conflicts.length === 0, 'when a group has to split, a keep-apart pair inside it lands on different tables');
+  }
   // the input layout is not changed (a pure function)
   {
     const lo = mk([['long4', 200, 200]]);
