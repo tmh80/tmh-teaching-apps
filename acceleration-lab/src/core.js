@@ -1,6 +1,6 @@
 /* ===== Acceleration Lab: state, helpers, maths, pop-ups, calculator ===== */
 const LAB={title:'Acceleration Lab',code:'ACCELERATION',key:'accel-lab-v1',file:'Acceleration-Lab-offline.html'};
-const MS=[1,2,3,4],RAMP_END=2; /* metres 1-2 are on the ramp, 3-4 on the flat */
+const MS=[1,2,3,4],AK=[2,3,4],RAMP_END=2; /* AK: the three changes we can measure (metre 1 has no metre before it) */ /* metres 1-2 are on the ramp, 3-4 on the flat */
 const COLS={t:'#2563eb',l:'#7c3aed',v:'#15803d',d:'#c2410c',a:'#be123c'};
 const SOFT={t:'#dbeafe',l:'#ede9fe',v:'#dcfce7',d:'#ffedd5',a:'#ffe4e6'};
 let S=blank();
@@ -24,9 +24,9 @@ function setPath(p,v){const ks=p.split('.'),last=ks.pop();let o=S;ks.forEach(k=>
 function avgT(k){const v=S.T[k].slice(0,S.trials).map(num).filter(x=>!isNaN(x));return v.length?r2(v.reduce((a,b)=>a+b,0)/v.length):null}
 function legCalc(k){const a=avgT(k);if(a==null)return null;if(k===1)return a;const b=avgT(k-1);return b==null?null:r2(a-b)}
 function spdCalc(k){const l=num(S.leg[k]);return l>0?1/l:null}
-function chgCalc(k){const v=num(S.spd[k]);if(isNaN(v))return null;if(k===1)return v;const p=num(S.spd[k-1]);return isNaN(p)?null:v-p}
+function chgCalc(k){if(k===1)return null;const v=num(S.spd[k]);if(isNaN(v))return null;const p=num(S.spd[k-1]);return isNaN(p)?null:v-p}
 /* acceleration (done for the student): change in speed ÷ time between the middles of the two metres */
-function gapT(k){const l=num(S.leg[k]);if(!(l>0))return null;if(k===1)return l/2;const p=num(S.leg[k-1]);return p>0?(p+l)/2:null}
+function gapT(k){const l=num(S.leg[k]);if(!(l>0)||k===1)return null;const p=num(S.leg[k-1]);return p>0?(p+l)/2:null}
 function accel(k){const d=num(S.chg[k]),g=gapT(k);return isNaN(d)||g==null?null:d/g}
 const near=(a,b)=>a!=null&&!isNaN(a)&&b!=null&&Math.abs(a-b)<=Math.max(0.011,Math.abs(b)*0.01);
 function cellOK(kind,k){const v=num(S[kind][k]);if(isNaN(v))return null;const want=kind==='leg'?legCalc(k):kind==='spd'?spdCalc(k):chgCalc(k);return want==null?null:near(v,want)}
@@ -61,7 +61,7 @@ const HELP={
   spd:{t:'Speed in each metre',c:'v',f:'speed = distance ÷ time = 1 ÷ time for that metre',
     p:['Speed tells you how many metres the cart moves every second (m/s).','Each piece of track is exactly 1 metre long, so you just do <b>1 ÷ the time</b>.','A <b>smaller</b> time means a <b>bigger</b> speed: the cart was faster.']},
   chg:{t:'Change in speed',c:'d',f:'change in speed = this speed − the speed before',
-    p:['This tells you if the cart got faster or slower from one metre to the next.','<b>Plus number (+):</b> it got faster. <b>Minus number (−):</b> it got slower.','<b>Metre 1:</b> the cart started still (0 m/s), so the change is just its speed in metre 1.']},
+    p:['This tells you if the cart got faster or slower from one metre to the next.','<b>Plus number (+):</b> it got faster. <b>Minus number (−):</b> it got slower.','<b>Metre 1</b> has no metre before it, so there is nothing to compare. Start at metre 2.']},
   acc:{t:'Acceleration (we do this for you)',c:'a',f:'acceleration = change in speed ÷ time it took to change',
     p:['Acceleration is how much the speed changes <b>every second</b>. Its unit is m/s² ("metres per second, every second").','Your speed for a metre is the cart\'s speed in the <b>middle</b> of that metre\'s time.','So the time between two speeds is <b>half</b> of one metre\'s time + <b>half</b> of the next metre\'s time.','<b>+</b> means speeding up. <b>−</b> means slowing down.']}
 };

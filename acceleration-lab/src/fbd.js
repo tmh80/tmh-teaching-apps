@@ -15,17 +15,29 @@ function sceneArt(s){
     :`<g opacity=".55"><line x1="${BW-170}" y1="40" x2="${BW-50}" y2="40" stroke="#14202e" stroke-width="3" stroke-dasharray="6 5"/><polygon points="${BW-38},40 ${BW-54},31 ${BW-54},49" fill="#14202e"/><text x="${BW-170}" y="26" font-size="15" fill="#14202e">moving this way</text></g>`;
   return ground+cart+mv;
 }
-function arrowSVG(a,showLbl=true){
-  const [dx,dy]=VEC[a.dir],x2=BCX+dx*a.len,y2=BCY+dy*a.len,hs=14,c=a.type?FT[a.type].c:'#7a8a92';
-  const t=a.type?FT[a.type].n:'Tap to label',lx=x2+dx*14,ly=y2+dy*18+(Math.abs(dy)<.5?-10:4);
-  return`<g class="farr" data-id="${a.id}"><line x1="${BCX}" y1="${BCY}" x2="${x2-dx*hs*.7}" y2="${y2-dy*hs*.7}" stroke="${c}" stroke-width="6" stroke-linecap="round" ${a.type?'':'stroke-dasharray="8 6"'}/>
+function arrowSVG(a,off=0){
+  /* off: sideways shift so two forces pointing the same way sit side by side instead of on top of each other */
+  const [dx,dy]=VEC[a.dir],px=-dy*off,py=dx*off,x1=BCX+px,y1=BCY+py,x2=x1+dx*a.len,y2=y1+dy*a.len,hs=14,c=a.type?FT[a.type].c:'#7a8a92';
+  const t=a.type?FT[a.type].n:'Tap to label',tw=t.length*8.4;let anc=dx>.3?'start':dx<-.3?'end':'middle',lx=x2+dx*14,ly;
+  /* labels go on the outside of a side-by-side pair, so they never sit on top of each other */
+  if(Math.abs(dy)<.5)ly=y2+(off?(py>0?18:-9):-10);
+  else if(Math.abs(dx)<=.3&&off){anc=px>0?'start':'end';lx=x2+(px>0?9:-9);ly=y2+dy*10+5}
+  else ly=y2+dy*18+4+(off?(py>0?7:-7):0);
+  /* keep every label inside the box */
+  const lo=anc==='start'?lx:anc==='end'?lx-tw:lx-tw/2;let sh=0;if(lo<6)sh=6-lo;if(lo+tw>BW-6)sh=-(lo+tw-(BW-6));lx+=sh;
+  if(Math.abs(sh)>8&&anc!=='middle')ly+=ly>BH-40?-24:22; /* pushed back inside the box: move it clear of the arrow head */
+  ly=clamp(ly,18,BH-8);
+  return`<g class="farr" data-id="${a.id}"><line x1="${x1}" y1="${y1}" x2="${x2-dx*hs*.7}" y2="${y2-dy*hs*.7}" stroke="${c}" stroke-width="6" stroke-linecap="round" ${a.type?'':'stroke-dasharray="8 6"'}/>
    <polygon points="${x2},${y2} ${x2-dx*hs-dy*hs*.55},${y2-dy*hs+dx*hs*.55} ${x2-dx*hs+dy*hs*.55},${y2-dy*hs-dx*hs*.55}" fill="${c}"/>
-   <line x1="${BCX}" y1="${BCY}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="24"/><circle cx="${x2}" cy="${y2}" r="13" fill="transparent" class="ftip"/>
-   ${showLbl?`<text x="${lx}" y="${ly}" text-anchor="${dx>.3?'start':dx<-.3?'end':'middle'}" font-size="15" font-weight="700" fill="${c}" paint-order="stroke" stroke="#fffaf2" stroke-width="4">${esc(t)}</text>`:''}</g>`;
+   <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="24"/><circle cx="${x2}" cy="${y2}" r="13" fill="transparent" class="ftip"/>
+   <text x="${lx}" y="${ly}" text-anchor="${anc}" font-size="15" font-weight="700" fill="${c}" paint-order="stroke" stroke="#fffaf2" stroke-width="4">${esc(t)}</text></g>`;
 }
+function arrowsSVG(arrows){const by={};arrows.forEach(a=>(by[a.dir]=by[a.dir]||[]).push(a));
+  /* longest first, so short arrows are drawn on top; same-direction arrows are spread 22 px apart */
+  return arrows.slice().sort((p,q)=>q.len-p.len).map(a=>{const g=by[a.dir],i=g.indexOf(a);return arrowSVG(a,(i-(g.length-1)/2)*22)}).join('')}
 function fbdSVG(s,arrows,opts={}){
   return`<svg viewBox="0 0 ${BW} ${BH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Free body diagram: the cart ${SCEN[s].t.toLowerCase()}"><rect width="${BW}" height="${BH}" fill="#fffaf2"/>${sceneArt(s)}
-   ${opts.noDot?'':`<circle cx="${BCX}" cy="${BCY}" r="8" fill="#e3a51c" stroke="#14202e" stroke-width="2"/>`}${arrows.map(a=>arrowSVG(a)).join('')}</svg>`;
+   ${opts.noDot?'':`<circle cx="${BCX}" cy="${BCY}" r="8" fill="#e3a51c" stroke="#14202e" stroke-width="2"/>`}${arrowsSVG(arrows)}</svg>`;
 }
 const modelArrows=s=>MODEL[s].map(([type,dir,len],i)=>({id:'m'+i,type,dir,len}));
 function fbdCheck(s,arrows){

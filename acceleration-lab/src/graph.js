@@ -1,13 +1,19 @@
 /* ===== Graph maker (from Paper Plane Lab), with negative numbers on the y-axis ===== */
+/* smooth curve through points (monotone cubic: bends gently, never overshoots a point) */
+function smoothPath(c,P){const n=P.length;if(n<2)return;c.moveTo(P[0].x,P[0].y);if(n===2){c.lineTo(P[1].x,P[1].y);return}
+  const d=[],m=[];for(let i=0;i<n-1;i++)d.push((P[i+1].y-P[i].y)/(P[i+1].x-P[i].x));
+  m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;
+  for(let i=0;i<n-1;i++){if(d[i]===0){m[i]=m[i+1]=0;continue}const a=m[i]/d[i],b=m[i+1]/d[i],q=a*a+b*b;if(q>9){const t=3/Math.sqrt(q);m[i]=t*a*d[i];m[i+1]=t*b*d[i]}}
+  for(let i=0;i<n-1;i++){const h=(P[i+1].x-P[i].x)/3;c.bezierCurveTo(P[i].x+h,P[i].y+m[i]*h,P[i+1].x-h,P[i+1].y-m[i+1]*h,P[i+1].x,P[i+1].y)}}
 const GW=1000,GH=560,GL=200,GR_=30,GT=62,GB=96;
 const gnum=v=>{const n=num(v);return isFinite(n)?n:NaN};
 function niceStep(range,target=6){const raw=Math.max(range,1e-6)/target,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return(f<1.5?1:f<3?2:f<7?5:10)*p}
 function gTicks(min,max,step){const o=[];if(!(step>0)||!(max>min))return o;let n=0;for(let v=min;v<=max+step*1e-6&&n<60;v+=step,n++)o.push(Math.round(v*1e6)/1e6);return o}
 function gValid(g){const a=gnum(g.ymin),b=gnum(g.ymax),s=gnum(g.ystep);return b>a&&s>0&&gTicks(a,b,s).length<=40}
-function gMap(g){const L=GL,R=GW-GR_,T=GT,B=GH-GB,ymin=gnum(g.ymin),ymax=gnum(g.ymax),n=4;
+function gMap(g){const L=GL,R=GW-GR_,T=GT,B=GH-GB,ymin=gnum(g.ymin),ymax=gnum(g.ymax),n=3;
   return{L,R,T,B,ymin,ymax,n,py:y=>B-(y-ymin)/(ymax-ymin)*(B-T),vy:p=>ymin+(B-p)/(B-T)*(ymax-ymin),slotX:i=>L+(R-L)*(i+.5)/n,slotW:(R-L)/n,
     zero:clamp(0,ymin,ymax)}}
-const accVals=()=>MS.map(k=>accel(k));
+const accVals=()=>AK.map(k=>accel(k));
 function gSuggest(){const v=accVals().filter(x=>x!=null);if(!v.length)return;const mn=Math.min(0,...v),mx=Math.max(0,...v),st=niceStep(mx-mn,6);
   const g=S.g;g.ystep=st;g.ymin=Math.round((Math.floor(mn/st)*st-(mn<0?0:0))*1e6)/1e6;g.ymax=Math.round(Math.ceil(mx/st)*st*1e6)/1e6;if(g.ymin===0&&mn===0&&v.some(x=>x<0))g.ymin=-st;save()}
 function wrapText(c,text,maxW){const ws=String(text).split(/\s+/),lines=[];let cur='';ws.forEach(w=>{const t=cur?cur+' '+w:w;if(c.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t});if(cur)lines.push(cur);return lines}
@@ -23,7 +29,7 @@ function drawGraph(c,g,o){
   if(!valid){c.strokeStyle='#14202e';c.lineWidth=3;c.beginPath();c.moveTo(L,T);c.lineTo(L,B);if(!o.blank)c.lineTo(R,B);c.stroke();
     if(o.blank){/* paper version: an empty grid for students to number themselves, room above and below zero */
       c.strokeStyle='#dfe5ec';c.lineWidth=1;for(let i=0;i<=12;i++){const y=T+(B-T)*i/12;c.beginPath();c.moveTo(L,y);c.lineTo(R,y);c.stroke()}
-      for(let i=0;i<4;i++){c.fillStyle='#14202e';c.font='bold 18px '+FONT;c.fillText(aShort(i+1),L+(R-L)*(i+.5)/4,B+28)}}
+      for(let i=0;i<3;i++){c.fillStyle='#14202e';c.font='bold 18px '+FONT;c.fillText(aShort(AK[i]),L+(R-L)*(i+.5)/3,B+28)}}
     else{c.fillStyle='#5a6878';c.font='20px '+FONT;c.fillText('Choose your y-axis numbers to start the graph.',(L+R)/2,(T+B)/2)}
     axisLabels(c,g.yl,g.xl,L,R,T,B);return}
   const m=gMap(g);c.font='19px '+FONT;c.lineWidth=1;
@@ -33,23 +39,25 @@ function drawGraph(c,g,o){
   const zy=m.py(m.zero);c.lineWidth=3.5;c.beginPath();c.moveTo(L,zy);c.lineTo(R,zy);c.stroke();
   if(m.ymin<0){c.fillStyle='rgba(179,48,30,.05)';c.fillRect(L+2,zy,R-L-2,B-zy)}
   axisLabels(c,g.yl,g.xl,L,R,T,B);
-  const bw=m.slotW*.5,av=accVals();
-  MS.forEach((k,i)=>{const cx=m.slotX(i),h=g.bars[k],placed=h!=null,val=placed?clamp(h,m.ymin,m.ymax):m.zero,y=m.py(val);
-    if(placed){c.fillStyle=val<0?'#fecdd3':'#fda4af';c.strokeStyle='#be123c';c.lineWidth=2;c.fillRect(cx-bw/2,Math.min(y,zy),bw,Math.abs(zy-y));c.strokeRect(cx-bw/2,Math.min(y,zy),bw,Math.abs(zy-y))}
+  const av=accVals(),pts=[];
+  AK.forEach((k,i)=>{const h=g.bars[k];if(h!=null)pts.push({x:m.slotX(i),y:m.py(clamp(h,m.ymin,m.ymax))})});
+  /* a smooth line through the student's points (a line graph, so the change looks gradual) */
+  if(pts.length>1){c.strokeStyle='#be123c';c.lineWidth=4;c.beginPath();smoothPath(c,pts);c.stroke()}
+  AK.forEach((k,i)=>{const cx=m.slotX(i),h=g.bars[k],placed=h!=null,val=placed?clamp(h,m.ymin,m.ymax):m.zero,y=m.py(val);
     let st=null;if(o.fb&&placed&&av[i]!=null)st=Math.abs(val-av[i])<=(m.ymax-m.ymin)*.035?'ok':'bad';
-    if(o.inter||st){c.fillStyle='#fff';c.strokeStyle=st==='ok'?'#2e7d4f':st==='bad'?'#b3301e':'#be123c';c.lineWidth=4;c.setLineDash(placed?[]:[5,4]);c.beginPath();c.arc(cx,y,o.inter?12:8,0,7);c.fill();c.stroke();c.setLineDash([])}
+    if(placed||o.inter){c.fillStyle=placed?'#be123c':'#fff';c.strokeStyle=st==='ok'?'#2e7d4f':st==='bad'?'#b3301e':'#be123c';c.lineWidth=st?5:3;c.setLineDash(placed?[]:[5,4]);c.beginPath();c.arc(cx,y,o.inter?12:9,0,7);c.fill();c.stroke();c.setLineDash([])}
     c.fillStyle='#14202e';c.font='bold 19px '+FONT;c.textAlign='center';c.fillText(aShort(k),cx,B+28);
     c.font='15px '+FONT;c.fillStyle=k<=RAMP_END?'#7a5b23':k===RAMP_END+1?'#9a6a00':'#475569';c.fillText(k<=RAMP_END?'ramp':k===RAMP_END+1?'ramp → flat':'flat',cx,B+50)});
-  if(o.inter&&!Object.keys(g.bars).length){c.fillStyle='rgba(190,18,60,.08)';c.fillRect(L+40,T+10,R-L-80,70);c.fillStyle='#9f1239';c.font='bold 22px '+FONT;c.textAlign='center';c.fillText('✋ Drag each round dot up or down to the right height',(L+R)/2,T+52)}
+  if(o.inter&&!Object.keys(g.bars).some(k=>AK.includes(+k))){c.fillStyle='rgba(190,18,60,.08)';c.fillRect(L+40,T+10,R-L-80,70);c.fillStyle='#9f1239';c.font='bold 22px '+FONT;c.textAlign='center';c.fillText('✋ Drag each dot up or down to the right height',(L+R)/2,T+52)}
 }
-function graphEval(){const g=S.g,r={valid:gValid(g)};r.placed=MS.filter(k=>g.bars[k]!=null).length;const av=accVals();
-  if(r.valid){const m=gMap(g);r.fits=av.every(a=>a==null||(a>=m.ymin&&a<=m.ymax));r.acc=MS.filter((k,i)=>g.bars[k]!=null&&av[i]!=null&&Math.abs(g.bars[k]-av[i])<=(m.ymax-m.ymin)*.035).length}else{r.fits=false;r.acc=0}
+function graphEval(){const g=S.g,r={valid:gValid(g)};r.placed=AK.filter(k=>g.bars[k]!=null).length;const av=accVals();
+  if(r.valid){const m=gMap(g);r.fits=av.every(a=>a==null||(a>=m.ymin&&a<=m.ymax));r.acc=AK.filter((k,i)=>g.bars[k]!=null&&av[i]!=null&&Math.abs(g.bars[k]-av[i])<=(m.ymax-m.ymin)*.035).length}else{r.fits=false;r.acc=0}
   r.neg=gnum(g.ymin)<0;r.title=/acc/i.test(g.title);r.yl=/acc/i.test(g.yl)&&/m\s*\/\s*s\s*(2|²|\^2)/i.test(g.yl);r.xl=String(g.xl).trim().length>2;return r}
 /* ---- dragging the bar tops ---- */
 let GDR=null;
 function gPos(ev){const cv=$('#gcv'),r=cv.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width*GW,y:(ev.clientY-r.top)/r.height*GH}}
 function gDown(ev){if(!gValid(S.g))return;const p=gPos(ev),m=gMap(S.g);
-  MS.forEach((k,i)=>{if(GDR)return;const cx=m.slotX(i),h=S.g.bars[k],y=m.py(h==null?m.zero:clamp(h,m.ymin,m.ymax));if(Math.abs(p.x-cx)<m.slotW*.35&&Math.abs(p.y-y)<30){GDR=k;$('#gcv').setPointerCapture(ev.pointerId);ev.preventDefault()}})}
+  AK.forEach((k,i)=>{if(GDR)return;const cx=m.slotX(i),h=S.g.bars[k],y=m.py(h==null?m.zero:clamp(h,m.ymin,m.ymax));if(Math.abs(p.x-cx)<m.slotW*.35&&Math.abs(p.y-y)<30){GDR=k;$('#gcv').setPointerCapture(ev.pointerId);ev.preventDefault()}})}
 function gMove(ev){if(GDR==null)return;const m=gMap(S.g),p=gPos(ev);let v=clamp(m.vy(p.y),m.ymin,m.ymax);const st=gnum(S.g.ystep)/10;v=Math.round(v/st)*st;S.g.bars[GDR]=Math.round(v*1e4)/1e4;gDraw()}
 function gUp(){if(GDR==null)return;GDR=null;save();gLive()}
 function gDraw(){const cv=$('#gcv');if(cv)drawGraph(cv.getContext('2d'),S.g,{inter:true,fb:!!S.chk.graph})}
@@ -61,12 +69,12 @@ function graphHTML(){
    ${isG6()?'<p class="note">The unit of acceleration is m/s². Type it as m/s2 or m/s².</p>':''}
    <h3>y-axis numbers</h3><div class="tip">⚠ Some accelerations can be <b>minus</b> numbers, so your lowest number may need to be <b>below zero</b> (like −1).${isG6()?' <button class="btn sm" data-act="gsuggest">Suggest numbers for me</button>':''}</div>
    <div class="axrow"><label>lowest<input class="n" inputmode="decimal" data-bind="g.ymin" data-redraw="2" value="${esc(g.ymin)}"></label><label>highest<input class="n" inputmode="decimal" data-bind="g.ymax" data-redraw="2" value="${esc(g.ymax)}"></label><label>gap<input class="n" inputmode="decimal" data-bind="g.ystep" data-redraw="2" value="${esc(g.ystep)}"></label></div>
-   <h3>Your accelerations</h3><table class="tb"><tbody>${MS.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
+   <h3>Your accelerations</h3><table class="tb"><tbody>${AK.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
    <div style="margin-top:10px"><button class="btn" data-act="gcheck">${S.chk.graph?'✓ Checking is on':'Check my graph'}</button></div><div id="gfb">${gFbHTML()}</div>`;
   return h+`</div><div><canvas id="gcv" class="cv" width="${GW}" height="${GH}" style="cursor:ns-resize" aria-label="Your acceleration graph"></canvas>${S.chk.graph?'<p class="note">Green ring = right height. Red ring = check the number again.</p>':''}</div></div>`;
 }
 function gFbHTML(){const e=graphEval();let h=e.valid&&!e.fits?'<div class="fb mid">Some of your accelerations don\'t fit. Check your lowest and highest numbers.</div>':'';
-  if(S.chk.graph){const it=[[e.title,'Title mentions acceleration'],[e.yl,'y-axis says acceleration with its unit m/s²'],[e.xl,'x-axis has a label'],[e.fits,'All accelerations fit on the axes'],[e.placed===4,'All 4 bars placed'],[e.acc===4,'Every bar is the right height']];
+  if(S.chk.graph){const it=[[e.title,'Title mentions acceleration'],[e.yl,'y-axis says acceleration with its unit m/s²'],[e.xl,'x-axis has a label'],[e.fits,'All accelerations fit on the axes'],[e.placed===3,'All 3 points placed'],[e.acc===3,'Every point is the right height']];
     h+=`<div class="fb ${it.every(x=>x[0])?'ok':'mid'}">${it.map(([ok,t])=>`${ok?'✓':'✗'} ${t}`).join('<br>')}</div>`}return h}
 function gLive(){gDraw();const f=$('#gfb');if(f)f.innerHTML=gFbHTML();chrome()}
 function graphBind(){const cv=$('#gcv');if(!cv)return;cv.onpointerdown=gDown;cv.onpointermove=gMove;cv.onpointerup=gUp;cv.onpointercancel=gUp;gDraw();drawSpeedModel($('#vcv'))}
@@ -90,6 +98,6 @@ function drawSpeedModel(cv){
   c.strokeStyle='#14202e';c.lineWidth=3;c.beginPath();c.moveTo(L,T);c.lineTo(L,B);c.lineTo(R,B);c.stroke();
   c.fillStyle='#14202e';c.font='bold 20px '+FONT;c.textAlign='center';c.fillText('Time from the start (s)',(L+R)/2,GH-20);
   c.save();c.translate(30,(T+B)/2);c.rotate(-Math.PI/2);c.fillText('Speed (m/s)',0,0);c.restore();
-  c.strokeStyle=COLS.v;c.lineWidth=4;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(px(p.t),py(p.v)):c.moveTo(px(p.t),py(p.v)));c.stroke();
+  c.strokeStyle=COLS.v;c.lineWidth=4;c.beginPath();smoothPath(c,pts.map(p=>({x:px(p.t),y:py(p.v)})));c.stroke();
   pts.forEach(p=>{c.fillStyle=p.k?COLS.v:'#94a3b8';c.beginPath();c.arc(px(p.t),py(p.v),8,0,7);c.fill();if(p.k){c.fillStyle='#14202e';c.font='bold 15px '+FONT;c.fillText('M'+p.k,px(p.t),py(p.v)-14)}});
 }

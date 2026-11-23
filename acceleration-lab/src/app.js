@@ -23,27 +23,27 @@ function stepConclusion(){
   else body=`<div class="wtu">Words to use: ${['positive acceleration','negative acceleration','m/s²','unbalanced','resultant force','gravity','friction','speeds up','slows down'].map(w=>`<span>${w}</span>`).join('')}</div>`+
    G78Q.map(([k,t,p])=>`<h3>${t}</h3><p class="note">${k==='pred'?predTxt+' ':''}${p}</p><textarea data-bind="con.${k}">${esc(S.con[k]||'')}</textarea>`).join('')+
    `<div class="tip" data-live="cl78">${cl78()}</div>`;
-  return`<div class="intro">On this page you will <b>write your conclusion</b> and <b>save your worksheet</b> as a PDF for Toddle.</div>
+  return`<div class="intro">On this page you will <b>write your conclusion</b>. Then go to <b>Worksheet</b> to save your PDF for Toddle.</div>
   <div class="panel"><h2>Conclusion ${stepTodo(5)}</h2>${body}</div>
-  <div class="panel"><h2>Save your worksheet</h2><p>Your PDF shows your tables, your graph, the speed model, your forces and your conclusion. Upload it to Toddle.</p>
-   <div class="chips"><button class="btn go" data-act="pdf">📄 Save my worksheet (PDF)</button><button class="btn" data-act="print">🖨 Print it</button></div><div id="pdfmsg"></div></div>`;
+`;
 }
 function cl78(){const t=['claim','evid','reason'].map(k=>String(S.con[k]||'').toLowerCase()).join(' ');
   const it=[[/positive|\+/.test(t)&&/negative|minus|−|-\d/.test(t),'uses positive and negative acceleration'],[/\d/.test(t)&&/m\/s(2|²)/.test(t),'gives numbers with the unit m/s²'],[/unbalanced/.test(t),'says the forces are unbalanced'],[/friction/.test(t),'names friction'],[/resultant/.test(t),'uses "resultant force"']];
   return'<b>Did you include…</b><br>'+it.map(([ok,l])=>`${ok?'✅':'⬜'} ${l}`).join('<br>')}
 
 /* ---------- shell ---------- */
-function stepHTML(){return[stepPredict,stepTimes,stepMetres,stepAccel,stepForces,stepConclusion][S.step]()}
+function stepHTML(){return[stepPredict,stepTimes,stepMetres,stepAccel,stepForces,stepConclusion,stepSheet][S.step]()}
 function render(){
   const app=$('#app');
   app.innerHTML=`<header class="top"><div class="brand"><h1>Acceleration <span>Lab</span></h1><p>Speeding up, slowing down, and the forces behind it</p></div>
    <div class="who">👤 <b>${esc(S.name||'—')}</b>${S.cls?' · '+esc(S.cls):''} · ${S.grade==='6'?'Grade 6':S.grade?'Grade 7/8':''} <button class="btn sm dark" data-act="gate">Change</button></div>
-   <div class="tools"><button class="btn sm dark" data-act="pdf">📄 Save PDF</button><button class="btn sm dark" data-act="teacher">For teachers</button></div></header>
+   <div class="tools"><button class="btn sm dark" data-go="6">📄 Worksheet</button><button class="btn sm dark" data-act="teacher">For teachers</button></div></header>
    <nav class="steps" id="stepbar"></nav><main id="main">${stepHTML()}</main>
-   <div class="navrow">${S.step>0?`<button class="btn" data-go="${S.step-1}">← Back</button>`:'<span></span>'}${S.step<5?`<button class="btn go" id="nextbtn" data-go="${S.step+1}">Next: ${STEPS[S.step+1].n} →</button>`:''}</div>
+   <div class="navrow">${S.step>0?`<button class="btn" data-go="${S.step-1}">← Back</button>`:'<span></span>'}${S.step<6?`<button class="btn go" id="nextbtn" data-go="${S.step+1}">Next: ${STEPS[S.step+1].n} →</button>`:''}</div>
    <button class="btn primary calcfab" data-act="calc">🧮 Calculator</button>`;
   chrome();refreshLive();graphBind();
   if(S.step===4&&!isG6())['ramp','flat'].forEach(s=>fbdMount($('#fbd-'+s),s));
+  if(S.step===6)renderPreview();
 }
 function chrome(){
   const bar=$('#stepbar');if(bar)bar.innerHTML=STEPS.map((s,i)=>{const st=stepStatus(i);return`<button class="${i===S.step?'on':''} ${st}" data-go="${i}"><b>${i+1}. ${st==='done'?'✓ Done':st==='part'?'Started':''}</b>${s.i} ${s.n}</button>`}).join('');
@@ -55,7 +55,7 @@ function liveHTML(key){const [a,b,c]=key.split(':');
   if(a==='mk')return mark(b,+c);if(a==='form')return formHint(b,+c);if(a==='chk2sum')return chk2Sum();
   if(a==='acctable')return accTable();if(a==='cl78')return cl78();if(a==='todo')return todoPill(+b);return''}
 function refreshLive(){$$('[data-live]').forEach(el=>{const h=liveHTML(el.dataset.live);if(el.innerHTML!==h)el.innerHTML=h;if(el.classList.contains('val'))el.classList.toggle('empty',h==='—')});chrome()}
-function go(i){S.step=clamp(+i,0,5);save();render();scrollTo(0,0)}
+function go(i){S.step=clamp(+i,0,6);save();render();scrollTo(0,0)}
 
 /* ---------- events ---------- */
 const SRC={leg:k=>k===1?['#av1']:['#av'+k,'#av'+(k-1)],spd:k=>['#leg'+k],chg:k=>k===1?['#spd1']:['#spd'+k,'#spd'+(k-1)]};

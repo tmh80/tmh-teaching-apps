@@ -31,7 +31,7 @@ header.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;backgroun
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(46,125,79,.5)}50%{box-shadow:0 0 0 8px rgba(46,125,79,0)}}
 @media (prefers-reduced-motion:reduce){.btn.pulse{animation:none}}
 .steps{display:flex;gap:6px;flex-wrap:wrap}
-.steps button{flex:1 1 140px;border:2px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px;cursor:pointer;text-align:left;font-size:14.5px;line-height:1.25}
+.steps button{flex:1 1 120px;border:2px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 10px;cursor:pointer;text-align:left;font-size:14.5px;line-height:1.25}
 .steps button b{display:block;font-size:12px;color:var(--muted);font-weight:700}
 .steps button.on{border-color:var(--ink);box-shadow:0 2px 0 var(--ink)}
 .steps button.done{border-color:var(--good);background:var(--good-soft)}
@@ -128,6 +128,9 @@ canvas.cv{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;
 .frame{line-height:2.3}.frame input{width:150px;margin:0 3px}
 /* worksheet (PDF / print) */
 #sheet{position:absolute;left:-10000px;top:0}
+.preview{display:flex;flex-direction:column;align-items:center;gap:14px;background:#cbd5e1;border-radius:8px;padding:14px 6px}
+.pv{overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.2);background:#fff}
+.pv .pg{position:relative}
 .pg{width:794px;min-height:1123px;background:#fff;padding:34px 40px;font-size:12.5px;color:#14202e;font-family:var(--font-ui);position:relative;line-height:1.4}
 .pg h1{font-size:20px;margin:0}.pg h2{font-size:14.5px;margin:12px 0 5px;border-bottom:2px solid #14202e;padding-bottom:2px}
 .pg .hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #be123c;padding-bottom:6px;margin-bottom:6px}
@@ -175,7 +178,7 @@ canvas.cv{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;
 <script>
 /* ===== Acceleration Lab: state, helpers, maths, pop-ups, calculator ===== */
 const LAB={title:'Acceleration Lab',code:'ACCELERATION',key:'accel-lab-v1',file:'Acceleration-Lab-offline.html'};
-const MS=[1,2,3,4],RAMP_END=2; /* metres 1-2 are on the ramp, 3-4 on the flat */
+const MS=[1,2,3,4],AK=[2,3,4],RAMP_END=2; /* AK: the three changes we can measure (metre 1 has no metre before it) */ /* metres 1-2 are on the ramp, 3-4 on the flat */
 const COLS={t:'#2563eb',l:'#7c3aed',v:'#15803d',d:'#c2410c',a:'#be123c'};
 const SOFT={t:'#dbeafe',l:'#ede9fe',v:'#dcfce7',d:'#ffedd5',a:'#ffe4e6'};
 let S=blank();
@@ -199,9 +202,9 @@ function setPath(p,v){const ks=p.split('.'),last=ks.pop();let o=S;ks.forEach(k=>
 function avgT(k){const v=S.T[k].slice(0,S.trials).map(num).filter(x=>!isNaN(x));return v.length?r2(v.reduce((a,b)=>a+b,0)/v.length):null}
 function legCalc(k){const a=avgT(k);if(a==null)return null;if(k===1)return a;const b=avgT(k-1);return b==null?null:r2(a-b)}
 function spdCalc(k){const l=num(S.leg[k]);return l>0?1/l:null}
-function chgCalc(k){const v=num(S.spd[k]);if(isNaN(v))return null;if(k===1)return v;const p=num(S.spd[k-1]);return isNaN(p)?null:v-p}
+function chgCalc(k){if(k===1)return null;const v=num(S.spd[k]);if(isNaN(v))return null;const p=num(S.spd[k-1]);return isNaN(p)?null:v-p}
 /* acceleration (done for the student): change in speed ÷ time between the middles of the two metres */
-function gapT(k){const l=num(S.leg[k]);if(!(l>0))return null;if(k===1)return l/2;const p=num(S.leg[k-1]);return p>0?(p+l)/2:null}
+function gapT(k){const l=num(S.leg[k]);if(!(l>0)||k===1)return null;const p=num(S.leg[k-1]);return p>0?(p+l)/2:null}
 function accel(k){const d=num(S.chg[k]),g=gapT(k);return isNaN(d)||g==null?null:d/g}
 const near=(a,b)=>a!=null&&!isNaN(a)&&b!=null&&Math.abs(a-b)<=Math.max(0.011,Math.abs(b)*0.01);
 function cellOK(kind,k){const v=num(S[kind][k]);if(isNaN(v))return null;const want=kind==='leg'?legCalc(k):kind==='spd'?spdCalc(k):chgCalc(k);return want==null?null:near(v,want)}
@@ -236,7 +239,7 @@ const HELP={
   spd:{t:'Speed in each metre',c:'v',f:'speed = distance ÷ time = 1 ÷ time for that metre',
     p:['Speed tells you how many metres the cart moves every second (m/s).','Each piece of track is exactly 1 metre long, so you just do <b>1 ÷ the time</b>.','A <b>smaller</b> time means a <b>bigger</b> speed: the cart was faster.']},
   chg:{t:'Change in speed',c:'d',f:'change in speed = this speed − the speed before',
-    p:['This tells you if the cart got faster or slower from one metre to the next.','<b>Plus number (+):</b> it got faster. <b>Minus number (−):</b> it got slower.','<b>Metre 1:</b> the cart started still (0 m/s), so the change is just its speed in metre 1.']},
+    p:['This tells you if the cart got faster or slower from one metre to the next.','<b>Plus number (+):</b> it got faster. <b>Minus number (−):</b> it got slower.','<b>Metre 1</b> has no metre before it, so there is nothing to compare. Start at metre 2.']},
   acc:{t:'Acceleration (we do this for you)',c:'a',f:'acceleration = change in speed ÷ time it took to change',
     p:['Acceleration is how much the speed changes <b>every second</b>. Its unit is m/s² ("metres per second, every second").','Your speed for a metre is the cart\'s speed in the <b>middle</b> of that metre\'s time.','So the time between two speeds is <b>half</b> of one metre\'s time + <b>half</b> of the next metre\'s time.','<b>+</b> means speeding up. <b>−</b> means slowing down.']}
 };
@@ -273,14 +276,15 @@ function calcKey(k){
 
 /* ===== the steps: predict, my times, each metre, acceleration table ===== */
 const STEPS=[
-  {n:'Predict',i:'🤔'},{n:'My times',i:'⏱'},{n:'Each metre',i:'🧮'},{n:'Acceleration',i:'📈'},{n:'Forces',i:'➡'},{n:'Conclusion',i:'✍'}];
+  {n:'Predict',i:'🤔'},{n:'My times',i:'⏱'},{n:'Each metre',i:'🧮'},{n:'Acceleration',i:'📈'},{n:'Forces',i:'➡'},{n:'Conclusion',i:'✍'},{n:'Worksheet',i:'📄'}];
 function stepStatus(i){
   const all=(a)=>a.every(Boolean),any=(a)=>a.some(Boolean);let p=[];
   if(i===0)p=[S.pred.ramp,S.pred.flat];
   if(i===1)p=MS.map(k=>avgT(k)!=null);
-  if(i===2)p=MS.flatMap(k=>['leg','spd','chg'].map(c=>!isNaN(num(S[c][k]))));
-  if(i===3){const e=graphEval();p=[!!S.g.title,!!S.g.xl,!!S.g.yl,e.valid,e.placed===4]}
+  if(i===2)p=MS.flatMap(k=>['leg','spd','chg'].filter(c=>!(c==='chg'&&k===1)).map(c=>!isNaN(num(S[c][k]))));
+  if(i===3){const e=graphEval();p=[!!S.g.title,!!S.g.xl,!!S.g.yl,e.valid,e.placed===3]}
   if(i===4)p=FQ_KEYS().map(k=>!!S.fq[k]).concat(isG6()?[]:['ramp','flat'].map(s=>(S.fbd[s].arrows||[]).length>=2));
+  if(i===6)return S.saved?'done':'';
   if(i===5)p=conKeys().map(k=>String(S.con[k]||'').trim()!=='');
   return all(p)?'done':any(p)?'part':'';
 }
@@ -295,7 +299,7 @@ function trackSVG(w=760){
   return`<svg viewBox="0 0 ${x(4)+50} 200" style="width:100%;max-width:${w}px;display:block" role="img" aria-label="The track: a 2 metre ramp, then 2 metres of flat floor, with marks every metre">
    <polygon points="${x(0)},40 ${x(2)},150 ${x(0)},150" fill="#f3e3c3" stroke="#c9a96b"/><rect x="${x(2)}" y="150" width="${x(4)-x(2)}" height="8" fill="#cbd5e1"/>
    <polyline points="${pts}" fill="none" stroke="#14202e" stroke-width="4"/>
-   <text x="${x(1)-30}" y="128" font-size="15" font-weight="800" fill="#7a5b23">RAMP</text><text x="${x(3)}" y="185" text-anchor="middle" font-size="15" font-weight="800" fill="#475569">FLAT</text>
+   <text x="${x(0)+14}" y="142" font-size="15" font-weight="800" fill="#7a5b23">RAMP</text><text x="${(x(3)+x(4))/2}" y="140" text-anchor="middle" font-size="15" font-weight="800" fill="#475569">FLAT</text>
    <g transform="translate(${x(0)+6},${28}) rotate(18)"><rect x="0" y="-22" width="44" height="20" rx="4" fill="#be123c"/><circle cx="9" cy="0" r="6" fill="#14202e"/><circle cx="35" cy="0" r="6" fill="#14202e"/></g>${marks}</svg>`;
 }
 
@@ -331,12 +335,12 @@ function formHint(kind,k){
   if(kind==='leg'){if(k===1)return isG6()?`= ${c('t',f(avgT(1)))}`:`= ${c('t','time at 1 m')}`;
     return isG6()?`= ${c('t',f(avgT(k)))} − ${c('t',f(avgT(k-1)))}`:`= ${c('t',`time at ${k} m`)} − ${c('t',`time at ${k-1} m`)}`}
   if(kind==='spd')return isG6()?`= 1 ÷ ${c('l',f(num(S.leg[k])))}`:`= 1 m ÷ ${c('l','time for metre '+k)}`;
-  if(kind==='chg'){if(k===1)return isG6()?`= ${c('v',f(num(S.spd[1])))} − 0`:`= ${c('v','speed 1')} − 0 (started still)`;
+  if(kind==='chg'){if(k===1)return'';
     return isG6()?`= ${c('v',f(num(S.spd[k])))} − ${c('v',f(num(S.spd[k-1])))}`:`= ${c('v','speed '+k)} − ${c('v','speed '+(k-1))}`}
 }
 function mark(kind,k){if(!S.chk.t2)return'';const ok=cellOK(kind,k);return ok==null?'<span class="mk"></span>':ok?'<span class="mk ok">✓</span>':'<span class="mk no">✗</span>'}
 function stepMetres(){
-  const inp=(kind,k,col,unit)=>`<td><input class="n c-${col}" id="${kind}${k}" inputmode="decimal" data-bind="${kind}.${k}" data-src="${kind}:${k}" value="${esc(S[kind][k])}" aria-label="${kind} metre ${k}"> <span data-live="mk:${kind}:${k}">${mark(kind,k)}</span><span class="form" data-live="form:${kind}:${k}">${formHint(kind,k)}</span></td>`;
+  const inp=(kind,k,col,unit)=>kind==='chg'&&k===1?`<td><span class="note">— no metre before it</span></td>`:`<td><input class="n c-${col}" id="${kind}${k}" inputmode="decimal" data-bind="${kind}.${k}" data-src="${kind}:${k}" value="${esc(S[kind][k])}" aria-label="${kind} metre ${k}"> <span data-live="mk:${kind}:${k}">${mark(kind,k)}</span><span class="form" data-live="form:${kind}:${k}">${formHint(kind,k)}</span></td>`;
   const rows=MS.map(k=>`<tr class="${zoneOf(k)}">${k===1||k===3?`<td class="zone" rowspan="2">${k===1?'Ramp':'Flat'}</td>`:''}<td class="l">Metre ${k}<br><span class="note">${k-1} m → ${k} m</span></td>
     <td><span class="val c-t" id="av${k}" data-live="avg:${k}"></span></td>${inp('leg',k,'l')}${inp('spd',k,'v')}${inp('chg',k,'d')}</tr>`).join('');
   return`<div class="intro">On this page <b>you do the maths</b>. Each column uses numbers from the column before it, and the colours show you which ones. Tap a box to light up the numbers it needs. Press <b>?</b> for help and 🧮 for the calculator. Round to <b>2 decimal places</b>.</div>
@@ -354,14 +358,14 @@ function chk2Sum(){if(!S.chk.t2)return'Green ✓ = right. Red ✗ = try that one
 
 /* ---------- Step 3: acceleration (worked out by the app from the student's numbers) ---------- */
 function accTable(){
-  const rows=MS.map(k=>{const a=accel(k),g=gapT(k);return`<tr class="${zoneOf(k)}"><td class="l">${aLabel(k)}</td>
+  const rows=AK.map(k=>{const a=accel(k),g=gapT(k);return`<tr class="${zoneOf(k)}"><td class="l">${aLabel(k)}</td>
     <td><span class="val c-d ${isNaN(num(S.chg[k]))?'empty':''}">${isNaN(num(S.chg[k]))?'—':fmt(num(S.chg[k]))}</span></td>
-    <td><span class="val c-l ${g==null?'empty':''}">${g==null?'—':fmt(g)}</span><span class="form">${k===1?'half of metre 1':`half of metre ${k-1} + half of metre ${k}`}</span></td>
+    <td><span class="val c-l ${g==null?'empty':''}">${g==null?'—':fmt(g)}</span><span class="form">half of metre ${k-1} + half of metre ${k}</span></td>
     <td><span class="val c-a ${a==null?'empty':''}" id="acc${k}">${a==null?'—':fmt(a)}</span><br>${aTag(k)}</td></tr>`}).join('');
   return`<div class="tscroll"><table class="tb"><thead><tr><th>Change</th><th class="c-d">Change in speed (m/s)</th><th class="c-l">Time between the middles (s)</th><th class="c-a">④ Acceleration (m/s²) <button class="qm" data-help="acc" aria-label="Explain">?</button></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function stepAccel(){
-  const miss=MS.filter(k=>accel(k)==null).length;
+  const miss=AK.filter(k=>accel(k)==null).length;
   return`<div class="intro">Now <b>we</b> do the tricky maths: the app turns your <span style="color:#fdba74">change in speed</span> into <span style="color:#fda4af">acceleration</span>. <b>Your job:</b> plot it on the graph. Look for <b>minus numbers</b>!</div>
   <div class="panel"><h2>Table 3: Acceleration <span class="note">(worked out for you)</span></h2>
    <div class="formula" style="display:inline-block">acceleration = <span style="color:${COLS.d}">change in speed</span> ÷ <span style="color:${COLS.l}">time it took to change</span></div>
@@ -375,15 +379,21 @@ function stepAccel(){
 }
 
 /* ===== Graph maker (from Paper Plane Lab), with negative numbers on the y-axis ===== */
+/* smooth curve through points (monotone cubic: bends gently, never overshoots a point) */
+function smoothPath(c,P){const n=P.length;if(n<2)return;c.moveTo(P[0].x,P[0].y);if(n===2){c.lineTo(P[1].x,P[1].y);return}
+  const d=[],m=[];for(let i=0;i<n-1;i++)d.push((P[i+1].y-P[i].y)/(P[i+1].x-P[i].x));
+  m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:(d[i-1]+d[i])/2;
+  for(let i=0;i<n-1;i++){if(d[i]===0){m[i]=m[i+1]=0;continue}const a=m[i]/d[i],b=m[i+1]/d[i],q=a*a+b*b;if(q>9){const t=3/Math.sqrt(q);m[i]=t*a*d[i];m[i+1]=t*b*d[i]}}
+  for(let i=0;i<n-1;i++){const h=(P[i+1].x-P[i].x)/3;c.bezierCurveTo(P[i].x+h,P[i].y+m[i]*h,P[i+1].x-h,P[i+1].y-m[i+1]*h,P[i+1].x,P[i+1].y)}}
 const GW=1000,GH=560,GL=200,GR_=30,GT=62,GB=96;
 const gnum=v=>{const n=num(v);return isFinite(n)?n:NaN};
 function niceStep(range,target=6){const raw=Math.max(range,1e-6)/target,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return(f<1.5?1:f<3?2:f<7?5:10)*p}
 function gTicks(min,max,step){const o=[];if(!(step>0)||!(max>min))return o;let n=0;for(let v=min;v<=max+step*1e-6&&n<60;v+=step,n++)o.push(Math.round(v*1e6)/1e6);return o}
 function gValid(g){const a=gnum(g.ymin),b=gnum(g.ymax),s=gnum(g.ystep);return b>a&&s>0&&gTicks(a,b,s).length<=40}
-function gMap(g){const L=GL,R=GW-GR_,T=GT,B=GH-GB,ymin=gnum(g.ymin),ymax=gnum(g.ymax),n=4;
+function gMap(g){const L=GL,R=GW-GR_,T=GT,B=GH-GB,ymin=gnum(g.ymin),ymax=gnum(g.ymax),n=3;
   return{L,R,T,B,ymin,ymax,n,py:y=>B-(y-ymin)/(ymax-ymin)*(B-T),vy:p=>ymin+(B-p)/(B-T)*(ymax-ymin),slotX:i=>L+(R-L)*(i+.5)/n,slotW:(R-L)/n,
     zero:clamp(0,ymin,ymax)}}
-const accVals=()=>MS.map(k=>accel(k));
+const accVals=()=>AK.map(k=>accel(k));
 function gSuggest(){const v=accVals().filter(x=>x!=null);if(!v.length)return;const mn=Math.min(0,...v),mx=Math.max(0,...v),st=niceStep(mx-mn,6);
   const g=S.g;g.ystep=st;g.ymin=Math.round((Math.floor(mn/st)*st-(mn<0?0:0))*1e6)/1e6;g.ymax=Math.round(Math.ceil(mx/st)*st*1e6)/1e6;if(g.ymin===0&&mn===0&&v.some(x=>x<0))g.ymin=-st;save()}
 function wrapText(c,text,maxW){const ws=String(text).split(/\s+/),lines=[];let cur='';ws.forEach(w=>{const t=cur?cur+' '+w:w;if(c.measureText(t).width>maxW&&cur){lines.push(cur);cur=w}else cur=t});if(cur)lines.push(cur);return lines}
@@ -399,7 +409,7 @@ function drawGraph(c,g,o){
   if(!valid){c.strokeStyle='#14202e';c.lineWidth=3;c.beginPath();c.moveTo(L,T);c.lineTo(L,B);if(!o.blank)c.lineTo(R,B);c.stroke();
     if(o.blank){/* paper version: an empty grid for students to number themselves, room above and below zero */
       c.strokeStyle='#dfe5ec';c.lineWidth=1;for(let i=0;i<=12;i++){const y=T+(B-T)*i/12;c.beginPath();c.moveTo(L,y);c.lineTo(R,y);c.stroke()}
-      for(let i=0;i<4;i++){c.fillStyle='#14202e';c.font='bold 18px '+FONT;c.fillText(aShort(i+1),L+(R-L)*(i+.5)/4,B+28)}}
+      for(let i=0;i<3;i++){c.fillStyle='#14202e';c.font='bold 18px '+FONT;c.fillText(aShort(AK[i]),L+(R-L)*(i+.5)/3,B+28)}}
     else{c.fillStyle='#5a6878';c.font='20px '+FONT;c.fillText('Choose your y-axis numbers to start the graph.',(L+R)/2,(T+B)/2)}
     axisLabels(c,g.yl,g.xl,L,R,T,B);return}
   const m=gMap(g);c.font='19px '+FONT;c.lineWidth=1;
@@ -409,23 +419,25 @@ function drawGraph(c,g,o){
   const zy=m.py(m.zero);c.lineWidth=3.5;c.beginPath();c.moveTo(L,zy);c.lineTo(R,zy);c.stroke();
   if(m.ymin<0){c.fillStyle='rgba(179,48,30,.05)';c.fillRect(L+2,zy,R-L-2,B-zy)}
   axisLabels(c,g.yl,g.xl,L,R,T,B);
-  const bw=m.slotW*.5,av=accVals();
-  MS.forEach((k,i)=>{const cx=m.slotX(i),h=g.bars[k],placed=h!=null,val=placed?clamp(h,m.ymin,m.ymax):m.zero,y=m.py(val);
-    if(placed){c.fillStyle=val<0?'#fecdd3':'#fda4af';c.strokeStyle='#be123c';c.lineWidth=2;c.fillRect(cx-bw/2,Math.min(y,zy),bw,Math.abs(zy-y));c.strokeRect(cx-bw/2,Math.min(y,zy),bw,Math.abs(zy-y))}
+  const av=accVals(),pts=[];
+  AK.forEach((k,i)=>{const h=g.bars[k];if(h!=null)pts.push({x:m.slotX(i),y:m.py(clamp(h,m.ymin,m.ymax))})});
+  /* a smooth line through the student's points (a line graph, so the change looks gradual) */
+  if(pts.length>1){c.strokeStyle='#be123c';c.lineWidth=4;c.beginPath();smoothPath(c,pts);c.stroke()}
+  AK.forEach((k,i)=>{const cx=m.slotX(i),h=g.bars[k],placed=h!=null,val=placed?clamp(h,m.ymin,m.ymax):m.zero,y=m.py(val);
     let st=null;if(o.fb&&placed&&av[i]!=null)st=Math.abs(val-av[i])<=(m.ymax-m.ymin)*.035?'ok':'bad';
-    if(o.inter||st){c.fillStyle='#fff';c.strokeStyle=st==='ok'?'#2e7d4f':st==='bad'?'#b3301e':'#be123c';c.lineWidth=4;c.setLineDash(placed?[]:[5,4]);c.beginPath();c.arc(cx,y,o.inter?12:8,0,7);c.fill();c.stroke();c.setLineDash([])}
+    if(placed||o.inter){c.fillStyle=placed?'#be123c':'#fff';c.strokeStyle=st==='ok'?'#2e7d4f':st==='bad'?'#b3301e':'#be123c';c.lineWidth=st?5:3;c.setLineDash(placed?[]:[5,4]);c.beginPath();c.arc(cx,y,o.inter?12:9,0,7);c.fill();c.stroke();c.setLineDash([])}
     c.fillStyle='#14202e';c.font='bold 19px '+FONT;c.textAlign='center';c.fillText(aShort(k),cx,B+28);
     c.font='15px '+FONT;c.fillStyle=k<=RAMP_END?'#7a5b23':k===RAMP_END+1?'#9a6a00':'#475569';c.fillText(k<=RAMP_END?'ramp':k===RAMP_END+1?'ramp → flat':'flat',cx,B+50)});
-  if(o.inter&&!Object.keys(g.bars).length){c.fillStyle='rgba(190,18,60,.08)';c.fillRect(L+40,T+10,R-L-80,70);c.fillStyle='#9f1239';c.font='bold 22px '+FONT;c.textAlign='center';c.fillText('✋ Drag each round dot up or down to the right height',(L+R)/2,T+52)}
+  if(o.inter&&!Object.keys(g.bars).some(k=>AK.includes(+k))){c.fillStyle='rgba(190,18,60,.08)';c.fillRect(L+40,T+10,R-L-80,70);c.fillStyle='#9f1239';c.font='bold 22px '+FONT;c.textAlign='center';c.fillText('✋ Drag each dot up or down to the right height',(L+R)/2,T+52)}
 }
-function graphEval(){const g=S.g,r={valid:gValid(g)};r.placed=MS.filter(k=>g.bars[k]!=null).length;const av=accVals();
-  if(r.valid){const m=gMap(g);r.fits=av.every(a=>a==null||(a>=m.ymin&&a<=m.ymax));r.acc=MS.filter((k,i)=>g.bars[k]!=null&&av[i]!=null&&Math.abs(g.bars[k]-av[i])<=(m.ymax-m.ymin)*.035).length}else{r.fits=false;r.acc=0}
+function graphEval(){const g=S.g,r={valid:gValid(g)};r.placed=AK.filter(k=>g.bars[k]!=null).length;const av=accVals();
+  if(r.valid){const m=gMap(g);r.fits=av.every(a=>a==null||(a>=m.ymin&&a<=m.ymax));r.acc=AK.filter((k,i)=>g.bars[k]!=null&&av[i]!=null&&Math.abs(g.bars[k]-av[i])<=(m.ymax-m.ymin)*.035).length}else{r.fits=false;r.acc=0}
   r.neg=gnum(g.ymin)<0;r.title=/acc/i.test(g.title);r.yl=/acc/i.test(g.yl)&&/m\s*\/\s*s\s*(2|²|\^2)/i.test(g.yl);r.xl=String(g.xl).trim().length>2;return r}
 /* ---- dragging the bar tops ---- */
 let GDR=null;
 function gPos(ev){const cv=$('#gcv'),r=cv.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width*GW,y:(ev.clientY-r.top)/r.height*GH}}
 function gDown(ev){if(!gValid(S.g))return;const p=gPos(ev),m=gMap(S.g);
-  MS.forEach((k,i)=>{if(GDR)return;const cx=m.slotX(i),h=S.g.bars[k],y=m.py(h==null?m.zero:clamp(h,m.ymin,m.ymax));if(Math.abs(p.x-cx)<m.slotW*.35&&Math.abs(p.y-y)<30){GDR=k;$('#gcv').setPointerCapture(ev.pointerId);ev.preventDefault()}})}
+  AK.forEach((k,i)=>{if(GDR)return;const cx=m.slotX(i),h=S.g.bars[k],y=m.py(h==null?m.zero:clamp(h,m.ymin,m.ymax));if(Math.abs(p.x-cx)<m.slotW*.35&&Math.abs(p.y-y)<30){GDR=k;$('#gcv').setPointerCapture(ev.pointerId);ev.preventDefault()}})}
 function gMove(ev){if(GDR==null)return;const m=gMap(S.g),p=gPos(ev);let v=clamp(m.vy(p.y),m.ymin,m.ymax);const st=gnum(S.g.ystep)/10;v=Math.round(v/st)*st;S.g.bars[GDR]=Math.round(v*1e4)/1e4;gDraw()}
 function gUp(){if(GDR==null)return;GDR=null;save();gLive()}
 function gDraw(){const cv=$('#gcv');if(cv)drawGraph(cv.getContext('2d'),S.g,{inter:true,fb:!!S.chk.graph})}
@@ -437,12 +449,12 @@ function graphHTML(){
    ${isG6()?'<p class="note">The unit of acceleration is m/s². Type it as m/s2 or m/s².</p>':''}
    <h3>y-axis numbers</h3><div class="tip">⚠ Some accelerations can be <b>minus</b> numbers, so your lowest number may need to be <b>below zero</b> (like −1).${isG6()?' <button class="btn sm" data-act="gsuggest">Suggest numbers for me</button>':''}</div>
    <div class="axrow"><label>lowest<input class="n" inputmode="decimal" data-bind="g.ymin" data-redraw="2" value="${esc(g.ymin)}"></label><label>highest<input class="n" inputmode="decimal" data-bind="g.ymax" data-redraw="2" value="${esc(g.ymax)}"></label><label>gap<input class="n" inputmode="decimal" data-bind="g.ystep" data-redraw="2" value="${esc(g.ystep)}"></label></div>
-   <h3>Your accelerations</h3><table class="tb"><tbody>${MS.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
+   <h3>Your accelerations</h3><table class="tb"><tbody>${AK.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
    <div style="margin-top:10px"><button class="btn" data-act="gcheck">${S.chk.graph?'✓ Checking is on':'Check my graph'}</button></div><div id="gfb">${gFbHTML()}</div>`;
   return h+`</div><div><canvas id="gcv" class="cv" width="${GW}" height="${GH}" style="cursor:ns-resize" aria-label="Your acceleration graph"></canvas>${S.chk.graph?'<p class="note">Green ring = right height. Red ring = check the number again.</p>':''}</div></div>`;
 }
 function gFbHTML(){const e=graphEval();let h=e.valid&&!e.fits?'<div class="fb mid">Some of your accelerations don\'t fit. Check your lowest and highest numbers.</div>':'';
-  if(S.chk.graph){const it=[[e.title,'Title mentions acceleration'],[e.yl,'y-axis says acceleration with its unit m/s²'],[e.xl,'x-axis has a label'],[e.fits,'All accelerations fit on the axes'],[e.placed===4,'All 4 bars placed'],[e.acc===4,'Every bar is the right height']];
+  if(S.chk.graph){const it=[[e.title,'Title mentions acceleration'],[e.yl,'y-axis says acceleration with its unit m/s²'],[e.xl,'x-axis has a label'],[e.fits,'All accelerations fit on the axes'],[e.placed===3,'All 3 points placed'],[e.acc===3,'Every point is the right height']];
     h+=`<div class="fb ${it.every(x=>x[0])?'ok':'mid'}">${it.map(([ok,t])=>`${ok?'✓':'✗'} ${t}`).join('<br>')}</div>`}return h}
 function gLive(){gDraw();const f=$('#gfb');if(f)f.innerHTML=gFbHTML();chrome()}
 function graphBind(){const cv=$('#gcv');if(!cv)return;cv.onpointerdown=gDown;cv.onpointermove=gMove;cv.onpointerup=gUp;cv.onpointercancel=gUp;gDraw();drawSpeedModel($('#vcv'))}
@@ -466,7 +478,7 @@ function drawSpeedModel(cv){
   c.strokeStyle='#14202e';c.lineWidth=3;c.beginPath();c.moveTo(L,T);c.lineTo(L,B);c.lineTo(R,B);c.stroke();
   c.fillStyle='#14202e';c.font='bold 20px '+FONT;c.textAlign='center';c.fillText('Time from the start (s)',(L+R)/2,GH-20);
   c.save();c.translate(30,(T+B)/2);c.rotate(-Math.PI/2);c.fillText('Speed (m/s)',0,0);c.restore();
-  c.strokeStyle=COLS.v;c.lineWidth=4;c.beginPath();pts.forEach((p,i)=>i?c.lineTo(px(p.t),py(p.v)):c.moveTo(px(p.t),py(p.v)));c.stroke();
+  c.strokeStyle=COLS.v;c.lineWidth=4;c.beginPath();smoothPath(c,pts.map(p=>({x:px(p.t),y:py(p.v)})));c.stroke();
   pts.forEach(p=>{c.fillStyle=p.k?COLS.v:'#94a3b8';c.beginPath();c.arc(px(p.t),py(p.v),8,0,7);c.fill();if(p.k){c.fillStyle='#14202e';c.font='bold 15px '+FONT;c.fillText('M'+p.k,px(p.t),py(p.v)-14)}});
 }
 
@@ -487,17 +499,29 @@ function sceneArt(s){
     :`<g opacity=".55"><line x1="${BW-170}" y1="40" x2="${BW-50}" y2="40" stroke="#14202e" stroke-width="3" stroke-dasharray="6 5"/><polygon points="${BW-38},40 ${BW-54},31 ${BW-54},49" fill="#14202e"/><text x="${BW-170}" y="26" font-size="15" fill="#14202e">moving this way</text></g>`;
   return ground+cart+mv;
 }
-function arrowSVG(a,showLbl=true){
-  const [dx,dy]=VEC[a.dir],x2=BCX+dx*a.len,y2=BCY+dy*a.len,hs=14,c=a.type?FT[a.type].c:'#7a8a92';
-  const t=a.type?FT[a.type].n:'Tap to label',lx=x2+dx*14,ly=y2+dy*18+(Math.abs(dy)<.5?-10:4);
-  return`<g class="farr" data-id="${a.id}"><line x1="${BCX}" y1="${BCY}" x2="${x2-dx*hs*.7}" y2="${y2-dy*hs*.7}" stroke="${c}" stroke-width="6" stroke-linecap="round" ${a.type?'':'stroke-dasharray="8 6"'}/>
+function arrowSVG(a,off=0){
+  /* off: sideways shift so two forces pointing the same way sit side by side instead of on top of each other */
+  const [dx,dy]=VEC[a.dir],px=-dy*off,py=dx*off,x1=BCX+px,y1=BCY+py,x2=x1+dx*a.len,y2=y1+dy*a.len,hs=14,c=a.type?FT[a.type].c:'#7a8a92';
+  const t=a.type?FT[a.type].n:'Tap to label',tw=t.length*8.4;let anc=dx>.3?'start':dx<-.3?'end':'middle',lx=x2+dx*14,ly;
+  /* labels go on the outside of a side-by-side pair, so they never sit on top of each other */
+  if(Math.abs(dy)<.5)ly=y2+(off?(py>0?18:-9):-10);
+  else if(Math.abs(dx)<=.3&&off){anc=px>0?'start':'end';lx=x2+(px>0?9:-9);ly=y2+dy*10+5}
+  else ly=y2+dy*18+4+(off?(py>0?7:-7):0);
+  /* keep every label inside the box */
+  const lo=anc==='start'?lx:anc==='end'?lx-tw:lx-tw/2;let sh=0;if(lo<6)sh=6-lo;if(lo+tw>BW-6)sh=-(lo+tw-(BW-6));lx+=sh;
+  if(Math.abs(sh)>8&&anc!=='middle')ly+=ly>BH-40?-24:22; /* pushed back inside the box: move it clear of the arrow head */
+  ly=clamp(ly,18,BH-8);
+  return`<g class="farr" data-id="${a.id}"><line x1="${x1}" y1="${y1}" x2="${x2-dx*hs*.7}" y2="${y2-dy*hs*.7}" stroke="${c}" stroke-width="6" stroke-linecap="round" ${a.type?'':'stroke-dasharray="8 6"'}/>
    <polygon points="${x2},${y2} ${x2-dx*hs-dy*hs*.55},${y2-dy*hs+dx*hs*.55} ${x2-dx*hs+dy*hs*.55},${y2-dy*hs-dx*hs*.55}" fill="${c}"/>
-   <line x1="${BCX}" y1="${BCY}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="24"/><circle cx="${x2}" cy="${y2}" r="13" fill="transparent" class="ftip"/>
-   ${showLbl?`<text x="${lx}" y="${ly}" text-anchor="${dx>.3?'start':dx<-.3?'end':'middle'}" font-size="15" font-weight="700" fill="${c}" paint-order="stroke" stroke="#fffaf2" stroke-width="4">${esc(t)}</text>`:''}</g>`;
+   <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="transparent" stroke-width="24"/><circle cx="${x2}" cy="${y2}" r="13" fill="transparent" class="ftip"/>
+   <text x="${lx}" y="${ly}" text-anchor="${anc}" font-size="15" font-weight="700" fill="${c}" paint-order="stroke" stroke="#fffaf2" stroke-width="4">${esc(t)}</text></g>`;
 }
+function arrowsSVG(arrows){const by={};arrows.forEach(a=>(by[a.dir]=by[a.dir]||[]).push(a));
+  /* longest first, so short arrows are drawn on top; same-direction arrows are spread 22 px apart */
+  return arrows.slice().sort((p,q)=>q.len-p.len).map(a=>{const g=by[a.dir],i=g.indexOf(a);return arrowSVG(a,(i-(g.length-1)/2)*22)}).join('')}
 function fbdSVG(s,arrows,opts={}){
   return`<svg viewBox="0 0 ${BW} ${BH}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Free body diagram: the cart ${SCEN[s].t.toLowerCase()}"><rect width="${BW}" height="${BH}" fill="#fffaf2"/>${sceneArt(s)}
-   ${opts.noDot?'':`<circle cx="${BCX}" cy="${BCY}" r="8" fill="#e3a51c" stroke="#14202e" stroke-width="2"/>`}${arrows.map(a=>arrowSVG(a)).join('')}</svg>`;
+   ${opts.noDot?'':`<circle cx="${BCX}" cy="${BCY}" r="8" fill="#e3a51c" stroke="#14202e" stroke-width="2"/>`}${arrowsSVG(arrows)}</svg>`;
 }
 const modelArrows=s=>MODEL[s].map(([type,dir,len],i)=>({id:'m'+i,type,dir,len}));
 function fbdCheck(s,arrows){
@@ -608,27 +632,27 @@ function stepConclusion(){
   else body=`<div class="wtu">Words to use: ${['positive acceleration','negative acceleration','m/s²','unbalanced','resultant force','gravity','friction','speeds up','slows down'].map(w=>`<span>${w}</span>`).join('')}</div>`+
    G78Q.map(([k,t,p])=>`<h3>${t}</h3><p class="note">${k==='pred'?predTxt+' ':''}${p}</p><textarea data-bind="con.${k}">${esc(S.con[k]||'')}</textarea>`).join('')+
    `<div class="tip" data-live="cl78">${cl78()}</div>`;
-  return`<div class="intro">On this page you will <b>write your conclusion</b> and <b>save your worksheet</b> as a PDF for Toddle.</div>
+  return`<div class="intro">On this page you will <b>write your conclusion</b>. Then go to <b>Worksheet</b> to save your PDF for Toddle.</div>
   <div class="panel"><h2>Conclusion ${stepTodo(5)}</h2>${body}</div>
-  <div class="panel"><h2>Save your worksheet</h2><p>Your PDF shows your tables, your graph, the speed model, your forces and your conclusion. Upload it to Toddle.</p>
-   <div class="chips"><button class="btn go" data-act="pdf">📄 Save my worksheet (PDF)</button><button class="btn" data-act="print">🖨 Print it</button></div><div id="pdfmsg"></div></div>`;
+`;
 }
 function cl78(){const t=['claim','evid','reason'].map(k=>String(S.con[k]||'').toLowerCase()).join(' ');
   const it=[[/positive|\+/.test(t)&&/negative|minus|−|-\d/.test(t),'uses positive and negative acceleration'],[/\d/.test(t)&&/m\/s(2|²)/.test(t),'gives numbers with the unit m/s²'],[/unbalanced/.test(t),'says the forces are unbalanced'],[/friction/.test(t),'names friction'],[/resultant/.test(t),'uses "resultant force"']];
   return'<b>Did you include…</b><br>'+it.map(([ok,l])=>`${ok?'✅':'⬜'} ${l}`).join('<br>')}
 
 /* ---------- shell ---------- */
-function stepHTML(){return[stepPredict,stepTimes,stepMetres,stepAccel,stepForces,stepConclusion][S.step]()}
+function stepHTML(){return[stepPredict,stepTimes,stepMetres,stepAccel,stepForces,stepConclusion,stepSheet][S.step]()}
 function render(){
   const app=$('#app');
   app.innerHTML=`<header class="top"><div class="brand"><h1>Acceleration <span>Lab</span></h1><p>Speeding up, slowing down, and the forces behind it</p></div>
    <div class="who">👤 <b>${esc(S.name||'—')}</b>${S.cls?' · '+esc(S.cls):''} · ${S.grade==='6'?'Grade 6':S.grade?'Grade 7/8':''} <button class="btn sm dark" data-act="gate">Change</button></div>
-   <div class="tools"><button class="btn sm dark" data-act="pdf">📄 Save PDF</button><button class="btn sm dark" data-act="teacher">For teachers</button></div></header>
+   <div class="tools"><button class="btn sm dark" data-go="6">📄 Worksheet</button><button class="btn sm dark" data-act="teacher">For teachers</button></div></header>
    <nav class="steps" id="stepbar"></nav><main id="main">${stepHTML()}</main>
-   <div class="navrow">${S.step>0?`<button class="btn" data-go="${S.step-1}">← Back</button>`:'<span></span>'}${S.step<5?`<button class="btn go" id="nextbtn" data-go="${S.step+1}">Next: ${STEPS[S.step+1].n} →</button>`:''}</div>
+   <div class="navrow">${S.step>0?`<button class="btn" data-go="${S.step-1}">← Back</button>`:'<span></span>'}${S.step<6?`<button class="btn go" id="nextbtn" data-go="${S.step+1}">Next: ${STEPS[S.step+1].n} →</button>`:''}</div>
    <button class="btn primary calcfab" data-act="calc">🧮 Calculator</button>`;
   chrome();refreshLive();graphBind();
   if(S.step===4&&!isG6())['ramp','flat'].forEach(s=>fbdMount($('#fbd-'+s),s));
+  if(S.step===6)renderPreview();
 }
 function chrome(){
   const bar=$('#stepbar');if(bar)bar.innerHTML=STEPS.map((s,i)=>{const st=stepStatus(i);return`<button class="${i===S.step?'on':''} ${st}" data-go="${i}"><b>${i+1}. ${st==='done'?'✓ Done':st==='part'?'Started':''}</b>${s.i} ${s.n}</button>`}).join('');
@@ -640,7 +664,7 @@ function liveHTML(key){const [a,b,c]=key.split(':');
   if(a==='mk')return mark(b,+c);if(a==='form')return formHint(b,+c);if(a==='chk2sum')return chk2Sum();
   if(a==='acctable')return accTable();if(a==='cl78')return cl78();if(a==='todo')return todoPill(+b);return''}
 function refreshLive(){$$('[data-live]').forEach(el=>{const h=liveHTML(el.dataset.live);if(el.innerHTML!==h)el.innerHTML=h;if(el.classList.contains('val'))el.classList.toggle('empty',h==='—')});chrome()}
-function go(i){S.step=clamp(+i,0,5);save();render();scrollTo(0,0)}
+function go(i){S.step=clamp(+i,0,6);save();render();scrollTo(0,0)}
 
 /* ---------- events ---------- */
 const SRC={leg:k=>k===1?['#av1']:['#av'+k,'#av'+(k-1)],spd:k=>['#leg'+k],chg:k=>k===1?['#spd1']:['#spd'+k,'#spd'+(k-1)]};
@@ -698,43 +722,49 @@ document.addEventListener('DOMContentLoaded',boot);
 function svgToPng(svg,w,h){return new Promise(res=>{const img=new Image();img.onload=()=>{const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);try{res(c.toDataURL('image/png'))}catch(e){res('')}};img.onerror=()=>res('');img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)})}
 function cvURL(draw){const c=document.createElement('canvas');c.width=GW;c.height=GH;draw(c);return c.toDataURL('image/png')}
 async function buildSheet(blankMode){
-  const B=!!blankMode,v=x=>B?'':esc(x),f=x=>B||x==null||isNaN(x)?'':fmt(x),g6=!B&&isG6();
+  const B=!!blankMode,v=x=>B?'':esc(x),f=x=>B||x==null||isNaN(x)?'':fmt(x),has=x=>String(x==null?'':x).trim()!=='';
   const pr=PRED_OPTS.reduce((o,[k,l])=>(o[k]=l,o),{});
   const key=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin:4px 0">${[['t','Time from start'],['l','Time for one metre'],['v','Speed'],['d','Change in speed'],['a','Acceleration']].map(([c,t])=>`<span style="border:2px solid ${COLS[c]};background:${SOFT[c]};color:${COLS[c]};border-radius:5px;padding:1px 8px;font-weight:700;font-size:11px">${t}</span>`).join('')}</div>`;
   const th=(c,t)=>`<th style="background:${SOFT[c]};color:${COLS[c]};border-bottom:3px solid ${COLS[c]}">${t}</th>`;
   const td=(c,t)=>`<td class="cell" style="color:${COLS[c]};font-weight:700;font-family:var(--font-num)">${t}</td>`;
   const n=B?3:S.trials,zone=k=>`background:${k<=RAMP_END?'#f3e3c3':'#e2e8f0'};text-align:left;font-weight:700`;
-  const t1=`<table><tr><th>Distance</th>${[...Array(n)].map((_,i)=>th('t',`Trial ${i+1} (s)`)).join('')}${th('t','Average (s)')}</tr>${MS.map(k=>`<tr><td style="${zone(k)}">${k} m mark ${k<=RAMP_END?'(ramp)':'(flat)'}</td>${[...Array(n)].map((_,i)=>td('t',v(S.T[k][i]))).join('')}${td('t',f(avgT(k)))}</tr>`).join('')}</table>`;
-  const t2=`<table><tr><th>Piece of track</th>${th('t','Time from start (s)')}${th('l','① Time for this metre (s)')}${th('v','② Speed (m/s)')}${th('d','③ Change in speed (m/s)')}${th('a','④ Acceleration (m/s²)'+(B?'':' *'))}</tr>
+  const secs=[];const add=(t,h)=>secs.push({t,h});
+  /* each part goes in only if the student has done something in it (the blank sheet has everything) */
+  if(B||S.pred.ramp||S.pred.flat)add('My prediction',`<div>Down the ramp the cart will: ${B?'☐ speed up ☐ stay the same ☐ slow down':'<b>'+esc(pr[S.pred.ramp]||'—')+'</b>'} &nbsp;&nbsp; On the flat it will: ${B?'☐ speed up ☐ stay the same ☐ slow down':'<b>'+esc(pr[S.pred.flat]||'—')+'</b>'}</div>${!B&&has(S.pred.why)?`<div class="ans" style="min-height:0;margin-top:4px">${esc(S.pred.why)}</div>`:''}`);
+  if(B||MS.some(k=>S.T[k].slice(0,S.trials).some(has)))add('Table 1: Time from the start',`<table><tr><th>Distance</th>${[...Array(n)].map((_,i)=>th('t',`Trial ${i+1} (s)`)).join('')}${th('t','Average (s)')}</tr>${MS.map(k=>`<tr><td style="${zone(k)}">${k} m mark ${k<=RAMP_END?'(ramp)':'(flat)'}</td>${[...Array(n)].map((_,i)=>td('t',v(S.T[k][i]))).join('')}${td('t',f(avgT(k)))}</tr>`).join('')}</table>`);
+  if(B||MS.some(k=>has(S.leg[k])||has(S.spd[k])||has(S.chg[k])))add('Table 2: Each metre on its own',`<table><tr><th>Piece of track</th>${th('t','Time from start (s)')}${th('l','① Time for this metre (s)')}${th('v','② Speed (m/s)')}${th('d','③ Change in speed (m/s)')}${th('a','④ Acceleration (m/s²)'+(B?'':' *'))}</tr>
    <tr style="font-size:10px;color:#475569"><td>Formula</td><td>Table 1</td><td>this mark − last mark</td><td>1 ÷ time</td><td>this speed − speed before</td><td>change in speed ÷ time between middles</td></tr>
-   ${MS.map(k=>`<tr><td style="${zone(k)}">Metre ${k} (${k-1}→${k} m)</td>${td('t',f(avgT(k)))}${td('l',v(S.leg[k]))}${td('v',v(S.spd[k]))}${td('d',v(S.chg[k]))}${td('a',f(accel(k))+(B||accel(k)==null?'':k===RAMP_END+1?' ⇄':accel(k)>0?' ⬆':' ⬇'))}</tr>`).join('')}</table>
-   ${B?'<p style="font-size:10.5px;margin:3px 0">Metre 1: time = time at 1 m; change in speed = speed − 0. ④ Your teacher will help with acceleration: time between middles = half of one metre\'s time + half of the next.</p>':'<p style="font-size:10.5px;margin:3px 0">* Acceleration was worked out by the app from my numbers. ⬆ speeding up · ⬇ slowing down · ⇄ crosses the bottom of the ramp.</p>'}`;
-  const gImg=cvURL(c=>drawGraph(c.getContext('2d'),B?{title:'',xl:'',yl:'',ymin:'',ymax:'',ystep:'',bars:{}}:S.g,{blank:B}));
-  const vImg=B?'':cvURL(c=>drawSpeedModel(c));
-  const fb={};for(const s of ['ramp','flat']){const arr=B?[]:isG6()?modelArrows(s):S.fbd[s].arrows||[];fb[s]=await svgToPng(fbdSVG(s,arr,{noDot:isG6()&&!B}),520,400)}
-  const fq=s=>['bal','res','acc'].map(q=>{const d=fqDef(s,q);return`<div style="font-size:11px;margin:2px 0"><b>${d.p}</b> ${d.o.map(([val,l])=>`${!B&&S.fq[s+'.'+q]===val?'☑':'☐'} ${l}`).join('  ')}</div>`}).join('');
-  let con;
-  if(B||isG6()){const gap=k=>B?'<span style="display:inline-block;width:120px;border-bottom:1px solid #14202e">&nbsp;</span>':`<b style="color:#1e3a8a;text-decoration:underline">${esc(S.con[k]||'     ')}</b>`;
-    con=`<p style="line-height:2">On the ramp, the cart was ${gap('f1')}. Its acceleration was a ${gap('f2')} number.<br>On the flat, the cart was ${gap('f3')}. Its acceleration was a ${gap('f4')} number.<br>On the flat, gravity could not pull the cart forwards any more, and ${gap('f5')} slowed it down.</p>
-     <b>My prediction was… because…</b><div class="ans">${v(S.con.pred)}</div>`;
+   ${MS.map(k=>{const a=accel(k);return`<tr><td style="${zone(k)}">Metre ${k} (${k-1}→${k} m)</td>${td('t',f(avgT(k)))}${td('l',v(S.leg[k]))}${td('v',v(S.spd[k]))}${k===1?'<td style="color:#64748b;font-size:10.5px">— nothing before it</td><td style="color:#64748b;font-size:10.5px">—</td>':td('d',v(S.chg[k]))+td('a',f(a)+(B||a==null?'':k===RAMP_END+1?' ⇄':a>0?' ⬆':' ⬇'))}</tr>`}).join('')}</table>
+   ${B?'<p style="font-size:10.5px;margin:3px 0">Metre 1: time = time at 1 m. ④ Your teacher will help with acceleration: time between middles = half of one metre\'s time + half of the next.</p>':'<p style="font-size:10.5px;margin:3px 0">* Acceleration was worked out by the app from my numbers. ⬆ speeding up · ⬇ slowing down · ⇄ crosses the bottom of the ramp.</p>'}`);
+  const ge=graphEval();
+  if(B||(ge.valid&&ge.placed>0)){const img=cvURL(c=>drawGraph(c.getContext('2d'),B?{title:'',xl:'',yl:'',ymin:'',ymax:'',ystep:'',bars:{}}:S.g,{blank:B}));
+    add('My acceleration graph',`<img src="${img}" style="width:${B?'70%':'82%'};border:1px solid #cbd5e1">${B?'<p style="font-size:10.5px">Choose your y-axis numbers. Leave room <b>below zero</b> for minus numbers. Draw the zero line, plot a point for each change, then join them with a smooth line.</p>':''}`)}
+  if(!B&&speedPts().pts.length>=3)add('Model: speed vs time (made from my numbers)',`<img src="${cvURL(c=>drawSpeedModel(c))}" style="width:66%;border:1px solid #cbd5e1">`);
+  const scen=[];
+  for(const s of ['ramp','flat']){const qs=['bal','res','acc'].filter(q=>B||S.fq[s+'.'+q]),arr=B?[]:isG6()?modelArrows(s):S.fbd[s].arrows||[];
+    if(!B&&!qs.length&&!(!isG6()&&arr.length))continue;
+    const img=await svgToPng(fbdSVG(s,arr,{noDot:isG6()&&!B}),520,400);
+    scen.push(`<div><b>${SCEN[s].t}</b><img src="${img}" style="width:100%;border:1px solid #cbd5e1">${qs.map(q=>{const d=fqDef(s,q),a=S.fq[s+'.'+q];return`<div style="font-size:11px;margin:2px 0"><b>${d.p}</b> ${B?d.o.map(([,l])=>'☐ '+l).join('  '):esc((d.o.find(o=>o[0]===a)||['',''])[1])}</div>`}).join('')}</div>`)}
+  if(scen.length)add(`Forces on the cart${!B&&isG6()?' (model diagrams)':''}`,`${B?'<p style="font-size:10.5px">Draw the forces on the cart from its centre dot. Bigger force = longer arrow. Label each arrow.</p>':''}<div class="two">${scen.join('')}</div>`);
+  let con='';
+  if(B||isG6()){const gap=k=>B?'<span style="display:inline-block;width:120px;border-bottom:1px solid #14202e">&nbsp;</span>':`<b style="color:#1e3a8a;text-decoration:underline">${esc(S.con[k]||'      ')}</b>`;
+    const sent=[[['f1','f2'],`On the ramp, the cart was ${gap('f1')}. Its acceleration was a ${gap('f2')} number.`],[['f3','f4'],`On the flat, the cart was ${gap('f3')}. Its acceleration was a ${gap('f4')} number.`],[['f5'],`On the flat, gravity could not pull the cart forwards any more, and ${gap('f5')} slowed it down.`]].filter(([ks])=>B||ks.some(k=>has(S.con[k])));
+    if(sent.length)con+=`<p style="line-height:2;margin:2px 0">${sent.map(x=>x[1]).join('<br>')}</p>`;
+    if(B||has(S.con.pred))con+=`<b>My prediction was… because…</b><div class="ans">${v(S.con.pred)}</div>`;
     if(B)con+=`<b>Grade 7/8: Claim, evidence, reasoning</b> (use two acceleration numbers and the words unbalanced, resultant force, friction)<div class="ans" style="min-height:90px"></div><b>Grade 7/8: Why is the metre 2 → 3 value a mix?</b><div class="ans"></div>`}
-  else con=G78Q.map(([k,t])=>`<b>${t}</b><div class="ans">${esc(S.con[k]||'')}</div>`).join('');
-  const hdr=(p)=>`<div class="hdr"><div><h1>Acceleration Lab: Worksheet</h1><div style="font-size:11px;color:#475569">How does a cart speed up on a ramp and slow down on the flat?</div></div>
+  else con=G78Q.filter(([k])=>has(S.con[k])).map(([k,t])=>`<b>${t}</b><div class="ans">${esc(S.con[k])}</div>`).join('');
+  if(con)add('Conclusion',con);
+  /* lay the parts out on A4 pages, starting a new page when a part would not fit */
+  const hdr=`<div class="hdr"><div><h1>Acceleration Lab: Worksheet</h1><div style="font-size:11px;color:#475569">How does a cart speed up on a ramp and slow down on the flat?</div></div>
     <div style="text-align:right;font-size:12px">${B?'Name: ____________________ &nbsp; Class: ______ &nbsp; Grade: ___':`<b>${esc(S.name)}</b> · ${esc(S.cls)} · ${S.grade==='6'?'Grade 6':'Grade '+(S.gnum||'7/8')}<br>${new Date().toLocaleDateString('en-GB')}`}</div></div>`;
-  const foot=p=>`<div class="foot">Acceleration Lab · page ${p} of 2</div>`;
-  const p1=`<div class="pg ${B?'blank':''}">${hdr(1)}${key}
-   <h2>1. My prediction</h2><div>Down the ramp the cart will: ${B?'☐ speed up ☐ stay the same ☐ slow down':'<b>'+esc(pr[S.pred.ramp]||'—')+'</b>'} &nbsp;&nbsp; On the flat it will: ${B?'☐ speed up ☐ stay the same ☐ slow down':'<b>'+esc(pr[S.pred.flat]||'—')+'</b>'}</div>${!B&&S.pred.why?`<div class="ans" style="min-height:0;margin-top:4px">${esc(S.pred.why)}</div>`:''}
-   <h2>2. Table 1: Time from the start</h2>${t1}
-   <h2>3. Table 2: Each metre on its own</h2>${t2}
-   <h2>4. My acceleration graph</h2><img src="${gImg}" style="width:${B?'78%':'86%'};border:1px solid #cbd5e1">
-   ${B?'<p style="font-size:10.5px">Choose your y-axis numbers. Leave room <b>below zero</b> for minus numbers. Draw the zero line, then a bar for each change: up from zero for +, down for −.</p>':''}${foot(1)}</div>`;
-  const p2=`<div class="pg ${B?'blank':''}">${hdr(2)}
-   ${B?'':`<h2>5. Model: speed vs time (made from my numbers)</h2><img src="${vImg}" style="width:70%;border:1px solid #cbd5e1">`}
-   <h2>${B?5:6}. Forces on the cart ${g6?'(model diagrams)':''}</h2>${B?'<p style="font-size:10.5px">Draw the forces on the cart from its centre dot. Bigger force = longer arrow. Label each arrow.</p>':''}
-   <div class="two"><div><b>On the ramp</b><img src="${fb.ramp}" style="width:100%;border:1px solid #cbd5e1">${fq('ramp')}</div><div><b>On the flat</b><img src="${fb.flat}" style="width:100%;border:1px solid #cbd5e1">${fq('flat')}</div></div>
-   <h2>${B?6:7}. Conclusion</h2>${con}${foot(2)}</div>`;
-  const host=$('#sheet')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'sheet'}));host.innerHTML=p1+p2;
-  await Promise.all($$('#sheet img').map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+  const host=$('#sheet')||document.body.appendChild(Object.assign(document.createElement('div'),{id:'sheet'}));host.innerHTML='';
+  const newPage=first=>{const pg=document.createElement('div');pg.className='pg'+(B?' blank':'');pg.innerHTML=hdr+(first?key:'')+'<div class="pbody"></div><div class="foot"></div>';host.appendChild(pg);return pg};
+  let pg=newPage(true);const LIMIT=1123-60;
+  if(!secs.length)$('.pbody',pg).innerHTML='<p style="margin-top:30px;font-size:14px;color:#64748b">Nothing has been filled in yet. Start with step 1 (Predict).</p>';
+  for(let i=0;i<secs.length;i++){const d=document.createElement('div');d.innerHTML=`<h2>${i+1}. ${secs[i].t}</h2>${secs[i].h}`;$('.pbody',pg).appendChild(d);
+    await Promise.all($$('img',d).map(im=>im.decode?im.decode().catch(()=>0):0));
+    if(d.getBoundingClientRect().bottom-pg.getBoundingClientRect().top>LIMIT&&$('.pbody',pg).children.length>1){pg=newPage(false);$('.pbody',pg).appendChild(d)}}
+  const pages=$$('.pg',host);pages.forEach((p,i)=>$('.foot',p).textContent=`Acceleration Lab · page ${i+1} of ${pages.length}`);
   return host;
 }
 function b64bytes(u){const b=atob(u.split(',')[1]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a}
@@ -752,19 +782,30 @@ function pdfFromCanvases(cvs,title){
   put(`trailer\n<< /Size ${info+1} /Root 1 0 R /Info ${info} 0 R >>\nstartxref\n${xref}\n%%EOF`);
   return new Blob(parts,{type:'application/pdf'});
 }
-function unfinished(){return STEPS.map((s,i)=>[s,i]).filter(([s,i])=>stepStatus(i)!=='done')}
-async function savePDF(force){
-  const left=unfinished();
-  if(left.length&&!force){popup('popsave','Before you save',`<p>These parts are not finished yet:</p>${left.map(([s,i])=>`<p>${s.i} <b>${s.n}</b> <button class="btn sm" data-gofix="${i}">Go there</button></p>`).join('')}<div class="navrow"><span></span><button class="btn go" id="saveany">Save anyway</button></div>`);
-    $$('[data-gofix]').forEach(b=>b.onclick=()=>{$('#popsave').remove();go(b.dataset.gofix)});$('#saveany').onclick=()=>{$('#popsave').remove();savePDF(true)};return}
+function unfinished(){return STEPS.slice(0,6).map((s,i)=>[s,i]).filter(([s,i])=>stepStatus(i)!=='done')}
+async function savePDF(){
   const msg=$('#pdfmsg');if(msg)msg.innerHTML='<div class="fb mid">Making your PDF…</div>';
   try{const host=await buildSheet(false),cvs=[];
-    for(const pg of $$('.pg',host))cvs.push(await html2canvas(pg,{scale:1.6,backgroundColor:'#fff',logging:false}));
+    for(const pg of $$('.pg',host))cvs.push(await html2canvas(pg,{scale:1.6,backgroundColor:'#fff',logging:false,windowWidth:900}));
     const blob=pdfFromCanvases(cvs,'Acceleration Lab - '+S.name),a=document.createElement('a');a.href=URL.createObjectURL(blob);
     a.download=`Acceleration-Lab-${(S.name||'worksheet').replace(/[^\w\- ]+/g,'').trim().replace(/\s+/g,'-')}.pdf`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);
-    if(msg)msg.innerHTML='<div class="fb ok">✓ Saved! Look in your Downloads folder, then upload the PDF to Toddle.</div>';
+    S.saved=true;save();chrome();
+    if(msg)msg.innerHTML='<div class="fb ok">✓ Saved! Look in your Downloads (or Files) folder, then upload the PDF to Toddle.</div>';
   }catch(e){if(msg)msg.innerHTML='<div class="fb no">The PDF could not be made here. Use 🖨 Print and choose "Save as PDF".</div>';console.error(e)}
 }
+/* ---------- Step 7: worksheet preview ---------- */
+function stepSheet(){
+  const left=unfinished();
+  return`<div class="intro">This is <b>your worksheet</b>. It only shows the parts you have done, so it always looks finished. Save it as a PDF and upload it to Toddle.</div>
+  <div class="panel"><h2>📄 My worksheet</h2>
+   <div class="chips"><button class="btn go" data-act="pdf">📄 Save my worksheet (PDF)</button><button class="btn" data-act="print">🖨 Print it</button></div><div id="pdfmsg"></div>
+   ${left.length?`<p class="note" style="margin-bottom:0">Not finished yet (you can still save): ${left.map(([s,i])=>`<button class="btn sm" data-go="${i}">${s.i} ${s.n}</button>`).join(' ')}</p>`:'<p class="note" style="margin-bottom:0">✓ Every step is done.</p>'}</div>
+  <div class="panel"><h3 style="margin-top:0">Preview</h3><div id="preview" class="preview"><p class="note">Building your preview…</p></div></div>`;
+}
+async function renderPreview(){const box=$('#preview');if(!box)return;const host=await buildSheet(false);if(!document.body.contains(box))return;
+  box.innerHTML='';const w=box.clientWidth,sc=Math.min(1,(w-4)/794);
+  $$('.pg',host).forEach(pg=>{const wrap=document.createElement('div');wrap.className='pv';const c=pg.cloneNode(true);c.style.transform=`scale(${sc})`;c.style.transformOrigin='top left';
+    wrap.style.width=794*sc+'px';wrap.appendChild(c);box.appendChild(wrap);wrap.style.height=c.offsetHeight*sc+'px'})}
 async function printSheet(blankMode){await buildSheet(blankMode);setTimeout(()=>print(),150)}
 
 /* ===== For teachers: lesson plan, notes, Toddle prompt, example data, paper worksheet ===== */
@@ -798,7 +839,7 @@ function teacherNotes(){
   <tr><td>12–22</td><td>Groups collect data (step 2). Way 1: one timer, a new run per mark. Way 2: a timer at every mark, all starting on "GO!" (faster). 1–5 trials can be chosen.</td></tr>
   <tr><td>22–38</td><td>Steps 3–5: tables, graph, forces.</td></tr><tr><td>38–45</td><td>Conclusion, save the PDF, exit question.</td></tr></table>
   <h3>Grades</h3><ul><li><b>Grade 6:</b> formulas show their own numbers (e.g. "= 2.54 − 2.00"), "Suggest numbers" on the graph, model free body diagrams to read, a sentence-frame conclusion.</li><li><b>Grade 7/8:</b> formulas in words, they choose the axis numbers, build both free body diagrams (checked), and write a claim, evidence and reasoning, plus why the metre 2 → 3 value is mixed.</li></ul>
-  <h3>Expect this in the results</h3><ul><li>Start → M1 and M1 → M2: positive (speeding up on the ramp).</li><li><b>M2 → M3 crosses the bottom of the ramp.</b> It compares the average speed in metre 2 (still on the ramp) with metre 3 (the flat, starting at top speed). It mixes speeding up and slowing down, so it can come out positive <i>or</i> negative. The app tags it "⇄ crosses the bottom of the ramp". It's a good discussion point.</li><li>M3 → M4: negative (friction slows the cart). If it is tiny or positive, the flat may be too smooth. Try carpet or a towel, or a lower ramp.</li><li>Hand timing has about 0.2 s reaction time, and a flat metre takes about 0.4–0.6 s. Averaging trials helps. Phone slow-motion video is an option.</li></ul>
+  <h3>Expect this in the results</h3><ul><li>M1 → M2: positive (speeding up on the ramp). There is no "start → metre 1" value on purpose: metre 1 is the only time that depends on the stopwatch starting exactly as the cart is let go, and any start error gets magnified, so it gave silly-big accelerations.</li><li><b>M2 → M3 crosses the bottom of the ramp.</b> It compares the average speed in metre 2 (still on the ramp) with metre 3 (the flat, starting at top speed). It mixes speeding up and slowing down, so it can come out positive <i>or</i> negative. The app tags it "⇄ crosses the bottom of the ramp". It's a good discussion point.</li><li>M3 → M4: negative (friction slows the cart). If it is tiny or positive, the flat may be too smooth. Try carpet or a towel, or a lower ramp.</li><li>Hand timing has about 0.2 s reaction time, and a flat metre takes about 0.4–0.6 s. Averaging trials helps. Phone slow-motion video is an option.</li></ul>
   <h3>The science wording</h3><p>On the flat, gravity still pulls down, but the floor pushes up just as hard, so gravity can no longer pull the cart <i>forwards</i>. Friction (and air resistance) is the only force along the floor, so it is unbalanced and the acceleration is negative.</p>
   <h3>Set it up on Toddle</h3><ol><li>Create a task with Toddle's AI task helper and paste the prompt below.</li><li>Attach <b>${LAB.file}</b>.</li><li>Set the hand-in to <b>file upload</b> (the PDF worksheet), then assign.</li></ol>
   <textarea readonly id="tprompt" style="min-height:150px;font-size:13px">${esc(TODDLE_PROMPT)}</textarea><button class="btn" id="tcopy">📋 Copy the prompt</button>

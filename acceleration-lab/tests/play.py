@@ -40,7 +40,7 @@ def run(grade, w=1280, h=900):
         for k, v in legs.items(): pg.fill(f'#leg{k}', v)
         spd = {1: '0.71', 2: '1.69', 3: '1.82', 4: '1.47'}
         for k, v in spd.items(): pg.fill(f'#spd{k}', v)
-        chg = {1: '0.71', 2: '0.98', 3: '0.13', 4: '-0.5'}  # metre 4 deliberately wrong (should be -0.35)
+        chg = {2: '0.98', 3: '0.13', 4: '-0.5'}  # metre 4 deliberately wrong (should be -0.35)
         for k, v in chg.items(): pg.fill(f'#chg{k}', v)
         pg.click('[data-act=chk2]')
         pg.click('#spd3')  # light up its sources
@@ -58,9 +58,9 @@ def run(grade, w=1280, h=900):
         assert pg.inner_text('#calcd').startswith('1.47'), pg.inner_text('#calcd')
         pg.click('#calcput'); assert pg.input_value('#spd4') == '1.47'
         pg.click('#popcalc .x')
-        T = lambda: pg.evaluate('MS.map(k=>accel(k))')
+        T = lambda: pg.evaluate('AK.map(k=>accel(k))')
         a = T(); print('accelerations', [round(x, 3) for x in a])
-        assert a[0] > 0 and a[1] > 0 and a[3] < 0
+        assert len(a) == 3 and a[0] > 0 and a[2] < 0
         pg.click('#nextbtn')
         # graph: title, labels, negative axis, drag each bar
         pg.fill('[data-bind="g.title"]', 'Part of the track vs acceleration'); pg.fill('[data-bind="g.xl"]', 'Part of the track'); pg.fill('[data-bind="g.yl"]', 'Acceleration (m/s²)')
@@ -71,18 +71,24 @@ def run(grade, w=1280, h=900):
                 pg.fill(f'[data-bind="g.{k}"]', v); pg.press(f'[data-bind="g.{k}"]', 'Tab')
         g = pg.evaluate('S.g'); assert float(str(g['ymin']).replace('−', '-')) < 0, g
         pg.locator('#gcv').scroll_into_view_if_needed(); box = pg.locator('#gcv').bounding_box()
-        for i, val in enumerate(a):
+        for i, val in enumerate(a):  # i = slot 0..2 for M1→M2, M2→M3, M3→M4
             m = pg.evaluate(f'(()=>{{const m=gMap(S.g);return [m.slotX({i}),m.py(m.zero),m.py({val})]}})()')
             sx = box['width'] / 1000; sy = box['height'] / 560
             pg.mouse.move(box['x'] + m[0] * sx, box['y'] + m[1] * sy); pg.mouse.down()
             pg.mouse.move(box['x'] + m[0] * sx, box['y'] + m[2] * sy, steps=6); pg.mouse.up()
         pg.click('[data-act=gcheck]')
-        e = pg.evaluate('graphEval()'); print('graph', e); assert e['placed'] == 4 and e['acc'] == 4 and e['fits']
+        e = pg.evaluate('graphEval()'); print('graph', e); assert e['placed'] == 3 and e['acc'] == 3 and e['fits']
         pg.screenshot(path=str(OUT / f'{tag}_4accel.png'), full_page=True)
-        pg.click('#nextbtn')
+        if grade == '6':  # a half-finished worksheet still saves, leaving out the empty parts
+            pg.click('[data-go="6"]'); pg.wait_for_selector('#preview .pv')
+            with pg.expect_download() as dl:
+                pg.click('#main [data-act=pdf]')
+            dl.value.save_as(str(OUT / 'partial_worksheet.pdf')); pg.click('#stepbar [data-go="4"]')
+        else:
+            pg.click('#nextbtn')
         # forces
         if grade != '6':
-            for s, arrows in (('ramp', [('weight', 90, 150), ('normal', -70+0, 130), ('friction', 200, 50)]), ('flat', [('weight', 90, 130), ('normal', -90, 130), ('forward', 0, 80)])):
+            for s, arrows in (('ramp', [('weight', 90, 150), ('normal', -70+0, 130), ('friction', 200, 50)]), ('flat', [('weight', 90, 130), ('normal', -90, 130), ('friction', 180, 70), ('airres', 180, 50), ('forward', 0, 80)])):
                 pg.locator(f'#fbd-{s} .board').scroll_into_view_if_needed(); bd = pg.locator(f'#fbd-{s} .board').bounding_box(); k = bd['width'] / 520
                 cx, cy = bd['x'] + 260 * k, bd['y'] + 200 * k
                 import math
@@ -110,9 +116,11 @@ def run(grade, w=1280, h=900):
                 pg.fill(f'[data-bind="con.{k}"]', 'On the ramp acceleration was positive (0.99 m/s²) and on the flat negative (−0.57 m/s²) because friction is an unbalanced resultant force.')
         pg.screenshot(path=str(OUT / f'{tag}_6conclusion.png'), full_page=True)
         st = pg.evaluate('STEPS.map((s,i)=>stepStatus(i))'); print('status', st)
+        pg.click('#nextbtn'); pg.wait_for_selector('#preview .pv'); pg.wait_for_timeout(300)
+        print('preview pages', pg.locator('#preview .pv').count())
+        pg.screenshot(path=str(OUT / f'{tag}_7sheet.png'), full_page=True)
         with pg.expect_download() as dl:
             pg.click('#main [data-act=pdf]')
-        if pg.locator('#saveany').count(): pass
         d = dl.value; d.save_as(str(OUT / f'{tag}_worksheet.pdf'))
         # memory: reload keeps everything
         pg.reload(); assert pg.locator('#gate').count() == 0

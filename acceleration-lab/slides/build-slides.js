@@ -141,7 +141,7 @@ T(s, [['Open Acceleration Lab and go to step 2 (My times).'], ['Choose how many 
 /* 8. Open the app */
 s = pres.addSlide({ masterName: 'CONTENT' });
 s.addText('In the app: you do the maths', { placeholder: 'title' });
-const rows = [['l', '① Time for one metre', 'this mark − last mark', 'metre 1: just the time at 1 m'], ['v', '② Speed', '1 ÷ time for that metre', 'round to 2 decimal places'], ['d', '③ Change in speed', 'this speed − speed before', 'metre 1: speed − 0'], ['a', '④ Acceleration', 'the app works it out', 'then you graph it']];
+const rows = [['l', '① Time for one metre', 'this mark − last mark', 'metre 1: just the time at 1 m'], ['v', '② Speed', '1 ÷ time for that metre', 'round to 2 decimal places'], ['d', '③ Change in speed', 'this speed − speed before', 'start at metre 2 (nothing before metre 1)'], ['a', '④ Acceleration', 'the app works it out', 'then you graph it']];
 rows.forEach(([c, h, f, n], i) => { const y = 1.45 + i * 1.12; card(s, 0.6, y, 8.0, 0.95, SOFT[c], K[c]);
   T(s, h, { x: 0.8, y: y + 0.1, w: 3.2, h: 0.75, fontSize: 20, bold: true, color: K[c], valign: 'middle' });
   T(s, f, { x: 4.0, y: y + 0.08, w: 4.5, h: 0.45, fontSize: 18, bold: true }); T(s, n, { x: 4.0, y: y + 0.5, w: 4.5, h: 0.4, fontSize: 14, color: K.mute }); });

@@ -1,13 +1,14 @@
 /* ===== the steps: predict, my times, each metre, acceleration table ===== */
 const STEPS=[
-  {n:'Predict',i:'🤔'},{n:'My times',i:'⏱'},{n:'Each metre',i:'🧮'},{n:'Acceleration',i:'📈'},{n:'Forces',i:'➡'},{n:'Conclusion',i:'✍'}];
+  {n:'Predict',i:'🤔'},{n:'My times',i:'⏱'},{n:'Each metre',i:'🧮'},{n:'Acceleration',i:'📈'},{n:'Forces',i:'➡'},{n:'Conclusion',i:'✍'},{n:'Worksheet',i:'📄'}];
 function stepStatus(i){
   const all=(a)=>a.every(Boolean),any=(a)=>a.some(Boolean);let p=[];
   if(i===0)p=[S.pred.ramp,S.pred.flat];
   if(i===1)p=MS.map(k=>avgT(k)!=null);
-  if(i===2)p=MS.flatMap(k=>['leg','spd','chg'].map(c=>!isNaN(num(S[c][k]))));
-  if(i===3){const e=graphEval();p=[!!S.g.title,!!S.g.xl,!!S.g.yl,e.valid,e.placed===4]}
+  if(i===2)p=MS.flatMap(k=>['leg','spd','chg'].filter(c=>!(c==='chg'&&k===1)).map(c=>!isNaN(num(S[c][k]))));
+  if(i===3){const e=graphEval();p=[!!S.g.title,!!S.g.xl,!!S.g.yl,e.valid,e.placed===3]}
   if(i===4)p=FQ_KEYS().map(k=>!!S.fq[k]).concat(isG6()?[]:['ramp','flat'].map(s=>(S.fbd[s].arrows||[]).length>=2));
+  if(i===6)return S.saved?'done':'';
   if(i===5)p=conKeys().map(k=>String(S.con[k]||'').trim()!=='');
   return all(p)?'done':any(p)?'part':'';
 }
@@ -22,7 +23,7 @@ function trackSVG(w=760){
   return`<svg viewBox="0 0 ${x(4)+50} 200" style="width:100%;max-width:${w}px;display:block" role="img" aria-label="The track: a 2 metre ramp, then 2 metres of flat floor, with marks every metre">
    <polygon points="${x(0)},40 ${x(2)},150 ${x(0)},150" fill="#f3e3c3" stroke="#c9a96b"/><rect x="${x(2)}" y="150" width="${x(4)-x(2)}" height="8" fill="#cbd5e1"/>
    <polyline points="${pts}" fill="none" stroke="#14202e" stroke-width="4"/>
-   <text x="${x(1)-30}" y="128" font-size="15" font-weight="800" fill="#7a5b23">RAMP</text><text x="${x(3)}" y="185" text-anchor="middle" font-size="15" font-weight="800" fill="#475569">FLAT</text>
+   <text x="${x(0)+14}" y="142" font-size="15" font-weight="800" fill="#7a5b23">RAMP</text><text x="${(x(3)+x(4))/2}" y="140" text-anchor="middle" font-size="15" font-weight="800" fill="#475569">FLAT</text>
    <g transform="translate(${x(0)+6},${28}) rotate(18)"><rect x="0" y="-22" width="44" height="20" rx="4" fill="#be123c"/><circle cx="9" cy="0" r="6" fill="#14202e"/><circle cx="35" cy="0" r="6" fill="#14202e"/></g>${marks}</svg>`;
 }
 
@@ -58,12 +59,12 @@ function formHint(kind,k){
   if(kind==='leg'){if(k===1)return isG6()?`= ${c('t',f(avgT(1)))}`:`= ${c('t','time at 1 m')}`;
     return isG6()?`= ${c('t',f(avgT(k)))} − ${c('t',f(avgT(k-1)))}`:`= ${c('t',`time at ${k} m`)} − ${c('t',`time at ${k-1} m`)}`}
   if(kind==='spd')return isG6()?`= 1 ÷ ${c('l',f(num(S.leg[k])))}`:`= 1 m ÷ ${c('l','time for metre '+k)}`;
-  if(kind==='chg'){if(k===1)return isG6()?`= ${c('v',f(num(S.spd[1])))} − 0`:`= ${c('v','speed 1')} − 0 (started still)`;
+  if(kind==='chg'){if(k===1)return'';
     return isG6()?`= ${c('v',f(num(S.spd[k])))} − ${c('v',f(num(S.spd[k-1])))}`:`= ${c('v','speed '+k)} − ${c('v','speed '+(k-1))}`}
 }
 function mark(kind,k){if(!S.chk.t2)return'';const ok=cellOK(kind,k);return ok==null?'<span class="mk"></span>':ok?'<span class="mk ok">✓</span>':'<span class="mk no">✗</span>'}
 function stepMetres(){
-  const inp=(kind,k,col,unit)=>`<td><input class="n c-${col}" id="${kind}${k}" inputmode="decimal" data-bind="${kind}.${k}" data-src="${kind}:${k}" value="${esc(S[kind][k])}" aria-label="${kind} metre ${k}"> <span data-live="mk:${kind}:${k}">${mark(kind,k)}</span><span class="form" data-live="form:${kind}:${k}">${formHint(kind,k)}</span></td>`;
+  const inp=(kind,k,col,unit)=>kind==='chg'&&k===1?`<td><span class="note">— no metre before it</span></td>`:`<td><input class="n c-${col}" id="${kind}${k}" inputmode="decimal" data-bind="${kind}.${k}" data-src="${kind}:${k}" value="${esc(S[kind][k])}" aria-label="${kind} metre ${k}"> <span data-live="mk:${kind}:${k}">${mark(kind,k)}</span><span class="form" data-live="form:${kind}:${k}">${formHint(kind,k)}</span></td>`;
   const rows=MS.map(k=>`<tr class="${zoneOf(k)}">${k===1||k===3?`<td class="zone" rowspan="2">${k===1?'Ramp':'Flat'}</td>`:''}<td class="l">Metre ${k}<br><span class="note">${k-1} m → ${k} m</span></td>
     <td><span class="val c-t" id="av${k}" data-live="avg:${k}"></span></td>${inp('leg',k,'l')}${inp('spd',k,'v')}${inp('chg',k,'d')}</tr>`).join('');
   return`<div class="intro">On this page <b>you do the maths</b>. Each column uses numbers from the column before it, and the colours show you which ones. Tap a box to light up the numbers it needs. Press <b>?</b> for help and 🧮 for the calculator. Round to <b>2 decimal places</b>.</div>
@@ -81,14 +82,14 @@ function chk2Sum(){if(!S.chk.t2)return'Green ✓ = right. Red ✗ = try that one
 
 /* ---------- Step 3: acceleration (worked out by the app from the student's numbers) ---------- */
 function accTable(){
-  const rows=MS.map(k=>{const a=accel(k),g=gapT(k);return`<tr class="${zoneOf(k)}"><td class="l">${aLabel(k)}</td>
+  const rows=AK.map(k=>{const a=accel(k),g=gapT(k);return`<tr class="${zoneOf(k)}"><td class="l">${aLabel(k)}</td>
     <td><span class="val c-d ${isNaN(num(S.chg[k]))?'empty':''}">${isNaN(num(S.chg[k]))?'—':fmt(num(S.chg[k]))}</span></td>
-    <td><span class="val c-l ${g==null?'empty':''}">${g==null?'—':fmt(g)}</span><span class="form">${k===1?'half of metre 1':`half of metre ${k-1} + half of metre ${k}`}</span></td>
+    <td><span class="val c-l ${g==null?'empty':''}">${g==null?'—':fmt(g)}</span><span class="form">half of metre ${k-1} + half of metre ${k}</span></td>
     <td><span class="val c-a ${a==null?'empty':''}" id="acc${k}">${a==null?'—':fmt(a)}</span><br>${aTag(k)}</td></tr>`}).join('');
   return`<div class="tscroll"><table class="tb"><thead><tr><th>Change</th><th class="c-d">Change in speed (m/s)</th><th class="c-l">Time between the middles (s)</th><th class="c-a">④ Acceleration (m/s²) <button class="qm" data-help="acc" aria-label="Explain">?</button></th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 function stepAccel(){
-  const miss=MS.filter(k=>accel(k)==null).length;
+  const miss=AK.filter(k=>accel(k)==null).length;
   return`<div class="intro">Now <b>we</b> do the tricky maths: the app turns your <span style="color:#fdba74">change in speed</span> into <span style="color:#fda4af">acceleration</span>. <b>Your job:</b> plot it on the graph. Look for <b>minus numbers</b>!</div>
   <div class="panel"><h2>Table 3: Acceleration <span class="note">(worked out for you)</span></h2>
    <div class="formula" style="display:inline-block">acceleration = <span style="color:${COLS.d}">change in speed</span> ÷ <span style="color:${COLS.l}">time it took to change</span></div>
