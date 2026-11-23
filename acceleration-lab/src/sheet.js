@@ -17,9 +17,12 @@ async function buildSheet(blankMode){
    ${MS.map(k=>{const a=accel(k);return`<tr><td style="${zone(k)}">Metre ${k} (${k-1}→${k} m)</td>${td('t',f(avgT(k)))}${td('l',v(S.leg[k]))}${td('v',v(S.spd[k]))}${k===1?'<td style="color:#64748b;font-size:10.5px">— nothing before it</td><td style="color:#64748b;font-size:10.5px">—</td>':td('d',v(S.chg[k]))+td('a',f(a)+(B||a==null?'':k===RAMP_END+1?' ⇄':a>0?' ⬆':' ⬇'))}</tr>`}).join('')}</table>
    ${B?'<p style="font-size:10.5px;margin:3px 0">Metre 1: time = time at 1 m. ④ Your teacher will help with acceleration: time between middles = half of one metre\'s time + half of the next.</p>':'<p style="font-size:10.5px;margin:3px 0">* Acceleration was worked out by the app from my numbers. ⬆ speeding up · ⬇ slowing down · ⇄ crosses the bottom of the ramp.</p>'}`);
   const ge=graphEval();
-  if(B||(ge.valid&&ge.placed>0)){const img=cvURL(c=>drawGraph(c.getContext('2d'),B?{title:'',xl:'',yl:'',ymin:'',ymax:'',ystep:'',bars:{}}:S.g,{blank:B}));
-    add('My acceleration graph',`<img src="${img}" style="width:${B?'70%':'82%'};border:1px solid #cbd5e1">${B?'<p style="font-size:10.5px">Choose your y-axis numbers. Leave room <b>below zero</b> for minus numbers. Draw the zero line, plot a point for each change, then join them with a smooth line.</p>':''}`)}
-  if(!B&&speedPts().pts.length>=3)add('Model: speed vs time (made from my numbers)',`<img src="${cvURL(c=>drawSpeedModel(c))}" style="width:66%;border:1px solid #cbd5e1">`);
+  const hasModel=!B&&speedPts().pts.length>=3,hasG=B||(ge.valid&&ge.placed>0);
+  if(hasModel||hasG){const img=hasG?cvURL(c=>drawGraph(c.getContext('2d'),B?{title:'',xl:'',yl:'',ymin:'',ymax:'',ystep:'',bars:{}}:S.g,{blank:B})):'';
+    const mimg=hasModel?cvURL(c=>drawSpeedModel(c)):'',cap=t=>`<div style="font-size:11px;font-weight:700;margin-bottom:2px">${t}</div>`;
+    /* model on the left, the student's graph on the right, so they can be compared */
+    add(B?'My acceleration graph':hasModel&&hasG?'The model and my acceleration graph':hasModel?'Model: speed vs time (made from my numbers)':'My acceleration graph',
+      (B?`<img src="${img}" style="width:70%;border:1px solid #cbd5e1">`:`<div class="two">${hasModel?`<div>${cap('Model: speed vs time (made from my numbers)')}<img src="${mimg}" style="width:100%;border:1px solid #cbd5e1"></div>`:''}${hasG?`<div>${cap('My graph: acceleration')}<img src="${img}" style="width:100%;border:1px solid #cbd5e1"></div>`:''}</div>${hasModel&&hasG?'<p style="font-size:10.5px;margin:3px 0">Where the speed goes up, my acceleration is above zero. Where the speed goes down, it is below zero.</p>':''}`)+`${B?'<p style="font-size:10.5px">Choose your y-axis numbers. Leave room <b>below zero</b> for minus numbers. Draw the zero line, plot a point for each change, then join them with a smooth line.</p>':''}`)}
   const scen=[];
   for(const s of ['ramp','flat']){const qs=['bal','res','acc'].filter(q=>B||S.fq[s+'.'+q]),arr=B?[]:isG6()?modelArrows(s):S.fbd[s].arrows||[];
     if(!B&&!qs.length&&!(!isG6()&&arr.length))continue;

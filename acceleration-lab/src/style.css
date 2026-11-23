@@ -85,8 +85,9 @@ td .mk{display:inline-block;width:20px;font-weight:800}
 .tag{font-size:12.5px;font-weight:700;border-radius:999px;padding:1px 8px;display:inline-block;margin-top:3px}
 .tag.up{background:var(--good-soft);color:var(--good)}.tag.down{background:var(--bad-soft);color:var(--bad)}.tag.mix{background:var(--warn-soft);color:var(--warn)}
 /* graph */
-.graphwrap{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:16px;align-items:start}
-@media (max-width:860px){.graphwrap{grid-template-columns:1fr}}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.cmp h3{margin-top:4px}
+.gctl{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;align-items:start;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:760px){.cmp,.gctl{grid-template-columns:1fr}}
 canvas.cv{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;touch-action:none;display:block}
 .axrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.axrow label{font-size:14px;display:flex;flex-direction:column}
 .axrow input{width:80px}

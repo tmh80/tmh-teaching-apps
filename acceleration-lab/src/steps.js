@@ -96,8 +96,12 @@ function stepAccel(){
    ${miss?`<div class="fb mid">${miss} acceleration${miss>1?'s are':' is'} missing. Finish Table 2 first. <button class="btn sm" data-go="2">Go to Table 2</button></div>`:''}
    <div data-live="acctable">${accTable()}</div>
    ${isG6()?'':'<p class="note">G7/8: the speed you worked out is the <b>average</b> speed for that metre, which is the speed at the middle of its time. That is why we use the time between the middles.</p>'}</div>
-  <div class="panel"><h2>Your graph: acceleration ${stepTodo(3)}</h2><div id="graphhost">${graphHTML()}</div></div>
-  <div class="panel"><h2>Model: speed vs time <span class="note">(made for you from your numbers)</span></h2>
-   <canvas id="vcv" class="cv" style="max-width:820px" width="${GW}" height="${GH}" aria-label="Speed vs time graph made from your numbers"></canvas>
-   <div class="tip">Compare the two graphs. Where the speed line goes <b>up</b>, your acceleration bars are <b>above zero</b>. Where the speed line goes <b>down</b>, the bars are <b>below zero</b>.</div></div>`;
+  <div class="panel"><h2>Compare: the model and your graph ${stepTodo(3)}</h2>
+   <div class="cmp"><div><h3>Model: speed vs time <span class="note">(made for you from your numbers)</span></h3>
+     <canvas id="vcv" class="cv" width="${GW}" height="${GH}" aria-label="Speed vs time graph made from your numbers"></canvas></div>
+    <div><h3>Your graph: acceleration <span class="note">(drag the dots)</span></h3>
+     <canvas id="gcv" class="cv" width="${GW}" height="${GH}" style="cursor:ns-resize" aria-label="Your acceleration graph"></canvas>
+     <p class="note" style="margin:4px 0 0">After "Check my graph": green ring = right height, red ring = check that number again.</p></div></div>
+   <div class="tip">Compare the two graphs. Where the speed line goes <b>up</b>, your acceleration points are <b>above zero</b>. Where the speed line goes <b>down</b>, the points are <b>below zero</b>. Where it is steepest, the acceleration is biggest.</div>
+   <div id="graphhost">${graphHTML()}</div></div>`;
 }

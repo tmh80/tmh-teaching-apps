@@ -63,15 +63,15 @@ function gUp(){if(GDR==null)return;GDR=null;save();gLive()}
 function gDraw(){const cv=$('#gcv');if(cv)drawGraph(cv.getContext('2d'),S.g,{inter:true,fb:!!S.chk.graph})}
 function graphHTML(){
   const g=S.g,e=graphEval(),av=accVals();
-  let h=`<div class="graphwrap"><div>
-   <h3>Graph title</h3>${isG6()?'<div class="tip">Write it as: <b>what changes along the bottom vs what you measured</b>, e.g. <i>Part of the track vs acceleration</i>.</div>':''}<input type="text" style="width:100%" data-bind="g.title" data-redraw="1" value="${esc(g.title)}" placeholder="… vs …">
+  let h=`<div class="gctl"><div>
+   <h3 style="margin-top:0">Graph title</h3>${isG6()?'<div class="tip">Write it as: <b>what changes along the bottom vs what you measured</b>, e.g. <i>Part of the track vs acceleration</i>.</div>':''}<input type="text" style="width:100%" data-bind="g.title" data-redraw="1" value="${esc(g.title)}" placeholder="… vs …">
    <h3>Axis labels</h3><div class="grid2"><label class="note">x-axis (along the bottom)<input type="text" data-bind="g.xl" data-redraw="1" value="${esc(g.xl)}"></label><label class="note">y-axis (up the side), with units<input type="text" data-bind="g.yl" data-redraw="1" value="${esc(g.yl)}"></label></div>
    ${isG6()?'<p class="note">The unit of acceleration is m/s². Type it as m/s2 or m/s².</p>':''}
-   <h3>y-axis numbers</h3><div class="tip">⚠ Some accelerations can be <b>minus</b> numbers, so your lowest number may need to be <b>below zero</b> (like −1).${isG6()?' <button class="btn sm" data-act="gsuggest">Suggest numbers for me</button>':''}</div>
+   </div><div><h3 style="margin-top:0">y-axis numbers</h3><div class="tip">⚠ Some accelerations can be <b>minus</b> numbers, so your lowest number may need to be <b>below zero</b> (like −1).${isG6()?' <button class="btn sm" data-act="gsuggest">Suggest numbers for me</button>':''}</div>
    <div class="axrow"><label>lowest<input class="n" inputmode="decimal" data-bind="g.ymin" data-redraw="2" value="${esc(g.ymin)}"></label><label>highest<input class="n" inputmode="decimal" data-bind="g.ymax" data-redraw="2" value="${esc(g.ymax)}"></label><label>gap<input class="n" inputmode="decimal" data-bind="g.ystep" data-redraw="2" value="${esc(g.ystep)}"></label></div>
-   <h3>Your accelerations</h3><table class="tb"><tbody>${AK.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
+   </div><div><h3 style="margin-top:0">Your accelerations</h3><table class="tb"><tbody>${AK.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
    <div style="margin-top:10px"><button class="btn" data-act="gcheck">${S.chk.graph?'✓ Checking is on':'Check my graph'}</button></div><div id="gfb">${gFbHTML()}</div>`;
-  return h+`</div><div><canvas id="gcv" class="cv" width="${GW}" height="${GH}" style="cursor:ns-resize" aria-label="Your acceleration graph"></canvas>${S.chk.graph?'<p class="note">Green ring = right height. Red ring = check the number again.</p>':''}</div></div>`;
+  return h+`</div></div>`;
 }
 function gFbHTML(){const e=graphEval();let h=e.valid&&!e.fits?'<div class="fb mid">Some of your accelerations don\'t fit. Check your lowest and highest numbers.</div>':'';
   if(S.chk.graph){const it=[[e.title,'Title mentions acceleration'],[e.yl,'y-axis says acceleration with its unit m/s²'],[e.xl,'x-axis has a label'],[e.fits,'All accelerations fit on the axes'],[e.placed===3,'All 3 points placed'],[e.acc===3,'Every point is the right height']];

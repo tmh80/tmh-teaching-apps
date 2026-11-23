@@ -14,7 +14,7 @@ A cart rolls down a 2 m ramp, then along 2 m of flat floor. Students time it fro
    - ③ change in speed = this speed − speed before (from metre 2; metre 1 has nothing before it)
 
    Each column is colour coded, has a "?" explanation, a formula hint (G6 with their numbers, G7/8 in words) and source cells that light up. There is also a calculator and "Check my maths" (checked against the student's own previous numbers).
-4. **Acceleration (done by the app):** change in speed ÷ time between the middles of the two metres (half of one metre's time + half of the next). There are three values: M1→M2, M2→M3 and M3→M4. Students build a **line graph** with a negative y-axis (title, labels, scale, dragging points; a smooth line joins them; G6 gets "Suggest numbers"). A smooth speed–time model curve is drawn automatically, with the ramp and flat shaded, for comparison.
+4. **Acceleration (done by the app):** change in speed ÷ time between the middles of the two metres (half of one metre's time + half of the next). There are three values: M1→M2, M2→M3 and M3→M4. Students build a **line graph** with a negative y-axis (title, labels, scale, dragging points; a smooth line joins them; G6 gets "Suggest numbers"). A smooth speed–time model curve is drawn automatically (ramp and flat shaded) and sits on the left, beside the student's graph on the right, in the app and the PDF.
 5. **Forces:**
    - G6 reads model free body diagrams.
    - G7/8 builds both diagrams with Force HQ's builder, adapted for slope directions. The checks include a "forward force" misconception message.

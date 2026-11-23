@@ -88,8 +88,9 @@ td .mk{display:inline-block;width:20px;font-weight:800}
 .tag{font-size:12.5px;font-weight:700;border-radius:999px;padding:1px 8px;display:inline-block;margin-top:3px}
 .tag.up{background:var(--good-soft);color:var(--good)}.tag.down{background:var(--bad-soft);color:var(--bad)}.tag.mix{background:var(--warn-soft);color:var(--warn)}
 /* graph */
-.graphwrap{display:grid;grid-template-columns:minmax(260px,380px) 1fr;gap:16px;align-items:start}
-@media (max-width:860px){.graphwrap{grid-template-columns:1fr}}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}.cmp h3{margin-top:4px}
+.gctl{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:18px;align-items:start;margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:760px){.cmp,.gctl{grid-template-columns:1fr}}
 canvas.cv{width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff;touch-action:none;display:block}
 .axrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.axrow label{font-size:14px;display:flex;flex-direction:column}
 .axrow input{width:80px}
@@ -372,10 +373,14 @@ function stepAccel(){
    ${miss?`<div class="fb mid">${miss} acceleration${miss>1?'s are':' is'} missing. Finish Table 2 first. <button class="btn sm" data-go="2">Go to Table 2</button></div>`:''}
    <div data-live="acctable">${accTable()}</div>
    ${isG6()?'':'<p class="note">G7/8: the speed you worked out is the <b>average</b> speed for that metre, which is the speed at the middle of its time. That is why we use the time between the middles.</p>'}</div>
-  <div class="panel"><h2>Your graph: acceleration ${stepTodo(3)}</h2><div id="graphhost">${graphHTML()}</div></div>
-  <div class="panel"><h2>Model: speed vs time <span class="note">(made for you from your numbers)</span></h2>
-   <canvas id="vcv" class="cv" style="max-width:820px" width="${GW}" height="${GH}" aria-label="Speed vs time graph made from your numbers"></canvas>
-   <div class="tip">Compare the two graphs. Where the speed line goes <b>up</b>, your acceleration bars are <b>above zero</b>. Where the speed line goes <b>down</b>, the bars are <b>below zero</b>.</div></div>`;
+  <div class="panel"><h2>Compare: the model and your graph ${stepTodo(3)}</h2>
+   <div class="cmp"><div><h3>Model: speed vs time <span class="note">(made for you from your numbers)</span></h3>
+     <canvas id="vcv" class="cv" width="${GW}" height="${GH}" aria-label="Speed vs time graph made from your numbers"></canvas></div>
+    <div><h3>Your graph: acceleration <span class="note">(drag the dots)</span></h3>
+     <canvas id="gcv" class="cv" width="${GW}" height="${GH}" style="cursor:ns-resize" aria-label="Your acceleration graph"></canvas>
+     <p class="note" style="margin:4px 0 0">After "Check my graph": green ring = right height, red ring = check that number again.</p></div></div>
+   <div class="tip">Compare the two graphs. Where the speed line goes <b>up</b>, your acceleration points are <b>above zero</b>. Where the speed line goes <b>down</b>, the points are <b>below zero</b>. Where it is steepest, the acceleration is biggest.</div>
+   <div id="graphhost">${graphHTML()}</div></div>`;
 }
 
 /* ===== Graph maker (from Paper Plane Lab), with negative numbers on the y-axis ===== */
@@ -443,15 +448,15 @@ function gUp(){if(GDR==null)return;GDR=null;save();gLive()}
 function gDraw(){const cv=$('#gcv');if(cv)drawGraph(cv.getContext('2d'),S.g,{inter:true,fb:!!S.chk.graph})}
 function graphHTML(){
   const g=S.g,e=graphEval(),av=accVals();
-  let h=`<div class="graphwrap"><div>
-   <h3>Graph title</h3>${isG6()?'<div class="tip">Write it as: <b>what changes along the bottom vs what you measured</b>, e.g. <i>Part of the track vs acceleration</i>.</div>':''}<input type="text" style="width:100%" data-bind="g.title" data-redraw="1" value="${esc(g.title)}" placeholder="… vs …">
+  let h=`<div class="gctl"><div>
+   <h3 style="margin-top:0">Graph title</h3>${isG6()?'<div class="tip">Write it as: <b>what changes along the bottom vs what you measured</b>, e.g. <i>Part of the track vs acceleration</i>.</div>':''}<input type="text" style="width:100%" data-bind="g.title" data-redraw="1" value="${esc(g.title)}" placeholder="… vs …">
    <h3>Axis labels</h3><div class="grid2"><label class="note">x-axis (along the bottom)<input type="text" data-bind="g.xl" data-redraw="1" value="${esc(g.xl)}"></label><label class="note">y-axis (up the side), with units<input type="text" data-bind="g.yl" data-redraw="1" value="${esc(g.yl)}"></label></div>
    ${isG6()?'<p class="note">The unit of acceleration is m/s². Type it as m/s2 or m/s².</p>':''}
-   <h3>y-axis numbers</h3><div class="tip">⚠ Some accelerations can be <b>minus</b> numbers, so your lowest number may need to be <b>below zero</b> (like −1).${isG6()?' <button class="btn sm" data-act="gsuggest">Suggest numbers for me</button>':''}</div>
+   </div><div><h3 style="margin-top:0">y-axis numbers</h3><div class="tip">⚠ Some accelerations can be <b>minus</b> numbers, so your lowest number may need to be <b>below zero</b> (like −1).${isG6()?' <button class="btn sm" data-act="gsuggest">Suggest numbers for me</button>':''}</div>
    <div class="axrow"><label>lowest<input class="n" inputmode="decimal" data-bind="g.ymin" data-redraw="2" value="${esc(g.ymin)}"></label><label>highest<input class="n" inputmode="decimal" data-bind="g.ymax" data-redraw="2" value="${esc(g.ymax)}"></label><label>gap<input class="n" inputmode="decimal" data-bind="g.ystep" data-redraw="2" value="${esc(g.ystep)}"></label></div>
-   <h3>Your accelerations</h3><table class="tb"><tbody>${AK.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
+   </div><div><h3 style="margin-top:0">Your accelerations</h3><table class="tb"><tbody>${AK.map((k,i)=>`<tr><td class="l">${aLabel(k)}</td><td><span class="val c-a ${av[i]==null?'empty':''}">${av[i]==null?'—':fmt(av[i])+' m/s²'}</span></td></tr>`).join('')}</tbody></table>
    <div style="margin-top:10px"><button class="btn" data-act="gcheck">${S.chk.graph?'✓ Checking is on':'Check my graph'}</button></div><div id="gfb">${gFbHTML()}</div>`;
-  return h+`</div><div><canvas id="gcv" class="cv" width="${GW}" height="${GH}" style="cursor:ns-resize" aria-label="Your acceleration graph"></canvas>${S.chk.graph?'<p class="note">Green ring = right height. Red ring = check the number again.</p>':''}</div></div>`;
+  return h+`</div></div>`;
 }
 function gFbHTML(){const e=graphEval();let h=e.valid&&!e.fits?'<div class="fb mid">Some of your accelerations don\'t fit. Check your lowest and highest numbers.</div>':'';
   if(S.chk.graph){const it=[[e.title,'Title mentions acceleration'],[e.yl,'y-axis says acceleration with its unit m/s²'],[e.xl,'x-axis has a label'],[e.fits,'All accelerations fit on the axes'],[e.placed===3,'All 3 points placed'],[e.acc===3,'Every point is the right height']];
@@ -737,9 +742,12 @@ async function buildSheet(blankMode){
    ${MS.map(k=>{const a=accel(k);return`<tr><td style="${zone(k)}">Metre ${k} (${k-1}→${k} m)</td>${td('t',f(avgT(k)))}${td('l',v(S.leg[k]))}${td('v',v(S.spd[k]))}${k===1?'<td style="color:#64748b;font-size:10.5px">— nothing before it</td><td style="color:#64748b;font-size:10.5px">—</td>':td('d',v(S.chg[k]))+td('a',f(a)+(B||a==null?'':k===RAMP_END+1?' ⇄':a>0?' ⬆':' ⬇'))}</tr>`}).join('')}</table>
    ${B?'<p style="font-size:10.5px;margin:3px 0">Metre 1: time = time at 1 m. ④ Your teacher will help with acceleration: time between middles = half of one metre\'s time + half of the next.</p>':'<p style="font-size:10.5px;margin:3px 0">* Acceleration was worked out by the app from my numbers. ⬆ speeding up · ⬇ slowing down · ⇄ crosses the bottom of the ramp.</p>'}`);
   const ge=graphEval();
-  if(B||(ge.valid&&ge.placed>0)){const img=cvURL(c=>drawGraph(c.getContext('2d'),B?{title:'',xl:'',yl:'',ymin:'',ymax:'',ystep:'',bars:{}}:S.g,{blank:B}));
-    add('My acceleration graph',`<img src="${img}" style="width:${B?'70%':'82%'};border:1px solid #cbd5e1">${B?'<p style="font-size:10.5px">Choose your y-axis numbers. Leave room <b>below zero</b> for minus numbers. Draw the zero line, plot a point for each change, then join them with a smooth line.</p>':''}`)}
-  if(!B&&speedPts().pts.length>=3)add('Model: speed vs time (made from my numbers)',`<img src="${cvURL(c=>drawSpeedModel(c))}" style="width:66%;border:1px solid #cbd5e1">`);
+  const hasModel=!B&&speedPts().pts.length>=3,hasG=B||(ge.valid&&ge.placed>0);
+  if(hasModel||hasG){const img=hasG?cvURL(c=>drawGraph(c.getContext('2d'),B?{title:'',xl:'',yl:'',ymin:'',ymax:'',ystep:'',bars:{}}:S.g,{blank:B})):'';
+    const mimg=hasModel?cvURL(c=>drawSpeedModel(c)):'',cap=t=>`<div style="font-size:11px;font-weight:700;margin-bottom:2px">${t}</div>`;
+    /* model on the left, the student's graph on the right, so they can be compared */
+    add(B?'My acceleration graph':hasModel&&hasG?'The model and my acceleration graph':hasModel?'Model: speed vs time (made from my numbers)':'My acceleration graph',
+      (B?`<img src="${img}" style="width:70%;border:1px solid #cbd5e1">`:`<div class="two">${hasModel?`<div>${cap('Model: speed vs time (made from my numbers)')}<img src="${mimg}" style="width:100%;border:1px solid #cbd5e1"></div>`:''}${hasG?`<div>${cap('My graph: acceleration')}<img src="${img}" style="width:100%;border:1px solid #cbd5e1"></div>`:''}</div>${hasModel&&hasG?'<p style="font-size:10.5px;margin:3px 0">Where the speed goes up, my acceleration is above zero. Where the speed goes down, it is below zero.</p>':''}`)+`${B?'<p style="font-size:10.5px">Choose your y-axis numbers. Leave room <b>below zero</b> for minus numbers. Draw the zero line, plot a point for each change, then join them with a smooth line.</p>':''}`)}
   const scen=[];
   for(const s of ['ramp','flat']){const qs=['bal','res','acc'].filter(q=>B||S.fq[s+'.'+q]),arr=B?[]:isG6()?modelArrows(s):S.fbd[s].arrows||[];
     if(!B&&!qs.length&&!(!isG6()&&arr.length))continue;
