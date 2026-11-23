@@ -3210,7 +3210,98 @@ const migrateLegacyLayouts=(rooms,legacy)=>{
     layouts:legacy.map(l=>({id:l.id,name:l.name,createdAt:l.createdAt||0,pieces:cloneJ(l.pieces||[]),joins:cloneJ(l.joins||[]),seats:cloneJ(l.seats||[]),groups:cloneJ(l.groups||[]),items:cloneJ(l.roomItems||[])}))}];
 };
 
-const PIECE_GEOMETRY={PG,legacyChairs,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly,
+/* ── Class setups (Phase 5): "Regular", "Lab", "Lab partners"… ──
+   setups-<class> = {activeId, list:[{id,name,icon,use,offPieces,createdAt}]}.
+   Regular has the fixed id 'regular' and is stored in sl-<class> exactly as
+   before (so main still reads it); every other setup lives in sl-<class>~<id>.
+   Found by id, never by list position, so reordering tabs never moves data. */
+const REGULAR_SETUP='regular';
+const SETUP_ICONS=['🪑','🧪','👥','🚀','⭐','🔬','📚'];
+const SETUP_USES={desk:['desk'],workstation:['workstation'],both:['desk','workstation']};
+const setupSlKey=(classId,setupId)=>!setupId||setupId===REGULAR_SETUP?`sl-${classId}`:`sl-${classId}~${setupId}`;
+/* Regular uses both, so a migrated class generates exactly as it did before */
+const regularSetup=(now=0)=>({id:REGULAR_SETUP,name:'Regular',icon:'🪑',use:['desk','workstation'],offPieces:[],createdAt:now});
+const defaultSetups=(now=0)=>({activeId:REGULAR_SETUP,list:[regularSetup(now)]});
+const useForName=name=>/lab/i.test(name||'')?['workstation']:['desk'];
+const useKey=use=>{const u=use||[];return u.includes('desk')&&u.includes('workstation')?'both':u.includes('workstation')?'workstation':'desk';};
+/* Whatever is on disk, made safe to use: Regular always there, a valid active id, valid fields */
+const normalizeSetups=raw=>{
+  const list=(Array.isArray(raw?.list)?raw.list:[]).filter(s=>s&&typeof s.id==='string').map(s=>({
+    ...s,name:typeof s.name==='string'&&s.name.trim()?s.name:(s.id===REGULAR_SETUP?'Regular':'Setup'),icon:s.icon||'🪑',
+    use:SETUP_USES[useKey(s.use)].slice(),offPieces:Array.isArray(s.offPieces)?s.offPieces:[],
+  }));
+  if(!list.some(s=>s.id===REGULAR_SETUP))list.unshift(regularSetup(0));
+  const activeId=list.some(s=>s.id===raw?.activeId)?raw.activeId:REGULAR_SETUP;
+  return{...(raw&&typeof raw==='object'?raw:{}),activeId,list};
+};
+/* Is this seat somewhere this setup generates into? Its table's roles must match the
+   setup's "use for" (plain old desks count as tables), the table mustn't be switched
+   off for this setup, and the seat itself must be in use and available. Worked out
+   when generating and drawing; never written into the seat (its `used` flag is shared
+   by meaning with other setups and the old app). */
+const seatUsableIn=(seat,pieceById,setup)=>{
+  if(!seat||!seat.used||seat.unavailable)return false;
+  if(!setup)return true;
+  const use=setup.use&&setup.use.length?setup.use:['desk','workstation'];
+  const piece=seat.pieceId?pieceById.get(seat.pieceId):null;
+  if(piece&&(setup.offPieces||[]).includes(piece.id))return false;
+  const roles=piece&&piece.roles&&piece.roles.length?piece.roles:['desk'];
+  return roles.some(r=>use.includes(r));
+};
+const usableSeatIds=(lo,setup)=>{
+  const pm=new Map((lo?.pieces||[]).map(p=>[p.id,p]));
+  return new Set((lo?.seats||[]).filter(s=>seatUsableIn(s,pm,setup)).map(s=>s.id));
+};
+const usableSeats=(lo,setup)=>{const ids=usableSeatIds(lo,setup);return(lo?.seats||[]).filter(s=>ids.has(s.id));};
+/* Pieces this setup can't use (drawn faded): wrong role, or switched off here */
+const unusablePieceIds=(pieces,setup)=>{
+  if(!setup)return new Set();
+  const use=setup.use&&setup.use.length?setup.use:['desk','workstation'];
+  return new Set((pieces||[]).filter(p=>(setup.offPieces||[]).includes(p.id)||!(p.roles&&p.roles.length?p.roles:['desk']).some(r=>use.includes(r))).map(p=>p.id));
+};
+/* The seats the engine may fill, as copies: an unusable seat is marked unavailable
+   (the flag the engine already skips). restoreSeatFlags puts the real flags back. */
+const seatsForSetup=(lo,setup)=>{
+  const ids=usableSeatIds(lo,setup);
+  return(lo?.seats||[]).map(s=>!s.used||s.unavailable||ids.has(s.id)?s:{...s,unavailable:true});
+};
+const restoreSeatFlags=(nextSeats,origSeats)=>{
+  const orig=new Map((origSeats||[]).map(s=>[s.id,s]));
+  return nextSeats.map(s=>{
+    const o=orig.get(s.id);if(!o)return s;
+    const out={...s};if('unavailable' in o)out.unavailable=o.unavailable;else delete out.unavailable;
+    return out;
+  });
+};
+/* Spread students across tables instead of filling seats in list order (which left
+   the newest tables empty). `fillable` is the seats that may still be filled, each
+   with a table key; `occupied` and `capacity` count per table. One seat at a time
+   goes to the table that is least full for its size, so 10 students at four tables
+   of 4 sit 3,3,2,2 rather than 4,4,2,0. Ties are broken by `rnd` so different
+   tables get the spare seats each time. Returns the seats to fill, in order. */
+const pickSpreadSeats=(fillable,tableOf,occupied,capacity,n,rnd=Math.random)=>{
+  const byTable=new Map();
+  fillable.forEach(s=>{const k=tableOf(s);if(!byTable.has(k))byTable.set(k,[]);byTable.get(k).push(s);});
+  const tie=new Map([...byTable.keys()].map(k=>[k,rnd()]));
+  const occ=new Map([...byTable.keys()].map(k=>[k,occupied.get(k)||0]));
+  const out=[];
+  while(out.length<n){
+    let best=null,bestR=Infinity;
+    for(const[k,list]of byTable){
+      if(!list.length)continue;
+      const cap=Math.max(1,capacity.get(k)||list.length),r=occ.get(k)/cap;
+      if(r<bestR-1e-9||(Math.abs(r-bestR)<=1e-9&&tie.get(k)<tie.get(best))){best=k;bestR=r;}
+    }
+    if(best===null)break;
+    out.push(byTable.get(best).shift());occ.set(best,occ.get(best)+1);
+  }
+  return out;
+};
+/* ta-trash: a deleted setup's seating is kept 30 days, then dropped (on launch) */
+const TRASH_DAYS=30;
+const purgeTrashList=(list,now,days=TRASH_DAYS)=>(Array.isArray(list)?list:[]).filter(t=>t&&Number.isFinite(t.deletedAt)&&now-t.deletedAt<days*86400000);
+
+const PIECE_GEOMETRY={PG,legacyChairs,REGULAR_SETUP,SETUP_ICONS,SETUP_USES,setupSlKey,regularSetup,defaultSetups,useForName,useKey,normalizeSetups,seatUsableIn,usableSeatIds,usableSeats,unusablePieceIds,seatsForSetup,restoreSeatFlags,pickSpreadSeats,purgeTrashList,TRASH_DAYS,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly,
   WALL_T,WALL_GRID,WALL_JOIN,wallLen,wallDir,wallPointAt,closestOnWall,nearestWall,clampOpeningT,openingAtPoint,openingFrame,OPENING_TYPES,wallSnapPoint,rectRoomWalls,wallsBounds,
   ROOM_ITEM_TYPES,ROOM_ITEM_SECTIONS,LEGACY_ITEM_SIZE,itemGeom,itemPivot,itemCorners,itemCentre,itemBounds,upgradeLegacyItem,newRoomItem,nextStationNumber,
   extractShell,extractLayout,applyRoomShell,sameShell,instantiateLayout,migrateLegacyLayouts,lineItemFromPoints,snapItemToWall,AREA_COLOURS};
@@ -3531,8 +3622,16 @@ const LEGACY_SEAT_TAGS=new Set(['Front','Board','Window','Door']);
 const randomizeSeating=({students,seats,rules,smartShuffle,hardTagRules,pairingHistory})=>{
   const studentById=id=>students.find(s=>s.id===id);
   const usedSeats=seats.filter(s=>s.used&&!s.unavailable);
-  const lockedIds=new Set(usedSeats.filter(s=>s.locked&&s.studentId).map(s=>s.studentId));
+  /* Anyone locked into an in-use seat stays put, even one this setup doesn't generate
+     into (it is passed in marked unavailable) — so they're never dealt a second seat too. */
+  const lockedIds=new Set(seats.filter(s=>s.used&&s.locked&&s.studentId).map(s=>s.studentId));
   const freeSeats=usedSeats.filter(s=>!s.locked);
+  /* Tables, for spreading students out: a group of seats is one table, a lone seat its own */
+  const tableOf=s=>s.groupId||`__solo_${s.id}`;
+  const capacity=new Map();
+  usedSeats.forEach(s=>capacity.set(tableOf(s),(capacity.get(tableOf(s))||0)+1));
+  const lockedOcc=new Map();
+  usedSeats.filter(s=>s.locked&&s.studentId).forEach(s=>lockedOcc.set(tableOf(s),(lockedOcc.get(tableOf(s))||0)+1));
   const pool=students.filter(s=>!lockedIds.has(s.id));
   const taggedSeats=freeSeats.filter(s=>s.tags.length>0);
   const untaggedSeats=freeSeats.filter(s=>!s.tags.length);
@@ -3550,9 +3649,13 @@ const randomizeSeating=({students,seats,rules,smartShuffle,hardTagRules,pairingH
       if(idx>=0){assign[seat.id]=p[idx].id;p.splice(idx,1);}
       else unmatchedTagged.push(seat);
     }
-    for(const seat of untaggedSeats){if(!p.length)break;assign[seat.id]=p.shift().id;}
-    // Best-fit mode: fill a tagged seat with whoever's left rather than leave it empty.
-    if(!hardTagRules)for(const seat of unmatchedTagged){if(!p.length)break;assign[seat.id]=p.shift().id;}
+    /* Everyone left goes to an untagged seat (and, in best-fit mode, a tagged seat nobody
+       matched), spread evenly over the tables rather than in list order, so with spare
+       seats no table is left empty while another is full. */
+    const occ=new Map(lockedOcc);
+    Object.keys(assign).forEach(id=>{const s=taggedSeats.find(x=>x.id===id);if(s)occ.set(tableOf(s),(occ.get(tableOf(s))||0)+1);});
+    const fillable=hardTagRules?untaggedSeats:[...untaggedSeats,...unmatchedTagged];
+    for(const seat of pickSpreadSeats(fillable,tableOf,occ,capacity,p.length))assign[seat.id]=p.shift().id;
     return assign;
   };
 

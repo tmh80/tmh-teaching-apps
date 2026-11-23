@@ -335,5 +335,57 @@ console.log('Zones, lines and board-style windows');
   ok(itemGeom(desk).w === 114 && itemGeom({ ...desk, w: 200, h: 72 }).w === 200, 'the teacher\'s desk keeps 114×52 until resized, then uses its own size');
 }
 
+console.log('Class setups: usable furniture, spreading students out, trash');
+{
+  const { REGULAR_SETUP, setupSlKey, defaultSetups, normalizeSetups, useForName, usableSeatIds, usableSeats, unusablePieceIds,
+    seatsForSetup, restoreSeatFlags, pickSpreadSeats, purgeTrashList, regularSetup } = G;
+  ok(setupSlKey('c1', REGULAR_SETUP) === 'sl-c1' && setupSlKey('c1') === 'sl-c1' && setupSlKey('c1', 'ab12') === 'sl-c1~ab12', 'Regular is stored in sl-<class>, any other setup in sl-<class>~<id>');
+  const d = defaultSetups(5);
+  ok(d.activeId === 'regular' && d.list.length === 1 && d.list[0].name === 'Regular' && d.list[0].use.join() === 'desk,workstation', 'a new class gets one Regular setup that uses tables and workstations (as before)');
+  const n1 = normalizeSetups({ activeId: 'gone', list: [{ id: 'lab', name: 'Lab', use: ['workstation'] }] });
+  ok(n1.list[0].id === 'regular' && n1.list[1].id === 'lab' && n1.activeId === 'regular' && Array.isArray(n1.list[1].offPieces), 'normalising puts Regular back, fixes a missing active id and fills offPieces');
+  ok(JSON.stringify(normalizeSetups(n1)) === JSON.stringify(n1) && normalizeSetups(null).list.length === 1, 'normalising is idempotent and copes with nothing saved');
+  ok(useForName('Lab') .join() === 'workstation' && useForName('Bio LAB 2').join() === 'workstation' && useForName('Lab partners').join() === 'workstation' && useForName('Rocket project').join() === 'desk', '"Use for" defaults to Workstations when the name says lab, else Tables');
+  const lo = {
+    pieces: [{ id: 'T', roles: ['desk'] }, { id: 'B', roles: ['workstation'] }, { id: 'X', roles: ['desk', 'workstation'] }],
+    seats: [
+      { id: 't1', pieceId: 'T', used: true }, { id: 't2', pieceId: 'T', used: true, unavailable: true },
+      { id: 'b1', pieceId: 'B', used: true }, { id: 'b2', pieceId: 'B', used: false },
+      { id: 'x1', pieceId: 'X', used: true }, { id: 'old', used: true },
+    ],
+  };
+  const lab = { id: 'lab', use: ['workstation'], offPieces: [] }, reg = { id: 'regular', use: ['desk'], offPieces: [] };
+  ok([...usableSeatIds(lo, lab)].sort().join() === 'b1,x1', 'Lab (workstations) uses bench places and "both" tables only, never switched-off or unavailable seats');
+  ok([...usableSeatIds(lo, reg)].sort().join() === 'old,t1,x1', 'Tables-only uses tables, "both" tables and old plain desks');
+  ok([...usableSeatIds(lo, regularSetup())].sort().join() === 'b1,old,t1,x1' && [...usableSeatIds(lo, null)].length === 4, 'Both (the migrated Regular) uses everything in use, exactly as before');
+  ok([...usableSeatIds(lo, { ...lab, offPieces: ['X'] })].join() === 'b1' && [...unusablePieceIds(lo.pieces, { ...lab, offPieces: ['X'] })].sort().join() === 'T,X', 'switching a table off for a setup leaves it out (and it is drawn faded)');
+  ok(usableSeats(lo, lab).map(s => s.id).join() === 'b1,x1', 'usableSeats gives the seats themselves');
+  const gen = seatsForSetup(lo, lab);
+  ok(gen.find(s => s.id === 't1').unavailable === true && gen.find(s => s.id === 'b1') === lo.seats.find(s => s.id === 'b1') && lo.seats[0].unavailable === undefined, 'for generating, unusable seats are marked unavailable on copies only');
+  const back = restoreSeatFlags(gen.map(s => ({ ...s, studentId: null })), lo.seats);
+  ok(back.every((s, i) => s.unavailable === lo.seats[i].unavailable && ('unavailable' in s) === ('unavailable' in lo.seats[i])), 'and the real flags are put back afterwards');
+  // spreading: 10 students, four tables of 4 -> 3,3,2,2 (no table empty)
+  const seats16 = Array.from({ length: 16 }, (_, i) => ({ id: 's' + i, groupId: 'g' + Math.floor(i / 4) }));
+  const tOf = s => s.groupId, cap = new Map(['g0', 'g1', 'g2', 'g3'].map(g => [g, 4]));
+  let allSpread = true;
+  for (let r = 0; r < 25; r++) {
+    const pick = pickSpreadSeats(seats16, tOf, new Map(), cap, 10);
+    const per = ['g0', 'g1', 'g2', 'g3'].map(g => pick.filter(s => s.groupId === g).length).sort().join();
+    if (pick.length !== 10 || per !== '2,2,3,3') allSpread = false;
+  }
+  ok(allSpread, '10 students at four tables of 4 always sit 3,3,2,2 (never a whole table empty)');
+  const big = [...Array.from({ length: 6 }, (_, i) => ({ id: 'a' + i, groupId: 'A' })), ...Array.from({ length: 2 }, (_, i) => ({ id: 'b' + i, groupId: 'B' }))];
+  const p4 = pickSpreadSeats(big, tOf, new Map(), new Map([['A', 6], ['B', 2]]), 4);
+  ok(p4.filter(s => s.groupId === 'A').length === 3 && p4.filter(s => s.groupId === 'B').length === 1, 'tables fill in proportion to their size (6-seat table 3, 2-seat table 1)');
+  const pre = pickSpreadSeats(seats16.slice(1), tOf, new Map([['g0', 1]]), cap, 3);
+  ok(!pre.some(s => s.groupId === 'g0'), 'someone already sitting (locked) at a table counts towards it');
+  ok(pickSpreadSeats(seats16, tOf, new Map(), cap, 40).length === 16, 'more students than seats: every seat is filled, nobody is placed twice');
+  const ord = pickSpreadSeats(seats16, tOf, new Map(), cap, 4).map(s => s.id);
+  ok(ord.every(id => ['s0', 's4', 's8', 's12'].includes(id)), 'within a table the first seats (in list order) fill first');
+  const now = Date.UTC(2026, 10, 23);
+  const trash = [{ key: 'a', deletedAt: now - 31 * 86400000 }, { key: 'b', deletedAt: now - 29 * 86400000 }, { key: 'c' }];
+  ok(purgeTrashList(trash, now).map(t => t.key).join() === 'b' && purgeTrashList(null, now).length === 0, 'trash older than 30 days is purged, newer kept');
+}
+
 console.log(`\n${passes} passed, ${failures} failed.`);
 process.exit(failures ? 1 : 0);
