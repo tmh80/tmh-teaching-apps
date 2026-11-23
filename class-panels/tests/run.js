@@ -703,6 +703,275 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await openManage('Grade 7B Test');
   await shot(page, '54-lab-editor-blackboard');
 
+  /* ── Class setups (Phase 5): migration, Regular/Lab tabs, usable furniture, spread, history, trash, restore ──
+     Its own browser profile: the usual fixture plus class 8C (tests/fixtures/setups-class.js), and a
+     setups entry already there for 7B, as if a first migration had crashed halfway through. */
+  console.log('Class setups: migration');
+  const SRC5 = fs.readFileSync(path.join(ROOT, 'src', 'teacher-app.jsx'), 'utf8');
+  const G5 = new Function(SRC5.slice(SRC5.indexOf('/* @geometry-begin'), SRC5.indexOf('/* @geometry-end */')) + '\nreturn PIECE_GEOMETRY;')();
+  const c8 = require('./fixtures/setups-class.js').build(G5);
+  const half7b = JSON.stringify({ activeId: 'regular', list: [{ id: 'regular', name: 'Regular 7B', icon: '🪑', use: ['desk', 'workstation'], offPieces: [], createdAt: 1 }] });
+  const seed5 = {
+    ...FIXTURE.data,
+    'ta-classes': JSON.stringify([...JSON.parse(FIXTURE.data['ta-classes']), c8.classObj]),
+    'ta-active-class': JSON.stringify('fx-8c'),
+    'sl-fx-8c': JSON.stringify(c8.sl), 'sh-fx-8c': JSON.stringify(c8.sh),
+    'setups-fx-7b': half7b,
+  };
+  const ctx5 = await browser.newContext({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 1, acceptDownloads: true });
+  await ctx5.addInitScript(fixture => {
+    try { if (localStorage.getItem('classboard-storage') === null) localStorage.setItem('classboard-storage', JSON.stringify(fixture)); } catch (e) {}
+  }, seed5);
+  const p5 = await ctx5.newPage();
+  p5.on('console', m => { if (m.type() === 'error') problems.push('console (setups): ' + m.text()); });
+  p5.on('pageerror', e => problems.push('pageerror (setups): ' + e.message));
+  p5.on('dialog', d => d.dismiss());
+  const w5 = ms => p5.waitForTimeout(ms);
+  const store5 = () => readStore(p5);
+  const S5 = async k => { const v = (await store5())[k]; return v === undefined ? undefined : JSON.parse(v); };
+  const shot5 = name => p5.screenshot({ path: path.join(SHOT_DIR, name + '.png') });
+  await p5.goto(URL); await w5(1200);
+
+  let st5 = await store5();
+  ok(['fx-6a', 'fx-7b', 'fx-8c'].every(c => st5[`setups-${c}`]), 'every class now has a setups entry');
+  const su8 = JSON.parse(st5['setups-fx-8c']);
+  ok(su8.activeId === 'regular' && su8.list.length === 1 && su8.list[0].name === 'Regular' && su8.list[0].use.join() === 'desk,workstation',
+    'it is one "Regular" setup that uses tables and workstations, so generating works exactly as before');
+  ok(st5['setups-fx-7b'] === half7b, 'a class that already had one (a migration cut short) is left exactly as it was');
+  ok(['sl-fx-6a', 'sl-fx-7b', 'sl-fx-8c'].every(k => st5[k] === seed5[k]), 'every sl-<class> is byte-for-byte unchanged');
+  ok(st5['cp-schema'] === '2', `cp-schema is 2 (${st5['cp-schema']})`);
+  let bk5 = await readBackups(p5);
+  const beforeSetups = bk5.filter(b => b.reason === 'before setups');
+  ok(beforeSetups.length === 1 && beforeSetups[0].data['sl-fx-8c'] === seed5['sl-fx-8c'] && !('setups-fx-8c' in beforeSetups[0].data) && !('cp-schema' in beforeSetups[0].data),
+    'one automatic backup "before setups" was taken, of the data before the change');
+  ok(bk5[0]?.reason === 'launch', 'the day\'s launch backup was still made');
+  await p5.reload(); await w5(1000);
+  ok((await readBackups(p5)).length === bk5.length && (await store5())['setups-fx-8c'] === st5['setups-fx-8c'], 'opening again does not migrate or back up again');
+
+  console.log('Class setups: tabs, Regular and Lab');
+  const manage5 = async () => {
+    if (await p5.locator('[title="Add a new desk or table to the room"]').count()) return;
+    await p5.locator(manageMenu).click(); await p5.getByText('Manage Seating').click(); await w5(900);
+  };
+  const tab5 = name => p5.locator(`[role="tab"][data-setup="${name}"]:visible`);
+  const menuFor = name => p5.locator(`[aria-label="More for ${name}"]:visible`);
+  const atPieces = (sl, ids) => sl.seats.filter(s => s.studentId && ids.includes(s.pieceId));
+  const perTable = (sl, ids) => ids.map(id => sl.seats.filter(s => s.pieceId === id && s.studentId).length);
+  await manage5();
+  ok(await tab5('Regular').count() === 1 && await p5.locator('[title^="New class setup"]').count() === 1, 'Manage Seating shows a "Regular" tab and ＋, even with one setup');
+  ok(await p5.locator('[title="Add a new desk or table to the room"]').count() === 1 && await p5.getByText('Aria Fake').first().isVisible(), 'and the class\'s seating as before');
+  await shot5('60-tabs-manage-whiteboard');
+  // the ⋯ menu: Regular uses tables only from now on
+  await menuFor('Regular').click(); await w5(250);
+  ok(await p5.getByText('Regular can be renamed but not deleted.').isVisible() && !(await p5.getByText('Delete…').count()), 'Regular\'s ⋯ menu has rename, icon, use for, duplicate, and no delete');
+  await shot5('61-tab-menu-whiteboard');
+  await p5.locator('.cp-pop [title^="Generate into tables only"]').click(); await w5(300);
+  ok(JSON.stringify((await S5('setups-fx-8c')).list[0].use) === '["desk"]', 'Use for: Tables is saved on the setup');
+  await p5.keyboard.press('Escape'); await w5(200);
+
+  // spread: 10 students, four tables of 4 (the benches are not used by Regular now)
+  const regBefore = await S5('sl-fx-8c');
+  ok(JSON.stringify(perTable(regBefore, c8.deskIds)) === '[4,4,2,0]', 'before: the old seating fills tables in list order (4,4,2,0)');
+  let spreadOk = true, benchFree = true;
+  for (let i = 0; i < 3; i++) {
+    await p5.getByText('🎲 Randomize').click(); await w5(650);
+    const sl = await S5('sl-fx-8c');
+    const pt = perTable(sl, c8.deskIds);
+    if (pt.some(n => n === 0) || pt.reduce((a, b) => a + b, 0) !== 10 || Math.max(...pt) > 3) spreadOk = false;
+    if (atPieces(sl, c8.benchIds).length) benchFree = false;
+  }
+  ok(spreadOk, `Randomize spreads 10 students over four tables of 4 with no table left empty (${perTable(await S5('sl-fx-8c'), c8.deskIds).join(',')})`);
+  ok(benchFree, 'and with "Tables" it leaves the lab benches free');
+  const regSaved = (await store5())['sl-fx-8c'];
+  const regSeating = JSON.parse(regSaved).seats.filter(s => s.studentId).map(s => `${s.id}=${s.studentId}`).sort().join();
+
+  // a new setup "Lab": a copy without students, used for workstations
+  await p5.locator('[title^="New class setup"]').click(); await w5(300);
+  ok(await p5.getByText('New class setup', { exact: true }).isVisible(), '＋ opens the New class setup dialog');
+  await p5.getByPlaceholder('e.g. Lab, Lab partners, Rocket project').fill('Lab'); await w5(150);
+  ok(await p5.locator('[role="dialog"] [title^="Generate into workstations only"]').evaluate(b => b.classList.contains('on')), 'naming it "Lab" picks Workstations');
+  await shot5('62-new-setup-dialog-whiteboard');
+  await p5.locator('[title="Make the setup and switch to it"]').click(); await w5(1100);
+  let su = await S5('setups-fx-8c');
+  const lab = su.list.find(s => s.name === 'Lab');
+  ok(su.list.length === 2 && lab && su.activeId === lab.id && lab.use.join() === 'workstation' && lab.icon === '🧪', 'creating it adds a 🧪 Lab tab (workstations) and switches to it');
+  const labKey = `sl-fx-8c~${lab.id}`;
+  let labSl = await S5(labKey);
+  ok(labSl && labSl.seats.length === regBefore.seats.length && labSl.seats.every(s => !s.studentId) && labSl.pieces.length === 7 && labSl.walls.length === 4,
+    `its seating is saved in ${labKey}: the same room and furniture, nobody seated`);
+  ok(labSl.rules.length === 0 && labSl.tags.length === 0, 'the copy keeps no rules or tags of its own (they stay with the class)');
+  ok((await store5())['sl-fx-8c'] === regSaved, 'Regular\'s sl-fx-8c is byte-for-byte unchanged');
+  ok(await tab5('Lab').getAttribute('aria-selected') === 'true', 'the Lab tab is selected');
+  ok(await p5.locator('[data-cp="unused"]').count() === 4, 'the four tables Lab doesn\'t use are drawn faded');
+  ok(await p5.locator('polygon[title*="Not used in Lab"]').count() === 4, 'and say "Not used in Lab" on hover');
+
+  // Randomize in Lab: benches only, the keep-apart rule from Regular still holds
+  let benchOnly = true, apartKept = true;
+  for (let i = 0; i < 6; i++) {
+    await p5.getByText('🎲 Randomize').click(); await w5(600);
+    labSl = await S5(labKey);
+    if (atPieces(labSl, c8.deskIds).length || atPieces(labSl, c8.benchIds).length !== 10) benchOnly = false;
+    const benchOf = id => labSl.seats.find(s => s.studentId === id)?.pieceId;
+    if (benchOf('c1') && benchOf('c1') === benchOf('c2')) apartKept = false;
+  }
+  ok(benchOnly, 'Randomize in Lab seats all 10 at the lab benches and nobody at a table');
+  ok(apartKept, 'the keep-apart rule set in Regular is kept in Lab (6 tries, Aria and Bo never share a bench)');
+  ok((await store5())['sl-fx-8c'] === regSaved, 'Regular is still byte-for-byte unchanged');
+  await p5.mouse.click(1205, 66); await w5(200);
+  await shot5('63-lab-benches-in-use-whiteboard');
+
+  // switch a bench off for Lab: Randomize leaves it empty
+  const benchHit = p5.locator('polygon[title^="Drag to move this table"]').nth(4);
+  await benchHit.click({ force: true }); await w5(300);
+  await p5.locator('[title^="Leave this table out when generating in Lab"]').click(); await w5(300);
+  su = await S5('setups-fx-8c');
+  const offId = su.list.find(s => s.id === lab.id).offPieces[0];
+  ok(su.list.find(s => s.id === lab.id).offPieces.length === 1 && c8.benchIds.includes(offId) && su.list[0].offPieces.length === 0, '"Use in Lab" off stores the bench in Lab\'s offPieces only');
+  const sittingThere = (await S5(labKey)).seats.filter(s => s.pieceId === offId && s.studentId).length;
+  ok(sittingThere > 0 && await p5.getByText(`${sittingThere} student${sittingThere > 1 ? 's are' : ' is'} at furniture not used in Lab`).isVisible(), `students already at that bench stay put, with a gentle warning (${sittingThere})`);
+  await p5.mouse.click(1205, 66); await w5(200);
+  await p5.getByText('🎲 Randomize').click(); await w5(650);
+  labSl = await S5(labKey);
+  ok(labSl.seats.filter(s => s.pieceId === offId && s.studentId).length === 0 && atPieces(labSl, c8.benchIds).length === 8, 'Randomize leaves that bench empty (8 seated at the other two)');
+  ok(await p5.locator('[data-cp="unused"]').count() === 5, 'and it is drawn faded too');
+  await p5.locator('polygon[title^="Drag to move this table"]').nth(4).click({ force: true }); await w5(300);
+  await p5.locator('[title^="Use this table again when generating in Lab"]').click(); await w5(300);
+  ok((await S5('setups-fx-8c')).list.find(s => s.id === lab.id).offPieces.length === 0, 'and switching it back on clears it');
+  await p5.mouse.click(1205, 66); await w5(200);
+  await p5.getByText('🎲 Randomize').click(); await w5(650);
+  const labSeating = (await store5())[labKey];
+
+  // history: confirmed per setup; the old entry counts as Regular's
+  await p5.getByText('Confirm seating').first().click(); await w5(400);
+  let sh8 = await S5('sh-fx-8c');
+  ok(sh8.length === 2 && sh8[0].setupId === lab.id && !('setupId' in sh8[1]), 'Confirm seating in Lab saves an entry tagged with Lab\'s setupId (the old one is untouched)');
+  ok(await p5.getByText('Previous arrangements (1)').isVisible(), 'Lab lists only its own arrangement');
+
+  // back to Regular: exactly as it was
+  await tab5('Regular').click(); await w5(900);
+  ok(await tab5('Regular').getAttribute('aria-selected') === 'true' && (await S5('setups-fx-8c')).activeId === 'regular', 'one click switches back to Regular');
+  ok((await store5())['sl-fx-8c'] === regSaved && (await store5())[labKey] === labSeating, 'switching saves nothing over either setup');
+  const seatedNow = await p5.locator('[title^="Drag to move this table"]').count();
+  const regFirst = c8.classObj.students.find(s => s.id === JSON.parse(regSaved).seats.find(x => x.studentId).studentId).name;
+  ok(seatedNow === 7 && await p5.getByText(regFirst, { exact: true }).first().isVisible() && await p5.locator('[data-cp="unused"]').count() === 3, `Regular shows its own seating again (${regFirst} at a table; the 3 benches faded)`);
+  ok(await p5.getByText('Previous arrangements (1)').isVisible(), 'and lists the arrangement from before setups as Regular\'s');
+  ok(JSON.parse((await store5())['sl-fx-8c']).seats.filter(s => s.studentId).map(s => `${s.id}=${s.studentId}`).sort().join() === regSeating, 'Regular\'s seating is exactly as it was');
+
+  // reload: the active setup is remembered
+  await tab5('Lab').click(); await w5(800);
+  await p5.reload(); await w5(1100);
+  await p5.locator(TAB.seating).click(); await w5(900);
+  ok(await p5.locator('[role="tab"]:visible').count() === 2 && await tab5('Lab').getAttribute('aria-selected') === 'true', 'after a reload the class Seating view opens on Lab, with a slim tab row');
+  await shot5('64-tabs-class-view-whiteboard');
+
+  console.log('Class setups: the class Seating view');
+  await tab5('Regular').click(); await w5(900);
+  ok(await tab5('Regular').getAttribute('aria-selected') === 'true', 'its tabs switch setup too');
+  let before = await store5();
+  await p5.locator('[title^="Shuffle everyone into new seats"]:visible').first().click(); await w5(900);
+  let after = await store5();
+  ok(after['sl-fx-8c'] !== before['sl-fx-8c'] && after[labKey] === before[labKey], 'Randomise there on Regular writes sl-fx-8c only');
+  ok(atPieces(JSON.parse(after['sl-fx-8c']), c8.benchIds).length === 0 && perTable(JSON.parse(after['sl-fx-8c']), c8.deskIds).every(n => n > 0), 'and fills only the tables, with none left empty');
+  await tab5('Lab').click(); await w5(900);
+  before = await store5();
+  await p5.locator('[title^="Shuffle everyone into new seats"]:visible').first().click(); await w5(900);
+  after = await store5();
+  ok(after[labKey] !== before[labKey] && after['sl-fx-8c'] === before['sl-fx-8c'], 'on Lab it writes Lab\'s key only');
+  ok(atPieces(JSON.parse(after[labKey]), c8.benchIds).length === 10, 'and seats everyone at the benches');
+  ok(JSON.parse(after[labKey]).rules.length === 0 && JSON.parse(after['sl-fx-8c']).rules.length === 1, 'the rules stay with the class (sl-fx-8c), not copied into Lab');
+
+  console.log('Class setups: delete, trash, restore');
+  await manage5();
+  await menuFor('Lab').click(); await w5(250);
+  await p5.locator('.cp-pop [title="Make a copy of this setup, seating and all"]').click(); await w5(1100);
+  su = await S5('setups-fx-8c');
+  const copy = su.list.find(s => s.name === 'Lab copy');
+  const whoWhere = v => JSON.parse(v).seats.map(s => `${s.id}=${s.studentId || ''}`).join();
+  ok(copy && su.activeId === copy.id && whoWhere((await store5())[`sl-fx-8c~${copy.id}`]) === whoWhere((await store5())[labKey]), 'Duplicate makes "Lab copy" with the same seating and switches to it');
+  // drag "Lab copy" before Lab
+  await tab5('Lab copy').dragTo(tab5('Lab')); await w5(400);
+  ok((await S5('setups-fx-8c')).list.map(s => s.name).join() === 'Regular,Lab copy,Lab', `tabs can be dragged to reorder (${(await S5('setups-fx-8c')).list.map(s => s.name).join(', ')})`);
+  const copyKey = `sl-fx-8c~${copy.id}`, copyVal = (await store5())[copyKey];
+  await menuFor('Lab copy').click(); await w5(250);
+  await p5.locator('.cp-pop [title="Delete this setup (it asks first)"]').click(); await w5(200);
+  ok(await p5.getByText('Its seating is kept in the trash for 30 days').isVisible(), 'Delete asks first');
+  await p5.locator('.cp-pop [title="Yes, delete Lab copy"]').click(); await w5(1000);
+  st5 = await store5();
+  const trash = JSON.parse(st5['ta-trash'] || '[]');
+  ok(!(copyKey in st5) && trash.length === 1 && trash[0].key === copyKey && JSON.stringify(trash[0].value) === copyVal && Number.isFinite(trash[0].deletedAt), 'its seating moved to ta-trash and the key is gone');
+  su = JSON.parse(st5['setups-fx-8c']);
+  ok(su.list.map(s => s.name).join() === 'Regular,Lab' && su.activeId === 'regular', 'the tab is gone and Regular is showing');
+  ok('sl-fx-8c' in st5 && labKey in st5, 'Regular and Lab are still there');
+  // trash older than 30 days goes on launch, newer stays
+  await p5.evaluate(async () => {
+    const t = JSON.parse((await window.storage.get('ta-trash')).value);
+    t[0].deletedAt = Date.now() - 31 * 86400000;
+    t.push({ key: 'sl-fx-8c~recent', value: { seats: [] }, deletedAt: Date.now() - 86400000 });
+    await window.storage.set('ta-trash', JSON.stringify(t));
+    // and pretend the automatic backups are from yesterday, so this launch makes a fresh one
+    const b = JSON.parse(localStorage.getItem('classpanels-auto-backups') || '[]');
+    localStorage.setItem('classpanels-auto-backups', JSON.stringify(b.map(x => ({ ...x, exportedAt: new Date(Date.parse(x.exportedAt) - 86400000).toISOString() }))));
+  });
+  await p5.reload(); await w5(1100);
+  const trash2 = await S5('ta-trash');
+  ok(trash2.length === 1 && trash2[0].key === 'sl-fx-8c~recent', 'on launch, trash older than 30 days is purged and newer trash kept');
+
+  // Settings > Export backup, then restore it: the setups come back exactly
+  await p5.locator('[title^="Settings"]').click(); await w5(300);
+  const [dl] = await Promise.all([p5.waitForEvent('download'), p5.locator('[title^="Save all your classes"]').click()]);
+  const exportPath = path.join(SHOT_DIR, 'phase5-export.json');
+  await dl.saveAs(exportPath);
+  const exported = JSON.parse(fs.readFileSync(exportPath, 'utf8')).data;
+  ok(['setups-fx-6a', 'setups-fx-7b', 'setups-fx-8c', labKey, 'ta-trash', 'cp-schema'].every(k => k in exported), 'Export backup includes setups-*, sl-*~*, ta-trash and cp-schema');
+  const latestAuto = (await readBackups(p5))[0];
+  ok(latestAuto && [labKey, 'setups-fx-8c'].every(k => k in latestAuto.data), 'automatic backups include them too');
+  await p5.keyboard.press('Escape'); await p5.mouse.click(10, 890); await w5(200);
+  await p5.evaluate(async k => { await window.storage.delete(k); await window.storage.delete('setups-fx-8c'); await window.storage.set('ta-trash', '[]'); }, labKey);
+  await p5.reload(); await w5(900);
+  await p5.locator('[title^="Settings"]').click(); await w5(300);
+  await p5.locator('input[type="file"][accept*="json"]').setInputFiles(exportPath); await w5(400);
+  await Promise.all([p5.waitForNavigation(), p5.getByRole('button', { name: 'Replace', exact: true }).click()]);
+  await w5(1100);
+  st5 = await store5();
+  const diff5 = Object.keys(exported).filter(k => st5[k] !== exported[k]);
+  ok(diff5.length === 0, 'restoring the export puts every key back exactly, setups included' + (diff5.length ? ` (differs: ${diff5.join(', ')})` : ''));
+  await p5.locator(TAB.seating).click(); await w5(700);
+  ok(await p5.locator('[role="tab"]:visible').count() === 2, 'and the class view has its Regular and Lab tabs again');
+
+  console.log('Class setups: rollback to main still works');
+  // main only reads sl-<class>: it must still have every field, of the right type
+  st5 = await store5();
+  const mainShape = v => {
+    const o = JSON.parse(v);
+    return Array.isArray(o.seats) && Array.isArray(o.groups) && Array.isArray(o.tags) && Array.isArray(o.roomItems) && Array.isArray(o.rules)
+      && o.seats.every(s => typeof s.id === 'string' && Number.isFinite(s.x) && Number.isFinite(s.y) && typeof s.used === 'boolean' && Array.isArray(s.tags) && (s.studentId === null || s.studentId === undefined || typeof s.studentId === 'string'))
+      && o.groups.every(g => typeof g.id === 'string' && Array.isArray(g.seatIds));
+  };
+  const slMain = Object.keys(st5).filter(k => /^sl-[^~]+$/.test(k));
+  ok(slMain.length === 3 && slMain.every(k => mainShape(st5[k])), `${slMain.join(', ')} still load in the shape main expects`);
+  ok(JSON.parse(st5['sl-fx-8c']).rules.length === 1 && st5['sl-fx-6a'] === FIXTURE.data['sl-fx-6a'], 'the class rules are in sl-fx-8c, and a class that was only migrated (6A) is untouched');
+  ok(Object.keys(st5).filter(k => k.includes('~')).every(k => k.startsWith('sl-') && mainShape(st5[k])), 'every other setup has the same shape, under keys main never reads');
+
+  // blackboard: the same screens
+  await p5.evaluate(async () => { await window.storage.set('ta-theme', JSON.stringify('blackboard')); });
+  await p5.reload(); await w5(1000);
+  await p5.locator(TAB.seating).click(); await w5(900);
+  await shot5('64-tabs-class-view-blackboard');
+  await manage5();
+  await tab5('Lab').click(); await w5(900);
+  await p5.mouse.click(1205, 66); await w5(200);
+  await shot5('63-lab-benches-in-use-blackboard');
+  await tab5('Regular').click(); await w5(900);
+  await shot5('60-tabs-manage-blackboard');
+  await menuFor('Lab').click(); await w5(250);
+  await shot5('61-tab-menu-blackboard');
+  await p5.keyboard.press('Escape'); await w5(200);
+  await p5.locator('[title^="New class setup"]').click(); await w5(300);
+  await p5.getByPlaceholder('e.g. Lab, Lab partners, Rocket project').fill('Lab partners'); await w5(150);
+  await shot5('62-new-setup-dialog-blackboard');
+  await p5.keyboard.press('Escape'); await w5(200);
+  await ctx5.close();
+
   console.log('Console');
   ok(problems.length === 0, 'no console errors or page errors' + (problems.length ? '\n    ' + problems.join('\n    ') : ''));
 

@@ -4119,7 +4119,7 @@ function SetupTabs({setups,onSwitch,manage=false,onNew,onReorder,renderMenu,extr
             onDragEnd={()=>{setDragId(null);setOverId(null);}}
             style={{display:"flex",alignItems:"center",flexShrink:0,borderRadius:"999px",opacity:dragId===s.id?0.45:1,
               boxShadow:overId===s.id&&dragId!==s.id?"-3px 0 0 var(--cp-sel)":"none"}}>
-            <button role="tab" aria-selected={on} className={cpc("tab",on)} onClick={()=>{if(!on)onSwitch(s.id);}}
+            <button role="tab" aria-selected={on} data-setup={s.name} className={cpc("tab",on)} onClick={()=>{if(!on)onSwitch(s.id);}}
               title={`${on?'Showing':'Switch to'} ${s.name}: its own seating, generated into ${setupUseText(s)}${manage?'. Drag to reorder':''}`}
               style={{display:"flex",alignItems:"center",gap:"5px",padding:manage?"4px 4px 4px 11px":"4px 12px",fontSize:"12.5px",whiteSpace:"nowrap","--tab-fill":"var(--cpb-sunny)",cursor:on?"default":"pointer"}}>
               <span aria-hidden="true">{s.icon}</span><span style={{maxWidth:"150px",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</span>
