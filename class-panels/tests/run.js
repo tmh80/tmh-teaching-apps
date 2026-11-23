@@ -528,8 +528,8 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   ok(afterSaveStore['ta-saved-layouts'] === FIXTURE.data['ta-saved-layouts'], 'the old ta-saved-layouts key is left exactly as it was');
   ok((await readBackups(page)).some(b => b.reason === 'before room library'), 'an automatic backup "before room library" was taken first');
   ok((await SL('fx-6a')).room?.roomId === lab204.id, 'the class is now linked to the room');
-  await page.mouse.click(700, 880); await wait(200);
   await shot(page, '42-rooms-popover');
+  await page.mouse.click(700, 880); await wait(200);
   // a second layout: add a hexagon, save it as "Clusters"
   await deselect();
   await addFromMenu('Hexagon');
@@ -696,7 +696,8 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await shot(page, '52-lab-projector-whiteboard');
   await page.keyboard.press('Escape'); await wait(300);
   await putLab('blackboard');
-  await page.getByText('Grade 7B Test').first().click(); await wait(300);
+  await openManage('Grade 7B Test');
+  await page.getByText('🎲 Randomize').click(); await wait(800);
   await page.locator(TAB.seating).click(); await wait(900);
   await shot(page, '53-lab-class-view-blackboard');
   await openManage('Grade 7B Test');
