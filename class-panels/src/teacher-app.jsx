@@ -129,6 +129,12 @@ const audio={
     }
     const c=this.getCtx();[784,988,784].forEach((f,i)=>{const o=c.createOscillator(),g=c.createGain();o.type="sine";o.frequency.setValueAtTime(f,c.currentTime+i*0.15);g.gain.setValueAtTime(0.25,c.currentTime+i*0.15);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+i*0.15+0.25);o.connect(g).connect(c.destination);o.start(c.currentTime+i*0.15);o.stop(c.currentTime+i*0.15+0.3);});
   }catch(e){}},
+  /* Station rotation: a rising "time to move" phrase, in the timer's style (a touch longer than ding) */
+  chime(){try{
+    if(this.style==='hourglass'){[329.63,440,554.37,659.25].forEach((f,i)=>this.bell(f,i*0.18,2.2,0.1));return;}
+    if(this.style==='blocks'){[523.25,659.25,783.99,1046.5].forEach((f,i)=>this.blip(f,i*0.09,i===3?0.3:0.09,0.07));return;}
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=>this.note(f,i*0.13,{dur:0.5,gain:0.2,type:"triangle"}));
+  }catch(e){}},
   oneShot(){this.beep();},
   tick(){try{
     if(this.style==='hourglass'){this.note(740,0,{dur:0.22,gain:0.07,attack:0.01,glideTo:520});return;} // soft water drop
@@ -468,7 +474,7 @@ function TimerCard({timer,onDelete,onToggle,onReset,onSelect,onDisplay,onRepeat,
 }
 
 /* ── Display Mode ── */
-function DisplayMode({timer,onToggle,onReset,onExit,continuousAlarm,coldCallStudent,onDismissColdCall,timerStyle}){
+function DisplayMode({timer,onToggle,onReset,onExit,continuousAlarm,coldCallStudent,onDismissColdCall,timerStyle,rotationStrip}){
   const eff=getEffSegs(timer);
   const{currentSegIdx:ci,segElapsed:se,running,finished,repeatInfo:ri}=timer;
   const seg=eff[ci]||eff[0];
@@ -527,6 +533,7 @@ function DisplayMode({timer,onToggle,onReset,onExit,continuousAlarm,coldCallStud
         {!finished&&ci<eff.length-1&&(
           <div style={{fontSize:"16px",color:"rgba(0,0,0,0.25)",fontWeight:500}}>Next: <span style={{color:"rgba(0,0,0,0.4)",fontWeight:600}}>{eff[ci+1].task}</span> ({fmt(eff[ci+1].minutes*60+eff[ci+1].seconds)})</div>
         )}
+        {rotationStrip&&<RotationStrip strip={rotationStrip} moving={!finished&&seg.task===ROT_MOVE}/>}
 
         {/* Cold call overlay — appears within display mode */}
         {coldCallStudent&&(
@@ -1088,7 +1095,14 @@ function ManageClassModal({classToEdit,onSave,onClose}){
 /* ══════════════════════════════════════════════════════════
    TIMER PANEL
    ══════════════════════════════════════════════════════════ */
-function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDismissColdCall,timerStyle}){
+/* A segment's length in test runs: window.__cpTickMs makes a "second" shorter. Nothing sets it in the app. */
+const timerTickMs=()=>{try{const v=Number(window.__cpTickMs);return v>=5?v:1000;}catch(e){return 1000;}};
+/* Props for the station rotation (Phase 7), all optional:
+   onSegmentEnd(timerId,segIdx,segTask,info) fires once each time a timer finishes a segment (info.finished: it was the last one);
+   onTimersChange([{id,running,finished,currentSegIdx}]) says which timers exist;
+   apiRef.current={addTimer} lets other panels create a timer without clicking (addTimer returns the new id; the 6th argument takes {id,select});
+   rotationStrip shows "Red → Station 3 …" on that timer's projector view. */
+function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDismissColdCall,timerStyle,onSegmentEnd,onTimersChange,apiRef,rotationStrip}){
   const[timers,setTimers]=useState([]);const[selectedId,setSelectedId]=useState(null);const[showBuilder,setShowBuilder]=useState(false);const[showActions,setShowActions]=useState(false);const[showTemplatesManager,setShowTemplatesManager]=useState(false);const[continuousAlarm,setContinuousAlarm]=useState(true);const[countdownBeeps,setCountdownBeeps]=useState(true);const[savedTemplates,setSavedTemplates]=useState([]);const[actions,setActions]=useState(DEFAULT_ACTIONS);const[customMin,setCustomMin]=useState("");const[customSec,setCustomSec]=useState("");const[displayMode,setDisplayMode]=useState(false);
   const[optionsOpen,setOptionsOpen]=useState(false); // narrow-view "⋯ More" dropdown
   const[quickOpen,setQuickOpen]=useState(false);const[quickSecs,setQuickSecs]=useState({}); // ⚡ Quick menu + remembered length per action
@@ -1117,11 +1131,13 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
   const saveActions=a=>{setActions(a);save("actions",a);};
   const saveTemplatesList=useCallback(list=>{setSavedTemplates(list);save("saved-templates",list);},[]);
 
-  const addTimer=useCallback((name,segments,repeat,paraMode=false,autoStart=false)=>{
-    const id=Date.now()+Math.random();
+  const addTimer=useCallback((name,segments,repeat,paraMode=false,autoStart=false,opts)=>{
+    const id=opts?.id??(Date.now()+Math.random());
     setTimers(p=>[...p,{id,name,segments,running:!!autoStart,finished:false,currentSegIdx:0,segElapsed:0,repeatInfo:repeat?{...repeat,current:1}:null,paraphraseMode:paraMode}]);
-    setSelectedId(prev=>prev||id);
+    setSelectedId(prev=>opts?.select?id:(prev||id));
+    return id;
   },[]);
+  useEffect(()=>{if(apiRef)apiRef.current={addTimer};return()=>{if(apiRef)apiRef.current=null;};},[apiRef,addTimer]);
 
   const currentTimer=timers.find(t=>t.id===selectedId&&!t.finished)||timers.find(t=>!t.finished);
   const currentId=currentTimer?.id||null;
@@ -1198,9 +1214,33 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
         if(el>=segDur){if(idx<eff.length-1){idx++;el=0;audio.ding();}else{if(rep&&(rep.infinite||rep.current<rep.total)){rep={...rep,current:rep.current+1};idx=0;el=0;audio.ding();}else{fin=true;if(continuousAlarm)audio.startAlarm(t.id);else audio.oneShot();}}}
         return{...t,currentSegIdx:idx,segElapsed:el,finished:fin,repeatInfo:rep};
       }));
-    },1000);
+    },timerTickMs());
     return()=>clearInterval(interval);
   },[continuousAlarm,countdownBeeps]);
+
+  /* Tell the station rotation when a segment ends. Worked out by comparing each timer with how it looked
+     on the last render, so the tick above is untouched: a segment ended if the timer moved on to a later
+     segment, wrapped to its next round, or finished. A reset, combine or split is never mistaken for one. */
+  const onSegEndRef=useRef(onSegmentEnd);onSegEndRef.current=onSegmentEnd;
+  const onTimersRef=useRef(onTimersChange);onTimersRef.current=onTimersChange;
+  const segSnap=useRef(new Map());
+  useEffect(()=>{
+    const prev=segSnap.current,next=new Map(),ends=[];
+    timers.forEach(t=>{
+      const rep=t.repeatInfo?t.repeatInfo.current:1,eff=getEffSegs(t);
+      const cur={idx:t.currentSegIdx,rep,fin:!!t.finished,tasks:eff.map(x=>x.task)};
+      const p=prev.get(t.id);
+      if(p&&!p.fin){
+        if(rep===p.rep&&t.finished)ends.push([t.id,p.idx,p.tasks[p.idx],{finished:true}]);
+        else if(rep===p.rep&&t.currentSegIdx>p.idx)for(let j=p.idx;j<t.currentSegIdx;j++)ends.push([t.id,j,p.tasks[j],{finished:false}]);
+        else if(rep===p.rep+1)ends.push([t.id,p.idx,p.tasks[p.idx],{finished:false}]);
+      }
+      next.set(t.id,cur);
+    });
+    segSnap.current=next;
+    if(onSegEndRef.current)ends.forEach(e=>onSegEndRef.current(...e));
+  },[timers]);
+  useEffect(()=>{onTimersRef.current?.(timers.map(t=>({id:t.id,running:t.running,finished:t.finished,currentSegIdx:t.currentSegIdx})));},[timers]);
 
   /* Report running status to tab badge */
   useEffect(()=>{
@@ -1381,7 +1421,7 @@ function TimerPanel({onStatusChange,activeClass,coldCallStudent,onColdCall,onDis
 
       {/* Display mode */}
       {displayMode&&currentTimer&&(
-        <DisplayMode timer={currentTimer} onToggle={id=>{toggleTimer(id);if(currentTimer.finished)setDisplayMode(false);}} onReset={resetTimer} onExit={()=>setDisplayMode(false)} continuousAlarm={continuousAlarm} coldCallStudent={coldCallStudent} onDismissColdCall={onDismissColdCall} timerStyle={timerStyle}/>
+        <DisplayMode timer={currentTimer} onToggle={id=>{toggleTimer(id);if(currentTimer.finished)setDisplayMode(false);}} onReset={resetTimer} onExit={()=>setDisplayMode(false)} continuousAlarm={continuousAlarm} coldCallStudent={coldCallStudent} onDismissColdCall={onDismissColdCall} timerStyle={timerStyle} rotationStrip={rotationStrip&&rotationStrip.timerId===currentTimer.id?rotationStrip:null}/>
       )}
     </div>
   );
@@ -3474,6 +3514,54 @@ const PIECE_GEOMETRY={PG,placeGroupsInSetup,GROUP_COLOR_KEYS,groupColorKey,legac
   extractShell,extractLayout,applyRoomShell,sameShell,instantiateLayout,migrateLegacyLayouts,lineItemFromPoints,snapItemToWall,AREA_COLOURS};
 /* @geometry-end */
 
+/* @rotation-begin ═══ Station rotation (Phase 7): pure helpers, no JSX, so tests/geometry.test.js can run them ═══
+   A rotation is an overlay on a setup: groups[g] sits at stationOrder[stationFor(g,step,n,direction)].
+   Nobody's seat is ever written. rot-<class> = {setupId,stationOrder,groups:[{name,color,studentIds}],step,
+   direction:'forward'|'alternate',timerId,minutes,changeover,loop,labels}. */
+const ROT_MOVE='Move!'; // the changeover segment's name; the rotation recognises it by this
+/* Which station (index into stationOrder) group g is at after `step` moves. Forwards: (g+s) mod n.
+   "Alternate directions": every second group (1, 3, 5…) goes backwards, (g−s) mod n. With an odd number of
+   stations a forwards and a backwards group do meet at one station now and then (two groups, one station). */
+const stationFor=(g,step,n,direction)=>{
+  if(!(n>0))return -1;
+  const back=direction==='alternate'&&g%2===1;
+  return((((g+(back?-step:step))%n)+n)%n);
+};
+/* For every station, the groups there at this step: [[groupIdx…] per station]. Stations nobody is at stay empty. */
+const stationOccupancy=(groupCount,step,n,direction)=>{
+  const occ=Array.from({length:Math.max(0,n)},()=>[]);
+  for(let g=0;g<groupCount&&n>0;g++)occ[stationFor(g,step,n,direction)].push(g);
+  return occ;
+};
+const stationLabel=st=>`Station ${st.n}${st.name?` · ${st.name}`:''}`;
+/* The timer's segments: one work segment per station, with a "Move!" changeover between each (and after the last when
+   looping, so the lap joins up). minutes may be fractional (2.5 = 2 min 30 s); changeover is seconds (0 = none). */
+const buildRotationSegments=(labels,{minutes=5,changeover=0,loop=false}={})=>{
+  const work=Math.max(1,Math.round((Number(minutes)||0)*60)),mv=Math.max(0,Math.round(Number(changeover)||0));
+  const segs=[];
+  labels.forEach((label,i)=>{
+    segs.push({task:label,minutes:Math.floor(work/60),seconds:work%60});
+    if(mv>0&&(i<labels.length-1||loop))segs.push({task:ROT_MOVE,minutes:Math.floor(mv/60),seconds:mv%60});
+  });
+  return segs;
+};
+/* A setup's stations, in the saved order (new ones last, by number). Items and tables flagged with `station`. */
+const orderStations=(items,pieces,order)=>{
+  const all=[
+    ...(items||[]).filter(i=>i&&i.station).map(i=>({id:i.id,kind:'item',n:Number.isFinite(i.station.n)?i.station.n:0,name:i.station.name||''})),
+    ...(pieces||[]).filter(p=>p&&p.station).map(p=>({id:p.id,kind:'piece',n:Number.isFinite(p.station.n)?p.station.n:0,name:p.station.name||''})),
+  ].sort((a,b)=>(a.n-b.n)||(a.id<b.id?-1:a.id>b.id?1:0));
+  const pos=new Map((order||[]).map((id,i)=>[id,i]));
+  return[...all.filter(s=>pos.has(s.id)).sort((a,b)=>pos.get(a.id)-pos.get(b.id)),...all.filter(s=>!pos.has(s.id))];
+};
+const defaultGroupName=(name,i)=>(name&&String(name).trim())||`Group ${i+1}`;
+/* Where each group goes at a step: [{gi,group,station:index}] */
+const rotationAt=(rot,step)=>(rot.groups||[]).map((group,gi)=>({gi,group,station:stationFor(gi,step,(rot.stationOrder||[]).length,rot.direction)}));
+/* A saved rot-<class> that is whole enough to use (anything else is ignored) */
+const validRotation=r=>r&&typeof r==='object'&&Array.isArray(r.stationOrder)&&r.stationOrder.length>0&&Array.isArray(r.groups)&&Number.isFinite(r.step)&&r.step>=0
+  ?{...r,direction:r.direction==='alternate'?'alternate':'forward',loop:!!r.loop,labels:Array.isArray(r.labels)?r.labels:[]}:null;
+/* @rotation-end */
+
 // Tag colours. Custom tags used to get whatever COLORS[i] fell out of
 // their position in whichever list happened to be rendering them — so the
 // same tag could show up a different colour on the seat map than in the
@@ -4621,7 +4709,7 @@ function useChairsMatch(classId){
   const set=useCallback(v=>{setOn(v);if(!classId)return;save(`cp-chairmatch-${classId}`,v);window.dispatchEvent(new CustomEvent('cp-chairmatch',{detail:{classId,on:v}}));},[classId]);
   return[on,set];
 }
-function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist,onUpdateStudentTags}){
+function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist,onUpdateStudentTags,rotation,onStartRotation}){
   /* Class setups (Phase 5): which setup is showing and where its seating is saved.
      slKey stays null until this class's setups have loaded, and nothing loads or saves till then. */
   const setup=setups?setups.list.find(x=>x.id===setups.activeId)||null:null;
@@ -4681,6 +4769,8 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
   const randomizeOptionsMenu=useAnchoredMenu();
   const layoutsMenu=useAnchoredMenu();
   const arrangementsMenu=useAnchoredMenu();
+  const stationsMenu=useAnchoredMenu(); // 🔄 Stations (Phase 7)
+  const[startRot,setStartRot]=useState(null); // the groups chosen in Stations, while the Start rotation dialog is open
   const convertMenu=useAnchoredMenu();
   /* Undo — one committed-state stack per class, session-only. doSave (below)
      pushes the state that was current just before each change. */
@@ -5770,6 +5860,11 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
   const setItemStation=(id,patch)=>patchItem(id,r=>({...r,station:{...r.station,...patch}}));
   const togglePieceStation=pid=>updatePieces([pid],p=>{const q={...p};if(q.station)delete q.station;else q.station={n:nextStationNumber(roomItems,pieces),name:''};return q;});
   const setPieceStation=(pid,patch)=>updatePieces([pid],p=>({...p,station:{...p.station,...patch}}));
+  /* 🔄 Stations: this setup's stations in their saved order. The order is saved on the setup (stations.order). */
+  const stationList=orderStations(roomItems,pieces,setup?.stations?.order);
+  const renameStation=(st,name)=>st.kind==='piece'?setPieceStation(st.id,{name}):setItemStation(st.id,{name});
+  const reorderStations=ids=>{if(setupId)patchSetup(setupId,x=>({...x,stations:{...(x.stations||{}),order:ids}}));};
+  const rotationHere=!!rotation;
   const[editingLabel,setEditingLabel]=useState(null); // item id whose label is being typed on the canvas
 
   /* ── Drag a room item ── */
@@ -6784,6 +6879,38 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
           document.body
         )}
 
+        {/* Stations (Phase 7): this setup's stations in order, and which groups rotate round them. Collapsed until opened. */}
+        <div>
+          <div ref={stationsMenu.anchorRef} style={{position:"relative"}}>
+            <button className={`cpb${stationsMenu.pos?" on":""}`} onClick={stationsMenu.toggle} title="Stations: put groups at the stations in this room and rotate them with a timer" style={{...btnS,width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:stationsMenu.pos?"#f0f1f4":"#fff"}}
+              onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
+              onMouseLeave={e=>e.currentTarget.style.background=stationsMenu.pos?"#f0f1f4":"#fff"}
+            >
+              <span>🔄 Stations{stationList.length>0?` (${stationList.length})`:''}</span>
+              <span style={{fontSize:"9px",color:"rgba(0,0,0,0.3)"}}>▾</span>
+            </button>
+          </div>
+        </div>
+        {stationsMenu.pos&&createPortal(
+          <div className="cp-pop" ref={stationsMenu.menuRef} style={(()=>{
+            /* longer than the other popovers, so it opens beside the button (not under it) and as tall as the window allows */
+            const r=stationsMenu.anchorRef.current?.getBoundingClientRect();
+            const top=Math.max(10,Math.min(r?r.top:10,window.innerHeight-600));
+            return{position:"fixed",left:(r?r.right:stationsMenu.pos.left)+8,top,zIndex:500,background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"10px",boxShadow:"0 8px 28px rgba(0,0,0,0.14)",padding:"8px",width:"300px",maxHeight:window.innerHeight-top-10,overflowY:"auto"};
+          })()}>
+            <StationsPopover classId={activeClass?.id} students={activeClass?.students||[]} stations={stationList} setupName={setup?.name||'Regular'} running={rotationHere} btnS={btnS} menuHead={menuHead}
+              onReorder={reorderStations} onRename={renameStation}
+              onStart={groupsPicked=>{setStartRot({groups:groupsPicked});stationsMenu.close();}}/>
+          </div>,
+          document.body
+        )}
+        {startRot&&<RotationStartDialog stationCount={stationList.length} groups={startRot.groups} onClose={()=>setStartRot(null)}
+          onStart={cfg=>{
+            onStartRotation?.({...cfg,setupId:setupId||REGULAR_SETUP,stations:stationList.map(s=>({id:s.id,label:stationLabel(s)}))});
+            setStartRot(null);
+            showNotice(`Rotation started. Its timer is in the Timer tab${cfg.autoStart?' and already running':', paused until you press Start'}.`);
+          }}/>}
+
         {/* Previous arrangements — auto history of confirmed seatings, last 10,
             also tucked into a popover */}
         <div>
@@ -7664,7 +7791,259 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
 /* ══════════════════════════════════════════════════════════
    STUDENT SEATING PANEL — clean read-only view, no tags
    ══════════════════════════════════════════════════════════ */
-function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist}){
+/* ══════════════════════════════════════════════════════════
+   STATION ROTATION (Phase 7): the screens
+   The pure rules (stationFor, the timer's segments, ordering) are in the @rotation block above.
+   A rotation is only an overlay on a setup: it never writes a seat.
+   ══════════════════════════════════════════════════════════ */
+const rotColour=color=>COLORS.find(c=>c.text===color)||COLORS[0];
+const rotStationLabel=(rot,k)=>rot.labels[k]||`Station ${k+1}`;
+/* Top-left corner of a station's badge on the map (an item's box, or a table's bounds) */
+const stationAnchor=(items,pieces,id)=>{
+  const it=(items||[]).find(i=>i.id===id);
+  if(it){const b=itemBounds(it);return{x:b.x,y:b.y};}
+  const p=(pieces||[]).find(q=>q.id===id);
+  if(p){const w=pieceToWorld(p);return{x:Math.min(...w.poly.map(q=>q[0]))+4,y:Math.min(...w.poly.map(q=>q[1]))+4};}
+  return null;
+};
+/* [{name,color,label}] for every group at a step: what the Rotate! card, the strip and the Next line show */
+const rotationItems=(rot,step)=>rotationAt(rot,step).map(a=>({name:defaultGroupName(a.group.name,a.gi),color:a.group.color,label:rotStationLabel(rot,a.station)}));
+
+/* On the room map: each station's current group(s), a colour chip beside the station's badge */
+const StationOverlay=({rot,items,pieces,students})=>{
+  if(!rot)return null;
+  const occ=stationOccupancy(rot.groups.length,rot.step,rot.stationOrder.length,rot.direction);
+  const nameOf=new Map((students||[]).map(s=>[s.id,s.name]));
+  return(
+    <>
+      {rot.stationOrder.map((sid,k)=>{
+        const a=stationAnchor(items,pieces,sid);
+        if(!a||!occ[k].length)return null;
+        const below=a.y<120; // near the top of the map the chip goes under the badge instead of above it
+        return(
+          <div key={`ro-${sid}`} data-station-groups={sid} style={{position:"absolute",left:a.x,top:a.y,zIndex:9,pointerEvents:"none",transform:below?"translate(-6px,18px)":"translate(-6px,calc(-100% - 14px))",display:"flex",flexDirection:"column",gap:3,width:"max-content",maxWidth:190,fontFamily:"'Source Sans 3',sans-serif"}}>
+            {occ[k].map(gi=>{
+              const g=rot.groups[gi],c=rotColour(g.color);
+              const names=(g.studentIds||[]).map(id=>nameOf.get(id)).filter(Boolean);
+              return(
+                <div key={gi} data-rot-group={defaultGroupName(g.name,gi)} style={{background:c.bg,border:`2px solid ${c.text}`,borderRadius:10,padding:"2px 8px 3px",boxShadow:"1.5px 2px 0 var(--cp-shadow)"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:5,fontSize:12,fontWeight:800,color:c.text,letterSpacing:0.3}}><span style={{width:9,height:9,borderRadius:"50%",background:c.text,flexShrink:0}}/>{defaultGroupName(g.name,gi)}</div>
+                  <div style={{fontSize:10.5,fontWeight:600,color:"#1a1a2e",lineHeight:1.25}}>{names.slice(0,6).join(", ")}{names.length>6?` +${names.length-6}`:""}</div>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </>
+  );
+};
+
+/* "Next: Blue → Station 4 · Red → Station 1": a slim line for the class Seating view */
+const RotationNextLine=({rot})=>{
+  if(!rot)return null;
+  const n=rot.stationOrder.length,last=!rot.loop&&rot.step>=n-1;
+  return(
+    <div data-rotation-next style={{padding:"6px 16px",borderBottom:"1px solid rgba(0,0,0,0.06)",background:"#fffbea",display:"flex",alignItems:"center",flexWrap:"wrap",gap:"4px 12px",flexShrink:0,fontFamily:"'Source Sans 3',sans-serif",fontSize:"12.5px",color:"#5c4a12"}}>
+      <b title="A station rotation is running on this setup">🔄 Step {(rot.step%n)+1} of {n}{rot.loop?` · lap ${Math.floor(rot.step/n)+1}`:""}</b>
+      {last?<span style={{fontWeight:600}}>Last station: no more moves</span>:<>
+        <b style={{color:"rgba(0,0,0,0.45)"}}>Next:</b>
+        {rotationItems(rot,rot.step+1).map((it,i)=>{const c=rotColour(it.color);return <span key={i} style={{display:"inline-flex",alignItems:"center",gap:5,fontWeight:700,color:"#1a1a2e"}}><span style={{width:9,height:9,borderRadius:"50%",background:c.text}}/>{it.name} → {it.label}</span>;})}
+      </>}
+    </div>
+  );
+};
+
+/* Under the projector timer: where every group is now (or is moving to) */
+function RotationStrip({strip,moving}){
+  return(
+    <div data-rotation-strip style={{display:"flex",flexWrap:"wrap",gap:"6px 8px",justifyContent:"center",alignItems:"center",maxWidth:"92vw",fontFamily:"'Source Sans 3',sans-serif"}}>
+      <span style={{fontSize:"14px",fontWeight:700,color:"rgba(0,0,0,0.45)",marginRight:2}}>{moving?"Move to:":"Now:"}</span>
+      {strip.items.map((it,i)=>{const c=rotColour(it.color);return(
+        <span key={i} style={{display:"inline-flex",alignItems:"center",gap:6,padding:"4px 12px",borderRadius:"14px",background:c.bg,border:`2px solid ${c.text}`,color:"#1a1a2e",fontSize:"15px",fontWeight:700,boxShadow:moving?`0 0 0 3px ${hexA(c.text,0.25)}`:"none"}}>
+          <span style={{width:10,height:10,borderRadius:"50%",background:c.text}}/>{it.name} → {it.label}
+        </span>);})}
+    </div>
+  );
+}
+
+/* The big full-screen "Rotate!" over everything (the projector views included). Closes itself, or on a click. */
+const RotateCard=({items,onClose})=>createPortal(
+  <div data-rotate-card onClick={onClose} title="Click to close" style={{position:"fixed",inset:0,zIndex:700,background:"rgba(20,14,8,0.86)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4vh",padding:"24px",fontFamily:"'Source Sans 3',sans-serif",animation:"coldCallReveal 0.35s cubic-bezier(0.34,1.56,0.64,1)",cursor:"pointer"}}>
+    <div style={{fontSize:"clamp(56px,12vw,150px)",fontWeight:800,color:"#fff",letterSpacing:"2px",lineHeight:1}}>Rotate! ↻</div>
+    <div style={{display:"flex",flexWrap:"wrap",gap:"12px 16px",justifyContent:"center",maxWidth:"92vw"}}>
+      {items.map((it,i)=>{const c=rotColour(it.color);return(
+        <div key={i} style={{background:c.bg,border:`4px solid ${c.text}`,borderRadius:"18px",padding:"8px 20px",fontSize:"clamp(18px,3vw,38px)",fontWeight:800,color:"#1a1a2e",whiteSpace:"nowrap"}}><span style={{color:c.text}}>{it.name}</span> → {it.label}</div>);})}
+    </div>
+    <div style={{fontSize:"13px",color:"rgba(255,255,255,0.5)"}}>click anywhere to close</div>
+  </div>,document.body);
+
+/* Floating controls while a rotation runs (teacher-facing, bottom middle). Rotate and Back never touch the timer. */
+function RotationBar({rot,setupName,timerState,onRotate,onBack,onEnd}){
+  const[ask,setAsk]=useState(false);
+  const n=rot.stationOrder.length;
+  return(
+    <div data-rotation-bar className="cp-pop" style={{position:"fixed",left:"50%",bottom:"58px",transform:"translateX(-50%)",zIndex:450,display:"flex",alignItems:"center",gap:"8px",padding:"7px 10px",borderRadius:"14px",fontFamily:"'Source Sans 3',sans-serif",maxWidth:"calc(100vw - 24px)",flexWrap:"wrap",justifyContent:"center"}}>
+      {ask?(<>
+        <span style={{fontSize:"12.5px",fontWeight:700,color:"#2b2118"}}>End the rotation? The setup and the timer stay.</span>
+        <button className="cpb cpb-bad" onClick={()=>{setAsk(false);onEnd();}} title="Yes, stop the station rotation" style={{padding:"6px 12px",borderRadius:"9px",fontSize:"12.5px",fontWeight:700}}>End it</button>
+        <button className="cpb" onClick={()=>setAsk(false)} title="No, keep rotating" style={{padding:"6px 12px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>Keep going</button>
+      </>):(<>
+        <span title={`Station rotation${setupName?` in ${setupName}`:""}`} style={{fontSize:"12.5px",fontWeight:800,color:"#2b2118",whiteSpace:"nowrap"}}>🔄 Step {(rot.step%n)+1} of {n}</span>
+        {timerState==="missing"&&<span title="The timer that was moving the groups is gone. Use Rotate to move them yourself." style={{fontSize:"11.5px",fontWeight:700,color:"#7a5a12",background:"#fdf3d6",border:"1.5px solid rgba(184,133,10,0.45)",borderRadius:"999px",padding:"2px 9px"}}>timer not running</span>}
+        {timerState==="done"&&<span title="The timer has finished its lap" style={{fontSize:"11.5px",fontWeight:700,color:"#7a5a12",background:"#fdf3d6",border:"1.5px solid rgba(184,133,10,0.45)",borderRadius:"999px",padding:"2px 9px"}}>timer finished</span>}
+        <button className={cpc()} onClick={onBack} disabled={rot.step<=0} title="Move every group back to where it was before the last move (the timer is not touched)" style={{padding:"6px 11px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>← Back</button>
+        <button className={cpc("primary")} onClick={onRotate} title="Move every group on to its next station now (the timer is not touched)" style={{padding:"6px 14px",borderRadius:"9px",fontSize:"12.5px",fontWeight:700}}>Rotate ↻</button>
+        <button className={cpc()} onClick={()=>setAsk(true)} title="Stop the station rotation (asks first). The setup and the timer stay." style={{padding:"6px 11px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>End rotation</button>
+      </>)}
+    </div>
+  );
+}
+
+/* "Start rotation": minutes, changeover, direction, laps. Opens from the Stations popover. */
+function RotationStartDialog({stationCount,groups,onStart,onClose}){
+  const[minutes,setMinutes]=useState('5');
+  const[changeover,setChangeover]=useState('30');
+  const[direction,setDirection]=useState('forward');
+  const[loop,setLoop]=useState(false);
+  const mins=Math.min(60,Math.max(0.5,parseFloat(minutes)||5));
+  const chg=Math.min(180,Math.max(0,Math.round(parseFloat(changeover)||0)));
+  const total=stationCount*mins*60+chg*(loop?stationCount:Math.max(0,stationCount-1));
+  const head={fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.35)",margin:"12px 2px 5px"};
+  const num={width:"64px",padding:"6px 8px",borderRadius:"8px",fontSize:"13.5px",fontWeight:700,fontFamily:"'Source Sans 3',sans-serif",textAlign:"center"};
+  const seg=(on,label,help,fn)=><button className={cpc("",on)} onClick={fn} title={help} style={{flex:1,padding:"7px 8px",borderRadius:"8px",fontSize:"12.5px",fontWeight:on?700:600}}>{label}</button>;
+  const go=autoStart=>onStart({groups,direction,minutes:mins,changeover:chg,loop,autoStart});
+  return createPortal(
+    <div onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}} style={{position:"fixed",inset:0,zIndex:600,background:"rgba(20,14,8,0.32)",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Source Sans 3',sans-serif"}}>
+      <div className="cp-pop" role="dialog" aria-label="Start rotation" style={{width:"392px",maxWidth:"calc(100vw - 32px)",maxHeight:"calc(100vh - 40px)",overflowY:"auto",borderRadius:"14px",padding:"16px 18px"}}>
+        <div style={{fontSize:"16px",fontWeight:800,color:"#2b2118"}}>Start rotation</div>
+        <div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.5)",marginTop:"2px",lineHeight:1.4}}>{groups.length} group{groups.length!==1?"s":""} across {stationCount} stations. This makes a timer with a step for each station. When a step ends, every group moves on.</div>
+        <div style={head}>Time</div>
+        <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",fontSize:"12.5px",color:"rgba(0,0,0,0.6)",fontWeight:600}}>
+          <label style={{display:"flex",alignItems:"center",gap:"6px"}} title="How long each group spends at a station">
+            <input type="number" min="0.5" max="60" step="0.5" value={minutes} onChange={e=>setMinutes(e.target.value)} onKeyDown={e=>e.stopPropagation()} aria-label="Minutes per station" style={num}/>minutes per station
+          </label>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap",marginTop:"7px",fontSize:"12.5px",color:"rgba(0,0,0,0.6)",fontWeight:600}}>
+          <label style={{display:"flex",alignItems:"center",gap:"6px"}} title="Time to walk to the next station, shown on the timer as a Move! step. 0 turns it off; up to 3 minutes (180 s).">
+            <input type="number" min="0" max="180" step="5" value={changeover} onChange={e=>setChangeover(e.target.value)} onKeyDown={e=>e.stopPropagation()} aria-label="Changeover seconds" style={num}/>seconds to move
+          </label>
+          <span style={{fontSize:"11px",color:"rgba(0,0,0,0.4)"}}>{chg>0?"a \"Move!\" step between stations (0–180 s)":"no Move! step"}</span>
+        </div>
+        <div style={head}>Direction</div>
+        <div style={{display:"flex",gap:"4px"}}>
+          {seg(direction==='forward',"Forwards for everyone","Every group goes 1 → 2 → 3 …",()=>setDirection('forward'))}
+          {seg(direction==='alternate',"Alternate directions","Every second group goes backwards: 3 → 2 → 1 …",()=>setDirection('alternate'))}
+        </div>
+        {direction==='alternate'&&stationCount%2===1&&groups.length>1&&<div style={{fontSize:"11px",color:"#7a5a12",marginTop:"5px",lineHeight:1.35}}>With an odd number of stations ({stationCount}), two groups will sometimes land on the same station. An even number works best.</div>}
+        <div style={head}>Rounds</div>
+        <div style={{display:"flex",gap:"4px"}}>
+          {seg(!loop,"One full lap","Each group visits every station once, then the timer finishes",()=>setLoop(false))}
+          {seg(loop,"Loop","Keep going round until you end the rotation",()=>setLoop(true))}
+        </div>
+        <div data-rotation-summary style={{fontSize:"12px",color:"rgba(0,0,0,0.55)",marginTop:"12px",lineHeight:1.45,padding:"7px 9px",borderRadius:"8px",background:"rgba(0,0,0,0.04)"}}>
+          {stationCount} stations × {fmtLen(Math.round(mins*60))}{chg>0?` + ${loop?stationCount:Math.max(0,stationCount-1)} moves of ${fmtLen(chg)}`:""} = <b>{loop?`${fmtLen(Math.round(total))} a lap`:fmtLen(Math.round(total))}</b>
+          {groups.length<stationCount&&<div style={{fontSize:"11px",color:"rgba(0,0,0,0.45)"}}>Fewer groups than stations: some stations stay empty each round.</div>}
+        </div>
+        <div style={{display:"flex",justifyContent:"flex-end",gap:"6px",marginTop:"16px",flexWrap:"wrap"}}>
+          <button className={cpc()} onClick={onClose} title="Don't start a rotation" style={{padding:"8px 14px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>Cancel</button>
+          <button className={cpc()} onClick={()=>go(false)} title="Make the timer but leave it paused: press Start on it when you're ready" style={{padding:"8px 14px",borderRadius:"9px",fontSize:"12.5px",fontWeight:600}}>Create paused</button>
+          <button className={cpc("primary")} onClick={()=>go(true)} title="Make the timer and start it now" style={{padding:"8px 16px",borderRadius:"9px",fontSize:"12.5px",fontWeight:700}}>▶ Start now</button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+/* The Stations popover in Manage Seating: this setup's stations in order (drag to reorder, rename), and
+   which groups take part. Start rotation opens the dialog above. */
+function StationsPopover({classId,students,stations,setupName,running,onReorder,onRename,onStart,btnS,menuHead}){
+  const[sources,setSources]=useState(null);   // [{id,label,groups:[{idx,name,studentIds}]}]
+  const[srcId,setSrcId]=useState(null);
+  const[picked,setPicked]=useState(null);     // Set of group positions taking part
+  const[dragIdx,setDragIdx]=useState(null);
+  const n=stations.length;
+  useEffect(()=>{
+    let alive=true;
+    Promise.all([load(`gp-${classId}`,null),load(`gg-${classId}`,[])]).then(([gp,gg])=>{
+      if(!alive)return;
+      const known=new Set((students||[]).map(s=>s.id));
+      /* same as the Groups panel: empty groups drop out, and colour/default name follow the position that is left */
+      const mk=(idLists,names)=>(idLists||[]).map((ids,i)=>({ids:(ids||[]).filter(id=>known.has(id)),name:(names||[])[i]||''})).filter(g=>g.ids.length>0).map((g,i)=>({idx:i,name:defaultGroupName(g.name,i),studentIds:g.ids}));
+      const list=[];
+      const cur=mk(gp?.resultGroupIds,gp?.groupNames);
+      if(cur.length)list.push({id:'current',label:'Last generated groups',groups:cur});
+      (Array.isArray(gg)?gg:[]).forEach(g=>{const gs=mk(g.groupIds,g.names);if(gs.length)list.push({id:g.id,label:`Saved: ${g.name}`,groups:gs});});
+      setSources(list);setSrcId(list[0]?.id||null);
+    });
+    return()=>{alive=false;};
+  },[classId]);
+  const src=sources?.find(s=>s.id===srcId)||null;
+  /* more groups than stations: start with the first few ticked, and let Tom choose */
+  useEffect(()=>{if(src)setPicked(new Set(src.groups.slice(0,Math.max(1,n)).map(g=>g.idx)));},[srcId,sources,n]);
+  const chosen=src&&picked?src.groups.filter(g=>picked.has(g.idx)):[];
+  const tooMany=chosen.length>n;
+  const canStart=!running&&n>=2&&chosen.length>=1&&!tooMany;
+  const nameOf=new Map((students||[]).map(s=>[s.id,s.name]));
+  const toggle=idx=>setPicked(p=>{const q=new Set(p);q.has(idx)?q.delete(idx):q.add(idx);return q;});
+  const drop=to=>{
+    if(dragIdx===null||dragIdx===to){setDragIdx(null);return;}
+    const ids=stations.map(s=>s.id);const[m]=ids.splice(dragIdx,1);ids.splice(to,0,m);
+    setDragIdx(null);onReorder(ids);
+  };
+  const field={padding:"4px 7px",borderRadius:"7px",fontSize:"12px",fontWeight:600,fontFamily:"'Source Sans 3',sans-serif",minWidth:0};
+  return(
+    <div style={{display:"flex",flexDirection:"column",gap:"8px"}}>
+      <div style={{fontSize:"11px",color:"rgba(0,0,0,0.5)",lineHeight:1.4,padding:"2px 2px 0"}}>Stations in <b style={{color:"#1a1a2e"}}>{setupName}</b>, in the order groups visit them.</div>
+      <div>
+        <div style={menuHead}>Stations{n?` (${n})`:""}</div>
+        {n===0&&<div data-stations-empty style={{fontSize:"11.5px",color:"rgba(0,0,0,0.5)",lineHeight:1.45,padding:"8px 9px",borderRadius:"8px",background:"rgba(0,0,0,0.04)"}}>No stations here yet. To make one, select a bench, table or item on the map, then press <b>★ Mark as station</b> in its selection bar. Give each a number and a name, then come back.</div>}
+        <div style={{display:"flex",flexDirection:"column",gap:"3px"}}>
+          {stations.map((st,i)=>(
+            <div key={st.id} data-station-row={st.id} draggable onDragStart={e=>{e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","cp-station");setDragIdx(i);}} onDragEnd={()=>setDragIdx(null)}
+              onDragOver={e=>{if(dragIdx!==null)e.preventDefault();}} onDrop={e=>{e.preventDefault();drop(i);}}
+              title="Drag to change the order groups visit the stations" style={{display:"flex",alignItems:"center",gap:"6px",padding:"4px 6px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.08)",background:dragIdx===i?"#f0f1f4":"#fff",opacity:dragIdx===i?0.5:1,cursor:"grab"}}>
+              <span aria-hidden="true" style={{color:"rgba(0,0,0,0.3)",fontSize:"12px",letterSpacing:"-2px"}}>⋮⋮</span>
+              <span style={{minWidth:"22px",height:"22px",boxSizing:"border-box",padding:"0 5px",borderRadius:"11px",background:"#ffd98a",border:"2px solid #2b2118",color:"#1a1208",fontSize:"12px",fontWeight:900,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{st.n}</span>
+              <input key={`${st.id}${st.name}`} defaultValue={st.name} maxLength={24} placeholder="Name, e.g. Circuits" title={`Rename station ${st.n} (shown on the map and the timer)`} aria-label={`Name of station ${st.n}`}
+                onBlur={e=>{if(e.target.value!==st.name)onRename(st,e.target.value.slice(0,24));}} onKeyDown={e=>{if(e.key==='Enter')e.target.blur();e.stopPropagation();}} onMouseDown={e=>e.stopPropagation()} draggable={false} style={{...field,flex:1}}/>
+              <span title={st.kind==='piece'?"A table or bench":"A room item"} style={{fontSize:"11px",color:"rgba(0,0,0,0.35)"}}>{st.kind==='piece'?"▭":"◆"}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <div style={menuHead}>Groups taking part</div>
+        {sources&&sources.length===0&&<div style={{fontSize:"11.5px",color:"rgba(0,0,0,0.5)",lineHeight:1.45,padding:"8px 9px",borderRadius:"8px",background:"rgba(0,0,0,0.04)"}}>No groups yet. Make some in Manage Groups (press Generate) and they will show up here. Saved groupings work too.</div>}
+        {src&&<>
+          <select value={srcId} onChange={e=>setSrcId(e.target.value)} title="Which groups to rotate: the last ones you generated, or a saved grouping" style={{...field,width:"100%",marginBottom:"5px"}}>
+            {sources.map(s=><option key={s.id} value={s.id}>{s.label}</option>)}
+          </select>
+          <div style={{display:"flex",flexDirection:"column",gap:"3px"}}>
+            {src.groups.map(g=>{const c=COLORS[g.idx%COLORS.length];const on=picked?.has(g.idx);return(
+              <label key={g.idx} data-group-pick={g.name} title={`${g.name}: ${g.studentIds.map(id=>nameOf.get(id)).join(", ")}`} style={{display:"flex",alignItems:"center",gap:"7px",padding:"4px 8px",borderRadius:"8px",background:on?c.bg:"#fff",border:`1.5px solid ${on?c.text:"rgba(0,0,0,0.08)"}`,cursor:"pointer",opacity:on?1:0.65}}>
+                <input type="checkbox" checked={!!on} onChange={()=>toggle(g.idx)} style={{margin:0}}/>
+                <span style={{width:"10px",height:"10px",borderRadius:"50%",background:c.text,flexShrink:0}}/>
+                <span style={{fontSize:"12px",fontWeight:800,color:c.text,whiteSpace:"nowrap"}}>{g.name}</span>
+                <span style={{fontSize:"10.5px",color:"rgba(0,0,0,0.5)",fontWeight:600,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1,minWidth:0}}>{g.studentIds.map(id=>(nameOf.get(id)||"").split(" ")[0]).join(", ")}</span>
+              </label>);})}
+          </div>
+          {tooMany&&<div data-groups-warning style={{fontSize:"11.5px",fontWeight:600,color:"#7a5a12",background:"#fdf3d6",border:"1.5px solid rgba(184,133,10,0.45)",borderRadius:"8px",padding:"6px 8px",marginTop:"5px",lineHeight:1.4}}>⚠ {chosen.length} groups but only {n} station{n!==1?"s":""}. Untick {chosen.length-n} group{chosen.length-n!==1?"s":""} to choose who takes part.</div>}
+          {!tooMany&&n>0&&chosen.length>0&&chosen.length<n&&<div style={{fontSize:"11px",color:"rgba(0,0,0,0.45)",marginTop:"5px",lineHeight:1.35}}>{chosen.length} group{chosen.length!==1?"s":""}, {n} stations: {n-chosen.length} station{n-chosen.length!==1?"s":""} sit{n-chosen.length===1?"s":""} empty each round, which is fine.</div>}
+        </>}
+      </div>
+      {running
+        ?<div data-rotation-running style={{fontSize:"11.5px",fontWeight:600,color:"#7a5a12",background:"#fdf3d6",border:"1.5px solid rgba(184,133,10,0.45)",borderRadius:"8px",padding:"6px 8px",lineHeight:1.4}}>A rotation is running (see the bar at the bottom). End it there to start a new one.</div>
+        :<>
+          {n===1&&<div style={{fontSize:"11px",color:"rgba(0,0,0,0.45)"}}>A rotation needs at least 2 stations.</div>}
+          <button className={`cpb cpb-primary${canStart?"":" is-off"}`} disabled={!canStart} onClick={()=>onStart(chosen.map(g=>({name:g.name,color:COLORS[g.idx%COLORS.length].text,studentIds:g.studentIds})))} title={canStart?"Choose the timing and start rotating the groups round the stations":"Needs 2 or more stations and some groups (no more groups than stations)"} style={{...btnS,width:"100%",fontWeight:700}}>🔄 Start rotation…</button>
+        </>}
+    </div>
+  );
+}
+
+function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist,rotation}){
   const[chairsMatch]=useChairsMatch(activeClass?.id);
   /* Class setups (Phase 5): the same active setup as Manage Seating (it lives in TeacherApp) */
   const setup=setups?setups.list.find(x=>x.id===setups.activeId)||null:null;
@@ -7845,6 +8224,8 @@ function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklis
   const notUsedHere=new Set(seats.filter(s=>s.used&&!s.unavailable&&!usableIds.has(s.id)).map(s=>s.id));
   const offPieceIds=unusablePieceIds(pieces,setup);
   const manySetups=(setups?.list.length||0)>1;
+  /* a station rotation (Phase 7) is drawn over its own setup only, and never touches a seat */
+  const rotHere=rotation&&rotation.setupId===(setup?.id||REGULAR_SETUP)?rotation:null;
 
   const RoomCanvas=({scale=1,interactive=true})=>{
     const chairMap=chairIndexMap(seats,groups);
@@ -7916,6 +8297,7 @@ function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklis
         );
       })}
       <StationBadges items={roomItems} pieces={pieces}/>
+      <StationOverlay rot={rotHere} items={roomItems} pieces={pieces} students={activeClass?.students}/>
      </div>
     </div>
     );
@@ -7955,6 +8337,8 @@ function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklis
           <SetupTabs setups={setups} onSwitch={id=>onChangeSetups?.({...setups,activeId:id})}/>
         </div>
       )}
+
+      <RotationNextLine rot={rotHere}/>
 
       {conflicts.length>0&&(
         <div style={{margin:"10px 14px 0",padding:"9px 10px",borderRadius:"9px",background:"#fdeeed",border:"1px solid rgba(220,60,60,0.18)",display:"flex",flexDirection:"column",gap:"4px",flexShrink:0}}>
@@ -8021,6 +8405,7 @@ function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklis
               <button className="cpb cpb-primary" onClick={randomise} title="Shuffle everyone into new seats, using the seat tags, keep-apart/together rules and Randomize options from Manage Seating" style={{display:"flex",alignItems:"center",gap:"5px",fontSize:"12.5px",fontWeight:700,padding:"7px 13px",borderRadius:"9px",border:"none",background:"#1a1a2e",color:"#fff",cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}>🎲 Randomise</button>
             </div>
           </div>
+          <RotationNextLine rot={rotHere}/>
           <div style={{flex:1,position:"relative",overflow:"hidden"}}>
             <div ref={displayScrollRef} style={{position:"absolute",inset:0,overflow:"auto",display:"flex",justifyContent:"safe center",alignItems:"safe center",...floorStyle()}}
             >
@@ -10149,6 +10534,52 @@ export default function TeacherApp(){
     saveSetups(activeClassId,n);
   },[activeClassId]);
 
+  /* ── Station rotation (Phase 7): rot-<class>, its link to a timer, and the moves ──
+     A rotation is an overlay on a setup. Moving the groups only changes `step` in rot-<class>; seat data is never written.
+     The linked timer's WORK segment ending moves everyone on (the Move! changeover that follows is the time to walk);
+     the last station of a one-lap rotation doesn't, since the timer is simply Done. */
+  const timerApiRef=useRef(null);                 // TimerPanel hands us addTimer through this
+  const[timerList,setTimerList]=useState(null);   // [{id,running,finished}] reported by TimerPanel (null until it has)
+  const[rotState,setRotState]=useState(null);     // {classId,data}
+  const[rotCard,setRotCard]=useState(null);       // {key,items}: the big "Rotate!" card
+  const rot=rotState?.classId===activeClassId?rotState.data:null;
+  const rotRef=useRef(null);rotRef.current=rot;
+  useEffect(()=>{
+    if(!activeClassId)return;
+    let cancelled=false;setRotCard(null);
+    load(`rot-${activeClassId}`,null).then(d=>{if(!cancelled)setRotState({classId:activeClassId,data:validRotation(d)});});
+    return()=>{cancelled=true;};
+  },[activeClassId]);
+  useEffect(()=>{if(!rotCard)return;const t=setTimeout(()=>setRotCard(null),4000);return()=>clearTimeout(t);},[rotCard]);
+  const commitRot=useCallback(next=>{
+    rotRef.current=next;
+    setRotState({classId:activeClassId,data:next});
+    if(next)save(`rot-${activeClassId}`,next);else window.storage.delete(`rot-${activeClassId}`).catch(()=>{});
+  },[activeClassId]);
+  /* Move every group on (or back). `announce` plays the chime and shows the Rotate! card. */
+  const stepRotation=useCallback((delta,announce)=>{
+    const r=rotRef.current;if(!r)return;
+    const step=Math.max(0,r.step+delta);if(step===r.step)return;
+    const next={...r,step};
+    commitRot(next);
+    if(announce){audio.chime();setRotCard({key:Date.now(),items:rotationItems(next,step)});}
+  },[commitRot]);
+  const onTimerSegmentEnd=useCallback((timerId,segIdx,task,info)=>{
+    const r=rotRef.current;
+    if(!r||r.timerId!==timerId||task===ROT_MOVE)return;
+    if(info?.finished&&!r.loop)return;
+    stepRotation(1,true);
+  },[stepRotation]);
+  const startRotation=useCallback(cfg=>{
+    const api=timerApiRef.current;if(!api||!activeClassId)return;
+    const labels=cfg.stations.map(x=>x.label);
+    const timerId=`rot${Date.now().toString(36)}`;
+    api.addTimer('Station rotation',buildRotationSegments(labels,cfg),cfg.loop?{infinite:true}:null,false,!!cfg.autoStart,{id:timerId,select:true});
+    commitRot({setupId:cfg.setupId,stationOrder:cfg.stations.map(x=>x.id),groups:cfg.groups,step:0,direction:cfg.direction,timerId,minutes:cfg.minutes,changeover:cfg.changeover,loop:!!cfg.loop,labels});
+  },[activeClassId,commitRot]);
+  const timerState=!rot||timerList===null?null:(t=>!t?'missing':t.finished?'done':'ok')(timerList.find(x=>x.id===rot.timerId));
+  const rotationStrip=rot?{timerId:rot.timerId,items:rotationItems(rot,rot.step)}:null;
+
   /* Load the active class's checklist (migrating its old flags the first time) */
   useEffect(()=>{
     if(!activeClassId)return;
@@ -10398,9 +10829,14 @@ export default function TeacherApp(){
 
       <div style={{display:"flex",flex:1,overflow:"hidden"}}>
         {/* Manage Seating / Manage Groups — full-width teacher views, hide other panels */}
+        {/* Timer panel: always mounted (hidden, not removed), so timers keep running while another tab or Manage Seating is open */}
+        <div className="cp-onboard" style={{display:openPanels.timer&&!manageSeatingOpen&&!manageGroupsOpen?"flex":"none",flexDirection:"column",...(isLastOpen("timer")?{flex:1,minWidth:PANEL_MIN.timer}:{width:colWidth("timer"),flexShrink:0}),overflow:"hidden auto"}}>
+          <TimerPanel onStatusChange={setTimerStatus} activeClass={activeClass} coldCallStudent={coldCallStudent} onColdCall={doColdCall} onDismissColdCall={dismissColdCall} timerStyle={timerStyle}
+            onSegmentEnd={onTimerSegmentEnd} onTimersChange={setTimerList} apiRef={timerApiRef} rotationStrip={rotationStrip}/>
+        </div>
         {manageSeatingOpen?(
           <div style={{flex:1,overflow:"hidden"}}>
-            <ManageSeatingPanel activeClass={activeClass} setups={setups} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist} onUpdateStudentTags={updateStudentTags}/>
+            <ManageSeatingPanel activeClass={activeClass} setups={setups} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist} onUpdateStudentTags={updateStudentTags} rotation={rot} onStartRotation={startRotation}/>
           </div>
         ):manageGroupsOpen?(
           <div style={{flex:1,overflow:"hidden"}}>
@@ -10408,13 +10844,9 @@ export default function TeacherApp(){
           </div>
         ):(
           <>
-            {/* Timer panel — always mounted so timer keeps running when hidden */}
-            <div className="cp-onboard" style={{display:openPanels.timer?"flex":"none",flexDirection:"column",...(isLastOpen("timer")?{flex:1,minWidth:PANEL_MIN.timer}:{width:colWidth("timer"),flexShrink:0}),overflow:"hidden auto"}}>
-              <TimerPanel onStatusChange={setTimerStatus} activeClass={activeClass} coldCallStudent={coldCallStudent} onColdCall={doColdCall} onDismissColdCall={dismissColdCall} timerStyle={timerStyle}/>
-            </div>
             {openPanels.timer&&!isLastOpen("timer")&&<ResizeHandle panelId="timer"/>}
 
-            {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} setups={setups} seatRev={setupsState?.rev} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist}/></div>)}
+            {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} setups={setups} seatRev={setupsState?.rev} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist} rotation={rot}/></div>)}
             {openPanels.seating&&!isLastOpen("seating")&&<ResizeHandle panelId="seating"/>}
 
             {openPanels.groups&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("groups")?{flex:1,minWidth:PANEL_MIN.groups}:{width:colWidth("groups"),flexShrink:0}),overflow:"hidden auto"}}><StudentGroupsPanel activeClass={activeClass} onGoToSeating={goToSeatingTab} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups}/></div>)}
@@ -10427,6 +10859,12 @@ export default function TeacherApp(){
           </>
         )}
       </div>
+
+      {/* Station rotation: Rotate / Back / End while one runs (Manage Seating and the class Seating view), and the big Rotate! card over everything */}
+      {rot&&(manageSeatingOpen||(!manageGroupsOpen&&openPanels.seating))&&(
+        <RotationBar rot={rot} setupName={setups?.list.find(x=>x.id===rot.setupId)?.name} timerState={timerState} onRotate={()=>stepRotation(1,true)} onBack={()=>stepRotation(-1,false)} onEnd={()=>commitRot(null)}/>
+      )}
+      {rotCard&&<RotateCard key={rotCard.key} items={rotCard.items} onClose={()=>setRotCard(null)}/>}
 
       {/* Manage class modal — rendered at root so it covers everything */}
       {editingClass&&(<ManageClassModal classToEdit={editingClass} onSave={handleSaveClass} onClose={()=>setEditingClass(null)}/>)}

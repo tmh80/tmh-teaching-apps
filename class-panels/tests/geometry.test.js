@@ -487,5 +487,63 @@ console.log('Seating groups into a setup (Phase 6)');
   }
 }
 
+/* ── Station rotation (Phase 7): the @rotation block, lifted out the same way ── */
+const ROT_START = SRC.indexOf('/* @rotation-begin'), ROT_END = SRC.indexOf('/* @rotation-end */');
+const R = ROT_START > 0 && ROT_END > ROT_START
+  ? new Function(SRC.slice(ROT_START, ROT_END) + '\nreturn {ROT_MOVE,stationFor,stationOccupancy,stationLabel,buildRotationSegments,orderStations,defaultGroupName,rotationAt,validRotation};')()
+  : null;
+console.log('Station rotation: who is where');
+ok(!!R, 'the rotation block is in teacher-app.jsx');
+if (R) {
+  const { stationFor, stationOccupancy, rotationAt } = R;
+  const lap = (g, n, dir) => Array.from({ length: n }, (_, s) => stationFor(g, s, n, dir));
+  // forwards: (g + step) mod n, wrapping round
+  ok(lap(0, 4, 'forward').join() === '0,1,2,3' && lap(2, 4, 'forward').join() === '2,3,0,1', 'forwards: group 0 visits 0,1,2,3 and group 2 starts at 2 and wraps (2,3,0,1)');
+  ok(stationFor(1, 4, 4, 'forward') === 1 && stationFor(3, 7, 4, 'forward') === 2, 'after a full lap (or more) everyone is back where they started: (g + step) mod n');
+  // alternate: odd groups go backwards, (g - step) mod n, and never go negative
+  ok(lap(0, 4, 'alternate').join() === '0,1,2,3', 'alternate: group 0 (even) still goes forwards');
+  ok(lap(1, 4, 'alternate').join() === '1,0,3,2' && lap(3, 4, 'alternate').join() === '3,2,1,0', 'alternate: groups 1 and 3 (every second group) go backwards and wrap below 0 (1,0,3,2)');
+  ok(lap(1, 4, 'forward').join() === '1,2,3,0', 'with "Forwards for everyone" group 1 goes forwards');
+  ok(stationFor(1, 5, 4, 'alternate') === 0 && stationFor(1, 9, 4, 'alternate') === 0, 'steps beyond one lap keep wrapping');
+  // with an even number of stations, groups going opposite ways never meet; with an odd number they sometimes do
+  const meet = (n, g) => Array.from({ length: n * 2 }, (_, s) => stationOccupancy(g, s, n, 'alternate').some(x => x.length > 1)).some(Boolean);
+  ok(!meet(4, 4) && !meet(6, 6) && !meet(6, 3), 'alternate with 4 or 6 stations: no two groups ever share a station');
+  ok(meet(3, 3), 'alternate with 3 stations: two groups do meet at one now and then (the dialog warns about it)');
+  const exactlyOne = (n, g, dir) => Array.from({ length: n }, (_, s) => stationOccupancy(g, s, n, dir)).every(o => o.flat().length === g && o.every(x => x.length <= 1));
+  ok(exactlyOne(4, 4, 'forward') && exactlyOne(5, 5, 'forward') && exactlyOne(6, 6, 'alternate'), 'every group is somewhere at every step, and (forwards, or alternate with an even number) never two to a station');
+  // more stations than groups: the extra stations just sit empty, and groups still all move on
+  ok(JSON.stringify(stationOccupancy(3, 0, 5, 'forward')) === '[[0],[1],[2],[],[]]' && JSON.stringify(stationOccupancy(3, 2, 5, 'forward')) === '[[],[],[0],[1],[2]]', '3 groups at 5 stations: two stations are empty, and the gap travels round (step 0, step 2)');
+  ok(JSON.stringify(stationOccupancy(2, 3, 6, 'alternate')) === '[[],[],[],[0],[1],[]]', '2 groups at 6 stations, alternate, step 3: group 0 at station 3, group 1 at (1 - 3) mod 6 = 4');
+  ok(stationFor(0, 1, 0, 'forward') === -1 && stationOccupancy(2, 0, 0, 'forward').length === 0, 'no stations: nothing to place, no crash');
+  const rot = { stationOrder: ['a', 'b', 'c', 'd'], groups: [{ name: 'X' }, { name: 'Y' }, { name: 'Z' }], direction: 'alternate', step: 1 };
+  ok(rotationAt(rot, 1).map(a => a.station).join() === '1,0,3' && rotationAt(rot, 2).map(a => a.station).join() === '2,3,0', 'rotationAt gives each group its station at a step (X forwards, Y backwards, Z forwards)');
+}
+console.log('Station rotation: the timer\'s segments');
+if (R) {
+  const { buildRotationSegments, orderStations, validRotation, stationLabel, ROT_MOVE } = R;
+  const labels = ['Station 1 · Circuits', 'Station 2 · Magnets', 'Station 3', 'Station 4 · Light'];
+  const withMove = buildRotationSegments(labels, { minutes: 5, changeover: 30 });
+  ok(withMove.length === 7 && withMove.map(s => s.task).join('|') === 'Station 1 · Circuits|Move!|Station 2 · Magnets|Move!|Station 3|Move!|Station 4 · Light', 'with a changeover: a work segment per station and a "Move!" between each, none after the last (7 segments)');
+  ok(withMove[0].minutes === 5 && withMove[0].seconds === 0 && withMove[1].minutes === 0 && withMove[1].seconds === 30 && withMove[1].task === ROT_MOVE, 'work segments are the minutes asked for; Move! is 30 s');
+  const none = buildRotationSegments(labels, { minutes: 3, changeover: 0 });
+  ok(none.length === 4 && none.every(s => s.task !== ROT_MOVE && s.minutes === 3), 'changeover 0: just the 4 work segments, no Move!');
+  const loop = buildRotationSegments(labels, { minutes: 2, changeover: 45, loop: true });
+  ok(loop.length === 8 && loop[7].task === ROT_MOVE && loop[7].seconds === 45, 'a looping rotation also ends with a Move! so the lap joins up');
+  ok(buildRotationSegments(labels, { minutes: 2, changeover: 0, loop: true }).length === 4, 'looping with no changeover has no Move! at all');
+  const odd = buildRotationSegments(['A', 'B'], { minutes: 2.5, changeover: 180 });
+  ok(odd[0].minutes === 2 && odd[0].seconds === 30 && odd[1].minutes === 3 && odd[1].seconds === 0, 'fractional minutes (2.5 = 2 min 30 s) and the longest changeover (3 min)');
+  ok(buildRotationSegments(['A'], { minutes: 5, changeover: 30 }).length === 1, 'one station: one segment, no Move!');
+  ok(buildRotationSegments([], { minutes: 5 }).length === 0, 'no stations: no segments');
+  // naming and ordering
+  ok(stationLabel({ n: 3, name: 'Heat' }) === 'Station 3 · Heat' && stationLabel({ n: 3, name: '' }) === 'Station 3', 'a station is "Station 3 · Heat", or just "Station 3" without a name');
+  const items = [{ id: 'i1', station: { n: 4, name: 'Light' } }, { id: 'i2' }], pieces = [{ id: 'p2', station: { n: 2, name: 'Magnets' } }, { id: 'p1', station: { n: 1 } }];
+  ok(orderStations(items, pieces).map(s => s.id).join() === 'p1,p2,i1', 'stations are listed by number when no order is saved (items and tables mixed)');
+  ok(orderStations(items, pieces, ['i1', 'p1']).map(s => s.id).join() === 'i1,p1,p2', 'a saved order wins; stations it does not know come last');
+  ok(orderStations(items, pieces, ['gone', 'p2', 'i1', 'p1']).map(s => s.id).join() === 'p2,i1,p1', 'a saved order that names a station that is gone just skips it');
+  ok(orderStations([], []).length === 0 && orderStations(null, null, null).length === 0, 'no stations: an empty list');
+  ok(validRotation(null) === null && validRotation({ stationOrder: [], groups: [{}], step: 0 }) === null && validRotation({ stationOrder: ['a'], groups: [], step: -1 }) === null, 'half-saved rotation data is ignored');
+  ok(validRotation({ stationOrder: ['a', 'b'], groups: [{ name: 'X' }], step: 2 }).direction === 'forward', 'and a whole one is accepted, with sensible defaults');
+}
+
 console.log(`\n${passes} passed, ${failures} failed.`);
 process.exit(failures ? 1 : 0);
