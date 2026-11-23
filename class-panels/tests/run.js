@@ -137,6 +137,9 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   ok(missing.length === 0, `all ${Object.keys(FIXTURE.data).length} fixture keys are still saved` + (missing.length ? ` (missing: ${missing.join(', ')})` : ''));
   ok(JSON.stringify(studentMap(store)) === JSON.stringify(studentMap(FIXTURE.data)), 'students are unchanged');
   ok(JSON.stringify(seatMap(store)) === JSON.stringify(seatMap(FIXTURE.data)), 'seat assignments and locks are unchanged');
+  const slKeys = Object.keys(FIXTURE.data).filter(k => k.startsWith('sl-'));
+  ok(slKeys.every(k => !('pieces' in JSON.parse(store[k])) && !('joins' in JSON.parse(store[k])) && JSON.parse(store[k]).seats.every(s => !s.pieceId)),
+    'old rooms are left as plain seats (no table pieces added on their own)');
   const sameRules = Object.keys(FIXTURE.data).filter(k => /^(sh|gg|gp|checklist)-|^ta-saved-layouts$|^saved-templates$/.test(k)).filter(k => store[k] !== FIXTURE.data[k]);
   ok(sameRules.length === 0, 'history, groups, checklists, saved layouts and timer templates are byte-for-byte unchanged' + (sameRules.length ? ` (changed: ${sameRules.join(', ')})` : ''));
 
@@ -183,6 +186,157 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   backups = await readBackups(page);
   ok(backups.length === 10, `only the newest 10 are kept (${backups.length})`);
   ok(backups[0].reason === 'launch' && backups[0].data['ta-classes'] === FIXTURE.data['ta-classes'], "the newest one is today's launch backup of the real data");
+
+  /* ── Table pieces (Phase 3): shapes that rotate, snap and join ── */
+  console.log('Table pieces');
+  const SL = async cls => JSON.parse((await readStore(page))[`sl-${cls}`]);
+  const openManage = async className => {
+    await page.getByText(className).first().click(); await page.waitForTimeout(300);
+    if (await page.locator('[title="Add a new desk or table to the room"]').count()) return; // already open (the menu item toggles it)
+    await page.locator(manageMenu).click();
+    await page.getByText('Manage Seating').click(); await page.waitForTimeout(800);
+  };
+  // waits past the editor's 400 ms save delay, so storage reads see the change
+  const addFromMenu = async title => {
+    await page.locator('[title="Add a new desk or table to the room"]').click(); await page.waitForTimeout(250);
+    await page.locator(`[title^="Add: ${title}"]`).first().click(); await page.waitForTimeout(650);
+  };
+  const hits = () => page.locator('polygon[title^="Drag to move this table"]');
+  const pieceSeatMap = sl => (sl.seats || []).filter(s => s.pieceId).map(s => `${s.pieceId}:${s.slot}=${s.studentId || ''}`).sort().join(',');
+  const deselect = async () => { await page.mouse.click(1205, 66); await page.waitForTimeout(200); }; // an empty corner of the floor (not the zoom control)
+
+  await openManage('Grade 7B Test');
+  await page.locator('[title="Add a new desk or table to the room"]').click(); await page.waitForTimeout(300);
+  ok(await page.locator('[title^="Add: Hexagon"]').count() === 1 && await page.locator('[title^="Add: Long table of 8"]').count() === 1 && await page.locator('[title^="Add: Horseshoe"]').count() === 1,
+    'the Add table menu offers Hexagon, Long table of 8 and Horseshoe');
+  ok(await page.locator('[title^="Add: Trapezoid"]').count() === 1 && await page.locator('[title="Add a table of 4 seats, grouped together"]').count() === 1,
+    'it shows each shape, and keeps the old simple seats');
+  await shot(page, '20-add-table-menu');
+  await page.locator('[title^="Add: Hexagon"]').click(); await page.waitForTimeout(700);
+  let sl7 = await SL('fx-7b');
+  let hexSeats = sl7.seats.filter(s => s.pieceId);
+  ok(sl7.pieces?.length === 2 && sl7.joins?.length === 1 && hexSeats.length === 6, `a hexagon is 2 joined trapezoids with 6 seats (${sl7.pieces?.length} pieces, ${sl7.joins?.length} join, ${hexSeats.length} seats)`);
+  ok(sl7.seats.length === 21 + 6 && sl7.seats.filter(s => !s.pieceId).length === 21, 'the 21 plain seats are still there');
+  ok(sl7.groups.filter(g => g.seatIds.some(id => hexSeats.some(s => s.id === id))).length === 1, 'the hexagon is one table group');
+  // clear the old desks away (rubber-band them, Delete) so Randomize has to use the new table:
+  // it fills seats in list order, so with spare seats the newest ones would stay empty
+  await page.locator('[title="Undo the last change"]').click(); await page.waitForTimeout(500);
+  const firstDesk = await page.locator('[title="Drag to move this desk"]').first().boundingBox(); // the desk at canvas 60,60
+  const org = [firstDesk.x - 60, firstDesk.y - 60];
+  await page.mouse.move(org[0] + 20, org[1] + 45); await page.mouse.down();
+  await page.mouse.move(org[0] + 500, org[1] + 400, { steps: 5 }); await page.mouse.move(org[0] + 1000, org[1] + 600, { steps: 5 }); await page.mouse.up();
+  await page.waitForTimeout(200);
+  await page.keyboard.press('Delete'); await page.waitForTimeout(700);
+  sl7 = await SL('fx-7b');
+  ok(sl7.seats.length === 0 && sl7.roomItems.length === 2, 'the old desks can be cleared away (the board and door stay)');
+  await addFromMenu('Hexagon');
+  sl7 = await SL('fx-7b');
+  hexSeats = sl7.seats.filter(s => s.pieceId);
+  await page.getByText('🎲 Randomize').click(); await page.waitForTimeout(700);
+  sl7 = await SL('fx-7b');
+  ok(hexSeats.length === 6 && sl7.seats.filter(s => s.pieceId && s.studentId).length === 6, 'Randomize fills the hexagon');
+  // pick the hexagon and turn it a quarter turn
+  await hits().first().scrollIntoViewIfNeeded();
+  await hits().first().click({ force: true }); await page.waitForTimeout(250);
+  ok(await page.locator('[title^="Drag to rotate this table"]').count() === 1, 'picking a table shows its rotate handle');
+  await shot(page, '21-hexagon-selected');
+  await page.locator('[title="Turn a quarter turn clockwise"]').click(); await page.waitForTimeout(700);
+  sl7 = await SL('fx-7b');
+  ok(sl7.pieces.map(p => p.rot).sort((a, b) => a - b).join(',') === '90,270', `⟳ 90° turns the whole hexagon (${sl7.pieces.map(p => p.rot).join(',')})`);
+  const beforeReload = pieceSeatMap(sl7), piecesBefore = JSON.stringify(sl7.pieces), joinsBefore = JSON.stringify(sl7.joins);
+  ok(sl7.seats.filter(s => s.pieceId && s.studentId).length > 0, 'students are sitting at the hexagon');
+  await page.reload(); await page.waitForTimeout(800);
+  sl7 = await SL('fx-7b');
+  ok(JSON.stringify(sl7.pieces) === piecesBefore && JSON.stringify(sl7.joins) === joinsBefore, 'after a reload, the pieces and joins are exactly as saved');
+  ok(pieceSeatMap(sl7) === beforeReload, 'after a reload, everyone is still in the same hexagon seat');
+  await openManage('Grade 7B Test');
+  ok(await hits().count() === 2, 'Manage Seating draws the two pieces again after the reload');
+  const hexName = (JSON.parse(FIXTURE.data['ta-classes'])[1].students.find(s => s.id === sl7.seats.find(x => x.pieceId && x.studentId).studentId) || {}).name;
+  ok(!!hexName && await page.getByText(hexName, { exact: true }).first().isVisible(), `and shows who sits there ("${hexName}")`);
+
+  // drag one trapezoid onto another: it snaps, shows a join line, and they become one table
+  await deselect();
+  await addFromMenu('Trapezoid');
+  await addFromMenu('Trapezoid');
+  await page.keyboard.press(']'); await page.keyboard.press(']');
+  for (let i = 0; i < 10; i++) await page.keyboard.press(']'); // 12 × 15° = 180°: upside down
+  await page.waitForTimeout(500);
+  sl7 = await SL('fx-7b');
+  const [tA, tB] = sl7.pieces.slice(-2);
+  ok(tA.shape === 'trap' && tB.shape === 'trap' && tB.rot === 180, `[ and ] turn the picked table in 15° steps (${tB.rot}°)`);
+  await hits().nth(3).scrollIntoViewIfNeeded();
+  const bA = await hits().nth(2).boundingBox(), bB = await hits().nth(3).boundingBox();
+  const from = [bB.x + bB.width / 2, bB.y + bB.height / 2], to = [bA.x + bA.width / 2 + 8, bA.y + bA.height / 2 + 78 + 9];
+  await page.mouse.move(...from); await page.mouse.down();
+  for (let k = 1; k <= 12; k++) { await page.mouse.move(from[0] + (to[0] - from[0]) * k / 12, from[1] + (to[1] - from[1]) * k / 12); await page.waitForTimeout(15); }
+  await page.waitForTimeout(250);
+  ok(await page.locator('line').evaluateAll(ls => ls.some(l => (l.getAttribute('style') || '').includes('--cp-join'))), 'while dragging close, a join line shows where it will snap');
+  await shot(page, '22-snap-preview');
+  await page.mouse.up(); await page.waitForTimeout(700);
+  sl7 = await SL('fx-7b');
+  const nB = sl7.pieces.find(p => p.id === tB.id), nA = sl7.pieces.find(p => p.id === tA.id);
+  ok(sl7.joins.length === 2 && sl7.joins.some(j => [j.a, j.b].sort().join() === [tA.id, tB.id].sort().join()), 'letting go joins them');
+  ok(Math.abs(nB.x - nA.x) < 0.05 && Math.abs(nB.y - nA.y - 77.94) < 0.05, `the second sits exactly under the first, long base to long base (${(nB.x - nA.x).toFixed(2)}, ${(nB.y - nA.y).toFixed(2)})`);
+  ok(sl7.seats.filter(s => s.pieceId === tA.id || s.pieceId === tB.id).length === 6, 'and together they seat 6 (a hexagon)');
+  await deselect();
+  await shot(page, '23-two-hexagons');
+
+  // the class Seating view draws the same tables, and its Randomise keeps them
+  await page.locator(TAB.seating).click(); await page.waitForTimeout(800);
+  ok(await page.getByText(hexName, { exact: true }).first().isVisible(), 'the class Seating view shows students at the tables');
+  await shot(page, '24-class-seating-view');
+  const piecesNow = JSON.stringify(sl7.pieces), joinsNow = JSON.stringify(sl7.joins);
+  await page.locator('[title^="Shuffle everyone into new seats"]:visible').first().click(); await page.waitForTimeout(800);
+  sl7 = await SL('fx-7b');
+  ok(JSON.stringify(sl7.pieces) === piecesNow && JSON.stringify(sl7.joins) === joinsNow, 'Randomise in the class Seating view keeps the pieces and joins');
+  ok(sl7.seats.filter(s => s.pieceId).length === 12 && sl7.seats.filter(s => s.studentId).length === 12, 'and fills all 12 table seats');
+
+  // Convert to table, then Undo
+  await openManage('Grade 6A Test');
+  const sl6Before = await SL('fx-6a');
+  await page.locator('[title="Select or drag the whole group"]').first().click(); await page.waitForTimeout(250);
+  await page.locator('[title^="Swap these desks for a table shape"]').click(); await page.waitForTimeout(250);
+  await shot(page, '25-convert-menu');
+  await page.locator('[title^="Make this a long table with 4 seats"]').click(); await page.waitForTimeout(700);
+  let sl6 = await SL('fx-6a');
+  const g1 = ['a1', 'a2', 'a3', 'a4'];
+  const longSeats = sl6.seats.filter(s => s.pieceId);
+  const inReading = [...longSeats].sort((a, b) => (a.y - b.y) || (a.x - b.x)).map(s => s.studentId);
+  ok(sl6.pieces?.length === 1 && sl6.pieces[0].shape === 'long4' && longSeats.length === 4, 'Convert to table swaps group 1 for a long table of 4');
+  ok(JSON.stringify(inReading) === JSON.stringify(g1), `everyone moves across in the same reading order (${inReading.join(',')})`);
+  ok(longSeats.find(s => s.studentId === 'a1')?.locked === true && longSeats.find(s => s.studentId === 'a1')?.tags.includes('LS'), "Ava's lock and the LS seat tag come along");
+  ok(sl6.groups.find(g => g.seatIds.includes(longSeats[0].id))?.label === '1', 'the new table keeps the group name "1"');
+  ok(sl6.seats.length === 24 && !sl6.seats.some(s => ['fx-6a-s1', 'fx-6a-s2', 'fx-6a-s3', 'fx-6a-s4'].includes(s.id)), 'the 4 old seats are replaced, the other 20 untouched');
+  await shot(page, '26-converted');
+  await page.locator('[title="Undo the last change"]').click(); await page.waitForTimeout(500);
+  sl6 = await SL('fx-6a');
+  ok(!('pieces' in sl6) && JSON.stringify(sl6.seats) === JSON.stringify(sl6Before.seats) && JSON.stringify(sl6.groups) === JSON.stringify(sl6Before.groups), 'one Undo puts the old desks and seating back exactly');
+
+  // a quick tour of the other ready-made tables, for the screenshots
+  await openManage('Grade 7B Test');
+  await deselect();
+  await addFromMenu('Long table of 8');
+  await addFromMenu('Horseshoe');
+  sl7 = await SL('fx-7b');
+  ok(sl7.pieces.length === 9 && sl7.seats.filter(s => s.pieceId).length === 12 + 8 + 9, `a long table of 8 and a horseshoe of 9 add ${8 + 9} seats`);
+  await addFromMenu('Trapezoid');
+  for (let i = 0; i < 2; i++) await page.keyboard.press(']');
+  await addFromMenu('Trapezoid');
+  await page.keyboard.press('[');
+  await deselect();
+  for (let i = 0; i < 3; i++) await page.locator('[title="Zoom out"]:visible').first().click();
+  await page.waitForTimeout(300);
+  await shot(page, '27-room-of-tables');
+  await page.locator('[title="Reset zoom"]:visible').first().click();
+
+  // blackboard theme
+  await page.evaluate(async () => { await window.storage.set('ta-theme', JSON.stringify('blackboard')); });
+  await page.reload(); await page.waitForTimeout(800);
+  await page.getByText('Grade 7B Test').first().click(); await page.waitForTimeout(300);
+  await page.locator(TAB.seating).click(); await page.waitForTimeout(800);
+  await shot(page, '28-blackboard-seating');
+  await openManage('Grade 7B Test');
+  await shot(page, '29-blackboard-manage');
 
   console.log('Console');
   ok(problems.length === 0, 'no console errors or page errors' + (problems.length ? '\n    ' + problems.join('\n    ') : ''));

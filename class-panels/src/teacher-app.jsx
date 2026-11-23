@@ -3420,10 +3420,13 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const separatePiece=pid=>{
     const cl=clusterOfPiece(pid);if(cl.length<2)return;
     const me=pieces.find(p=>p.id===pid);
-    const rc=piecesCentre(pieces.filter(p=>cl.includes(p.id)&&p.id!==pid));
+    // straight away from the middle of the rest (pieces' own centres: a turned shape's bounding box is lopsided)
+    const rest=pieces.filter(p=>cl.includes(p.id)&&p.id!==pid);
+    const rc=[rest.reduce((a,p)=>a+p.x,0)/rest.length,rest.reduce((a,p)=>a+p.y,0)/rest.length];
     let v=[me.x-rc[0],me.y-rc[1]];const L=Math.hypot(v[0],v[1]);v=L?[v[0]/L,v[1]/L]:[0,1];
     const nj=joins.filter(j=>j.a!==pid&&j.b!==pid);
-    const next=keepOnCanvas(transformPieces(pieces,[pid],{dx:Math.round(v[0]*32),dy:Math.round(v[1]*32)}),[pid],nj);
+    // far enough apart that the two newly freed chairs don't bump into each other
+    const next=keepOnCanvas(transformPieces(pieces,[pid],{dx:Math.round(v[0]*64),dy:Math.round(v[1]*64)}),[pid],nj);
     const r=commitPieces(next,nj);
     selectPieces([pid],pid,r.seats);
   };
@@ -3476,8 +3479,12 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const idSet=new Set(ids);
     const old=readingOrder(ids.map(id=>seats.find(s=>s.id===id)).filter(Boolean),s=>[s.x,s.y]);
     const oldGroup=groups.find(g=>g.seatIds.some(id=>idSet.has(id))&&g.seatIds.every(id=>idSet.has(id)));
-    const set=placePieceSet(buildPieceSet(opt.kind,sUid,opt),Math.max(8,Math.min(...old.map(s=>s.x))),Math.max(8,Math.min(...old.map(s=>s.y))));
+    // centred where the old desks were
+    const built=buildPieceSet(opt.kind,sUid,opt),bb=piecesBounds(built.pieces,slotsForLayout(built.pieces,built.joins));
+    const cx=(Math.min(...old.map(s=>s.x))+Math.max(...old.map(s=>s.x))+SW)/2,cy=(Math.min(...old.map(s=>s.y))+Math.max(...old.map(s=>s.y))+SH)/2;
+    const set=placePieceSet(built,Math.max(8,Math.round(cx-bb.w/2)),Math.max(8,Math.round(cy-bb.h/2)));
     const newIds=new Set(set.pieces.map(p=>p.id));
+    const oldIdx=oldGroup?groups.indexOf(oldGroup):-1;
     const baseSeats=seats.filter(s=>!idSet.has(s.id));
     const baseGroups=groups.filter(g=>g!==oldGroup).map(g=>({...g,seatIds:g.seatIds.filter(id=>!idSet.has(id))}));
     const r=commitPieces([...pieces,...set.pieces],[...joins,...set.joins],{seats:baseSeats,groups:baseGroups,after:(rs,rg)=>{
@@ -3485,9 +3492,14 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
       const carry={};
       fresh.forEach((s,i)=>{const o=old[i];if(o)carry[s.id]={studentId:o.studentId||null,locked:!!(o.locked&&o.studentId),tags:o.tags||[],tagRule:o.tagRule||'OR',used:o.used!==false,...(o.unavailable?{unavailable:true}:{})};});
       const seats2=rs.map(s=>carry[s.id]?{...s,...carry[s.id]}:s);
-      // the new table keeps the old group's name
+      // the new table keeps the old group's name and place in the list (so no chair colours shift)
       const gid=seats2.find(s=>newIds.has(s.pieceId)&&s.groupId)?.groupId;
-      const groups2=oldGroup&&gid?rg.map(g=>g.id===gid?{...g,label:oldGroup.label}:g):rg;
+      let groups2=rg;
+      if(oldGroup&&gid){
+        const ng={...rg.find(g=>g.id===gid),label:oldGroup.label};
+        groups2=rg.filter(g=>g.id!==gid);
+        groups2.splice(Math.min(oldIdx,groups2.length),0,ng);
+      }
       return repairSeatGroups(seats2,groups2);
     }});
     selectPieces(clusterOfPiece(set.pieces[0].id,r.pieces,r.joins),set.pieces[0].id,r.seats);
@@ -4591,6 +4603,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 </svg>
                 {/* A small paper tab with the table's group name, above each table of 2+ seats */}
                 {clusters.map(ids=>{
+                  if(pieceDrag&&ids.some(id=>pieceDrag.ids.includes(id)))return null; // tucked away while it's moving
                   const seatId=seats.find(s=>ids.includes(s.pieceId)&&groupOfSeat[s.id])?.id;
                   if(!seatId)return null;
                   const{g,gi}=groupOfSeat[seatId];
@@ -4696,7 +4709,8 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 return(
                   <div key={s.id} onClick={e=>{e.stopPropagation();handleSeatClick(e,s.id);}} onMouseDown={e=>e.stopPropagation()}
                     style={{position:"absolute",left:t.x-t.w/2,top:t.y-t.h/2,width:t.w,height:t.h,userSelect:"none",zIndex:isSel?6:2}}>
-                    {isSel&&<div style={{position:"absolute",inset:-4,borderRadius:8,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",pointerEvents:"none"}}/>}
+                    {/* ring only for a seat picked on its own — a picked table already lights up its outline */}
+                    {isSel&&!activeSelPieces.length&&<div style={{position:"absolute",inset:-4,borderRadius:8,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",pointerEvents:"none"}}/>}
                     {st?(
                       <>
                         <NameTag name={st.name} tilt={tagTilt(s.id)} w={t.w} h={t.h} fontSize={t.font} pad={15} warn={mismatch} locked={s.locked}
