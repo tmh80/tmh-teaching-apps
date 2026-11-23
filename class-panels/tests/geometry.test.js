@@ -54,12 +54,12 @@ console.log('Shapes and their default seats');
   ok(onSlots([both], []).length === 8, 'bench with the back slots switched on seats 8');
   const off = { ...newPiece('long4', u), seatsOff: [0] };
   ok(onSlots([off], []).length === 3, 'seatsOff switches a slot off');
-  // chairs sit outside the edge, facing the table
+  // chairs are tucked under the table edge (centre just inside, back sticking out), facing the table
   const w = pieceToWorld(newPiece('long4', u));
   const sl = slotsForLayout([newPiece('long4', u)], []);
-  ok(sl.filter(s => s.state === 'on').every(s => !G.pgInPoly([s.chair.x, s.chair.y], w.poly)), 'every chair is outside the table outline');
+  ok(sl.filter(s => s.state === 'on').every(s => G.pgInPoly([s.chair.x, s.chair.y], w.poly) && !G.pgInPoly([s.p[0] + s.n[0] * 4, s.p[1] + s.n[1] * 4], w.poly)), 'every chair is tucked under the edge: its centre is under the table, its back sticks out');
   const bottom = sl.find(s => s.slot === 2);
-  ok(near(bottom.chair.facing, 0) && bottom.chair.y > 48, 'a bottom-edge chair sits below and faces up');
+  ok(near(bottom.chair.facing, 0) && bottom.chair.y > 42 && bottom.chair.y < 48, 'a bottom-edge chair sits under the bottom edge and faces up');
 }
 
 console.log('Two trapezoids, long base to long base');
@@ -191,6 +191,29 @@ console.log('Convert options and reading order');
   ok(convertOptions(20).every(o => o.seats >= 20), 'a big group gets something big enough');
   const order = readingOrder([[200, 10], [10, 12], [10, 80], [200, 78]], p => p).map(p => p.join(','));
   ok(order.join(' ') === '10,12 200,10 10,80 200,78', 'reading order is row by row, left to right');
+}
+
+console.log('Chairs under plain seat groups, standing spots at benches');
+{
+  const { legacyChairs, pgStanding } = G;
+  const box = (x, y, id) => ({ id, x, y });
+  const rectOf = its => { const xs = its.map(i => i.x), ys = its.map(i => i.y); const x0 = Math.min(...xs), y0 = Math.min(...ys); return { x: x0 - 8, y: y0 - 8, w: Math.max(...xs) - x0 + 114 + 16, h: Math.max(...ys) - y0 + 52 + 16 }; };
+  const sides = its => legacyChairs(its, rectOf(its)).map(c => c.side).join('');
+  const sq = [box(100, 100, 'a'), box(214, 100, 'b'), box(100, 152, 'c'), box(214, 152, 'd')];
+  ok(sides(sq) === 'TTBB', `2x2: top row above, bottom row below (${sides(sq)})`);
+  ok(sides([box(0, 0, 'a'), box(114, 0, 'b'), box(228, 0, 'c')]) === 'BBB', 'a single row puts chairs below');
+  ok(sides([box(0, 0, 'a'), box(0, 52, 'b'), box(0, 104, 'c')]) === 'LLL', 'a single column puts chairs to the left');
+  ok(sides([box(0, 0, 'a'), box(114, 0, 'b'), box(0, 52, 'c'), box(114, 52, 'd'), box(0, 104, 'e'), box(114, 104, 'f')]) === 'LRLRLR', 'two columns of 3 rows: the outer side');
+  ok(sides([box(0, 0, 'a')]) === 'B', 'a lone seat gets its chair below');
+  const big = []; for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) big.push(box(c * 114, r * 52, `${r}${c}`));
+  ok(sides(big) === 'TTTLRBBB' && legacyChairs(big, rectOf(big)).length === 8, 'a 3x3 block: edges get chairs, the middle seat is tucked fully under (none drawn)');
+  const cs = legacyChairs(sq, rectOf(sq)), top = cs.find(c => c.id === 'a'), bot = cs.find(c => c.id === 'c');
+  ok(near(top.y, 100 - 8 + 1) && top.facing === 180 && near(bot.y, 152 + 52 + 8 - 1) && bot.facing === 0, 'chairs are centred just inside the table edge, facing the table');
+  ok(pgStanding({ roles: ['workstation'] }) && !pgStanding({ roles: ['desk', 'workstation'] }) && !pgStanding({ roles: ['desk'] }), 'only roles exactly [workstation] means standing spots');
+  const b = newPiece('bench', mkUid()), bs = slotsForLayout([b], []).filter(s => s.state === 'on');
+  ok(bs.length === 4 && bs.every(s => s.standing && dist([s.chair.x, s.chair.y], s.p) > 8), 'a lab bench has 4 standing spots just outside its edge');
+  const bd = slotsForLayout([{ ...b, roles: ['desk'] }], []).filter(s => s.state === 'on');
+  ok(bd.length === 4 && bd.every(s => !s.standing), 'switched to Table, the same bench has chairs (and the same 4 slots)');
 }
 
 console.log(`\n${passes} passed, ${failures} failed.`);
