@@ -125,6 +125,11 @@ The units are canvas pixels on the existing 8 px grid. A seat slot draws as a **
 - **Name tags:** cream paper `#fffaf0` with an ink border and a slight tilt (±1.5°, fixed per seat so it doesn't jitter).
 - **Floor:** pale with a faint tile grid, and walls as thick ink lines.
 - **Board colour:** the existing whiteboard and blackboard themes still work. In blackboard mode, the ink turns chalk-white and the fills turn muted.
+- **Table colours (Phase 3c, built):** a table can be tinted instead of wood, from a palette of keys (`mint sky cyan sunny coral lilac red blue green gold pink`; no key = Wood), drawn under the hatching and ink outline. Where `color` lives:
+  - `groups[].color` for any cluster of seats or joined pieces (one cluster = one group, so one colour);
+  - `pieces[].color` for a lone one-seat piece that has no group;
+  - `seats[].color` for a lone legacy desk.
+  Joining keeps the larger group's colour; a piece that splits off starts as Wood (a new group made from coloured lone pieces or desks takes the first one's colour). The theme maps keys through `--cp-table-<key>` and a deeper `--cp-tchair-<key>` (in `CP_THEME_CSS`). "Match chairs to table colour" is per class, key `cp-chairmatch-<classId>` (true/false), in the Randomize options. `groupColorKey(i)` / `GROUP_COLOR_KEYS` map the Groups panel's colour order (blue, green, gold, lilac, red, cyan) to palette keys, for Phase 6.
 - **Room-item icons** are drawn in the same style as the icon: books, globe, sink, tap, etc.
 - Everything is inline SVG with **no images or web fonts added**, so the app still makes no internet requests.
 - Use it in **both** the Manage Seating canvas and the class-facing Seating view, and in Groups where seats are drawn.
