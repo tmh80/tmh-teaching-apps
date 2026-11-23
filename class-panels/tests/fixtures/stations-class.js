@@ -3,7 +3,7 @@
  * 8 students; a room with two long tables and a lab bench, all flagged as stations, plus a computer
  * item flagged as the fourth: 4 stations (1 Circuits, 2 Magnets, 3 Heat, 4 Light), set up in that
  * order. Four generated groups of two (gp-fx-9s; the 2nd and 4th have names, the others show as
- * "Group 1" and "Group 3"), and one saved grouping of three (gg-fx-9s) for "pick another source".
+ * "Group 1" and "Group 3"), and two saved groupings (gg-fx-9s): "Lab trios" (3 groups, fewer than stations) and "Five teams" (5 groups, more).
  * The long tables' seats hold the students, so the tests can prove no seat ever changes.
  *
  * build(G) takes the geometry block lifted out of teacher-app.jsx (as tests/geometry.test.js does),
@@ -40,7 +40,10 @@ module.exports.build = G => {
     groupNames: ['', 'Falcons', '', 'Owls'],
     resultGroupIds: [ids.slice(0, 2), ids.slice(2, 4), ids.slice(4, 6), ids.slice(6, 8)], ungroupedIds: [],
   };
-  const gg = [{ id: 'fx-9s-gg1', name: 'Lab trios', groupIds: [ids.slice(0, 3), ids.slice(3, 6), ids.slice(6, 8)], names: ['Sparks', '', 'Volts'], createdAt: 1794474000000 }];
+  const gg = [
+    { id: 'fx-9s-gg1', name: 'Lab trios', groupIds: [ids.slice(0, 3), ids.slice(3, 6), ids.slice(6, 8)], names: ['Sparks', '', 'Volts'], createdAt: 1794474000000 },
+    { id: 'fx-9s-gg2', name: 'Five teams', groupIds: [['s1'], ['s2'], ['s3'], ['s4', 's5'], ['s6', 's7', 's8']], names: ['', '', '', '', ''], createdAt: 1794474100000 },
+  ];
   return {
     classObj: { id: 'fx-9s', name: 'Grade 9S Test', students },
     sl, gp, gg, stationIds: [pieces[0].id, pieces[1].id, pieces[2].id, 'fx-9s-pc'], students,

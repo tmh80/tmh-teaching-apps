@@ -1139,6 +1139,273 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   ok((await store6())['sl-fx-8c'] === regular0, 'Regular is unchanged in the blackboard run too');
   await ctx6.close();
 
+  {
+  /* ── Station rotation (Phase 7): stations list, start rotation, the linked timer, automatic and manual moves,
+     the overlay, the Rotate! card, the projector strip, reload, and that no seat is ever written.
+     Its own browser profile: the usual fixture plus class 9S (tests/fixtures/stations-class.js) with 4 stations and 4 groups.
+     A localStorage key __cpTickMs (read before the app starts) makes the timer's "second" 40 ms for the automatic-move part. */
+  console.log('Station rotation: stations list');
+  const c9 = require('./fixtures/stations-class.js').build(G5);
+  const seed7 = {
+    ...FIXTURE.data,
+    'ta-classes': JSON.stringify([...JSON.parse(FIXTURE.data['ta-classes']), c9.classObj]),
+    'ta-active-class': JSON.stringify('fx-9s'),
+    'sl-fx-9s': JSON.stringify(c9.sl), 'gp-fx-9s': JSON.stringify(c9.gp), 'gg-fx-9s': JSON.stringify(c9.gg),
+  };
+  const ctx7 = await browser.newContext({ viewport: { width: 1400, height: 900 }, deviceScaleFactor: 1 });
+  await ctx7.addInitScript(fixture => {
+    try {
+      const t = Number(localStorage.getItem('__cpTickMs')); if (t) window.__cpTickMs = t;
+      if (localStorage.getItem('classboard-storage') === null) localStorage.setItem('classboard-storage', JSON.stringify(fixture));
+    } catch (e) {}
+  }, seed7);
+  const p7 = await ctx7.newPage();
+  p7.on('console', m => { if (m.type() === 'error') problems.push('console (stations): ' + m.text()); });
+  p7.on('pageerror', e => problems.push('pageerror (stations): ' + e.message));
+  p7.on('dialog', d => d.dismiss());
+  const w7 = ms => p7.waitForTimeout(ms);
+  const S7 = async k => { const v = (await readStore(p7))[k]; return v === undefined ? undefined : JSON.parse(v); };
+  const shot7 = name => p7.screenshot({ path: path.join(SHOT_DIR, name + '.png') });
+  const until7 = async (fn, ms = 9000) => { const t0 = Date.now(); while (Date.now() - t0 < ms) { if (await fn()) return true; await w7(40); } return false; };
+  const manage7 = async () => {
+    if (await p7.locator('[title="Add a new desk or table to the room"]').count()) return;
+    await p7.locator(manageMenu).click(); await p7.getByText('Manage Seating').click(); await w7(900);
+  };
+  const seatsOf7 = async () => seatMap(await readStore(p7));
+  /* the top tabs toggle once you are out of Manage Seating, so look before clicking */
+  const timerOnly7 = async () => {
+    if (!(await p7.locator('.cp-onboard').first().isVisible())) await p7.locator(TAB.timer).click();
+    await w7(300);
+    if (await p7.locator('[title^="Full screen"]').isVisible().catch(() => false)) { await p7.locator(TAB.seating).click(); await w7(300); }
+  };
+  const seatTab7 = async () => {
+    if (!(await p7.locator('[title^="Full screen"]').isVisible().catch(() => false))) await p7.locator(TAB.seating).click();
+    await w7(900);
+  };
+  const barBtn = name => p7.locator('[data-rotation-bar]').getByRole('button', { name });
+  const chipAt = id => p7.locator(`[data-station-groups="${id}"]`);
+  const [S1, S2, S3, SPC] = c9.stationIds;
+  await p7.goto(URL); await w7(1300);
+  await manage7();
+  const popBtn = p7.getByText('🔄 Stations');
+  ok(await popBtn.count() === 1 && await p7.locator('[data-station-row]').count() === 0, 'Manage Seating has a "🔄 Stations (4)" section, collapsed until opened');
+  ok((await popBtn.textContent()).includes('(4)'), 'its button counts the 4 stations in this setup');
+
+  // a class with no stations explains how to make one
+  await p7.getByText('Grade 6A Test').first().click(); await w7(900);
+  await p7.getByText('🔄 Stations').click(); await w7(300);
+  ok(await p7.locator('[data-stations-empty]').isVisible() && (await p7.locator('[data-stations-empty]').textContent()).includes('★ Mark as station'), 'with no stations the popover says to select a bench or item, then ★ Mark as station');
+  await p7.keyboard.press('Escape'); await p7.mouse.click(700, 800); await w7(200);
+  await p7.getByText('Grade 9S Test').first().click(); await w7(900);
+
+  await p7.getByText('🔄 Stations').click(); await w7(400);
+  const rowIds = () => p7.locator('[data-station-row]').evaluateAll(els => els.map(e => e.getAttribute('data-station-row')));
+  const rowNames = () => p7.locator('[data-station-row] input').evaluateAll(els => els.map(e => e.value));
+  ok((await rowIds()).join() === [S1, S2, S3, SPC].join() && (await rowNames()).join() === 'Circuits,Magnets,Heat,Light', 'it lists the 4 stations in order: 1 Circuits, 2 Magnets, 3 Heat, 4 Light (tables and an item together)');
+  await shot7('70-stations-popover-whiteboard');
+  // rename inline (and put it back); the station's name is saved on the table itself
+  await p7.locator('[data-station-row] input').nth(2).fill('Heat lab'); await p7.keyboard.press('Enter'); await w7(700);
+  ok((await S7('sl-fx-9s')).pieces.find(p => p.id === S3).station.name === 'Heat lab', 'an inline rename is saved on the station (Heat → Heat lab)');
+  await p7.locator('[data-station-row] input').nth(2).fill('Heat'); await p7.keyboard.press('Enter'); await w7(700);
+  ok((await S7('sl-fx-9s')).pieces.find(p => p.id === S3).station.name === 'Heat', 'and renamed back');
+  // drag to reorder: Light (4th) to the top
+  await p7.locator('[data-station-row]').nth(3).dragTo(p7.locator('[data-station-row]').nth(0)); await w7(600);
+  ok((await rowIds()).join() === [SPC, S1, S2, S3].join(), 'dragging "Light" to the top reorders the list');
+  ok((await S7('setups-fx-9s')).list.find(s => s.id === 'regular').stations.order.join() === [SPC, S1, S2, S3].join(), 'the order is saved on the setup (setups-<class>)');
+  await p7.keyboard.press('Escape'); await p7.mouse.click(700, 820); await w7(200);
+  await p7.reload(); await w7(1300); await manage7();
+  await p7.getByText('🔄 Stations').click(); await w7(400);
+  ok((await rowIds()).join() === [SPC, S1, S2, S3].join(), 'after a reload the new order is still there');
+  await p7.locator('[data-station-row]').nth(0).dragTo(p7.locator('[data-station-row]').nth(3)); await w7(600);
+  ok((await rowIds()).join() === [S1, S2, S3, SPC].join(), 'and dragging it back restores 1, 2, 3, 4');
+
+  console.log('Station rotation: groups taking part');
+  const pickNames = () => p7.locator('[data-group-pick]').evaluateAll(els => els.map(e => e.getAttribute('data-group-pick')));
+  ok((await pickNames()).join() === 'Group 1,Falcons,Group 3,Owls', 'groups taking part: the last generated groups with their names (Group 1, Falcons, Group 3, Owls)');
+  const lastGen = await p7.locator('[data-group-pick]').first().textContent();
+  ok(lastGen.includes('Ada') && lastGen.includes('Ben'), 'each shows its members');
+  await p7.locator('.cp-pop select').selectOption({ label: 'Saved: Lab trios' }); await w7(300);
+  ok((await pickNames()).join() === 'Sparks,Group 2,Volts' && (await p7.getByText(/1 station sits empty each round/).count()) === 1, 'a saved grouping can be used instead; 3 groups at 4 stations says one station sits empty, which is fine');
+  await p7.locator('.cp-pop select').selectOption({ label: 'Saved: Five teams' }); await w7(300);
+  ok((await pickNames()).length === 5 && await p7.locator('[data-groups-warning]').count() === 0 && await p7.locator('[data-group-pick] input:checked').count() === 4, '5 groups at 4 stations: the first 4 are ticked to begin with');
+  await p7.locator('[data-group-pick] input').nth(4).check(); await w7(250);
+  const startBtn = p7.getByRole('button', { name: /Start rotation…/ });
+  ok(await p7.locator('[data-groups-warning]').isVisible() && await startBtn.isDisabled(), 'ticking a 5th warns "5 groups but only 4 stations" and Start rotation waits');
+  await shot7('70b-more-groups-than-stations-whiteboard');
+  await p7.locator('[data-group-pick] input').nth(4).uncheck(); await w7(250);
+  ok(await p7.locator('[data-groups-warning]').count() === 0 && await startBtn.isEnabled(), 'unticking one clears the warning');
+  await p7.locator('.cp-pop select').selectOption({ label: 'Last generated groups' }); await w7(300);
+  ok((await pickNames()).join() === 'Group 1,Falcons,Group 3,Owls', 'back to the last generated groups');
+
+  console.log('Station rotation: start rotation (paused)');
+  const seatsBefore = await seatsOf7();
+  const slBefore = (await readStore(p7))['sl-fx-9s'];
+  await startBtn.click(); await w7(400);
+  const dlg = p7.locator('[role="dialog"][aria-label="Start rotation"]');
+  ok(await dlg.isVisible() && (await p7.getByLabel('Changeover seconds').inputValue()) === '30' && (await p7.getByLabel('Minutes per station').inputValue()) === '5', 'Start rotation opens a dialog: 5 minutes per station, changeover 30 s by default');
+  ok(await dlg.getByRole('button', { name: 'Forwards for everyone' }).count() === 1 && await dlg.getByRole('button', { name: 'Alternate directions' }).count() === 1 && await dlg.getByRole('button', { name: 'One full lap' }).count() === 1 && await dlg.getByRole('button', { name: 'Loop' }).count() === 1, 'it offers Forwards / Alternate directions and One full lap / Loop');
+  ok((await dlg.locator('[data-rotation-summary]').textContent()).includes('21m 30s'), 'and sums the time up: 4 × 5m + 3 moves of 30s = 21m 30s');
+  await shot7('71-start-dialog-whiteboard');
+  await dlg.getByRole('button', { name: 'Create paused' }).click(); await w7(700);
+  let rot = await S7('rot-fx-9s');
+  ok(rot && rot.setupId === 'regular' && rot.stationOrder.join() === [S1, S2, S3, SPC].join() && rot.step === 0 && rot.direction === 'forward' && rot.minutes === 5 && rot.changeover === 30 && rot.loop === false && typeof rot.timerId === 'string', 'rot-fx-9s is saved: setup, station order, step 0, forwards, 5 min, 30 s changeover, the timer\'s id');
+  ok(rot.groups.length === 4 && rot.groups.map(g => g.name).join() === 'Group 1,Falcons,Group 3,Owls' && rot.groups[1].studentIds.join() === 's3,s4' && /^#/.test(rot.groups[0].color), 'it keeps each group\'s name, colour and students');
+  ok(rot.labels.join('|') === 'Station 1 · Circuits|Station 2 · Magnets|Station 3 · Heat|Station 4 · Light', 'and the station names it used');
+  ok(await p7.locator('[data-rotation-bar]').isVisible(), 'the floating bar (Rotate, Back, End rotation) is showing in Manage Seating');
+  ok(await p7.getByText(/Rotation started. Its timer is in the Timer tab/).count() === 1, 'a note says where the timer is');
+
+  console.log('Station rotation: the linked timer');
+  await timerOnly7();
+  const rcard = p7.locator('[data-timer-card]', { hasText: 'Station rotation' });
+  ok(await rcard.count() === 1, 'the Timer tab has a "Station rotation" timer');
+  const cardText = await rcard.textContent();
+  ok(['Station 1 · Circuits', 'Station 2 · Magnets', 'Station 3 · Heat', 'Station 4 · Light'].every(t => cardText.includes(t)) && (cardText.match(/Move!/g) || []).length >= 3, 'its steps are named after the stations, with a "Move!" between each');
+  ok((await rcard.getByRole('button', { name: 'Start' }).count()) === 1, 'it was left paused (Start, not Pause)');
+  await rcard.locator('[title="Projector view"]').click(); await w7(600);
+  const projText = await p7.locator('.cp-onboard').filter({ hasText: 'Exit Display' }).last().innerText();
+  ok((projText.match(/05:00/g) || []).length >= 4 && (projText.match(/00:30/g) || []).length >= 3, `in the projector view: four 05:00 station steps and three 00:30 Move! steps (${(projText.match(/05:00/g) || []).length} / ${(projText.match(/00:30/g) || []).length})`);
+  const strip = p7.locator('[data-rotation-strip]');
+  ok(await strip.isVisible() && (await strip.textContent()).includes('Group 1 → Station 1 · Circuits') && (await strip.textContent()).includes('Owls → Station 4 · Light'), 'the projector timer shows a strip: "Group 1 → Station 1 · Circuits … Owls → Station 4 · Light"');
+  await shot7('74-projector-strip-whiteboard');
+  await p7.keyboard.press('Escape'); await w7(300);
+
+  console.log('Station rotation: overlay and manual moves');
+  await seatTab7();
+  const bar = p7.locator('[data-rotation-bar]');
+  ok(await bar.isVisible(), 'the bar shows on the class Seating view too');
+  const txt = id => chipAt(id).first().textContent();
+  ok((await txt(S1)).includes('Group 1') && (await txt(S1)).includes('Ada Pretend') && (await txt(S2)).includes('Falcons') && (await txt(S3)).includes('Group 3') && (await txt(SPC)).includes('Owls'), 'the map shows each group at its station: Group 1 (Ada, Ben) at 1, Falcons at 2, Group 3 at 3, Owls at 4');
+  ok((await p7.locator('[data-rotation-next]').textContent()).includes('Next:') && (await p7.locator('[data-rotation-next]').textContent()).includes('Group 1 → Station 2 · Magnets'), 'a "Next: Group 1 → Station 2 · Magnets …" line is above the map');
+  await shot7('72-class-view-overlay-whiteboard');
+  // Rotate moves everyone on and shows the card; the timer isn't touched
+  await barBtn(/^Rotate/).click(); await w7(500);
+  ok((await S7('rot-fx-9s')).step === 1 && (await txt(S2)).includes('Group 1') && (await txt(S1)).includes('Owls') && (await txt(SPC)).includes('Group 3'), 'Rotate ↻ moves every group to its next station (step 1: Group 1 at 2, Owls back round to 1)');
+  const card = p7.locator('[data-rotate-card]');
+  ok(await card.isVisible() && (await card.textContent()).includes('Rotate!') && (await card.textContent()).includes('Group 1 → Station 2 · Magnets'), 'and a big "Rotate! ↻" card lists each group → its new station');
+  await shot7('73-rotate-card-whiteboard');
+  await card.click(); await w7(300);
+  ok(await card.count() === 0, 'a click closes the card');
+  await barBtn(/Back/).click(); await w7(400);
+  ok((await S7('rot-fx-9s')).step === 0 && (await txt(S1)).includes('Group 1') && await p7.locator('[data-rotate-card]').count() === 0 && await barBtn(/Back/).isDisabled(), '← Back puts everyone back (step 0), with no card, and is switched off at the start');
+  await timerOnly7();
+  ok((await rcard.getByRole('button', { name: 'Start' }).count()) === 1 && (await rcard.textContent()).includes('Station 1 · Circuits'), 'the timer was never touched: still paused on Station 1');
+  await seatTab7();
+  // projector view of the class map
+  await p7.locator('[title^="Full screen"]').click(); await w7(900);
+  ok(await p7.locator('[data-station-groups]').count() >= 4 && await p7.locator('[data-rotation-next]').count() >= 1, 'the class map\'s projector view shows the stations\' groups and the Next line too');
+  await shot7('75-class-projector-overlay-whiteboard');
+  await p7.keyboard.press('Escape'); await w7(300);
+
+  console.log('Station rotation: end, alternate directions');
+  await barBtn('End rotation').click(); await w7(300);
+  ok(await p7.getByText('End the rotation? The setup and the timer stay.').isVisible() && (await S7('rot-fx-9s')) !== undefined, 'End rotation asks first (and nothing has been cleared yet)');
+  await shot7('76-end-asks-whiteboard');
+  await p7.getByRole('button', { name: 'Keep going' }).click(); await w7(300);
+  ok((await S7('rot-fx-9s')) !== undefined && await p7.locator('[data-station-groups]').count() === 4, 'Keep going leaves the rotation as it was');
+  await barBtn('End rotation').click(); await w7(250);
+  await p7.getByRole('button', { name: 'End it' }).click(); await w7(500);
+  ok((await S7('rot-fx-9s')) === undefined && await p7.locator('[data-station-groups]').count() === 0 && await p7.locator('[data-rotation-bar]').count() === 0, 'End it clears rot-<class>, the overlay and the bar');
+  await timerOnly7();
+  ok(!!(await S7('setups-fx-9s')) && await rcard.count() === 1, 'the setup and the timer are still there');
+  // a new rotation, alternate directions
+  await manage7(); await p7.getByText('🔄 Stations').click(); await w7(400);
+  await p7.getByRole('button', { name: /Start rotation…/ }).click(); await w7(300);
+  await p7.getByRole('button', { name: 'Alternate directions' }).click(); await w7(200);
+  ok((await p7.getByText(/odd number of stations/).count()) === 0, 'no odd-number warning with 4 stations');
+  await shot7('71b-start-dialog-alternate-whiteboard');
+  await p7.getByRole('button', { name: 'Create paused' }).click(); await w7(600);
+  rot = await S7('rot-fx-9s');
+  ok(rot.direction === 'alternate' && rot.step === 0, 'Alternate directions is saved on the rotation');
+  await seatTab7();
+  await barBtn(/^Rotate/).click(); await w7(500);
+  ok((await txt(S2)).includes('Group 1') && (await txt(S1)).includes('Falcons') && (await txt(SPC)).includes('Group 3') && (await txt(S3)).includes('Owls'), 'alternate, step 1: Group 1 and Group 3 go forwards (to 2 and 4); Falcons and Owls go backwards (to 1 and 3)');
+  await barBtn(/^Rotate/).click(); await w7(400);
+  ok((await txt(S3)).includes('Group 1') && (await txt(SPC)).includes('Falcons') && (await txt(S1)).includes('Group 3') && (await txt(S2)).includes('Owls'), 'step 2: Group 1 and Group 3 forwards (to 3 and 1); Falcons and Owls backwards (to 4 and 2). Nobody shares a station');
+  await p7.locator('[data-rotate-card]').click().catch(() => {}); await w7(300);
+
+  console.log('Station rotation: reload mid-rotation');
+  await p7.reload(); await w7(1300);
+  ok((await S7('rot-fx-9s')).step === 2, 'reloading keeps the step (2)');
+  await seatTab7();
+  ok((await txt(S3)).includes('Group 1') && (await txt(SPC)).includes('Falcons') && (await txt(S1)).includes('Group 3'), 'and the overlay comes back where it was');
+  ok((await bar.textContent()).includes('timer not running'), 'the timers are gone after a reload, so the bar says "timer not running"');
+  await shot7('77-timer-not-running-whiteboard');
+  await barBtn(/Back/).click(); await w7(400);
+  ok((await S7('rot-fx-9s')).step === 1 && (await txt(S2)).includes('Group 1'), 'but the manual controls still work (Back → step 1)');
+  const seatsMid = await seatsOf7();
+
+  console.log('Station rotation: automatic moves (timer sped up)');
+  await barBtn('End rotation').click(); await w7(250); await p7.getByRole('button', { name: 'End it' }).click(); await w7(400);
+  await p7.evaluate(() => localStorage.setItem('__cpTickMs', '40'));
+  await p7.reload(); await w7(1300);
+  await manage7(); await p7.getByText('🔄 Stations').click(); await w7(400);
+  await p7.getByRole('button', { name: /Start rotation…/ }).click(); await w7(300);
+  await p7.getByLabel('Minutes per station').fill('0.5');
+  await p7.getByRole('button', { name: /Start now/ }).click(); await w7(300);
+  rot = await S7('rot-fx-9s');
+  ok(rot.minutes === 0.5 && rot.step === 0, 'started now: 0.5 min per station (30 ticks of 40 ms), 30 s changeover (also 30 ticks)');
+  await seatTab7();
+  const stepNow = async () => (await S7('rot-fx-9s'))?.step;
+  ok(await until7(async () => (await stepNow()) === 1, 6000), 'when the first station\'s step ends, the step goes up to 1 by itself');
+  ok(await until7(async () => await p7.locator('[data-rotate-card]').isVisible(), 1500), 'and the big Rotate! card appears');
+  ok((await txt(S2)).includes('Group 1') && (await txt(S1)).includes('Owls'), 'and the overlay moved Group 1 to station 2');
+  await shot7('73b-rotate-card-automatic-whiteboard');
+  // the Move! step that follows is the time to walk: it must not move anyone again
+  const seen = new Set(); const t0 = Date.now();
+  while (Date.now() - t0 < 700) { seen.add(await stepNow()); await w7(50); }
+  ok(seen.size === 1 && seen.has(1), 'the 30 s Move! step does not move the groups a second time');
+  ok(await until7(async () => (await stepNow()) === 2, 5000) && await until7(async () => (await stepNow()) === 3, 5000), 'each later station\'s step ending moves everyone on again (2, then 3)');
+  ok(await until7(async () => (await bar.textContent()).includes('timer finished'), 6000), 'at the end of the lap the timer finishes');
+  await w7(600);
+  ok((await stepNow()) === 3 && (await txt(SPC)).includes('Group 1') && (await txt(S1)).includes('Falcons'), 'the last station does not move anyone (step stays 3: Group 1 at Station 4)');
+  // while the timer was sped up the whole time: nobody sat anywhere new
+  const seatsEnd = await seatsOf7();
+  ok(JSON.stringify(seatsEnd) === JSON.stringify(seatsBefore) && JSON.stringify(seatsMid) === JSON.stringify(seatsBefore), 'no seat assignment changed at any point (every sl- key\'s seats are as they were)');
+  ok((await readStore(p7))['sl-fx-9s'] === slBefore, 'sl-fx-9s is byte-for-byte what it was before the rotation started');
+  const slKeys = Object.keys(await readStore(p7)).filter(k => k.startsWith('sl-'));
+  ok(slKeys.every(k => !k.includes('~')) && slKeys.length === 3, 'and no setup\'s seating key was created or touched along the way');
+
+  console.log('Station rotation: existing timer features');
+  await timerOnly7();
+  await p7.locator('[data-timer-card]', { hasText: 'Station rotation' }).getByRole('button', { name: 'Dismiss' }).click({ force: true }); await w7(300);
+  ok(await p7.locator('[data-timer-card]', { hasText: 'Station rotation' }).count() === 0, 'a finished timer can still be dismissed');
+  await p7.locator('[title="Start a fresh 1m timer"]').click(); await p7.locator('[title="Start a fresh 2m timer"]').click(); await w7(300);
+  ok(await p7.locator('[data-timer-card]').count() === 2, 'the time presets still make timers');
+  await p7.locator('[data-timer-card]').nth(1).dragTo(p7.locator('[data-timer-card]').nth(0)); await w7(500);
+  ok(await p7.locator('[data-timer-card]').count() === 1 && (await p7.locator('[data-timer-card]').textContent()).includes('1m → 2m') && await p7.getByRole('button', { name: /Split/ }).count() === 1, 'dragging one timer onto another combines them ("1m → 2m") and offers ✂ Split');
+  await p7.keyboard.press('Escape'); await p7.mouse.click(700, 880); await w7(200);
+  await p7.getByRole('button', { name: /Split/ }).click(); await w7(500);
+  ok(await p7.locator('[data-timer-card]').count() === 2 && (await p7.locator('[data-timer-card]').allTextContents()).join('|').includes('1m') && (await p7.locator('[data-timer-card]').allTextContents()).join('|').includes('2m') && await p7.getByRole('button', { name: /Split/ }).count() === 0, 'Split puts the two timers back');
+  await p7.getByRole('button', { name: /Quick/ }).click(); await w7(300);
+  await p7.getByRole('button', { name: '▶ Think', exact: true }).click(); await w7(500);
+  ok(await p7.locator('[data-timer-card]', { hasText: 'Think' }).getByRole('button', { name: 'Pause' }).count() === 1, '⚡ Quick still starts a running "Think" timer');
+  const stepAfterOthers = (await S7('rot-fx-9s'))?.step;
+  await w7(1800); // 40 ms ticks: the 1-minute "Think" timer is well through a few steps; none may touch the rotation
+  ok((await S7('rot-fx-9s'))?.step === stepAfterOthers, 'ordinary timers running at the same time do not step the rotation');
+
+  console.log('Station rotation: blackboard');
+  await p7.evaluate(async () => { await window.storage.set('ta-theme', JSON.stringify('blackboard')); localStorage.removeItem('__cpTickMs'); });
+  await p7.reload(); await w7(1300);
+  await seatTab7();
+  await shot7('72-class-view-overlay-blackboard');
+  await p7.getByRole('button', { name: /^Rotate/ }).click(); await w7(600);
+  await shot7('73-rotate-card-blackboard');
+  await p7.locator('[data-rotate-card]').click(); await w7(300);
+  await barBtn('End rotation').click(); await w7(250); await p7.getByRole('button', { name: 'End it' }).click(); await w7(400);
+  await manage7(); await w7(300);
+  await p7.getByText('🔄 Stations').click(); await w7(500);
+  await shot7('70-stations-popover-blackboard');
+  await p7.getByRole('button', { name: /Start rotation…/ }).click(); await w7(400);
+  await shot7('71-start-dialog-blackboard');
+  await p7.getByRole('button', { name: 'Create paused' }).click(); await w7(600);
+  await timerOnly7();
+  await p7.locator('[data-timer-card]', { hasText: 'Station rotation' }).locator('[title="Projector view"]').click(); await w7(700);
+  ok(await p7.locator('[data-rotation-strip]').isVisible(), 'the projector strip shows in blackboard too');
+  await shot7('74-projector-strip-blackboard');
+  await p7.keyboard.press('Escape'); await w7(300);
+  await ctx7.close();
+  }
+
   console.log('Console');
   ok(problems.length === 0, 'no console errors or page errors' + (problems.length ? '\n    ' + problems.join('\n    ') : ''));
 
