@@ -147,6 +147,8 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   const slKeys = Object.keys(FIXTURE.data).filter(k => k.startsWith('sl-'));
   ok(slKeys.every(k => !('pieces' in JSON.parse(store[k])) && !('joins' in JSON.parse(store[k])) && JSON.parse(store[k]).seats.every(s => !s.pieceId)),
     'old rooms are left as plain seats (no table pieces added on their own)');
+  ok(slKeys.every(k => !('walls' in JSON.parse(store[k])) && !('openings' in JSON.parse(store[k])) && !('room' in JSON.parse(store[k]))) && !('ta-rooms' in store),
+    'old rooms have no walls, openings or room link, and there is no room library yet');
   const sameRules = Object.keys(FIXTURE.data).filter(k => /^(sh|gg|gp|checklist)-|^ta-saved-layouts$|^saved-templates$/.test(k)).filter(k => store[k] !== FIXTURE.data[k]);
   ok(sameRules.length === 0, 'history, groups, checklists, saved layouts and timer templates are byte-for-byte unchanged' + (sameRules.length ? ` (changed: ${sameRules.join(', ')})` : ''));
 
@@ -376,6 +378,329 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await shot(page, '28-blackboard-seating');
   await openManage('Grade 7B Test');
   await shot(page, '29-blackboard-manage');
+
+
+  /* ── Room builder (Phase 4): walls, doors, windows, items, labels, stations, the room library ── */
+  console.log('Room builder');
+  const { lab } = require('./fixtures/lab-layout.js');
+  const roomsStore = async () => { const s = await readStore(page); return s['ta-rooms'] ? JSON.parse(s['ta-rooms']) : null; };
+  const shellOf = sl => JSON.stringify([sl.walls || [], sl.openings || [], (sl.roomItems || []).filter(i => i.fixed)]);
+  const wait = ms => page.waitForTimeout(ms);
+  // canvas px -> screen px, taken from the first desk (always drawn at canvas 60,60 in the fixture) so it works at any zoom
+  const mapper = async () => { const b = await page.locator('[title="Drag to move this desk"]').first().boundingBox(); const z = b.width / 114; return (cx, cy) => [b.x + (cx - 60) * z, b.y + (cy - 60) * z]; };
+  const dragMouse = async (from, to, steps = 10) => {
+    await page.mouse.move(...from); await page.mouse.down();
+    for (let k = 1; k <= steps; k++) { await page.mouse.move(from[0] + (to[0] - from[0]) * k / steps, from[1] + (to[1] - from[1]) * k / steps); await wait(12); }
+    await page.mouse.up(); await wait(650);
+  };
+  await page.evaluate(async () => { await window.storage.set('ta-theme', JSON.stringify('whiteboard')); });
+  await page.reload(); await wait(800);
+  await openManage('Grade 6A Test');
+  const storeBefore = await readStore(page);
+  ok(!('ta-rooms' in storeBefore), 'no room library exists until Tom saves a room');
+  const slAFx = JSON.parse(FIXTURE.data['sl-fx-6a']);
+  const items6Before = JSON.stringify((await SL('fx-6a')).roomItems);
+  ok(items6Before === JSON.stringify(slAFx.roomItems), 'the original desk, board and door are untouched');
+
+  // the Rooms popover lists the old saved layouts under "My saved layouts" before anything is saved
+  await page.locator('[title^="Rooms: save this room"]').click(); await wait(300);
+  ok(await page.getByText('My saved layouts').isVisible() && await page.getByText('Test clusters').isVisible(), 'Rooms shows the old saved layouts under "My saved layouts"');
+  ok(await page.getByText('Save as new room…').isVisible(), 'Rooms offers "Save as new room…"');
+  await page.keyboard.press('Escape'); await page.mouse.click(700, 880); await wait(200);
+
+  // Edit room: tables dimmed and can't be picked; draw a rectangle room plus one more wall
+  await page.locator('[title^="Edit room"]').click(); await wait(300);
+  const deskBlocked = await page.locator('[title="Drag to move this desk"]').first().click({ trial: true, timeout: 600 }).then(() => false, () => true);
+  ok(deskBlocked, 'in Edit room the tables are dimmed and can\'t be clicked');
+  await page.locator('[title^="Draw four walls"]').click(); await wait(700);
+  let slA = await SL('fx-6a');
+  ok(slA.walls?.length === 4 && slA.walls.every(w => w.x1 % 8 === 0 && w.y1 % 8 === 0), `Rectangle room draws 4 walls on the grid (${slA.walls?.length})`);
+  let m = await mapper();
+  await dragMouse(m(120, 470), m(405, 479)); // a nearly straight drag: it snaps to 0° and the grid
+  slA = await SL('fx-6a');
+  const extra = slA.walls?.[4];
+  ok(slA.walls?.length === 5 && extra && extra.y1 === extra.y2 && extra.x1 % 8 === 0, `dragging on the floor draws a wall that snaps straight (${JSON.stringify(extra)})`);
+  ok(await page.locator('[title^="Click to select this wall"]').count() === 5, 'in Edit room every wall can be picked');
+  // click the top wall: it is selected
+  const topHit = page.locator('[title^="Click to select this wall"]').first();
+  const tb = await topHit.boundingBox();
+  await page.mouse.click(tb.x + tb.width * 0.7, tb.y + tb.height / 2); await wait(250);
+  ok(await page.getByText('Delete wall').isVisible(), 'clicking a wall selects it (Delete wall appears)');
+  await shot(page, '41-room-mode-wall-selected');
+
+  // a door dragged from the palette sticks to the wall; dragging it slides it along
+  const pal = await page.locator('[title^="Door: drag it onto a wall"]').boundingBox();
+  const wallMid = [tb.x + tb.width * 0.3, tb.y + tb.height / 2 + 14]; // a little off the wall: it still lands on it
+  await dragMouse([pal.x + pal.width / 2, pal.y + pal.height / 2], wallMid);
+  slA = await SL('fx-6a');
+  const door1 = slA.openings?.[0];
+  ok(slA.openings?.length === 1 && door1.type === 'door' && door1.wallId === slA.walls[0].id && Math.abs(door1.t - 0.3) < 0.05, `a door dropped on the top wall sticks to it at that spot (t=${door1?.t})`);
+  const dh = await page.locator('rect[title^="Door —"]').boundingBox();
+  await dragMouse([dh.x + dh.width / 2, dh.y + dh.height / 2], [dh.x + dh.width / 2 + 200, dh.y + dh.height / 2 + 6]);
+  slA = await SL('fx-6a');
+  const door2 = slA.openings[0];
+  ok(door2.wallId === door1.wallId && door2.t > door1.t + 0.1 && door2.t <= 1, `dragging the door slides it along the wall (t ${door1.t} -> ${door2.t})`);
+  await page.locator('[title^="Window: drag it onto a wall"]').click(); await wait(650); // a click puts a window on the selected/longest wall
+  slA = await SL('fx-6a');
+  ok(slA.openings.length === 2 && slA.openings[1].type === 'window', 'clicking Window puts one on a wall too');
+  await page.locator('rect[title^="Door —"]').click(); await wait(200);
+  await page.locator('[title="Move the hinge to the other end of the door"]').click(); await wait(650);
+  await page.locator('[title="Make the door open to the other side of the wall"]').click(); await wait(650);
+  slA = await SL('fx-6a');
+  ok(slA.openings[0].flip === true && slA.openings[0].swing === -1, 'a door can be flipped and its swing changed');
+  await page.locator('[title="Finish editing the room"]').click(); await wait(300);
+  ok(await page.locator('[title^="Click to select this wall"]').count() === 0 && await page.locator('rect[title^="Door —"]').count() === 0, 'outside Edit room, walls and openings can\'t be picked or dragged');
+  const wallsBefore = JSON.stringify(slA.walls), opsBefore = JSON.stringify(slA.openings);
+  await page.reload(); await wait(800);
+  slA = await SL('fx-6a');
+  ok(JSON.stringify(slA.walls) === wallsBefore && JSON.stringify(slA.openings) === opsBefore, 'after a reload the walls, the door (still on its wall) and the window are as saved');
+  await openManage('Grade 6A Test');
+  ok(await page.locator('line[style*="--cp-wall)"]').count() === 5, 'and Manage Seating draws all 5 walls again');
+  await shot(page, '40-room-with-walls');
+
+  // the catalogue: five items, two labelled, one resized, one turned
+  await page.locator('[title^="Add a classroom or science-lab item"]').click(); await wait(300);
+  ok(await page.getByText('Fire extinguisher', { exact: true }).count() >= 1 && await page.locator('[title^="Add item: Fume cupboard"]').count() === 1 && await page.locator('[title^="Add item: a lab bench"]').count() === 1, 'the catalogue lists classroom and lab items, and a "Lab bench (seats)" shortcut');
+  await page.getByPlaceholder('Search: sink, eyewash, bin…').fill('eyewash'); await wait(150);
+  ok(await page.locator('[title^="Add item:"]').count() === 1, 'searching "eyewash" narrows it to the eyewash station');
+  await page.getByPlaceholder('Search: sink, eyewash, bin…').fill(''); await wait(150);
+  await shot(page, '30-catalogue');
+  const addItem = async title => {
+    if (!(await page.locator('[title^="Add item:"]').count())) { await page.locator('[title^="Add a classroom or science-lab item"]').click(); await wait(250); }
+    await page.locator(`[title^="Add item: ${title}"]`).first().click(); await wait(650);
+  };
+  const labelInput = '[title^="The name shown on the map"]';
+  await page.keyboard.press('Escape'); await page.mouse.click(700, 880);
+  await addItem('Sink');
+  await page.locator(labelInput).fill('Sink A'); await page.locator(labelInput).press('Enter'); await wait(650);
+  await addItem('Eyewash station');
+  await page.locator(labelInput).fill('Eyewash 1'); await page.locator(labelInput).press('Enter'); await wait(650);
+  await page.locator('[title^="Mark this as a station"]').click(); await wait(650); // station 1
+  await addItem('Fume cupboard');
+  const handle = page.locator('[title="Drag to resize"]').nth(0); // a small item has 4 corner handles, the first is bottom-right
+  const hb = await handle.boundingBox();
+  await dragMouse([hb.x + hb.width / 2, hb.y + hb.height / 2], [hb.x + hb.width / 2 + 40, hb.y + hb.height / 2 + 24]);
+  await addItem('Bin');
+  await page.locator('[title="Turn a quarter turn clockwise"]').click(); await wait(650);
+  await addItem('Box');
+  let sl6i = await SL('fx-6a');
+  const added = sl6i.roomItems.slice(3);
+  const byType = t => added.find(i => i.type === t);
+  ok(added.length === 5, `five catalogue items were added (${added.map(i => i.type).join(', ')})`);
+  ok(byType('sink')?.label === 'Sink A' && byType('eyewash')?.label === 'Eyewash 1', 'two of them have the labels typed in the selection panel');
+  ok(byType('fume')?.w === 128 && byType('fume')?.h === 72, `one was resized with its handle (${byType('fume')?.w}×${byType('fume')?.h})`);
+  ok(byType('bin')?.rot === 90, 'one was turned 90°');
+  ok(byType('sink')?.fixed === true && byType('bin')?.fixed === false, 'sinks start as fixed parts of the room, bins don\'t');
+  // a lab bench with seats, and a station flag on it
+  await page.locator('[title^="Add a classroom or science-lab item"]').click(); await wait(250);
+  await page.locator('[title^="Add item: a lab bench"]').click(); await wait(700);
+  await page.locator('[title^="Mark this as a station"]').click(); await wait(650);
+  sl6i = await SL('fx-6a');
+  const bench = sl6i.pieces?.[0], eyeItem = sl6i.roomItems.find(i => i.type === 'eyewash');
+  ok(bench?.shape === 'bench' && sl6i.seats.filter(s => s.pieceId === bench.id).length === 4, 'the Lab bench shortcut adds a bench piece with 4 seats');
+  ok(eyeItem.station?.n === 1 && bench.station?.n === 2, 'the eyewash and the bench are marked as stations 1 and 2');
+  ok(await page.locator('[title^="Station 1"]').count() === 1 && await page.locator('[title^="Station 2"]').count() === 1, 'both show a numbered badge on the map');
+  await deselect();
+  await shot(page, '31-items-on-map');
+  const itemsAll = JSON.stringify(sl6i.roomItems), piecesAll = JSON.stringify(sl6i.pieces);
+  await page.reload(); await wait(800);
+  sl6i = await SL('fx-6a');
+  ok(JSON.stringify(sl6i.roomItems) === itemsAll && JSON.stringify(sl6i.pieces) === piecesAll, 'after a reload every item (label, size, turn, station) and the bench are as saved');
+  await openManage('Grade 6A Test');
+  ok(await page.getByText('Sink A', { exact: true }).first().isVisible() && await page.getByText('Eyewash 1', { exact: true }).first().isVisible(), 'the labels show on the map');
+  ok(await page.locator('[title^="Station 1"]').count() === 1 && await page.locator('[title^="Station 2"]').count() === 1, 'and so do both station badges');
+
+  // the room library: save as "Lab 204", add a second layout, switch between them
+  const slBefore = await SL('fx-6a');
+  const seatedCount = sl => sl.seats.filter(s => s.studentId).length;
+  const openRooms = async () => { await page.locator('[title^="Rooms: save this room"]').click(); await wait(350); };
+  await openRooms();
+  await page.getByText('Save as new room…').click(); await wait(150);
+  await page.getByPlaceholder('Room name, e.g. Lab 204').fill('Lab 204');
+  await page.locator('[title="Save with this name"]').click(); await wait(900);
+  let rooms = await roomsStore();
+  const lab204 = rooms?.find(r => r.name === 'Lab 204');
+  ok(!!lab204 && lab204.shell.walls.length === 5 && lab204.shell.openings.length === 2 && lab204.layouts.length === 1, 'Save as new room stores the shell (5 walls, 2 openings) and one layout');
+  ok(lab204.shell.items.map(i => i.type).sort().join() === 'eyewash,fume,sink' && lab204.layouts[0].items.map(i => i.type).sort().join() === 'bin,box,desk,board,door'.split(',').sort().join(), 'fixed items went into the shell, the movable ones into the layout');
+  ok(lab204.layouts[0].seats.every(s => !s.studentId) && lab204.layouts[0].pieces.length === 1, 'the layout has the furniture but no students');
+  ok(rooms.some(r => r.legacy && r.name === 'My saved layouts' && r.layouts.some(l => l.name === 'Test clusters')), 'the first save also brought the old saved layouts in as "My saved layouts"');
+  const afterSaveStore = await readStore(page);
+  ok(afterSaveStore['ta-saved-layouts'] === FIXTURE.data['ta-saved-layouts'], 'the old ta-saved-layouts key is left exactly as it was');
+  ok((await readBackups(page)).some(b => b.reason === 'before room library'), 'an automatic backup "before room library" was taken first');
+  ok((await SL('fx-6a')).room?.roomId === lab204.id, 'the class is now linked to the room');
+  await page.mouse.click(700, 880); await wait(200);
+  await shot(page, '42-rooms-popover');
+  // a second layout: add a hexagon, save it as "Clusters"
+  await deselect();
+  await addFromMenu('Hexagon');
+  await openRooms();
+  await page.getByText('Save layout to room', { exact: false }).first().click(); await wait(200);
+  await page.getByRole('button', { name: /Lab 204/ }).first().click(); await wait(200);
+  await page.getByPlaceholder('New layout name, e.g. Clusters').fill('Clusters');
+  await page.locator('[title="Save with this name"]').click(); await wait(900);
+  rooms = await roomsStore();
+  const lab204b = rooms.find(r => r.name === 'Lab 204');
+  ok(lab204b.layouts.length === 2 && lab204b.layouts[1].name === 'Clusters' && lab204b.layouts[1].pieces.length === 3, 'Save layout to room adds a second layout "Clusters" (bench + hexagon)');
+  await page.mouse.click(700, 880); await wait(200);
+  // switch back to Layout 1: students are reseated, the shell stays as it was
+  const beforeSwitch = await SL('fx-6a');
+  await openRooms();
+  await page.locator(`[title^='Use layout "Layout 1"']`).click(); await wait(250);
+  await page.getByRole('button', { name: 'Use it' }).click(); await wait(900);
+  const afterSwitch = await SL('fx-6a');
+  ok(afterSwitch.pieces.length === 1 && afterSwitch.room.layoutId === lab204b.layouts[0].id, 'using "Layout 1" brings back just the bench (the hexagon is gone)');
+  ok(seatedCount(afterSwitch) === seatedCount(beforeSwitch) && seatedCount(beforeSwitch) === 20, `all ${seatedCount(afterSwitch)} students are reseated`);
+  ok(shellOf(afterSwitch) === shellOf(beforeSwitch), 'and the walls, openings and fixed items are unchanged');
+  await openRooms();
+  await page.locator(`[title^='Use layout "Clusters"']`).click(); await wait(250);
+  await page.getByRole('button', { name: 'Use it' }).click(); await wait(900);
+  const clusters = await SL('fx-6a');
+  ok(clusters.pieces.length === 3 && seatedCount(clusters) === 20 && shellOf(clusters) === shellOf(beforeSwitch), 'switching to "Clusters" works the same way');
+  await page.locator('[title="Undo the last change"]').click(); await wait(700);
+  ok((await SL('fx-6a')).pieces.length === 1, 'and Undo takes a layout switch back');
+
+  // a second class uses the same room; an edit to the shell goes to every class only when Tom says so
+  await openManage('Grade 7B Test');
+  const bB0 = await SL('fx-7b');
+  ok(!bB0.room && !bB0.walls, 'class 7B starts with no room');
+  await openRooms();
+  await page.locator('[title="Show or hide this room\'s layouts"]').nth(0).click(); await wait(200);
+  const useBtn = page.locator('[title^="Use Lab 204:"]');
+  await useBtn.click(); await wait(250);
+  await page.getByRole('button', { name: 'Use it' }).click(); await wait(900);
+  const bB1 = await SL('fx-7b');
+  ok(bB1.walls?.length === 5 && bB1.room?.roomId === lab204.id && shellOf(bB1) === shellOf(await SL('fx-6a')), 'class 7B now has the same walls and fixed items, and is linked to the room');
+  ok(seatedCount(bB1) === seatedCount(bB0) && seatedCount(bB1) > 0, `7B's students were reseated (${seatedCount(bB1)} of ${seatedCount(bB0)} who were seated)`);
+  const furnitureOf = sl => JSON.stringify([sl.seats, sl.groups, sl.pieces, sl.joins, (sl.roomItems || []).filter(i => !i.fixed)]);
+  const b1Furniture = furnitureOf(bB1);
+  await openManage('Grade 6A Test');
+  await page.locator('[title^="Edit room"]').click(); await wait(300);
+  m = await mapper();
+  await dragMouse(m(520, 470), m(700, 470));
+  ok(await page.getByText('for every class that uses it?').isVisible(), 'editing the shell of a linked room asks "Update Lab 204 for every class that uses it?"');
+  await shot(page, '43-update-room-ask');
+  await page.getByRole('button', { name: 'Yes, update' }).click(); await wait(1000);
+  rooms = await roomsStore();
+  ok(rooms.find(r => r.name === 'Lab 204').shell.walls.length === 6, 'answering yes saves the new wall into the room');
+  await page.locator('[title="Finish editing the room"]').click(); await wait(200);
+  await openManage('Grade 7B Test');
+  const bB2 = await SL('fx-7b');
+  ok(bB2.walls.length === 6, 'class 7B shows the new wall after loading');
+  ok(furnitureOf(bB2) === b1Furniture, 'and its furniture, seats and students are exactly as they were');
+
+  // Randomise from the class Seating view keeps the walls, openings, items and the room link
+  await page.getByText('Grade 6A Test').first().click(); await wait(300);
+  const aS0 = await SL('fx-6a');
+  await page.locator(TAB.seating).click(); await wait(900);
+  await page.locator('[title^="Shuffle everyone into new seats"]:visible').first().click(); await wait(900);
+  const aS1 = await SL('fx-6a');
+  ok(shellOf(aS1) === shellOf(aS0) && JSON.stringify(aS1.room) === JSON.stringify(aS0.room) && aS1.walls.length === 6 && aS1.openings.length === 2, 'Randomise in the Seating view keeps walls, openings, items and the room link');
+  ok(JSON.stringify(aS1.pieces) === JSON.stringify(aS0.pieces) && seatedCount(aS1) === 20, 'and the table pieces and seating');
+  ok(await page.locator('line[style*="--cp-wall)"]').count() >= 6 && await page.locator('[title^="Station 1"]').count() >= 1, 'the class Seating view draws the walls and station badges too');
+
+  console.log('Teacher\'s desk, areas, lines and board-style windows');
+  await page.getByText('Grade 6A Test').first().click(); await wait(300);
+  await openManage('Grade 6A Test');
+  const justThisClass = page.getByRole('button', { name: 'Just this class' });
+  // 1. the teacher's desk can be any size, and both views draw the same size
+  const deskItemBefore = (await SL('fx-6a')).roomItems.find(i => i.type === 'desk');
+  ok(deskItemBefore.w === undefined, 'the original teacher\'s desk has no size saved, so it keeps 114×52');
+  await page.locator('[title^="Edit room"]').click(); await wait(300); // the old desk sits under a table in this fixture; in Edit room tables step aside
+  await page.locator('[title^="Teacher\'s desk"]').first().click({ position: { x: 4, y: 4 } }); await wait(300);
+  const dHandle = page.locator('[title="Drag to resize"]').nth(0); // bottom-right
+  const dhb = await dHandle.boundingBox();
+  await dragMouse([dhb.x + dhb.width / 2, dhb.y + dhb.height / 2], [dhb.x + dhb.width / 2 + 88, dhb.y + dhb.height / 2 + 24]);
+  if (await justThisClass.count()) await justThisClass.click();
+  await page.locator('[title="Finish editing the room"]').click(); await wait(300);
+  const deskNow = (await SL('fx-6a')).roomItems.find(i => i.type === 'desk');
+  ok(deskNow.w >= 192 && deskNow.h >= 72 && deskNow.x === deskItemBefore.x, `the desk was resized with its handles (${deskNow.w}×${deskNow.h})`);
+  await shot(page, '32-big-teachers-desk');
+  const hasBox = (w, h) => page.evaluate(([w, h]) => [...document.querySelectorAll('div')].some(d => d.style.width === w + 'px' && d.style.height === h + 'px' && d.querySelector(':scope > svg')), [w, h]);
+  ok(await hasBox(deskNow.w, deskNow.h), 'Manage Seating draws it at that size');
+  await page.locator(TAB.seating).click(); await wait(900);
+  ok(await hasBox(deskNow.w, deskNow.h), 'and the class Seating view draws exactly the same size');
+  await openManage('Grade 6A Test');
+
+  // 2. an Area (colour + label) and a Line (drawn by dragging; dashed, with an arrow)
+  await page.locator('[title^="Add a classroom or science-lab item"]').click(); await wait(250);
+  await page.locator('[title^="Add item: Area"]').click(); await wait(650);
+  await page.locator('[title="Make it sky"]').click(); await wait(650);
+  await page.locator(labelInput).fill('Reading corner'); await page.locator(labelInput).press('Enter'); await wait(650);
+  let slZ = await SL('fx-6a');
+  const areaItem = slZ.roomItems.find(i => i.type === 'area');
+  ok(areaItem?.color === 'sky' && areaItem.label === 'Reading corner' && areaItem.w === 192, 'an Area has a colour from the palette and a label in its corner');
+  await page.locator('[title="Turn a quarter turn clockwise"]').click(); await wait(650);
+  ok((await SL('fx-6a')).roomItems.find(i => i.type === 'area').rot === 90, 'areas can be turned');
+  ok(await page.evaluate(() => { const a = [...document.querySelectorAll('div')].find(d => d.style.width === '192px' && d.style.height === '128px'); const t = document.querySelector('[title^="Drag to move this table"], polygon[title^="Drag to move"]'); return !!a && (!t || !!(a.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING)); }), 'areas are drawn underneath the tables');
+  await shot(page, '33-area');
+  await deselect();
+  await page.locator('[title^="Edit room"]').click(); await wait(300);
+  await page.locator('[title^="Dragging on the floor draws a free line"]').click(); await wait(200);
+  m = await mapper();
+  await dragMouse(m(120, 500), m(360, 505));
+  if (await justThisClass.count()) await justThisClass.click();
+  slZ = await SL('fx-6a');
+  const lineItem = slZ.roomItems.find(i => i.type === 'line');
+  ok(lineItem && lineItem.rot === 0 && lineItem.w >= 232, `dragging in Edit room draws a straight line item (${lineItem?.w} long)`);
+  await page.locator('[title="Switch between a solid and a dashed line"]').click(); await wait(650);
+  await page.locator('[title="Add or remove an arrow head at the end of the line"]').click(); await wait(650);
+  const lineNow = (await SL('fx-6a')).roomItems.find(i => i.type === 'line');
+  ok(lineNow.dashed === true && lineNow.arrow === true, 'a line can be dashed and have an arrow head');
+  await page.locator('[title="Finish editing the room"]').click(); await wait(300);
+
+  // 3. a board-style window: placed anywhere, snaps onto a wall when dropped on one
+  await deselect();
+  await page.locator('[title^="Add a classroom or science-lab item"]').click(); await wait(250);
+  await page.locator('[title^="Add item: Window"]').click(); await wait(650);
+  let winItem = (await SL('fx-6a')).roomItems.find(i => i.type === 'window');
+  ok(winItem && winItem.w === 160 && winItem.h === 24 && winItem.fixed === true, 'the Window is a long thin room item (160×24), part of the room');
+  const topWall = (await SL('fx-6a')).walls[0];
+  await page.locator('[title^="Edit room"]').click(); await wait(300);
+  const wbox = await page.locator('div[title^="Window"]').first().boundingBox();
+  m = await mapper();
+  await dragMouse([wbox.x + wbox.width / 2, wbox.y + wbox.height / 2], m(500, topWall.y1 + 9));
+  if (await justThisClass.count()) await justThisClass.click();
+  await page.locator('[title="Finish editing the room"]').click(); await wait(300);
+  winItem = (await SL('fx-6a')).roomItems.find(i => i.type === 'window');
+  ok(winItem.rot === 0 && Math.abs(winItem.y + winItem.h / 2 - topWall.y1) < 1, `dropped on the top wall, it sits along the wall (centre y ${winItem.y + winItem.h / 2} vs wall ${topWall.y1})`);
+  await page.locator(labelInput).fill('Window 1'); await page.locator(labelInput).press('Enter'); await wait(650);
+  await deselect();
+  const itemsZ = JSON.stringify((await SL('fx-6a')).roomItems);
+  await page.reload(); await wait(800);
+  ok(JSON.stringify((await SL('fx-6a')).roomItems) === itemsZ, 'the desk size, area, line and window all survive a reload');
+  await page.locator(TAB.seating).click(); await wait(900);
+  ok(await page.getByText('Reading corner', { exact: true }).first().isVisible() && await page.getByText('Window 1', { exact: true }).first().isVisible(), 'the class Seating view shows the area and the window, so students can find their way');
+  await shot(page, '34-class-view-zones');
+
+  console.log('Full science lab map');
+  // a complete lab (fixture data), in both themes, in the editor and the class view
+  const putLab = async theme => {
+    await page.evaluate(async ([l, th]) => {
+      const raw = JSON.parse(localStorage.getItem('classboard-storage'));
+      raw['sl-fx-7b'] = JSON.stringify(l); raw['ta-theme'] = JSON.stringify(th);
+      localStorage.setItem('classboard-storage', JSON.stringify(raw));
+    }, [lab, theme]);
+    await page.reload(); await wait(900);
+  };
+  await putLab('whiteboard');
+  await openManage('Grade 7B Test');
+  await page.getByText('🎲 Randomize').click(); await wait(800);
+  const flagToggle = page.locator('[title^="Show a 🚩 dot"]');
+  if (await flagToggle.count()) await flagToggle.first().click();
+  await wait(300);
+  ok(await page.locator('line[style*="--cp-wall)"]').count() === 4 && await page.locator('[title^="Station "]').count() === 6, 'the lab map has 4 walls and 6 numbered benches');
+  await shot(page, '50-lab-editor-whiteboard');
+  await page.locator(TAB.seating).click(); await wait(900);
+  await shot(page, '51-lab-class-view-whiteboard');
+  await page.locator('[title^="Full screen"]').click(); await wait(900);
+  await shot(page, '52-lab-projector-whiteboard');
+  await page.keyboard.press('Escape'); await wait(300);
+  await putLab('blackboard');
+  await page.getByText('Grade 7B Test').first().click(); await wait(300);
+  await page.locator(TAB.seating).click(); await wait(900);
+  await shot(page, '53-lab-class-view-blackboard');
+  await openManage('Grade 7B Test');
+  await shot(page, '54-lab-editor-blackboard');
 
   console.log('Console');
   ok(problems.length === 0, 'no console errors or page errors' + (problems.length ? '\n    ' + problems.join('\n    ') : ''));

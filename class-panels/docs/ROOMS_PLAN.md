@@ -80,7 +80,7 @@ ta-rooms                  [{ id, name,
 setups-<class>            { activeId, list:[{ id, name, icon, roomId?, layoutId?,
                                               use:['desk'] | ['workstation'] | ['desk','workstation'],
                                               stations?:{…see H} }] }
-sl-<class>                UNCHANGED shape (+ optional pieces/walls fields); = the FIRST setup ("Regular")
+sl-<class>                UNCHANGED shape (+ optional pieces, joins, walls, openings, room fields; roomItems/pieces may carry station); = the FIRST setup ("Regular")
 sl-<class>~<setupId>      the same shape as sl-, for every other setup
 rot-<class>               { setupId, stationOrder:[stationId…], groupIds:[…], step, timerId? }
 classpanels-auto-backups  (Phase 0) the last 10 automatic backups, in plain localStorage OUTSIDE classboard-storage; call `autoBackup(reason)` before any migration
@@ -129,18 +129,18 @@ The units are canvas pixels on the existing 8 px grid. A seat slot draws as a **
 - Everything is inline SVG with **no images or web fonts added**, so the app still makes no internet requests.
 - Use it in **both** the Manage Seating canvas and the class-facing Seating view, and in Groups where seats are drawn.
 
-## 7. Room builder (Phase 4)
+## 7. Room builder (Phase 4) — built
 
-- **Room mode toggle** in Manage Seating: "🧱 Edit room". In room mode, walls and room items can be edited and tables are dimmed. Outside room mode, the walls are locked so they can't be dragged by accident.
-- **Walls:** click-drag to draw. Walls snap to the grid and to 0°, 45° and 90°, and join at their ends. A "Rectangle room" quick button draws four walls. Dragging an end moves it, and Delete removes the selected wall.
-- **Openings:** drag a door, double door or window onto a wall and it sticks to the wall. Doors can be flipped and their swing changed.
-- **Item catalogue** with search, grouped as follows:
-  - **Classroom:** teacher's desk, whiteboard, projector screen, TV, bookshelf, cupboard, filing cabinet, bin, recycling, computer station, printer, sofa/reading corner, rug, plant, window seat, coat hooks, sink.
-  - **Science lab:** lab bench (seats → workstation), demo bench, sink, fume cupboard, eyewash station, safety shower, fire blanket, fire extinguisher, first-aid kit, gas shut-off, emergency stop, chemical store, prep-room door, goggles cabinet, sharps/glass bin, power isolator.
-  - **Free shapes:** box, label/text, arrow.
-- Every item has a **label** (editable by double-clicking or in the selection bar), a **size** (resize handles) and a **rotation**. The label shows on the map.
-- **Station flag:** any item or table can be marked "Station" with a number and a name. Phase 7 uses this.
-- **Room library:** a "Rooms" popover (replacing "Saved layouts") lists the rooms, with each room's layouts underneath. It offers *Use this room*, *Load layout*, *Update layout* (asks first), *Save as new layout*, *Rename*, *Duplicate* and *Delete* (asks first, and is refused while any setup uses it).
+- **Room mode toggle** in Manage Seating: "🧱 Edit room". In room mode walls, openings and items can be edited and tables are dimmed and can't be picked. Outside room mode walls and openings can't be picked or dragged; room items stay movable.
+- **Walls** `walls:[{id,x1,y1,x2,y2}]` (optional field on `sl-<class>`). Click-drag on the floor draws one; it snaps to the 8 px grid, to 0/45/90° and onto nearby wall ends (corners join). "▭ Rectangle room" draws four walls round the content. Dragging an end moves it (walls meeting at that corner come with it); dragging the wall moves it; Delete removes it. Drawn 12 px thick with ink outline and pencil hatching.
+- **Openings** `openings:[{id,type:'door'|'double-door'|'window',wallId,t,width,flip,swing}]`. Dragged from the palette onto a wall (a click puts one on the selected or longest wall) and slid along it. Doors flip (hinge end) and swing (side). Old freestanding `door` items are untouched.
+- **Item catalogue** (searchable popover "+ Room items", sections **Zones and lines**, **Classroom**, **Science lab**, **Free shapes**). `roomItems` gain optional `{w,h,rot,label,fixed,station,color,dashed,arrow}`; `(x,y)` is the top-left of the box before it turns, and it turns about its middle. The original desk/board/door have no `w/h/rot`: they keep their old sizes (**desk 114×52, board 260×36, door 64×64 — the editor and the class view now draw exactly the same**) and are converted only when resized or turned. Every item has a label (double-click, or the selection panel), 4/8 resize handles, the turn handle, `[` `]`, ⟳ 90°. One shared drawing (`RoomItemView`, `WallsLayer`, `StationBadges`) is used by the editor and by the class Seating view (read-only), which also opens zoomed to fit a room with walls.
+- **Teacher's desk and board are resizable** with the same handles; the desk's books and globe scale with it.
+- **Zones and lines.** *Area*: a soft tinted rectangle (mint, sky, cyan, sunny or coral) with a dashed ink border and a label in its corner; resizable and turnable; drawn underneath everything, tables included; only its edge strip can be grabbed, so tables and the floor inside stay clickable. *Line*: a thin item drawn by click-drag in room mode ("Draw lines" tool), solid or dashed, optional arrow head, optional colour.
+- **Window item**: a long thin board-shaped blue rectangle (pale `--cp-sky`, glass glints, mullions) — the catalogue's Classroom "Window". Placeable anywhere; dropped on a wall it turns to lie along it and centres on it (`snapItemToWall`). The wall-opening window is still in the Edit room palette.
+- **Station flag**: any item or table piece can be marked in the selection panel, stored as `station:{n,name}`; it shows a numbered badge (and name) on the map in both views. Phase 7 reads `station` from `roomItems` and `pieces`.
+- **Room library** (`ta-rooms`, "🏫 Rooms" popover replacing Layouts). Room = shell (`walls`, `openings`, items with `fixed:true`) + layouts (`pieces`, `joins`, blank `seats`, `groups`, non-fixed `items`; never students). Actions: Save as new room, Save layout to room (new or update, asks), Use room / use a layout (asks; students reseated with `bestFitReseat`; Undo works), Rename, Duplicate, Delete (asks). The class stores `room:{roomId,layoutId,shellLocal?}`. Editing the shell of a linked room asks "Update <room> for every class that uses it?": *Yes* saves the shell into `ta-rooms` (and later shell edits follow); other classes take the new shell the next time they load (never furniture or students). *Just this class* sets `shellLocal`, which keeps that class's own shell until it is shared from Rooms. Old `ta-saved-layouts` stay readable under "My saved layouts"; the first library save copies them in as a room of that name (the old key is never rewritten). Everything is backed up once per session first (`autoBackup('before room library')`).
+- API (Phase 5): `loadRooms()`, `saveRooms(rooms)`, `applyRoomShell(layoutObj,room)`, `extractShell(layoutObj)`, `extractLayout(layoutObj)`, `instantiateLayout(layout,uid)`, `sameShell`, `syncClassWithRoom(classId,layout)`.
 
 ## 8. Class chips (Phase 1)
 

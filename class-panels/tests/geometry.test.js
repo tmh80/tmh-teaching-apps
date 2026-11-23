@@ -216,5 +216,124 @@ console.log('Chairs under plain seat groups, standing spots at benches');
   ok(bd.length === 4 && bd.every(s => !s.standing), 'switched to Table, the same bench has chairs (and the same 4 slots)');
 }
 
+/* ── Room shell (Phase 4): walls, openings, items, the room library ── */
+const { itemCentre, lineItemFromPoints, snapItemToWall, AREA_COLOURS, wallSnapPoint, rectRoomWalls, closestOnWall, clampOpeningT, openingAtPoint, openingFrame, itemGeom, itemBounds, upgradeLegacyItem, newRoomItem,
+  extractShell, extractLayout, applyRoomShell, sameShell, instantiateLayout, migrateLegacyLayouts, nextStationNumber, ROOM_ITEM_TYPES, ROOM_ITEM_SECTIONS } = G;
+
+console.log('Wall snapping');
+{
+  ok(wallSnapPoint([83, 61], []).p.join() === '80,64', 'a free point snaps to the 8 px grid');
+  const diag = wallSnapPoint([140, 133], [], { anchor: [100, 100] }).p;
+  ok(diag.join() === '140,140', `a 45° drag stays on the diagonal (${diag})`);
+  ok(Math.abs(diag[0] - 100) === Math.abs(diag[1] - 100), 'both axes moved by the same amount');
+  ok(wallSnapPoint([203, 112], [], { anchor: [100, 100] }).p.join() === '200,100', 'a nearly horizontal drag snaps to 0°');
+  ok(wallSnapPoint([108, 197], [], { anchor: [100, 100] }).p.join() === '100,200', 'a nearly vertical drag snaps to 90°');
+  ok(wallSnapPoint([-40, 98], [], { anchor: [100, 100] }).p.join() === '-40,100', 'dragging left stays horizontal');
+  const walls = [{ id: 'a', x1: 40, y1: 40, x2: 300, y2: 40 }];
+  const j = wallSnapPoint([306, 47], walls, { anchor: [300, 200] });
+  ok(j.joined && j.p.join() === '300,40', 'a wall end snaps onto a nearby wall end so the corner joins exactly');
+  ok(!wallSnapPoint([330, 47], walls).joined, 'but not from far away');
+  ok(!wallSnapPoint([302, 42], walls, { ignoreId: 'a' }).joined, 'a wall never snaps to its own ends');
+  const rect = rectRoomWalls({ x: 21, y: 22, w: 300, h: 200 }, (() => { let i = 0; return () => 'w' + i++; })());
+  ok(rect.length === 4 && rect[0].x1 === 16 && rect[0].y1 === 16 && rect[0].x2 === 328 && rect[2].y1 === 224, 'Rectangle room makes four walls on the grid, just outside the box');
+  ok(rect.every((w, i) => w.x2 === rect[(i + 1) % 4].x1 && w.y2 === rect[(i + 1) % 4].y1), 'the four walls join end to end, clockwise');
+  ok(rectRoomWalls({ x: -50, y: -50, w: 100, h: 100 }, () => 'q')[0].x1 === 8, 'a rectangle never starts off the canvas');
+}
+
+console.log('Openings on a wall');
+{
+  const wall = { id: 'w', x1: 0, y1: 0, x2: 200, y2: 0 };
+  const c = closestOnWall(wall, [150, 12]);
+  ok(near(c.t, 0.75) && near(c.dist, 12), 'the closest point on a wall gives its position t and how far away it is');
+  ok(clampOpeningT(wall, 56, 0.01) === 0.14 && clampOpeningT(wall, 56, 0.99) === 0.86, 'a door can\'t poke out past the ends of its wall');
+  ok(clampOpeningT({ id: 'x', x1: 0, y1: 0, x2: 40, y2: 0 }, 56, 0.2) === 0.5, 'on a wall shorter than the door it sits in the middle');
+  const drop = openingAtPoint([wall], [100, 20], 56, 36);
+  ok(drop && drop.wallId === 'w' && drop.t === 0.5, 'dropping a door near a wall puts it on that wall at that spot');
+  ok(openingAtPoint([wall], [100, 90], 56, 36) === null, 'dropping it far from any wall puts it nowhere');
+  const two = [wall, { id: 'v', x1: 0, y1: 100, x2: 200, y2: 100 }];
+  ok(openingAtPoint(two, [60, 80], 56, 36).wallId === 'v', 'with two walls it picks the nearer one');
+  const f = openingFrame(wall, { t: 0.25, width: 56 });
+  ok(near(f.c[0], 50) && near(f.c[1], 0) && near(f.a[0], 22) && near(f.b[0], 78) && f.ang === 0, 'an opening is centred at t along the wall, its width spread each side');
+  const diagWall = { id: 'd', x1: 0, y1: 0, x2: 100, y2: 100 };
+  const fd = openingFrame(diagWall, { t: 0.5, width: 40 });
+  ok(near(fd.ang, 45) && near(fd.c[0], 50) && near(dist(fd.a, fd.b), 40), 'on a diagonal wall the opening turns with it');
+}
+
+console.log('Room items');
+{
+  const mk = type => ({ id: 'i', type, x: 100, y: 100 });
+  ok(itemGeom(mk('desk')).w === 114 && itemGeom(mk('desk')).h === 52 && itemGeom(mk('desk')).legacy, 'an original desk keeps its old fixed size');
+  ok(itemGeom({ ...mk('desk'), rotation: 90 }).w === 52, 'and its old on-its-side shape');
+  ok(itemGeom(mk('sink')).w === 64 && !itemGeom(mk('sink')).legacy, 'a catalogue item falls back to its catalogue size');
+  ok(itemGeom({ ...mk('sink'), w: 80, h: 48 }).w === 80, 'a saved size wins');
+  const b = itemBounds({ id: 'i', type: 'box', x: 100, y: 100, w: 100, h: 40, rot: 90 });
+  ok(near(b.w, 40) && near(b.h, 100) && near(b.x + b.w / 2, 150) && near(b.y + b.h / 2, 120), 'a turned item\'s bounds swap, about its middle');
+  const door = { id: 'd', type: 'door', x: 800, y: 400, rotation: 90 };
+  const up = upgradeLegacyItem(door), bb0 = itemBounds(door), bb1 = itemBounds(up);
+  ok(up.w === 64 && up.rot === 90 && near(bb0.x, bb1.x, 0.1) && near(bb0.y, bb1.y, 0.1) && near(bb0.w, bb1.w, 0.1), 'an original door is converted without moving');
+  const desk = { id: 'k', type: 'desk', x: 60, y: 60, rotation: 90 }, ud = upgradeLegacyItem(desk), db0 = itemBounds(desk), db1 = itemBounds(ud);
+  ok(ud.w === 114 && ud.rot === 90 && near(db0.x, db1.x, 0.1) && near(db0.y, db1.y, 0.1) && near(db0.h, db1.h, 0.1), 'and so is an original desk on its side');
+  ok(upgradeLegacyItem(ud) === ud, 'converting twice changes nothing');
+  const all = ROOM_ITEM_SECTIONS.flatMap(s => s.types);
+  ok(all.every(t => ROOM_ITEM_TYPES[t]) && ['sink', 'fume', 'eyewash', 'shower', 'blanket', 'extinguisher', 'firstaid', 'gas', 'estop', 'chemstore', 'prepdoor', 'goggles', 'glassbin', 'isolator', 'demo'].every(t => ROOM_ITEM_SECTIONS.find(x => x.id === 'lab').types.includes(t)), 'every catalogue entry exists and the lab section has all 15 lab items');
+  ok(['box', 'text', 'arrow'].every(t => ROOM_ITEM_SECTIONS.find(x => x.id === 'free').types.includes(t)), 'free shapes: box, text and arrow');
+  ok(ROOM_ITEM_TYPES.sink.fixed && ROOM_ITEM_TYPES.fume.fixed && ROOM_ITEM_TYPES.board.fixed && !ROOM_ITEM_TYPES.bin.fixed, 'sinks, fume cupboards and boards start fixed; bins don\'t');
+  ok(nextStationNumber([{ station: { n: 2 } }], [{ station: { n: 5 } }, {}]) === 6 && nextStationNumber([], []) === 1, 'the next station number follows the highest one');
+}
+
+console.log('Room library: shell, layout, apply');
+{
+  const uid = mkUid();
+  const lo = {
+    seats: [{ id: 's1', groupId: 'g1', x: 0, y: 0, studentId: 'stu1', locked: true, used: true, pieceId: 'p1', slot: 0 }, { id: 's2', groupId: 'g1', x: 1, y: 1, studentId: 'stu2', locked: false, used: true, pieceId: 'p1', slot: 1 }],
+    groups: [{ id: 'g1', seatIds: ['s1', 's2'], label: '1' }], tags: ['LS'], rules: [{ id: 'r', type: 'apart' }],
+    roomItems: [{ id: 'sinkA', type: 'sink', x: 10, y: 10, fixed: true }, { id: 'binA', type: 'bin', x: 50, y: 50, fixed: false }, { id: 'oldDesk', type: 'desk', x: 5, y: 5, rotation: 0 }],
+    pieces: [{ id: 'p1', shape: 'pair', x: 100, y: 100, rot: 0, roles: ['desk'], station: { n: 1, name: 'Dissect' } }], joins: [],
+    walls: [{ id: 'w1', x1: 0, y1: 0, x2: 100, y2: 0 }], openings: [{ id: 'o1', type: 'door', wallId: 'w1', t: 0.5, width: 56, flip: false, swing: 1 }],
+  };
+  const sh = extractShell(lo);
+  ok(sh.walls.length === 1 && sh.openings.length === 1 && sh.items.length === 1 && sh.items[0].id === 'sinkA', 'the shell is the walls, openings and fixed items only');
+  const ly = extractLayout(lo);
+  ok(ly.items.map(i => i.id).join() === 'binA,oldDesk', 'the layout holds the non-fixed items (original items count as movable)');
+  ok(ly.seats.every(s => s.studentId === null && !s.locked) && ly.pieces[0].station.n === 1, 'a layout never holds students, and keeps its pieces (and station flags)');
+  ok(lo.seats[0].studentId === 'stu1', 'extracting doesn\'t touch the class\'s own seats');
+  const room = { id: 'R', name: 'Lab 204', shell: { walls: [{ id: 'w1', x1: 0, y1: 0, x2: 100, y2: 0 }, { id: 'w2', x1: 100, y1: 0, x2: 100, y2: 80 }], openings: [], items: [{ id: 'sinkA', type: 'sink', x: 10, y: 10, fixed: true }, { id: 'fumeA', type: 'fume', x: 90, y: 10, fixed: true }] }, layouts: [] };
+  const ap = applyRoomShell(lo, room);
+  ok(ap.walls.length === 2 && !('openings' in ap) && ap.roomItems.filter(i => i.fixed).map(i => i.id).join() === 'sinkA,fumeA', 'applying a shell swaps in its walls, openings and fixed items');
+  ok(ap.roomItems.some(i => i.id === 'binA') && ap.roomItems.some(i => i.id === 'oldDesk'), 'and keeps the class\'s own movable items');
+  ok(JSON.stringify(ap.seats) === JSON.stringify(lo.seats) && JSON.stringify(ap.pieces) === JSON.stringify(lo.pieces) && ap.rules === lo.rules && ap.tags === lo.tags && JSON.stringify(ap.groups) === JSON.stringify(lo.groups), 'seats, students, pieces, groups, tags and rules are untouched');
+  ok(JSON.stringify(applyRoomShell(ap, room)) === JSON.stringify(ap), 'applying twice gives the same result');
+  ok(sameShell(ap, room) && !sameShell(lo, room), 'sameShell says whether a class already has the room\'s shell');
+  ok(!('walls' in applyRoomShell(lo, { shell: { walls: [], openings: [], items: [] } })), 'a room with no walls clears them (and writes no empty field)');
+  const inst = instantiateLayout({ ...ly, items: ly.items }, uid);
+  ok(inst.pieces[0].id !== 'p1' && inst.seats.every(s => s.pieceId === inst.pieces[0].id) && inst.seats[0].id !== 's1', 'a layout instance has fresh piece and seat ids, linked to each other');
+  ok(inst.groups[0].seatIds.every(id => inst.seats.some(s => s.id === id)) && inst.seats.every(s => s.groupId === inst.groups[0].id), 'its groups point at the new seats');
+  ok(inst.items.length === 2 && inst.items.every(i => !['binA', 'oldDesk'].includes(i.id)) && inst.pieces[0].station.name === 'Dissect', 'items get fresh ids and station flags carry over');
+  const legacy = [{ id: 'L1', name: 'Test clusters', seats: [], groups: [], roomItems: [{ id: 'x', type: 'desk', x: 1, y: 1 }], createdAt: 5 }];
+  const m1 = migrateLegacyLayouts([], legacy);
+  ok(m1.length === 1 && m1[0].legacy && m1[0].name === 'My saved layouts' && m1[0].layouts[0].name === 'Test clusters' && m1[0].layouts[0].items.length === 1, 'old saved layouts come in as a room called "My saved layouts"');
+  ok(JSON.stringify(migrateLegacyLayouts(m1, legacy)) === JSON.stringify(m1) && migrateLegacyLayouts([{ id: 'a' }], []).length === 1, 'the migration is idempotent and does nothing without old layouts');
+}
+
+console.log('Zones, lines and board-style windows');
+{
+  ok(ROOM_ITEM_SECTIONS[0].id === 'zones' && ROOM_ITEM_SECTIONS[0].types.join() === 'area,line', 'the catalogue starts with a "Zones and lines" section (area, line)');
+  ok(ROOM_ITEM_SECTIONS.find(x => x.id === 'classroom').types.includes('window') && ROOM_ITEM_TYPES.window.fixed, 'the window is a classroom item and part of the room');
+  ok(Object.keys(AREA_COLOURS).join() === 'mint,sky,cyan,sunny,coral' && newRoomItem('area', mkUid()).color === 'mint', 'areas pick from mint, sky, cyan, sunny and coral (mint to start)');
+  const ln = lineItemFromPoints([100, 100], [300, 100], mkUid());
+  ok(ln.type === 'line' && ln.w === 200 && ln.rot === 0 && near(itemCentre(itemGeom(ln))[0], 200) && near(itemCentre(itemGeom(ln))[1], 100), 'a line from two points is a thin item as long as the drag, centred on it');
+  const dg = lineItemFromPoints([100, 100], [200, 200], mkUid());
+  ok(near(dg.rot, 45) && near(dg.w, 141), 'a diagonal drag gives a turned line');
+  const wall = { id: 'w', x1: 0, y1: 100, x2: 400, y2: 100 };
+  const win = { id: 'x', type: 'window', x: 150, y: 85, w: 160, h: 24, rot: 20 };
+  const sn = snapItemToWall(win, [wall]);
+  ok(sn && sn.rot === 0 && near(itemCentre(itemGeom(sn))[1], 100) && near(itemCentre(itemGeom(sn))[0], 230), 'a window dropped on a wall lies along it, centred on it');
+  ok(snapItemToWall({ ...win, y: 300 }, [wall]) === null, 'but not when it is far from any wall');
+  const vwin = snapItemToWall({ id: 'y', type: 'window', x: 330, y: 140, w: 160, h: 24, rot: 0 }, [{ id: 'v', x1: 400, y1: 0, x2: 400, y2: 400 }]);
+  ok(vwin && vwin.rot === 90 && near(itemCentre(itemGeom(vwin))[0], 400), 'on an upright wall it turns upright');
+  const desk = { id: 'd', type: 'desk', x: 60, y: 60 };
+  ok(itemGeom(desk).w === 114 && itemGeom({ ...desk, w: 200, h: 72 }).w === 200, 'the teacher\'s desk keeps 114×52 until resized, then uses its own size');
+}
+
 console.log(`\n${passes} passed, ${failures} failed.`);
 process.exit(failures ? 1 : 0);
