@@ -168,6 +168,7 @@ The units are canvas pixels on the existing 8 px grid. A seat slot draws as a **
   4. Set `cp-schema=2` only after every class has been migrated.
 - **Rename, reorder (drag), duplicate, delete:** deleting asks first, Regular can't be deleted, and a deleted setup's `sl-…~id` key is kept for 30 days in `ta-trash` before it is removed.
 - Each setup gets **Confirm seating / history**, tagged with `setupId`.
+- **Spread students out when generating** (found in Phase 3): Randomise fills seats in list order. When there are more seats than students, the most recently added tables stay empty. In setups, generate across all usable tables: fill whole tables evenly, rather than leaving whole tables empty at the end, unless the teacher has switched seats off.
 - The **Backup export** (`SettingsModal`) already exports every key. Check that it includes the new keys and that a restore round-trips.
 
 ## 10. Groups into setups (Phase 6)
