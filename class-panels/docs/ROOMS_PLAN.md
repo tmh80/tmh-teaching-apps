@@ -211,7 +211,7 @@ The phases run **one at a time** on `classpanels-rooms`, because nearly everythi
 | 7 | Stations + timer rotation + display | Sonnet | Builds on 4 and 5; a clear spec |
 | T | Timer quick actions + drag to combine + repeat (section 15) | Sonnet | Only touches the Timer panel, so it can run alongside the other phases |
 | 2b | **Button theme everywhere** (Tom, 23 Nov: "I love the buttons for the classes but now I need all buttons to have that same theme"). Restyle every app button in the class-chip style: top tabs, panel buttons, menus, toggles. Do this straight after Phase 4 merges and before Phase 5, because it touches every screen. | Sonnet | Wide but shallow |
-| 8 | Final pass: Help-mode titles, README, `class-panels/README.md`, full regression, screenshots for Tom | Sonnet + planner review | |
+| 8 | Final pass. Also: the old "Record seating / Save layout" prompt that appears when loading a layout still writes to `ta-saved-layouts`. Route it into the room library (`saveRooms`) so new saves show up in 🏫 Rooms. Final pass items: Help-mode titles, README, `class-panels/README.md`, full regression, screenshots for Tom | Sonnet + planner review | |
 
 Each phase hands back:
 - what changed, described in plain English;
