@@ -68,10 +68,12 @@ const QT = {
     bind(el, q, api) {
       const U = q.units && q.units.length;
       const lb = $('.cluebtn', el); if (lb) { let k = 0; lb.addEventListener('click', () => { if (api.locked()) return; const li = document.createElement('li'); li.innerHTML = q.hints[k]; $('.clist', el).appendChild(li); k++; if (k >= q.hints.length) { lb.disabled = true; lb.textContent = 'No more hints'; } else lb.textContent = 'Show another hint'; }); }
+      let trapped = false;   // q.trap(v, ans): a message for a known wrong method, shown once without using up the go
       const go = () => { if (api.locked()) return; const au = api.auto, raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v) && !au) { api.say('Type your answer as a number.', 'no'); return; }
         if (U && !u && !au) { api.say('Choose a unit for your answer first.', 'no'); return; }
         if (q.need && !q.need() && !au) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
         const ans = q.live ? q.live() : q.ans, numOk = !isNaN(v) && near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
+        if (!ok && !numOk && q.trap && !trapped && !au && !isNaN(v)) { const tm = q.trap(v, ans); if (tm) { trapped = true; api.say(tm, 'hint'); return; } }
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u, w: ($('.numworkin', el) || {}).value || '' }); };
       api.reg({ blank: () => !$('.ansin', el).value.trim(), check: go });

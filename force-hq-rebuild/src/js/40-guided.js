@@ -155,7 +155,7 @@ function renderStepQs() {
   qChrome();
 }
 
-/* ---------- the Your turn box: hidden until Next, then front and centre; it can be minimised to the left column ---------- */
+/* ---------- the Your turn box: hidden until Next, then front and centre; minimised, it floats as a "Your turn · Open" button at the bottom of the screen, so it is always in view (Tom, 23 Nov 2026: tucked under the left column it was off the screen) ---------- */
 let QSTATE = 'hidden';
 const hasQs = () => !!(CH && (CHDATA[CH.id].steps[GI].qs || []).length);
 function anyAnswered() { const st = CHDATA[CH.id].steps[GI]; return (st.qs || []).some(q => dbGet(stepKey(CH.id, GI) + '.' + q.id, null)); }
@@ -185,7 +185,7 @@ function qChrome() {
     const old = $('.qrunsbtn', qc); if (old) old.remove();
     if (['run', 'shove', 'launch', 'drop'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
-    hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
+    hd.innerHTML = `<button type="button" class="qopen2${done ? ' alldone' : ''}" id="qOpen" aria-label="Open the questions"><span class="qic" aria-hidden="true">📋</span><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
     $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qrunsbtn', qc); if (old) old.remove();
     ft.innerHTML = '';
   }

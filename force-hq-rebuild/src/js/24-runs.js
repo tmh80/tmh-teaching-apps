@@ -2,7 +2,7 @@
    Each button action starts a run. The run updates live while the crate moves, then is saved with a
    plain-English sentence and the key numbers, so students can answer questions without re-running.
    Shown in a pop-out side panel ("📋 My runs"), in the Journal, and under the Your turn questions. */
-let RUN = null, RUNSEQ = 0, RUNDIRTY = 0;
+let RUN = null, RUNSEQ = 0, RUNDIRTY = 0, RUNHOLD = false;
 const runsAll = () => dbGet('runs', []);
 function runWhere() {
   if (VIEW === 'vExplore') return { sec: 'explore', label: 'Explore' };
@@ -147,11 +147,23 @@ function runsTabHTML() {
   return `<p class="scaleNote">Every push, pull and launch is saved here, newest first. Runs from this step are open. Tap any older run to open it.</p>
     <h3 class="jh3">${w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'}</h3>${here.length ? `<ol class="runlist">${here.map(r => runItem(r, true)).join('')}</ol>` : '<p class="scaleNote">No runs in this step yet.</p>'}
     ${rest.length ? `<h3 class="jh3">Earlier runs</h3><ol class="runlist">${rest.map(r => runItem(r, false)).join('')}</ol>` : ''}
-    <button type="button" class="mini" id="rpClear">Clear all my runs</button>`;
+    ${clearBtnHTML()}`;
+}
+/* Clear all my runs: two taps. The "are you sure?" state is kept here, not on the button, because the Journal redraws several times a second while a run is going (Tom, 23 Nov 2026: during a run the second tap never worked). A run that is still going is kept. */
+let CLEAR_ARM = 0, CLEAR_MSG = '';
+function clearBtnHTML() {
+  const armed = Date.now() - CLEAR_ARM < 6000, live = !!RUN;
+  return `${CLEAR_MSG ? `<p class="scaleNote rpcleared">${CLEAR_MSG}</p>` : ''}<button type="button" class="mini" id="rpClear">${armed ? (live ? 'Tap again to clear every finished run' : 'Tap again to clear every run') : live ? 'Clear my finished runs' : 'Clear all my runs'}</button>${live && !armed ? '<span class="scaleNote"> (1 run underway: it will be kept)</span>' : ''}`;
+}
+function clearRuns() {
+  if (Date.now() - CLEAR_ARM >= 6000) { CLEAR_ARM = Date.now(); CLEAR_MSG = ''; runsRefresh(true); setTimeout(() => runsRefresh(true), 6050); return; }
+  CLEAR_ARM = 0; const keep = RUN ? runsAll().filter(r => r.n === RUN.n && r.at === RUN.at) : [];
+  dbSet('runs', keep); CLEAR_MSG = keep.length ? 'Your finished runs are cleared. 1 run is underway, so it has been kept. Tap Clear again when it ends to clear it too.' : 'All your runs are cleared.';
+  RUNDIRTY = 1; runsRefresh(true); setTimeout(() => { CLEAR_MSG = ''; }, 8000);
 }
 const runsFor = () => runsAll().filter(sameStep);
 function runsRefresh(force) {
-  if (!RUNDIRTY && !force) return; RUNDIRTY = 0;
+  if (!RUNDIRTY && !force) return; if (RUNHOLD && !force) return; RUNDIRTY = 0;
   if (typeof journalOpen === 'function' && journalOpen() && JTAB === 'runs') renderJournal();
   const b = $('#qCard .qrunsbtn .rc'); if (b) b.textContent = runsFor().length;
 }
@@ -164,7 +176,11 @@ function initRuns() {
   document.addEventListener('click', e => {
     const sb = e.target.closest('.snapthumb');
     if (sb) { const r = runsAll().find(x => x.n + '-' + x.at === sb.dataset.snapimg); if (r && r.snap && r.snap.img) openModal(`<div class="modal snapbig"><h2>Snapshot ${r.n}</h2><img src="${r.snap.img}" alt="The arena at this moment"><p>${runText(r)}</p><div class="row"><button type="button" class="go" data-close>Close</button></div></div>`); return; }
-    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); RUNDIRTY = 1; runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
+    if (e.target.closest('#rpClear')) clearRuns();
   });
+  /* hold off the live redraw while a finger or mouse button is down in the Journal, so a tap there is never lost to a redraw */
+  document.addEventListener('pointerdown', e => { RUNHOLD = !!e.target.closest('.jpanel, #journal, .journal'); }, true);
+  const release = () => { if (RUNHOLD) setTimeout(() => { RUNHOLD = false; }, 60); };
+  document.addEventListener('pointerup', release, true); document.addEventListener('pointercancel', release, true);
   setInterval(() => runsRefresh(), 250);
 }

@@ -83,3 +83,11 @@
 ## Done: Chapter 6 completed (3 Nov 2026)
 - Parts 4 and 5, the Extension, the Build tasks, the Explore Workshop scene (free workshop with every machine, any load in kg, a world picker and Perfect / Real; Try the rescue again), fun facts, the My Rescue page (Part 5 is Operation Gummy Lift), worksheets and Toddle files for every Part and build task. See the Brief's Chapter 6 build log.
 - Not built (banked): Explore "Draw what's happening now" (checks a free-body diagram against the live forces), the work triangle on the calculator, a 1-rope option in the builder.
+
+## Done: Tom's class feedback (23 Nov 2026)
+- Chapter 2, step 1: the push gave 3.125 m/s, so the readout showed 3.12 or 3.13. The push is now added up exactly (any frame rate) and peaks at 261 N, so the readings are 3.26, 1.63 (48 kg), 1.28 (61 kg), 0.53 (147 kg) and 0.82 m/s (96 kg). Questions ask for the **highest velocity**; a distance ÷ time answer gets a hint about average velocity and a second go.
+- Minimised questions were off the bottom of the screen under the left column. They now float as a "📋 Your turn · Open" button at the bottom of the screen.
+- Clear all my runs didn't work during a run (the Journal redrew and lost the "tap again" state). It now keeps the live run and clears the rest, with a note saying so.
+- Chapter 1 s3r (air floor): with a kid and an adult on the left against one adult, the crate went right first. Cause: the earlier run was paused while the crate slid right, the teams were changed, and Pull! carried on that run. Pull! now starts again from still when the set-up has changed; it still resumes when nothing changed. Changing teams in the middle of a run still carries on (that is real inertia).
+- Test: `tests/feedback_1123.py`.
+

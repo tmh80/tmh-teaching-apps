@@ -198,6 +198,16 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .qtip{flex-basis:100%;margin:0;font-family:var(--f-body);font-size:14px;font-weight:400;color:var(--muted)}
 .qfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.qfoot:empty{display:none}
 .qcard.docked{padding:0;border-style:dashed;cursor:pointer}
+/* minimised questions float at the bottom of the screen, always in view (Tom, 23 Nov 2026) */
+.qcard.docked{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:58;width:auto;max-width:calc(100vw - 32px);border:2.5px solid var(--accent);border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.28)}
+.qcard.docked .qhead{margin:0}
+.qcard.docked .qopen2{padding:8px 10px 8px 14px;gap:12px}
+.qcard.docked .qopen2 b{font-size:19px;line-height:1.1}
+.qcard.docked .qopen2 .qic{font-size:22px}
+.qcard.docked .qopen2.alldone{background:var(--right-soft)}.qcard.docked:has(.alldone){border-color:var(--good)}
+@media (min-width:1180px){body.jopen .qcard.docked{left:calc(50% - 215px)}}
+@media (max-width:700px){.qcard.docked{left:12px;bottom:12px;transform:none;max-width:calc(100vw - 96px)}.qcard.docked .qopen2 b{font-size:17px}.qcard.docked .qopen2 small{font-size:12px}}
+@media print{.qcard.docked{display:none}}
 .qcard.docked > :not(.qhead){display:none}
 .qopen2{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;border:0;background:var(--accent-soft);color:var(--ink);border-radius:9px;padding:12px 14px;text-align:left}
 .qopen2 b{display:block;font-family:var(--f-display);font-size:22px}
@@ -891,3 +901,5 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glchips{flex-wrap:wrap;gap:6px;margin:6px 0} .glchip.on{border-color:var(--accent);background:var(--chip)}
 .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid currentColor;vertical-align:baseline;margin:0 2px}
 .glhint .glplug li{margin:4px 0}
+/* room under the page for the floating Your turn button, so it never hides the last buttons */
+body:has(#qCard.docked:not([hidden])) main{padding-bottom:96px}

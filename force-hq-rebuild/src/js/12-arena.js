@@ -372,7 +372,12 @@ function renderControls() {
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
-  $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); if (S.running) runMark('pull'); else runEnd('paused'); });
+  /* Pull! after a pause carries on the same run. If the teams, the mass or the floor changed while it was paused (or after a push), the crate starts again from still, because that is a new experiment: carrying on let a crate that was still sliding right keep going right for a moment against a stronger left team (Tom, 23 Nov 2026) */
+  const pullSig = () => [S.left.slice().sort(), S.right.slice().sort(), S.mass, S.floor].join('|');
+  $('#runBtn').addEventListener('click', () => {
+    if (S.msg) resetSim();
+    else if (!S.running && (S.t > 0 || S.v !== 0) && S.pullSig !== pullSig()) { const was = S.v !== 0; resetSim(); if (was) toast('New set-up, so the crate starts again from still.'); }
+    S.running = !S.running; syncRun(); if (S.running) { S.pullSig = pullSig(); runMark('pull'); } else runEnd('paused'); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
   $('#shoveBtn').addEventListener('click', () => { if (S.scene === 'space') { if (spacePush()) runMark('push'); labChanged(); return; } shove(); runMark('push'); labChanged(); });
   const thr = d => { if (!thrust(d)) return; if (!RUN) runMark('thrust'); labChanged(); };

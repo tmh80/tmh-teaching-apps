@@ -17,7 +17,9 @@ const SLED_X0 = -9, SLED_FIN = 6;                           // the Snow Arena: s
 const SP_PUSH_T = 1.2, SP_THR_F = 50, DOCK_X = 4.5, POD_X0 = -3, AST_X0 = -4.55, TETHER_X = -9.3, SP_WARP = 8;
 const pprof = t => { if (t < 0 || t >= SP_PUSH_T) return 0; const r = 0.2; if (t < r) return sstep(t / r); if (t > SP_PUSH_T - r) return sstep((SP_PUSH_T - t) / r); return 1; };
 const PXM = 39, CX = 450, GROUND = 300, ROPEY = 262, CW = 88, CRH = 64, LIM = 9, MAXT = 6;
-const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 250;
+const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 261;   // the push: 261 N at its peak, 78.3 N·s in all, so the 24 kg crate always ends up at 3.26 m/s on the air floor (250 N gave exactly 3.125 m/s, which showed as 3.12 or 3.13 depending on the computer: Tom, 23 Nov 2026)
+/* the push force added up exactly over [a, b] seconds into the push (the integral of SHOVE_F·sin²(πt/SHOVE_T)), so the speed after a push never depends on the frame rate */
+const shoveImp = (a, b) => { const I = t => { t = Math.min(Math.max(t, 0), SHOVE_T); return SHOVE_F * (t / 2 - SHOVE_T / (4 * Math.PI) * Math.sin(2 * Math.PI * t / SHOVE_T)); }; return I(b) - I(a); };
 const S = {
   left: [], right: [], mass: 50, floor: 'concrete', x: 0, v: 0, a: 0, t: 0, pullT: 0, shoveT: -1, lastShoveT: null,
   running: false, hist: [], msg: '', flags: null, frozen: false,
@@ -45,7 +47,7 @@ function forces() {
   if (S.scene === 'space') return spaceForces();
   const u = S.running ? Math.min(1, S.pullT / PULL_RAMP) : 1, k = sstep(u), m = S.mass, fl = FLOORS[S.floor];
   const L = tot(S.left) * k, R = tot(S.right) * k, W = m * G, N = W, fs = fl.mus * W, fk = fl.mu * W;
-  const shove = S.shoveT >= 0 && S.shoveT < SHOVE_T ? SHOVE_F * Math.pow(Math.sin(Math.PI * S.shoveT / SHOVE_T), 2) : 0;
+  const shove = S.shoveAvg != null ? S.shoveAvg : S.shoveT >= 0 && S.shoveT < SHOVE_T ? SHOVE_F * Math.pow(Math.sin(Math.PI * S.shoveT / SHOVE_T), 2) : 0;
   const app = R - L + shove;
   let fr;
   if (Math.abs(S.v) < 1e-6) fr = Math.abs(app) <= fs ? -app : -Math.sign(app) * fk;
@@ -76,7 +78,8 @@ function stepSpace(dt) {
 }
 function stepSim(dt) {
   if (S.scene === 'space') { stepSpace(dt); return; }
-  const f = forces(); S.a = f.a;
+  if (S.shoveT >= 0) S.shoveAvg = shoveImp(S.shoveT, S.shoveT + dt) / dt;   // the average push over this step, so the push adds exactly the right velocity
+  const f = forces(); S.a = f.a; S.shoveAvg = null;
   let v2 = S.v + f.a * dt;
   if (S.v !== 0 && v2 * S.v < 0) v2 = 0;
   if (Math.abs(v2) < 1e-5 && Math.abs(f.app) <= f.fmax) v2 = 0;

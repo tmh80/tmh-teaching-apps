@@ -253,6 +253,16 @@ input[type=range]{width:100%;accent-color:var(--accent)}
 .qtip{flex-basis:100%;margin:0;font-family:var(--f-body);font-size:14px;font-weight:400;color:var(--muted)}
 .qfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.qfoot:empty{display:none}
 .qcard.docked{padding:0;border-style:dashed;cursor:pointer}
+/* minimised questions float at the bottom of the screen, always in view (Tom, 23 Nov 2026) */
+.qcard.docked{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:58;width:auto;max-width:calc(100vw - 32px);border:2.5px solid var(--accent);border-radius:14px;box-shadow:0 10px 28px rgba(0,0,0,.28)}
+.qcard.docked .qhead{margin:0}
+.qcard.docked .qopen2{padding:8px 10px 8px 14px;gap:12px}
+.qcard.docked .qopen2 b{font-size:19px;line-height:1.1}
+.qcard.docked .qopen2 .qic{font-size:22px}
+.qcard.docked .qopen2.alldone{background:var(--right-soft)}.qcard.docked:has(.alldone){border-color:var(--good)}
+@media (min-width:1180px){body.jopen .qcard.docked{left:calc(50% - 215px)}}
+@media (max-width:700px){.qcard.docked{left:12px;bottom:12px;transform:none;max-width:calc(100vw - 96px)}.qcard.docked .qopen2 b{font-size:17px}.qcard.docked .qopen2 small{font-size:12px}}
+@media print{.qcard.docked{display:none}}
 .qcard.docked > :not(.qhead){display:none}
 .qopen2{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;border:0;background:var(--accent-soft);color:var(--ink);border-radius:9px;padding:12px 14px;text-align:left}
 .qopen2 b{display:block;font-family:var(--f-display);font-size:22px}
@@ -946,6 +956,8 @@ input.coin.right{border-color:var(--good)!important;background:var(--okbg)} inpu
 .glchips{flex-wrap:wrap;gap:6px;margin:6px 0} .glchip.on{border-color:var(--accent);background:var(--chip)}
 .blank{display:inline-block;min-width:3.2em;border-bottom:2px solid currentColor;vertical-align:baseline;margin:0 2px}
 .glhint .glplug li{margin:4px 0}
+/* room under the page for the floating Your turn button, so it never hides the last buttons */
+body:has(#qCard.docked:not([hidden])) main{padding-bottom:96px}
 
 /* ===== Key vocabulary flashcards: real index cards (cream paper, red header line, pale blue ruled lines) =====
    The handwriting sits ON the lines: every text block on a card has line-height = --lh (the rule spacing) and the ruled background is drawn
@@ -2071,7 +2083,9 @@ const SLED_X0 = -9, SLED_FIN = 6;                           // the Snow Arena: s
 const SP_PUSH_T = 1.2, SP_THR_F = 50, DOCK_X = 4.5, POD_X0 = -3, AST_X0 = -4.55, TETHER_X = -9.3, SP_WARP = 8;
 const pprof = t => { if (t < 0 || t >= SP_PUSH_T) return 0; const r = 0.2; if (t < r) return sstep(t / r); if (t > SP_PUSH_T - r) return sstep((SP_PUSH_T - t) / r); return 1; };
 const PXM = 39, CX = 450, GROUND = 300, ROPEY = 262, CW = 88, CRH = 64, LIM = 9, MAXT = 6;
-const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 250;
+const PULL_RAMP = 0.4, SHOVE_T = 0.6, SHOVE_F = 261;   // the push: 261 N at its peak, 78.3 N·s in all, so the 24 kg crate always ends up at 3.26 m/s on the air floor (250 N gave exactly 3.125 m/s, which showed as 3.12 or 3.13 depending on the computer: Tom, 23 Nov 2026)
+/* the push force added up exactly over [a, b] seconds into the push (the integral of SHOVE_F·sin²(πt/SHOVE_T)), so the speed after a push never depends on the frame rate */
+const shoveImp = (a, b) => { const I = t => { t = Math.min(Math.max(t, 0), SHOVE_T); return SHOVE_F * (t / 2 - SHOVE_T / (4 * Math.PI) * Math.sin(2 * Math.PI * t / SHOVE_T)); }; return I(b) - I(a); };
 const S = {
   left: [], right: [], mass: 50, floor: 'concrete', x: 0, v: 0, a: 0, t: 0, pullT: 0, shoveT: -1, lastShoveT: null,
   running: false, hist: [], msg: '', flags: null, frozen: false,
@@ -2099,7 +2113,7 @@ function forces() {
   if (S.scene === 'space') return spaceForces();
   const u = S.running ? Math.min(1, S.pullT / PULL_RAMP) : 1, k = sstep(u), m = S.mass, fl = FLOORS[S.floor];
   const L = tot(S.left) * k, R = tot(S.right) * k, W = m * G, N = W, fs = fl.mus * W, fk = fl.mu * W;
-  const shove = S.shoveT >= 0 && S.shoveT < SHOVE_T ? SHOVE_F * Math.pow(Math.sin(Math.PI * S.shoveT / SHOVE_T), 2) : 0;
+  const shove = S.shoveAvg != null ? S.shoveAvg : S.shoveT >= 0 && S.shoveT < SHOVE_T ? SHOVE_F * Math.pow(Math.sin(Math.PI * S.shoveT / SHOVE_T), 2) : 0;
   const app = R - L + shove;
   let fr;
   if (Math.abs(S.v) < 1e-6) fr = Math.abs(app) <= fs ? -app : -Math.sign(app) * fk;
@@ -2130,7 +2144,8 @@ function stepSpace(dt) {
 }
 function stepSim(dt) {
   if (S.scene === 'space') { stepSpace(dt); return; }
-  const f = forces(); S.a = f.a;
+  if (S.shoveT >= 0) S.shoveAvg = shoveImp(S.shoveT, S.shoveT + dt) / dt;   // the average push over this step, so the push adds exactly the right velocity
+  const f = forces(); S.a = f.a; S.shoveAvg = null;
   let v2 = S.v + f.a * dt;
   if (S.v !== 0 && v2 * S.v < 0) v2 = 0;
   if (Math.abs(v2) < 1e-5 && Math.abs(f.app) <= f.fmax) v2 = 0;
@@ -2764,7 +2779,12 @@ function renderControls() {
 }
 function labChanged() { renderControls(); if (LAB.onChange) LAB.onChange(); }
 function initControls() {
-  $('#runBtn').addEventListener('click', () => { if (S.msg) resetSim(); S.running = !S.running; syncRun(); if (S.running) runMark('pull'); else runEnd('paused'); });
+  /* Pull! after a pause carries on the same run. If the teams, the mass or the floor changed while it was paused (or after a push), the crate starts again from still, because that is a new experiment: carrying on let a crate that was still sliding right keep going right for a moment against a stronger left team (Tom, 23 Nov 2026) */
+  const pullSig = () => [S.left.slice().sort(), S.right.slice().sort(), S.mass, S.floor].join('|');
+  $('#runBtn').addEventListener('click', () => {
+    if (S.msg) resetSim();
+    else if (!S.running && (S.t > 0 || S.v !== 0) && S.pullSig !== pullSig()) { const was = S.v !== 0; resetSim(); if (was) toast('New set-up, so the crate starts again from still.'); }
+    S.running = !S.running; syncRun(); if (S.running) { S.pullSig = pullSig(); runMark('pull'); } else runEnd('paused'); });
   $('#resetBtn').addEventListener('click', () => { resetSim(); labChanged(); });
   $('#shoveBtn').addEventListener('click', () => { if (S.scene === 'space') { if (spacePush()) runMark('push'); labChanged(); return; } shove(); runMark('push'); labChanged(); });
   const thr = d => { if (!thrust(d)) return; if (!RUN) runMark('thrust'); labChanged(); };
@@ -3567,7 +3587,7 @@ let JOURNAL_OPENED = false;
    Each button action starts a run. The run updates live while the crate moves, then is saved with a
    plain-English sentence and the key numbers, so students can answer questions without re-running.
    Shown in a pop-out side panel ("📋 My runs"), in the Journal, and under the Your turn questions. */
-let RUN = null, RUNSEQ = 0, RUNDIRTY = 0;
+let RUN = null, RUNSEQ = 0, RUNDIRTY = 0, RUNHOLD = false;
 const runsAll = () => dbGet('runs', []);
 function runWhere() {
   if (VIEW === 'vExplore') return { sec: 'explore', label: 'Explore' };
@@ -3712,11 +3732,23 @@ function runsTabHTML() {
   return `<p class="scaleNote">Every push, pull and launch is saved here, newest first. Runs from this step are open. Tap any older run to open it.</p>
     <h3 class="jh3">${w.step === 'challenge' ? 'This Challenge' : w.sec === 'explore' ? 'Explore' : 'This step'}</h3>${here.length ? `<ol class="runlist">${here.map(r => runItem(r, true)).join('')}</ol>` : '<p class="scaleNote">No runs in this step yet.</p>'}
     ${rest.length ? `<h3 class="jh3">Earlier runs</h3><ol class="runlist">${rest.map(r => runItem(r, false)).join('')}</ol>` : ''}
-    <button type="button" class="mini" id="rpClear">Clear all my runs</button>`;
+    ${clearBtnHTML()}`;
+}
+/* Clear all my runs: two taps. The "are you sure?" state is kept here, not on the button, because the Journal redraws several times a second while a run is going (Tom, 23 Nov 2026: during a run the second tap never worked). A run that is still going is kept. */
+let CLEAR_ARM = 0, CLEAR_MSG = '';
+function clearBtnHTML() {
+  const armed = Date.now() - CLEAR_ARM < 6000, live = !!RUN;
+  return `${CLEAR_MSG ? `<p class="scaleNote rpcleared">${CLEAR_MSG}</p>` : ''}<button type="button" class="mini" id="rpClear">${armed ? (live ? 'Tap again to clear every finished run' : 'Tap again to clear every run') : live ? 'Clear my finished runs' : 'Clear all my runs'}</button>${live && !armed ? '<span class="scaleNote"> (1 run underway: it will be kept)</span>' : ''}`;
+}
+function clearRuns() {
+  if (Date.now() - CLEAR_ARM >= 6000) { CLEAR_ARM = Date.now(); CLEAR_MSG = ''; runsRefresh(true); setTimeout(() => runsRefresh(true), 6050); return; }
+  CLEAR_ARM = 0; const keep = RUN ? runsAll().filter(r => r.n === RUN.n && r.at === RUN.at) : [];
+  dbSet('runs', keep); CLEAR_MSG = keep.length ? 'Your finished runs are cleared. 1 run is underway, so it has been kept. Tap Clear again when it ends to clear it too.' : 'All your runs are cleared.';
+  RUNDIRTY = 1; runsRefresh(true); setTimeout(() => { CLEAR_MSG = ''; }, 8000);
 }
 const runsFor = () => runsAll().filter(sameStep);
 function runsRefresh(force) {
-  if (!RUNDIRTY && !force) return; RUNDIRTY = 0;
+  if (!RUNDIRTY && !force) return; if (RUNHOLD && !force) return; RUNDIRTY = 0;
   if (typeof journalOpen === 'function' && journalOpen() && JTAB === 'runs') renderJournal();
   const b = $('#qCard .qrunsbtn .rc'); if (b) b.textContent = runsFor().length;
 }
@@ -3729,8 +3761,12 @@ function initRuns() {
   document.addEventListener('click', e => {
     const sb = e.target.closest('.snapthumb');
     if (sb) { const r = runsAll().find(x => x.n + '-' + x.at === sb.dataset.snapimg); if (r && r.snap && r.snap.img) openModal(`<div class="modal snapbig"><h2>Snapshot ${r.n}</h2><img src="${r.snap.img}" alt="The arena at this moment"><p>${runText(r)}</p><div class="row"><button type="button" class="go" data-close>Close</button></div></div>`); return; }
-    const c = e.target.closest('#rpClear'); if (c) { if (c.dataset.sure) { RUN = null; dbSet('runs', []); RUNDIRTY = 1; runsRefresh(true); } else { c.dataset.sure = '1'; c.textContent = 'Tap again to clear every run'; } }
+    if (e.target.closest('#rpClear')) clearRuns();
   });
+  /* hold off the live redraw while a finger or mouse button is down in the Journal, so a tap there is never lost to a redraw */
+  document.addEventListener('pointerdown', e => { RUNHOLD = !!e.target.closest('.jpanel, #journal, .journal'); }, true);
+  const release = () => { if (RUNHOLD) setTimeout(() => { RUNHOLD = false; }, 60); };
+  document.addEventListener('pointerup', release, true); document.addEventListener('pointercancel', release, true);
   setInterval(() => runsRefresh(), 250);
 }
 
@@ -3972,10 +4008,12 @@ const QT = {
     bind(el, q, api) {
       const U = q.units && q.units.length;
       const lb = $('.cluebtn', el); if (lb) { let k = 0; lb.addEventListener('click', () => { if (api.locked()) return; const li = document.createElement('li'); li.innerHTML = q.hints[k]; $('.clist', el).appendChild(li); k++; if (k >= q.hints.length) { lb.disabled = true; lb.textContent = 'No more hints'; } else lb.textContent = 'Show another hint'; }); }
+      let trapped = false;   // q.trap(v, ans): a message for a known wrong method, shown once without using up the go
       const go = () => { if (api.locked()) return; const au = api.auto, raw = $('.ansin', el).value, v = parseNum(raw), u = U ? $('.unitsel', el).value : null; if (isNaN(v) && !au) { api.say('Type your answer as a number.', 'no'); return; }
         if (U && !u && !au) { api.say('Choose a unit for your answer first.', 'no'); return; }
         if (q.need && !q.need() && !au) { api.say(q.needMsg || 'Set up the arena first.', 'no'); return; }
         const ans = q.live ? q.live() : q.ans, numOk = !isNaN(v) && near(v, ans, q.tol != null ? q.tol : Math.max(0.6, Math.abs(ans) * 0.01)), unitOk = !U || u === q.unit, ok = numOk && unitOk;
+        if (!ok && !numOk && q.trap && !trapped && !au && !isNaN(v)) { const tm = q.trap(v, ans); if (tm) { trapped = true; api.say(tm, 'hint'); return; } }
         const help = q.work || (q.hints && q.hints[q.hints.length - 1]) || '';
         api.answer(raw, ok, ok ? (q.ok || 'That\'s right!') : numOk ? `Whoops! The number is right, but the unit should be ${q.unit}. ${help}`.trim() : `Whoops! The answer is ${fmt(ans, 2)} ${q.unit || ''}. ${help}`.trim(), { score: ok ? 1 : 0, ans, u, w: ($('.numworkin', el) || {}).value || '' }); };
       api.reg({ blank: () => !$('.ansin', el).value.trim(), check: go });
@@ -4809,7 +4847,7 @@ function renderStepQs() {
   qChrome();
 }
 
-/* ---------- the Your turn box: hidden until Next, then front and centre; it can be minimised to the left column ---------- */
+/* ---------- the Your turn box: hidden until Next, then front and centre; minimised, it floats as a "Your turn · Open" button at the bottom of the screen, so it is always in view (Tom, 23 Nov 2026: tucked under the left column it was off the screen) ---------- */
 let QSTATE = 'hidden';
 const hasQs = () => !!(CH && (CHDATA[CH.id].steps[GI].qs || []).length);
 function anyAnswered() { const st = CHDATA[CH.id].steps[GI]; return (st.qs || []).some(q => dbGet(stepKey(CH.id, GI) + '.' + q.id, null)); }
@@ -4839,7 +4877,7 @@ function qChrome() {
     const old = $('.qrunsbtn', qc); if (old) old.remove();
     if (['run', 'shove', 'launch', 'drop'].some(k => LAB.show.has(k))) hd.insertAdjacentHTML('afterend', qRunsHTML());
   } else {
-    hd.innerHTML = `<button type="button" class="qopen2" id="qOpen" aria-label="Open the questions"><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
+    hd.innerHTML = `<button type="button" class="qopen2${done ? ' alldone' : ''}" id="qOpen" aria-label="Open the questions"><span class="qic" aria-hidden="true">📋</span><span><b>Your turn</b><small>${done ? '✓ All answered' : `${c.done} of ${c.total} done`}</small></span><span class="qgo">⤢ Open</span></button>`;
     $('#qOpen').addEventListener('click', () => qPlace('pop')); const old = $('.qrunsbtn', qc); if (old) old.remove();
     ft.innerHTML = '';
   }
@@ -5106,6 +5144,8 @@ function ch2Record() {
   const B = LAB.bmarks; if (B && S.launchMass === B.mass && S.mass === B.mass && S.launchN && F.bmN !== S.launchN && !S.running && ((F.stopped && S.brakeFrom != null) || /end of the arena/.test(S.msg))) { F.bmN = S.launchN; brakeMark(B, F.stopped ? S.x - S.brakeFrom : null, S.brakeF); renderControls(); }
 }
 const sp = m => S.flags.sp && S.flags.sp[m], sd = m => S.flags.sd && S.flags.sd[m];
+/* a push reading that is too low but in the right area: most likely distance ÷ time, which gives the average velocity, not the highest one (Tom, 23 Nov 2026). The student gets one more go. */
+const avgTrap = (v, ans) => v < ans - 0.03 && v > ans * 0.4 ? 'Not quite. Did you divide the distance by the time? That gives the crate\'s average velocity. It is lower, because the crate was still speeding up during the push. Read the Velocity readout once the push is over, then try again.' : null;
 /* the launcher course used in Chapter 2: start at -7 m, brake line at -4 m */
 function course(m, v0, F) { S.floor = 'air'; S.mass = m; S.x0 = -7; S.brakeX = -4; S.v0 = v0; S.brakeF = F; }
 
@@ -5116,29 +5156,29 @@ CHDATA.c2 = {
     { id: 'i1', title: 'The same push, three crates', floors: ['air'],
       cards: [
         { html: `<p>Welcome to Chapter 2! In Chapter 1 you found out what forces are. Now you'll find out why some things are much harder to get moving than others.</p><p>The crate is sitting on the <b>air floor</b>, so there is no friction at all.</p>` },
-        { hi: '#shoveBtn', html: `<p>The <b>Give it a push</b> button always gives the crate exactly the same shove. You'll try that same shove on three crates with different masses.</p><p>The <b>Velocity</b> readout under the arena shows how fast the crate is moving, in metres per second (m/s).</p>` }],
+        { hi: '#shoveBtn', html: `<p>The <b>Give it a push</b> button always gives the crate exactly the same shove. You'll try that same shove on three crates with different masses.</p><p>The <b>Velocity</b> readout under the arena shows how fast the crate is moving, in metres per second (m/s). The crate speeds up while it is being pushed. When the push is over, it glides at its <b>highest velocity</b>.</p>` }],
       predict: { q: 'The same push will hit a 24 kg, a 61 kg and a 147 kg crate. Which one do you think will move fastest?', opts: ['The 24 kg crate', 'The 61 kg crate', 'The 147 kg crate', 'They will all move at the same velocity'] },
       setup() { S.floor = 'air'; S.mass = 24; }, adds: ['shove', 'mass', 'readM', 'readV'], sides: [], pullers: [], idle: 'Give the crate a push',
       tick() { ch2Record(); },
       tasks: [['Make your prediction in the box above.', () => predOf() != null], ['Push the <b>24 kg</b> crate.', () => sp(24) != null], ['Use the Crate mass slider to set <b>61 kg</b>, then push it.', () => sp(61) != null], ['Set <b>147 kg</b>, then push it.', () => sp(147) != null]],
       qs: [
-        { id: 'q1', type: 'reading', p: 'What velocity did the push give the <b>24 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(24), need: () => sp(24) != null, needMsg: 'Push the 24 kg crate first.', ok: 'Correct! The light crate shoots off quickly.' },
-        { id: 'q2', type: 'reading', p: 'What velocity did the push give the <b>61 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(61), need: () => sp(61) != null, needMsg: 'Push the 61 kg crate first.', ok: 'Correct!' },
-        { id: 'q3', type: 'reading', p: 'What velocity did the push give the <b>147 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(147), need: () => sp(147) != null, needMsg: 'Push the 147 kg crate first.', ok: 'Correct! The heavy crate only creeps along.' },
-        { id: 'q4', type: 'mcq', p: 'The 147 kg crate has about 6 times the mass of the 24 kg crate. What happened to its velocity?', opts: ['It moved about 6 times more slowly', 'It moved about 6 times faster', 'It moved at the same velocity', 'It didn\'t move at all'], a: 0, ok: 'Exactly. 3.13 m/s ÷ 0.51 m/s is about 6. The same push gives a heavier crate much less velocity.', why: { 1: 'Look at your readings again. Which crate was fastest?', 2: 'Your three readings were different. Which was the smallest?', 3: 'On the air floor there is no friction, so even the heavy crate moved a little.' } }] },
+        { id: 'q1', type: 'reading', p: 'What is the <b>highest velocity</b> the push gives the <b>24 kg</b> crate? Read the Velocity readout once the push is over and the crate is gliding.', unit: 'm/s', tol: 0.03, trap: avgTrap, live: () => sp(24), need: () => sp(24) != null, needMsg: 'Push the 24 kg crate first.', ok: 'Correct! The light crate shoots off quickly.' },
+        { id: 'q2', type: 'reading', p: 'What is the highest velocity the push gives the <b>61 kg</b> crate?', unit: 'm/s', tol: 0.03, trap: avgTrap, live: () => sp(61), need: () => sp(61) != null, needMsg: 'Push the 61 kg crate first.', ok: 'Correct!' },
+        { id: 'q3', type: 'reading', p: 'What is the highest velocity the push gives the <b>147 kg</b> crate?', unit: 'm/s', tol: 0.03, trap: avgTrap, live: () => sp(147), need: () => sp(147) != null, needMsg: 'Push the 147 kg crate first.', ok: 'Correct! The heavy crate only creeps along.' },
+        { id: 'q4', type: 'mcq', p: 'The 147 kg crate has about 6 times the mass of the 24 kg crate. What happened to its velocity?', opts: ['It moved about 6 times more slowly', 'It moved about 6 times faster', 'It moved at the same velocity', 'It didn\'t move at all'], a: 0, ok: 'Exactly. 3.26 m/s ÷ 0.53 m/s is about 6. The same push gives a heavier crate much less velocity.', why: { 1: 'Look at your readings again. Which crate was fastest?', 2: 'Your three readings were different. Which was the smallest?', 3: 'On the air floor there is no friction, so even the heavy crate moved a little.' } }] },
 
     { id: 'i2', title: 'Inertia', floors: ['air'],
       cards: [
         { html: `<p>The heavy crate was much harder to get moving. Scientists say it has more ${T('inertia')}.</p><div class="law"><b>Inertia</b> is how hard it is to change the way an object is moving. The more mass an object has, the more inertia it has.</div><p>Inertia works both ways. A heavy object is hard to <b>start</b> moving, and once it is moving, it is hard to <b>stop</b>.</p>` },
-        { html: `<p>There is a pattern in your velocities. With the same push, <b>2 times the mass</b> gives <b>half the velocity</b>, 3 times the mass gives a third of the velocity, and so on.</p><div class="example">The 24 kg crate went 3.13 m/s. A 48 kg crate has 2 times the mass (48 ÷ 24 = 2), so the same push gives it 3.13 ÷ 2 = <b>1.56 m/s</b>.</div><p>Test it for yourself with a 48 kg crate.</p>` }],
+        { html: `<p>There is a pattern in your velocities. With the same push, <b>2 times the mass</b> gives <b>half the velocity</b>, 3 times the mass gives a third of the velocity, and so on.</p><div class="example">The push gave the 24 kg crate a highest velocity of 3.26 m/s. A 48 kg crate has 2 times the mass (48 ÷ 24 = 2), so the same push gives it 3.26 ÷ 2 = <b>1.63 m/s</b>.</div><p>Test it for yourself with a 48 kg crate.</p>` }],
       setup() { S.floor = 'air'; S.mass = 48; }, adds: [], sides: [], pullers: [], idle: 'Give the crate a push',
       tick() { ch2Record(); },
       tasks: [['Set the crate to <b>48 kg</b> (2 times the mass of the 24 kg crate) and give it a push.', () => sp(48) != null]],
       qs: [
         { id: 'q1', type: 'tap', p: '<b>Key idea.</b> Tap the sentence that says what inertia is.', opts: ['Inertia is how hard it is to change the way an object is moving.', 'Inertia is the force that keeps a moving object moving.', 'Inertia is how fast an object is moving at the start.', 'Inertia is the pull of gravity on an object\'s mass.'], a: 0, ok: 'Yes! Inertia is how hard it is to change an object\'s motion: to start it, stop it, or change its velocity.', why: { 1: 'Inertia isn\'t a force. It is a property that every object has, because it has mass.', 2: 'That describes velocity. A still crate has inertia too.', 3: 'That describes weight.' } },
         { id: 'q2', type: 'gap', p: 'An object with more ___ has more inertia, so it is ___ to get it moving.', ans: [['mass'], ['harder', 'more difficult']], ok: 'Perfect. More mass means more inertia.' },
-        { id: 'q3', type: 'reading', p: 'What velocity did the push give the <b>48 kg</b> crate?', unit: 'm/s', tol: 0.03, live: () => sp(48), need: () => sp(48) != null, needMsg: 'Push the 48 kg crate first.', ok: 'Correct! About half of the 24 kg crate\'s 3.13 m/s, just as the pattern says.' },
-        { id: 'q4', type: 'num', p: 'A 96 kg crate has 4 times the mass of the 24 kg crate. The same push gave the 24 kg crate 3.13 m/s. What velocity will it give the 96 kg crate?', unit: 'm/s', ans: 0.78, tol: 0.02, ok: 'Brilliant! 4 times the mass gives a quarter of the velocity: 3.13 ÷ 4 = 0.78 m/s.', hints: ['4 times the mass gives a quarter of the velocity.', 'Type 3.13 ÷ 4 into the calculator.'] }] },
+        { id: 'q3', type: 'reading', p: 'What is the highest velocity the push gives the <b>48 kg</b> crate?', unit: 'm/s', tol: 0.03, trap: avgTrap, live: () => sp(48), need: () => sp(48) != null, needMsg: 'Push the 48 kg crate first.', ok: 'Correct! About half of the 24 kg crate\'s 3.26 m/s, just as the pattern says.' },
+        { id: 'q4', type: 'num', p: 'A 96 kg crate has 4 times the mass of the 24 kg crate. The same push gave the 24 kg crate a highest velocity of 3.26 m/s. What highest velocity will it give the 96 kg crate? Give your answer to 2 decimal places.', unit: 'm/s', ans: 0.82, tol: 0.02, ok: 'Brilliant! 4 times the mass gives a quarter of the velocity: 3.26 ÷ 4 = 0.815, which is about 0.82 m/s.', hints: ['4 times the mass gives a quarter of the velocity.', 'Type 3.26 ÷ 4 into the calculator.'] }] },
 
     { id: 'i3', title: 'The velocity–time graph', info: ['vt'], floors: ['air'],
       cards: [{ html: `<p>A new panel has appeared under the arena: a ${T('vtgraph', 'velocity–time graph')}. It draws the crate's velocity as time goes by.</p><p>This time the Velocity readout is hidden, so you'll read the velocity from the graph instead.</p>` }],
