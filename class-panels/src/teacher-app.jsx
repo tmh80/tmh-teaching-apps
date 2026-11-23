@@ -2730,7 +2730,7 @@ function LayoutCard({layout,onLoad,onDelete}){
 }
 
 /* ── Manage groups: rename any group from one place, not just the selected one ── */
-function ManageGroupsModal({groups,onRename,onDelete,onClose}){
+function ManageGroupsModal({groups,onRename,onDelete,onClose,isTable}){
   const inp={padding:"7px 10px",borderRadius:"8px",border:"1px solid rgba(0,0,0,0.09)",background:"#fff",color:"#1a1a2e",fontSize:"13px",fontWeight:500,outline:"none",fontFamily:"'Source Sans 3',sans-serif"};
   const[confirmDelete,setConfirmDelete]=useState(null); // groupId pending a second click
   return(
@@ -2747,7 +2747,10 @@ function ManageGroupsModal({groups,onRename,onDelete,onClose}){
             <div key={g.id} style={{display:"flex",alignItems:"center",gap:"8px"}}>
               <input defaultValue={g.label||''} onBlur={e=>onRename(g.id,e.target.value)} onKeyDown={e=>{if(e.key==='Enter')e.target.blur();}} placeholder="Table group name" style={{...inp,flex:1,minWidth:0}}/>
               <span style={{fontSize:"11px",color:"rgba(0,0,0,0.3)",flexShrink:0}}>{g.seatIds.length} seat{g.seatIds.length!==1?'s':''}</span>
-              {confirmDelete===g.id?(
+              {isTable?.(g)?(
+                /* a table made of pieces is a group because it's one table — split it on the canvas instead */
+                <span title="This group is a table. To split it, pick the table on the canvas and use Separate, or Alt-drag a piece off" style={{flexShrink:0,fontSize:"11px",color:"rgba(0,0,0,0.3)",fontWeight:600,padding:"6px 2px"}}>table</span>
+              ):confirmDelete===g.id?(
                 <button onClick={()=>{onDelete(g.id);setConfirmDelete(null);}} title="Click again to confirm — seats stay, they just won't be grouped together anymore"
                   style={{flexShrink:0,padding:"6px 9px",borderRadius:"7px",border:"1px solid rgba(200,60,60,0.3)",background:"#fdeeed",color:"#c44",fontSize:"11px",fontWeight:700,cursor:"pointer",fontFamily:"'Source Sans 3',sans-serif"}}
                 >Confirm?</button>
@@ -5081,7 +5084,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
       {/* ── Manage groups dialog ── */}
       {showManageGroups&&(
         <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.25)",backdropFilter:"blur(4px)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:100,padding:"20px"}} onClick={e=>{if(e.target===e.currentTarget)setShowManageGroups(false);}}>
-          <ManageGroupsModal groups={groups} onRename={renameGroup} onDelete={deleteGroup} onClose={()=>setShowManageGroups(false)}/>
+          <ManageGroupsModal groups={groups} onRename={renameGroup} onDelete={deleteGroup} isTable={g=>g.seatIds.some(id=>seats.find(s=>s.id===id)?.pieceId)} onClose={()=>setShowManageGroups(false)}/>
         </div>
       )}
 
