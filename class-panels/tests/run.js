@@ -793,9 +793,9 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await shot5('62-new-setup-dialog-whiteboard');
   await p5.locator('[title="Make the setup and switch to it"]').click(); await w5(1100);
   let su = await S5('setups-fx-8c');
-  const lab = su.list.find(s => s.name === 'Lab');
-  ok(su.list.length === 2 && lab && su.activeId === lab.id && lab.use.join() === 'workstation' && lab.icon === '🧪', 'creating it adds a 🧪 Lab tab (workstations) and switches to it');
-  const labKey = `sl-fx-8c~${lab.id}`;
+  const labSu = su.list.find(s => s.name === 'Lab');
+  ok(su.list.length === 2 && labSu && su.activeId === labSu.id && labSu.use.join() === 'workstation' && labSu.icon === '🧪', 'creating it adds a 🧪 Lab tab (workstations) and switches to it');
+  const labKey = `sl-fx-8c~${labSu.id}`;
   let labSl = await S5(labKey);
   ok(labSl && labSl.seats.length === regBefore.seats.length && labSl.seats.every(s => !s.studentId) && labSl.pieces.length === 7 && labSl.walls.length === 4,
     `its seating is saved in ${labKey}: the same room and furniture, nobody seated`);
@@ -822,11 +822,12 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
 
   // switch a bench off for Lab: Randomize leaves it empty
   const benchHit = p5.locator('polygon[title^="Drag to move this table"]').nth(4);
-  await benchHit.click({ force: true }); await w5(300);
+  // pick the bench by its back edge (away from the name tags, which would start dragging a student)
+  await benchHit.click({ force: true, position: { x: 30, y: 10 } }); await w5(300);
   await p5.locator('[title^="Leave this table out when generating in Lab"]').click(); await w5(300);
   su = await S5('setups-fx-8c');
-  const offId = su.list.find(s => s.id === lab.id).offPieces[0];
-  ok(su.list.find(s => s.id === lab.id).offPieces.length === 1 && c8.benchIds.includes(offId) && su.list[0].offPieces.length === 0, '"Use in Lab" off stores the bench in Lab\'s offPieces only');
+  const offId = su.list.find(s => s.id === labSu.id).offPieces[0];
+  ok(su.list.find(s => s.id === labSu.id).offPieces.length === 1 && c8.benchIds.includes(offId) && su.list[0].offPieces.length === 0, '"Use in Lab" off stores the bench in Lab\'s offPieces only');
   const sittingThere = (await S5(labKey)).seats.filter(s => s.pieceId === offId && s.studentId).length;
   ok(sittingThere > 0 && await p5.getByText(`${sittingThere} student${sittingThere > 1 ? 's are' : ' is'} at furniture not used in Lab`).isVisible(), `students already at that bench stay put, with a gentle warning (${sittingThere})`);
   await p5.mouse.click(1205, 66); await w5(200);
@@ -834,9 +835,9 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   labSl = await S5(labKey);
   ok(labSl.seats.filter(s => s.pieceId === offId && s.studentId).length === 0 && atPieces(labSl, c8.benchIds).length === 8, 'Randomize leaves that bench empty (8 seated at the other two)');
   ok(await p5.locator('[data-cp="unused"]').count() === 5, 'and it is drawn faded too');
-  await p5.locator('polygon[title^="Drag to move this table"]').nth(4).click({ force: true }); await w5(300);
+  await p5.locator('polygon[title^="Drag to move this table"]').nth(4).click({ force: true, position: { x: 30, y: 10 } }); await w5(300);
   await p5.locator('[title^="Use this table again when generating in Lab"]').click(); await w5(300);
-  ok((await S5('setups-fx-8c')).list.find(s => s.id === lab.id).offPieces.length === 0, 'and switching it back on clears it');
+  ok((await S5('setups-fx-8c')).list.find(s => s.id === labSu.id).offPieces.length === 0, 'and switching it back on clears it');
   await p5.mouse.click(1205, 66); await w5(200);
   await p5.getByText('🎲 Randomize').click(); await w5(650);
   const labSeating = (await store5())[labKey];
@@ -844,7 +845,7 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   // history: confirmed per setup; the old entry counts as Regular's
   await p5.getByText('Confirm seating').first().click(); await w5(400);
   let sh8 = await S5('sh-fx-8c');
-  ok(sh8.length === 2 && sh8[0].setupId === lab.id && !('setupId' in sh8[1]), 'Confirm seating in Lab saves an entry tagged with Lab\'s setupId (the old one is untouched)');
+  ok(sh8.length === 2 && sh8[0].setupId === labSu.id && !('setupId' in sh8[1]), 'Confirm seating in Lab saves an entry tagged with Lab\'s setupId (the old one is untouched)');
   ok(await p5.getByText('Previous arrangements (1)').isVisible(), 'Lab lists only its own arrangement');
 
   // back to Regular: exactly as it was
@@ -867,18 +868,18 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   console.log('Class setups: the class Seating view');
   await tab5('Regular').click(); await w5(900);
   ok(await tab5('Regular').getAttribute('aria-selected') === 'true', 'its tabs switch setup too');
-  let before = await store5();
+  let bef5 = await store5();
   await p5.locator('[title^="Shuffle everyone into new seats"]:visible').first().click(); await w5(900);
-  let after = await store5();
-  ok(after['sl-fx-8c'] !== before['sl-fx-8c'] && after[labKey] === before[labKey], 'Randomise there on Regular writes sl-fx-8c only');
-  ok(atPieces(JSON.parse(after['sl-fx-8c']), c8.benchIds).length === 0 && perTable(JSON.parse(after['sl-fx-8c']), c8.deskIds).every(n => n > 0), 'and fills only the tables, with none left empty');
+  let aft5 = await store5();
+  ok(aft5['sl-fx-8c'] !== bef5['sl-fx-8c'] && aft5[labKey] === bef5[labKey], 'Randomise there on Regular writes sl-fx-8c only');
+  ok(atPieces(JSON.parse(aft5['sl-fx-8c']), c8.benchIds).length === 0 && perTable(JSON.parse(aft5['sl-fx-8c']), c8.deskIds).every(n => n > 0), 'and fills only the tables, with none left empty');
   await tab5('Lab').click(); await w5(900);
-  before = await store5();
+  bef5 = await store5();
   await p5.locator('[title^="Shuffle everyone into new seats"]:visible').first().click(); await w5(900);
-  after = await store5();
-  ok(after[labKey] !== before[labKey] && after['sl-fx-8c'] === before['sl-fx-8c'], 'on Lab it writes Lab\'s key only');
-  ok(atPieces(JSON.parse(after[labKey]), c8.benchIds).length === 10, 'and seats everyone at the benches');
-  ok(JSON.parse(after[labKey]).rules.length === 0 && JSON.parse(after['sl-fx-8c']).rules.length === 1, 'the rules stay with the class (sl-fx-8c), not copied into Lab');
+  aft5 = await store5();
+  ok(aft5[labKey] !== bef5[labKey] && aft5['sl-fx-8c'] === bef5['sl-fx-8c'], 'on Lab it writes Lab\'s key only');
+  ok(atPieces(JSON.parse(aft5[labKey]), c8.benchIds).length === 10, 'and seats everyone at the benches');
+  ok(JSON.parse(aft5[labKey]).rules.length === 0 && JSON.parse(aft5['sl-fx-8c']).rules.length === 1, 'the rules stay with the class (sl-fx-8c), not copied into Lab');
 
   console.log('Class setups: delete, trash, restore');
   await manage5();

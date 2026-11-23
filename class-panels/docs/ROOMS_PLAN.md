@@ -77,17 +77,22 @@ ta-rooms                  [{ id, name,
                                       openings:[{id,type:'door'|'window'|'double-door',wallId,t,width,swing}],
                                       items:[{id,type,x,y,w,h,rot,label}] },   // fixed: sinks, fume cupboard, board…
                              layouts:[{ id, name, pieces:[…], seats:[blank], groups:[…], items:[…movable] }] }]
-setups-<class>            { activeId, list:[{ id, name, icon, roomId?, layoutId?,
+setups-<class>            { activeId, list:[{ id, name, icon, createdAt,
                                               use:['desk'] | ['workstation'] | ['desk','workstation'],
+                                              offPieces:[pieceId…],
                                               stations?:{…see H} }] }
-sl-<class>                UNCHANGED shape (+ optional pieces, joins, walls, openings, room fields; roomItems/pieces may carry station); = the FIRST setup ("Regular")
-sl-<class>~<setupId>      the same shape as sl-, for every other setup
+                          (Phase 5: Regular is the entry with the fixed id 'regular', wherever it sits in
+                          the list; others get 'su…' ids. The room link lives in each setup's own sl- object
+                          (`room`), not here, so roomId/layoutId were dropped from this entry.)
+sl-<class>                UNCHANGED shape (+ optional pieces, joins, walls, openings, room fields; roomItems/pieces may carry station); = the setup with id 'regular'
+sl-<class>~<setupId>      the same shape as sl-, for every other setup; its tags and rules are always [] (class-level, see below)
+ta-trash                  [{ key, value, deletedAt, classId, setup }]: a deleted setup's seating, purged 30 days later on launch
 rot-<class>               { setupId, stationOrder:[stationId…], groupIds:[…], step, timerId? }
 classpanels-auto-backups  (Phase 0) the last 10 automatic backups, in plain localStorage OUTSIDE classboard-storage; call `autoBackup(reason)` before any migration
 ```
 
-- **Rules stay class-level** in `sl-<class>`. Every setup uses them, and the Groups panel already reads rules from there.
-- **Seat history** (`sh-<class>`) and **pairing history** stay per class. A history entry gets an optional `setupId`.
+- **Rules stay class-level** in `sl-<class>`. Every setup uses them, and the Groups panel already reads rules from there. The class's seat-tag list (`tags`) is class-level too. A setup's own key stores `tags:[]`, `rules:[]`; editing rules or the tag list while another setup is showing writes them into `sl-<class>` (only those two fields, and only when they really changed).
+- **Seat history** (`sh-<class>`) and **pairing history** stay per class. A history entry gets an optional `setupId` (none = Regular). The cap of 10 is per setup.
 - **Shell vs. layout.** The room *shell* (walls, doors, windows, fixed items) is shared live: change it once, and every class and setup that uses the room sees the change. The movable furniture comes from a *layout*. Editing furniture in a setup changes only that setup, until Tom presses "Update layout 'Clusters'" (which asks first) or "Save as new layout".
 - The old `ta-saved-layouts` entries migrate into the library as a room called "My saved layouts", with each one as a layout. The old key is kept.
 
@@ -175,6 +180,18 @@ The units are canvas pixels on the existing 8 px grid. A seat slot draws as a **
 - Each setup gets **Confirm seating / history**, tagged with `setupId`.
 - **Spread students out when generating** (found in Phase 3): Randomise fills seats in list order. When there are more seats than students, the most recently added tables stay empty. In setups, generate across all usable tables: fill whole tables evenly, rather than leaving whole tables empty at the end, unless the teacher has switched seats off.
 - The **Backup export** (`SettingsModal`) already exports every key. Check that it includes the new keys and that a restore round-trips.
+
+**As built (Phase 5), and where it differs from the above:**
+- **Regular is found by id**, not by being first: `setupSlKey(classId,'regular')` is `sl-<class>`, any other id is `sl-<class>~<id>`. Tabs can be dragged into any order (Regular included) without moving any data.
+- **Active setup** is `setups-<class>.activeId`, held in `TeacherApp` and passed to both seating panels, so they always agree; switching class restores that class's choice. Each panel's load effect reloads on class *or* setup change, saves any edit still waiting (the 400 ms delay) into the setup it was made in first, and clears the undo stack.
+- **Tab row:** Manage Seating always shows it (a strip above the floor, with ⋯ on every tab and ＋). The ⋯ menu has Rename, Icon, Use for (Tables / Workstations / Both), Duplicate and Delete… (not on Regular). The class Seating view shows a slim row only once the class has a second setup; the projector view names the setup next to the class.
+- **New setup dialog:** icons 🪑 🧪 👥 🚀 ⭐ 🔬 📚; start from a copy of the current setup without or with students, a room layout from 🏫 Rooms, or an empty room. "Use for" follows the name (Workstations if it contains "lab") until Tom picks one. Copies keep table colours, the room link (walls etc. follow that room) and piece ids.
+- **Usable furniture** is worked out (`usableSeatIds`) when generating and drawing, never saved into seats: a seat is usable if it is `used`, not `unavailable`, its piece's `roles` meet the setup's `use` (plain old desks count as tables), and the piece isn't in the setup's `offPieces`. Generating passes copies of the other seats marked `unavailable` (the engine's existing flag) and puts the real flags back afterwards. Unused furniture is washed out with a light hatch; hovering a table says "Not used in Lab"; students already there stay put and Manage Seating shows a sunny "⚠ N students are at furniture not used in Lab" chip until the next Randomize moves them. `offPieces` holds piece ids only (old plain desks can't be switched off per setup).
+- **"Use in <setup>"** in the table's selection bar only appears once the class has a second setup (or that table is already off), to keep a one-setup class's bar short.
+- **Spread** applies to all generating, Regular included: after tag matching, each remaining student goes to the table that is least full for its size (`pickSpreadSeats`), ties broken at random. Rules, tags (hard and best-fit), locks and smart shuffle are unchanged. A student locked into a seat the setup doesn't use stays there and is no longer also dealt a second seat.
+- **Migration** runs once at launch for every class in `ta-classes` (before the daily backup): `autoBackup('before setups')` only if some class lacks an entry, existing entries are never overwritten, and `cp-schema=2` is written only after checking every class has one. A class made later has no entry until its setups first change (it reads as Regular only). `autoBackupIfNewDay` now looks only for an earlier *launch* backup, so the migration's backup doesn't stand in for the day's.
+- **Deleting a class** also deletes its `setups-` entry and setup keys. Removing a student from the roster clears them from every setup.
+- **Helpers for Phases 6 and 7** (exported from `teacher-app.jsx`): `createSetup(classId,{name,icon,use,fromLayout,withStudents,fromRoom,offPieces,activate})` → the setup; `loadSetupLayout(classId,setupId)`; `saveSetupLayout(classId,setupId,obj)`; `usableSeats(layoutObj,setup)`. They fire a `cp-setups-changed` window event that `TeacherApp` listens to, so open panels follow. Also available inside the file: `loadSetups`, `saveSetups`, `deleteSetup`, `setupSlKey`, `seatsForSetup`/`restoreSeatFlags`, `unusablePieceIds`.
 
 ## 10. Groups into setups (Phase 6)
 
