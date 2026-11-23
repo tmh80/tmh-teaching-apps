@@ -1517,9 +1517,8 @@ const tableFill=key=>key&&TABLE_COLOR_KEYS.has(key)?`var(--cp-table-${key})`:"va
 const tableChairFill=key=>key&&TABLE_COLOR_KEYS.has(key)?`var(--cp-tchair-${key})`:null;
 /* The Groups panel's colours in its own order (blue, green, gold, purple, red, cyan),
    as table-colour keys: Phase 6 uses this to colour a table like the group seated at it. */
-const GROUP_COLOR_KEYS=['blue','green','gold','lilac','red','cyan'];
-const groupColorKey=i=>GROUP_COLOR_KEYS[((i%GROUP_COLOR_KEYS.length)+GROUP_COLOR_KEYS.length)%GROUP_COLOR_KEYS.length];
-/* The colour key of the table a seat sits at: its group's, else its piece's, else its own (a lone legacy desk). */
+/* (GROUP_COLOR_KEYS and groupColorKey now live in the geometry block, beside the seating function that uses them.)
+   The colour key of the table a seat sits at: its group's, else its piece's, else its own (a lone legacy desk). */
 const seatTableColor=(seat,groupById,pieceById)=>seat?(seat.groupId?groupById?.get(seat.groupId)?.color:seat.pieceId?pieceById?.get(seat.pieceId)?.color:seat.color):undefined;
 /* Chair fill for a seat: its table's deeper shade when "match chairs" is on and the table is coloured, else the rotating palette. */
 const matchedChair=(on,key,fallback)=>(on&&tableChairFill(key))||fallback;
@@ -2408,6 +2407,8 @@ function RuleEditor({rules,onChange,students,title="Keep apart / together"}){
 const sSnap=v=>Math.round(v/SGR)*SGR;
 const sUid=()=>Math.random().toString(36).slice(2,9);
 const MONTH_ABBR=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+/* "24 Nov", for a setup made from Groups */
+const fmtSetupDate=ts=>{const d=new Date(ts);return `${d.getDate()} ${MONTH_ABBR[d.getMonth()][0]+MONTH_ABBR[d.getMonth()].slice(1).toLowerCase()}`;};
 const fmtArrangementDate=ts=>{
   const d=new Date(ts);
   return `${MONTH_ABBR[d.getMonth()]} ${d.getDate()}`;
@@ -3303,7 +3304,167 @@ const pickSpreadSeats=(fillable,tableOf,occupied,capacity,n,rnd=Math.random)=>{
 const TRASH_DAYS=30;
 const purgeTrashList=(list,now,days=TRASH_DAYS)=>(Array.isArray(list)?list:[]).filter(t=>t&&Number.isFinite(t.deletedAt)&&now-t.deletedAt<days*86400000);
 
-const PIECE_GEOMETRY={PG,legacyChairs,REGULAR_SETUP,SETUP_ICONS,SETUP_USES,setupSlKey,regularSetup,defaultSetups,useForName,useKey,normalizeSetups,seatUsableIn,usableSeatIds,usableSeats,unusablePieceIds,seatsForSetup,restoreSeatFlags,pickSpreadSeats,purgeTrashList,TRASH_DAYS,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly,
+/* ── Seat groups into a setup (Phase 6, ROOMS_PLAN section 10) ──
+   Pure: takes a setup's layout ({seats,groups,pieces}), the setup (for its usable
+   furniture) and the Groups panel's result, and returns the layout with students
+   seated and tables coloured. Nothing here touches storage, and it never sees
+   Regular: the caller only ever hands it the target setup's own layout.
+   groups: [{name, ids:[studentId…], colorIndex}] (colorIndex picks the table colour
+   via groupColorKey, so it matches the Groups panel); ungroupedIds: spread over what's left.
+   Each group goes to ONE cluster (a table, or joined tables): the smallest that holds it
+   whole, biggest groups first. With more groups than clusters, a group shares the
+   cluster with the least room left that still fits it. A group too big for any single
+   cluster splits across neighbouring clusters (nearest by centre). Locked students stay
+   where they are. Keep-apart rules are respected where possible and reported when not. */
+const GROUP_COLOR_KEYS=['blue','green','gold','lilac','red','cyan'];
+const groupColorKey=i=>GROUP_COLOR_KEYS[((i%GROUP_COLOR_KEYS.length)+GROUP_COLOR_KEYS.length)%GROUP_COLOR_KEYS.length];
+const placeGroupsInSetup=({layout,setup,groups=[],ungroupedIds=[],rules=[],clearLabels=false,rnd=Math.random})=>{
+  const seatsIn=layout?.seats||[],piecesIn=layout?.pieces||[],gIn=layout?.groups||[];
+  const pieceById=new Map(piecesIn.map(p=>[p.id,p]));
+  const usable=usableSeatIds(layout,setup);
+  const isLocked=s=>!!(s.used&&s.locked&&s.studentId);
+  const lockedIds=new Set(seatsIn.filter(isLocked).map(s=>s.studentId));
+  const seen=new Set();
+  const gl=groups.map((g,i)=>({index:i,name:g.name||`Group ${i+1}`,colorIndex:g.colorIndex==null?i:g.colorIndex,ids:(g.ids||[]).filter(id=>{if(lockedIds.has(id)||seen.has(id))return false;seen.add(id);return true;})}));
+  const rest=(ungroupedIds||[]).filter(id=>{if(lockedIds.has(id)||seen.has(id))return false;seen.add(id);return true;});
+  const apart=new Map();
+  (rules||[]).filter(r=>r&&r.type==='apart').forEach(r=>{
+    const ids=r.studentIds||[r.aId,r.bId].filter(Boolean);
+    ids.forEach(a=>ids.forEach(b=>{if(a!==b){if(!apart.has(a))apart.set(a,new Set());apart.get(a).add(b);}}));
+  });
+  const ckey=s=>s.groupId||`__solo_${s.id}`;
+  const ctr=s=>[s.x+PG.SEAT_W/2,s.y+PG.SEAT_H/2];
+  const edgeOf=s=>{const p=pieceById.get(s.pieceId),sl=p&&SHAPES[p.shape]&&SHAPES[p.shape].slots[s.slot];return sl?`${p.id}:${sl.edge}`:null;};
+  const cost=(a,b)=>{const pa=ctr(a),pb=ctr(b),ea=edgeOf(a),eb=edgeOf(b);return Math.hypot(pa[0]-pb[0],pa[1]-pb[1])+(ea&&eb&&ea!==eb?80:0);};
+  // clusters of seats that are free to fill in this setup
+  const map=new Map();
+  seatsIn.filter(s=>usable.has(s.id)&&!isLocked(s)).forEach(s=>{
+    const k=ckey(s);
+    if(!map.has(k))map.set(k,{key:k,groupId:s.groupId||null,all:[],seats:[],taken:[],tally:new Map()});
+    const c=map.get(k);c.all.push(s);c.seats.push(s);
+  });
+  const centre=c=>{const xs=c.all.map(ctr);return[xs.reduce((a,p)=>a+p[0],0)/xs.length,xs.reduce((a,p)=>a+p[1],0)/xs.length];};
+  const clusters=readingOrder([...map.values()],centre);
+  clusters.forEach((c,i)=>{c.order=i;[c.cx,c.cy]=centre(c);c.cap=c.all.length;});
+  const seatOf=new Map(); // seat id -> student id
+  const clusterOfSeat=new Map();clusters.forEach(c=>c.all.forEach(s=>clusterOfSeat.set(s.id,c)));
+  /* n seats from a cluster, as compact as possible: from each starting seat grow by the
+     cheapest neighbour (the same side of a bench or table counts as closer) */
+  const compact=(avail,n)=>{
+    if(n>=avail.length)return avail.slice();
+    let best=null,bestCost=Infinity;
+    avail.forEach(seed=>{
+      const pick=[seed];let total=0;
+      while(pick.length<n){
+        let bs=null,bc=Infinity;
+        avail.forEach(s=>{if(pick.includes(s))return;const c=pick.reduce((a,p)=>a+cost(p,s),0);if(c<bc-1e-9){bc=c;bs=s;}});
+        total+=bc;pick.push(bs);
+      }
+      if(total<bestCost-1e-9){bestCost=total;best=pick;}
+    });
+    return best;
+  };
+  const clash=(c,ids)=>ids.some(a=>c.taken.some(b=>apart.get(a)?.has(b)));
+  const put=(g,c,ids)=>{
+    const chosen=compact(c.seats,ids.length);
+    chosen.forEach((s,i)=>{seatOf.set(s.id,ids[i]);c.taken.push(ids[i]);});
+    c.seats=c.seats.filter(s=>!chosen.includes(s));
+    c.tally.set(g.index,(c.tally.get(g.index)||0)+chosen.length);
+    return chosen;
+  };
+  const results=[],unplaced=[];
+  [...gl].filter(g=>g.ids.length).sort((a,b)=>b.ids.length-a.ids.length||a.index-b.index).forEach(g=>{
+    const n=g.ids.length,res={index:g.index,name:g.name,count:n,tables:[],seatIds:[],split:false,shared:false};
+    const fits=clusters.filter(c=>c.seats.length>=n);
+    const bySize=(a,b)=>a.seats.length-b.seats.length||a.order-b.order;
+    const fresh=fits.filter(c=>!c.taken.length).sort(bySize)[0];
+    const sharing=fits.filter(c=>c.taken.length&&!clash(c,g.ids)).sort(bySize)[0];
+    const whole=fresh||sharing;
+    if(whole){
+      res.shared=!!whole.taken.length;
+      res.tables.push(whole.key);res.seatIds.push(...put(g,whole,g.ids).map(s=>s.id));
+    }else{
+      // too big for any one cluster: the one with most room first, then the nearest neighbours
+      const left=[...g.ids],used=[];
+      while(left.length){
+        const pool=clusters.filter(c=>c.seats.length>0&&!used.includes(c));
+        if(!pool.length)break;
+        let next;
+        if(!used.length)next=pool.sort((a,b)=>b.seats.length-a.seats.length||a.taken.length-b.taken.length||a.order-b.order)[0];
+        else{
+          const mx=used.reduce((a,c)=>a+c.cx,0)/used.length,my=used.reduce((a,c)=>a+c.cy,0)/used.length;
+          const d=c=>Math.hypot(c.cx-mx,c.cy-my);
+          next=pool.sort((a,b)=>d(a)-d(b)||a.taken.length-b.taken.length||b.seats.length-a.seats.length||a.order-b.order)[0];
+        }
+        used.push(next);
+        const ids=left.splice(0,Math.min(next.seats.length,left.length));
+        res.tables.push(next.key);res.seatIds.push(...put(g,next,ids).map(s=>s.id));
+      }
+      res.split=res.tables.length>1;
+      res.count=n-left.length;
+      unplaced.push(...left);
+    }
+    results.push(res);
+  });
+  // everyone not in a group: spread over the seats still free (tables with the most room first)
+  const free=clusters.flatMap(c=>c.seats);
+  const occ=new Map(clusters.map(c=>[c.key,c.taken.length])),cap=new Map(clusters.map(c=>[c.key,c.cap]));
+  const left2=pickSpreadSeats(free,ckey,occ,cap,Math.min(rest.length,free.length),rnd);
+  rest.forEach(id=>{
+    if(!left2.length){unplaced.push(id);return;}
+    let k=left2.findIndex(s=>!clash(clusterOfSeat.get(s.id),[id]));
+    if(k<0)k=0;
+    const s=left2.splice(k,1)[0],c=clusterOfSeat.get(s.id);
+    seatOf.set(s.id,id);c.taken.push(id);
+  });
+  // who ended up at a table with someone they must be kept apart from
+  const conflicts=[];
+  clusters.forEach(c=>{
+    const ids=c.taken;
+    for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++)if(apart.get(ids[i])?.has(ids[j]))conflicts.push({aId:ids[i],bId:ids[j]});
+  });
+  // everyone cleared except locked students, then the placements
+  const seatsNext=seatsIn.map(s=>isLocked(s)?s:{...s,studentId:seatOf.get(s.id)||null,locked:false});
+  // table colours and names: each table takes the group with the most seats at it
+  const winner=c=>{let best=null;c.tally.forEach((n,gi)=>{if(!best||n>best.n||(n===best.n&&gi<best.gi))best={n,gi};});return best&&gl[best.gi];};
+  const byGroupId=new Map(clusters.filter(c=>c.groupId).map(c=>[c.groupId,c]));
+  const groupsNext=gIn.map(g=>{
+    const c=byGroupId.get(g.id);if(!c)return g;
+    const w=winner(c),{color:_c,...base}=g;
+    return w?{...base,color:groupColorKey(w.colorIndex),label:w.name}:base;
+  });
+  const labelled=new Map(),loneColour=new Map();
+  clusters.forEach(c=>{
+    const w=winner(c);
+    const ps=[...new Set(c.all.map(s=>s.pieceId).filter(Boolean))].map(id=>pieceById.get(id)).filter(Boolean);
+    if(c.groupId&&w){const first=readingOrder(ps,p=>[p.x,p.y])[0];if(first)labelled.set(first.id,w.name);}
+    if(!c.groupId)ps.forEach(p=>loneColour.set(p.id,w?groupColorKey(w.colorIndex):null));
+  });
+  const generated=new Set(clusters.flatMap(c=>c.all.map(s=>s.pieceId)).filter(Boolean));
+  const piecesNext=piecesIn.map(p=>{
+    let q=p;
+    if(labelled.has(p.id))q={...q,label:labelled.get(p.id).slice(0,24)};
+    else if(clearLabels&&q.label&&generated.has(p.id)){const{label:_l,...r}=q;q=r;}
+    if(loneColour.has(p.id)){const k=loneColour.get(p.id),{color:_c,...r}=q;q=k?{...r,color:k}:r;}
+    return q;
+  });
+  // a lone legacy desk (no table piece) is coloured on the seat itself
+  const seatsOut=seatsNext.map(s=>{
+    const c=clusterOfSeat.get(s.id);
+    if(!c||c.groupId||s.pieceId)return s;
+    const w=winner(c),{color:_c,...r}=s;
+    return w?{...r,color:groupColorKey(w.colorIndex)}:r;
+  });
+  return{
+    seats:seatsOut,groups:groupsNext,pieces:piecesNext,
+    placed:results.sort((a,b)=>a.index-b.index), // one per group seated: {index,name,count,tables:[clusterKey…],seatIds,split,shared}
+    unplaced,                                    // student ids that got no seat
+    conflicts,                                   // [{aId,bId}] keep-apart pairs sharing a table
+    lockedKept:lockedIds.size,                   // students left in their locked seats
+  };
+};
+
+const PIECE_GEOMETRY={PG,placeGroupsInSetup,GROUP_COLOR_KEYS,groupColorKey,legacyChairs,REGULAR_SETUP,SETUP_ICONS,SETUP_USES,setupSlKey,regularSetup,defaultSetups,useForName,useKey,normalizeSetups,seatUsableIn,usableSeatIds,usableSeats,unusablePieceIds,seatsForSetup,restoreSeatFlags,pickSpreadSeats,purgeTrashList,TRASH_DAYS,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly,
   WALL_T,WALL_GRID,WALL_JOIN,wallLen,wallDir,wallPointAt,closestOnWall,nearestWall,clampOpeningT,openingAtPoint,openingFrame,OPENING_TYPES,wallSnapPoint,rectRoomWalls,wallsBounds,
   ROOM_ITEM_TYPES,ROOM_ITEM_SECTIONS,LEGACY_ITEM_SIZE,itemGeom,itemPivot,itemCorners,itemCentre,itemBounds,upgradeLegacyItem,newRoomItem,nextStationNumber,
   extractShell,extractLayout,applyRoomShell,sameShell,instantiateLayout,migrateLegacyLayouts,lineItemFromPoints,snapItemToWall,AREA_COLOURS};
@@ -3677,9 +3838,9 @@ async function startingLayout({fromLayout,withStudents,fromRoom}){
 }
 /* Phase 6/7 hook: make a setup in code. Returns the new setup. With activate:true
    it also becomes the class's active setup. Open panels hear about it (SETUPS_EVENT). */
-export async function createSetup(classId,{name,icon,use,fromLayout,withStudents=false,fromRoom,offPieces,activate=false}={}){
+export async function createSetup(classId,{name,icon,use,fromLayout,withStudents=false,fromRoom,offPieces,activate=false,extra}={}){
   const cur=await loadSetups(classId);
-  const setup={id:`su${sUid()}`,name:(name||'').trim()||'New setup',icon:icon||'🪑',use:SETUP_USES[useKey(use||useForName(name))].slice(),offPieces:fromLayout&&Array.isArray(offPieces)?[...offPieces]:[],createdAt:Date.now()};
+  const setup={id:`su${sUid()}`,name:(name||'').trim()||'New setup',icon:icon||'🪑',use:SETUP_USES[useKey(use||useForName(name))].slice(),offPieces:fromLayout&&Array.isArray(offPieces)?[...offPieces]:[],createdAt:Date.now(),...(extra||{})};
   // the seating first, then the list: a crash in between leaves an unused key, never a tab with no seating
   await save(setupSlKey(classId,setup.id),await startingLayout({fromLayout,withStudents,fromRoom}));
   await saveSetups(classId,{...cur,list:[...cur.list,setup],...(activate?{activeId:setup.id}:{})});
@@ -3704,6 +3865,39 @@ async function deleteSetup(classId,setupId){
   if(raw)await window.storage.delete(key);
   notifySetups(classId);
   return true;
+}
+/* ── Seat the Groups panel's groups into a setup (Phase 6, ROOMS_PLAN section 10) ──
+   `target` is {setupId} (replace that setup's seating) or {name,icon,use,from} for a new
+   setup, where `from` is {kind:'current'} (the active setup's room and furniture),
+   {kind:'setup',setupId} or {kind:'room',roomId,layoutId}. Regular is never a target and
+   is never written: the only seating keys saved are the target's own (sl-<class>~<id>).
+   The target becomes the active setup. Returns what happened, for the summary. */
+async function seatGroupsIntoSetup(classId,{target,groups,ungroupedIds}){
+  const cur=await loadSetups(classId);
+  const classObj=await load(`sl-${classId}`,null);
+  const rules=classObj?.rules||[];
+  const fromGroups={at:Date.now(),names:groups.map((g,i)=>g.name||`Group ${i+1}`)};
+  const withLayout=(lo,res)=>({...lo,seats:res.seats,groups:res.groups,...(lo.pieces?{pieces:res.pieces}:{})});
+  if(target.setupId){
+    if(target.setupId===REGULAR_SETUP)throw new Error('Regular is never changed by Seat these groups');
+    const setup=cur.list.find(x=>x.id===target.setupId);
+    const lo=setup&&await loadSetupLayout(classId,setup.id);
+    if(!lo)throw new Error('That setup has no seating to replace');
+    const res=placeGroupsInSetup({layout:lo,setup,groups,ungroupedIds,rules,clearLabels:!!setup.fromGroups});
+    await saveSetupLayout(classId,setup.id,withLayout(lo,res));
+    await saveSetups(classId,{...cur,activeId:setup.id,list:cur.list.map(x=>x.id===setup.id?{...x,fromGroups}:x)});
+    notifySetups(classId);
+    return{setup,res,created:false};
+  }
+  const from=target.from||{kind:'current'};
+  const srcSetup=from.kind==='setup'?cur.list.find(x=>x.id===from.setupId):from.kind==='current'?cur.list.find(x=>x.id===cur.activeId):null;
+  const srcLayout=srcSetup?await loadSetupLayout(classId,srcSetup.id):null;
+  const base=await startingLayout({fromLayout:srcLayout||undefined,withStudents:false,fromRoom:from.kind==='room'?{roomId:from.roomId,layoutId:from.layoutId}:undefined});
+  const offPieces=srcLayout&&srcSetup?srcSetup.offPieces||[]:[];
+  const use=SETUP_USES[useKey(target.use||useForName(target.name))].slice();
+  const res=placeGroupsInSetup({layout:base,setup:{use,offPieces},groups,ungroupedIds,rules});
+  const setup=await createSetup(classId,{name:target.name,icon:target.icon,use,fromLayout:withLayout(base,res),withStudents:true,offPieces,activate:true,extra:{fromGroups}});
+  return{setup,res,created:true};
 }
 /* On launch: anything in the trash for more than 30 days goes for good */
 async function purgeTrash(now=Date.now()){
@@ -4120,7 +4314,7 @@ function SetupTabs({setups,onSwitch,manage=false,onNew,onReorder,renderMenu,extr
             style={{display:"flex",alignItems:"center",flexShrink:0,borderRadius:"999px",opacity:dragId===s.id?0.45:1,
               boxShadow:overId===s.id&&dragId!==s.id?"-3px 0 0 var(--cp-sel)":"none"}}>
             <button role="tab" aria-selected={on} data-setup={s.name} className={cpc("tab",on)} onClick={()=>{if(!on)onSwitch(s.id);}}
-              title={`${on?'Showing':'Switch to'} ${s.name}: its own seating, generated into ${setupUseText(s)}${manage?'. Drag to reorder':''}`}
+              title={`${on?'Showing':'Switch to'} ${s.name}: its own seating, generated into ${setupUseText(s)}${s.fromGroups?`. Made from Groups on ${fmtSetupDate(s.fromGroups.at)}`:''}${manage?'. Drag to reorder':''}`}
               style={{display:"flex",alignItems:"center",gap:"5px",padding:manage?"4px 4px 4px 11px":"4px 12px",fontSize:"12.5px",whiteSpace:"nowrap","--tab-fill":"var(--cpb-sunny)",cursor:on?"default":"pointer"}}>
               <span aria-hidden="true">{s.icon}</span><span style={{maxWidth:"150px",overflow:"hidden",textOverflow:"ellipsis"}}>{s.name}</span>
               {manage&&(
@@ -7466,7 +7660,7 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
 /* ══════════════════════════════════════════════════════════
    STUDENT SEATING PANEL — clean read-only view, no tags
    ══════════════════════════════════════════════════════════ */
-function StudentSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist}){
+function StudentSeatingPanel({activeClass,setups,seatRev,onChangeSetups,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist}){
   const[chairsMatch]=useChairsMatch(activeClass?.id);
   /* Class setups (Phase 5): the same active setup as Manage Seating (it lives in TeacherApp) */
   const setup=setups?setups.list.find(x=>x.id===setups.activeId)||null:null;
@@ -7608,7 +7802,7 @@ function StudentSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChan
       if(loaded.walls?.length)requestAnimationFrame(()=>requestAnimationFrame(()=>setZoom(fitZoomFor(scrollRef.current,loaded))));
     });
     return()=>{alive=false;cleanupCenter();};
-  },[activeClass?.id,slKey]);
+  },[activeClass?.id,slKey,seatRev]);
 
   useEffect(()=>{
     if(!displayMode)return;
@@ -9754,11 +9948,11 @@ export default function TeacherApp(){
   /* Class setups (Phase 5): the active class's setups-<class>, held here so Manage
      Seating and the class Seating view always show the same setup. Tagged with its
      class id, so while another class's setups are still loading neither panel uses them. */
-  const[setupsState,setSetupsState]=useState(null); // {classId, data}
+  const[setupsState,setSetupsState]=useState(null); // {classId, data, rev} (rev counts reloads, so the class Seating view re-reads a setup whose seating was replaced under it)
   useEffect(()=>{
     if(!activeClassId)return;
     let cancelled=false;
-    const reload=()=>loadSetups(activeClassId).then(d=>{if(!cancelled)setSetupsState({classId:activeClassId,data:d});});
+    const reload=()=>loadSetups(activeClassId).then(d=>{if(!cancelled)setSetupsState(p=>({classId:activeClassId,data:d,rev:(p?.rev||0)+1}));});
     reload();
     const onChanged=e=>{if(e.detail?.classId===activeClassId)reload();}; // createSetup / deleteSetup, also from Phase 6 code
     window.addEventListener(SETUPS_EVENT,onChanged);
@@ -9767,7 +9961,7 @@ export default function TeacherApp(){
   const setups=setupsState?.classId===activeClassId?setupsState.data:null;
   const changeSetups=useCallback(next=>{
     const n=normalizeSetups(next);
-    setSetupsState({classId:activeClassId,data:n});
+    setSetupsState(p=>({classId:activeClassId,data:n,rev:p?.rev||0}));
     saveSetups(activeClassId,n);
   },[activeClassId]);
 
@@ -10030,7 +10224,7 @@ export default function TeacherApp(){
             </div>
             {openPanels.timer&&!isLastOpen("timer")&&<ResizeHandle panelId="timer"/>}
 
-            {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} setups={setups} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist}/></div>)}
+            {openPanels.seating&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("seating")?{flex:1,minWidth:PANEL_MIN.seating}:{width:colWidth("seating"),flexShrink:0}),overflow:"hidden auto"}}><StudentSeatingPanel activeClass={activeClass} setups={setups} seatRev={setupsState?.rev} onChangeSetups={changeSetups} checklist={checklist} onChangeChecklist={updateChecklist} flagsByStudent={flagsByStudent} now={now} showFlags={showFlagsSeating} onSetShowFlags={handleSetShowFlagsSeating} onGoToChecklist={goToChecklist}/></div>)}
             {openPanels.seating&&!isLastOpen("seating")&&<ResizeHandle panelId="seating"/>}
 
             {openPanels.groups&&(<div style={{display:"flex",flexDirection:"column",...(isLastOpen("groups")?{flex:1,minWidth:PANEL_MIN.groups}:{width:colWidth("groups"),flexShrink:0}),overflow:"hidden auto"}}><StudentGroupsPanel activeClass={activeClass} flagsByStudent={flagsByStudent} showFlags={showFlagsGroups}/></div>)}

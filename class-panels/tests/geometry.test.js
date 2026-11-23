@@ -387,5 +387,99 @@ console.log('Class setups: usable furniture, spreading students out, trash');
   ok(purgeTrashList(trash, now).map(t => t.key).join() === 'b' && purgeTrashList(null, now).length === 0, 'trash older than 30 days is purged, newer kept');
 }
 
+console.log('Seating groups into a setup (Phase 6)');
+{
+  const { placeGroupsInSetup, groupColorKey, GROUP_COLOR_KEYS: GCK } = G;
+  const mk = (specs) => {
+    const uid = mkUid();
+    const pieces = specs.map(([shape, x, y]) => ({ ...newPiece(shape, uid), x, y }));
+    const { seats, groups } = syncPieceSeats({ seats: [], groups: [], pieces, joins: [] }, { uid, nextLabel });
+    return { seats, groups, pieces };
+  };
+  const stu = n => Array.from({ length: n }, (_, i) => 's' + (i + 1));
+  const mkGroups = (sizes) => { let k = 0; return sizes.map((n, i) => ({ name: 'Group ' + (i + 1), colorIndex: i, ids: Array.from({ length: n }, () => 's' + (++k)) })); };
+  const seatOfStudent = (res, id) => res.seats.find(s => s.studentId === id);
+  const benchesOnly = { use: ['workstation'], offPieces: [] }, tablesOnly = { use: ['desk'], offPieces: [] };
+
+  // pairs onto benches: each pair side by side on one bench (adjacent standing places)
+  {
+    const lo = mk([['bench', 260, 470], ['bench', 640, 470], ['bench', 1020, 470], ['long4', 200, 200]]);
+    const res = placeGroupsInSetup({ layout: lo, setup: benchesOnly, groups: mkGroups([2, 2, 2, 2]), ungroupedIds: [] });
+    const pieceOf = id => seatOfStudent(res, id).pieceId;
+    const adjacent = (a, b) => { const sa = seatOfStudent(res, a), sb = seatOfStudent(res, b); return sa.pieceId === sb.pieceId && Math.abs(sa.slot - sb.slot) === 1; };
+    ok(res.placed.length === 4 && res.unplaced.length === 0, 'four pairs fit on three 4-place benches (the long table is not used by a Lab-style setup)');
+    ok([['s1', 's2'], ['s3', 's4'], ['s5', 's6'], ['s7', 's8']].every(([a, b]) => adjacent(a, b)), 'every pair stands side by side on one bench (neighbouring places)');
+    ok(!res.seats.some(s => s.studentId && s.pieceId === lo.pieces[3].id), 'nobody is put at furniture the setup does not use');
+    ok(new Set(['s1', 's3', 's5'].map(pieceOf)).size === 3, 'the first three pairs each get a bench to themselves before anyone shares');
+    ok(res.placed.filter(p => p.shared).length === 1, 'only the fourth pair shares a bench');
+  }
+  // groups of 4 onto long tables
+  {
+    const lo = mk([['long4', 200, 200], ['long4', 480, 200], ['long4', 760, 200]]);
+    const res = placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: mkGroups([4, 4, 4]), ungroupedIds: [] });
+    const tbl = id => seatOfStudent(res, id).pieceId;
+    ok(['s1', 's5', 's9'].every((a, i) => [1, 2, 3].every(k => tbl('s' + (i * 4 + k)) === tbl(a))), 'each group of 4 fills one long table');
+    ok(new Set(['s1', 's5', 's9'].map(tbl)).size === 3 && res.placed.every(p => !p.split && p.tables.length === 1), 'on three different tables, none split');
+  }
+  // a group of 5 splits across two NEIGHBOURING tables
+  {
+    const lo = mk([['long4', 200, 200], ['long4', 480, 200], ['long4', 760, 200], ['long4', 1040, 200]]);
+    const res = placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: mkGroups([5, 3]), ungroupedIds: [] });
+    const g5 = res.placed.find(p => p.index === 0);
+    const xs = g5.seatIds.map(id => lo.pieces.find(p => p.id === res.seats.find(s => s.id === id).pieceId).x);
+    const cols = [...new Set(xs)];
+    ok(g5.split && g5.tables.length === 2 && g5.count === 5, 'a group of 5 does not fit one 4-seat table, so it splits over two');
+    ok(cols.length === 2 && Math.abs(cols[0] - cols[1]) === 280, 'the two tables are neighbours (280 apart, not across the room)');
+    ok(!res.placed.find(p => p.index === 1).split && res.unplaced.length === 0, 'the group of 3 sits whole, and everyone is placed');
+    const colouredTables = res.groups.filter(g => g.color === groupColorKey(0));
+    ok(colouredTables.length === 2, 'a split group colours every table it uses');
+  }
+  // not enough seats: as many as possible, the rest listed
+  {
+    const lo = mk([['bench', 260, 470], ['bench', 640, 470], ['bench', 1020, 470]]);
+    const res = placeGroupsInSetup({ layout: lo, setup: benchesOnly, groups: mkGroups([4, 4, 3, 3]), ungroupedIds: ['u1', 'u2'] });
+    const seated = res.seats.filter(s => s.studentId).length;
+    ok(seated === 12 && res.unplaced.length === 4, `14 students and 12 places: ${seated} seated, ${res.unplaced.length} listed as not placed`);
+    ok(res.unplaced.includes('u1') && res.unplaced.includes('u2'), 'the people without a group are the ones left out first');
+    ok(new Set(res.seats.filter(s => s.studentId).map(s => s.studentId)).size === 12, 'nobody is seated twice');
+  }
+  // locked seats are left alone
+  {
+    const lo = mk([['long4', 200, 200], ['long4', 480, 200]]);
+    const lockedSeat = lo.seats[0];
+    lo.seats = lo.seats.map(s => s.id === lockedSeat.id ? { ...s, studentId: 's2', locked: true } : s);
+    const res = placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: mkGroups([4, 4]), ungroupedIds: [] });
+    const after = res.seats.find(s => s.id === lockedSeat.id);
+    ok(after.studentId === 's2' && after.locked === true, 'a locked student stays in their locked seat');
+    ok(res.seats.filter(s => s.studentId === 's2').length === 1, 'and is not seated a second time with their group');
+    ok(res.lockedKept === 1 && res.unplaced.length === 0, 'the rest of their group is still seated (others take the free seats)');
+  }
+  // colours in order, matching the Groups panel
+  {
+    const lo = mk(Array.from({ length: 8 }, (_, i) => ['long4', 200 + i * 280, 200]));
+    const res = placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: mkGroups(Array(8).fill(4)), ungroupedIds: [] });
+    const colourOfGroup = gi => { const p = res.placed.find(x => x.index === gi); const seat = res.seats.find(s => s.id === p.seatIds[0]); return res.groups.find(g => g.id === seat.groupId).color; };
+    ok(Array.from({ length: 8 }, (_, i) => colourOfGroup(i)).join() === Array.from({ length: 8 }, (_, i) => GCK[i % GCK.length]).join(), 'group 1 is blue, 2 green, 3 gold, 4 lilac, 5 red, 6 cyan, then round again');
+    ok(res.groups.every(g => g.label && /^Group \d$/.test(g.label)) && res.pieces.every(p => /^Group \d$/.test(p.label)), 'each table is named after its group, on the table group and on the table itself');
+  }
+  // ungrouped students spread into the remaining tables; keep-apart respected
+  {
+    const lo = mk([['long4', 200, 200], ['long4', 480, 200], ['long4', 760, 200]]);
+    const res = placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: mkGroups([4]), ungroupedIds: ['u1', 'u2', 'u3', 'u4', 'u5'], rules: [{ id: 'r', type: 'apart', aId: 'u1', bId: 'u2' }] });
+    const tableOf = id => seatOfStudent(res, id).groupId;
+    ok(res.unplaced.length === 0 && tableOf('u1') !== tableOf('u2'), 'ungrouped students fill the free tables, keeping a keep-apart pair on different tables');
+    ok(!res.groups.find(g => g.id === tableOf('u1')).color, 'a table with nobody from a group on it is left uncoloured');
+    const forced = placeGroupsInSetup({ layout: mk([['long4', 200, 200]]), setup: tablesOnly, groups: mkGroups([2]), ungroupedIds: ['u1', 'u2'], rules: [{ id: 'r', type: 'apart', aId: 'u1', bId: 'u2' }] });
+    ok(forced.unplaced.length === 0 && forced.conflicts.length === 1, 'a keep-apart pair that cannot be separated is reported, not failed');
+  }
+  // the input layout is not changed (a pure function)
+  {
+    const lo = mk([['long4', 200, 200]]);
+    const snap = JSON.stringify(lo);
+    placeGroupsInSetup({ layout: lo, setup: tablesOnly, groups: mkGroups([4]), ungroupedIds: [] });
+    ok(JSON.stringify(lo) === snap, 'placing never changes the layout it was given');
+  }
+}
+
 console.log(`\n${passes} passed, ${failures} failed.`);
 process.exit(failures ? 1 : 0);
