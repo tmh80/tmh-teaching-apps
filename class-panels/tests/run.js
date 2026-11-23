@@ -125,6 +125,13 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   ok(await page.locator('pattern#cp-hatch').count() >= 1, 'the pencil-hatch pattern is drawn once on the canvas');
   ok(await page.locator('[title="Drag to move this desk"]').count() === 24, 'all 24 fixture seats are drawn (and draggable)');
   ok(await page.locator('[title="Select or drag the whole group"]').count() === 6, 'all 6 group tabs are drawn');
+  // chairs are drawn first, so every table top covers them and only their backs show (a floor plan)
+  const paint = await page.locator('[data-cp]').evaluateAll(els => els.map(e => e.getAttribute('data-cp')));
+  const lastChair = paint.lastIndexOf('chair'), firstTable = paint.indexOf('table');
+  ok(paint.filter(k => k === 'chair').length >= 20 && lastChair >= 0 && firstTable > lastChair,
+    `old seats: every chair is drawn beneath the tables (${paint.filter(k => k === 'chair').length} chairs, all before the first table top)`);
+  const chairBox = await page.locator('[data-cp="chair"]').first().boundingBox();
+  ok(chairBox && chairBox.width > 0, 'the chairs are really on screen');
   await page.locator(manageMenu).click();
   await page.getByText('Manage Groups').click(); await page.waitForTimeout(800);
   await shot(page, '07-manage-groups');
@@ -209,8 +216,10 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await page.locator('[title="Add a new desk or table to the room"]').click(); await page.waitForTimeout(300);
   ok(await page.locator('[title^="Add: Hexagon"]').count() === 1 && await page.locator('[title^="Add: Long table of 8"]').count() === 1 && await page.locator('[title^="Add: Horseshoe"]').count() === 1,
     'the Add table menu offers Hexagon, Long table of 8 and Horseshoe');
-  ok(await page.locator('[title^="Add: Trapezoid"]').count() === 1 && await page.locator('[title="Add a table of 4 seats, grouped together"]').count() === 1,
-    'it shows each shape, and keeps the old simple seats');
+  ok(await page.locator('[title^="Add: Trapezoid"]').count() === 1 && await page.locator('[title^="Add: Lab bench"]').count() === 1,
+    'it shows each shape');
+  ok(!(await page.getByText('Simple seats').count()) && await page.locator('[title^="Add a table of"], [title="Add one ungrouped seat"]').count() === 0,
+    'the Add table menu no longer has "Simple seats" (Ready-made replaces them)');
   await shot(page, '20-add-table-menu');
   await page.locator('[title^="Add: Hexagon"]').click(); await page.waitForTimeout(700);
   let sl7 = await SL('fx-7b');
@@ -328,6 +337,36 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   await page.waitForTimeout(300);
   await shot(page, '27-room-of-tables');
   await page.locator('[title="Reset zoom"]:visible').first().click();
+
+  // lab benches have standing spots, not chairs; "Use for" decides which a table shows
+  const marks = async () => ({ chairs: await page.locator('[data-cp="chair"]').count(), spots: await page.locator('[data-cp="spot"]').count() });
+  await deselect();
+  let m0 = await marks();
+  await addFromMenu('Lab bench');
+  let m1 = await marks();
+  sl7 = await SL('fx-7b');
+  ok(m1.spots - m0.spots === 4 && m1.chairs === m0.chairs, `a lab bench draws 4 standing spots and no chairs (+${m1.spots - m0.spots} spots, +${m1.chairs - m0.chairs} chairs)`);
+  ok(sl7.pieces.at(-1).shape === 'bench' && sl7.seats.filter(s => s.pieceId === sl7.pieces.at(-1).id).length === 4, 'its 4 places are still ordinary seats that hold students');
+  ok(await page.getByText('✎ Edit places…').count() === 1, 'its selection bar says "places", not "seats"');
+  await shot(page, '30-lab-bench');
+  await deselect();
+  m0 = await marks();
+  await addFromMenu('Long table');
+  m1 = await marks();
+  ok(m1.chairs - m0.chairs === 4 && m1.spots === m0.spots, `a long table draws chairs (+${m1.chairs - m0.chairs})`);
+  const seatsBefore = (await SL('fx-7b')).seats.map(x => x.id).join();
+  await page.getByRole('button', { name: 'Workstation', exact: true }).click(); await page.waitForTimeout(650);
+  let m2 = await marks();
+  ok(m2.spots - m1.spots === 4 && m2.chairs === m0.chairs, `switched to Workstation it shows standing spots instead (+${m2.spots - m1.spots} spots, ${m2.chairs - m1.chairs} chairs)`);
+  ok((await SL('fx-7b')).seats.map(x => x.id).join() === seatsBefore, 'the seats are exactly the same (it is a drawing change only)');
+  await shot(page, '31-long-table-as-workstation');
+  await page.locator('[title^="An everyday table"]').click(); await page.waitForTimeout(650);
+  let m3 = await marks();
+  ok(m3.chairs === m1.chairs && m3.spots === m1.spots, 'and back to Table it shows chairs again');
+  await page.locator('[title^="Counts as both"]').click(); await page.waitForTimeout(650);
+  let m4 = await marks();
+  ok(m4.chairs === m1.chairs && m4.spots === m1.spots, '"Both" keeps the chairs');
+  await deselect();
 
   // blackboard theme
   await page.evaluate(async () => { await window.storage.set('ta-theme', JSON.stringify('blackboard')); });

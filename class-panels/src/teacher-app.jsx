@@ -1477,7 +1477,7 @@ const TableSurface=({points,rect,rot=0,fill="var(--cp-wood)",radius=10,shadow=tr
     :{points:pts.map(p=>p.join(",")).join(" ")};
   const Shape=useRect?"rect":"polygon";
   return(
-    <svg width={bw+M*2} height={bh+M*2} style={{position:"absolute",left:bx-M,top:by-M,overflow:"visible",pointerEvents:"none",opacity:faded?0.55:1}} aria-hidden="true">
+    <svg data-cp="table" width={bw+M*2} height={bh+M*2} style={{position:"absolute",left:bx-M,top:by-M,overflow:"visible",pointerEvents:"none",opacity:faded?0.55:1}} aria-hidden="true">
       <g transform={`translate(${M-bx},${M-by})`}>
         {shadow&&<Shape {...shapeProps} transform={`translate(2.5 3.5) ${useRect?rt:""}`} style={{fill:"var(--cp-shadow)"}}/>}
         {selected&&<Shape {...shapeProps} transform={useRect?rt:undefined} style={{fill:"none",stroke:"var(--cp-sel-glow)",strokeWidth:9,strokeLinejoin:"round"}}/>}
@@ -1492,17 +1492,36 @@ const TableSurface=({points,rect,rot=0,fill="var(--cp-wood)",radius=10,shadow=tr
 /* A chair seen from above: a cushion and a thicker backrest. (x,y) is its centre;
    `facing` is the direction the sitter faces in degrees — 0 faces up (towards a
    table above), 90 faces right, and so on. `empty` draws it hollow and dashed. */
-const Chair=({x,y,facing=0,color=0,empty=false,dim=false,w=34,h=18})=>{
+const Chair=({x,y,facing=0,color=0,empty=false,dim=false,w=38,h=18})=>{
   const fill=typeof color==="number"?chairColor(color):color;
   const S=Math.max(w,h)+8,hc=S/2,cush=h*0.66,back=h-cush;
-  const st=empty?{fill:"none",stroke:INK,strokeWidth:INK_W,strokeDasharray:"3 2.5"}:{fill,stroke:INK,strokeWidth:INK_W};
+  // empty: a pale ghost chair, so it still reads as a chair when only its back shows
+  const st=empty?{fill:"var(--cp-floor)",fillOpacity:0.75,stroke:INK,strokeWidth:INK_W,strokeDasharray:"3 2.5"}:{fill,stroke:INK,strokeWidth:INK_W};
   return(
-    <svg width={S} height={S} style={{position:"absolute",left:x-hc,top:y-hc,overflow:"visible",pointerEvents:"none",opacity:dim?0.45:1}} aria-hidden="true">
+    <svg data-cp="chair" width={S} height={S} style={{position:"absolute",left:x-hc,top:y-hc,overflow:"visible",pointerEvents:"none",opacity:dim?0.45:1}} aria-hidden="true">
       <g transform={`rotate(${facing} ${hc} ${hc}) translate(${hc-w/2} ${hc-h/2})`}>
         <rect x={0.5} y={cush} width={w-1} height={back} rx={3} style={st}/>
         {!empty&&<rect x={0.5} y={cush} width={w-1} height={back} rx={3} style={{fill:"rgba(43,33,24,0.22)"}}/>}
         <rect x={0.5} y={0.5} width={w-1} height={cush+0.5} rx={5.5} style={st}/>
         {!empty&&<rect x={0.5} y={0.5} width={w-1} height={cush+0.5} rx={5.5} style={{fill:"url(#cp-hatch)",opacity:0.7}}/>}
+      </g>
+    </svg>
+  );
+};
+
+/* A standing spot for a lab bench: a little rounded floor mat with a pair of
+   footprints, in the chair colour, just outside the bench edge. Same arguments
+   as Chair (x,y is its centre; `facing` turns it so it lies along the edge). */
+const StandingSpot=({x,y,facing=0,color=0,empty=false,dim=false,w=34,h=14})=>{
+  const fill=typeof color==="number"?chairColor(color):color;
+  const S=Math.max(w,h)+8,hc=S/2;
+  const st=empty?{fill:"none",stroke:INK,strokeWidth:INK_W,strokeDasharray:"3 2.5"}:{fill,stroke:INK,strokeWidth:INK_W};
+  return(
+    <svg data-cp="spot" width={S} height={S} style={{position:"absolute",left:x-hc,top:y-hc,overflow:"visible",pointerEvents:"none",opacity:dim?0.45:1}} aria-hidden="true">
+      <g transform={`rotate(${facing} ${hc} ${hc}) translate(${hc-w/2} ${hc-h/2})`}>
+        <rect x={0.5} y={0.5} width={w-1} height={h-1} rx={h/2-0.5} style={st}/>
+        {!empty&&<rect x={0.5} y={0.5} width={w-1} height={h-1} rx={h/2-0.5} style={{fill:"url(#cp-hatch)",opacity:0.7}}/>}
+        {[w/2-6,w/2+6].map(cx=><ellipse key={cx} cx={cx} cy={h/2} rx={2.6} ry={4} style={{fill:"var(--cp-ink)",opacity:empty?0.25:0.4}}/>)}
       </g>
     </svg>
   );
@@ -1522,10 +1541,11 @@ const NameTag=({name,tilt=0,w,h=26,fontSize=12,pad=6,warn=false,locked=false,onC
   </div>
 );
 
-/* The drawing under one seat: either its own little table (a lone desk) or, in a
-   shared table, a faint seam around the seat's patch of it, then the chair tucked
-   in at the bottom. state: "ok" | "unused" | "unavailable". */
-const SeatArt=({w=SW,h=SH,chair=0,state="ok",standalone=false,hasStudent=true,selected=false})=>{
+/* The drawing on top of one seat's chair: either its own little table (a lone
+   desk) or, in a shared table, a faint seam around the seat's patch of it. The
+   chairs themselves are LegacyChairs, drawn first so they sit under the table.
+   state: "ok" | "unused" | "unavailable". */
+const SeatArt=({w=SW,h=SH,state="ok",standalone=false,selected=false})=>{
   const dim=state==="unused",bad=state==="unavailable";
   return(
     <>
@@ -1536,9 +1556,40 @@ const SeatArt=({w=SW,h=SH,chair=0,state="ok",standalone=false,hasStudent=true,se
         </svg>
       )}
       {standalone&&bad&&<svg width={w} height={h} style={{position:"absolute",left:0,top:0,pointerEvents:"none"}} aria-hidden="true"><rect x={2} y={2} width={w-4} height={h-4} rx={7} style={{fill:"url(#cp-hatch-x)"}}/></svg>}
-      <Chair x={w/2} y={h-9} color={chair} empty={!hasStudent||dim||bad} dim={dim}/>
     </>
   );
+};
+
+/* Chairs for plain seat groups and lone desks (seats without a table piece).
+   Rendered BEFORE every table top so each chair is tucked under its table with
+   only its back showing, like a floor plan. `pos` is {seatId:{x,y}} (live while
+   dragging); a group's table is the seat area plus GROUP_PAD, a lone desk's is
+   its own seat box. */
+const LegacyChairs=({seats,groups,pos,chairMap,hideUnused=false})=>{
+  const out=[];
+  const sById=new Map(seats.map(s=>[s.id,s]));
+  const grouped=new Set();
+  const add=(items,rect)=>{
+    legacyChairs(items.map(s=>({id:s.id,...pos[s.id]})),rect).forEach(c=>{
+      const s=sById.get(c.id);
+      if(hideUnused&&!s.used)return;
+      const bad=!!s.unavailable;
+      out.push(<Chair key={`lc-${c.id}`} x={c.x} y={c.y} facing={c.facing} color={bad?"var(--cp-coral)":(chairMap?.[c.id]??0)} empty={bad||!s.studentId||!s.used} dim={!s.used}/>);
+    });
+  };
+  (groups||[]).forEach(g=>{
+    const items=g.seatIds.map(id=>sById.get(id)).filter(s=>s&&!s.pieceId&&pos[s.id]);
+    if(!items.length||g.seatIds.some(id=>sById.get(id)?.pieceId))return; // a piece table draws its own chairs
+    g.seatIds.forEach(id=>grouped.add(id));
+    const xs=items.map(s=>pos[s.id].x),ys=items.map(s=>pos[s.id].y);
+    const x0=Math.min(...xs),y0=Math.min(...ys);
+    add(items,{x:x0-GROUP_PAD,y:y0-GROUP_PAD,w:Math.max(...xs)-x0+SW+GROUP_PAD*2,h:Math.max(...ys)-y0+SH+GROUP_PAD*2});
+  });
+  seats.forEach(s=>{
+    if(s.pieceId||grouped.has(s.id)||!pos[s.id])return;
+    add([s],{x:pos[s.id].x+1,y:pos[s.id].y+1,w:SW-2,h:SH-2}); // the lone desk's own table (see SeatArt)
+  });
+  return <>{out}</>;
 };
 
 /* Little pictures for the room items. Drawn to the box they're given (w×h), so a
@@ -1609,7 +1660,7 @@ const RoomItemArt=({type,w,h,label,fontSize=10.5})=>{
 };
 
 /* Table pieces (shapes that can rotate and join — see the geometry block below):
-   chairs just outside each seat's edge, facing in, then one continuous table
+   chairs tucked under each seat's edge (back showing), facing in, then one continuous table
    top per cluster of joined pieces. A cluster's outlines all go in one SVG,
    ink first at double width and wood on top, so where two pieces meet the
    wood covers the seam and only a very faint dotted line is left. Used by both
@@ -1629,7 +1680,8 @@ const PieceTables=({pieces,joins,slots,seatByKey,chairMap,selectedIds,hideUnused
         const seat=seatByKey?.get(s.key);
         if(hideUnused&&seat&&!seat.used)return null;
         const bad=!!seat?.unavailable;
-        return <Chair key={`ch-${s.key}`} x={s.chair.x} y={s.chair.y} facing={s.chair.facing}
+        const Mark=s.standing?StandingSpot:Chair; // lab benches: people stand, so a floor mat instead of a chair
+        return <Mark key={`ch-${s.key}`} x={s.chair.x} y={s.chair.y} facing={s.chair.facing}
           color={bad?"var(--cp-coral)":(chairMap?.[seat?.id]??0)} empty={!bad&&(!seat?.studentId||!seat?.used)} dim={!!seat&&!seat.used}/>;
       })}
       <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">
@@ -1935,11 +1987,16 @@ const repairSeatGroups=(seatsIn,groupsIn)=>{
    ════════════════════════════════════════════════════════════════════════ */
 const PG={
   SEAT_W:114,SEAT_H:52,   // the notional seat box every seat still has (must match SW/SH)
-  CHAIR_OFF:10,           // chair centre this far outside its table edge (its front just tucks in)
+  CHAIR_OFF:-1,           // chair centre sits this far INSIDE the edge: it's tucked under the table, only its back sticks out
+  CHAIR_OUT:8,            // ...so this much of the chair shows beyond the table edge
+  STAND_OFF:11,           // a standing spot (lab bench) is a floor mat just outside the edge, not tucked under
+  GROUP_PAD:8,            // table top round a plain seat group (must match GROUP_PAD)
   SNAP_DIST:18,SNAP_ANGLE:12,
   JOIN_MARGIN:12,         // a slot this close to a joined stretch of edge hides too (its chair would hit the other table)
 };
 const pgR=v=>Math.round(v*100)/100;
+/* Lab benches ('Use for: Workstation' only) have standing spots, not chairs: students stand to do practical work. */
+const pgStanding=p=>{const r=p?.roles||[];return r.length===1&&r[0]==='workstation';};
 const pgNorm=a=>{a=((a%360)+360)%360;return a>180?a-360:a;};   // → (-180,180]
 const pgNorm360=a=>pgR(((a%360)+360)%360);
 const pgSub=(a,b)=>[a[0]-b[0],a[1]-b[1]];
@@ -2154,7 +2211,7 @@ const pgPlaceTags=(slots,worlds)=>{
   }
   slots.forEach(s=>{
     const sup=CHAIR_TAG.w/2*Math.abs(s.n[0])+CHAIR_TAG.h/2*Math.abs(s.n[1]);
-    const d=PG.CHAIR_OFF+sup+1; // just past the chair's cushion, over its backrest
+    const d=(s.reach||PG.CHAIR_OUT)+sup+2; // just clear of the chair's back (or the standing mat)
     s.tag={x:pgR(s.p[0]+s.n[0]*d),y:pgR(s.p[1]+s.n[1]*d),w:CHAIR_TAG.w,h:CHAIR_TAG.h,font:CHAIR_TAG.font,mode:'chair'};
   });
 };
@@ -2184,8 +2241,10 @@ const slotsForLayout=(pieces,joins)=>{
         if((cover.get(`${p.id}:${sl.edge}`)||[]).some(([u0,u1])=>u>=u0-PG.JOIN_MARGIN&&u<=u1+PG.JOIN_MARGIN))state='joined';
       }
       const facing=pgR(Math.atan2(-sl.n[0],sl.n[1])*180/Math.PI); // Chair: 0 = sitter faces up
-      out.push({key:`${p.id}:${sl.idx}`,pieceId:p.id,slot:sl.idx,state,p:sl.p,n:sl.n,
-        chair:{x:pgR(sl.p[0]+sl.n[0]*PG.CHAIR_OFF),y:pgR(sl.p[1]+sl.n[1]*PG.CHAIR_OFF),facing}});
+      const standing=pgStanding(p),dist=standing?PG.STAND_OFF:PG.CHAIR_OFF;
+      out.push({key:`${p.id}:${sl.idx}`,pieceId:p.id,slot:sl.idx,state,p:sl.p,n:sl.n,standing,
+        reach:standing?PG.STAND_OFF+8:PG.CHAIR_OUT, // how far past the table edge the chair or mat shows
+        chair:{x:pgR(sl.p[0]+sl.n[0]*dist),y:pgR(sl.p[1]+sl.n[1]*dist),facing}});
     });
   });
   clustersFromJoins(pieces||[],joins).forEach(ids=>{
@@ -2324,7 +2383,47 @@ const convertOptions=n=>{
   return out;
 };
 
-const PIECE_GEOMETRY={PG,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly};
+/* Chairs for plain (pre-table) seat groups. The table top covers the whole seat
+   area and each chair is tucked under one outer edge, like a floor plan.
+   `items` are seat boxes {id,x,y} (top-left of a 114×52 box); `rect` is the table top.
+   Which edge: a single row → below; a single column → left; two columns (3+ rows)
+   → the outer side; otherwise the top row goes above and the bottom row below, and a
+   middle row uses the left/right end. A seat with no free edge (the middle of a big
+   block) gets no chair: it would be fully under the table and invisible anyway. */
+const pgBands=(vals,tol=24)=>{
+  const bands=[];
+  [...vals].sort((a,b)=>a-b).forEach(v=>{const b=bands[bands.length-1];if(b&&v-b.max<=tol)b.max=v;else bands.push({min:v,max:v});});
+  return bands;
+};
+const legacyChairs=(items,rect)=>{
+  const rows=pgBands(items.map(i=>i.y)),cols=pgBands(items.map(i=>i.x));
+  const nR=rows.length,nC=cols.length;
+  const idx=(bands,v)=>bands.findIndex(b=>v>=b.min-1e-6&&v<=b.max+1e-6);
+  const out=[];
+  items.forEach(it=>{
+    const r=idx(rows,it.y),c=idx(cols,it.x);
+    let side;
+    if(items.length===1||nR===1)side='B';
+    else if(nC===1)side='L';
+    else if(nC===2&&nR>=3)side=c===0?'L':'R';
+    else if(r===0)side='T';
+    else if(r===nR-1)side='B';
+    else if(c===0)side='L';
+    else if(c===nC-1)side='R';
+    else side=null;
+    if(!side)return;
+    const o=PG.CHAIR_OFF,cx=it.x+PG.SEAT_W/2,cy=it.y+PG.SEAT_H/2;
+    const hx=Math.max(rect.x+14,Math.min(rect.x+rect.w-14,cx)),hy=Math.max(rect.y+14,Math.min(rect.y+rect.h-14,cy));
+    // centre = edge + outward normal × CHAIR_OFF (negative, so tucked in); facing 0 = sitter faces up
+    if(side==='B')out.push({id:it.id,x:pgR(hx),y:pgR(rect.y+rect.h+o),facing:0,side});
+    else if(side==='T')out.push({id:it.id,x:pgR(hx),y:pgR(rect.y-o),facing:180,side});
+    else if(side==='L')out.push({id:it.id,x:pgR(rect.x-o),y:pgR(hy),facing:90,side});
+    else out.push({id:it.id,x:pgR(rect.x+rect.w+o),y:pgR(hy),facing:270,side});
+  });
+  return out;
+};
+
+const PIECE_GEOMETRY={PG,legacyChairs,pgStanding,SHAPES,TRAP_H,shapeDef,pieceToWorld,detectJoins,clustersFromJoins,transformPieces,piecesCentre,alignPieceToEdge,findSnap,slotsForLayout,piecesBounds,syncPieceSeats,readingOrder,newPiece,PIECE_COMBOS,buildPieceSet,placePieceSet,seatCountOf,convertOptions,pgInPoly};
 /* @geometry-end */
 
 // Tag colours. Custom tags used to get whatever COLORS[i] fell out of
@@ -3259,8 +3358,8 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const clampGroupDelta=(dragIds,dx,dy)=>{
     const groupSeats=seats.filter(s=>dragIds.has(s.id));
     if(!groupSeats.length)return{dx,dy};
-    const minDx=Math.max(...groupSeats.map(s=>GROUP_PAD-s.x));
-    const minDy=Math.max(...groupSeats.map(s=>GROUP_PAD+GROUP_BAR_H-s.y));
+    const minDx=Math.max(...groupSeats.map(s=>GROUP_PAD+PG.CHAIR_OUT-s.x)); // left chairs stick out too
+    const minDy=Math.max(...groupSeats.map(s=>GROUP_PAD+PG.CHAIR_OUT+GROUP_BAR_H-s.y));
     return{dx:Math.max(dx,minDx),dy:Math.max(dy,minDy)};
   };
 
@@ -4227,7 +4326,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 {kind:'long6',label:'Long of 6',tip:'Long table: 3 seats on each long side'},
                 {kind:'trap',label:'Trapezoid',tip:'Trapezoid: one seat on each side. Two joined long side to long side make a hexagon'},
                 {kind:'round',label:'Round',tip:'Round table for 4 (5 or 6 from its menu once added)'},
-                {kind:'bench',label:'Lab bench',tip:'Lab bench (a workstation): 4 seats on one side, the back can be switched on'},
+                {kind:'bench',label:'Lab bench',tip:'Lab bench (a workstation): 4 standing places on one side, the back can be switched on'},
               ].map(o=>(
                 <button key={o.kind} onClick={()=>{addPieceSet(o.kind);addTableMenu.close();}} title={`Add: ${o.tip}`} style={{...btnS,padding:"7px 3px 5px",display:"flex",flexDirection:"column",alignItems:"center",gap:"4px"}}
                   onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
@@ -4236,39 +4335,13 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
               ))}
             </div>
             <div style={menuHead}>Ready-made</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px",marginBottom:"10px"}}>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px"}}>
               {['hexagon','long8','horseshoe'].map(k=>(
                 <button key={k} onClick={()=>{addPieceSet(k);addTableMenu.close();}} title={`Add: ${PIECE_COMBOS[k].name} (${PIECE_COMBOS[k].hint}), already joined`} style={{...btnS,padding:"7px 3px 5px",display:"flex",flexDirection:"column",alignItems:"center",gap:"4px"}}
                   onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
                   onMouseLeave={e=>e.currentTarget.style.background="#fff"}
                 ><PieceThumb kind={k} size={46}/><span style={{fontSize:"10px",color:"rgba(0,0,0,0.5)",lineHeight:1.1,textAlign:"center"}}>{PIECE_COMBOS[k].name}</span></button>
               ))}
-            </div>
-            {/* The original seat boxes, for anyone who prefers them */}
-            <div style={menuHead}>Simple seats</div>
-            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"4px"}}>
-              {[
-                {n:1,o:'H',label:'1 seat',lay:[{c:0,r:0}]},
-                {n:2,o:'H',label:'2 horiz',lay:[{c:0,r:0},{c:1,r:0}]},
-                {n:2,o:'V',label:'2 vert',lay:[{c:0,r:0},{c:0,r:1}]},
-                {n:3,o:'H',label:'3 horiz',lay:[{c:0,r:0},{c:1,r:0},{c:2,r:0}]},
-                {n:3,o:'V',label:'3 vert',lay:[{c:0,r:0},{c:0,r:1},{c:0,r:2}]},
-                {n:4,o:'H',label:'4 seats',lay:[{c:0,r:0},{c:1,r:0},{c:0,r:1},{c:1,r:1}]},
-              ].map(({n,o,label,lay})=>{
-                const maxC=Math.max(...lay.map(l=>l.c));
-                const maxR=Math.max(...lay.map(l=>l.r));
-                return(
-                  <button key={`${n}${o}`} onClick={()=>{addTable(n,o);addTableMenu.close();}} title={n===1?"Add one ungrouped seat":`Add a table of ${n} seats, grouped together`} style={{...btnS,padding:"8px 6px",display:"flex",flexDirection:"column",alignItems:"center",gap:"5px"}}
-                    onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
-                    onMouseLeave={e=>e.currentTarget.style.background="#fff"}
-                  >
-                    <div style={{display:"grid",gridTemplateColumns:`repeat(${maxC+1},10px)`,gridTemplateRows:`repeat(${maxR+1},8px)`,gap:"1px"}}>
-                      {lay.map((l,i)=><div key={i} style={{gridColumn:l.c+1,gridRow:l.r+1,background:"rgba(0,0,0,0.2)",borderRadius:"1px"}}/>)}
-                    </div>
-                    <span style={{fontSize:"10px",color:"rgba(0,0,0,0.35)"}}>{label}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>,
           document.body
@@ -4326,20 +4399,22 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 const roleOf=r=>(r||[]).includes('workstation')?((r||[]).includes('desk')?'both':'workstation'):'desk';
                 const curRole=roleOf(focus.roles);
                 const seatedHere=seats.filter(s=>activeSelPieces.includes(s.pieceId)&&s.studentId).length;
+                // lab benches have standing spots, not chairs, so say "place" rather than "seat" for them
+                const stand=selP.length>0&&selP.every(pgStanding),placeWord=stand?'place':'seat';
                 const seg=(on)=>({flex:1,padding:"5px 0",border:"none",cursor:"pointer",fontSize:"10.5px",fontWeight:700,background:on?"#1a1a2e":"#fff",color:on?"#fff":"rgba(0,0,0,0.45)",fontFamily:"'Source Sans 3',sans-serif"});
                 return(
                   <>
                     <div style={{fontSize:"12.5px",fontWeight:700,color:"#1a1a2e",lineHeight:1.3}}>
                       {selP.length===1?SHAPES[focus.shape]?.name:`${selP.length} pieces joined`}
-                      <span style={{fontWeight:500,color:"rgba(0,0,0,0.4)"}}> · {nSeats} seat{nSeats!==1?'s':''}</span>
+                      <span style={{fontWeight:500,color:"rgba(0,0,0,0.4)"}}> · {nSeats} {placeWord}{nSeats!==1?'s':''}</span>
                     </div>
                     <div style={{display:"flex",gap:"4px"}}>
                       <button onClick={()=>rotatePiecesBy(activeSelPieces,-15)} title="Turn 15° anticlockwise (key: [ )" style={{...btnS,flex:1,padding:"6px 0"}}>↺ 15°</button>
                       <button onClick={()=>rotatePiecesBy(activeSelPieces,90)} title="Turn a quarter turn clockwise" style={{...btnS,flex:1.3,padding:"6px 0",color:"#1a1a2e"}}>⟳ 90°</button>
                       <button onClick={()=>rotatePiecesBy(activeSelPieces,15)} title="Turn 15° clockwise (key: ] )" style={{...btnS,flex:1,padding:"6px 0"}}>↻ 15°</button>
                     </div>
-                    <button onClick={()=>setEditSeats(v=>!v)} title="Click the chairs round the table to switch seats on or off, e.g. the ends of a long table or the back of a lab bench"
-                      style={{...btnS,background:editSeats?"#eaf1fc":"#fff",color:editSeats?"#2e6bce":"rgba(0,0,0,0.5)",border:`1px solid ${editSeats?"rgba(66,133,244,0.35)":"rgba(0,0,0,0.08)"}`}}>{editSeats?'✓ Done editing seats':'✎ Edit seats…'}</button>
+                    <button onClick={()=>setEditSeats(v=>!v)} title={stand?"Click the standing spots round the bench to switch places on or off, e.g. the back of a lab bench":"Click the chairs round the table to switch seats on or off, e.g. the ends of a long table or the back of a lab bench"}
+                      style={{...btnS,background:editSeats?"#eaf1fc":"#fff",color:editSeats?"#2e6bce":"rgba(0,0,0,0.5)",border:`1px solid ${editSeats?"rgba(66,133,244,0.35)":"rgba(0,0,0,0.08)"}`}}>{editSeats?`✓ Done editing ${placeWord}s`:`✎ Edit ${placeWord}s…`}</button>
                     {focus.shape==='round'&&(
                       <div title="How many seats round this table" style={{display:"flex",alignItems:"center",gap:"6px"}}>
                         <span style={{fontSize:"10.5px",color:"rgba(0,0,0,0.4)",fontWeight:600}}>Seats</span>
@@ -4352,7 +4427,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                       <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.25)",margin:"4px 0 4px"}}>Use for</div>
                       <div style={{display:"flex",borderRadius:"7px",overflow:"hidden",border:"1px solid rgba(0,0,0,0.08)"}}>
                         {[['desk','Table',['desk']],['workstation','Workstation',['workstation']],['both','Both',['desk','workstation']]].map(([k,lbl,roles])=>(
-                          <button key={k} onClick={()=>updatePieces(activeSelPieces,p=>({...p,roles}))} title={k==='desk'?"An everyday table (used by regular seating)":k==='workstation'?"A lab workstation (used by lab seating)":"Counts as both a table and a workstation"} style={seg(curRole===k)}>{lbl}</button>
+                          <button key={k} onClick={()=>updatePieces(activeSelPieces,p=>({...p,roles}))} title={k==='desk'?"An everyday table (used by regular seating)":k==='workstation'?"A lab workstation (used by lab seating). Students stand at it, so it shows standing spots instead of chairs":"Counts as both a table and a workstation"} style={seg(curRole===k)}>{lbl}</button>
                         ))}
                       </div>
                     </div>
@@ -4637,8 +4712,8 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                   const on=sl.state==='on';
                   return(
                     <button key={`es-${sl.key}`} onClick={e=>{e.stopPropagation();toggleSlot(sl.pieceId,sl.slot);}} onMouseDown={e=>e.stopPropagation()}
-                      title={on?"Switch this seat off (whoever sits here goes back to the student list)":"Switch a seat on here"}
-                      style={{position:"absolute",left:sl.chair.x-15,top:sl.chair.y-15,width:30,height:30,borderRadius:"50%",zIndex:7,padding:0,cursor:"pointer",
+                      title={sl.standing?(on?"Switch this place off (whoever stands here goes back to the student list)":"Switch a place on here"):(on?"Switch this seat off (whoever sits here goes back to the student list)":"Switch a seat on here")}
+                      style={{position:"absolute",left:sl.p[0]+sl.n[0]*(sl.standing?20:14)-15,top:sl.p[1]+sl.n[1]*(sl.standing?20:14)-15,width:30,height:30,borderRadius:"50%",zIndex:7,padding:0,cursor:"pointer",
                         border:`2px ${on?"solid":"dashed"} var(--cp-sel)`,background:on?"var(--cp-sel)":"rgba(255,255,255,0.75)",color:on?"#fff":"var(--cp-sel)",fontSize:"15px",fontWeight:800,lineHeight:1,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 1px 4px rgba(0,0,0,0.2)"}}>{on?"✓":"+"}</button>
                   );
                 })}
@@ -4653,6 +4728,8 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
               (unrelated to current selection), soft (an individual member is
               selected — the rest of the table gets a dashed halo), full (the
               group itself is selected via its tab — blue outline + glow). */}
+          {/* Chairs first, so every table top below covers them and only their backs show */}
+          <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairIndexMap(seats,groups)}/>
           {groups.map((g,gi)=>{
             // a table made of pieces draws itself (above); this is for plain seat groups
             if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null;
@@ -4674,7 +4751,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                 {isSoft&&<div style={{position:"absolute",left:gb.x-PAD-4,top:gb.y-PAD-4,width:gb.w+PAD*2+8,height:gb.h+PAD*2+8,borderRadius:15,border:"2px dashed var(--cp-sel)",opacity:0.75,pointerEvents:"none"}}/>}
                 {/* Tab bar — click to select the whole group, drag to move it */}
                 <button onMouseDown={e=>handleGroupTabMD(e,g.id)} title="Select or drag the whole group" style={{
-                  position:"absolute",left:gb.x-PAD,top:gb.y-PAD-BAR_H,
+                  position:"absolute",left:gb.x-PAD,top:gb.y-PAD-BAR_H-PG.CHAIR_OUT, // lifted above the top-row chairs
                   width:gb.w+PAD*2,height:BAR_H,
                   display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",
                   borderRadius:"10px 10px 0 0",
@@ -4752,7 +4829,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                     zIndex:isLifted?30:isSel?5:1,
                   }}
                 >
-                  <SeatArt chair={chairMap[s.id]} state={state} standalone={!grouped.has(s.id)} hasStudent={!!st} selected={isSel}/>
+                  <SeatArt state={state} standalone={!grouped.has(s.id)} selected={isSel}/>
                   {isSel&&(selType==='group'
                     ?<div style={{position:"absolute",inset:1,borderRadius:7,border:"1.5px solid var(--cp-sel)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>
                     :<div style={{position:"absolute",inset:-3,borderRadius:10,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>)}
@@ -5522,6 +5599,8 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
       {/* Table pieces: chairs round the outside and one table top per joined cluster */}
       <PieceTables pieces={pieces} joins={joins} slots={pieceSlots} seatByKey={pieceSeatByKey} chairMap={chairMap} hideUnused/>
 
+      {/* Chairs first, so the table tops below cover them and only their backs show */}
+      <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairMap} hideUnused/>
       {/* One shared table top under each group's seats */}
       {groups.map(g=>{
         if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null; // a piece table draws itself
@@ -5553,7 +5632,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
         }
         return(
           <div key={s.id} style={{position:"absolute",left:p.x,top:p.y,width:SW,height:SH}}>
-            <SeatArt chair={chairMap[s.id]} state="ok" standalone={!grouped.has(s.id)} hasStudent={!!st}/>
+            <SeatArt state="ok" standalone={!grouped.has(s.id)}/>
             {st&&(
               <div style={{position:"absolute",left:5,top:6,width:SW-10,height:30}}>
                 <NameTag name={st.name} tilt={tagTilt(s.id)} w={SW-10} h={30} fontSize={13} pad={6}
