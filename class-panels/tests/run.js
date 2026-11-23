@@ -513,7 +513,7 @@ const studentMap = store => JSON.parse(store['ta-classes']).map(c => `${c.id}:${
   // the room library: save as "Lab 204", add a second layout, switch between them
   const slBefore = await SL('fx-6a');
   const seatedCount = sl => sl.seats.filter(s => s.studentId).length;
-  const openRooms = async () => { await page.locator('[title^="Rooms: save this room"]').click(); await wait(350); };
+  const openRooms = async () => { const rb = page.locator('[title^="Rooms: save this room"]'); await rb.scrollIntoViewIfNeeded(); await wait(150); await rb.click(); await wait(350); }; // scroll first: a picked table's colour picker makes the side bar taller, and a scroll while the menu opens would close it
   await openRooms();
   await page.getByText('Save as new room…').click(); await wait(150);
   await page.getByPlaceholder('Room name, e.g. Lab 204').fill('Lab 204');

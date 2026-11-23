@@ -1409,8 +1409,8 @@ const GROUP_PAD=8,GROUP_BAR_H=22; // group boundary padding + tab-bar height, sh
    ink to chalk-white and mute the fills without touching any component.
    ══════════════════════════════════════════════════════════ */
 const CP_THEME_CSS=`
-[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);--cp-bench:#bfd3d6;--cp-join:#2fa36b;--cp-wall:#d9cdb8;--cp-wall-hatch:rgba(43,33,24,0.36);--cp-window:#cdeefa;}
-[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);--cp-bench:#5d7b80;--cp-join:#7fe0a8;--cp-wall:#5b8470;--cp-wall-hatch:rgba(239,233,216,0.34);--cp-window:#4f8aa0;}
+[data-theme]{--cp-ink:#2b2118;--cp-wood:#cc9d74;--cp-wood2:#a8704a;--cp-hatch-light:rgba(255,248,236,0.6);--cp-hatch-dark:rgba(110,70,40,0.13);--cp-shadow:rgba(60,40,20,0.17);--cp-paper:#fffaf0;--cp-tag-ink:#2b2118;--cp-tag-text:#1a1208;--cp-floor:#f3f8f6;--cp-floor-line:rgba(43,33,24,0.075);--cp-chair-0:#b2efc4;--cp-chair-1:#9ccaf9;--cp-chair-2:#d2f5fb;--cp-chair-3:#ffd98a;--cp-chair-4:#ffb3a1;--cp-board-fill:#f8fcfb;--cp-sky:#9ccaf9;--cp-mint:#b2efc4;--cp-cyan:#d2f5fb;--cp-coral:#ffb3a1;--cp-sel:#2e6bce;--cp-sel-glow:rgba(66,133,244,0.28);--cp-sel-fill:rgba(255,255,255,0.3);--cp-bench:#bfd3d6;--cp-join:#2fa36b;--cp-wall:#d9cdb8;--cp-wall-hatch:rgba(43,33,24,0.36);--cp-window:#cdeefa;--cp-table-mint:#a8e8bd;--cp-table-sky:#9ccaf9;--cp-table-cyan:#a9e6f2;--cp-table-sunny:#ffd98a;--cp-table-coral:#ffae9a;--cp-table-lilac:#cdb6ee;--cp-table-red:#e7746f;--cp-table-blue:#6f9be0;--cp-table-green:#6cbc7c;--cp-table-gold:#e0b13f;--cp-table-pink:#ee8fb8;--cp-tchair-mint:color-mix(in srgb,var(--cp-table-mint) 76%,#2b2118);--cp-tchair-sky:color-mix(in srgb,var(--cp-table-sky) 76%,#2b2118);--cp-tchair-cyan:color-mix(in srgb,var(--cp-table-cyan) 76%,#2b2118);--cp-tchair-sunny:color-mix(in srgb,var(--cp-table-sunny) 76%,#2b2118);--cp-tchair-coral:color-mix(in srgb,var(--cp-table-coral) 76%,#2b2118);--cp-tchair-lilac:color-mix(in srgb,var(--cp-table-lilac) 76%,#2b2118);--cp-tchair-red:color-mix(in srgb,var(--cp-table-red) 76%,#2b2118);--cp-tchair-blue:color-mix(in srgb,var(--cp-table-blue) 76%,#2b2118);--cp-tchair-green:color-mix(in srgb,var(--cp-table-green) 76%,#2b2118);--cp-tchair-gold:color-mix(in srgb,var(--cp-table-gold) 76%,#2b2118);--cp-tchair-pink:color-mix(in srgb,var(--cp-table-pink) 76%,#2b2118);}
+[data-theme="blackboard"]{--cp-ink:#efe9d8;--cp-wood:#8d6a4a;--cp-wood2:#765635;--cp-hatch-light:rgba(255,255,255,0.13);--cp-hatch-dark:rgba(0,0,0,0.2);--cp-shadow:rgba(0,0,0,0.38);--cp-paper:#f0e8d2;--cp-floor:#173323;--cp-floor-line:rgba(255,255,255,0.075);--cp-chair-0:#6fb08a;--cp-chair-1:#6f9bc8;--cp-chair-2:#80b6c0;--cp-chair-3:#cdac62;--cp-chair-4:#cc8e7e;--cp-board-fill:#264434;--cp-sky:#6f9bc8;--cp-mint:#6fb08a;--cp-cyan:#80b6c0;--cp-coral:#cc8e7e;--cp-sel:#7fb0ff;--cp-sel-glow:rgba(127,176,255,0.32);--cp-sel-fill:rgba(127,176,255,0.2);--cp-bench:#5d7b80;--cp-join:#7fe0a8;--cp-wall:#5b8470;--cp-wall-hatch:rgba(239,233,216,0.34);--cp-window:#4f8aa0;--cp-table-mint:#5f9f7a;--cp-table-sky:#5f8dbd;--cp-table-cyan:#6fa9b6;--cp-table-sunny:#bf9d55;--cp-table-coral:#bf7f70;--cp-table-lilac:#9a82bd;--cp-table-red:#b5605a;--cp-table-blue:#5578b5;--cp-table-green:#4f9460;--cp-table-gold:#a88a3a;--cp-table-pink:#b8678d;--cp-tchair-mint:color-mix(in srgb,var(--cp-table-mint) 78%,#000);--cp-tchair-sky:color-mix(in srgb,var(--cp-table-sky) 78%,#000);--cp-tchair-cyan:color-mix(in srgb,var(--cp-table-cyan) 78%,#000);--cp-tchair-sunny:color-mix(in srgb,var(--cp-table-sunny) 78%,#000);--cp-tchair-coral:color-mix(in srgb,var(--cp-table-coral) 78%,#000);--cp-tchair-lilac:color-mix(in srgb,var(--cp-table-lilac) 78%,#000);--cp-tchair-red:color-mix(in srgb,var(--cp-table-red) 78%,#000);--cp-tchair-blue:color-mix(in srgb,var(--cp-table-blue) 78%,#000);--cp-tchair-green:color-mix(in srgb,var(--cp-table-green) 78%,#000);--cp-tchair-gold:color-mix(in srgb,var(--cp-table-gold) 78%,#000);--cp-tchair-pink:color-mix(in srgb,var(--cp-table-pink) 78%,#000);}
 `;
 /* ══════════════════════════════════════════════════════════
    BUTTON KIT (Phase 2b) — every button, toggle, menu and field in the
@@ -1503,6 +1503,24 @@ const cpc=(variant="",on=false,extra="")=>["cpb",variant&&`cpb-${variant}`,on&&"
 function CPButton({variant="",on=false,className="",type="button",...rest}){return <button type={type} className={cpc(variant,on,className)} {...rest}/>;}
 /* A toggle knob to drop inside a <button className="cp-swbtn"> (or any button row). Mint when on. */
 const CPSwitch=({on,small=false})=><span className={`cp-sw${small?" sm":""}${on?" on":""}`} aria-hidden="true"/>;
+/* ── Table colours (Phase 3c) ──
+   `color` is a palette key stored on the thing that owns the table: a group
+   (groups[].color) for any cluster of seats or joined pieces, a lone single-seat
+   piece (pieces[].color), or a lone legacy desk (seats[].color). No colour = wood.
+   The theme maps the key to --cp-table-<key> (and a deeper --cp-tchair-<key> for
+   "match chairs to table colour"), so whiteboard and blackboard stay in step. */
+const TABLE_COLORS=[['wood','Wood'],['mint','mint'],['sky','sky'],['cyan','cyan'],['sunny','sunny'],['coral','coral'],['lilac','lilac'],['red','red'],['blue','blue'],['green','green'],['gold','gold'],['pink','pink']];
+const TABLE_COLOR_KEYS=new Set(TABLE_COLORS.map(c=>c[0]).filter(k=>k!=='wood'));
+const tableFill=key=>key&&TABLE_COLOR_KEYS.has(key)?`var(--cp-table-${key})`:"var(--cp-wood)";
+const tableChairFill=key=>key&&TABLE_COLOR_KEYS.has(key)?`var(--cp-tchair-${key})`:null;
+/* The Groups panel's colours in its own order (blue, green, gold, purple, red, cyan),
+   as table-colour keys: Phase 6 uses this to colour a table like the group seated at it. */
+const GROUP_COLOR_KEYS=['blue','green','gold','lilac','red','cyan'];
+const groupColorKey=i=>GROUP_COLOR_KEYS[((i%GROUP_COLOR_KEYS.length)+GROUP_COLOR_KEYS.length)%GROUP_COLOR_KEYS.length];
+/* The colour key of the table a seat sits at: its group's, else its piece's, else its own (a lone legacy desk). */
+const seatTableColor=(seat,groupById,pieceById)=>seat?(seat.groupId?groupById?.get(seat.groupId)?.color:seat.pieceId?pieceById?.get(seat.pieceId)?.color:seat.color):undefined;
+/* Chair fill for a seat: its table's deeper shade when "match chairs" is on and the table is coloured, else the rotating palette. */
+const matchedChair=(on,key,fallback)=>(on&&tableChairFill(key))||fallback;
 const INK="var(--cp-ink)";
 const INK_W=1.6; // outline weight in canvas px
 const CHAIR_COUNT=5;
@@ -1637,11 +1655,11 @@ const NameTag=({name,tilt=0,w,h=26,fontSize=12,pad=6,warn=false,locked=false,onC
    desk) or, in a shared table, a faint seam around the seat's patch of it. The
    chairs themselves are LegacyChairs, drawn first so they sit under the table.
    state: "ok" | "unused" | "unavailable". */
-const SeatArt=({w=SW,h=SH,state="ok",standalone=false,selected=false})=>{
+const SeatArt=({w=SW,h=SH,state="ok",standalone=false,selected=false,color})=>{
   const dim=state==="unused",bad=state==="unavailable";
   return(
     <>
-      {standalone&&<TableSurface rect={{x:1,y:1,w:w-2,h:h-2}} radius={8} selected={selected} fill={bad?"var(--cp-coral)":"var(--cp-wood)"} dashed={dim} faded={dim}/>}
+      {standalone&&<TableSurface rect={{x:1,y:1,w:w-2,h:h-2}} radius={8} selected={selected} fill={bad?"var(--cp-coral)":tableFill(color)} dashed={dim} faded={dim}/>}
       {!standalone&&(
         <svg width={w} height={h} style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">
           <rect x={2} y={2} width={w-4} height={h-4} rx={6} style={{fill:dim?"var(--cp-floor)":bad?"url(#cp-hatch-x)":"none",fillOpacity:dim?0.5:1,stroke:"var(--cp-ink)",strokeOpacity:0.3,strokeWidth:1.2,strokeDasharray:"3 3"}}/>
@@ -1657,16 +1675,16 @@ const SeatArt=({w=SW,h=SH,state="ok",standalone=false,selected=false})=>{
    only its back showing, like a floor plan. `pos` is {seatId:{x,y}} (live while
    dragging); a group's table is the seat area plus GROUP_PAD, a lone desk's is
    its own seat box. */
-const LegacyChairs=({seats,groups,pos,chairMap,hideUnused=false})=>{
+const LegacyChairs=({seats,groups,pos,chairMap,hideUnused=false,chairMatch=false})=>{
   const out=[];
   const sById=new Map(seats.map(s=>[s.id,s]));
   const grouped=new Set();
-  const add=(items,rect)=>{
+  const add=(items,rect,tcol)=>{
     legacyChairs(items.map(s=>({id:s.id,...pos[s.id]})),rect).forEach(c=>{
       const s=sById.get(c.id);
       if(hideUnused&&!s.used)return;
       const bad=!!s.unavailable;
-      out.push(<Chair key={`lc-${c.id}`} x={c.x} y={c.y} facing={c.facing} color={bad?"var(--cp-coral)":(chairMap?.[c.id]??0)} empty={bad||!s.studentId||!s.used} dim={!s.used}/>);
+      out.push(<Chair key={`lc-${c.id}`} x={c.x} y={c.y} facing={c.facing} color={bad?"var(--cp-coral)":matchedChair(chairMatch,tcol,chairMap?.[c.id]??0)} empty={bad||!s.studentId||!s.used} dim={!s.used}/>);
     });
   };
   (groups||[]).forEach(g=>{
@@ -1675,11 +1693,11 @@ const LegacyChairs=({seats,groups,pos,chairMap,hideUnused=false})=>{
     g.seatIds.forEach(id=>grouped.add(id));
     const xs=items.map(s=>pos[s.id].x),ys=items.map(s=>pos[s.id].y);
     const x0=Math.min(...xs),y0=Math.min(...ys);
-    add(items,{x:x0-GROUP_PAD,y:y0-GROUP_PAD,w:Math.max(...xs)-x0+SW+GROUP_PAD*2,h:Math.max(...ys)-y0+SH+GROUP_PAD*2});
+    add(items,{x:x0-GROUP_PAD,y:y0-GROUP_PAD,w:Math.max(...xs)-x0+SW+GROUP_PAD*2,h:Math.max(...ys)-y0+SH+GROUP_PAD*2},g.color);
   });
   seats.forEach(s=>{
     if(s.pieceId||grouped.has(s.id)||!pos[s.id])return;
-    add([s],{x:pos[s.id].x+1,y:pos[s.id].y+1,w:SW-2,h:SH-2}); // the lone desk's own table (see SeatArt)
+    add([s],{x:pos[s.id].x+1,y:pos[s.id].y+1,w:SW-2,h:SH-2},s.color); // the lone desk's own table (see SeatArt)
   });
   return <>{out}</>;
 };
@@ -2184,9 +2202,15 @@ const WallsLayer=({walls,openings,selWallId,selOpeningId,draft,edit})=>{
    Manage Seating and the class Seating view, so the two can't drift apart.
    seatByKey maps "pieceId:slot" → seat (for chair colour / empty / unused). */
 const isWorkstationPiece=p=>(p.roles||[]).includes('workstation')&&!(p.roles||[]).includes('desk');
-const PieceTables=({pieces,joins,slots,seatByKey,chairMap,selectedIds,hideUnused=false,snapLine=null})=>{
+const PieceTables=({pieces,joins,slots,seatByKey,chairMap,selectedIds,hideUnused=false,snapLine=null,groups,chairMatch=false})=>{
   if(!pieces?.length)return null;
   const W=new Map(pieces.map(p=>[p.id,pieceToWorld(p)]));
+  const groupById=new Map((groups||[]).map(g=>[g.id,g])),pieceById=new Map(pieces.map(p=>[p.id,p]));
+  /* a cluster's colour: its group's (one cluster = one group); a lone piece with no group has its own */
+  const colorOfPieces=ids=>{
+    const s=slots.filter(q=>ids.includes(q.pieceId)).map(q=>seatByKey?.get(q.key)).find(x=>x?.groupId&&groupById.has(x.groupId));
+    return s?groupById.get(s.groupId).color:ids.map(id=>pieceById.get(id)?.color).find(Boolean);
+  };
   const sel=selectedIds||new Set();
   const shape=(w,props,key)=>w.circle
     ?<circle key={key} cx={w.center[0]} cy={w.center[1]} r={w.circle} {...props}/>
@@ -2199,12 +2223,13 @@ const PieceTables=({pieces,joins,slots,seatByKey,chairMap,selectedIds,hideUnused
         const bad=!!seat?.unavailable;
         const Mark=s.standing?StandingSpot:Chair; // lab benches: people stand, so a floor mat instead of a chair
         return <Mark key={`ch-${s.key}`} x={s.chair.x} y={s.chair.y} facing={s.chair.facing}
-          color={bad?"var(--cp-coral)":(chairMap?.[seat?.id]??0)} empty={!bad&&(!seat?.studentId||!seat?.used)} dim={!!seat&&!seat.used}/>;
+          color={bad?"var(--cp-coral)":matchedChair(chairMatch,seatTableColor(seat,groupById,pieceById),chairMap?.[seat?.id]??0)} empty={!bad&&(!seat?.studentId||!seat?.used)} dim={!!seat&&!seat.used}/>;
       })}
       <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none"}} aria-hidden="true">
         {clustersFromJoins(pieces,joins).map(ids=>{
           const ws=ids.map(id=>W.get(id));
           const isSel=ids.some(id=>sel.has(id));
+          const tcol=colorOfPieces(ids);
           const seams=(joins||[]).filter(j=>ids.includes(j.a)&&ids.includes(j.b)).map(j=>{
             const ea=W.get(j.a)?.edges[j.ea],eb=W.get(j.b)?.edges[j.eb];if(!ea||!eb)return null;
             const[u0,u1]=pgOverlap(ea,eb);
@@ -2215,7 +2240,7 @@ const PieceTables=({pieces,joins,slots,seatByKey,chairMap,selectedIds,hideUnused
               {ws.map(w=>shape(w,{transform:"translate(2.5 3.5)",style:{fill:"var(--cp-shadow)"}},`sh${w.id}`))}
               {isSel&&ws.map(w=>shape(w,{style:{fill:"none",stroke:"var(--cp-sel-glow)",strokeWidth:12,strokeLinejoin:"round"}},`gl${w.id}`))}
               {ws.map(w=>shape(w,{style:{fill:"none",stroke:isSel&&sel.has(w.id)?"var(--cp-sel)":INK,strokeWidth:(isSel&&sel.has(w.id)?2.4:INK_W)*2,strokeLinejoin:"round"}},`ol${w.id}`))}
-              {ws.map(w=>shape(w,{style:{fill:isWorkstationPiece(w.piece)?"var(--cp-bench)":"var(--cp-wood)"}},`fl${w.id}`))}
+              {ws.map(w=>shape(w,{style:{fill:tcol&&TABLE_COLOR_KEYS.has(tcol)?tableFill(tcol):isWorkstationPiece(w.piece)?"var(--cp-bench)":"var(--cp-wood)"}},`fl${w.id}`))}
               {ws.map(w=>shape(w,{style:{fill:"url(#cp-hatch)"}},`ht${w.id}`))}
               {seams.map(([a,b],i)=><line key={`sm${i}`} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} style={{stroke:INK,strokeOpacity:0.16,strokeWidth:1.2,strokeDasharray:"1.5 4",strokeLinecap:"round"}}/>)}
               {ws.filter(w=>w.piece.label).map(w=>{
@@ -2825,13 +2850,16 @@ const syncPieceSeats=({seats=[],groups=[],pieces=[],joins=[]},{uid,nextLabel})=>
   const plain=groups.map(g=>({...g,seatIds:g.seatIds.filter(id=>!pieceSeatIds.has(id))})).filter(g=>g.seatIds.length>=2);
   const used=new Set(plain.map(g=>g.id));
   const outGroups=[...plain];
-  clustersFromJoins(pieces,joins).forEach(ids=>{
+  // biggest cluster first, so when a table splits the larger half keeps the old group (and its colour)
+  const seatCountOfCluster=ids=>slots.filter(s=>ids.includes(s.pieceId)).length;
+  clustersFromJoins(pieces,joins).map((ids,i)=>({ids,i,n:seatCountOfCluster(ids)})).sort((a,b)=>b.n-a.n||a.i-b.i).map(x=>x.ids).forEach(ids=>{
     const set=new Set(ids);
     const members=slots.filter(s=>set.has(s.pieceId)).map(s=>seatIdByKey.get(s.key)).filter(Boolean);
     if(members.length<2)return;
     const mem=new Set(members);
     const prev=groups.filter(g=>!used.has(g.id)).map(g=>({g,n:g.seatIds.filter(id=>mem.has(id)).length})).filter(x=>x.n>0).sort((a,b)=>b.n-a.n)[0];
-    const g=prev?{...prev.g,seatIds:members}:{id:uid(),seatIds:members,label:nextLabel([...outGroups,...groups])};
+    const pcol=pieces.find(p=>set.has(p.id)&&p.color)?.color; // a new table takes the colour a piece already had
+    const g=prev?{...prev.g,seatIds:members}:{id:uid(),seatIds:members,label:nextLabel([...outGroups,...groups]),...(pcol?{color:pcol}:{})};
     used.add(g.id);outGroups.push(g);
   });
   const groupOf={};outGroups.forEach(g=>g.seatIds.forEach(id=>{groupOf[id]=g.id;}));
@@ -3955,6 +3983,21 @@ function ManageSeatTagsModal({avTags,orphanTags,colorFor,onSetColor,onDelete,onA
   );
 }
 
+/* "Match chairs to table colour": per class, kept under its own key (cp-chairmatch-<classId>) so it
+   needs no change to the saved layout. The editor and the class Seating view share it through an event. */
+function useChairsMatch(classId){
+  const[on,setOn]=useState(false);
+  useEffect(()=>{
+    setOn(false);if(!classId)return;
+    let live=true;
+    load(`cp-chairmatch-${classId}`,false).then(v=>{if(live)setOn(!!v);});
+    const h=e=>{if(e.detail?.classId===classId)setOn(!!e.detail.on);};
+    window.addEventListener('cp-chairmatch',h);
+    return()=>{live=false;window.removeEventListener('cp-chairmatch',h);};
+  },[classId]);
+  const set=useCallback(v=>{setOn(v);if(!classId)return;save(`cp-chairmatch-${classId}`,v);window.dispatchEvent(new CustomEvent('cp-chairmatch',{detail:{classId,on:v}}));},[classId]);
+  return[on,set];
+}
 function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist,onUpdateStudentTags}){
   const[seats,setSeats]=useState([]);
   const[groups,setGroups]=useState([]);
@@ -4044,6 +4087,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
   const[groupMergeChoice,setGroupMergeChoice]=useState(null); // {seatIds, groupIds, tidy} — set when "Group" spans 2+ existing groups, or touches none while other groups exist to offer joining
   const[newGroupMergeName,setNewGroupMergeName]=useState('');
   const[smartShuffle,setSmartShuffle]=useState(false);
+  const[chairsMatch,setChairsMatch]=useChairsMatch(activeClass?.id);
   const[hardTagRules,setHardTagRules]=useState(true); // true = seat stays empty rather than break a tag rule; false = fill every seat, breaking tag rules if needed
   const[randomizeConflicts,setRandomizeConflicts]=useState(null); // apart/together rules the last Randomize couldn't satisfy; null = hasn't run yet
   useEffect(()=>{load('seating-rand-opts',{}).then(o=>{if(o?.smartShuffle!=null)setSmartShuffle(!!o.smartShuffle);if(o?.hardTagRules!=null)setHardTagRules(!!o.hardTagRules);});},[]); // shared with the Seating tab's Randomise
@@ -4433,6 +4477,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const r=syncPieceSeats({seats:base.seats||seats,groups:base.groups||groups,pieces:pc,joins:cj},{uid:sUid,nextLabel:nextGroupLabel});
     let rs=r.seats,rg=r.groups;
     if(base.after)({seats:rs,groups:rg}=base.after(rs,rg));
+    /* in a joined table the group owns the colour, so a piece's own colour is dropped (a split piece then starts as Wood) */
+    const joined=new Set(clustersFromJoins(pc,cj).filter(c=>c.length>1).flat());
+    if(pc.some(p=>p.color&&joined.has(p.id)))pc=pc.map(p=>{if(!(p.color&&joined.has(p.id)))return p;const{color:_c,...q}=p;return q;});
     setPieces(pc);setJoins(cj);setSeats(rs);setGroups(rg);
     doSave(rs,rg,avTags,roomItems,rules,pc,cj);
     const names=r.bumped.map(id=>studentById(id)?.name).filter(Boolean);
@@ -4581,6 +4628,32 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const r=commitPieces(pieces.map(x=>x.id===pid?np:x),joins);
     selectPieces([...selPieces],focusPiece,r.seats);
   };
+  /* ── Table colour (Phase 3c): which tables are picked, and recolouring them.
+     A seat in a group colours that group (a whole cluster / joined table is one group); a seat
+     of a lone one-seat piece colours the piece; a lone legacy desk colours the seat itself. ── */
+  const colourTargets=()=>{
+    const gids=new Set(),pids=new Set(),sids=new Set();
+    const mine=activeSelPieces.length?seats.filter(s=>activeSelPieces.includes(s.pieceId)):Array.from(sel).map(id=>seats.find(s=>s.id===id)).filter(Boolean);
+    mine.forEach(s=>{if(s.groupId)gids.add(s.groupId);else if(s.pieceId)pids.add(s.pieceId);else sids.add(s.id);});
+    activeSelPieces.forEach(id=>{if(!seats.some(s=>s.pieceId===id&&s.groupId))pids.add(id);});
+    return{gids,pids,sids,any:gids.size+pids.size+sids.size>0};
+  };
+  const currentTableColor=()=>{
+    const t=colourTargets();
+    const keys=[...[...t.gids].map(id=>groups.find(g=>g.id===id)?.color),...[...t.pids].map(id=>pieces.find(p=>p.id===id)?.color),...[...t.sids].map(id=>seats.find(s=>s.id===id)?.color)].map(k=>k||'wood');
+    return keys.length&&keys.every(k=>k===keys[0])?keys[0]:null;
+  };
+  const setTableColor=key=>{
+    const t=colourTargets();if(!t.any)return;
+    const put=o=>{const{color:_c,...q}=o;return key==='wood'?q:{...q,color:key};};
+    const nextG=groups.map(g=>t.gids.has(g.id)?put(g):g);
+    const inGroup=new Set(groups.filter(g=>t.gids.has(g.id)).flatMap(g=>g.seatIds));
+    const nextP=pieces.map(p=>t.pids.has(p.id)?put(p):(p.color&&seats.some(s=>s.pieceId===p.id&&inGroup.has(s.id))?(({color:_c,...q})=>q)(p):p));
+    const nextS=seats.map(s=>t.sids.has(s.id)?put(s):s);
+    setGroups(nextG);setPieces(nextP);setSeats(nextS);
+    doSave(nextS,nextG,avTags,roomItems,rules,nextP,joins);
+  };
+
   const updatePieces=(ids,fn)=>{
     const r=commitPieces(pieces.map(p=>ids.includes(p.id)?fn(p):p),joins);
     selectPieces(ids,focusPiece,r.seats);
@@ -4801,6 +4874,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
      that group if it'd drop below 2 members) — a building block shared by every
      "put these seats in a (different) group" action below. Doesn't touch where
      the seats end up; that's the caller's job. */
+  /* A group made from lone coloured desks starts in the first one's colour; the desks' own colour then moves to the group. */
+  const seedGroupColor=seatIds=>seats.find(s=>seatIds.includes(s.id)&&s.color)?.color;
+  const dropSeatColor=x=>{if(!x.color)return x;const{color:_c,...q}=x;return q;};
   const detachSeatsFromGroups=(seatIds)=>{
     let nextG=groups,nextS=seats;
     seatIds.forEach(seatId=>{
@@ -4827,7 +4903,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const toMove=seatIds.filter(id=>seats.find(s=>s.id===id)?.groupId!==groupId);
     const{nextS,nextG}=detachSeatsFromGroups(toMove);
     const finalG=nextG.map(g=>g.id===groupId?{...g,seatIds:[...new Set([...g.seatIds,...toMove])]}:g);
-    const finalS=nextS.map(x=>toMove.includes(x.id)?{...x,groupId}:x);
+    const finalS=nextS.map(x=>toMove.includes(x.id)?{...dropSeatColor(x),groupId}:x);
     setSeats(finalS);setGroups(finalG);
     setSel(new Set(finalG.find(g=>g.id===groupId)?.seatIds||[]));setSelType('group');
     doSave(finalS,finalG,avTags,roomItems,rules);
@@ -4838,8 +4914,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const{nextS,nextG}=detachSeatsFromGroups(seatIds);
     const newGid=sUid();
     const label=(name||'').trim().slice(0,20)||nextGroupLabel(nextG);
-    const finalG=[...nextG,{id:newGid,seatIds:[...seatIds],label}];
-    const finalS=nextS.map(x=>seatIds.includes(x.id)?{...x,groupId:newGid}:x);
+    const col=seedGroupColor(seatIds);
+    const finalG=[...nextG,{id:newGid,seatIds:[...seatIds],label,...(col?{color:col}:{})}];
+    const finalS=nextS.map(x=>seatIds.includes(x.id)?{...dropSeatColor(x),groupId:newGid}:x);
     setSeats(finalS);setGroups(finalG);setSel(new Set(seatIds));setSelType('group');
     doSave(finalS,finalG,avTags,roomItems,rules);
   };
@@ -4859,8 +4936,9 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
     const{nextS,nextG}=detachSeatsFromGroups(seatIds);
     const newGid=sUid();
     const label=(name||'').trim().slice(0,20)||nextGroupLabel(nextG);
-    const finalG=[...nextG,{id:newGid,seatIds:[...seatIds],label}];
-    const finalS=nextS.map(x=>seatIds.includes(x.id)?{...x,groupId:newGid,x:posMap[x.id]?.x??x.x,y:posMap[x.id]?.y??x.y}:x);
+    const col=seedGroupColor(seatIds);
+    const finalG=[...nextG,{id:newGid,seatIds:[...seatIds],label,...(col?{color:col}:{})}];
+    const finalS=nextS.map(x=>seatIds.includes(x.id)?{...dropSeatColor(x),groupId:newGid,x:posMap[x.id]?.x??x.x,y:posMap[x.id]?.y??x.y}:x);
     setSeats(finalS);setGroups(finalG);setSel(new Set(seatIds));setSelType('group');
     doSave(finalS,finalG,avTags,roomItems,rules);
   };
@@ -5555,6 +5633,11 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                   <CPSwitch on={!hardTagRules} small/>
                   <span style={{fontSize:"11px",fontWeight:600,color:!hardTagRules?"#2e6bce":"rgba(0,0,0,0.4)"}}>{hardTagRules?"Hard tag rules":"Best fit (fill every seat)"}</span>
                 </button>
+                <button className="cpb" onClick={()=>setChairsMatch(!chairsMatch)} title="Chairs at a coloured table use a slightly deeper shade of the table's colour (instead of the rotating chair colours). Plain wood tables keep the usual chairs" data-cp-chairmatch
+                  style={{width:"100%",display:"flex",alignItems:"center",gap:"7px",padding:"6px 8px",borderRadius:"8px",border:`1px solid ${chairsMatch?"rgba(66,133,244,0.35)":"rgba(0,0,0,0.08)"}`,background:chairsMatch?"#eaf1fc":"transparent",cursor:"pointer",justifyContent:"flex-start"}}>
+                  <CPSwitch on={chairsMatch} small/>
+                  <span style={{fontSize:"11px",fontWeight:600,color:chairsMatch?"#2e6bce":"rgba(0,0,0,0.4)"}}>Match chairs to table colour</span>
+                </button>
               </div>,
               document.body
             )}
@@ -5817,6 +5900,29 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                   </>
                 );
               })()}
+              {(()=>{
+                /* ── Table colour: a row of swatches whenever a table is picked (a group via its tab, a table piece, or a seat that has a table) ── */
+                if(!colourTargets().any)return null;
+                const cur=currentTableColor();
+                return(
+                  <div data-cp-colour-picker>
+                    <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(0,0,0,0.25)",margin:"4px 0 5px"}}>Table colour</div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:"5px"}}>
+                      {TABLE_COLORS.map(([k,name])=>{
+                        const on=cur===k;
+                        return(
+                          <button key={k} className="cpo" data-cp-colour={k} aria-pressed={on} onClick={()=>setTableColor(k)}
+                            title={k==='wood'?"Back to plain wood (the default)":`Colour this table ${name}`}
+                            style={{width:23,height:23,padding:0,borderRadius:7,background:tableFill(k),boxShadow:on?"0 0 0 2.5px var(--cp-sel)":"none",transform:on?"scale(1.08)":"none",position:"relative",overflow:"hidden"}}>
+                            <span aria-hidden="true" style={{position:"absolute",inset:0,backgroundImage:"repeating-linear-gradient(122deg,var(--cp-hatch-light) 0 1px,transparent 1px 5px)"}}/>
+                            {on&&<span aria-hidden="true" style={{position:"relative",fontSize:12,fontWeight:900,color:"#2b2118",lineHeight:1}}>✓</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
               {/* Plain desks → a real table shape */}
               {convertTargetIds&&(
                 <div ref={convertMenu.anchorRef}>
@@ -6069,7 +6175,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             const selB=activeSelPieces.length?piecesBounds(livePieces.filter(p=>selIds.has(p.id)),liveSlots):null;
             return(
               <>
-                <PieceTables pieces={livePieces} joins={joins} slots={liveSlots} seatByKey={seatByKey} chairMap={chairMap} selectedIds={selIds} snapLine={pieceDrag?.snap?.line}/>
+                <PieceTables pieces={livePieces} joins={joins} slots={liveSlots} seatByKey={seatByKey} chairMap={chairMap} selectedIds={selIds} snapLine={pieceDrag?.snap?.line} groups={groups} chairMatch={chairsMatch}/>
                 {/* Invisible hit areas over each table top: click to pick the table, drag to move it */}
                 <svg width="1" height="1" style={{position:"absolute",left:0,top:0,overflow:"visible",pointerEvents:"none",zIndex:1}}>
                   {!roomMode&&livePieces.map(p=>{
@@ -6128,7 +6234,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
               selected — the rest of the table gets a dashed halo), full (the
               group itself is selected via its tab — blue outline + glow). */}
           {/* Chairs first, so every table top below covers them and only their backs show */}
-          <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairIndexMap(seats,groups)}/>
+          <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairIndexMap(seats,groups)} chairMatch={chairsMatch}/>
           {groups.map((g,gi)=>{
             // a table made of pieces draws itself (above); this is for plain seat groups
             if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null;
@@ -6146,7 +6252,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
             const PAD=GROUP_PAD,BAR_H=GROUP_BAR_H;
             return(
               <div key={`gb-${g.id}`}>
-                <TableSurface rect={{x:gb.x-PAD,y:gb.y-PAD,w:gb.w+PAD*2,h:gb.h+PAD*2}} radius={12} selected={isFull}/>
+                <TableSurface rect={{x:gb.x-PAD,y:gb.y-PAD,w:gb.w+PAD*2,h:gb.h+PAD*2}} radius={12} selected={isFull} fill={tableFill(g.color)}/>
                 {isSoft&&<div style={{position:"absolute",left:gb.x-PAD-4,top:gb.y-PAD-4,width:gb.w+PAD*2+8,height:gb.h+PAD*2+8,borderRadius:15,border:"2px dashed var(--cp-sel)",opacity:0.75,pointerEvents:"none"}}/>}
                 {/* Tab bar — click to select the whole group, drag to move it */}
                 <button onMouseDown={e=>handleGroupTabMD(e,g.id)} title="Select or drag the whole group" style={{
@@ -6228,7 +6334,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
                     zIndex:isLifted?30:isSel?5:1,
                   }}
                 >
-                  <SeatArt state={state} standalone={!grouped.has(s.id)} selected={isSel}/>
+                  <SeatArt state={state} standalone={!grouped.has(s.id)} selected={isSel} color={s.color}/>
                   {isSel&&(selType==='group'
                     ?<div style={{position:"absolute",inset:1,borderRadius:7,border:"1.5px solid var(--cp-sel)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>
                     :<div style={{position:"absolute",inset:-3,borderRadius:10,border:"2.5px solid var(--cp-sel)",boxShadow:"0 0 0 4px var(--cp-sel-glow)",background:"var(--cp-sel-fill)",pointerEvents:"none"}}/>)}
@@ -6815,6 +6921,7 @@ function ManageSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStud
    STUDENT SEATING PANEL — clean read-only view, no tags
    ══════════════════════════════════════════════════════════ */
 function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStudent,now,showFlags,onSetShowFlags,onGoToChecklist}){
+  const[chairsMatch]=useChairsMatch(activeClass?.id);
   const[layout,setLayout]=useState(null);
   const[displayMode,setDisplayMode]=useState(false);
   const[nameClick,setNameClick]=useState(null); // {studentId, name, x, y} — opened by clicking either the name or a flag dot
@@ -6994,15 +7101,15 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
       {roomItems.filter(i=>i.type!=='area').map(item=><RoomItemView key={item.id} item={item} fontScale={1.08}/>)}
 
       {/* Table pieces: chairs round the outside and one table top per joined cluster */}
-      <PieceTables pieces={pieces} joins={joins} slots={pieceSlots} seatByKey={pieceSeatByKey} chairMap={chairMap} hideUnused/>
+      <PieceTables pieces={pieces} joins={joins} slots={pieceSlots} seatByKey={pieceSeatByKey} chairMap={chairMap} hideUnused groups={groups} chairMatch={chairsMatch}/>
 
       {/* Chairs first, so the table tops below cover them and only their backs show */}
-      <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairMap} hideUnused/>
+      <LegacyChairs seats={seats} groups={groups} pos={pos} chairMap={chairMap} hideUnused chairMatch={chairsMatch}/>
       {/* One shared table top under each group's seats */}
       {groups.map(g=>{
         if(g.seatIds.some(id=>seats.find(x=>x.id===id)?.pieceId))return null; // a piece table draws itself
         const gb=gBoundsFromSeats(g,seats);
-        return <TableSurface key={`gb-${g.id}`} rect={{x:gb.x-GROUP_PAD,y:gb.y-GROUP_PAD,w:gb.w+GROUP_PAD*2,h:gb.h+GROUP_PAD*2}} radius={12}/>;
+        return <TableSurface key={`gb-${g.id}`} rect={{x:gb.x-GROUP_PAD,y:gb.y-GROUP_PAD,w:gb.w+GROUP_PAD*2,h:gb.h+GROUP_PAD*2}} radius={12} fill={tableFill(g.color)}/>;
       })}
 
       {/* Seats — chair + paper name tag, no controls */}
@@ -7029,7 +7136,7 @@ function StudentSeatingPanel({activeClass,checklist,onChangeChecklist,flagsByStu
         }
         return(
           <div key={s.id} style={{position:"absolute",left:p.x,top:p.y,width:SW,height:SH}}>
-            <SeatArt state="ok" standalone={!grouped.has(s.id)}/>
+            <SeatArt state="ok" standalone={!grouped.has(s.id)} color={s.color}/>
             {st&&(
               <div style={{position:"absolute",left:5,top:6,width:SW-10,height:30}}>
                 <NameTag name={st.name} tilt={tagTilt(s.id)} w={SW-10} h={30} fontSize={13} pad={6}
