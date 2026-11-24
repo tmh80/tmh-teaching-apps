@@ -226,6 +226,13 @@ The units are canvas pixels on the existing 8 px grid. A seat slot draws as a **
 - **Class display:** the class Seating view shows each station on the room map with its current group (group name + members), plus a "Next: …" line. The timer's DisplayMode can show a small "Group A → Station 3" strip.
 - **End rotation** clears `rot-<class>` but keeps the setup.
 
+**As built (Phase 7), and where it differs from the above:**
+- **Stations** popover (sidebar, collapsed; opens beside the button): this setup's stations in order (drag to reorder, saved as `stations.order` on the setup entry; inline rename), and the groups taking part (last generated `gp-`, or any saved `gg-` grouping). More groups than stations: the first few are ticked, a warning shows and Start waits until the ticks fit. Fewer: extra stations sit empty.
+- **Start rotation** dialog: minutes per station (0.5 to 60), changeover 0 to 180 s (default 30, a "Move!" segment between stations; also after the last one when looping), Forwards or Alternate directions, One lap or Loop, then Start now or Create paused. Alternate with an odd number of stations makes two groups meet at one station now and then (a warning says so); an even number never does.
+- **Timer API** (`TimerPanel` props): `apiRef.current={addTimer}` (`addTimer(name,segments,repeat,paraMode,autoStart,{id,select})` now returns the id), `onSegmentEnd(timerId,segIdx,segTask,{finished})`, `onTimersChange([{id,running,finished,currentSegIdx}])`, `rotationStrip`. `onSegmentEnd` is worked out by comparing each timer with the previous render, so the tick, alarms, repeats, combine/Split and paraphrase mode are untouched. `TimerPanel` is now always mounted (hidden, not removed) so timers survive Manage Seating. `window.__cpTickMs` (tests only) shortens a timer "second".
+- **Step moves when a work segment ends** (the Move! that follows is the walking time), except the last station of a one-lap rotation (the timer is simply Done). Manual Rotate/Back never touch the timer. `rot-<class>` also stores `loop` and `labels`; End rotation deletes the key.
+- The overlay (chips beside each station badge, a "Next:" line) is drawn on the class Seating view and its projector view, never in Manage Seating; the floating bar shows in both. After a reload the timers are gone, so the bar says "timer not running" and the manual controls carry on.
+
 ## 12. Phases, order and who does them
 
 The phases run **one at a time** on `classpanels-rooms`, because nearly everything is in one large file. The exception is Phases 0 and 1, which touch separate areas and can run side by side. The planner (Opus) reviews each phase's diff and screenshots before starting the next.
