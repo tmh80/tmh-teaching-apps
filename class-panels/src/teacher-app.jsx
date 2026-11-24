@@ -702,8 +702,8 @@ function BuilderPanel({onAdd,onClose,savedTemplates,onSaveTemplate,onDeleteTempl
    ══════════════════════════════════════════════════════════ */
 const CHIP_PALETTE=["#b2efc4","#9ccaf9","#d2f5fb","#ffd98a","#ffb3a1"]; // the app icon's mint, sky, cyan, sunny, coral
 const CHIP_INK="#2b2118";
-function ClassChips({classes,activeClassId,onSetActiveClass}){
-  const rowRef=useRef(null);
+function ClassChips({classes,activeClassId,onSetActiveClass,measureRef}){
+  const ownRef=useRef(null);const rowRef=measureRef||ownRef;
   /* Mouse wheel scrolls the row sideways (the scrollbar is hidden). Native
      listener because React's onWheel is passive and can't preventDefault. */
   useEffect(()=>{
@@ -727,7 +727,9 @@ function ClassChips({classes,activeClassId,onSetActiveClass}){
     else if(r>el.scrollLeft+el.clientWidth)el.scrollLeft=r-el.clientWidth+6;
   },[activeClassId,classes.length]);
   return(
-    <div ref={rowRef} className="no-drag cp-chips" style={{display:"flex",alignItems:"center",gap:"6px",flex:"1 1 0",minWidth:0,overflowX:"auto",overflowY:"hidden",scrollbarWidth:"none",padding:"3px 4px"}}>
+    <div ref={rowRef} aria-hidden={measureRef?"true":undefined} className="no-drag cp-chips" style={measureRef
+      ?{position:"absolute",left:0,top:0,visibility:"hidden",pointerEvents:"none",display:"flex",alignItems:"center",gap:"6px",whiteSpace:"nowrap",padding:"3px 4px"} // full-width copy, only for measuring
+      :{display:"flex",alignItems:"center",gap:"6px",flex:"1 1 0",minWidth:0,overflowX:"auto",overflowY:"hidden",scrollbarWidth:"none",padding:"3px 4px"}}>
       {classes.map((c,i)=>{
         const active=c.id===activeClassId;
         const colour=c.color||c.colour||CHIP_PALETTE[i%CHIP_PALETTE.length];
@@ -751,7 +753,7 @@ function ClassChips({classes,activeClassId,onSetActiveClass}){
 /* ══════════════════════════════════════════════════════════
    DOTS MENU
    ══════════════════════════════════════════════════════════ */
-function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageClass,onDeleteClass}){
+function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageClass,onDeleteClass,showList=true}){
   const[open,setOpen]=useState(false);
   const[confirmDeleteId,setConfirmDeleteId]=useState(null);
   const ref=useRef(null);
@@ -766,9 +768,9 @@ function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageCla
   const menuItem={display:"flex",alignItems:"center",gap:"8px",width:"100%",textAlign:"left",padding:"9px 16px",background:"none",border:"none",cursor:"pointer",fontSize:"13px",color:"#1a1a2e",fontFamily:"'Source Sans 3',sans-serif",fontWeight:400,};
   return(
     <div ref={ref} style={{position:"relative"}}>
-      <button className={`cpb cpb-tab${open?" on":""}`} onClick={()=>setOpen(o=>!o)} style={{background:open?"rgba(255,255,255,0.3)":"none",border:"1px solid rgba(74,49,28,0.22)",borderRadius:"6px",padding:"4px 9px",cursor:"pointer",color:open?"rgba(74,49,28,0.9)":"rgba(74,49,28,0.65)",fontSize:"16px",lineHeight:1,fontFamily:"'Source Sans 3',sans-serif",transition:"all 0.15s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(74,49,28,0.4)";e.currentTarget.style.color="rgba(74,49,28,0.9)";}} onMouseLeave={e=>{if(!open){e.currentTarget.style.borderColor="rgba(74,49,28,0.22)";e.currentTarget.style.color="rgba(74,49,28,0.65)";}}} title="Class settings">⋯</button>
+      <button className={`cpb cpb-tab${open?" on":""}`} onClick={()=>setOpen(o=>!o)} style={{background:open?"rgba(255,255,255,0.3)":"none",border:"1px solid rgba(74,49,28,0.22)",borderRadius:"6px",padding:"4px 9px",cursor:"pointer",color:open?"rgba(74,49,28,0.9)":"rgba(74,49,28,0.65)",fontSize:"16px",lineHeight:1,fontFamily:"'Source Sans 3',sans-serif",transition:"all 0.15s"}} onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(74,49,28,0.4)";e.currentTarget.style.color="rgba(74,49,28,0.9)";}} onMouseLeave={e=>{if(!open){e.currentTarget.style.borderColor="rgba(74,49,28,0.22)";e.currentTarget.style.color="rgba(74,49,28,0.65)";}}} title="Classes: switch class, add a new class, manage or delete this one">Classes{showList&&activeClass?<span style={{fontWeight:700,maxWidth:"160px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",display:"inline-block",verticalAlign:"bottom"}}>: {activeClass.name}</span>:null} <span style={{fontSize:"9px"}}>▾</span></button>
       {open&&(
-        <div className="cp-pop" style={{position:"absolute",right:0,top:"calc(100% + 6px)",background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"14px",boxShadow:"0 8px 32px rgba(0,0,0,0.12)",minWidth:"230px",zIndex:400,overflow:"hidden",animation:"fadeIn 0.15s ease"}}>
+        <div className="cp-pop" style={{position:"absolute",left:0,top:"calc(100% + 6px)",background:"#fff",border:"1px solid rgba(0,0,0,0.09)",borderRadius:"14px",boxShadow:"0 8px 32px rgba(0,0,0,0.12)",minWidth:"230px",zIndex:400,overflow:"hidden",animation:"fadeIn 0.15s ease"}}>
           {/* Active class header */}
           <div style={{padding:"14px 16px 10px",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
             <div style={{fontSize:"9px",fontWeight:700,letterSpacing:"2px",textTransform:"uppercase",color:"rgba(0,0,0,0.25)",marginBottom:"3px"}}>Active class</div>
@@ -776,7 +778,22 @@ function DotsMenu({classes,activeClassId,onSetActiveClass,onNewClass,onManageCla
             {activeClass?.isDemo&&<div style={{fontSize:"10.5px",color:"#b8850a",marginTop:"2px",fontWeight:500}}>Demo data — click Manage class to replace</div>}
             {activeClass&&!activeClass.isDemo&&<div style={{fontSize:"10.5px",color:"rgba(0,0,0,0.3)",marginTop:"2px"}}>{activeClass.students.length} student{activeClass.students.length!==1?"s":""}</div>}
           </div>
-          {/* Classes are switched with the chips in the banner now; this menu keeps the class admin. */}
+          {/* When the window is too narrow for the class buttons, the classes are listed here instead */}
+          {showList&&classes.length>1&&(
+            <div style={{padding:"6px 0",borderBottom:"1px solid rgba(0,0,0,0.06)",maxHeight:"50vh",overflowY:"auto"}}>
+              {classes.map((c,i)=>{
+                const active=c.id===activeClassId;
+                const colour=c.color||c.colour||CHIP_PALETTE[i%CHIP_PALETTE.length];
+                return(
+                  <button key={c.id} className={`cpb cpb-item${active?" on":""}`} onClick={()=>{if(!active)onSetActiveClass(c.id);setOpen(false);}} title={`${active?"Current class":"Switch to"} ${c.name}${i<9?` (Alt+${i+1})`:""}`} style={{...menuItem,fontWeight:active?700:400}}>
+                    <span style={{width:"10px",height:"10px",borderRadius:"50%",background:colour,border:`1px solid ${CHIP_INK}`,flexShrink:0}}/>
+                    <span style={{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{c.name}</span>
+                    {active&&<span style={{fontSize:"11px"}}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
           <div style={{padding:"6px 0",borderBottom:"1px solid rgba(0,0,0,0.06)"}}>
             <button className="cpb cpb-item" onClick={()=>{onNewClass();setOpen(false);}} title="Add a new class with its own roster" style={{...menuItem,color:"rgba(0,0,0,0.55)",}} onMouseEnter={e=>e.currentTarget.style.background="rgba(0,0,0,0.03)"} onMouseLeave={e=>e.currentTarget.style.background="none"}>
               <span style={{fontSize:"15px",lineHeight:1}}>+</span><span>New class</span>
@@ -10342,6 +10359,21 @@ function TabStrip({openPanels,onToggle,onTabClickFromManageSeating,timerStatus,c
     return()=>document.removeEventListener("mousedown",h);
   },[tabsMenuOpen]);
 
+  /* Class buttons: shown only when all of them fit; measured off a hidden full-width copy */
+  const chipsOuterRef=useRef(null);
+  const chipsMeasureRef=useRef(null);
+  const[chipsCollapsed,setChipsCollapsed]=useState(false);
+  useEffect(()=>{
+    const outer=chipsOuterRef.current,measure=chipsMeasureRef.current;
+    if(!outer||!measure)return;
+    const check=()=>setChipsCollapsed(measure.scrollWidth>outer.clientWidth+1);
+    check();
+    const ro=new ResizeObserver(check);
+    ro.observe(outer);ro.observe(measure);
+    document.fonts?.ready?.then(check);
+    return()=>ro.disconnect();
+  },[]);
+
   const renderTabButton=tab=>{
     const isOpen=!anyManageOpen&&openPanels[tab.id];
     const showBadge=tab.id==="timer"&&!isOpen&&timerStatus?.running;
@@ -10359,7 +10391,12 @@ function TabStrip({openPanels,onToggle,onTabClickFromManageSeating,timerStatus,c
     <div className="drag-bar" style={{display:"flex",alignItems:"center",height:"50px",padding:"0 12px",background:"repeating-linear-gradient(115deg,rgba(255,250,240,0.4) 0px,rgba(255,250,240,0.4) 1px,transparent 1px,transparent 5px),linear-gradient(180deg,#e0c1a0,#d1a97e)",borderBottom:"1px solid rgba(120,85,55,0.22)",flexShrink:0,zIndex:100,position:"relative"}}>
       <div style={{width:"72px",flexShrink:0}}/>
       {/* Chips and tabs each get an equal share (flex 1 1 0, minWidth 0), so neither can push into the other or the right-hand cluster; the tabs already collapse to "Panels" when their share is too small. */}
-      <ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass}/>
+      {/* Classes ▾ always; the class buttons beside it only when every one fits, otherwise they're listed in the menu */}
+      <div className="no-drag" style={{flexShrink:0,marginRight:"6px"}}><DotsMenu classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass} onNewClass={onNewClass} onManageClass={onManageClass} onDeleteClass={onDeleteClass} showList={chipsCollapsed}/></div>
+      <div ref={chipsOuterRef} style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",position:"relative",overflow:"hidden"}}>
+        <ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass} measureRef={chipsMeasureRef}/>
+        {!chipsCollapsed&&<ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass}/>}
+      </div>
       <div ref={tabsOuterRef} style={{display:"flex",gap:"3px",flex:"1 1 0",minWidth:0,justifyContent:"center",alignItems:"center",position:"relative"}}>
         {/* Hidden always-full-size copy, purely to measure whether all four
             tabs would fit — never shown, never interactive. */}
@@ -10421,7 +10458,6 @@ function TabStrip({openPanels,onToggle,onTabClickFromManageSeating,timerStatus,c
           onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(74,49,28,0.4)";e.currentTarget.style.color="rgba(74,49,28,0.9)";}}
           onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(74,49,28,0.22)";e.currentTarget.style.color="rgba(74,49,28,0.65)";}}
         >⚙</button>
-        <div className="no-drag"><DotsMenu classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass} onNewClass={onNewClass} onManageClass={onManageClass} onDeleteClass={onDeleteClass}/></div>
         <button className={`no-drag cpb cpb-tab${helpMode?" on":""}`} data-help-btn onClick={onToggleHelp} title={helpMode?"You are here! Click again or double click to leave help mode.":"Turn on help mode — hover anything to see what it does"} style={{background:helpMode?"#2e6bce":"none",border:`1px solid ${helpMode?"#2e6bce":"rgba(74,49,28,0.22)"}`,borderRadius:"6px",padding:"4px 9px",cursor:"pointer",color:helpMode?"#fff":"rgba(74,49,28,0.65)",fontSize:"15px",fontWeight:700,lineHeight:1,fontFamily:"'Source Sans 3',sans-serif",transition:"all 0.15s"}}
           onMouseEnter={e=>{if(!helpMode){e.currentTarget.style.borderColor="rgba(74,49,28,0.4)";e.currentTarget.style.color="rgba(74,49,28,0.9)";}}}
           onMouseLeave={e=>{if(!helpMode){e.currentTarget.style.borderColor="rgba(74,49,28,0.22)";e.currentTarget.style.color="rgba(74,49,28,0.65)";}}}
