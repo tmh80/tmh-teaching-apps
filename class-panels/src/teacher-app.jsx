@@ -1720,8 +1720,8 @@ const LegacyChairs=({seats,groups,pos,chairMap,hideUnused=false,chairMatch=false
   const out=[];
   const sById=new Map(seats.map(s=>[s.id,s]));
   const grouped=new Set();
-  const add=(items,rect,tcol)=>{
-    legacyChairs(items.map(s=>({id:s.id,...pos[s.id]})),rect).forEach(c=>{
+  const add=(items,rect,tcol,flip)=>{
+    legacyChairs(items.map(s=>({id:s.id,...pos[s.id]})),rect,flip).forEach(c=>{
       const s=sById.get(c.id);
       if(hideUnused&&!s.used)return;
       const bad=!!s.unavailable;
@@ -1734,11 +1734,11 @@ const LegacyChairs=({seats,groups,pos,chairMap,hideUnused=false,chairMatch=false
     g.seatIds.forEach(id=>grouped.add(id));
     const xs=items.map(s=>pos[s.id].x),ys=items.map(s=>pos[s.id].y);
     const x0=Math.min(...xs),y0=Math.min(...ys);
-    add(items,{x:x0-GROUP_PAD,y:y0-GROUP_PAD,w:Math.max(...xs)-x0+SW+GROUP_PAD*2,h:Math.max(...ys)-y0+SH+GROUP_PAD*2},g.color);
+    add(items,{x:x0-GROUP_PAD,y:y0-GROUP_PAD,w:Math.max(...xs)-x0+SW+GROUP_PAD*2,h:Math.max(...ys)-y0+SH+GROUP_PAD*2},g.color,!!g.flipChairs);
   });
   seats.forEach(s=>{
     if(s.pieceId||grouped.has(s.id)||!pos[s.id])return;
-    add([s],{x:pos[s.id].x+1,y:pos[s.id].y+1,w:SW-2,h:SH-2},s.color); // the lone desk's own table (see SeatArt)
+    add([s],{x:pos[s.id].x+1,y:pos[s.id].y+1,w:SW-2,h:SH-2},s.color,!!s.flipChairs); // the lone desk's own table (see SeatArt)
   });
   return <>{out}</>;
 };
@@ -2991,7 +2991,7 @@ const pgBands=(vals,tol=24)=>{
   [...vals].sort((a,b)=>a-b).forEach(v=>{const b=bands[bands.length-1];if(b&&v-b.max<=tol)b.max=v;else bands.push({min:v,max:v});});
   return bands;
 };
-const legacyChairs=(items,rect)=>{
+const legacyChairs=(items,rect,flip=false)=>{ // flip: Tom's ⇅ Flip chairs, puts every chair on the opposite side
   const rows=pgBands(items.map(i=>i.y)),cols=pgBands(items.map(i=>i.x));
   const nR=rows.length,nC=cols.length;
   const idx=(bands,v)=>bands.findIndex(b=>v>=b.min-1e-6&&v<=b.max+1e-6);
@@ -3008,6 +3008,7 @@ const legacyChairs=(items,rect)=>{
     else if(c===nC-1)side='R';
     else side=null;
     if(!side)return;
+    if(flip)side={T:'B',B:'T',L:'R',R:'L'}[side];
     const o=PG.CHAIR_OFF,cx=it.x+PG.SEAT_W/2,cy=it.y+PG.SEAT_H/2;
     const hx=Math.max(rect.x+14,Math.min(rect.x+rect.w-14,cx)),hy=Math.max(rect.y+14,Math.min(rect.y+rect.h-14,cy));
     // centre = edge + outward normal × CHAIR_OFF (negative, so tucked in); facing 0 = sitter faces up
@@ -5738,6 +5739,18 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
     setSeats(nextS);setGroups(nextG);setSel(new Set(toUngroup));setSelType('seat');doSave(nextS,nextG,avTags,roomItems,rules);
   };
 
+  /* ── ⇅ Flip chairs on plain desk groups and lone desks: chairs move to the
+     opposite side of the table (stored as flipChairs on the group or desk) ── */
+  const handleFlipChairs=()=>{
+    const ss=Array.from(sel).map(id=>seats.find(s=>s.id===id)).filter(s=>s&&!s.pieceId);
+    if(!ss.length)return;
+    const gIds=new Set(ss.map(s=>s.groupId).filter(Boolean));
+    const lone=new Set(ss.filter(s=>!s.groupId).map(s=>s.id));
+    const nextG=groups.map(g=>gIds.has(g.id)?{...g,flipChairs:!g.flipChairs}:g);
+    const nextS=seats.map(s=>lone.has(s.id)?{...s,flipChairs:!s.flipChairs}:s);
+    setSeats(nextS);setGroups(nextG);doSave(nextS,nextG,avTags,roomItems,rules);
+  };
+
   /* ── Remove one seat from a group (the "−" overlay) — dissolves the group if
      it'd drop to 1 seat, same convention as handleUngroup ── */
   const removeSeatFromGroup=(seatId,groupId)=>{
@@ -6664,6 +6677,7 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
                       <button className="cpb" onClick={()=>rotatePiecesBy(activeSelPieces,90)} title="Turn a quarter turn clockwise" style={{...btnS,flex:1.3,padding:"6px 0",color:"#1a1a2e"}}>⟳ 90°</button>
                       <button className="cpb" onClick={()=>rotatePiecesBy(activeSelPieces,15)} title="Turn 15° clockwise (key: ] )" style={{...btnS,flex:1,padding:"6px 0"}}>↻ 15°</button>
                     </div>
+                    <button className="cpb" onClick={()=>rotatePiecesBy(activeSelPieces,180)} title="Flip the table round so the chairs are on the other side" style={btnS}>⇅ Flip</button>
                     <button className={`cpb${editSeats?" on":""}`} onClick={()=>setEditSeats(v=>!v)} title={stand?"Click the standing spots round the bench to switch places on or off, e.g. the back of a lab bench":"Click the chairs round the table to switch seats on or off, e.g. the ends of a long table or the back of a lab bench"}
                       style={{...btnS,background:editSeats?"#eaf1fc":"#fff",color:editSeats?"#2e6bce":"rgba(0,0,0,0.5)",border:`1px solid ${editSeats?"rgba(66,133,244,0.35)":"rgba(0,0,0,0.08)"}`}}>{editSeats?`✓ Done editing ${placeWord}s`:`✎ Edit ${placeWord}s…`}</button>
                     {focus.shape==='round'&&(
@@ -6779,6 +6793,9 @@ function ManageSeatingPanel({activeClass,setups,onChangeSetups,checklist,onChang
                   onMouseEnter={e=>e.currentTarget.style.background="#f0f1f4"}
                   onMouseLeave={e=>e.currentTarget.style.background="#fff"}
                 >Ungroup</button>
+              )}
+              {selSeats.length>0&&!selSeats.some(s=>s.pieceId)&&(
+                <button className="cpb" onClick={handleFlipChairs} title="Put the chairs on the other side of this table" style={btnS}>⇅ Flip chairs</button>
               )}
               {!isGrpSel&&selSeats.length===1&&(
                 <button className="cpb" onClick={()=>{const s=selSeats[0];const nextS=seats.map(x=>x.id===s.id?{...x,used:!x.used}:x);setSeats(nextS);doSave(nextS,groups,avTags,roomItems,rules);}} title={selSeats[0].used?"Take this seat out of use — it won't be filled by Randomize":"Put this seat back into use"} style={btnS}
