@@ -2127,7 +2127,7 @@ const StationBadges=({items,pieces})=>(
     {(items||[]).filter(i=>i.station).map(i=>{const b=itemBounds(i);return <StationBadge key={`sb-${i.id}`} x={b.x} y={b.y} station={i.station}/>;})}
     {(pieces||[]).filter(p=>p.station).map(p=>{
       const w=pieceToWorld(p),xs=w.poly.map(q=>q[0]),ys=w.poly.map(q=>q[1]);
-      return <StationBadge key={`sb-${p.id}`} x={Math.min(...xs)+4} y={Math.min(...ys)+4} station={p.station}/>;
+      return <StationBadge key={`sb-${p.id}`} x={Math.min(...xs)+4} y={Math.min(...ys)-14} station={p.station}/>; // just above the table edge, so it never covers a name tag
     })}
   </>
 );
@@ -7803,7 +7803,7 @@ const stationAnchor=(items,pieces,id)=>{
   const it=(items||[]).find(i=>i.id===id);
   if(it){const b=itemBounds(it);return{x:b.x,y:b.y};}
   const p=(pieces||[]).find(q=>q.id===id);
-  if(p){const w=pieceToWorld(p);return{x:Math.min(...w.poly.map(q=>q[0]))+4,y:Math.min(...w.poly.map(q=>q[1]))+4};}
+  if(p){const w=pieceToWorld(p);return{x:Math.min(...w.poly.map(q=>q[0]))+4,y:Math.min(...w.poly.map(q=>q[1]))-14};} // same spot as its StationBadge
   return null;
 };
 /* [{name,color,label}] for every group at a step: what the Rotate! card, the strip and the Next line show */
