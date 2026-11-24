@@ -727,9 +727,7 @@ function ClassChips({classes,activeClassId,onSetActiveClass,measureRef}){
     else if(r>el.scrollLeft+el.clientWidth)el.scrollLeft=r-el.clientWidth+6;
   },[activeClassId,classes.length]);
   return(
-    <div ref={rowRef} aria-hidden={measureRef?"true":undefined} className="no-drag cp-chips" style={measureRef
-      ?{position:"absolute",left:0,top:0,visibility:"hidden",pointerEvents:"none",display:"flex",alignItems:"center",gap:"6px",whiteSpace:"nowrap",padding:"3px 4px"} // full-width copy, only for measuring
-      :{display:"flex",alignItems:"center",gap:"6px",flex:"1 1 0",minWidth:0,overflowX:"auto",overflowY:"hidden",scrollbarWidth:"none",padding:"3px 4px"}}>
+    <div ref={rowRef} className="no-drag cp-chips" style={{display:"flex",alignItems:"center",gap:"6px",flex:"1 1 0",minWidth:0,overflowX:"auto",overflowY:"hidden",scrollbarWidth:"none",padding:"3px 4px"}}>
       {classes.map((c,i)=>{
         const active=c.id===activeClassId;
         const colour=c.color||c.colour||CHIP_PALETTE[i%CHIP_PALETTE.length];
@@ -10359,20 +10357,30 @@ function TabStrip({openPanels,onToggle,onTabClickFromManageSeating,timerStatus,c
     return()=>document.removeEventListener("mousedown",h);
   },[tabsMenuOpen]);
 
-  /* Class buttons: shown only when all of them fit; measured off a hidden full-width copy */
+  /* Class buttons: shown only when all of them fit. While shown, remember the width
+     they need; once folded into the Classes menu, bring them back when the space
+     reaches that width again. (No hidden copy, so nothing invisible to trip over.) */
   const chipsOuterRef=useRef(null);
-  const chipsMeasureRef=useRef(null);
+  const chipsRowRef=useRef(null);
+  const chipsNeedRef=useRef(0);
   const[chipsCollapsed,setChipsCollapsed]=useState(false);
+  const classesSig=classes.map(c=>c.id+c.name).join('|');
+  useEffect(()=>{setChipsCollapsed(false);},[classesSig]); // classes changed: show and re-measure
   useEffect(()=>{
-    const outer=chipsOuterRef.current,measure=chipsMeasureRef.current;
-    if(!outer||!measure)return;
-    const check=()=>setChipsCollapsed(measure.scrollWidth>outer.clientWidth+1);
+    const outer=chipsOuterRef.current;if(!outer)return;
+    const check=()=>{
+      const row=chipsRowRef.current;
+      if(row){ // showing: fold away if they no longer fit
+        chipsNeedRef.current=row.scrollWidth;
+        if(row.scrollWidth>row.clientWidth+1)setChipsCollapsed(true);
+      }else if(chipsNeedRef.current&&outer.clientWidth>=chipsNeedRef.current+1)setChipsCollapsed(false);
+    };
     check();
     const ro=new ResizeObserver(check);
-    ro.observe(outer);ro.observe(measure);
+    ro.observe(outer);
     document.fonts?.ready?.then(check);
     return()=>ro.disconnect();
-  },[]);
+  },[chipsCollapsed,classesSig]);
 
   const renderTabButton=tab=>{
     const isOpen=!anyManageOpen&&openPanels[tab.id];
@@ -10394,8 +10402,7 @@ function TabStrip({openPanels,onToggle,onTabClickFromManageSeating,timerStatus,c
       {/* Classes ▾ always; the class buttons beside it only when every one fits, otherwise they're listed in the menu */}
       <div className="no-drag" style={{flexShrink:0,marginRight:"6px"}}><DotsMenu classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass} onNewClass={onNewClass} onManageClass={onManageClass} onDeleteClass={onDeleteClass} showList={chipsCollapsed}/></div>
       <div ref={chipsOuterRef} style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",position:"relative",overflow:"hidden"}}>
-        <ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass} measureRef={chipsMeasureRef}/>
-        {!chipsCollapsed&&<ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass}/>}
+        {!chipsCollapsed&&<ClassChips classes={classes} activeClassId={activeClassId} onSetActiveClass={onSetActiveClass} measureRef={chipsRowRef}/>}
       </div>
       <div ref={tabsOuterRef} style={{display:"flex",gap:"3px",flex:"1 1 0",minWidth:0,justifyContent:"center",alignItems:"center",position:"relative"}}>
         {/* Hidden always-full-size copy, purely to measure whether all four
