@@ -1814,13 +1814,13 @@ const SUBINFO=[
  {f:'CH₄',kind:'compound',parts:'1 carbon atom + 4 hydrogen atoms',col:'#9FD8C0',fact:'Methane is the main gas in natural gas. Titan, Saturn’s biggest moon, has rain and lakes of liquid methane.',
   atoms:[['C',60,45,13],['H',38,26,9],['H',82,26,9],['H',38,64,9],['H',82,64,9]],bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1]]},
  {f:'C₂H₆',kind:'compound',parts:'2 carbon atoms + 6 hydrogen atoms',col:'#C9E3A4',fact:'Titan’s lakes are a mix of liquid methane and ethane.',
-  atoms:[['C',46,45,12],['C',74,45,12],['H',26,30,8],['H',26,60,8],['H',46,70,8],['H',94,30,8],['H',74,20,8]],bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1],[1,6,1],[1,7,1]]},
+  atoms:[['C',46,45,12],['C',74,45,12],['H',26,30,8],['H',26,60,8],['H',46,70,8],['H',94,30,8],['H',94,60,8],['H',74,20,8]],bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[1,5,1],[1,6,1],[1,7,1]]},
  {f:'N₂',kind:'element',parts:'2 nitrogen atoms joined together: a molecule made of just one element',col:'#A9BEF5',fact:'Nitrogen makes up about 78% of Earth’s air. On Neptune’s moon Triton, frozen nitrogen bursts out of geysers.',
   atoms:[['N',47,45,14],['N',73,45,14]],bonds:[[0,1,3]]},
  {f:'CO₂',kind:'compound',parts:'1 carbon atom + 2 oxygen atoms',col:'#D5D5D5',fact:'At normal pressure it never becomes a liquid: solid “dry ice” turns straight into a gas. This is called subliming. Mars has dry-ice frost at its poles, and Venus’s air is almost all carbon dioxide.',
   atoms:[['O',28,45,12],['C',60,45,12],['O',92,45,12]],bonds:[[0,1,2],[1,2,2]]},
  {f:'H₂SO₄',kind:'compound',parts:'2 hydrogen atoms + 1 sulfur atom + 4 oxygen atoms',col:'#F0E08A',fact:'A very corrosive acid. Venus’s thick yellow clouds are made of tiny drops of sulfuric acid.',
-  atoms:[['S',60,45,13],['O',60,19,10],['O',60,71,10],['O',34,45,10],['O',86,45,10],['H',13,45,7],['H',107,45,7]],bonds:[[0,1,1],[0,2,1],[0,3,1],[0,4,1],[3,5,1],[4,6,1]]},
+  atoms:[['S',60,45,13],['O',60,19,10],['O',60,71,10],['O',34,45,10],['O',86,45,10],['H',13,45,7],['H',107,45,7]],bonds:[[0,1,2],[0,2,2],[0,3,1],[0,4,1],[3,5,1],[4,6,1]]},
  {f:'S₈',kind:'element',parts:'only sulfur atoms. In solid sulfur they join up in rings of 8 (S₈)',col:'#F2C230',fact:'Sulfur is yellow. Jupiter’s moon Io has volcanoes that spray out sulfur.',
   atoms:Array.from({length:8},(_,i)=>['S',60+28*Math.cos(i*Math.PI/4),45+24*Math.sin(i*Math.PI/4)*.95,8]),bonds:Array.from({length:8},(_,i)=>[i,(i+1)%8,1])}];
 const LABCH=[
