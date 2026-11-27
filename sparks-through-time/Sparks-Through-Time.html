@@ -234,6 +234,13 @@ select{font:inherit; padding:7px 10px; border-radius:10px; border:1px solid var(
 .cell-body{fill:var(--cellbody)}
 .cell-cap{fill:var(--copper)}
 .cell-txt{fill:#fff; font-family:var(--font-body); font-size:11px; font-weight:800; text-anchor:middle; dominant-baseline:central}
+.cell-short{stroke:#c0392b; stroke-width:3}
+.battery-smoke{pointer-events:none; aria-hidden:true}
+.battery-smoke-puff{fill:#69707b; stroke:#f4f5f7; stroke-width:.7; opacity:0; transform-box:fill-box; transform-origin:center; animation:batterySmoke 2s ease-out infinite}
+.battery-smoke-puff:nth-child(2){animation-delay:-.5s}.battery-smoke-puff:nth-child(3){animation-delay:-1s}.battery-smoke-puff:nth-child(4){animation-delay:-1.5s}
+@keyframes batterySmoke{0%{transform:translate(0,5px) scale(.45);opacity:0}18%{opacity:.9}100%{transform:translate(9px,-29px) scale(1.65);opacity:0}}
+@media (prefers-reduced-motion:reduce){.battery-smoke-puff{animation:none;opacity:.75;transform:translate(3px,-10px)}}
+@media print{.battery-smoke{display:none!important}}
 .metal{fill:var(--metal)}
 .glass{fill:var(--glass); stroke:var(--metal); stroke-width:2}
 .filament{stroke:var(--metal); stroke-width:1.6; fill:none}
@@ -520,6 +527,12 @@ table.data th{background:var(--panel-2)}
 .ws-student .ws-img{outline:2px solid #1d4ed8; outline-offset:2px}
 .ws-student-note{font-size:.8rem; color:#1d4ed8; margin:0}
 .teacher-top{display:flex; justify-content:flex-end; margin:0 0 10px}
+.teacher-home-btn.locked{background:var(--panel-2); color:var(--muted); border-color:var(--line); filter:grayscale(1); opacity:.68}
+.teacher-home-btn.locked:hover,.teacher-home-btn.locked:focus-visible{opacity:1; filter:grayscale(.65)}
+.teacher-home-btn.unlocked{border-color:#d6a900; background:#fff4b8; color:#554000; box-shadow:0 0 0 3px rgba(255,210,63,.22),0 0 18px rgba(255,210,63,.65); font-weight:800}
+.teacher-home-btn.unlocked:hover,.teacher-home-btn.unlocked:focus-visible{box-shadow:0 0 0 4px rgba(255,210,63,.3),0 0 24px rgba(255,210,63,.8)}
+@media (prefers-reduced-motion:no-preference){.teacher-home-btn.unlocked{animation:teacherGlow 2.4s ease-in-out infinite}}
+@keyframes teacherGlow{50%{box-shadow:0 0 0 4px rgba(255,210,63,.3),0 0 26px rgba(255,210,63,.85)}}
 .hw-btns{display:flex; flex-wrap:wrap; gap:6px; justify-content:flex-end}
 .hw-howto ol{margin:6px 0; padding-left:20px} .hw-howto li{margin:3px 0}
 .hw-files{display:grid; gap:8px}
@@ -820,7 +833,12 @@ body.wide .grid-wrap .controls{gap:10px}
 .chip.ladder-neg{background:#dce8ff; border-color:#8aa8e0; color:#1d4fb0}
 .ladder-ref{display:inline-block; margin:8px 0 2px; padding:8px 12px; border:1.5px solid var(--line); border-radius:10px; font-size:.9rem; font-weight:400; background:var(--panel-2)}
 .ladder-ref ol{margin:.3em 0 .3em 1.4em}
+.ladder-ref .ladder-list{display:grid; gap:2px; margin:6px 0; color:#1a2140}
+.ladder-ref .ladder-item{display:flex; gap:8px; padding:2px 6px; line-height:1.35; background:transparent}
+.ladder-ref .ladder-rank{display:inline-block; width:1.2em; text-align:right; font-weight:700; flex:none}
 .ladder-ref small{display:block; color:var(--muted)}
+.ws .ladder-ref{display:block; max-width:360px; background:#f5f6fa; color:#1a2140; break-inside:avoid}
+.ws .ladder-ref small{color:#3a4160}
 .rod-flow{animation:rodFlow .6s linear infinite}
 @keyframes rodFlow{to{stroke-dashoffset:-14}}
 .answer-btn.picked{color:#fff}
@@ -1786,7 +1804,11 @@ function renderHome(){
   STOPS.forEach(s=>{ const p = prog(s.id); sheet.append(h('button',{class:'stamp-pair', type:'button', title:`${s.yearLabel}: ${s.title}`, onclick:()=>travel(s)}, h('span',{class:'stamp-pair-imgs'}, stampSVG(s,'L',p.learn,50), stampSVG(s,'C',p.challenge,50)), h('small',{}, s.yearLabel))); });
   const who = teacherMode() ? h('span',{class:'traveller'}, '\ud83c\udf93 ', h('b',{}, 'Teacher mode'), ': everything is unlocked. ', h('button',{class:'btn small ghost', type:'button', onclick:()=>{ Store.data.teacherOK = false; Store.save(); renderHome(); }}, 'Switch to student mode')) : travellerOK() ? h('span',{class:'traveller'}, '\ud83e\uddd1\u200d\ud83d\ude80 Time traveller: ', h('b',{}, Store.data.studentName), ` \u00b7 Class ${Store.data.studentClass} `, h('button',{class:'btn small ghost', type:'button', onclick:()=>askTraveller(true)}, 'Change')) : h('span');
   setTimeout(()=>askTraveller(false), 0);
-  root.append(h('div',{class:'teacher-top'}, who, h('button',{class:'btn small', type:'button', onclick:()=>renderTeacher()}, 'For teachers: set classwork or homework')));
+  const teacherBtn = h('button',{class:'btn small teacher-home-btn ' + (teacherMode() ? 'unlocked' : 'locked'), type:'button', 'aria-label':teacherMode() ? 'Teacher mode is active. Open the teacher page.' : 'Teacher mode is locked. Type the teacher code to unlock it.', onclick:()=>{
+    if (teacherMode()) renderTeacher();
+    else rtAskTeacherCode(()=>renderHome(), 'Type the teacher code to turn on Teacher mode. The button will glow; click it again to set classwork or homework.');
+  }}, (teacherMode() ? '🎓 Teacher mode: ON' : '🔒 Teacher mode') + ' · set classwork or homework');
+  root.append(h('div',{class:'teacher-top'}, who, teacherBtn));
   root.append(
     h('section',{class:'hero'},
       h('div',{class:'hero-head'}, h('h1',{}, 'Sparks ', h('em',{}, 'Through'), ' Time'), h('div',{class:'hero-machine'}, timeMachineSVG(200, true))),
@@ -1992,7 +2014,7 @@ function askTraveller(force){
   const f = travellerFields(upd);
   const teacherBox = h('div',{class:'teacher-skip'});
   const showCode = ()=>{ teacherBox.innerHTML = ''; const code = h('input',{type:'password', placeholder:'Teacher code', autocomplete:'off', 'aria-label':'Teacher code'}); const m = h('span',{class:'legend'});
-    const tryIt = ()=>{ if (code.value.trim().toUpperCase()===TEACHER_CODE){ Store.data.teacherOK = true; Store.save(); ov.remove(); renderTeacher(); } else { m.textContent = 'That isn\u2019t the teacher code. Students: type your name and class above.'; code.value = ''; } };
+    const tryIt = ()=>{ if (code.value.trim().toUpperCase()===TEACHER_CODE){ Store.data.teacherOK = true; Store.save(); ov.remove(); renderHome(); } else { m.textContent = 'That isn\u2019t the teacher code. Students: type your name and class above.'; code.value = ''; } };
     code.addEventListener('keydown', e=>{ if (e.key==='Enter') tryIt(); });
     teacherBox.append(h('div',{class:'row', style:{justifyContent:'center'}}, code, h('button',{class:'btn small', type:'button', onclick:tryIt}, 'Enter')), m); code.focus(); };
   teacherBox.append(h('button',{class:'btn small ghost', type:'button', onclick:showCode}, 'I\u2019m a teacher'));
@@ -2629,12 +2651,18 @@ const Circuit = (()=>{
       const L = (x1,y1,x2,y2,cls)=>sv('line',{x1,y1,x2,y2,class:cls||'sym-line'});
       const T = (x,y,txt,cls)=>{ const [X,Y] = rot(x,y,a); return sv('text',{x:X, y:Y, class:cls||'lbl'}, txt); };
       if (e.type==='cell'){
+        const shorted = !hide && r && Math.abs(r.I)>3.5;
         if (pic){
-          gb.append(sv('rect',{x:-22,y:-11,width:44,height:22,rx:4,class:'cell-body'}), sv('rect',{x:12, y:-11, width:10, height:22, rx:3, class:'cell-cap'}), sv('rect',{x:22, y:-4, width:3, height:8, class:'cell-cap'}));
+          gb.append(sv('rect',{x:-22,y:-11,width:44,height:22,rx:4,class:'cell-body'+(shorted?' cell-short':'')}), sv('rect',{x:12, y:-11, width:10, height:22, rx:3, class:'cell-cap'}), sv('rect',{x:22, y:-4, width:3, height:8, class:'cell-cap'}));
           gl.append(T(17, 0, '+', 'cell-txt'), T(-4, 0, '1.5V', 'cell-txt'));
         } else {
-          gb.append(sv('rect',{x:-3.5,y:-16,width:7,height:32,class:'bgfill'}), L(4,-15,4,15), L(-4,-8,-4,8,'sym-thick'));
+          gb.append(sv('rect',{x:-8,y:-20,width:16,height:40,rx:3,class:'bgfill'+(shorted?' cell-short':'')}), L(4,-15,4,15), L(-4,-8,-4,8,'sym-thick'));
           gl.append(T(13, -15, '+'));
+        }
+        if (shorted){
+          const smoke = sv('g',{class:'battery-smoke','aria-hidden':'true'});
+          [[-7,-15,4],[-1,-17,5],[5,-14,3.7],[0,-19,4.5]].forEach(([cx,cy,cr])=>smoke.append(sv('circle',{cx,cy,r:cr,class:'battery-smoke-puff'})));
+          gl.append(smoke);
         }
       } else if (e.type==='bulb'){
         const b = (!hide && r) ? r.b : 0; const lit = b > 0.04;
@@ -2826,7 +2854,7 @@ const Circuit = (()=>{
       stats.maxB = stats.bulbs.reduce((m,b)=>Math.max(m,b.b),0);
       stats.lit = stats.bulbs.filter(b=>b.b>0.04).length;
       if (!st.hide && res.short && editable){ msg(bd.hasGen ? 'Short circuit! The electricity has found a shortcut back to the generator without passing through any bulbs. In real life the wires would get dangerously hot.' : 'Short circuit! The electricity has found a shortcut back to the cell without passing through any bulbs. In real life the wires and cell would get dangerously hot.'); bd.shortShown = true; }
-      else if (bd.shortShown){ msg(''); bd.shortShown = false; }
+      else if (bd.shortShown || statusEl.textContent.startsWith('Short circuit!')){ msg(''); bd.shortShown = false; }
       lastStats = stats;
       if (o.onChange && !drag && !tickOnly) o.onChange(stats, !!user);
     }
@@ -3613,7 +3641,7 @@ function lightningRod(el, onStrike){
 }
 /* the electron ladder (a simple triboelectric series): the material lower down grabs electrons when two are rubbed */
 const LADDER = ['Human hair','Glass','Wool','Silk','Paper','Rubber balloon','Plastic'];
-const LADDER_HTML = '<div class="ladder-ref"><b>The electron ladder</b><ol>' + LADDER.map(m=>'<li>' + m + '</li>').join('') + '</ol><small>Higher up: gives electrons away, so it becomes <b>positive</b>. Lower down: grabs electrons, so it becomes <b>negative</b>.</small></div>';
+const LADDER_HTML = '<div class="ladder-ref"><b>The electron ladder</b><div class="ladder-list">' + LADDER.map((m,i)=>'<div class="ladder-item"><span class="ladder-rank">' + (i+1) + '.</span><span>' + m + '</span></div>').join('') + '</div><small>Higher up: gives electrons away, so it becomes <b>positive</b>. Lower down: grabs electrons, so it becomes <b>negative</b>.</small></div>';
 function electronLadder(el, onTry){
   const tried = new Set();
   const list = h('ol',{class:'ladder'}); LADDER.forEach(m=>list.append(h('li',{}, m)));
@@ -4750,7 +4778,7 @@ const SRC = {
 };
 const FOSSIL = ['coal','gas'];
 const sunAt = h => (h>=6 && h<=18) ? Math.sin(Math.PI*(h-6)/12) : 0;
-function simDay(c, wk){
+function simTownDay(c, wk){
   const w = WEATHER[wk]; let batt = c.battery*60; const cap = c.battery*120, rate = c.battery*40;
   const hours = []; let blackouts = 0, co2 = 0, wasted = 0;
   for (let hr=0; hr<24; hr++){
@@ -4809,9 +4837,16 @@ function townGame(el, opts){
   }
   function run(){
     if (cost()>budget){ result.className='feedback bad'; result.innerHTML = `That costs ${cost()}, which is over your budget of ${budget}. Remove something before you run the day.`; return; }
-    const sim = simDay(c, wk); runBtn.disabled = true; result.className='feedback'; result.innerHTML='';
+    runBtn.disabled = true; result.className='feedback'; result.innerHTML='';
+    let sim;
+    try { sim = simTownDay(c, wk); }
+    catch(err){ runBtn.disabled = false; result.className='feedback bad'; result.textContent='The day could not be run. Please try again.'; console.error(err); return; }
     let hr = 0;
-    const stepFn = ()=>{ if (!chart.isConnected) return; hr++; drawChart(sim, hr); drawStrip(Math.min(hr,23), sim.hours[Math.min(hr,23)]); if (hr<24) setTimeout(stepFn, reduceMotion?0:180); else finish(sim); };
+    const stepFn = ()=>{
+      if (!chart.isConnected){ runBtn.disabled = false; return; }
+      try { hr++; drawChart(sim, hr); drawStrip(Math.min(hr,23), sim.hours[Math.min(hr,23)]); if (hr<24) setTimeout(stepFn, reduceMotion?0:180); else finish(sim); }
+      catch(err){ runBtn.disabled = false; result.className='feedback bad'; result.textContent='The day was interrupted. Please try again.'; console.error(err); }
+    };
     stepFn();
   }
   function finish(sim){
@@ -5637,6 +5672,12 @@ function wsItem(it, n, mode, saved){
   if (key && it.explain && t!=='num') box.append(h('p',{class:'ws-note', html:it.explain}));
   return box;
 }
+function wsAutoResult(it, state){
+  const savedPoints = Number.isFinite(state.pts) && Number.isFinite(state.max);
+  const pt = savedPoints ? {pts:state.pts, max:state.max} : rvPoints(it, state.resp || (it.t==='order' || it.t==='fill' ? [] : it.t==='multi' ? {picked:[]} : {}), !!state.ok);
+  const score = `(${pt.pts}/${pt.max})`;
+  return pt.pts === pt.max ? `Correct ${score}` : pt.pts > 0 ? `Partly correct ${score}` : `Try again ${score}`;
+}
 function buildWorksheet(stop, mode, name, part){
   part = part || 'f';
   const items = rvItems(stop, part); const st = rvStore(rvKey(stop, part));
@@ -5655,9 +5696,16 @@ function buildWorksheet(stop, mode, name, part){
   if (mode==='student'){
     const right = auto.filter(([it,i])=>st[i] && st[i].ok).length;
     root.append(h('div',{class:'ws-feedback'}, h('h3',{class:'ws-part'}, 'Feedback page'),
-      h('p',{}, `Auto-marked questions: `, h('b',{}, `${right} of ${auto.length} correct`), `. Questions answered: ${items.filter((_,i)=>st[i]&&st[i].done).length} of ${items.length}.`),
+      h('p',{}, `Auto-marked questions: `, h('b',{}, `${right} of ${auto.length} fully correct`), `. Questions answered: ${items.filter((_,i)=>st[i]&&st[i].done).length} of ${items.length}.`),
       progressBox(stop, part),
-      h('table',{class:'ws-table'}, h('thead',{}, h('tr',{}, h('th',{}, 'Question'), h('th',{}, 'Type'), h('th',{}, 'Result'))), h('tbody',{}, items.map((it,i)=>h('tr',{}, h('td',{}, i+1), h('td',{}, typeName(it)), h('td',{}, !(st[i]&&st[i].done) ? 'Not answered' : SELF(it.t) ? `Self-checked (${(st[i].resp.ticks||[]).length} of ${(it.checklist||[]).length} ticked)` : st[i].ok ? '✓ Correct' : '✗ Try again')))))));
+      h('table',{class:'ws-table'},
+        h('thead',{}, h('tr',{}, h('th',{}, 'Question'), h('th',{}, 'Type'), h('th',{}, 'Result'))),
+        h('tbody',{}, items.map((it,i)=>h('tr',{},
+          h('td',{}, i+1),
+          h('td',{}, typeName(it)),
+          h('td',{}, !(st[i]&&st[i].done) ? 'Not answered' : SELF(it.t) ? `Self-checked (${(st[i].resp.ticks||[]).length} of ${(it.checklist||[]).length} ticked)` : wsAutoResult(it, st[i]))
+        )))
+      )));
   }
   return root;
 }
@@ -5870,7 +5918,7 @@ atom:[
 ],
 /* ---------------- static ---------------- */
 static:[
-  {t:'table', obj:['Aii'], q:'Each object is rubbed with a cloth. Use the <b>electron ladder</b> to complete the charges on both.' + LADDER_HTML, rowHead:'Experiment', cols:[{name:'Object becomes', options:['Positive','Negative','Neutral']},{name:'Cloth becomes', options:['Positive','Negative','Neutral']}], rows:[{label:'Balloon rubbed on wool', ans:['Negative','Positive']},{label:'Glass rod rubbed on silk', ans:['Positive','Negative']},{label:'Plastic comb pulled through hair', ans:['Negative','Positive']}], explain:'The material lower on the electron ladder grabs electrons and becomes negative. The other one loses electrons and is left positive.'},
+  {t:'table', obj:['Aii'], q:'In each row, <span style="color:#0072B2;font-weight:800">object 1 (blue)</span> is rubbed with <span style="color:#D55E00;font-weight:800">object 2 (red)</span>. Use the <b>electron ladder</b> to complete the charges on both.' + LADDER_HTML, rowHead:'Experiment', cols:[{name:'Object 1 becomes', options:['Positive','Negative','Neutral']},{name:'Object 2 becomes', options:['Positive','Negative','Neutral']}], rows:[{label:'<span style="color:#0072B2;font-weight:800">Object 1: balloon</span><br>rubbed on <span style="color:#D55E00;font-weight:800">object 2: wool</span>', ans:['Negative','Positive']},{label:'<span style="color:#0072B2;font-weight:800">Object 1: glass rod</span><br>rubbed on <span style="color:#D55E00;font-weight:800">object 2: silk</span>', ans:['Positive','Negative']},{label:'<span style="color:#0072B2;font-weight:800">Object 1: plastic comb</span><br>pulled through <span style="color:#D55E00;font-weight:800">object 2: hair</span>', ans:['Negative','Positive']}], explain:'The material lower on the electron ladder grabs electrons and becomes negative. The other one loses electrons and is left positive.'},
   {t:'mcq', obj:['Ai'], q:'After rubbing, a balloon is negatively charged. What has actually happened?', options:['Electrons moved from the wool onto the balloon','Protons moved from the balloon onto the wool','The rubbing created new electrons','The balloon’s positive charges were destroyed'], answer:0, explain:'Only electrons move. Charge is never created or destroyed, just moved.'},
   {t:'mcq', obj:['Aiii'], q:'A mystery rod <b>repels</b> a negatively charged balloon. The rod is then held near some neutral paper bits, and they jump up to it. What is the charge on the rod?', options:['Negative','Positive','Neutral','It can’t be worked out'], answer:0, explain:'Repelling a negative balloon means the rod is negative too. Charged objects attract neutral paper whatever their charge.'},
   {t:'multi', obj:['Ai'], q:'Which statements are true? Tick all that apply.', options:['Like charges repel','Only electrons move when materials are rubbed','A charged object can attract a neutral object','Neutral objects contain no charges at all','Protons move easily from one material to another'], answers:[0,1,2], explain:'Neutral objects contain equal numbers of positive and negative charges, so they cancel out.'},
@@ -6323,6 +6371,10 @@ function tileFactor(map, r, c, type){
   if (t.t==='sea') return {ok:false, why:'Build this one on land.'};
   return {ok:true, f:1};
 }
+function plantFitsMap(map, p){
+  if (!p || !GSRC[p.type] || !Number.isInteger(p.r) || !Number.isInteger(p.c) || p.r<0 || p.c<0 || p.r>=GROWS || p.c>=GCOLS) return false;
+  return !!tileFactor(map, p.r, p.c, p.type).ok;
+}
 function distToCity(map, r, c){ return Math.min(...map.city.map(([a,b])=>Math.abs(a-r)+Math.abs(b-c))); }
 function simGrid(map, placed){
   const hours = []; let blackouts = 0, co2 = 0; const cap = placed.filter(p=>p.type==='battery').length*80, rate = placed.filter(p=>p.type==='battery').length*30; let batt = cap*0.5;
@@ -6429,6 +6481,7 @@ function gridBuilder(el, opts){
   opts = opts || {};
   const st = Object.assign({seed: Math.floor(Math.random()*1e9), placed:[]}, opts.state||{});
   let map = makeMap(st.seed, opts.force); let tool = null, sel = null, lastSim = null;
+  st.placed = (st.placed||[]).filter(p=>plantFitsMap(map,p));
   const budget = opts.budget || 60;
   const W = GCOLS*TILE, H = GROWS*TILE;
   const svg = sv('svg',{viewBox:`0 0 ${W} ${H}`, class:'grid-map', role:'img', 'aria-label':'Map for your power grid'});
@@ -6576,7 +6629,8 @@ function routeToCity(map, net, r, c){
 function segKeysOf(path){ const out = []; for (let i=1;i<path.length;i++){ const a = path[i-1], b = path[i]; out.push(a<b ? a+'|'+b : b+'|'+a); } return out; }
 /* potential output of one plant in one hour, before lines */
 function plantPotential(map, p, hr, mod){
-  const P = PLANTS[p.type]; const f = p.f==null ? 1 : p.f; mod = mod || {};
+  const P = PLANTS[p.type]; if (!P || !plantFitsMap(map,p)) return 0;
+  const f = p.f==null ? 1 : p.f; mod = mod || {};
   if (p.type==='solar') return P.mw * f * sunAt(hr) * (mod.sun||1);
   if (p.type==='wind') return P.mw * f * map.gust[hr] * (mod.wind||1);
   if (p.type==='hydro') return P.mw * f * (mod.rain||1);
@@ -6789,6 +6843,7 @@ function gridGame(el, cfg){
   const big = cfg.mode==='big';
   if (big && !st.big) st.big = {year:BIG.start, money:BIG.startMoney, history:[], snap:null, status:'build'};
   let map = makeMap(st.seed, cfg.force);
+  st.placed = st.placed.filter(p=>plantFitsMap(map,p));
   const prebuild = ()=>{ if (!cfg.prebuild || st.prebuilt || st.placed.length) return; st.prebuilt = true; prebuildFossil(map, st, cfg.prebuild); };
   prebuild();
   const year = ()=> big ? st.big.year : 2025;
